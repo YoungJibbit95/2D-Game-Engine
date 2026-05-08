@@ -1,0 +1,12 @@
+{
+  "id": "stone",
+  "numericId": 3,
+  "displayName": "Stone Block",
+  "texture": "tiles/stone",
+  "solid": true,
+  "blocksLight": true,
+  "hardness": 2.5,
+  "miningPowerRequired": 0,
+  "dropItem": "stone_block",
+  "mergeGroup": "stone"
+}

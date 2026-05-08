@@ -1,0 +1,12 @@
+{
+  "id": "copper_ore",
+  "numericId": 4,
+  "displayName": "Copper Ore",
+  "texture": "tiles/copper_ore",
+  "solid": true,
+  "blocksLight": true,
+  "hardness": 3.0,
+  "miningPowerRequired": 0,
+  "dropItem": "copper_ore",
+  "mergeGroup": "stone"
+}

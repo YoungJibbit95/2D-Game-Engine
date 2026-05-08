@@ -1,0 +1,7 @@
+{
+  "id": "gel",
+  "displayName": "Gel",
+  "type": "Material",
+  "texture": "items/gel",
+  "maxStack": 999
+}

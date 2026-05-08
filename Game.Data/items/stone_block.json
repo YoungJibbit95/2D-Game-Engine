@@ -1,0 +1,9 @@
+{
+  "id": "stone_block",
+  "displayName": "Stone Block",
+  "type": "PlaceableTile",
+  "texture": "items/stone_block",
+  "maxStack": 999,
+  "useTime": 0.1,
+  "placesTile": "stone"
+}

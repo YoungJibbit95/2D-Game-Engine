@@ -1,0 +1,12 @@
+{
+  "id": "air",
+  "numericId": 0,
+  "displayName": "Air",
+  "texture": "tiles/air",
+  "solid": false,
+  "blocksLight": false,
+  "hardness": 0.0,
+  "miningPowerRequired": 0,
+  "dropItem": null,
+  "mergeGroup": null
+}

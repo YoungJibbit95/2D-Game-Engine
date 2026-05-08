@@ -1,0 +1,7 @@
+{
+  "id": "wood",
+  "displayName": "Wood",
+  "type": "Material",
+  "texture": "items/wood",
+  "maxStack": 999
+}

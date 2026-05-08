@@ -1,0 +1,12 @@
+{
+  "id": "iron_ore",
+  "numericId": 5,
+  "displayName": "Iron Ore",
+  "texture": "tiles/iron_ore",
+  "solid": true,
+  "blocksLight": true,
+  "hardness": 3.5,
+  "miningPowerRequired": 10,
+  "dropItem": "iron_ore",
+  "mergeGroup": "stone"
+}

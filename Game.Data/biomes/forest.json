@@ -1,0 +1,8 @@
+{
+  "id": "forest",
+  "displayName": "Forest",
+  "surfaceTile": "grass",
+  "undergroundTile": "dirt",
+  "treeType": "normal_tree",
+  "enemySpawnTable": "forest_day"
+}

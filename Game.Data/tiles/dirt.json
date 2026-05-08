@@ -1,0 +1,12 @@
+{
+  "id": "dirt",
+  "numericId": 1,
+  "displayName": "Dirt Block",
+  "texture": "tiles/dirt",
+  "solid": true,
+  "blocksLight": true,
+  "hardness": 1.0,
+  "miningPowerRequired": 0,
+  "dropItem": "dirt_block",
+  "mergeGroup": "soil"
+}

@@ -1,0 +1,9 @@
+{
+  "id": "dirt_block",
+  "displayName": "Dirt Block",
+  "type": "PlaceableTile",
+  "texture": "items/dirt_block",
+  "maxStack": 999,
+  "useTime": 0.1,
+  "placesTile": "dirt"
+}

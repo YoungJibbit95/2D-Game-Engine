@@ -1,0 +1,7 @@
+{
+  "id": "copper_coin",
+  "displayName": "Copper Coin",
+  "type": "Material",
+  "texture": "items/copper_coin",
+  "maxStack": 999
+}

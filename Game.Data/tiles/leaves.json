@@ -1,0 +1,12 @@
+{
+  "id": "leaves",
+  "numericId": 7,
+  "displayName": "Leaves",
+  "texture": "tiles/leaves",
+  "solid": true,
+  "blocksLight": false,
+  "hardness": 0.2,
+  "miningPowerRequired": 0,
+  "dropItem": null,
+  "mergeGroup": "leaves"
+}

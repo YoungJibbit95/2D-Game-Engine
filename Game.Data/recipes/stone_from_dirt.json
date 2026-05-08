@@ -1,0 +1,8 @@
+{
+  "id": "stone_from_dirt",
+  "result": { "itemId": "stone_block", "count": 1 },
+  "ingredients": [
+    { "itemId": "dirt_block", "count": 2 }
+  ],
+  "station": null
+}

@@ -1,0 +1,10 @@
+{
+  "id": "forest_night_slime",
+  "entityId": "slime",
+  "biomeId": "forest",
+  "requiresNight": true,
+  "minTileY": 0,
+  "maxTileY": 120,
+  "chance": 0.65,
+  "maxActive": 8
+}

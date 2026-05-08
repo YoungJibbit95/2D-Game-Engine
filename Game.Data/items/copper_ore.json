@@ -1,0 +1,7 @@
+{
+  "id": "copper_ore",
+  "displayName": "Copper Ore",
+  "type": "Material",
+  "texture": "items/copper_ore",
+  "maxStack": 999
+}

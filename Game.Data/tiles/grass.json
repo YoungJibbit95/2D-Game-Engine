@@ -1,0 +1,12 @@
+{
+  "id": "grass",
+  "numericId": 2,
+  "displayName": "Grass Block",
+  "texture": "tiles/grass",
+  "solid": true,
+  "blocksLight": true,
+  "hardness": 1.0,
+  "miningPowerRequired": 0,
+  "dropItem": "dirt_block",
+  "mergeGroup": "soil"
+}

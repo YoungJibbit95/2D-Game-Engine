@@ -1,0 +1,12 @@
+{
+  "id": "wood",
+  "numericId": 6,
+  "displayName": "Wood",
+  "texture": "tiles/wood",
+  "solid": true,
+  "blocksLight": true,
+  "hardness": 1.2,
+  "miningPowerRequired": 0,
+  "dropItem": "wood",
+  "mergeGroup": "wood"
+}

@@ -1,0 +1,11 @@
+{
+  "id": "copper_pickaxe",
+  "displayName": "Copper Pickaxe",
+  "type": "ToolPickaxe",
+  "texture": "items/copper_pickaxe",
+  "maxStack": 1,
+  "useTime": 0.35,
+  "toolPower": 35,
+  "damage": 3,
+  "knockback": 1.5
+}
