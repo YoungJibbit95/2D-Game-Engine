@@ -22,6 +22,7 @@
 - [x] Building placement validation.
 - [x] Prevent block placement inside player AABB.
 - [x] Placeable tile item consumption.
+- [x] Selected item core action routing for mining, building, and melee.
 
 ## Items And Inventory
 
@@ -36,7 +37,7 @@
 - [x] Hotbar split from main inventory.
 - [x] Hotbar selected slot input.
 - [x] Pickup dropped items.
-- [ ] Selected hotbar item use.
+- [x] Selected hotbar item use.
 
 ## Crafting
 
@@ -64,6 +65,7 @@
 - [x] Dirt/grass/stone layers.
 - [x] Random-walk caves.
 - [x] Copper/iron ore veins.
+- [x] Underground water pockets.
 - [x] Trees.
 - [x] Spawn point on surface.
 - [x] Forest biome baseline.
@@ -87,7 +89,7 @@
 - [x] Day/night clock.
 - [x] `/time` debug command.
 - [x] Time-based enemy spawn tables.
-- [ ] Time-based sky color.
+- [x] Time-based sky color.
 - [ ] Time-based music/ambient hooks.
 
 ## Spawning

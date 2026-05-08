@@ -45,10 +45,7 @@ public sealed class WaterPocketGenerationStep : IWorldGenerationStep
                     continue;
                 }
 
-                if (world.GetTile(x, y).IsAir)
-                {
-                    world.SetTile(x, y, TileInstance.Liquid(255));
-                }
+                world.SetTile(x, y, TileInstance.Liquid(255));
             }
         }
     }

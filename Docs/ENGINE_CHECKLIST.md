@@ -38,6 +38,7 @@
 - [x] Terrain generation step.
 - [x] Cave random-walk generation step.
 - [x] Ore vein generation step.
+- [x] Underground water pocket generation step.
 - [x] Tree generation step.
 - [x] Deterministic advanced generation tests.
 - [x] Biome-specific generation step routing.
@@ -99,6 +100,7 @@
 
 - [x] Greyscale tile light values.
 - [x] Sunlight pass.
+- [x] Time-driven sky/sunlight model.
 - [x] Point light propagation.
 - [x] Solid tile attenuation.
 - [ ] Dirty light regions.
@@ -154,6 +156,7 @@
 - [x] Dropped item runtime entity.
 - [x] Item pickup system.
 - [x] Player inventory model with hotbar/main split.
+- [x] Selected item use core for mining, building, and melee.
 - [x] Mining progress system.
 - [x] Mining range/tool-power checks.
 - [x] Tile drop result from mining.

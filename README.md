@@ -69,6 +69,9 @@ Milestone 1 and the first core world tasks are scaffolded:
 - `PlayerRespawnSystem` restores dead players at the world metadata spawn point after a delay.
 - Chunk streaming planner computes load/unload boundaries around visible tile areas and keeps dirty chunks loaded.
 - Structure templates and placer support reusable worldgen structures, with an initial surface shelter generation step.
+- Advanced world generation now includes underground liquid pockets using tile liquid data.
+- `PlayerItemUseSystem` routes selected hotbar items into mining, building, and melee actions.
+- `WorldSkySystem` evaluates day/night sky color and sunlight intensity for lighting/rendering integration.
 
 ## Rider
 

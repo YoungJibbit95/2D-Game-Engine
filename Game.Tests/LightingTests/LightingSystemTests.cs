@@ -18,6 +18,16 @@ public sealed class LightingSystemTests
     }
 
     [Fact]
+    public void Recalculate_UsesConfiguredSunlightIntensity()
+    {
+        var world = new World(8, 8, WorldMetadata.CreateDefault(seed: 1));
+
+        new LightingSystem().Recalculate(world, Array.Empty<LightSource>(), sunlight: 64);
+
+        Assert.Equal(64, world.GetTile(0, 0).Light);
+    }
+
+    [Fact]
     public void Recalculate_PropagatesPointLight()
     {
         var world = new World(32, 32, WorldMetadata.CreateDefault(seed: 1));

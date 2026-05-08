@@ -16,10 +16,10 @@ public sealed class WorldSkySystem
         var sunlight = Lerp(28, 255, daylight);
 
         return new SkyState(
-            (byte)Math.Clamp(r, 0, 255),
-            (byte)Math.Clamp(g, 0, 255),
-            (byte)Math.Clamp(b, 0, 255),
-            sunlight);
+            (byte)Math.Clamp((int)r, 0, 255),
+            (byte)Math.Clamp((int)g, 0, 255),
+            (byte)Math.Clamp((int)b, 0, 255),
+            (byte)Math.Clamp((int)sunlight, 0, 255));
     }
 
     private static float ComputeDaylight(double normalizedTime)

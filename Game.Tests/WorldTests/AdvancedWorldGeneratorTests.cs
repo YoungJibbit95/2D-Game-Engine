@@ -37,6 +37,16 @@ public sealed class AdvancedWorldGeneratorTests
     }
 
     [Fact]
+    public void Generate_CreatesUndergroundWaterPockets()
+    {
+        var world = new AdvancedWorldGenerator().Generate(192, 128, seed: 606);
+
+        var liquidTiles = CountTilesMatching(world, (_, y, tile) => y > world.HeightTiles / 3 && tile.HasLiquid);
+
+        Assert.True(liquidTiles > 0);
+    }
+
+    [Fact]
     public void Generate_CreatesTreesWithWoodAndLeaves()
     {
         var world = new AdvancedWorldGenerator().Generate(192, 96, seed: 303);

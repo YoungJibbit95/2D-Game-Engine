@@ -26,9 +26,10 @@ public sealed class LightingSystem
 
     private static void ApplySunlight(World.World world, byte[] lightBuffer, byte sunlight)
     {
+        var maxSunlight = (int)sunlight;
         for (var x = 0; x < world.WidthTiles; x++)
         {
-            var light = sunlight;
+            var light = maxSunlight;
 
             for (var y = 0; y < world.HeightTiles; y++)
             {
@@ -39,7 +40,7 @@ public sealed class LightingSystem
                 {
                     light = Math.Max(0, light - SolidFalloff);
                 }
-                else if (light < sunlight)
+                else if (light < maxSunlight)
                 {
                     light = Math.Max(0, light - AirFalloff);
                 }
