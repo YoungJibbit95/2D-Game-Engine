@@ -4,18 +4,17 @@ namespace Game.Core.Lighting;
 
 public sealed class LightingSystem
 {
-    private const int Sunlight = 255;
     private const int AirFalloff = 6;
     private const int SolidFalloff = 80;
 
-    public void Recalculate(World.World world, IEnumerable<LightSource> lightSources)
+    public void Recalculate(World.World world, IEnumerable<LightSource> lightSources, byte sunlight = 255)
     {
         ArgumentNullException.ThrowIfNull(world);
         ArgumentNullException.ThrowIfNull(lightSources);
 
         var lightBuffer = new byte[world.WidthTiles * world.HeightTiles];
 
-        ApplySunlight(world, lightBuffer);
+        ApplySunlight(world, lightBuffer, sunlight);
 
         foreach (var source in lightSources)
         {
@@ -25,11 +24,11 @@ public sealed class LightingSystem
         ApplyToWorld(world, lightBuffer);
     }
 
-    private static void ApplySunlight(World.World world, byte[] lightBuffer)
+    private static void ApplySunlight(World.World world, byte[] lightBuffer, byte sunlight)
     {
         for (var x = 0; x < world.WidthTiles; x++)
         {
-            var light = Sunlight;
+            var light = sunlight;
 
             for (var y = 0; y < world.HeightTiles; y++)
             {
@@ -40,7 +39,7 @@ public sealed class LightingSystem
                 {
                     light = Math.Max(0, light - SolidFalloff);
                 }
-                else if (light < Sunlight)
+                else if (light < sunlight)
                 {
                     light = Math.Max(0, light - AirFalloff);
                 }

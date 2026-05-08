@@ -80,6 +80,37 @@ public sealed class BuildingSystem
         return true;
     }
 
+    public bool PlaceTile(
+        World.World world,
+        PlayerInventory inventory,
+        ItemRegistry items,
+        TileRegistry tiles,
+        TilePos target,
+        string itemId,
+        Vector2 actorCenterWorld,
+        float reachPixels,
+        RectI actorBounds)
+    {
+        ArgumentNullException.ThrowIfNull(inventory);
+        ArgumentException.ThrowIfNullOrWhiteSpace(itemId);
+
+        var itemStack = new ItemStack(itemId, 1);
+        if (!CanPlace(world, items, tiles, target, itemStack, actorCenterWorld, reachPixels, actorBounds))
+        {
+            return false;
+        }
+
+        if (!inventory.RemoveItem(itemId, 1))
+        {
+            return false;
+        }
+
+        var itemDefinition = items.GetById(itemId);
+        var tileDefinition = tiles.GetById(itemDefinition.PlacesTileId!);
+        world.SetTile(target.X, target.Y, TileInstance.FromTileId(tileDefinition.NumericId, TileFlags.IsNatural));
+        return true;
+    }
+
     private static bool IsWithinReach(Vector2 actorCenterWorld, TilePos target, float reachPixels)
     {
         var tileCenter = CoordinateUtils.TileToWorld(target) + new Vector2(GameConstants.TileSize * 0.5f);

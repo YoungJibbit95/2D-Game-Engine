@@ -45,4 +45,6 @@ public sealed class AdvancedWorldGenerator
         var spawnTile = new SpawnPointFinder().FindSurfaceSpawn(world);
         world.SetMetadata(world.Metadata with { SpawnTile = spawnTile });
         world.ClearAllDirtyFlags();
-        return new WorldGenerationR
+        return new WorldGenerationResult(world, context.Biomes, spawnTile);
+    }
+}

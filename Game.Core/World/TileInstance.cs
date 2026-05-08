@@ -36,4 +36,20 @@ public struct TileInstance
 
         return new TileInstance
         {
-      
+            TileId = tileId,
+            Flags = flags | TileFlags.Solid
+        };
+    }
+
+    public static TileInstance Liquid(byte amount)
+    {
+        return amount == 0
+            ? Air
+            : new TileInstance
+            {
+                TileId = KnownTileIds.Air,
+                LiquidAmount = amount,
+                Flags = TileFlags.HasLiquid
+            };
+    }
+}
