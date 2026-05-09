@@ -1,4 +1,4 @@
-# TerrariaLike
+# 2D Game Engine
 
 This repository starts a small MonoGame-based 2D sandbox action-adventure engine.
 
@@ -19,19 +19,21 @@ Milestone 1 and the first core world tasks are scaffolded:
 - FPS/debug text rendered without a content-pipeline font.
 - Coordinate primitives: `TilePos`, `ChunkPos`, `RectI`, and `CoordinateUtils`.
 - Chunked world model: `TileInstance`, `Chunk`, `World`, tile dirty flags, and solid checks.
+- Chunk metadata tracks active liquid tiles, lit tiles, tile entities, and save ticks for streaming/save/debug decisions.
 - Deterministic `SimpleWorldGenerator` with FastNoiseLite-backed surface noise.
 - JSON-driven tile definitions and registry.
 - JSON-driven item definitions and registry.
 - Inventory stack rules, split, merge, swap, and removal behavior.
+- Inventory cursor interaction foundation with left-click pick/place/merge/swap and right-click split/place-one rules.
 - Tilemap rendering with visible chunk iteration.
 - Camera follow.
 - Player entity with keyboard movement, jumping, gravity, and tile collision.
 - First HUD pass with hotbar slots and health bar.
 - World save/load with readable metadata, MessagePack chunk payloads, and LZ4 compression.
-- Greyscale lighting with sunlight, point lights, and render overlay.
+- Greyscale lighting with sunlight, point lights, render overlay, underground falloff tuning, and configurable ambient floor.
 - Spatial grid for reusable area/entity queries.
 - Game content database loader for base data roots.
-- Recipe registry and crafting core.
+- Recipe registry and crafting core with known recipe, station, ingredient, category, and sort query results.
 - Loot table registry and deterministic loot rolling support.
 - Biome registry and biome map baseline.
 - Mod/content-pack loader with `mod.json`, override reporting, and tile numeric-id conflict detection.
@@ -72,6 +74,50 @@ Milestone 1 and the first core world tasks are scaffolded:
 - Advanced world generation now includes underground liquid pockets using tile liquid data.
 - `PlayerItemUseSystem` routes selected hotbar items into mining, building, and melee actions.
 - `WorldSkySystem` evaluates day/night sky color and sunlight intensity for lighting/rendering integration.
+- `LiquidSimulationSystem` provides an active-region baseline for water falling and sideways flow.
+- `WorldSimulationScheduler` coordinates dirty liquid/render/light regions and runs liquid steps inside `GameSimulation`.
+- Equipment core includes armor/accessory slots, item stat modifiers, and player stat calculation.
+- Status effects load from JSON, participate in mod content merging, and support timed buffs/debuffs, damage ticks, healing ticks, and stat modifiers.
+- World query services provide tile raycasts, line-of-sight checks, and filtered tile region scans for interaction, combat, and AI.
+- Dirty region tracking is available as a foundation for future liquid, lighting, particle, and chunk-render schedulers.
+- Tile mining and placement events feed world-simulation dirty regions through `WorldSimulationEventBridge`.
+- World analysis metrics count tile distribution, liquid coverage, solid/air ratios, and surface ranges for generation quality checks.
+- Interaction targeting can choose mining and placement targets from actor reach and world raycasts.
+- Melee attacks can optionally respect world line-of-sight.
+- Client tile rendering now visualizes tile liquid amounts, and rendering has initial layer, shader registry, and post-processing settings scaffolding.
+- Startup now enters a main menu with Singleplayer, planned local splitscreen, planned multiplayer, settings, and exit entries.
+- A loading state prepares the singleplayer world session before entering gameplay.
+- World generation profiles define starter small, medium, and large Terraria-like world sizes and tuning targets.
+- Base worldgen data now includes `small`, `medium`, and `large` JSON profiles with vertical dimension bands for sky, surface, underground, and deep layers.
+- Horizontally infinite worlds can stream deterministic chunks in both negative and positive X while keeping top/bottom finite.
+- Infinite chunk generation includes depth-aware ambient light, terrain, caves, ores, water pockets, and pass-through mineable trees.
+- Streamed infinite-world chunks can load from saved chunk files and dirty chunks are saved before unload.
+- Engine diagnostics can build world/entity/time snapshots for future debug windows and profiler overlays.
+- World generation profiles now drive terrain surface, dirt depth, cave walkers, ore veins, water pockets, and tree attempts.
+- Generated wood and leaf tiles are pass-through but mineable, matching the Terraria-style tree interaction model.
+- Client gameplay now resolves mouse world/tile targets and routes selected hotbar use into mining, building, and melee.
+- The debug console includes `/debug world` for compact world, chunk, entity, liquid, and surface metrics.
+- Tile and item definitions now support normalized tags for material-style gameplay rules and tooling filters.
+- Sprite asset manifests now define stable logical sprite ids, categories, dimensions, tags, and future atlas hooks.
+- Item definitions now support data-driven primary actions for mine, place, melee, shoot, consume, cast, and interact flows.
+- Placeable items can declare placement support rules such as adjacent solid support, wall/solid support, or solid ground.
+- Area queries support rectangles, circles, cones, and tile flood fill as shared foundations for attacks, AI, triggers, and interaction tooling.
+- `Docs/ENGINE_STATUS.md` tracks what exists, what is partial, and what still needs deeper engine work.
+- `Docs/ENGINE_ARCHITECTURE.md` and `Docs/ASSET_PIPELINE_PLAN.md` document how the engine and asset pipeline are meant to work.
+- Tile entity foundations are available with a chest tile entity, tile-position manager, and JSON save/load service.
+- Worldgen profiles can be loaded from JSON and evaluated with a quality gate using `WorldAnalyzer` metrics.
+- Combat attack-shape definitions can resolve rectangle, circle, and cone query shapes for future data-driven weapons.
+- Mining targeting can select pass-through non-air tiles, so Terraria-style trees/furniture can be walked through but still mined.
+- The first crafting station foundation is in place through workbench tile/item data and nearby station discovery.
+- Ranged selected-item use can spawn projectiles, consume ammo, and respect `useTime` cooldowns; base data includes a wooden bow and wooden arrows.
+- World generation profiles are part of the content/mod pipeline and can drive caves, water pockets, tree parameters, and data-driven ore definitions.
+- `WorldGenerationService` produces generated worlds together with analysis metrics and quality-gate reports for menus, tools, and seed validation.
+- Melee weapons can use data-driven attack shapes from item JSON; projectiles, weapons, and enemy contact damage can apply status effects from content data.
+- Shared settings now cover video, rendering, audio, gameplay, input/keybinds, and debug options.
+- Gameplay has an in-game pause menu with editable settings tabs; the same settings surface is reachable from the main menu.
+- Settings rows and tabs support mouse selection, keybind capture warns about conflicts, keybind reset requires confirmation, and resolution/fullscreen/VSync changes apply live.
+- The pause/settings surface now includes world streaming options and debug toggles for the debug HUD and tile grid.
+- Base item data includes a first copper armor set with equipment stats and workbench recipes.
 
 ## Rider
 

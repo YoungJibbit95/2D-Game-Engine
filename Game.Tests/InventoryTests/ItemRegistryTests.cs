@@ -1,4 +1,5 @@
 using Game.Core.Data;
+using Game.Core.Combat;
 using Game.Core.Items;
 using Xunit;
 
@@ -36,7 +37,16 @@ public sealed class ItemRegistryTests
           "useTime": 0.35,
           "toolPower": 35,
           "damage": 3,
-          "knockback": 1.5
+          "knockback": 1.5,
+          "attackShape": {
+            "kind": "Rectangle",
+            "range": 40,
+            "width": 36,
+            "height": 24
+          },
+          "onHitEffects": [
+            { "effect": "poisoned", "chance": 0.25, "durationSeconds": 3.0 }
+          ]
         }
         """;
 
@@ -48,6 +58,59 @@ public sealed class ItemRegistryTests
         Assert.Equal(ItemType.ToolPickaxe, definition.Type);
         Assert.Equal("items/copper_pickaxe", definition.TexturePath);
         Assert.Equal(35, definition.ToolPower);
+        Assert.Equal(ItemActionKind.Mine, Assert.Single(definition.Actions).Kind);
+        Assert.NotNull(definition.AttackShape);
+        Assert.Equal(AttackShapeKind.Rectangle, definition.AttackShape.Kind);
+        var effect = Assert.Single(definition.OnHitEffects);
+        Assert.Equal("poisoned", effect.EffectId);
+        Assert.Equal(0.25f, effect.Chance);
+    }
+
+    [Fact]
+    public void Loader_ReadsDataDrivenItemActions()
+    {
+        const string json = """
+        {
+          "id": "wooden_bow",
+          "displayName": "Wooden Bow",
+          "type": "WeaponRanged",
+          "texture": "items/wooden_bow",
+          "maxStack": 1,
+          "actions": [
+            {
+              "kind": "Shoot",
+              "projectile": "wooden_arrow",
+              "ammo": "wooden_arrow",
+              "ammoCost": 1,
+              "projectileSpeedMultiplier": 1.25
+            }
+          ]
+        }
+        """;
+
+        var definition = new ItemDefinitionJsonLoader().LoadDefinitionFromJson(json);
+        var action = Assert.Single(definition.Actions);
+
+        Assert.Equal(ItemActionKind.Shoot, action.Kind);
+        Assert.Equal("wooden_arrow", action.ProjectileId);
+        Assert.Equal("wooden_arrow", action.AmmoItemId);
+        Assert.Equal(1.25f, action.ProjectileSpeedMultiplier);
+    }
+
+    [Fact]
+    public void Create_RejectsShootActionWithoutProjectile()
+    {
+        var badItem = new ItemDefinition
+        {
+            Id = "bad_bow",
+            DisplayName = "Bad Bow",
+            Type = ItemType.WeaponRanged,
+            TexturePath = "items/bad_bow",
+            MaxStack = 1,
+            Actions = new[] { ItemActionDefinition.Create(ItemActionKind.Shoot) }
+        };
+
+        Assert.Throws<RegistryValidationException>(() => ItemRegistry.Create(new[] { badItem }));
     }
 
     private static ItemDefinition CreateDirtBlockDefinition()

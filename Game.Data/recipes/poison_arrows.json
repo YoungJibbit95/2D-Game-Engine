@@ -1,0 +1,11 @@
+{
+  "id": "poison_arrows",
+  "result": { "itemId": "poison_arrow", "count": 25 },
+  "ingredients": [
+    { "itemId": "wooden_arrow", "count": 25 },
+    { "itemId": "gel", "count": 2 }
+  ],
+  "station": "workbench",
+  "category": "ammo",
+  "sortOrder": 25
+}

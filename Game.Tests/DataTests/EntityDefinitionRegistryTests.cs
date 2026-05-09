@@ -17,7 +17,12 @@ public sealed class EntityDefinitionRegistryTests
           "width": 16,
           "height": 14,
           "aiBehavior": "slime",
-          "lootTable": "slime_basic"
+          "lootTable": "slime_basic",
+          "contactDamage": 12,
+          "contactKnockback": 220,
+          "onContactEffects": [
+            { "effect": "poisoned", "chance": 0.5, "durationSeconds": 2.5 }
+          ]
         }
         """;
 
@@ -26,6 +31,11 @@ public sealed class EntityDefinitionRegistryTests
         Assert.Equal("slime", entity.Id);
         Assert.Equal("entities/slime", entity.TexturePath);
         Assert.Equal("slime_basic", entity.LootTableId);
+        Assert.Equal(12, entity.ContactDamage);
+        Assert.Equal(220, entity.ContactKnockback);
+        var effect = Assert.Single(entity.OnContactEffects);
+        Assert.Equal("poisoned", effect.EffectId);
+        Assert.Equal(0.5f, effect.Chance);
     }
 
     [Fact]

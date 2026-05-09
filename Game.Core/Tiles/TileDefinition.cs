@@ -1,3 +1,5 @@
+using Game.Core.Data;
+
 namespace Game.Core.Tiles;
 
 public sealed record TileDefinition
@@ -21,4 +23,13 @@ public sealed record TileDefinition
     public string? DropItemId { get; init; }
 
     public string? MergeGroup { get; init; }
+
+    public string? CraftingStationId { get; init; }
+
+    public IReadOnlyList<string> Tags { get; init; } = Array.Empty<string>();
+
+    public bool HasTag(string tag)
+    {
+        return DefinitionTags.HasTag(Tags, tag);
+    }
 }

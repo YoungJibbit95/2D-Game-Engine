@@ -9,18 +9,25 @@ using Game.Core.Physics;
 using Game.Core.Spawning;
 using Game.Core.Time;
 using Game.Core.World;
+using Game.Core.World.Liquids;
+using Game.Core.World.Simulation;
 using InventoryModel = Game.Core.Inventory.Inventory;
 using GameWorld = Game.Core.World.World;
 
 namespace Game.Core.Runtime;
 
-public sealed class GameSimulation
+public sealed class GameSimulation : IDisposable
 {
     private readonly CombatSystem _combat;
     private readonly ItemPickupSystem _pickup;
     private readonly SpawnScheduler _spawnScheduler;
     private readonly SpawnSchedulerOptions _spawnOptions;
     private readonly PlayerRespawnSystem _respawn;
+    private readonly WorldSimulationScheduler _worldSimulation;
+    private readonly WorldSimulationOptions _worldSimulationOptions;
+    private readonly LiquidSimulationSystem _liquids;
+    private readonly WorldSimulationEventBridge _worldSimulationEvents;
+    private readonly ChunkMetadataService _chunkMetadata;
 
     public GameSimulation(
         GameContentDatabase content,
@@ -35,7 +42,11 @@ public sealed class GameSimulation
         ItemPickupSystem? pickup = null,
         SpawnScheduler? spawnScheduler = null,
         SpawnSchedulerOptions? spawnOptions = null,
-        PlayerRespawnSystem? respawn = null)
+        PlayerRespawnSystem? respawn = null,
+        WorldSimulationScheduler? worldSimulation = null,
+        WorldSimulationOptions? worldSimulationOptions = null,
+        LiquidSimulationSystem? liquids = null,
+        ChunkMetadataService? chunkMetadata = null)
     {
         Content = content ?? throw new ArgumentNullException(nameof(content));
         World = world ?? throw new ArgumentNullException(nameof(world));
@@ -50,6 +61,11 @@ public sealed class GameSimulation
         _spawnScheduler = spawnScheduler ?? new SpawnScheduler();
         _spawnOptions = spawnOptions ?? SpawnSchedulerOptions.Default;
         _respawn = respawn ?? new PlayerRespawnSystem();
+        _worldSimulation = worldSimulation ?? new WorldSimulationScheduler();
+        _worldSimulationOptions = worldSimulationOptions ?? WorldSimulationOptions.Default;
+        _liquids = liquids ?? new LiquidSimulationSystem();
+        _chunkMetadata = chunkMetadata ?? new ChunkMetadataService();
+        _worldSimulationEvents = WorldSimulationEventBridge.Attach(Events, _worldSimulation);
     }
 
     public GameContentDatabase Content { get; }
@@ -77,10 +93,17 @@ public sealed class GameSimulation
                 ContactDamageResult.None,
                 0,
                 SpawnSchedulerResult.None,
-                PlayerRespawnResult.None);
+                PlayerRespawnResult.None,
+                WorldSimulationTickResult.None);
         }
 
         Time.Update(deltaSeconds);
+        var worldSimulation = _worldSimulation.Tick(World, deltaSeconds, _liquids, _worldSimulationOptions);
+        if (worldSimulation.RenderDirtyRegions.Count > 0)
+        {
+            _chunkMetadata.RefreshRegions(World, worldSimulation.RenderDirtyRegions);
+        }
+
         if (!Player.HealthComponent.IsDead)
         {
             Player.SetCommand(command);
@@ -89,10 +112,10 @@ public sealed class GameSimulation
 
         Entities.UpdateAll(World, deltaSeconds);
 
-        var combat = _combat.ResolveProjectileHits(Entities, Content.LootTables, Events);
+        var combat = _combat.ResolveProjectileHits(Entities, Content, Events);
         var contactDamage = Player.HealthComponent.IsDead
             ? ContactDamageResult.None
-            : _combat.ResolveEnemyContactDamage(Player, Entities, events: Events);
+            : _combat.ResolveEnemyContactDamage(Player, Entities, Content, events: Events);
         var pickedUpItems = Player.HealthComponent.IsDead
             ? 0
             : _pickup.PickupItems(Entities, PlayerInventory, Player.Bounds.Inflate(12), Events);
@@ -107,6 +130,11 @@ public sealed class GameSimulation
             _spawnOptions);
         var respawn = _respawn.Update(Player, World, deltaSeconds);
 
-        return new GameSimulationTickResult(combat, contactDamage, pickedUpItems, spawning, respawn);
+        return new GameSimulationTickResult(combat, contactDamage, pickedUpItems, spawning, respawn, worldSimulation);
+    }
+
+    public void Dispose()
+    {
+        _worldSimulationEvents.Dispose();
     }
 }

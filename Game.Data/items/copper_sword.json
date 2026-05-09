@@ -1,0 +1,17 @@
+{
+  "id": "copper_sword",
+  "displayName": "Copper Sword",
+  "type": "WeaponMelee",
+  "texture": "items/copper_sword",
+  "maxStack": 1,
+  "useTime": 0.28,
+  "damage": 7,
+  "knockback": 1.6,
+  "attackShape": {
+    "kind": "Rectangle",
+    "range": 42,
+    "width": 42,
+    "height": 28
+  },
+  "tags": ["weapon", "melee", "starter"]
+}

@@ -57,8 +57,68 @@ public sealed class CraftingSystem
         return inventory.AddItem(recipe.Result);
     }
 
+    public IReadOnlyList<CraftingQueryResult> QueryRecipes(CraftingContext context, RecipeRegistry recipes)
+    {
+        ArgumentNullException.ThrowIfNull(context);
+        ArgumentNullException.ThrowIfNull(recipes);
+
+        return recipes.Definitions
+            .OrderBy(recipe => recipe.Category, StringComparer.OrdinalIgnoreCase)
+            .ThenBy(recipe => recipe.SortOrder)
+            .ThenBy(recipe => recipe.Id, StringComparer.OrdinalIgnoreCase)
+            .Select(recipe =>
+            {
+                var known = context.Knows(recipe);
+                var station = context.HasStation(recipe);
+                var ingredients = HasIngredients(context.Inventory, recipe);
+                return new CraftingQueryResult(recipe, known, station, ingredients, known && station && ingredients && CanFitResult(context.Inventory, recipe));
+            })
+            .ToArray();
+    }
+
+    public bool Craft(CraftingContext context, RecipeDefinition recipe)
+    {
+        ArgumentNullException.ThrowIfNull(context);
+        ArgumentNullException.ThrowIfNull(recipe);
+
+        if (!context.Knows(recipe) || !context.HasStation(recipe) || !HasIngredients(context.Inventory, recipe) || !CanFitResult(context.Inventory, recipe))
+        {
+            return false;
+        }
+
+        foreach (var ingredient in recipe.Ingredients)
+        {
+            context.Inventory.RemoveItem(ingredient.ItemId, ingredient.Count);
+        }
+
+        return context.Inventory.AddItem(recipe.Result);
+    }
+
     private static bool IsStationAvailable(RecipeDefinition recipe, string? station)
     {
         return recipe.Station is null || string.Equals(recipe.Station, station, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static bool HasIngredients(PlayerInventory inventory, RecipeDefinition recipe)
+    {
+        return recipe.Ingredients.All(ingredient => inventory.CountItem(ingredient.ItemId) >= ingredient.Count);
+    }
+
+    private static bool CanFitResult(PlayerInventory inventory, RecipeDefinition recipe)
+    {
+        if (!HasIngredients(inventory, recipe))
+        {
+            return false;
+        }
+
+        var hotbar = inventory.Hotbar.Clone();
+        var main = inventory.Main.Clone();
+        var simulated = new PlayerInventory(hotbar, main, inventory.ItemDefinitions);
+        foreach (var ingredient in recipe.Ingredients)
+        {
+            simulated.RemoveItem(ingredient.ItemId, ingredient.Count);
+        }
+
+        return simulated.CanAddItem(recipe.Result);
     }
 }

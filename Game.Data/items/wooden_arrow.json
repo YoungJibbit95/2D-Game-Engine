@@ -1,0 +1,8 @@
+{
+  "id": "wooden_arrow",
+  "displayName": "Wooden Arrow",
+  "type": "Ammo",
+  "texture": "items/wooden_arrow",
+  "maxStack": 999,
+  "tags": ["ammo", "arrow"]
+}

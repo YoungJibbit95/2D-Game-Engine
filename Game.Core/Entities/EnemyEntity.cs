@@ -1,5 +1,6 @@
 using Game.Core.Combat;
 using Game.Core.Entities.AI;
+using Game.Core.Effects;
 using Game.Core.Physics;
 using Game.Core.World;
 using System.Numerics;
@@ -22,13 +23,19 @@ public sealed class EnemyEntity : Entity
         HealthComponent health,
         IAiBehavior aiBehavior,
         TileCollisionResolver collisionResolver,
-        string? lootTableId = null)
+        string? lootTableId = null,
+        int contactDamage = 10,
+        float contactKnockback = 180f,
+        IReadOnlyList<StatusEffectApplication>? onContactEffects = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(definitionId);
 
         DefinitionId = definitionId;
         Health = health;
         LootTableId = lootTableId;
+        ContactDamage = Math.Max(0, contactDamage);
+        ContactKnockback = Math.Max(0, contactKnockback);
+        OnContactEffects = onContactEffects ?? Array.Empty<StatusEffectApplication>();
         _aiBehavior = aiBehavior;
         _collisionResolver = collisionResolver;
         Body = new PhysicsBody
@@ -47,6 +54,14 @@ public sealed class EnemyEntity : Entity
 
     public HealthComponent Health { get; }
 
+    public StatusEffectCollection StatusEffects { get; } = new();
+
+    public int ContactDamage { get; }
+
+    public float ContactKnockback { get; }
+
+    public IReadOnlyList<StatusEffectApplication> OnContactEffects { get; }
+
     public override RectI Bounds => Body.Bounds;
 
     public bool ApplyDamage(DamageInfo damage)
@@ -56,6 +71,7 @@ public sealed class EnemyEntity : Entity
 
     public override void Update(GameWorld world, float deltaSeconds)
     {
+        StatusEffects.Update(deltaSeconds, Health);
         Health.Update(deltaSeconds);
         if (Health.IsDead)
         {

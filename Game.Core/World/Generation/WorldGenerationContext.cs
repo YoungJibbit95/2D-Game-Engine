@@ -4,12 +4,13 @@ namespace Game.Core.World.Generation;
 
 public sealed class WorldGenerationContext
 {
-    public WorldGenerationContext(World world, int seed, Random random, INoiseService noise)
+    public WorldGenerationContext(World world, int seed, Random random, INoiseService noise, WorldGenerationProfile? profile = null)
     {
         World = world;
         Seed = seed;
         Random = random;
         Noise = noise;
+        Profile = profile ?? WorldGenerationProfile.ForDimensions(world.WidthTiles, world.HeightTiles);
         SurfaceHeights = new int[world.WidthTiles];
         Biomes = new BiomeMap("forest");
     }
@@ -21,6 +22,8 @@ public sealed class WorldGenerationContext
     public Random Random { get; }
 
     public INoiseService Noise { get; }
+
+    public WorldGenerationProfile Profile { get; }
 
     public int[] SurfaceHeights { get; }
 

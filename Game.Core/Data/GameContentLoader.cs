@@ -1,5 +1,7 @@
+using Game.Core.Assets;
 using Game.Core.Biomes;
 using Game.Core.Crafting;
+using Game.Core.Effects;
 using Game.Core.Entities;
 using Game.Core.Items;
 using Game.Core.Loot;
@@ -7,6 +9,7 @@ using Game.Core.Mods;
 using Game.Core.Projectiles;
 using Game.Core.Spawning;
 using Game.Core.Tiles;
+using Game.Core.World.Generation;
 using System.Text.Json;
 
 namespace Game.Core.Data;
@@ -21,6 +24,9 @@ public sealed class GameContentLoader
     private readonly ProjectileDefinitionJsonLoader _projectileLoader;
     private readonly EntityDefinitionJsonLoader _entityLoader;
     private readonly SpawnRuleJsonLoader _spawnRuleLoader;
+    private readonly StatusEffectDefinitionJsonLoader _statusEffectLoader;
+    private readonly SpriteAssetJsonLoader _spriteAssetLoader;
+    private readonly WorldGenerationProfileJsonLoader _worldGenerationProfileLoader;
 
     public GameContentLoader()
         : this(
@@ -31,7 +37,10 @@ public sealed class GameContentLoader
             new BiomeJsonLoader(),
             new ProjectileDefinitionJsonLoader(),
             new EntityDefinitionJsonLoader(),
-            new SpawnRuleJsonLoader())
+            new SpawnRuleJsonLoader(),
+            new StatusEffectDefinitionJsonLoader(),
+            new SpriteAssetJsonLoader(),
+            new WorldGenerationProfileJsonLoader())
     {
     }
 
@@ -43,7 +52,10 @@ public sealed class GameContentLoader
         BiomeJsonLoader biomeLoader,
         ProjectileDefinitionJsonLoader projectileLoader,
         EntityDefinitionJsonLoader entityLoader,
-        SpawnRuleJsonLoader spawnRuleLoader)
+        SpawnRuleJsonLoader spawnRuleLoader,
+        StatusEffectDefinitionJsonLoader statusEffectLoader,
+        SpriteAssetJsonLoader spriteAssetLoader,
+        WorldGenerationProfileJsonLoader? worldGenerationProfileLoader = null)
     {
         _tileLoader = tileLoader;
         _itemLoader = itemLoader;
@@ -53,6 +65,9 @@ public sealed class GameContentLoader
         _projectileLoader = projectileLoader;
         _entityLoader = entityLoader;
         _spawnRuleLoader = spawnRuleLoader;
+        _statusEffectLoader = statusEffectLoader;
+        _spriteAssetLoader = spriteAssetLoader;
+        _worldGenerationProfileLoader = worldGenerationProfileLoader ?? new WorldGenerationProfileJsonLoader();
     }
 
     public GameContentDatabase LoadFromRoot(string contentRoot)
@@ -97,7 +112,10 @@ public sealed class GameContentLoader
             _biomeLoader.LoadDefinitionsFromDirectory(Path.Combine(root, "biomes")),
             _projectileLoader.LoadDefinitionsFromDirectory(Path.Combine(root, "projectiles")),
             _entityLoader.LoadDefinitionsFromDirectory(Path.Combine(root, "entities")),
-            _spawnRuleLoader.LoadDefinitionsFromDirectory(Path.Combine(root, "spawns")));
+            _spawnRuleLoader.LoadDefinitionsFromDirectory(Path.Combine(root, "spawns")),
+            _statusEffectLoader.LoadDefinitionsFromDirectory(Path.Combine(root, "effects")),
+            _spriteAssetLoader.LoadDefinitionsFromDirectory(Path.Combine(root, "assets")),
+            _worldGenerationProfileLoader.LoadProfilesFromDirectory(Path.Combine(root, "worldgen")));
     }
 
     private static ContentPackManifest LoadManifest(string modDirectory)
@@ -126,7 +144,10 @@ public sealed class GameContentLoader
         IReadOnlyList<BiomeDefinition> Biomes,
         IReadOnlyList<ProjectileDefinition> Projectiles,
         IReadOnlyList<EntityDefinition> Entities,
-        IReadOnlyList<SpawnRuleDefinition> SpawnRules);
+        IReadOnlyList<SpawnRuleDefinition> SpawnRules,
+        IReadOnlyList<StatusEffectDefinition> StatusEffects,
+        IReadOnlyList<SpriteAssetDefinition> SpriteAssets,
+        IReadOnlyList<WorldGenerationProfile> WorldGenerationProfiles);
 
     private sealed class ContentDatabaseBuilder
     {
@@ -140,6 +161,9 @@ public sealed class GameContentLoader
         private readonly Dictionary<string, Packed<ProjectileDefinition>> _projectiles = new(StringComparer.OrdinalIgnoreCase);
         private readonly Dictionary<string, Packed<EntityDefinition>> _entities = new(StringComparer.OrdinalIgnoreCase);
         private readonly Dictionary<string, Packed<SpawnRuleDefinition>> _spawnRules = new(StringComparer.OrdinalIgnoreCase);
+        private readonly Dictionary<string, Packed<StatusEffectDefinition>> _statusEffects = new(StringComparer.OrdinalIgnoreCase);
+        private readonly Dictionary<string, Packed<SpriteAssetDefinition>> _spriteAssets = new(StringComparer.OrdinalIgnoreCase);
+        private readonly Dictionary<string, Packed<WorldGenerationProfile>> _worldGenerationProfiles = new(StringComparer.OrdinalIgnoreCase);
 
         public ContentDatabaseBuilder(ContentLoadReport report)
         {
@@ -160,6 +184,9 @@ public sealed class GameContentLoader
             MergeById(_projectiles, definitions.Projectiles, projectile => projectile.Id, "projectile", packId);
             MergeById(_entities, definitions.Entities, entity => entity.Id, "entity", packId);
             MergeById(_spawnRules, definitions.SpawnRules, rule => rule.Id, "spawn", packId);
+            MergeById(_statusEffects, definitions.StatusEffects, effect => effect.Id, "effect", packId);
+            MergeById(_spriteAssets, definitions.SpriteAssets, sprite => sprite.Id, "sprite", packId);
+            MergeById(_worldGenerationProfiles, definitions.WorldGenerationProfiles, profile => profile.Id, "worldgen", packId);
         }
 
         public GameContentDatabase Build()
@@ -172,7 +199,12 @@ public sealed class GameContentLoader
                 BiomeRegistry.Create(_biomes.Values.Select(value => value.Definition)),
                 ProjectileRegistry.Create(_projectiles.Values.Select(value => value.Definition)),
                 EntityDefinitionRegistry.Create(_entities.Values.Select(value => value.Definition)),
-                SpawnRuleRegistry.Create(_spawnRules.Values.Select(value => value.Definition)));
+                SpawnRuleRegistry.Create(_spawnRules.Values.Select(value => value.Definition)))
+            {
+                StatusEffects = StatusEffectRegistry.Create(_statusEffects.Values.Select(value => value.Definition)),
+                SpriteAssets = SpriteAssetRegistry.Create(_spriteAssets.Values.Select(value => value.Definition)),
+                WorldGenerationProfiles = WorldGenerationProfileRegistry.Create(_worldGenerationProfiles.Values.Select(value => value.Definition))
+            };
         }
 
         private void MergeTile(TileDefinition tile, string packId)

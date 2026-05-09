@@ -53,6 +53,37 @@ public sealed class LightingSystemTests
         Assert.True(world.GetTile(18, 16).Light < world.GetTile(16, 16).Light);
     }
 
+    [Fact]
+    public void Recalculate_LeavesUndergroundCavesDarkWithoutLightSources()
+    {
+        var world = new World(8, 10, WorldMetadata.CreateDefault(seed: 1));
+        for (var x = 0; x < world.WidthTiles; x++)
+        {
+            for (var y = 0; y < 5; y++)
+            {
+                world.SetTile(x, y, KnownTileIds.Stone);
+            }
+        }
+
+        new LightingSystem().Recalculate(world, Array.Empty<LightSource>());
+
+        Assert.InRange(world.GetTile(4, 7).Light, 0, 12);
+    }
+
+    [Fact]
+    public void Recalculate_UsesAmbientFloorUnderground()
+    {
+        var world = new World(4, 8, WorldMetadata.CreateDefault(seed: 1));
+        for (var y = 0; y < 8; y++)
+        {
+            world.SetTile(0, y, KnownTileIds.Stone);
+        }
+
+        new LightingSystem().Recalculate(world, Array.Empty<LightSource>(), options: new LightingOptions(MinimumAmbientLight: 9));
+
+        Assert.Equal(9, world.GetTile(0, 7).Light);
+    }
+
     private static void AddStoneRoof(World world)
     {
         for (var x = 0; x < world.WidthTiles; x++)

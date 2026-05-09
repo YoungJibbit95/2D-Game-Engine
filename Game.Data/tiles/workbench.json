@@ -1,0 +1,14 @@
+{
+  "id": "workbench",
+  "numericId": 8,
+  "displayName": "Workbench",
+  "texture": "tiles/workbench",
+  "solid": false,
+  "blocksLight": false,
+  "hardness": 1.0,
+  "miningPowerRequired": 0,
+  "dropItem": "workbench",
+  "mergeGroup": "furniture",
+  "craftingStation": "workbench",
+  "tags": ["station", "crafting", "furniture", "mineable"]
+}

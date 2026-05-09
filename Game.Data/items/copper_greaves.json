@@ -1,0 +1,11 @@
+{
+  "id": "copper_greaves",
+  "displayName": "Copper Greaves",
+  "type": "Armor",
+  "texture": "items/copper_greaves",
+  "maxStack": 1,
+  "equipmentSlot": "Legs",
+  "defense": 2,
+  "movementSpeedBonus": 0.04,
+  "tags": ["item", "armor", "copper", "starter"]
+}

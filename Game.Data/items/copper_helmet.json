@@ -1,0 +1,10 @@
+{
+  "id": "copper_helmet",
+  "displayName": "Copper Helmet",
+  "type": "Armor",
+  "texture": "items/copper_helmet",
+  "maxStack": 1,
+  "equipmentSlot": "Head",
+  "defense": 2,
+  "tags": ["item", "armor", "copper", "starter"]
+}

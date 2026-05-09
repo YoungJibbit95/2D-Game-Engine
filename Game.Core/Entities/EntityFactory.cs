@@ -25,7 +25,10 @@ public sealed class EntityFactory
             new HealthComponent(definition.MaxHealth, currentHealth),
             CreateAiBehavior(definition.AiBehavior),
             _collisionResolver,
-            definition.LootTableId);
+            definition.LootTableId,
+            definition.ContactDamage,
+            definition.ContactKnockback,
+            definition.OnContactEffects);
     }
 
     private static IAiBehavior CreateAiBehavior(string? aiBehavior)

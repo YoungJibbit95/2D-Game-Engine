@@ -1,0 +1,11 @@
+{
+  "id": "healing_potion",
+  "result": { "itemId": "healing_potion", "count": 2 },
+  "ingredients": [
+    { "itemId": "gel", "count": 1 },
+    { "itemId": "wood", "count": 1 }
+  ],
+  "station": "workbench",
+  "category": "consumables",
+  "sortOrder": 20
+}

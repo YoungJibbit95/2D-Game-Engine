@@ -1,9 +1,11 @@
 using Game.Core.Combat;
 using Game.Core.Entities;
 using Game.Core.Events;
+using Game.Core.Effects;
 using Game.Core.Items;
 using Game.Core.Loot;
 using Game.Core.Physics;
+using Game.Core.World;
 using System.Numerics;
 using Xunit;
 
@@ -67,6 +69,76 @@ public sealed class MeleeAttackSystemTests
         Assert.Contains(entities.Entities, entity => entity is DroppedItemEntity);
     }
 
+    [Fact]
+    public void Attack_WithWorldLineOfSight_DoesNotHitThroughSolidTiles()
+    {
+        var world = new World(8, 4, WorldMetadata.CreateDefault(seed: 1));
+        world.SetTile(1, 0, KnownTileIds.Stone);
+        var entities = new EntityManager(spatialCellSize: 16);
+        var player = new PlayerEntity(Vector2.Zero, new TileCollisionResolver());
+        entities.Add(player);
+        var enemy = CreateEnemy(new Vector2(24, 0), health: 20);
+        entities.Add(enemy);
+
+        var result = CreateSystem().Attack(player, entities, CreateSword(damage: 6), CreateLootTables(), new Vector2(64, 0), world);
+
+        Assert.True(result.Attacked);
+        Assert.Equal(0, result.Hits);
+        Assert.Equal(20, enemy.Health.Current);
+    }
+
+    [Fact]
+    public void Attack_UsesDataDrivenCircleShape()
+    {
+        var entities = new EntityManager(spatialCellSize: 16);
+        var player = new PlayerEntity(Vector2.Zero, new TileCollisionResolver());
+        entities.Add(player);
+        var enemyAbovePlayer = CreateEnemy(new Vector2(0, -24), health: 20);
+        entities.Add(enemyAbovePlayer);
+        var shortSword = CreateSword(damage: 4) with
+        {
+            AttackShape = new AttackShapeDefinition
+            {
+                Kind = AttackShapeKind.Circle,
+                Range = 40
+            }
+        };
+
+        var result = CreateSystem().Attack(player, entities, shortSword, CreateLootTables(), new Vector2(64, 0));
+
+        Assert.Equal(1, result.Hits);
+        Assert.Equal(16, enemyAbovePlayer.Health.Current);
+    }
+
+    [Fact]
+    public void Attack_AppliesItemOnHitStatusEffects()
+    {
+        var entities = new EntityManager(spatialCellSize: 16);
+        var player = new PlayerEntity(Vector2.Zero, new TileCollisionResolver());
+        entities.Add(player);
+        var enemy = CreateEnemy(new Vector2(18, 0), health: 20);
+        entities.Add(enemy);
+        var poisonedSword = CreateSword(damage: 2) with
+        {
+            OnHitEffects = new[]
+            {
+                new StatusEffectApplication { EffectId = "poisoned" }
+            }
+        };
+
+        var result = CreateSystem().Attack(
+            player,
+            entities,
+            poisonedSword,
+            CreateLootTables(),
+            new Vector2(64, 0),
+            events: null,
+            statusEffectRegistry: CreateStatusEffects());
+
+        Assert.Equal(1, result.StatusEffectsApplied);
+        Assert.True(enemy.StatusEffects.HasEffect("poisoned"));
+    }
+
     private static MeleeAttackSystem CreateSystem()
     {
         return new MeleeAttackSystem(new LootRoller(new Random(1)), new TileCollisionResolver());
@@ -110,6 +182,22 @@ public sealed class MeleeAttackSystemTests
                 {
                     new LootEntryDefinition { ItemId = "gel", Min = 1, Max = 1, Chance = 1f }
                 }
+            }
+        });
+    }
+
+    private static StatusEffectRegistry CreateStatusEffects()
+    {
+        return StatusEffectRegistry.Create(new[]
+        {
+            new StatusEffectDefinition
+            {
+                Id = "poisoned",
+                DisplayName = "Poisoned",
+                Kind = StatusEffectKind.Debuff,
+                DurationSeconds = 4,
+                TickIntervalSeconds = 1,
+                DamagePerTick = 1
             }
         });
     }

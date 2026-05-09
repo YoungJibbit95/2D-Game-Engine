@@ -1,0 +1,12 @@
+{
+  "id": "mining_charm",
+  "result": { "itemId": "mining_charm", "count": 1 },
+  "ingredients": [
+    { "itemId": "copper_ore", "count": 4 },
+    { "itemId": "iron_ore", "count": 4 },
+    { "itemId": "gel", "count": 2 }
+  ],
+  "station": "workbench",
+  "category": "accessories",
+  "sortOrder": 50
+}

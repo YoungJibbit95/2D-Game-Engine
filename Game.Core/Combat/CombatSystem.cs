@@ -1,5 +1,7 @@
+using Game.Core.Data;
 using Game.Core.Entities;
 using Game.Core.Events;
+using Game.Core.Effects;
 using Game.Core.Inventory;
 using Game.Core.Loot;
 using Game.Core.Physics;
@@ -11,14 +13,32 @@ public sealed class CombatSystem
 {
     private readonly LootRoller _lootRoller;
     private readonly TileCollisionResolver _collisionResolver;
+    private readonly StatusEffectApplier _statusEffects;
 
-    public CombatSystem(LootRoller lootRoller, TileCollisionResolver collisionResolver)
+    public CombatSystem(LootRoller lootRoller, TileCollisionResolver collisionResolver, StatusEffectApplier? statusEffects = null)
     {
         _lootRoller = lootRoller;
         _collisionResolver = collisionResolver;
+        _statusEffects = statusEffects ?? new StatusEffectApplier();
     }
 
     public CombatResolutionResult ResolveProjectileHits(EntityManager entities, LootTableRegistry lootTables, GameEventBus? events = null)
+    {
+        return ResolveProjectileHits(entities, lootTables, projectiles: null, statusEffects: null, events);
+    }
+
+    public CombatResolutionResult ResolveProjectileHits(EntityManager entities, GameContentDatabase content, GameEventBus? events = null)
+    {
+        ArgumentNullException.ThrowIfNull(content);
+        return ResolveProjectileHits(entities, content.LootTables, content.Projectiles, content.StatusEffects, events);
+    }
+
+    private CombatResolutionResult ResolveProjectileHits(
+        EntityManager entities,
+        LootTableRegistry lootTables,
+        ProjectileRegistry? projectiles,
+        StatusEffectRegistry? statusEffects,
+        GameEventBus? events)
     {
         ArgumentNullException.ThrowIfNull(entities);
         ArgumentNullException.ThrowIfNull(lootTables);
@@ -26,6 +46,7 @@ public sealed class CombatSystem
         var projectileHits = 0;
         var enemyDeaths = 0;
         var droppedItems = 0;
+        var effectsApplied = 0;
         var pendingDrops = new List<DroppedItemEntity>();
 
         foreach (var projectile in entities.Entities.OfType<ProjectileEntity>().Where(entity => entity.IsActive).ToArray())
@@ -40,6 +61,14 @@ public sealed class CombatSystem
                 projectileHits++;
                 var damageApplied = enemy.ApplyDamage(projectile.DamageInfo);
                 events?.Publish(new ProjectileHitEvent(projectile.Id, enemy.Id, projectile.Damage));
+                if (damageApplied &&
+                    projectiles is not null &&
+                    statusEffects is not null &&
+                    projectiles.TryGetById(projectile.ProjectileId, out var projectileDefinition))
+                {
+                    effectsApplied += _statusEffects.Apply(enemy.StatusEffects, statusEffects, projectileDefinition.OnHitEffects);
+                }
+
                 projectile.RegisterHit();
 
                 if (damageApplied && enemy.Health.IsDead)
@@ -62,7 +91,7 @@ public sealed class CombatSystem
             entities.Add(drop);
         }
 
-        return new CombatResolutionResult(projectileHits, enemyDeaths, droppedItems);
+        return new CombatResolutionResult(projectileHits, enemyDeaths, droppedItems, effectsApplied);
     }
 
     public ContactDamageResult ResolveEnemyContactDamage(
@@ -102,6 +131,60 @@ public sealed class CombatSystem
 
             events?.Publish(new PlayerDamagedEvent(damage, player.Health, player.MaxHealth, enemy.Id));
             return new ContactDamageResult(1, damage, player.HealthComponent.IsDead);
+        }
+
+        return ContactDamageResult.None;
+    }
+
+    public ContactDamageResult ResolveEnemyContactDamage(
+        PlayerEntity player,
+        EntityManager entities,
+        GameContentDatabase content,
+        float invulnerabilitySeconds = 0.65f,
+        GameEventBus? events = null)
+    {
+        ArgumentNullException.ThrowIfNull(content);
+        return ResolveEnemyContactDamageInternal(player, entities, content.StatusEffects, invulnerabilitySeconds, events);
+    }
+
+    private ContactDamageResult ResolveEnemyContactDamageInternal(
+        PlayerEntity player,
+        EntityManager entities,
+        StatusEffectRegistry statusEffects,
+        float invulnerabilitySeconds,
+        GameEventBus? events)
+    {
+        ArgumentNullException.ThrowIfNull(player);
+        ArgumentNullException.ThrowIfNull(entities);
+        ArgumentNullException.ThrowIfNull(statusEffects);
+
+        if (player.HealthComponent.IsDead)
+        {
+            return ContactDamageResult.None;
+        }
+
+        foreach (var enemy in entities.Query(player.Bounds).OfType<EnemyEntity>().Where(entity => entity.IsActive).ToArray())
+        {
+            if (!enemy.Bounds.Intersects(player.Bounds) || enemy.ContactDamage <= 0)
+            {
+                continue;
+            }
+
+            var direction = player.Body.Center - enemy.Body.Center;
+            if (direction == System.Numerics.Vector2.Zero)
+            {
+                direction = System.Numerics.Vector2.UnitY * -1;
+            }
+
+            var damageInfo = new DamageInfo(enemy.ContactDamage, DamageType.Contact, enemy.Id, direction, enemy.ContactKnockback);
+            if (!player.ApplyDamage(damageInfo, invulnerabilitySeconds))
+            {
+                return ContactDamageResult.None;
+            }
+
+            _statusEffects.Apply(player.StatusEffects, statusEffects, enemy.OnContactEffects);
+            events?.Publish(new PlayerDamagedEvent(enemy.ContactDamage, player.Health, player.MaxHealth, enemy.Id));
+            return new ContactDamageResult(1, enemy.ContactDamage, player.HealthComponent.IsDead);
         }
 
         return ContactDamageResult.None;

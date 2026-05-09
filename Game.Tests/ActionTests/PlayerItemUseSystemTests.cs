@@ -98,6 +98,59 @@ public sealed class PlayerItemUseSystemTests
         Assert.Equal(14, enemy.Health.Current);
     }
 
+    [Fact]
+    public void UseSelectedItem_RangedWeaponSpawnsProjectileAndConsumesAmmo()
+    {
+        var content = CreateContent();
+        var world = new World(16, 16, WorldMetadata.CreateDefault(seed: 1));
+        var player = new PlayerEntity(Vector2.Zero, new TileCollisionResolver());
+        var inventory = new PlayerInventory(content.Items);
+        inventory.Hotbar.Slots[0].SetStack(new ItemStack("wooden_bow", 1));
+        inventory.Hotbar.Slots[1].SetStack(new ItemStack("wooden_arrow", 3));
+        var entities = new EntityManager(spatialCellSize: 16);
+
+        var result = new PlayerItemUseSystem().UseSelectedItem(
+            world,
+            content,
+            player,
+            inventory,
+            entities,
+            TilePos.Zero,
+            player.Body.Center + new Vector2(80, 0),
+            0.1f);
+
+        Assert.Equal(PlayerItemUseKind.Shoot, result.Kind);
+        var projectile = Assert.IsType<ProjectileEntity>(Assert.Single(entities.Entities));
+        Assert.Same(projectile, result.Projectile);
+        Assert.Equal("wooden_arrow", projectile.ProjectileId);
+        Assert.Equal(2, inventory.CountItem("wooden_arrow"));
+        Assert.True(projectile.Velocity.X > 0);
+    }
+
+    [Fact]
+    public void UseSelectedItem_RangedWeaponRespectsUseCooldown()
+    {
+        var content = CreateContent();
+        var world = new World(16, 16, WorldMetadata.CreateDefault(seed: 1));
+        var player = new PlayerEntity(Vector2.Zero, new TileCollisionResolver());
+        var inventory = new PlayerInventory(content.Items);
+        inventory.Hotbar.Slots[0].SetStack(new ItemStack("wooden_bow", 1));
+        inventory.Hotbar.Slots[1].SetStack(new ItemStack("wooden_arrow", 3));
+        var entities = new EntityManager(spatialCellSize: 16);
+        var use = new PlayerItemUseSystem();
+
+        var first = use.UseSelectedItem(world, content, player, inventory, entities, TilePos.Zero, player.Body.Center + new Vector2(80, 0), 0.1f);
+        var blocked = use.UseSelectedItem(world, content, player, inventory, entities, TilePos.Zero, player.Body.Center + new Vector2(80, 0), 0.1f);
+        use.Update(0.5f);
+        var second = use.UseSelectedItem(world, content, player, inventory, entities, TilePos.Zero, player.Body.Center + new Vector2(80, 0), 0.1f);
+
+        Assert.Equal(PlayerItemUseKind.Shoot, first.Kind);
+        Assert.Equal(PlayerItemUseKind.None, blocked.Kind);
+        Assert.Equal(PlayerItemUseKind.Shoot, second.Kind);
+        Assert.Equal(2, entities.Entities.Count);
+        Assert.Equal(1, inventory.CountItem("wooden_arrow"));
+    }
+
     private static GameContentDatabase CreateContent()
     {
         return new GameContentDatabase(
@@ -148,12 +201,53 @@ public sealed class PlayerItemUseSystemTests
                     UseTime = 0.25f,
                     Damage = 6,
                     Knockback = 30
+                },
+                new ItemDefinition
+                {
+                    Id = "wooden_bow",
+                    DisplayName = "Wooden Bow",
+                    Type = ItemType.WeaponRanged,
+                    TexturePath = "items/wooden_bow",
+                    MaxStack = 1,
+                    UseTime = 0.45f,
+                    Damage = 4,
+                    Knockback = 10,
+                    Actions = new[]
+                    {
+                        new ItemActionDefinition
+                        {
+                            Kind = ItemActionKind.Shoot,
+                            ProjectileId = "wooden_arrow",
+                            AmmoItemId = "wooden_arrow",
+                            AmmoCost = 1
+                        }
+                    }
+                },
+                new ItemDefinition
+                {
+                    Id = "wooden_arrow",
+                    DisplayName = "Wooden Arrow",
+                    Type = ItemType.Ammo,
+                    TexturePath = "items/wooden_arrow",
+                    MaxStack = 999
                 }
             }),
             RecipeRegistry.Create(Array.Empty<RecipeDefinition>()),
             LootTableRegistry.Create(Array.Empty<LootTableDefinition>()),
             BiomeRegistry.Create(Array.Empty<BiomeDefinition>()),
-            ProjectileRegistry.Create(Array.Empty<ProjectileDefinition>()),
+            ProjectileRegistry.Create(new[]
+            {
+                new ProjectileDefinition
+                {
+                    Id = "wooden_arrow",
+                    TexturePath = "projectiles/wooden_arrow",
+                    Speed = 320,
+                    Damage = 5,
+                    Gravity = 0.2f,
+                    Pierce = 0,
+                    Lifetime = 5
+                }
+            }),
             EntityDefinitionRegistry.Create(new[] { CreateSlimeDefinition() }),
             SpawnRuleRegistry.Create(Array.Empty<SpawnRuleDefinition>()));
     }

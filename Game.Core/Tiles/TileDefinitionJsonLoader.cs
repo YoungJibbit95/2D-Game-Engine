@@ -1,3 +1,4 @@
+using Game.Core.Data;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -88,6 +89,13 @@ public sealed class TileDefinitionJsonLoader
 
         public string? MergeGroup { get; init; }
 
+        public string? CraftingStationId { get; init; }
+
+        [JsonPropertyName("craftingStation")]
+        public string? CraftingStation { get; init; }
+
+        public string[] Tags { get; init; } = Array.Empty<string>();
+
         public TileDefinition ToDefinition()
         {
             return new TileDefinition
@@ -101,7 +109,9 @@ public sealed class TileDefinitionJsonLoader
                 Hardness = Hardness,
                 MiningPowerRequired = MiningPowerRequired,
                 DropItemId = DropItemId ?? DropItem,
-                MergeGroup = MergeGroup
+                MergeGroup = MergeGroup,
+                CraftingStationId = CraftingStationId ?? CraftingStation,
+                Tags = DefinitionTags.Normalize(Tags)
             };
         }
     }

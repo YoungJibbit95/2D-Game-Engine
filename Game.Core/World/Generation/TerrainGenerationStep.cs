@@ -9,8 +9,11 @@ public sealed class TerrainGenerationStep : IWorldGenerationStep
     public void Apply(WorldGenerationContext context)
     {
         var world = context.World;
-        var baseSurfaceY = Math.Clamp(world.HeightTiles / 3, 6, world.HeightTiles - 10);
-        var amplitude = Math.Max(3, world.HeightTiles / 10);
+        var profile = context.Profile;
+        var baseSurfaceY = Math.Clamp(profile.SurfaceBaseY, 6, world.HeightTiles - 10);
+        var amplitude = Math.Max(1, profile.SurfaceAmplitude);
+        var dirtDepthMin = Math.Max(1, Math.Min(profile.DirtDepthMin, profile.DirtDepthMax));
+        var dirtDepthMax = Math.Max(dirtDepthMin, Math.Max(profile.DirtDepthMin, profile.DirtDepthMax));
 
         for (var x = 0; x < world.WidthTiles; x++)
         {
@@ -19,7 +22,7 @@ public sealed class TerrainGenerationStep : IWorldGenerationStep
             surfaceY = Math.Clamp(surfaceY, Math.Max(3, world.HeightTiles / 6), Math.Max(4, world.HeightTiles / 2));
             context.SurfaceHeights[x] = surfaceY;
 
-            var dirtDepth = 4 + Math.Abs(StableHash(context.Seed, x) % 5);
+            var dirtDepth = dirtDepthMin + Math.Abs(StableHash(context.Seed, x) % (dirtDepthMax - dirtDepthMin + 1));
             for (var y = surfaceY; y < world.HeightTiles; y++)
             {
                 var tileId = y == surfaceY

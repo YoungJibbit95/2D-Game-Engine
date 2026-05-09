@@ -4,9 +4,9 @@ public sealed class World
 {
     private readonly Dictionary<ChunkPos, Chunk> _chunks = new();
 
-    public World(int widthTiles, int heightTiles, WorldMetadata metadata)
+    public World(int widthTiles, int heightTiles, WorldMetadata metadata, bool isHorizontallyInfinite = false)
     {
-        if (widthTiles <= 0)
+        if (widthTiles <= 0 && !isHorizontallyInfinite)
         {
             throw new ArgumentOutOfRangeException(nameof(widthTiles), "World width must be greater than zero.");
         }
@@ -16,14 +16,17 @@ public sealed class World
             throw new ArgumentOutOfRangeException(nameof(heightTiles), "World height must be greater than zero.");
         }
 
-        WidthTiles = widthTiles;
+        WidthTiles = isHorizontallyInfinite ? Math.Max(widthTiles, GameConstants.ChunkSize) : widthTiles;
         HeightTiles = heightTiles;
         Metadata = metadata;
+        IsHorizontallyInfinite = isHorizontallyInfinite;
     }
 
     public int WidthTiles { get; }
 
     public int HeightTiles { get; }
+
+    public bool IsHorizontallyInfinite { get; }
 
     public IReadOnlyDictionary<ChunkPos, Chunk> Chunks => _chunks;
 
@@ -37,16 +40,15 @@ public sealed class World
 
     public IEnumerable<ChunkPos> GetChunkPositions()
     {
+        if (IsHorizontallyInfinite)
+        {
+            return _chunks.Keys.OrderBy(position => position.Y).ThenBy(position => position.X);
+        }
+
         var maxChunkX = CoordinateUtils.TileToChunk(WidthTiles - 1, 0).X;
         var maxChunkY = CoordinateUtils.TileToChunk(0, HeightTiles - 1).Y;
 
-        for (var cy = 0; cy <= maxChunkY; cy++)
-        {
-            for (var cx = 0; cx <= maxChunkX; cx++)
-            {
-                yield return new ChunkPos(cx, cy);
-            }
-        }
+        return EnumerateFiniteChunkPositions(maxChunkX, maxChunkY);
     }
 
     public TileInstance GetTile(int x, int y)
@@ -106,7 +108,7 @@ public sealed class World
 
     public bool IsInBounds(int x, int y)
     {
-        return x >= 0 && x < WidthTiles && y >= 0 && y < HeightTiles;
+        return y >= 0 && y < HeightTiles && (IsHorizontallyInfinite || (x >= 0 && x < WidthTiles));
     }
 
     public void MarkDirtyAround(int x, int y)
@@ -181,6 +183,17 @@ public sealed class World
         if (!IsInBounds(x, y))
         {
             throw new ArgumentOutOfRangeException(nameof(x), $"Tile ({x}, {y}) is outside the world bounds.");
+        }
+    }
+
+    private static IEnumerable<ChunkPos> EnumerateFiniteChunkPositions(int maxChunkX, int maxChunkY)
+    {
+        for (var cy = 0; cy <= maxChunkY; cy++)
+        {
+            for (var cx = 0; cx <= maxChunkX; cx++)
+            {
+                yield return new ChunkPos(cx, cy);
+            }
         }
     }
 }

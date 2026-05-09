@@ -8,5 +8,6 @@
   "hardness": 1.0,
   "miningPowerRequired": 0,
   "dropItem": "dirt_block",
-  "mergeGroup": "soil"
+  "mergeGroup": "soil",
+  "tags": ["soil", "natural", "mineable"]
 }

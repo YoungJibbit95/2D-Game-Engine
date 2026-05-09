@@ -10,4 +10,5 @@ public static class KnownTileIds
     public const ushort IronOre = 5;
     public const ushort Wood = 6;
     public const ushort Leaves = 7;
+    public const ushort Workbench = 8;
 }

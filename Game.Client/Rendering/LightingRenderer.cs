@@ -22,8 +22,8 @@ public sealed class LightingRenderer
     private static void DrawChunk(RenderContext context, World world, Chunk chunk, Camera2D camera)
     {
         var chunkBounds = CoordinateUtils.ChunkTileBounds(chunk.Position);
-        var minX = Math.Max(chunkBounds.Left, 0);
-        var maxX = Math.Min(chunkBounds.Right, world.WidthTiles);
+        var minX = world.IsHorizontallyInfinite ? chunkBounds.Left : Math.Max(chunkBounds.Left, 0);
+        var maxX = world.IsHorizontallyInfinite ? chunkBounds.Right : Math.Min(chunkBounds.Right, world.WidthTiles);
         var minY = Math.Max(chunkBounds.Top, 0);
         var maxY = Math.Min(chunkBounds.Bottom, world.HeightTiles);
 

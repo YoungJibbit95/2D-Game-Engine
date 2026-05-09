@@ -70,6 +70,12 @@ public sealed class RecipeDefinitionJsonLoader
 
         public string? Station { get; init; }
 
+        public string? Category { get; init; }
+
+        public int SortOrder { get; init; }
+
+        public bool KnownByDefault { get; init; } = true;
+
         public RecipeDefinition ToDefinition()
         {
             return new RecipeDefinition
@@ -83,7 +89,10 @@ public sealed class RecipeDefinitionJsonLoader
                         Count = ingredient.Count
                     })
                     .ToArray(),
-                Station = Station
+                Station = Station,
+                Category = string.IsNullOrWhiteSpace(Category) ? "general" : Category,
+                SortOrder = SortOrder,
+                KnownByDefault = KnownByDefault
             };
         }
     }

@@ -1,3 +1,5 @@
+using Game.Core.Effects;
+
 namespace Game.Core.Projectiles;
 
 public sealed record ProjectileDefinition
@@ -15,4 +17,6 @@ public sealed record ProjectileDefinition
     public int Pierce { get; init; }
 
     public required float Lifetime { get; init; }
+
+    public IReadOnlyList<StatusEffectApplication> OnHitEffects { get; init; } = Array.Empty<StatusEffectApplication>();
 }

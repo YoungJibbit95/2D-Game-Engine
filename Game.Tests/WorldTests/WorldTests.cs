@@ -74,6 +74,20 @@ public sealed class WorldTests
         Assert.Throws<ArgumentOutOfRangeException>(() => world.SetTile(0, 64, KnownTileIds.Dirt));
     }
 
+    [Fact]
+    public void HorizontallyInfiniteWorld_AllowsNegativeAndPositiveTileX()
+    {
+        var world = new World(GameConstants.ChunkSize, 64, WorldMetadata.CreateDefault(seed: 1234), isHorizontallyInfinite: true);
+
+        world.SetTile(-1, 5, KnownTileIds.Dirt);
+        world.SetTile(4096, 5, KnownTileIds.Stone);
+
+        Assert.True(world.IsHorizontallyInfinite);
+        Assert.Equal(KnownTileIds.Dirt, world.GetTile(-1, 5).TileId);
+        Assert.Equal(KnownTileIds.Stone, world.GetTile(4096, 5).TileId);
+        Assert.Throws<ArgumentOutOfRangeException>(() => world.SetTile(0, 64, KnownTileIds.Dirt));
+    }
+
     private static World CreateWorld()
     {
         return new World(64, 64, WorldMetadata.CreateDefault(seed: 1234));

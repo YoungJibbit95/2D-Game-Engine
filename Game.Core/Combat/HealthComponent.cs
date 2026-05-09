@@ -43,6 +43,17 @@ public sealed class HealthComponent
         return true;
     }
 
+    public bool ApplyRawDamage(int amount)
+    {
+        if (amount <= 0 || IsDead)
+        {
+            return false;
+        }
+
+        Current = Math.Max(0, Current - amount);
+        return true;
+    }
+
     public void Heal(int amount)
     {
         if (amount <= 0 || IsDead)

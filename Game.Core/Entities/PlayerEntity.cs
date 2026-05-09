@@ -1,4 +1,5 @@
 using Game.Core.Combat;
+using Game.Core.Effects;
 using Game.Core.Physics;
 using Game.Core.World;
 using System.Numerics;
@@ -35,6 +36,8 @@ public sealed class PlayerEntity : Entity
 
     public HealthComponent HealthComponent { get; }
 
+    public StatusEffectCollection StatusEffects { get; } = new();
+
     public int Health => HealthComponent.Current;
 
     public int MaxHealth => HealthComponent.Max;
@@ -70,6 +73,7 @@ public sealed class PlayerEntity : Entity
 
     public override void Update(GameWorld world, float deltaSeconds)
     {
+        StatusEffects.Update(deltaSeconds, HealthComponent);
         HealthComponent.Update(deltaSeconds);
         ApplyHorizontalMovement(deltaSeconds);
         ApplyJump();

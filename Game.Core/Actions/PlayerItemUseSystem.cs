@@ -7,6 +7,7 @@ using Game.Core.Inventory;
 using Game.Core.Items;
 using Game.Core.Loot;
 using Game.Core.Physics;
+using Game.Core.Projectiles;
 using Game.Core.World;
 using System.Numerics;
 
@@ -20,21 +21,26 @@ public sealed class PlayerItemUseSystem
     private readonly BuildingSystem _building;
     private readonly MeleeAttackSystem _melee;
     private readonly TileCollisionResolver _collisionResolver;
+    private readonly ProjectileFactory _projectiles;
+    private float _useCooldownRemaining;
 
     public PlayerItemUseSystem(
         MiningSystem? mining = null,
         BuildingSystem? building = null,
         MeleeAttackSystem? melee = null,
-        TileCollisionResolver? collisionResolver = null)
+        TileCollisionResolver? collisionResolver = null,
+        ProjectileFactory? projectiles = null)
     {
         _collisionResolver = collisionResolver ?? new TileCollisionResolver();
         _mining = mining ?? new MiningSystem();
         _building = building ?? new BuildingSystem();
         _melee = melee ?? new MeleeAttackSystem(new LootRoller(new Random()), _collisionResolver);
+        _projectiles = projectiles ?? new ProjectileFactory();
     }
 
     public void Update(float deltaSeconds)
     {
+        _useCooldownRemaining = Math.Max(0, _useCooldownRemaining - Math.Max(0, deltaSeconds));
         _melee.Update(deltaSeconds);
     }
 
@@ -62,11 +68,18 @@ public sealed class PlayerItemUseSystem
             return PlayerItemUseResult.None;
         }
 
-        return item.Type switch
+        var action = ItemActionResolver.GetPrimaryAction(item);
+        if (UsesDiscreteCooldown(action) && _useCooldownRemaining > 0)
         {
-            ItemType.PlaceableTile => TryBuild(world, content, player, inventory, targetTile, selected.ItemId),
-            ItemType.ToolPickaxe => TryMine(world, content, player, entities, targetTile, item, deltaSeconds, events),
-            ItemType.WeaponMelee or ItemType.ToolAxe => TryMelee(player, entities, content.LootTables, item, targetWorldPosition, events),
+            return PlayerItemUseResult.None;
+        }
+
+        return action.Kind switch
+        {
+            ItemActionKind.Place => TryBuild(world, content, player, inventory, targetTile, selected.ItemId, action, events),
+            ItemActionKind.Mine => TryMine(world, content, player, entities, targetTile, item, action, deltaSeconds, events),
+            ItemActionKind.Melee => TryMelee(player, entities, content, item, targetWorldPosition, events),
+            ItemActionKind.Shoot => TryShoot(content, player, inventory, entities, item, action, targetWorldPosition),
             _ => PlayerItemUseResult.None
         };
     }
@@ -77,7 +90,9 @@ public sealed class PlayerItemUseSystem
         PlayerEntity player,
         PlayerInventory inventory,
         TilePos targetTile,
-        string itemId)
+        string itemId,
+        ItemActionDefinition action,
+        GameEventBus? events)
     {
         var placed = _building.PlaceTile(
             world,
@@ -87,11 +102,12 @@ public sealed class PlayerItemUseSystem
             targetTile,
             itemId,
             player.Body.Center,
-            DefaultReachPixels,
-            player.Bounds);
+            ResolveReach(action),
+            player.Bounds,
+            events);
 
         return placed
-            ? new PlayerItemUseResult(PlayerItemUseKind.Build, MiningResult.None, true, MeleeAttackResult.None)
+            ? StartCooldown(new PlayerItemUseResult(PlayerItemUseKind.Build, MiningResult.None, true, MeleeAttackResult.None), content.Items.GetById(itemId))
             : PlayerItemUseResult.None;
     }
 
@@ -102,6 +118,7 @@ public sealed class PlayerItemUseSystem
         EntityManager entities,
         TilePos targetTile,
         ItemDefinition item,
+        ItemActionDefinition action,
         float deltaSeconds,
         GameEventBus? events)
     {
@@ -110,7 +127,7 @@ public sealed class PlayerItemUseSystem
             content.Tiles,
             targetTile,
             player.Body.Center,
-            DefaultReachPixels,
+            ResolveReach(action),
             item.ToolPower,
             deltaSeconds,
             events);
@@ -131,14 +148,71 @@ public sealed class PlayerItemUseSystem
     private PlayerItemUseResult TryMelee(
         PlayerEntity player,
         EntityManager entities,
-        LootTableRegistry lootTables,
+        GameContentDatabase content,
         ItemDefinition item,
         Vector2 targetWorldPosition,
         GameEventBus? events)
     {
-        var melee = _melee.Attack(player, entities, item, lootTables, targetWorldPosition, events);
+        var melee = _melee.Attack(player, entities, item, content.LootTables, targetWorldPosition, events, content.StatusEffects);
         return melee.Attacked
-            ? new PlayerItemUseResult(PlayerItemUseKind.Melee, MiningResult.None, false, melee)
+            ? StartCooldown(new PlayerItemUseResult(PlayerItemUseKind.Melee, MiningResult.None, false, melee), item)
             : PlayerItemUseResult.None;
+    }
+
+    private PlayerItemUseResult TryShoot(
+        GameContentDatabase content,
+        PlayerEntity player,
+        PlayerInventory inventory,
+        EntityManager entities,
+        ItemDefinition item,
+        ItemActionDefinition action,
+        Vector2 targetWorldPosition)
+    {
+        if (string.IsNullOrWhiteSpace(action.ProjectileId) || !content.Projectiles.TryGetById(action.ProjectileId, out var definition))
+        {
+            return PlayerItemUseResult.None;
+        }
+
+        if (!string.IsNullOrWhiteSpace(action.AmmoItemId))
+        {
+            if (inventory.CountItem(action.AmmoItemId) < action.AmmoCost)
+            {
+                return PlayerItemUseResult.None;
+            }
+
+            inventory.RemoveItem(action.AmmoItemId, action.AmmoCost);
+        }
+
+        var direction = targetWorldPosition - player.Body.Center;
+        var projectile = _projectiles.Create(
+            definition,
+            player.Body.Center,
+            direction,
+            player.Id == 0 ? null : player.Id);
+
+        projectile.Velocity *= action.ProjectileSpeedMultiplier;
+        entities.Add(projectile);
+
+        return StartCooldown(new PlayerItemUseResult(PlayerItemUseKind.Shoot, MiningResult.None, false, MeleeAttackResult.None, projectile), item);
+    }
+
+    private static float ResolveReach(ItemActionDefinition action)
+    {
+        return action.ReachPixels > 0 ? action.ReachPixels : DefaultReachPixels;
+    }
+
+    private PlayerItemUseResult StartCooldown(PlayerItemUseResult result, ItemDefinition item)
+    {
+        if (result.Kind != PlayerItemUseKind.None && item.UseTime > 0)
+        {
+            _useCooldownRemaining = Math.Max(_useCooldownRemaining, item.UseTime);
+        }
+
+        return result;
+    }
+
+    private static bool UsesDiscreteCooldown(ItemActionDefinition action)
+    {
+        return action.Kind is ItemActionKind.Place or ItemActionKind.Melee or ItemActionKind.Shoot or ItemActionKind.Consume or ItemActionKind.Cast;
     }
 }

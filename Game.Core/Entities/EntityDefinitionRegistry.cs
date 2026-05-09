@@ -1,4 +1,5 @@
 using Game.Core.Data;
+using Game.Core.Effects;
 
 namespace Game.Core.Entities;
 
@@ -68,6 +69,39 @@ public sealed class EntityDefinitionRegistry
         if (definition.Width <= 0 || definition.Height <= 0)
         {
             throw new RegistryValidationException($"Entity '{definition.Id}' must have positive size.");
+        }
+
+        if (definition.ContactDamage < 0)
+        {
+            throw new RegistryValidationException($"Entity '{definition.Id}' has negative contact damage.");
+        }
+
+        if (definition.ContactKnockback < 0)
+        {
+            throw new RegistryValidationException($"Entity '{definition.Id}' has negative contact knockback.");
+        }
+
+        ValidateEffects(definition.Id, definition.OnContactEffects);
+    }
+
+    private static void ValidateEffects(string entityId, IEnumerable<StatusEffectApplication> effects)
+    {
+        foreach (var effect in effects)
+        {
+            if (string.IsNullOrWhiteSpace(effect.EffectId))
+            {
+                throw new RegistryValidationException($"Entity '{entityId}' has a status effect application without an effect id.");
+            }
+
+            if (effect.Chance < 0)
+            {
+                throw new RegistryValidationException($"Entity '{entityId}' has a status effect application with negative chance.");
+            }
+
+            if (effect.DurationSeconds is <= 0)
+            {
+                throw new RegistryValidationException($"Entity '{entityId}' has a status effect application with non-positive duration override.");
+            }
         }
     }
 

@@ -1,0 +1,11 @@
+{
+  "id": "iron_pickaxe",
+  "result": { "itemId": "iron_pickaxe", "count": 1 },
+  "ingredients": [
+    { "itemId": "iron_ore", "count": 12 },
+    { "itemId": "wood", "count": 3 }
+  ],
+  "station": "workbench",
+  "category": "tools",
+  "sortOrder": 35
+}

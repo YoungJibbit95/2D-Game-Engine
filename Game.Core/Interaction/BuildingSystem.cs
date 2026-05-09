@@ -1,4 +1,5 @@
 using Game.Core.Inventory;
+using Game.Core.Events;
 using Game.Core.Items;
 using Game.Core.Tiles;
 using Game.Core.World;
@@ -47,7 +48,8 @@ public sealed class BuildingSystem
         var itemDefinition = items.GetById(item.ItemId);
         return itemDefinition.Type == ItemType.PlaceableTile &&
                !string.IsNullOrWhiteSpace(itemDefinition.PlacesTileId) &&
-               tiles.TryGetById(itemDefinition.PlacesTileId, out _);
+               tiles.TryGetById(itemDefinition.PlacesTileId, out _) &&
+               SatisfiesPlacementSupport(world, target, itemDefinition.PlacementSupport);
     }
 
     public bool PlaceTile(
@@ -59,7 +61,8 @@ public sealed class BuildingSystem
         string itemId,
         Vector2 actorCenterWorld,
         float reachPixels,
-        RectI actorBounds)
+        RectI actorBounds,
+        GameEventBus? events = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(itemId);
 
@@ -76,7 +79,8 @@ public sealed class BuildingSystem
 
         var itemDefinition = items.GetById(itemId);
         var tileDefinition = tiles.GetById(itemDefinition.PlacesTileId!);
-        world.SetTile(target.X, target.Y, TileInstance.FromTileId(tileDefinition.NumericId, TileFlags.IsNatural));
+        world.SetTile(target.X, target.Y, TileInstance.FromTileId(tileDefinition.NumericId, isSolid: tileDefinition.Solid));
+        events?.Publish(new TilePlacedEvent(target, tileDefinition.NumericId, itemId));
         return true;
     }
 
@@ -89,7 +93,8 @@ public sealed class BuildingSystem
         string itemId,
         Vector2 actorCenterWorld,
         float reachPixels,
-        RectI actorBounds)
+        RectI actorBounds,
+        GameEventBus? events = null)
     {
         ArgumentNullException.ThrowIfNull(inventory);
         ArgumentException.ThrowIfNullOrWhiteSpace(itemId);
@@ -107,7 +112,8 @@ public sealed class BuildingSystem
 
         var itemDefinition = items.GetById(itemId);
         var tileDefinition = tiles.GetById(itemDefinition.PlacesTileId!);
-        world.SetTile(target.X, target.Y, TileInstance.FromTileId(tileDefinition.NumericId, TileFlags.IsNatural));
+        world.SetTile(target.X, target.Y, TileInstance.FromTileId(tileDefinition.NumericId, isSolid: tileDefinition.Solid));
+        events?.Publish(new TilePlacedEvent(target, tileDefinition.NumericId, itemId));
         return true;
     }
 
@@ -115,5 +121,38 @@ public sealed class BuildingSystem
     {
         var tileCenter = CoordinateUtils.TileToWorld(target) + new Vector2(GameConstants.TileSize * 0.5f);
         return Vector2.Distance(actorCenterWorld, tileCenter) <= reachPixels;
+    }
+
+    private static bool SatisfiesPlacementSupport(World.World world, TilePos target, PlacementSupportRule support)
+    {
+        return support switch
+        {
+            PlacementSupportRule.None => true,
+            PlacementSupportRule.AdjacentSolid => HasAdjacentSolid(world, target),
+            PlacementSupportRule.AdjacentSolidOrWall => HasAdjacentSolid(world, target) || HasAdjacentWall(world, target),
+            PlacementSupportRule.OnSolidGround => world.IsSolid(target.X, target.Y + 1),
+            _ => false
+        };
+    }
+
+    private static bool HasAdjacentSolid(World.World world, TilePos target)
+    {
+        return world.IsSolid(target.X - 1, target.Y) ||
+               world.IsSolid(target.X + 1, target.Y) ||
+               world.IsSolid(target.X, target.Y - 1) ||
+               world.IsSolid(target.X, target.Y + 1);
+    }
+
+    private static bool HasAdjacentWall(World.World world, TilePos target)
+    {
+        return HasWall(world, target.X - 1, target.Y) ||
+               HasWall(world, target.X + 1, target.Y) ||
+               HasWall(world, target.X, target.Y - 1) ||
+               HasWall(world, target.X, target.Y + 1);
+    }
+
+    private static bool HasWall(World.World world, int x, int y)
+    {
+        return world.IsInBounds(x, y) && world.GetTile(x, y).WallId != 0;
     }
 }

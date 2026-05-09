@@ -1,0 +1,20 @@
+{
+  "id": "wooden_bow",
+  "displayName": "Wooden Bow",
+  "type": "WeaponRanged",
+  "texture": "items/wooden_bow",
+  "maxStack": 1,
+  "useTime": 0.45,
+  "damage": 4,
+  "knockback": 1.0,
+  "actions": [
+    {
+      "kind": "Shoot",
+      "projectile": "wooden_arrow",
+      "ammo": "wooden_arrow",
+      "ammoCost": 1,
+      "projectileSpeedMultiplier": 1.0
+    }
+  ],
+  "tags": ["weapon", "ranged", "starter"]
+}

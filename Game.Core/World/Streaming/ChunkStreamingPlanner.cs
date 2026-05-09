@@ -46,19 +46,21 @@ public sealed class ChunkStreamingPlanner
             yield break;
         }
 
-        var minTileX = Math.Clamp(area.Left, 0, world.WidthTiles - 1);
+        var minTileX = world.IsHorizontallyInfinite ? area.Left : Math.Clamp(area.Left, 0, world.WidthTiles - 1);
         var minTileY = Math.Clamp(area.Top, 0, world.HeightTiles - 1);
-        var maxTileX = Math.Clamp(area.Right - 1, 0, world.WidthTiles - 1);
+        var maxTileX = world.IsHorizontallyInfinite ? area.Right - 1 : Math.Clamp(area.Right - 1, 0, world.WidthTiles - 1);
         var maxTileY = Math.Clamp(area.Bottom - 1, 0, world.HeightTiles - 1);
 
         var minChunk = CoordinateUtils.TileToChunk(minTileX, minTileY);
         var maxChunk = CoordinateUtils.TileToChunk(maxTileX, maxTileY);
-        var worldMaxChunk = CoordinateUtils.TileToChunk(world.WidthTiles - 1, world.HeightTiles - 1);
+        var worldMaxChunkY = CoordinateUtils.TileToChunk(0, world.HeightTiles - 1).Y;
 
-        var startX = Math.Max(0, minChunk.X - marginChunks);
+        var startX = world.IsHorizontallyInfinite ? minChunk.X - marginChunks : Math.Max(0, minChunk.X - marginChunks);
         var startY = Math.Max(0, minChunk.Y - marginChunks);
-        var endX = Math.Min(worldMaxChunk.X, maxChunk.X + marginChunks);
-        var endY = Math.Min(worldMaxChunk.Y, maxChunk.Y + marginChunks);
+        var endX = world.IsHorizontallyInfinite
+            ? maxChunk.X + marginChunks
+            : Math.Min(CoordinateUtils.TileToChunk(world.WidthTiles - 1, world.HeightTiles - 1).X, maxChunk.X + marginChunks);
+        var endY = Math.Min(worldMaxChunkY, maxChunk.Y + marginChunks);
 
         for (var y = startY; y <= endY; y++)
         {

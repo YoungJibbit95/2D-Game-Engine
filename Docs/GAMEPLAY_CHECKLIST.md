@@ -1,103 +1,66 @@
 # Gameplay Checklist
 
-## Player
+Only open work is kept here. Completed items are removed after implementation.
 
-- [x] Player runtime model.
-- [x] Player entity with physics body.
-- [x] Keyboard movement commands.
-- [x] Walk acceleration and max speed.
-- [x] Jump and gravity.
-- [x] Tile collision.
-- [x] Camera follow.
-- [x] Respawn point.
-- [x] Damage and invulnerability.
+## Player And Controls
 
-## World Interaction
+- [ ] Add inventory screen toggle and input capture.
+- [ ] Add armor/accessory equip flow.
+- [ ] Add consumable use flow that applies status effects.
+- [ ] Add configurable reach, mining speed, movement speed, and damage from final player stats.
 
-- [ ] Mouse world position.
-- [ ] Mouse tile target.
-- [x] Mining reach check.
-- [x] Mining progress timer.
-- [x] Tile removal and item drop.
-- [x] Building placement validation.
-- [x] Prevent block placement inside player AABB.
-- [x] Placeable tile item consumption.
-- [x] Selected item core action routing for mining, building, and melee.
+## Mining, Building, And Interaction
 
-## Items And Inventory
+- [ ] Expand placement anchor/support rules for platforms, walls, furniture, and tile entities.
+- [ ] Add mining progress UI at the cursor.
+- [ ] Add tile hit particles and audio hooks on mining progress and completion.
+- [ ] Add interact actions for chests, doors, signs, NPCs, crafting stations, and tile entities.
+- [ ] Add liquid interaction rules for placing blocks in water and mining flooded tiles.
 
-- [x] Item stack model.
-- [x] Inventory slots.
-- [x] Add item stack merge.
-- [x] Remove item atomically.
-- [x] Swap slots.
-- [x] Split stack.
-- [x] Merge stack.
-- [x] Placeable tile item definitions.
-- [x] Hotbar split from main inventory.
-- [x] Hotbar selected slot input.
-- [x] Pickup dropped items.
-- [x] Selected hotbar item use.
+## Items, Equipment, And Effects
+
+- [ ] Expand starter progression beyond current wood/copper/iron weapons/tools and first copper armor pieces.
+- [ ] Add first accessories with movement, mining, defense, and light bonuses.
+- [ ] Add first consumables: healing potion, regeneration food, antidote.
+- [ ] Add equipment persistence.
+- [ ] Add status effect persistence.
+- [ ] Add item tooltip stat formatting.
+- [ ] Add item use cooldown display and blocked-use feedback.
 
 ## Crafting
 
-- [x] Recipe definitions.
-- [x] Recipe registry.
-- [x] Ingredient availability checks.
-- [x] Craft operation.
-- [ ] Station requirement checks.
+- [ ] Add furnace and anvil station definitions.
+- [ ] Wire nearby crafting station detection into gameplay UI.
+- [ ] Add craft-from-nearby-chests option as a later quality-of-life feature.
 
 ## Combat
 
-- [x] Health component.
-- [x] Damage info model.
-- [x] Melee hitbox.
-- [x] Projectile entity.
-- [x] Knockback.
-- [x] Slime enemy runtime baseline.
-- [x] Loot table definitions.
-- [x] Loot roller.
-- [x] Loot drops on death.
+- [ ] Use world-aware line-of-sight melee in selected item use.
+- [ ] Add attack arcs, animation phases, and multi-hit windows for melee weapons.
+- [ ] Add status-effect UI, audio, particle, and balancing feedback for weapon/projectile/enemy applications.
+- [ ] Add projectile knockback, pierce tuning, and hit effects.
+- [ ] Add ranged weapon spread, charge, reload, and ammo preference rules.
+- [ ] Add enemy hurt flash, death particles, and audio hooks.
 
-## World Generation Expansion
+## Enemies And Spawning
 
-- [x] Surface heightmap.
-- [x] Dirt/grass/stone layers.
-- [x] Random-walk caves.
-- [x] Copper/iron ore veins.
-- [x] Underground water pockets.
-- [x] Trees.
-- [x] Spawn point on surface.
-- [x] Forest biome baseline.
-- [x] Biome definitions and registry.
-- [x] Autotile neighbor mask logic.
+- [ ] Add spawn rate tuning by biome and depth.
+- [ ] Add underground danger curve based on depth and time.
+- [ ] Add enemy variants with different AI behaviors.
+- [ ] Add line-of-sight chase rules for AI.
+- [ ] Add despawn fade/cleanup feedback for debug builds.
 
-## Engine-Ready Gameplay Infrastructure
+## World Generation Gameplay
 
-- [x] Tile lighting values available for gameplay/rendering.
-- [x] Spatial query structure ready for projectiles, pickups, enemies, triggers.
-- [x] Gameplay event bus for pickups, mining, combat, and commands.
-- [x] Debug command backend can mutate inventory, time, and entity runtime state.
-- [x] Client runtime has inventory, content database, entity manager, and command context wired.
-- [x] World save/load can persist changed tile data.
-- [x] Player save/load.
-- [x] Entity save/load.
-- [x] Dropped item persistence.
+- [ ] Add chest loot rooms generated near caves.
+- [ ] Add surface lakes and cave pools that interact with liquid simulation.
+- [ ] Add biome-specific small structures.
+- [ ] Add background wall distribution for underground areas.
+- [ ] Add ore progression balance pass using profile-driven ore definitions and generation analysis metrics.
 
 ## Time And World Rules
 
-- [x] Day/night clock.
-- [x] `/time` debug command.
-- [x] Time-based enemy spawn tables.
-- [x] Time-based sky color.
-- [ ] Time-based music/ambient hooks.
-
-## Spawning
-
-- [x] Data-driven spawn rule definitions.
-- [x] Biome-gated spawns.
-- [x] Day/night-gated spawns.
-- [x] Active enemy cap per spawn rule.
-- [x] `/spawn` debug command for entity definitions.
-- [x] Player-distance spawn bands.
-- [ ] Spawn rate tuning by biome/depth.
+- [ ] Add time-based music and ambient hooks.
+- [ ] Add simple weather hooks affecting sky, spawn rules, and ambient audio.
+- [ ] Add world events triggered by time, depth, biome, or player actions.
+- [ ] Add optional survival-style comfort stats: warmth, wetness, rested.

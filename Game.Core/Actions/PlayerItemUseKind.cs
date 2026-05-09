@@ -5,5 +5,6 @@ public enum PlayerItemUseKind
     None,
     Mine,
     Build,
-    Melee
+    Melee,
+    Shoot
 }

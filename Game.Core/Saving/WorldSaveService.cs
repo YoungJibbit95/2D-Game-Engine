@@ -14,15 +14,18 @@ public sealed class WorldSaveService
     };
 
     private readonly ChunkBinarySerializer _chunkSerializer;
+    private readonly ChunkMetadataService _chunkMetadata;
+    private long _saveTick;
 
     public WorldSaveService()
-        : this(new ChunkBinarySerializer())
+        : this(new ChunkBinarySerializer(), new ChunkMetadataService())
     {
     }
 
-    public WorldSaveService(ChunkBinarySerializer chunkSerializer)
+    public WorldSaveService(ChunkBinarySerializer chunkSerializer, ChunkMetadataService? chunkMetadata = null)
     {
         _chunkSerializer = chunkSerializer;
+        _chunkMetadata = chunkMetadata ?? new ChunkMetadataService();
     }
 
     public void Save(World.World world, string worldDirectory, WorldSaveMode mode = WorldSaveMode.AllChunks)
@@ -35,8 +38,32 @@ public sealed class WorldSaveService
         Directory.CreateDirectory(chunkDirectory);
 
         SaveMetadata(world, worldDirectory);
+        _saveTick++;
         SaveChunks(world, chunkDirectory, mode);
         world.ClearAllDirtyFlags();
+    }
+
+    public bool SaveChunk(World.World world, string worldDirectory, ChunkPos position)
+    {
+        ArgumentNullException.ThrowIfNull(world);
+        ArgumentException.ThrowIfNullOrWhiteSpace(worldDirectory);
+
+        if (!world.TryGetChunk(position, out var chunk) || chunk is null)
+        {
+            return false;
+        }
+
+        Directory.CreateDirectory(worldDirectory);
+        var chunkDirectory = Path.Combine(worldDirectory, ChunkDirectoryName);
+        Directory.CreateDirectory(chunkDirectory);
+
+        SaveMetadata(world, worldDirectory);
+        _saveTick++;
+        var path = Path.Combine(chunkDirectory, GetChunkFileName(position));
+        File.WriteAllBytes(path, _chunkSerializer.Serialize(chunk));
+        _chunkMetadata.MarkSaved(chunk, _saveTick);
+        chunk.ClearDirtyFlags();
+        return true;
     }
 
     public World.World Load(string worldDirectory)
@@ -59,7 +86,8 @@ public sealed class WorldSaveService
                 metadata.Name,
                 metadata.Seed,
                 metadata.CreatedAtUtc,
-                new TilePos(metadata.SpawnTileX, metadata.SpawnTileY)));
+                new TilePos(metadata.SpawnTileX, metadata.SpawnTileY)),
+            metadata.IsHorizontallyInfinite);
 
         var chunkDirectory = Path.Combine(worldDirectory, ChunkDirectoryName);
         if (!Directory.Exists(chunkDirectory))
@@ -73,8 +101,32 @@ public sealed class WorldSaveService
             world.GetOrCreateChunk(chunk.Position).LoadTiles(chunk.Tiles);
         }
 
+        _chunkMetadata.RefreshAll(world);
         world.ClearAllDirtyFlags();
         return world;
+    }
+
+    public bool TryLoadChunk(World.World world, string worldDirectory, ChunkPos position)
+    {
+        ArgumentNullException.ThrowIfNull(world);
+        ArgumentException.ThrowIfNullOrWhiteSpace(worldDirectory);
+
+        var path = Path.Combine(worldDirectory, ChunkDirectoryName, GetChunkFileName(position));
+        if (!File.Exists(path))
+        {
+            return false;
+        }
+
+        var loaded = _chunkSerializer.Deserialize(File.ReadAllBytes(path));
+        if (loaded.Position != position)
+        {
+            throw new InvalidDataException(
+                $"Chunk file '{path}' contains {loaded.Position}, but {position} was requested.");
+        }
+
+        world.GetOrCreateChunk(position).LoadTiles(loaded.Tiles);
+        _chunkMetadata.RefreshChunk(world, position);
+        return true;
     }
 
     private static void SaveMetadata(World.World world, string worldDirectory)
@@ -86,6 +138,7 @@ public sealed class WorldSaveService
             CreatedAtUtc = world.Metadata.CreatedAtUtc,
             WidthTiles = world.WidthTiles,
             HeightTiles = world.HeightTiles,
+            IsHorizontallyInfinite = world.IsHorizontallyInfinite,
             SpawnTileX = world.Metadata.SpawnTile.X,
             SpawnTileY = world.Metadata.SpawnTile.Y
         };
@@ -104,6 +157,7 @@ public sealed class WorldSaveService
 
             var path = Path.Combine(chunkDirectory, GetChunkFileName(chunk.Position));
             File.WriteAllBytes(path, _chunkSerializer.Serialize(chunk));
+            _chunkMetadata.MarkSaved(chunk, _saveTick);
         }
     }
 

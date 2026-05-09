@@ -4,32 +4,31 @@ namespace Game.Core.Lighting;
 
 public sealed class LightingSystem
 {
-    private const int AirFalloff = 6;
-    private const int SolidFalloff = 80;
-
-    public void Recalculate(World.World world, IEnumerable<LightSource> lightSources, byte sunlight = 255)
+    public void Recalculate(World.World world, IEnumerable<LightSource> lightSources, byte sunlight = 255, LightingOptions? options = null)
     {
         ArgumentNullException.ThrowIfNull(world);
         ArgumentNullException.ThrowIfNull(lightSources);
+        options ??= LightingOptions.Default;
 
         var lightBuffer = new byte[world.WidthTiles * world.HeightTiles];
 
-        ApplySunlight(world, lightBuffer, sunlight);
+        ApplySunlight(world, lightBuffer, sunlight, options);
 
         foreach (var source in lightSources)
         {
-            PropagateLightSource(world, lightBuffer, source);
+            PropagateLightSource(world, lightBuffer, source, options);
         }
 
         ApplyToWorld(world, lightBuffer);
     }
 
-    private static void ApplySunlight(World.World world, byte[] lightBuffer, byte sunlight)
+    private static void ApplySunlight(World.World world, byte[] lightBuffer, byte sunlight, LightingOptions options)
     {
         var maxSunlight = (int)sunlight;
         for (var x = 0; x < world.WidthTiles; x++)
         {
             var light = maxSunlight;
+            var skyBlocked = false;
 
             for (var y = 0; y < world.HeightTiles; y++)
             {
@@ -38,17 +37,22 @@ public sealed class LightingSystem
 
                 if (tile.IsSolid)
                 {
-                    light = Math.Max(0, light - SolidFalloff);
+                    skyBlocked = true;
+                    light = Math.Max(options.MinimumAmbientLight, light - options.SolidFalloff);
+                }
+                else if (skyBlocked)
+                {
+                    light = Math.Max(options.MinimumAmbientLight, light - options.UndergroundAirFalloff);
                 }
                 else if (light < maxSunlight)
                 {
-                    light = Math.Max(0, light - AirFalloff);
+                    light = Math.Max(options.MinimumAmbientLight, light - options.OpenAirFalloff);
                 }
             }
         }
     }
 
-    private static void PropagateLightSource(World.World world, byte[] lightBuffer, LightSource source)
+    private static void PropagateLightSource(World.World world, byte[] lightBuffer, LightSource source, LightingOptions options)
     {
         if (!world.IsInBounds(source.Position.X, source.Position.Y) || source.Intensity == 0 || source.Radius <= 0)
         {
@@ -83,7 +87,7 @@ public sealed class LightingSystem
                     continue;
                 }
 
-                var falloff = world.IsSolid(neighbor.X, neighbor.Y) ? SolidFalloff : 28;
+                var falloff = world.IsSolid(neighbor.X, neighbor.Y) ? options.PointLightSolidFalloff : options.PointLightAirFalloff;
                 if (node.Intensity <= falloff)
                 {
                     continue;

@@ -16,7 +16,10 @@ public sealed class ProjectileRegistryTests
           "damage": 5,
           "gravity": 0.2,
           "pierce": 0,
-          "lifetime": 5.0
+          "lifetime": 5.0,
+          "onHitEffects": [
+            { "effect": "poisoned", "chance": 1.0, "durationSeconds": 4.0 }
+          ]
         }
         """;
 
@@ -25,6 +28,9 @@ public sealed class ProjectileRegistryTests
         Assert.Equal("wooden_arrow", projectile.Id);
         Assert.Equal("projectiles/wooden_arrow", projectile.TexturePath);
         Assert.Equal(5, projectile.Damage);
+        var effect = Assert.Single(projectile.OnHitEffects);
+        Assert.Equal("poisoned", effect.EffectId);
+        Assert.Equal(4.0f, effect.DurationSeconds);
     }
 
     [Fact]

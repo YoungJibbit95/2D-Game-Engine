@@ -1,3 +1,4 @@
+using Game.Core.Effects;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -9,7 +10,8 @@ public sealed class ProjectileDefinitionJsonLoader
     {
         PropertyNameCaseInsensitive = true,
         ReadCommentHandling = JsonCommentHandling.Skip,
-        AllowTrailingCommas = true
+        AllowTrailingCommas = true,
+        Converters = { new JsonStringEnumConverter() }
     };
 
     public ProjectileRegistry LoadRegistryFromDirectory(string directoryPath)
@@ -79,6 +81,8 @@ public sealed class ProjectileDefinitionJsonLoader
 
         public float Lifetime { get; init; }
 
+        public List<StatusEffectApplicationDto> OnHitEffects { get; init; } = new();
+
         public ProjectileDefinition ToDefinition()
         {
             return new ProjectileDefinition
@@ -89,7 +93,30 @@ public sealed class ProjectileDefinitionJsonLoader
                 Damage = Damage,
                 Gravity = Gravity,
                 Pierce = Pierce,
-                Lifetime = Lifetime
+                Lifetime = Lifetime,
+                OnHitEffects = OnHitEffects.Select(effect => effect.ToDefinition()).ToArray()
+            };
+        }
+    }
+
+    private sealed record StatusEffectApplicationDto
+    {
+        public string? EffectId { get; init; }
+
+        [JsonPropertyName("effect")]
+        public string? Effect { get; init; }
+
+        public float Chance { get; init; } = 1f;
+
+        public float? DurationSeconds { get; init; }
+
+        public StatusEffectApplication ToDefinition()
+        {
+            return new StatusEffectApplication
+            {
+                EffectId = EffectId ?? Effect ?? string.Empty,
+                Chance = Chance,
+                DurationSeconds = DurationSeconds
             };
         }
     }

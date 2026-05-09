@@ -1,0 +1,99 @@
+{
+  "id": "small",
+  "widthTiles": 384,
+  "heightTiles": 160,
+  "surfaceBaseY": 58,
+  "surfaceAmplitude": 10,
+  "dirtDepthMin": 8,
+  "dirtDepthMax": 18,
+  "caveWalkerCount": 18,
+  "caveWalkLength": 130,
+  "caveMinDepthOffset": 8,
+  "caveClampDepthOffset": 5,
+  "caveMinRadius": 1,
+  "caveMaxRadius": 2,
+  "caveRadiusChangeChance": 0.08,
+  "copperVeinCount": 30,
+  "ironVeinCount": 20,
+  "treeAttempts": 44,
+  "treeAttemptChance": 0.55,
+  "treeMinHeight": 4,
+  "treeMaxHeight": 7,
+  "waterPocketAttempts": 18,
+  "waterMinDepthOffset": 12,
+  "waterMinRadiusX": 3,
+  "waterMaxRadiusX": 7,
+  "waterMinRadiusY": 2,
+  "waterMaxRadiusY": 4,
+  "dimensions": [
+    {
+      "id": "sky",
+      "displayName": "Sky",
+      "minTileY": 0,
+      "maxTileYInclusive": 32,
+      "surfaceTileId": 2,
+      "subsurfaceTileId": 1,
+      "fillTileId": 3,
+      "caveMultiplier": 0.2,
+      "oreMultiplier": 0.1,
+      "ambientLight": 255
+    },
+    {
+      "id": "surface",
+      "displayName": "Surface",
+      "minTileY": 33,
+      "maxTileYInclusive": 88,
+      "surfaceTileId": 2,
+      "subsurfaceTileId": 1,
+      "fillTileId": 3,
+      "caveMultiplier": 0.8,
+      "oreMultiplier": 0.7,
+      "ambientLight": 160,
+      "allowsSurfaceTrees": true
+    },
+    {
+      "id": "underground",
+      "displayName": "Underground",
+      "minTileY": 89,
+      "maxTileYInclusive": 128,
+      "surfaceTileId": 3,
+      "subsurfaceTileId": 3,
+      "fillTileId": 3,
+      "caveMultiplier": 1.15,
+      "oreMultiplier": 1.2,
+      "ambientLight": 42
+    },
+    {
+      "id": "deep",
+      "displayName": "Deep",
+      "minTileY": 129,
+      "maxTileYInclusive": 159,
+      "surfaceTileId": 3,
+      "subsurfaceTileId": 3,
+      "fillTileId": 3,
+      "caveMultiplier": 1.45,
+      "oreMultiplier": 1.55,
+      "ambientLight": 10
+    }
+  ],
+  "ores": [
+    {
+      "tileId": 4,
+      "veinCount": 30,
+      "minDepthOffset": 8,
+      "minLength": 5,
+      "maxLength": 12,
+      "radius": 2,
+      "replaceTileId": 3
+    },
+    {
+      "tileId": 5,
+      "veinCount": 20,
+      "minDepthOffset": 16,
+      "minLength": 5,
+      "maxLength": 12,
+      "radius": 2,
+      "replaceTileId": 3
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "id": "poisoned",
+  "displayName": "Poisoned",
+  "kind": "Debuff",
+  "durationSeconds": 6.0,
+  "tickIntervalSeconds": 1.0,
+  "damagePerTick": 2
+}

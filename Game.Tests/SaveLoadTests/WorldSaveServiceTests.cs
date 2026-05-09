@@ -53,6 +53,59 @@ public sealed class WorldSaveServiceTests : IDisposable
         Assert.True(rewrittenFiles.Length < world.Chunks.Count);
     }
 
+    [Fact]
+    public void Save_UpdatesSavedChunkMetadataTick()
+    {
+        var world = new World(32, 32, WorldMetadata.CreateDefault(seed: 2));
+        world.SetTile(1, 1, KnownTileIds.Dirt);
+
+        new WorldSaveService().Save(world, _tempDirectory);
+
+        var chunk = world.GetOrCreateChunk(new ChunkPos(0, 0));
+        Assert.True(chunk.Metadata.LastSavedTick > 0);
+    }
+
+    [Fact]
+    public void SaveAndLoad_RoundTripsHorizontallyInfiniteWorldChunks()
+    {
+        var world = new World(32, 96, WorldMetadata.CreateDefault(seed: 77), isHorizontallyInfinite: true);
+        world.SetTile(-41, 20, KnownTileIds.Dirt);
+        world.SetTile(87, 44, KnownTileIds.Stone);
+        world.SetTile(-1, 63, TileInstance.Liquid(255));
+
+        var service = new WorldSaveService();
+        service.Save(world, _tempDirectory);
+
+        var loaded = service.Load(_tempDirectory);
+
+        Assert.True(loaded.IsHorizontallyInfinite);
+        Assert.True(loaded.IsInBounds(-10_000, 10));
+        Assert.Equal(KnownTileIds.Dirt, loaded.GetTile(-41, 20).TileId);
+        Assert.Equal(KnownTileIds.Stone, loaded.GetTile(87, 44).TileId);
+        Assert.True(loaded.GetTile(-1, 63).HasLiquid);
+        Assert.All(loaded.Chunks.Values, chunk => Assert.False(chunk.IsDirty));
+    }
+
+    [Fact]
+    public void SaveChunkAndTryLoadChunk_RoundTripsSingleNegativeChunk()
+    {
+        var source = new World(32, 96, WorldMetadata.CreateDefault(seed: 77), isHorizontallyInfinite: true);
+        source.SetTile(-40, 20, KnownTileIds.Dirt);
+        source.SetTile(-39, 21, TileInstance.Liquid(255));
+        var position = CoordinateUtils.TileToChunk(-40, 20);
+        var service = new WorldSaveService();
+
+        var saved = service.SaveChunk(source, _tempDirectory, position);
+        var target = new World(32, 96, WorldMetadata.CreateDefault(seed: 77), isHorizontallyInfinite: true);
+        var loaded = service.TryLoadChunk(target, _tempDirectory, position);
+
+        Assert.True(saved);
+        Assert.True(loaded);
+        Assert.Equal(KnownTileIds.Dirt, target.GetTile(-40, 20).TileId);
+        Assert.True(target.GetTile(-39, 21).HasLiquid);
+        Assert.False(target.Chunks[position].IsDirty);
+    }
+
     public void Dispose()
     {
         if (Directory.Exists(_tempDirectory))

@@ -56,4 +56,20 @@ public sealed class ChunkStreamingPlannerTests
         Assert.Equal(1, unloaded);
         Assert.False(world.TryGetChunk(new ChunkPos(3, 1), out _));
     }
+
+    [Fact]
+    public void Plan_AllowsNegativeChunksForHorizontallyInfiniteWorld()
+    {
+        var world = new World(Game.Core.GameConstants.ChunkSize, 96, WorldMetadata.CreateDefault(seed: 1), isHorizontallyInfinite: true);
+
+        var plan = new ChunkStreamingPlanner().Plan(world, new RectI(-96, 0, 96, 32), new ChunkStreamingOptions
+        {
+            LoadMarginChunks = 0,
+            UnloadMarginChunks = 0
+        });
+
+        Assert.Contains(new ChunkPos(-3, 0), plan.RequiredChunks);
+        Assert.Contains(new ChunkPos(-1, 0), plan.RequiredChunks);
+        Assert.Contains(new ChunkPos(-3, 0), plan.ChunksToLoad);
+    }
 }

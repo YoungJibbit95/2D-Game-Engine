@@ -1,18 +1,26 @@
 using Game.Client.Input;
 using Game.Client.Rendering;
 using Game.Client.UI;
+using Game.Core;
+using Game.Core.Actions;
 using Game.Client.Configuration;
 using Game.Core.Commands;
 using Game.Core.Data;
+using Game.Core.Diagnostics;
 using Game.Core.Entities;
 using Game.Core.Events;
+using Game.Core.Interaction;
 using Game.Core.Inventory;
+using Game.Core.Items;
 using Game.Core.Lighting;
 using Game.Core.Physics;
 using Game.Core.Projectiles;
+using Game.Core.Settings;
+using Game.Core.Saving;
 using Game.Core.Time;
-using Game.Core;
 using Game.Core.World;
+using Game.Core.World.Generation;
+using Game.Core.World.Streaming;
 using System.Globalization;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
@@ -27,48 +35,67 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
     private readonly TilemapRenderer _tilemapRenderer = new();
     private readonly LightingRenderer _lightingRenderer = new();
     private readonly TileCollisionResolver _collisionResolver = new();
-    private readonly EntityManager _entities = new();
-    private readonly GameEventBus _events = new();
+    private readonly PlayerItemUseSystem _itemUse = new();
+    private readonly InteractionTargetingSystem _targeting = new();
+    private readonly InfiniteWorldChunkGenerator _infiniteWorldgen = new();
+    private readonly ChunkStreamingPlanner _streamingPlanner = new();
+    private readonly WorldSaveService _worldSaves = new();
+    private readonly EngineDebugSnapshotBuilder _debugSnapshots = new();
     private readonly CommandDispatcher _commands = new(CommandRegistry.CreateDefault());
     private readonly HudOverlay _hud = new();
     private readonly DebugConsoleOverlay _debugConsole = new();
+    private readonly PauseMenuOverlay _pauseMenu;
+    private readonly GameStateManager _states;
     private readonly EntityFactory _entityFactory;
+    private readonly LoadedGameSession? _loadedSession;
 
     private World? _world;
     private PlayerEntity? _player;
+    private EntityManager _entities = new();
+    private GameEventBus _events = new();
     private WorldTime _worldTime = new();
     private GameContentDatabase? _content;
-    private Inventory? _inventory;
+    private PlayerInventory? _inventory;
+    private TilePos? _hoverTile;
+    private TilePos? _interactionTile;
+    private Rectangle _lastViewportBounds = new(0, 0, 1280, 720);
+    private EngineDebugSnapshot? _debugSnapshot;
+    private double _nextDebugSnapshotAt;
     private bool _showGrid;
     private int _selectedHotbarSlot;
+    private string? _worldSaveDirectory;
 
-    public PlayingState()
+    public PlayingState(GameStateManager states, LoadedGameSession? loadedSession = null)
     {
+        _states = states;
+        _loadedSession = loadedSession;
         _entityFactory = new EntityFactory(_collisionResolver);
+        _pauseMenu = new PauseMenuOverlay(
+            ClientPaths.SettingsPath(),
+            resume: static () => { },
+            mainMenu: ReturnToMainMenu,
+            exitGame: _states.RequestExit,
+            settingsChanged: _states.ApplySettings);
     }
 
     public string Name => "Playing";
 
-    public bool CapturesKeyboard => _debugConsole.IsOpen;
+    public bool CapturesKeyboard => _debugConsole.IsOpen || _pauseMenu.IsOpen;
 
     public void Initialize()
     {
-        _content = new GameContentLoader().LoadWithMods(ClientPaths.FindGameDataRoot(), ClientPaths.ModsRoot()).Database;
-        _inventory = new Inventory(50, _content.Items);
-        GiveStarterItems(_inventory);
-        _worldTime = new WorldTime();
-        _world = new SimpleWorldGenerator().Generate(widthTiles: 256, heightTiles: 128, seed: 1337);
-        var spawn = new Vector2(
-            _world.Metadata.SpawnTile.X * GameConstants.TileSize + 2,
-            _world.Metadata.SpawnTile.Y * GameConstants.TileSize);
-        _player = new PlayerEntity(new System.Numerics.Vector2(spawn.X, spawn.Y), _collisionResolver);
-        new LightingSystem().Recalculate(_world, new[]
-        {
-            new LightSource(CoordinateUtils.WorldToTile(spawn.X, spawn.Y), 235, Radius: 9)
-        });
-        _world.ClearAllDirtyFlags();
-        _camera.Position = spawn;
-        _camera.Zoom = 2f;
+        var session = _loadedSession ?? WorldSessionFactory.CreateSingleplayer(seed: 1337, worldName: "Debug World");
+        _content = session.Content;
+        _inventory = session.Inventory;
+        _world = session.World;
+        _player = session.Player;
+        _entities = session.Entities;
+        _events = session.Events;
+        _worldTime = session.WorldTime;
+        _worldSaveDirectory = session.WorldSaveDirectory;
+
+        _camera.Position = new Vector2(_player.Body.Center.X, _player.Body.Center.Y);
+        _camera.Zoom = _pauseMenu.Settings.Gameplay.CameraZoom;
     }
 
     public void LoadContent(ContentManager content)
@@ -77,6 +104,12 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
 
     public void FixedUpdate(float fixedDeltaSeconds)
     {
+        if (_pauseMenu.IsOpen)
+        {
+            _player?.SetCommand(PlayerCommand.None);
+            return;
+        }
+
         _worldTime.Update(fixedDeltaSeconds);
 
         if (_world is not null && _player is not null)
@@ -89,15 +122,32 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
     public void Update(double deltaSeconds)
     {
         _input.Update();
-        if (_debugConsole.Update(_input, ExecuteDebugCommand))
+        var settings = _pauseMenu.Settings;
+
+        if (_pauseMenu.IsOpen)
+        {
+            _pauseMenu.Update(_input);
+            _player?.SetCommand(PlayerCommand.None);
+            return;
+        }
+
+        if (_debugConsole.Update(_input, ExecuteDebugCommand, settings.Input.KeyBindings.DebugConsole))
         {
             _player?.SetCommand(PlayerCommand.None);
             return;
         }
 
-        _showGrid = _input.IsKeyDown(Keys.F3);
-        UpdateHotbarSelection();
-        _player?.SetCommand(PlayerCommandBuilder.Build(_input));
+        if (_input.IsBindingPressed(settings.Input.KeyBindings.Pause))
+        {
+            _pauseMenu.Open();
+            _player?.SetCommand(PlayerCommand.None);
+            return;
+        }
+
+        _showGrid = settings.Debug.ShowGrid || _input.IsBindingDown(settings.Input.KeyBindings.DebugToggle);
+        UpdateHotbarSelection(settings.Input);
+        _player?.SetCommand(PlayerCommandBuilder.Build(_input, settings.Input.KeyBindings));
+        UpdateItemUse((float)deltaSeconds, settings);
     }
 
     public void Draw(RenderContext context)
@@ -107,8 +157,12 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
             return;
         }
 
+        _lastViewportBounds = context.ViewportBounds;
+        var settings = _pauseMenu.Settings;
+        _camera.Zoom = settings.Gameplay.CameraZoom;
         var cameraTarget = GetCameraTarget();
         _camera.Follow(cameraTarget, context.ViewportBounds, smoothing: 0.18f);
+        EnsureVisibleChunks();
 
         context.SpriteBatch.Draw(
             context.Pixel,
@@ -116,23 +170,44 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
             new Color(91, 155, 213));
 
         _tilemapRenderer.ShowGrid = _showGrid;
+        _tilemapRenderer.DrawLiquids = settings.Rendering.DrawLiquids;
         _tilemapRenderer.Draw(context, _world, _camera);
         DrawPlayer(context);
         DrawEntities(context);
-        _lightingRenderer.Draw(context, _world, _camera);
+        if (settings.Rendering.DrawLightingOverlay)
+        {
+            _lightingRenderer.Draw(context, _world, _camera);
+        }
+
         _hud.Draw(context, _selectedHotbarSlot, _player?.Health ?? 0, _player?.MaxHealth ?? 100);
 
-        var worldTimeText = _worldTime.NormalizedTimeOfDay.ToString("0.000", CultureInfo.InvariantCulture);
-        context.DebugText.Draw(new Vector2(12, 58), $"WORLD TIME: {worldTimeText}", Color.LightGray, 2);
-        context.DebugText.Draw(new Vector2(12, 82), $"CHUNKS: {_world.Chunks.Count}", Color.LightGray, 2);
-        context.DebugText.Draw(new Vector2(12, 106), $"ENTITIES: {_entities.Entities.Count}", Color.LightGray, 2);
-        if (_player is not null)
+        if (settings.Rendering.DrawDebugOverlays && settings.Debug.ShowDebugOverlay)
         {
-            var playerTile = CoordinateUtils.WorldToTile(_player.Body.Center.X, _player.Body.Center.Y);
-            context.DebugText.Draw(new Vector2(12, 130), $"PLAYER TILE: {playerTile.X}:{playerTile.Y}", Color.LightGray, 2);
+            var worldTimeText = _worldTime.NormalizedTimeOfDay.ToString("0.000", CultureInfo.InvariantCulture);
+            context.DebugText.Draw(new Vector2(12, 58), $"WORLD TIME: {worldTimeText}", Color.LightGray, 2);
+            context.DebugText.Draw(new Vector2(12, 82), $"CHUNKS: {_world.Chunks.Count}", Color.LightGray, 2);
+            context.DebugText.Draw(new Vector2(12, 106), $"ENTITIES: {_entities.Entities.Count}", Color.LightGray, 2);
+            if (_player is not null)
+            {
+                var playerTile = CoordinateUtils.WorldToTile(_player.Body.Center.X, _player.Body.Center.Y);
+                context.DebugText.Draw(new Vector2(12, 130), $"PLAYER TILE: {playerTile.X}:{playerTile.Y}", Color.LightGray, 2);
+            }
+
+            if (_hoverTile is { } hoverTile)
+            {
+                context.DebugText.Draw(new Vector2(12, 154), $"MOUSE TILE: {hoverTile.X}:{hoverTile.Y}", Color.LightGray, 2);
+            }
+
+            DrawEngineDebugSnapshot(context);
+        }
+
+        if (settings.Gameplay.ShowInteractionTarget)
+        {
+            DrawInteractionTarget(context);
         }
 
         _debugConsole.Draw(context);
+        _pauseMenu.Draw(context);
     }
 
     public void Dispose()
@@ -208,25 +283,123 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
         context.SpriteBatch.Draw(context.Pixel, destination, color);
     }
 
-    private void UpdateHotbarSelection()
+    private void UpdateHotbarSelection(InputSettings inputSettings)
     {
         for (var slot = 0; slot < 10; slot++)
         {
-            var key = slot == 9 ? Keys.D0 : (Keys)((int)Keys.D1 + slot);
-            if (_input.IsKeyPressed(key))
+            if (_input.IsBindingPressed(GetHotbarBinding(inputSettings.KeyBindings, slot)))
             {
                 _selectedHotbarSlot = slot;
+                _inventory?.SelectHotbarSlot(slot);
             }
         }
 
-        if (_input.ScrollDelta > 0)
+        var scrollDelta = inputSettings.InvertHotbarScroll ? -_input.ScrollDelta : _input.ScrollDelta;
+        if (scrollDelta > 0)
         {
             _selectedHotbarSlot = (_selectedHotbarSlot + 9) % 10;
+            _inventory?.SelectHotbarSlot(_selectedHotbarSlot);
         }
-        else if (_input.ScrollDelta < 0)
+        else if (scrollDelta < 0)
         {
             _selectedHotbarSlot = (_selectedHotbarSlot + 1) % 10;
+            _inventory?.SelectHotbarSlot(_selectedHotbarSlot);
         }
+    }
+
+    private void UpdateItemUse(float deltaSeconds, GameSettings settings)
+    {
+        if (_world is null || _content is null || _player is null || _inventory is null)
+        {
+            return;
+        }
+
+        _itemUse.Update(deltaSeconds);
+        var mouseWorld = _camera.ScreenToWorld(_input.MousePosition.ToVector2(), _lastViewportBounds);
+        _hoverTile = CoordinateUtils.WorldToTile(mouseWorld.X, mouseWorld.Y);
+        _interactionTile = ResolveInteractionTarget(mouseWorld, settings.Gameplay.InteractionReachPixels);
+
+        var useInputActive = settings.Gameplay.HoldToMine
+            ? _input.IsBindingDown(settings.Input.KeyBindings.AttackPrimary)
+            : _input.IsBindingPressed(settings.Input.KeyBindings.AttackPrimary);
+
+        if (!useInputActive || _interactionTile is not { } targetTile)
+        {
+            return;
+        }
+
+        _itemUse.UseSelectedItem(
+            _world,
+            _content,
+            _player,
+            _inventory,
+            _entities,
+            targetTile,
+            new System.Numerics.Vector2(mouseWorld.X, mouseWorld.Y),
+            deltaSeconds,
+            _events);
+    }
+
+    private TilePos? ResolveInteractionTarget(Vector2 mouseWorld, float reachPixels)
+    {
+        if (_world is null || _content is null || _player is null || _inventory is null)
+        {
+            return null;
+        }
+
+        var selected = _inventory.SelectedStack;
+        if (selected.IsEmpty || ! _content.Items.TryGetById(selected.ItemId, out var item))
+        {
+            return _hoverTile;
+        }
+
+        var aim = new System.Numerics.Vector2(mouseWorld.X, mouseWorld.Y);
+        var target = item.Type switch
+        {
+            ItemType.PlaceableTile => _targeting.FindPlacementTarget(_world, _player.Body.Center, aim, reachPixels),
+            ItemType.ToolPickaxe => _targeting.FindMiningTarget(_world, _player.Body.Center, aim, reachPixels),
+            _ => _hoverTile is { } hover ? new InteractionTarget(true, hover) : InteractionTarget.None
+        };
+
+        return target.Found ? target.TilePosition : null;
+    }
+
+    private void DrawInteractionTarget(RenderContext context)
+    {
+        if (_interactionTile is not { } target)
+        {
+            return;
+        }
+
+        var screenPosition = _camera.WorldToScreen(
+            new Vector2(target.X * GameConstants.TileSize, target.Y * GameConstants.TileSize),
+            context.ViewportBounds);
+        var size = Math.Max(1, (int)MathF.Ceiling(GameConstants.TileSize * _camera.Zoom));
+        var bounds = new Rectangle((int)MathF.Floor(screenPosition.X), (int)MathF.Floor(screenPosition.Y), size, size);
+        var color = new Color(245, 214, 126, 210);
+
+        context.SpriteBatch.Draw(context.Pixel, new Rectangle(bounds.X, bounds.Y, bounds.Width, 2), color);
+        context.SpriteBatch.Draw(context.Pixel, new Rectangle(bounds.X, bounds.Bottom - 2, bounds.Width, 2), color);
+        context.SpriteBatch.Draw(context.Pixel, new Rectangle(bounds.X, bounds.Y, 2, bounds.Height), color);
+        context.SpriteBatch.Draw(context.Pixel, new Rectangle(bounds.Right - 2, bounds.Y, 2, bounds.Height), color);
+    }
+
+    private void DrawEngineDebugSnapshot(RenderContext context)
+    {
+        if (_world is null)
+        {
+            return;
+        }
+
+        if (_debugSnapshot is null || context.Time.TotalSeconds >= _nextDebugSnapshotAt)
+        {
+            _debugSnapshot = _debugSnapshots.Build(_world, _entities, _worldTime);
+            _nextDebugSnapshotAt = context.Time.TotalSeconds + 0.5;
+        }
+
+        var snapshot = _debugSnapshot;
+        context.DebugText.Draw(new Vector2(12, 178), $"DIRTY: {snapshot.DirtyChunkCount} LIQ: {snapshot.LiquidTileCount}", Color.LightGray, 2);
+        context.DebugText.Draw(new Vector2(12, 202), $"SURF: {snapshot.MinSurfaceY}-{snapshot.MaxSurfaceY}", Color.LightGray, 2);
     }
 
     private CommandResult ExecuteDebugCommand(string command)
@@ -239,7 +412,8 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
         return _commands.Execute(command, new CommandContext
         {
             Content = _content,
-            PlayerInventory = _inventory,
+            World = _world,
+            PlayerLoadoutInventory = _inventory,
             WorldTime = _worldTime,
             EntityManager = _entities,
             EntityFactory = _entityFactory,
@@ -248,10 +422,89 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
         });
     }
 
-    private static void GiveStarterItems(Inventory inventory)
+    private void ReturnToMainMenu()
     {
-        inventory.AddItem(new ItemStack("copper_pickaxe", 1));
-        inventory.AddItem(new ItemStack("dirt_block", 50));
-        inventory.AddItem(new ItemStack("stone_block", 25));
+        _states.ChangeState(new MainMenuState(_states, _states.RequestExit));
     }
+
+    private void EnsureVisibleChunks()
+    {
+        if (_world is null ||
+            !_world.IsHorizontallyInfinite ||
+            _loadedSession?.WorldGenerationProfile is not { } profile)
+        {
+            return;
+        }
+
+        var minTile = CoordinateUtils.WorldToTile(_camera.VisibleWorldRect.Left, _camera.VisibleWorldRect.Top);
+        var maxTile = CoordinateUtils.WorldToTile(_camera.VisibleWorldRect.Right, _camera.VisibleWorldRect.Bottom);
+        var visibleTiles = RectI.FromInclusiveTileBounds(minTile.X, minTile.Y, maxTile.X, maxTile.Y);
+        var worldSettings = _pauseMenu.Settings.World;
+        var plan = _streamingPlanner.Plan(_world, visibleTiles, new ChunkStreamingOptions
+        {
+            LoadMarginChunks = worldSettings.ChunkLoadMargin,
+            UnloadMarginChunks = worldSettings.ChunkUnloadMargin,
+            KeepDirtyChunksLoaded = worldSettings.KeepDirtyChunksLoaded
+        });
+        LoadOrGenerateRequiredChunks(profile, plan);
+        SaveAndUnloadChunks(plan);
+    }
+
+    private void LoadOrGenerateRequiredChunks(WorldGenerationProfile profile, ChunkStreamingPlan plan)
+    {
+        if (_world is null)
+        {
+            return;
+        }
+
+        foreach (var position in plan.ChunksToLoad)
+        {
+            if (!string.IsNullOrWhiteSpace(_worldSaveDirectory) &&
+                _worldSaves.TryLoadChunk(_world, _worldSaveDirectory, position))
+            {
+                continue;
+            }
+
+            _infiniteWorldgen.EnsureChunk(_world, profile, position);
+        }
+    }
+
+    private void SaveAndUnloadChunks(ChunkStreamingPlan plan)
+    {
+        if (_world is null)
+        {
+            return;
+        }
+
+        foreach (var position in plan.ChunksToUnload)
+        {
+            if (_world.TryGetChunk(position, out var chunk) &&
+                chunk is not null &&
+                chunk.IsDirty &&
+                !string.IsNullOrWhiteSpace(_worldSaveDirectory))
+            {
+                _worldSaves.SaveChunk(_world, _worldSaveDirectory, position);
+            }
+
+            _world.UnloadChunk(position);
+        }
+    }
+
+    private static string GetHotbarBinding(KeyBindingSettings bindings, int slot)
+    {
+        return slot switch
+        {
+            0 => bindings.Hotbar1,
+            1 => bindings.Hotbar2,
+            2 => bindings.Hotbar3,
+            3 => bindings.Hotbar4,
+            4 => bindings.Hotbar5,
+            5 => bindings.Hotbar6,
+            6 => bindings.Hotbar7,
+            7 => bindings.Hotbar8,
+            8 => bindings.Hotbar9,
+            _ => bindings.Hotbar10
+        };
+    }
+
 }

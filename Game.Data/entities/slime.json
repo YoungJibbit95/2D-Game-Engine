@@ -5,6 +5,8 @@
   "maxHealth": 20,
   "width": 16,
   "height": 14,
+  "contactDamage": 10,
+  "contactKnockback": 180,
   "aiBehavior": "slime",
   "lootTable": "slime_basic"
 }

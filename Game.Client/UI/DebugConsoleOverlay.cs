@@ -14,12 +14,12 @@ public sealed class DebugConsoleOverlay
 
     public bool IsOpen { get; private set; }
 
-    public bool Update(InputManager input, Func<string, CommandResult> executeCommand)
+    public bool Update(InputManager input, Func<string, CommandResult> executeCommand, string toggleBinding = "F10")
     {
         ArgumentNullException.ThrowIfNull(input);
         ArgumentNullException.ThrowIfNull(executeCommand);
 
-        if (input.IsKeyPressed(Keys.F10))
+        if (input.IsBindingPressed(toggleBinding))
         {
             IsOpen = !IsOpen;
             return true;

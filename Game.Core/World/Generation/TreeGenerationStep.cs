@@ -9,14 +9,16 @@ public sealed class TreeGenerationStep : IWorldGenerationStep
     public void Apply(WorldGenerationContext context)
     {
         var world = context.World;
+        var treeChance = Math.Clamp(context.Profile.TreeAttemptChance, 0f, 1f);
 
-        for (var x = 3; x < world.WidthTiles - 3; x += context.Random.Next(5, 10))
+        for (var attempt = 0; attempt < Math.Max(0, context.Profile.TreeAttempts); attempt++)
         {
-            if (context.Random.NextDouble() > 0.65)
+            if (world.WidthTiles <= 6 || context.Random.NextDouble() > treeChance)
             {
                 continue;
             }
 
+            var x = context.Random.Next(3, world.WidthTiles - 3);
             TryPlaceTree(context, x);
         }
     }
@@ -31,7 +33,9 @@ public sealed class TreeGenerationStep : IWorldGenerationStep
             return;
         }
 
-        var height = context.Random.Next(4, 8);
+        var minHeight = Math.Max(1, Math.Min(context.Profile.TreeMinHeight, context.Profile.TreeMaxHeight));
+        var maxHeight = Math.Max(minHeight, Math.Max(context.Profile.TreeMinHeight, context.Profile.TreeMaxHeight));
+        var height = context.Random.Next(minHeight, maxHeight + 1);
         for (var y = surfaceY - height; y < surfaceY; y++)
         {
             if (!world.IsInBounds(x, y) || !world.GetTile(x, y).IsAir)
@@ -42,7 +46,7 @@ public sealed class TreeGenerationStep : IWorldGenerationStep
 
         for (var y = surfaceY - height; y < surfaceY; y++)
         {
-            world.SetTile(x, y, TileInstance.FromTileId(KnownTileIds.Wood, TileFlags.IsNatural));
+            world.SetTile(x, y, TileInstance.FromTileId(KnownTileIds.Wood, TileFlags.IsNatural, isSolid: false));
         }
 
         PlaceLeaves(world, x, surfaceY - height);
@@ -63,7 +67,7 @@ public sealed class TreeGenerationStep : IWorldGenerationStep
                 var dy = Math.Abs(y - centerY);
                 if (dx + dy <= 3)
                 {
-                    world.SetTile(x, y, TileInstance.FromTileId(KnownTileIds.Leaves, TileFlags.IsNatural));
+                    world.SetTile(x, y, TileInstance.FromTileId(KnownTileIds.Leaves, TileFlags.IsNatural, isSolid: false));
                 }
             }
         }

@@ -1,4 +1,6 @@
 using Game.Core.Mods;
+using Game.Core.Items;
+using Game.Core.Effects;
 
 namespace Game.Core.Data;
 
@@ -14,8 +16,11 @@ public sealed class ContentReferenceValidator
         ValidateRecipes(database, report);
         ValidateLootTables(database, report);
         ValidateBiomes(database, report);
+        ValidateProjectiles(database, report);
         ValidateEntities(database, report);
         ValidateSpawnRules(database, report);
+        ValidateWorldGenerationProfiles(database, report);
+        ValidateSpriteReferences(database, report);
     }
 
     private static void ValidateTiles(GameContentDatabase database, ContentLoadReport report)
@@ -38,15 +43,34 @@ public sealed class ContentReferenceValidator
     {
         foreach (var item in database.Items.Definitions)
         {
-            if (string.IsNullOrWhiteSpace(item.PlacesTileId))
-            {
-                continue;
-            }
-
-            if (!database.Tiles.TryGetById(item.PlacesTileId, out _))
+            if (!string.IsNullOrWhiteSpace(item.PlacesTileId) && !database.Tiles.TryGetById(item.PlacesTileId, out _))
             {
                 AddMissingReference(report, "item", item.Id, "placed tile", item.PlacesTileId);
             }
+
+            foreach (var action in item.Actions)
+            {
+                ValidateItemAction(database, report, item.Id, action);
+            }
+
+            ValidateStatusEffects(database, report, "item", item.Id, item.OnHitEffects);
+        }
+    }
+
+    private static void ValidateItemAction(
+        GameContentDatabase database,
+        ContentLoadReport report,
+        string itemId,
+        ItemActionDefinition action)
+    {
+        if (!string.IsNullOrWhiteSpace(action.ProjectileId) && !database.Projectiles.TryGetById(action.ProjectileId, out _))
+        {
+            AddMissingReference(report, "item", itemId, "projectile", action.ProjectileId);
+        }
+
+        if (!string.IsNullOrWhiteSpace(action.AmmoItemId) && !database.Items.TryGetById(action.AmmoItemId, out _))
+        {
+            AddMissingReference(report, "item", itemId, "ammo item", action.AmmoItemId);
         }
     }
 
@@ -65,6 +89,17 @@ public sealed class ContentReferenceValidator
                 {
                     AddMissingReference(report, "recipe", recipe.Id, "ingredient item", ingredient.ItemId);
                 }
+            }
+
+            if (!string.IsNullOrWhiteSpace(recipe.Station) &&
+                !database.Tiles.Definitions.Any(tile => string.Equals(tile.CraftingStationId, recipe.Station, StringComparison.OrdinalIgnoreCase)))
+            {
+                report.AddIssue(
+                    ContentIssueSeverity.Warning,
+                    "validation",
+                    "recipe",
+                    recipe.Id,
+                    $"Recipe requires station '{recipe.Station}', but no tile currently provides that station.");
             }
         }
     }
@@ -103,15 +138,20 @@ public sealed class ContentReferenceValidator
     {
         foreach (var entity in database.Entities.Definitions)
         {
-            if (string.IsNullOrWhiteSpace(entity.LootTableId))
-            {
-                continue;
-            }
-
-            if (!database.LootTables.TryGetById(entity.LootTableId, out _))
+            if (!string.IsNullOrWhiteSpace(entity.LootTableId) && !database.LootTables.TryGetById(entity.LootTableId, out _))
             {
                 AddMissingReference(report, "entity", entity.Id, "loot table", entity.LootTableId);
             }
+
+            ValidateStatusEffects(database, report, "entity", entity.Id, entity.OnContactEffects);
+        }
+    }
+
+    private static void ValidateProjectiles(GameContentDatabase database, ContentLoadReport report)
+    {
+        foreach (var projectile in database.Projectiles.Definitions)
+        {
+            ValidateStatusEffects(database, report, "projectile", projectile.Id, projectile.OnHitEffects);
         }
     }
 
@@ -127,6 +167,109 @@ public sealed class ContentReferenceValidator
             if (!string.IsNullOrWhiteSpace(rule.BiomeId) && !database.Biomes.TryGetById(rule.BiomeId, out _))
             {
                 AddMissingReference(report, "spawn", rule.Id, "biome", rule.BiomeId);
+            }
+        }
+    }
+
+    private static void ValidateWorldGenerationProfiles(GameContentDatabase database, ContentLoadReport report)
+    {
+        foreach (var profile in database.WorldGenerationProfiles.Profiles)
+        {
+            foreach (var dimension in profile.Dimensions)
+            {
+                ValidateDimensionTile(database, report, profile.Id, "surface tile numeric id", dimension.SurfaceTileId);
+                ValidateDimensionTile(database, report, profile.Id, "subsurface tile numeric id", dimension.SubsurfaceTileId);
+                ValidateDimensionTile(database, report, profile.Id, "fill tile numeric id", dimension.FillTileId);
+            }
+
+            foreach (var ore in profile.Ores)
+            {
+                if (ore.TileId == 0)
+                {
+                    continue;
+                }
+
+                if (!database.Tiles.TryGetByNumericId(ore.TileId, out _))
+                {
+                    AddMissingReference(report, "worldgen", profile.Id, "ore tile numeric id", ore.TileId.ToString());
+                }
+
+                if (!database.Tiles.TryGetByNumericId(ore.ReplaceTileId, out _))
+                {
+                    AddMissingReference(report, "worldgen", profile.Id, "ore replacement tile numeric id", ore.ReplaceTileId.ToString());
+                }
+            }
+        }
+    }
+
+    private static void ValidateDimensionTile(
+        GameContentDatabase database,
+        ContentLoadReport report,
+        string profileId,
+        string referenceKind,
+        ushort tileId)
+    {
+        if (!database.Tiles.TryGetByNumericId(tileId, out _))
+        {
+            AddMissingReference(report, "worldgen", profileId, referenceKind, tileId.ToString());
+        }
+    }
+
+    private static void ValidateSpriteReferences(GameContentDatabase database, ContentLoadReport report)
+    {
+        if (!database.SpriteAssets.HasExplicitAssets)
+        {
+            return;
+        }
+
+        foreach (var tile in database.Tiles.Definitions.Where(tile => !string.Equals(tile.Id, database.Tiles.Fallback.Id, StringComparison.OrdinalIgnoreCase)))
+        {
+            RequireSprite(database, report, "tile", tile.Id, tile.TexturePath);
+        }
+
+        foreach (var item in database.Items.Definitions.Where(item => !string.Equals(item.Id, database.Items.Fallback.Id, StringComparison.OrdinalIgnoreCase)))
+        {
+            RequireSprite(database, report, "item", item.Id, item.TexturePath);
+        }
+
+        foreach (var entity in database.Entities.Definitions)
+        {
+            RequireSprite(database, report, "entity", entity.Id, entity.TexturePath);
+        }
+
+        foreach (var projectile in database.Projectiles.Definitions)
+        {
+            RequireSprite(database, report, "projectile", projectile.Id, projectile.TexturePath);
+        }
+    }
+
+    private static void RequireSprite(
+        GameContentDatabase database,
+        ContentLoadReport report,
+        string contentKind,
+        string contentId,
+        string spriteId)
+    {
+        if (database.SpriteAssets.TryGetById(spriteId, out _))
+        {
+            return;
+        }
+
+        AddMissingReference(report, contentKind, contentId, "sprite asset", spriteId);
+    }
+
+    private static void ValidateStatusEffects(
+        GameContentDatabase database,
+        ContentLoadReport report,
+        string contentKind,
+        string contentId,
+        IEnumerable<StatusEffectApplication> effects)
+    {
+        foreach (var effect in effects)
+        {
+            if (!database.StatusEffects.TryGetById(effect.EffectId, out _))
+            {
+                AddMissingReference(report, contentKind, contentId, "status effect", effect.EffectId);
             }
         }
     }

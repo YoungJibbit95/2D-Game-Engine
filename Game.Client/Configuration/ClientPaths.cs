@@ -8,6 +8,12 @@ public static class ClientPaths
         return Path.Combine(appData, "TerrariaLike", "settings.json");
     }
 
+    public static string WorldSaveDirectory(string worldName, int seed)
+    {
+        var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+        return Path.Combine(appData, "TerrariaLike", "Saves", "Worlds", $"{SanitizePathSegment(worldName)}_{seed}");
+    }
+
     public static string FindGameDataRoot()
     {
         foreach (var root in CandidateRoots())
@@ -39,5 +45,21 @@ public static class ClientPaths
             yield return current.FullName;
             current = current.Parent;
         }
+    }
+
+    private static string SanitizePathSegment(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return "World";
+        }
+
+        var invalid = Path.GetInvalidFileNameChars();
+        var chars = value
+            .Trim()
+            .Select(character => invalid.Contains(character) ? '_' : character)
+            .ToArray();
+        var sanitized = new string(chars);
+        return string.IsNullOrWhiteSpace(sanitized) ? "World" : sanitized;
     }
 }

@@ -18,6 +18,8 @@ public sealed class Chunk
 
     public bool NeedsLightUpdate { get; private set; }
 
+    public ChunkMetadata Metadata { get; private set; } = ChunkMetadata.Empty;
+
     public TileInstance GetTile(int localX, int localY)
     {
         ValidateLocalPosition(localX, localY);
@@ -81,6 +83,12 @@ public sealed class Chunk
         IsDirty = false;
         NeedsMeshRebuild = false;
         NeedsLightUpdate = false;
+    }
+
+    public void UpdateMetadata(ChunkMetadata metadata)
+    {
+        ArgumentNullException.ThrowIfNull(metadata);
+        Metadata = metadata;
     }
 
     private static int ToIndex(int localX, int localY)

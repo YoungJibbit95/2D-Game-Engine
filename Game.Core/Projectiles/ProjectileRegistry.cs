@@ -1,4 +1,5 @@
 using Game.Core.Data;
+using Game.Core.Effects;
 
 namespace Game.Core.Projectiles;
 
@@ -72,6 +73,29 @@ public sealed class ProjectileRegistry
         if (definition.Lifetime <= 0)
         {
             throw new RegistryValidationException($"Projectile '{definition.Id}' must have positive lifetime.");
+        }
+
+        ValidateEffects(definition.Id, definition.OnHitEffects);
+    }
+
+    private static void ValidateEffects(string projectileId, IEnumerable<StatusEffectApplication> effects)
+    {
+        foreach (var effect in effects)
+        {
+            if (string.IsNullOrWhiteSpace(effect.EffectId))
+            {
+                throw new RegistryValidationException($"Projectile '{projectileId}' has a status effect application without an effect id.");
+            }
+
+            if (effect.Chance < 0)
+            {
+                throw new RegistryValidationException($"Projectile '{projectileId}' has a status effect application with negative chance.");
+            }
+
+            if (effect.DurationSeconds is <= 0)
+            {
+                throw new RegistryValidationException($"Projectile '{projectileId}' has a status effect application with non-positive duration override.");
+            }
         }
     }
 

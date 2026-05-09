@@ -1,4 +1,5 @@
 using Game.Core.Data;
+using Game.Core.Effects;
 
 namespace Game.Core.Items;
 
@@ -70,6 +71,62 @@ public sealed class ItemRegistry : IItemDefinitionProvider
         if (definition.UseTime < 0)
         {
             throw new RegistryValidationException($"Item '{definition.Id}' has negative use time.");
+        }
+
+        foreach (var action in definition.Actions)
+        {
+            ValidateAction(definition, action);
+        }
+
+        ValidateEffects(definition.Id, definition.OnHitEffects);
+    }
+
+    private static void ValidateEffects(string itemId, IEnumerable<StatusEffectApplication> effects)
+    {
+        foreach (var effect in effects)
+        {
+            if (string.IsNullOrWhiteSpace(effect.EffectId))
+            {
+                throw new RegistryValidationException($"Item '{itemId}' has a status effect application without an effect id.");
+            }
+
+            if (effect.Chance < 0)
+            {
+                throw new RegistryValidationException($"Item '{itemId}' has a status effect application with negative chance.");
+            }
+
+            if (effect.DurationSeconds is <= 0)
+            {
+                throw new RegistryValidationException($"Item '{itemId}' has a status effect application with non-positive duration override.");
+            }
+        }
+    }
+
+    private static void ValidateAction(ItemDefinition item, ItemActionDefinition action)
+    {
+        if (action.Kind == ItemActionKind.Shoot && string.IsNullOrWhiteSpace(action.ProjectileId))
+        {
+            throw new RegistryValidationException($"Item '{item.Id}' has a shoot action without a projectile id.");
+        }
+
+        if (action.Kind == ItemActionKind.Place && string.IsNullOrWhiteSpace(item.PlacesTileId))
+        {
+            throw new RegistryValidationException($"Item '{item.Id}' has a place action without a placed tile id.");
+        }
+
+        if (action.AmmoCost <= 0)
+        {
+            throw new RegistryValidationException($"Item '{item.Id}' has an action with a non-positive ammo cost.");
+        }
+
+        if (action.ProjectileSpeedMultiplier <= 0)
+        {
+            throw new RegistryValidationException($"Item '{item.Id}' has an action with a non-positive projectile speed multiplier.");
+        }
+
+        if (action.ReachPixels < 0)
+        {
+            throw new RegistryValidationException($"Item '{item.Id}' has an action with a negative reach.");
         }
     }
 

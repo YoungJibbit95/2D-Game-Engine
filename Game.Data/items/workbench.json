@@ -1,0 +1,11 @@
+{
+  "id": "workbench",
+  "displayName": "Workbench",
+  "type": "PlaceableTile",
+  "texture": "items/workbench",
+  "maxStack": 99,
+  "useTime": 0.15,
+  "placesTile": "workbench",
+  "placementSupport": "OnSolidGround",
+  "tags": ["station", "crafting", "placeable", "furniture"]
+}

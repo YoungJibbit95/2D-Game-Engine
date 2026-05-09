@@ -1,0 +1,11 @@
+{
+  "id": "mining_charm",
+  "displayName": "Mining Charm",
+  "type": "Accessory",
+  "texture": "items/mining_charm",
+  "maxStack": 1,
+  "equipmentSlot": "Accessory1",
+  "miningSpeedBonus": 0.12,
+  "movementSpeedBonus": 0.05,
+  "tags": ["item", "accessory", "mining"]
+}

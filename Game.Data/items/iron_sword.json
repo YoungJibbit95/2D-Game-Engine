@@ -1,0 +1,17 @@
+{
+  "id": "iron_sword",
+  "displayName": "Iron Sword",
+  "type": "WeaponMelee",
+  "texture": "items/iron_sword",
+  "maxStack": 1,
+  "useTime": 0.24,
+  "damage": 11,
+  "knockback": 2.0,
+  "attackShape": {
+    "kind": "Cone",
+    "range": 54,
+    "width": 70,
+    "angleDegrees": 72
+  },
+  "tags": ["weapon", "melee", "iron"]
+}

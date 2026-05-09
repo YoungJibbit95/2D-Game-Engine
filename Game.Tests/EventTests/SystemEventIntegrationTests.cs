@@ -7,6 +7,9 @@ using Game.Core.Items;
 using Game.Core.Loot;
 using Game.Core.Physics;
 using Game.Core.Projectiles;
+using Game.Core.Tiles;
+using Game.Core.World;
+using Game.Core.World.Simulation;
 using System.Numerics;
 using Xunit;
 
@@ -58,6 +61,50 @@ public sealed class SystemEventIntegrationTests
         Assert.Equal(1, deathCount);
     }
 
+    [Fact]
+    public void BuildingSystem_PublishesTilePlacedEvent()
+    {
+        var bus = new GameEventBus();
+        TilePlacedEvent? received = null;
+        bus.Subscribe<TilePlacedEvent>(gameEvent => received = gameEvent);
+        var world = new World(8, 8, WorldMetadata.CreateDefault(seed: 1));
+        var inventory = new Inventory(2, CreateBuildItems());
+        inventory.AddItem(new ItemStack("dirt_block", 1));
+
+        var placed = new BuildingSystem().PlaceTile(
+            world,
+            inventory,
+            CreateBuildItems(),
+            CreateBuildTiles(),
+            new TilePos(2, 2),
+            "dirt_block",
+            Vector2.Zero,
+            128,
+            new RectI(1000, 1000, 1, 1),
+            bus);
+
+        Assert.True(placed);
+        Assert.NotNull(received);
+        Assert.Equal(new TilePos(2, 2), received.Position);
+        Assert.Equal(KnownTileIds.Dirt, received.TileId);
+        Assert.Equal("dirt_block", received.ItemId);
+    }
+
+    [Fact]
+    public void WorldSimulationEventBridge_MarksRegionsFromTileEvents()
+    {
+        var bus = new GameEventBus();
+        var scheduler = new WorldSimulationScheduler();
+        using var bridge = WorldSimulationEventBridge.Attach(bus, scheduler, tilePadding: 1);
+
+        bus.Publish(new TileMinedEvent(new TilePos(4, 4), KnownTileIds.Dirt, ItemStack.Empty));
+        bus.Publish(new TilePlacedEvent(new TilePos(6, 4), KnownTileIds.Stone, "stone_block"));
+
+        Assert.True(scheduler.PendingLiquidRegionCount > 0);
+        Assert.True(scheduler.PendingRenderRegionCount > 0);
+        Assert.True(scheduler.PendingLightRegionCount > 0);
+    }
+
     private static ItemRegistry CreateItems()
     {
         return ItemRegistry.Create(new[]
@@ -81,6 +128,39 @@ public sealed class SystemEventIntegrationTests
             {
                 Id = "slime_basic",
                 Entries = Array.Empty<LootEntryDefinition>()
+            }
+        });
+    }
+
+    private static ItemRegistry CreateBuildItems()
+    {
+        return ItemRegistry.Create(new[]
+        {
+            new ItemDefinition
+            {
+                Id = "dirt_block",
+                DisplayName = "Dirt Block",
+                Type = ItemType.PlaceableTile,
+                TexturePath = "items/dirt_block",
+                MaxStack = 999,
+                PlacesTileId = "dirt"
+            }
+        });
+    }
+
+    private static TileRegistry CreateBuildTiles()
+    {
+        return TileRegistry.Create(new[]
+        {
+            new TileDefinition
+            {
+                NumericId = KnownTileIds.Dirt,
+                Id = "dirt",
+                DisplayName = "Dirt",
+                TexturePath = "tiles/dirt",
+                Solid = true,
+                BlocksLight = true,
+                Hardness = 1
             }
         });
     }

@@ -1,0 +1,10 @@
+{
+  "id": "copper_chestplate",
+  "result": { "itemId": "copper_chestplate", "count": 1 },
+  "ingredients": [
+    { "itemId": "copper_ore", "count": 16 }
+  ],
+  "station": "workbench",
+  "category": "armor",
+  "sortOrder": 71
+}

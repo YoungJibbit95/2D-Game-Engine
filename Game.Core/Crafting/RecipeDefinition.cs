@@ -11,4 +11,10 @@ public sealed record RecipeDefinition
     public required IReadOnlyList<RecipeIngredient> Ingredients { get; init; }
 
     public string? Station { get; init; }
+
+    public string Category { get; init; } = "general";
+
+    public int SortOrder { get; init; }
+
+    public bool KnownByDefault { get; init; } = true;
 }

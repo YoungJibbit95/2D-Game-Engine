@@ -5,5 +5,7 @@
   "texture": "items/stone_block",
   "maxStack": 999,
   "useTime": 0.1,
-  "placesTile": "stone"
+  "placesTile": "stone",
+  "placementSupport": "AdjacentSolid",
+  "tags": ["block", "stone", "placeable"]
 }

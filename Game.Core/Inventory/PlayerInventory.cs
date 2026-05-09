@@ -33,6 +33,8 @@ public sealed class PlayerInventory
 
     public Inventory Main { get; }
 
+    public IItemDefinitionProvider ItemDefinitions => _items;
+
     public int SelectedHotbarSlot { get; private set; }
 
     public ItemStack SelectedStack => Hotbar.Slots[SelectedHotbarSlot].Stack;

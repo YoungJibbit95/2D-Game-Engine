@@ -1,16 +1,36 @@
 using Game.Client.Rendering;
+using Game.Core.Settings;
 using Microsoft.Xna.Framework.Content;
 
 namespace Game.Client.GameStates;
 
 public sealed class GameStateManager : IDisposable
 {
+    private readonly Action _requestExit;
+    private readonly Action<GameSettings> _applySettings;
     private IGameState? _currentState;
     private ContentManager? _content;
+
+    public GameStateManager(Action? requestExit = null, Action<GameSettings>? applySettings = null)
+    {
+        _requestExit = requestExit ?? (() => { });
+        _applySettings = applySettings ?? (_ => { });
+    }
 
     public string CurrentStateName => _currentState?.Name ?? "None";
 
     public IGameState? CurrentState => _currentState;
+
+    public void RequestExit()
+    {
+        _requestExit();
+    }
+
+    public void ApplySettings(GameSettings settings)
+    {
+        ArgumentNullException.ThrowIfNull(settings);
+        _applySettings(settings);
+    }
 
     public void ChangeState(IGameState nextState)
     {

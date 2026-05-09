@@ -1,0 +1,11 @@
+{
+  "id": "copper_chestplate",
+  "displayName": "Copper Chestplate",
+  "type": "Armor",
+  "texture": "items/copper_chestplate",
+  "maxStack": 1,
+  "equipmentSlot": "Body",
+  "defense": 3,
+  "maxHealthBonus": 5,
+  "tags": ["item", "armor", "copper", "starter"]
+}

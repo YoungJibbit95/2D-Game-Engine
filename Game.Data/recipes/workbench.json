@@ -1,0 +1,10 @@
+{
+  "id": "workbench",
+  "result": { "itemId": "workbench", "count": 1 },
+  "ingredients": [
+    { "itemId": "wood", "count": 10 }
+  ],
+  "station": null,
+  "category": "stations",
+  "sortOrder": 10
+}

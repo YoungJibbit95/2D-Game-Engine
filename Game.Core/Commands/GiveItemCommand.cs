@@ -17,7 +17,7 @@ public sealed class GiveItemCommand : IConsoleCommand
             return CommandResult.Failure("Content database is required for /give.");
         }
 
-        if (context.PlayerInventory is null)
+        if (context.PlayerInventory is null && context.PlayerLoadoutInventory is null)
         {
             return CommandResult.Failure("Player inventory is required for /give.");
         }
@@ -40,7 +40,18 @@ public sealed class GiveItemCommand : IConsoleCommand
         }
 
         var stack = new ItemStack(itemId, count);
-        if (!context.PlayerInventory.CanAddItem(stack))
+        if (context.PlayerLoadoutInventory is not null)
+        {
+            if (!context.PlayerLoadoutInventory.CanAddItem(stack))
+            {
+                return CommandResult.Failure($"Inventory cannot fit {count}x {itemId}.");
+            }
+
+            context.PlayerLoadoutInventory.AddItem(stack);
+            return CommandResult.Success($"Gave {count}x {itemId}.");
+        }
+
+        if (!context.PlayerInventory!.CanAddItem(stack))
         {
             return CommandResult.Failure($"Inventory cannot fit {count}x {itemId}.");
         }

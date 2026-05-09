@@ -1,0 +1,10 @@
+{
+  "id": "wooden_bow",
+  "result": { "itemId": "wooden_bow", "count": 1 },
+  "ingredients": [
+    { "itemId": "wood", "count": 12 }
+  ],
+  "station": "workbench",
+  "category": "weapons",
+  "sortOrder": 30
+}

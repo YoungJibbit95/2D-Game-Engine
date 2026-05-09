@@ -32,10 +32,26 @@ public sealed class AdvancedWorldGenerator
         return GenerateDetailed(widthTiles, heightTiles, seed).World;
     }
 
+    public World Generate(WorldGenerationProfile profile, int seed)
+    {
+        return GenerateDetailed(profile, seed).World;
+    }
+
+    public WorldGenerationResult GenerateDetailed(WorldGenerationProfile profile, int seed)
+    {
+        ArgumentNullException.ThrowIfNull(profile);
+        return GenerateDetailed(profile.WidthTiles, profile.HeightTiles, seed, profile);
+    }
+
     public WorldGenerationResult GenerateDetailed(int widthTiles, int heightTiles, int seed)
     {
+        return GenerateDetailed(widthTiles, heightTiles, seed, WorldGenerationProfile.ForDimensions(widthTiles, heightTiles));
+    }
+
+    private WorldGenerationResult GenerateDetailed(int widthTiles, int heightTiles, int seed, WorldGenerationProfile profile)
+    {
         var world = new World(widthTiles, heightTiles, WorldMetadata.CreateDefault(seed));
-        var context = new WorldGenerationContext(world, seed, new Random(seed), _noiseFactory(seed));
+        var context = new WorldGenerationContext(world, seed, new Random(seed), _noiseFactory(seed), profile);
 
         foreach (var step in _steps)
         {

@@ -1,0 +1,11 @@
+{
+  "id": "wooden_arrows",
+  "result": { "itemId": "wooden_arrow", "count": 25 },
+  "ingredients": [
+    { "itemId": "wood", "count": 1 },
+    { "itemId": "stone_block", "count": 1 }
+  ],
+  "station": "workbench",
+  "category": "ammo",
+  "sortOrder": 20
+}

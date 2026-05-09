@@ -1,6 +1,7 @@
 using Game.Core.Combat;
 using Game.Core.Entities;
 using Game.Core.Spawning;
+using Game.Core.World.Simulation;
 
 namespace Game.Core.Runtime;
 
@@ -9,4 +10,5 @@ public readonly record struct GameSimulationTickResult(
     ContactDamageResult ContactDamage,
     int PickedUpItems,
     SpawnSchedulerResult Spawning,
-    PlayerRespawnResult Respawn);
+    PlayerRespawnResult Respawn,
+    WorldSimulationTickResult WorldSimulation);

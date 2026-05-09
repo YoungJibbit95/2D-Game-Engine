@@ -1,0 +1,10 @@
+{
+  "id": "copper_helmet",
+  "result": { "itemId": "copper_helmet", "count": 1 },
+  "ingredients": [
+    { "itemId": "copper_ore", "count": 10 }
+  ],
+  "station": "workbench",
+  "category": "armor",
+  "sortOrder": 70
+}

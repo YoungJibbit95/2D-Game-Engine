@@ -1,0 +1,11 @@
+{
+  "id": "copper_sword",
+  "result": { "itemId": "copper_sword", "count": 1 },
+  "ingredients": [
+    { "itemId": "copper_ore", "count": 8 },
+    { "itemId": "wood", "count": 2 }
+  ],
+  "station": "workbench",
+  "category": "weapons",
+  "sortOrder": 25
+}

@@ -1,3 +1,4 @@
+using Game.Core.Effects;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -9,7 +10,8 @@ public sealed class EntityDefinitionJsonLoader
     {
         PropertyNameCaseInsensitive = true,
         ReadCommentHandling = JsonCommentHandling.Skip,
-        AllowTrailingCommas = true
+        AllowTrailingCommas = true,
+        Converters = { new JsonStringEnumConverter() }
     };
 
     public EntityDefinitionRegistry LoadRegistryFromDirectory(string directoryPath)
@@ -84,6 +86,12 @@ public sealed class EntityDefinitionJsonLoader
         [JsonPropertyName("lootTable")]
         public string? LootTable { get; init; }
 
+        public int ContactDamage { get; init; } = 10;
+
+        public float ContactKnockback { get; init; } = 180f;
+
+        public List<StatusEffectApplicationDto> OnContactEffects { get; init; } = new();
+
         public EntityDefinition ToDefinition()
         {
             return new EntityDefinition
@@ -95,7 +103,32 @@ public sealed class EntityDefinitionJsonLoader
                 Width = Width,
                 Height = Height,
                 AiBehavior = AiBehavior,
-                LootTableId = LootTableId ?? LootTable
+                LootTableId = LootTableId ?? LootTable,
+                ContactDamage = ContactDamage,
+                ContactKnockback = ContactKnockback,
+                OnContactEffects = OnContactEffects.Select(effect => effect.ToDefinition()).ToArray()
+            };
+        }
+    }
+
+    private sealed record StatusEffectApplicationDto
+    {
+        public string? EffectId { get; init; }
+
+        [JsonPropertyName("effect")]
+        public string? Effect { get; init; }
+
+        public float Chance { get; init; } = 1f;
+
+        public float? DurationSeconds { get; init; }
+
+        public StatusEffectApplication ToDefinition()
+        {
+            return new StatusEffectApplication
+            {
+                EffectId = EffectId ?? Effect ?? string.Empty,
+                Chance = Chance,
+                DurationSeconds = DurationSeconds
             };
         }
     }

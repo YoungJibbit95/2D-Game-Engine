@@ -16,7 +16,7 @@ public sealed class MainGame : Microsoft.Xna.Framework.Game
     private readonly GameStateManager _states;
     private readonly GameTimeService _time;
     private readonly FixedUpdateRunner _fixedUpdateRunner;
-    private readonly GameSettings _settings;
+    private GameSettings _settings;
     private readonly GameSettingsService _settingsService;
 
     private SpriteBatch? _spriteBatch;
@@ -35,7 +35,7 @@ public sealed class MainGame : Microsoft.Xna.Framework.Game
             IsFullScreen = _settings.Video.Fullscreen
         };
 
-        _states = new GameStateManager();
+        _states = new GameStateManager(Exit, ApplySettings);
         _time = new GameTimeService();
         _fixedUpdateRunner = new FixedUpdateRunner();
 
@@ -48,7 +48,7 @@ public sealed class MainGame : Microsoft.Xna.Framework.Game
     protected override void Initialize()
     {
         _graphics.ApplyChanges();
-        _states.ChangeState(new PlayingState());
+        _states.ChangeState(new MainMenuState(_states, _states.RequestExit));
 
         base.Initialize();
     }
@@ -66,11 +66,6 @@ public sealed class MainGame : Microsoft.Xna.Framework.Game
     protected override void Update(GameTime gameTime)
     {
         _time.BeginFrame(gameTime);
-
-        if (Keyboard.GetState().IsKeyDown(Keys.Escape) && !CurrentStateCapturesKeyboard())
-        {
-            Exit();
-        }
 
         _states.Update(_time.FrameDeltaSeconds);
         _fixedUpdateRunner.Run(_time.FrameDeltaSeconds, FixedUpdate);
@@ -141,6 +136,28 @@ public sealed class MainGame : Microsoft.Xna.Framework.Game
         catch (InvalidDataException)
         {
             return GameSettings.CreateDefault();
+        }
+    }
+
+    private void ApplySettings(GameSettings settings)
+    {
+        _settings = settings;
+
+        var video = settings.Video;
+        var needsApply =
+            _graphics.PreferredBackBufferWidth != video.Width ||
+            _graphics.PreferredBackBufferHeight != video.Height ||
+            _graphics.IsFullScreen != video.Fullscreen ||
+            _graphics.SynchronizeWithVerticalRetrace != video.VSync;
+
+        _graphics.PreferredBackBufferWidth = video.Width;
+        _graphics.PreferredBackBufferHeight = video.Height;
+        _graphics.IsFullScreen = video.Fullscreen;
+        _graphics.SynchronizeWithVerticalRetrace = video.VSync;
+
+        if (needsApply)
+        {
+            _graphics.ApplyChanges();
         }
     }
 }

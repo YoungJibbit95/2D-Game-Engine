@@ -1,0 +1,10 @@
+{
+  "id": "copper_greaves",
+  "result": { "itemId": "copper_greaves", "count": 1 },
+  "ingredients": [
+    { "itemId": "copper_ore", "count": 14 }
+  ],
+  "station": "workbench",
+  "category": "armor",
+  "sortOrder": 72
+}

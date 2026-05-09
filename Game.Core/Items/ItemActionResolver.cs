@@ -1,0 +1,26 @@
+namespace Game.Core.Items;
+
+public static class ItemActionResolver
+{
+    public static ItemActionDefinition GetPrimaryAction(ItemDefinition item)
+    {
+        ArgumentNullException.ThrowIfNull(item);
+
+        return item.Actions.Count > 0
+            ? item.Actions[0]
+            : InferFromLegacyType(item.Type);
+    }
+
+    public static ItemActionDefinition InferFromLegacyType(ItemType type)
+    {
+        return type switch
+        {
+            ItemType.PlaceableTile => ItemActionDefinition.Create(ItemActionKind.Place),
+            ItemType.ToolPickaxe => ItemActionDefinition.Create(ItemActionKind.Mine),
+            ItemType.WeaponMelee or ItemType.ToolAxe => ItemActionDefinition.Create(ItemActionKind.Melee),
+            ItemType.WeaponRanged => ItemActionDefinition.Create(ItemActionKind.Shoot),
+            ItemType.Consumable => ItemActionDefinition.Create(ItemActionKind.Consume),
+            _ => ItemActionDefinition.Create(ItemActionKind.None)
+        };
+    }
+}

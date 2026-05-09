@@ -1,0 +1,12 @@
+{
+  "id": "iron_pickaxe",
+  "displayName": "Iron Pickaxe",
+  "type": "ToolPickaxe",
+  "texture": "items/iron_pickaxe",
+  "maxStack": 1,
+  "useTime": 0.3,
+  "toolPower": 55,
+  "damage": 5,
+  "knockback": 1.3,
+  "tags": ["item", "tool", "pickaxe", "iron"]
+}

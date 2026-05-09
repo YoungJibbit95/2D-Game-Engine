@@ -12,6 +12,7 @@ using Game.Core.Projectiles;
 using Game.Core.Spawning;
 using Game.Core.Tiles;
 using Game.Core.Time;
+using Game.Core.World;
 using System.Numerics;
 using Xunit;
 
@@ -56,6 +57,22 @@ public sealed class CommandDispatcherTests
 
         Assert.True(result.IsSuccess);
         Assert.Equal(2, inventory.CountItem("gel"));
+    }
+
+    [Fact]
+    public void Execute_GiveCommand_CanUsePlayerInventoryModel()
+    {
+        var content = CreateContent();
+        var inventory = new PlayerInventory(content.Items);
+
+        var result = CreateDispatcher().Execute("/give gel 4", new CommandContext
+        {
+            Content = content,
+            PlayerLoadoutInventory = inventory
+        });
+
+        Assert.True(result.IsSuccess);
+        Assert.Equal(4, inventory.CountItem("gel"));
     }
 
     [Fact]
@@ -114,6 +131,26 @@ public sealed class CommandDispatcherTests
         Assert.NotNull(received);
         Assert.Equal("does_not_exist", received.CommandName);
         Assert.False(received.Success);
+    }
+
+    [Fact]
+    public void Execute_DebugWorld_ReturnsSnapshotSummary()
+    {
+        var world = new World(8, 8, WorldMetadata.CreateDefault(seed: 44) with { Name = "Test World" });
+        world.SetTile(1, 1, KnownTileIds.Dirt);
+        var entities = new EntityManager(spatialCellSize: 16);
+
+        var result = CreateDispatcher().Execute("/debug world", new CommandContext
+        {
+            World = world,
+            EntityManager = entities,
+            WorldTime = new WorldTime()
+        });
+
+        Assert.True(result.IsSuccess);
+        Assert.Contains("Test World", result.Message);
+        Assert.Contains("seed=44", result.Message);
+        Assert.Contains("chunks=1", result.Message);
     }
 
     private static CommandDispatcher CreateDispatcher()

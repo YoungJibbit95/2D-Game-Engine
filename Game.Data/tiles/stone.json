@@ -8,5 +8,6 @@
   "hardness": 2.5,
   "miningPowerRequired": 0,
   "dropItem": "stone_block",
-  "mergeGroup": "stone"
+  "mergeGroup": "stone",
+  "tags": ["stone", "natural", "mineable"]
 }

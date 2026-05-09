@@ -81,6 +81,66 @@ public sealed class MiningAndBuildingTests
         Assert.True(world.GetTile(0, 0).IsAir);
     }
 
+    [Fact]
+    public void BuildingSystem_RequiresAdjacentSolidSupportWhenConfigured()
+    {
+        var world = CreateWorld();
+        var inventory = CreateInventory();
+        inventory.AddItem(new ItemStack("dirt_block", 2));
+        var items = CreateItems(PlacementSupportRule.AdjacentSolid);
+
+        var unsupported = new BuildingSystem().PlaceTile(
+            world,
+            inventory,
+            items,
+            CreateTiles(),
+            new TilePos(4, 4),
+            "dirt_block",
+            new Vector2(64, 64),
+            96,
+            new RectI(0, 0, 12, 28));
+
+        world.SetTile(3, 4, KnownTileIds.Stone);
+        var supported = new BuildingSystem().PlaceTile(
+            world,
+            inventory,
+            items,
+            CreateTiles(),
+            new TilePos(4, 4),
+            "dirt_block",
+            new Vector2(64, 64),
+            96,
+            new RectI(0, 0, 12, 28));
+
+        Assert.False(unsupported);
+        Assert.True(supported);
+        Assert.Equal(KnownTileIds.Dirt, world.GetTile(4, 4).TileId);
+    }
+
+    [Fact]
+    public void BuildingSystem_UsesTileDefinitionSolidityWhenPlacing()
+    {
+        var world = CreateWorld();
+        world.SetTile(4, 4, KnownTileIds.Stone);
+        var inventory = new Inventory(4, CreateItemsForWorkbench());
+        inventory.AddItem(new ItemStack("workbench", 1));
+
+        var placed = new BuildingSystem().PlaceTile(
+            world,
+            inventory,
+            CreateItemsForWorkbench(),
+            CreateTilesWithWorkbench(),
+            new TilePos(4, 3),
+            "workbench",
+            new Vector2(64, 32),
+            96,
+            new RectI(0, 0, 12, 28));
+
+        Assert.True(placed);
+        Assert.Equal(KnownTileIds.Workbench, world.GetTile(4, 3).TileId);
+        Assert.False(world.GetTile(4, 3).IsSolid);
+    }
+
     private static World CreateWorld()
     {
         return new World(16, 16, WorldMetadata.CreateDefault(seed: 1));
@@ -91,7 +151,7 @@ public sealed class MiningAndBuildingTests
         return new Inventory(4, CreateItems());
     }
 
-    private static ItemRegistry CreateItems()
+    private static ItemRegistry CreateItems(PlacementSupportRule placementSupport = PlacementSupportRule.None)
     {
         return ItemRegistry.Create(new[]
         {
@@ -102,7 +162,8 @@ public sealed class MiningAndBuildingTests
                 Type = ItemType.PlaceableTile,
                 TexturePath = "items/dirt_block",
                 MaxStack = 999,
-                PlacesTileId = "dirt"
+                PlacesTileId = "dirt",
+                PlacementSupport = placementSupport
             }
         });
     }
@@ -111,6 +172,18 @@ public sealed class MiningAndBuildingTests
     {
         return TileRegistry.Create(new[]
         {
+            new TileDefinition
+            {
+                NumericId = KnownTileIds.Stone,
+                Id = "stone",
+                DisplayName = "Stone",
+                TexturePath = "tiles/stone",
+                Solid = true,
+                BlocksLight = true,
+                Hardness = 1,
+                MiningPowerRequired = 0,
+                DropItemId = "stone_block"
+            },
             new TileDefinition
             {
                 NumericId = KnownTileIds.Dirt,
@@ -122,6 +195,55 @@ public sealed class MiningAndBuildingTests
                 Hardness = 1,
                 MiningPowerRequired = 0,
                 DropItemId = "dirt_block"
+            }
+        });
+    }
+
+    private static ItemRegistry CreateItemsForWorkbench()
+    {
+        return ItemRegistry.Create(new[]
+        {
+            new ItemDefinition
+            {
+                Id = "workbench",
+                DisplayName = "Workbench",
+                Type = ItemType.PlaceableTile,
+                TexturePath = "items/workbench",
+                MaxStack = 99,
+                PlacesTileId = "workbench",
+                PlacementSupport = PlacementSupportRule.OnSolidGround
+            }
+        });
+    }
+
+    private static TileRegistry CreateTilesWithWorkbench()
+    {
+        return TileRegistry.Create(new[]
+        {
+            new TileDefinition
+            {
+                NumericId = KnownTileIds.Stone,
+                Id = "stone",
+                DisplayName = "Stone",
+                TexturePath = "tiles/stone",
+                Solid = true,
+                BlocksLight = true,
+                Hardness = 1,
+                MiningPowerRequired = 0,
+                DropItemId = "stone_block"
+            },
+            new TileDefinition
+            {
+                NumericId = KnownTileIds.Workbench,
+                Id = "workbench",
+                DisplayName = "Workbench",
+                TexturePath = "tiles/workbench",
+                Solid = false,
+                BlocksLight = false,
+                Hardness = 1,
+                MiningPowerRequired = 0,
+                DropItemId = "workbench",
+                CraftingStationId = "workbench"
             }
         });
     }

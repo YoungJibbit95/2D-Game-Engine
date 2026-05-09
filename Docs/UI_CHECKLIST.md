@@ -1,57 +1,59 @@
 # UI Checklist
 
+Only open work is kept here. Completed items are removed after implementation.
+
 ## Architecture
 
-- [x] `UIElement` tree.
-- [x] Visibility/enabled state.
-- [x] Child layout and drawing.
-- [x] Mouse hit testing.
-- [x] Input consumed by UI blocks world input.
-- [ ] Focus handling.
-- [ ] Tooltip layer.
-- [ ] Drag state.
+- [ ] Add focus handling and keyboard navigation.
+- [ ] Add tooltip layer with delayed hover and pinned debug mode.
+- [ ] Wire core cursor item drag state into UI focus, hover, and hit-test flow.
+- [ ] Add modal/window layering and topmost hit-testing rules.
+- [ ] Add reusable layout primitives: grid, stack, scroll, tabs, splitter, and dock panel.
 
 ## HUD
 
-- [x] FPS/debug text baseline.
-- [x] World/player debug overlay.
-- [x] Hotbar with 10 slots.
-- [x] Selected slot highlight.
-- [x] Health display.
-- [x] Lighting overlay.
-- [ ] Mining progress at cursor.
-- [ ] Selected item tooltip.
+- [ ] Add mining progress at cursor.
+- [ ] Add selected item tooltip.
+- [ ] Add buff/debuff icon row with remaining-time radial or bar.
+- [ ] Add interaction prompt for chests, doors, signs, NPCs, and crafting stations.
+- [ ] Add liquid/debug overlay showing tile liquid amount and flow direction.
+- [ ] Add combat feedback overlays for damage numbers, hit flashes, and cooldowns.
 
-## Inventory UI
+## Inventory And Equipment UI
 
-- [ ] Inventory screen toggle.
-- [ ] Inventory slot widgets.
-- [ ] Cursor item state.
-- [ ] Left-click pick/place/merge/swap.
-- [ ] Right-click split/place one.
-- [ ] Shift-click quick move.
-- [ ] Item tooltip.
+- [ ] Add inventory screen toggle.
+- [ ] Add inventory slot widgets.
+- [ ] Add equipment slot widgets.
+- [ ] Wire core slot click rules into visible inventory widgets.
+- [ ] Add shift-click quick move.
+- [ ] Add item tooltip with damage, defense, tool power, status effects, and stat modifiers.
+- [ ] Add stat summary panel for armor/accessory bonuses.
 
 ## Crafting UI
 
-- [ ] Recipe list.
-- [ ] Selected recipe details.
-- [ ] Ingredient availability display.
-- [ ] Craft button.
+- [ ] Add recipe list.
+- [ ] Add selected recipe details.
+- [ ] Add ingredient availability display.
+- [ ] Add station requirement display.
+- [ ] Add craft button and repeated crafting input behavior.
 
 ## Menus
 
-- [ ] Main menu state.
-- [ ] World select state.
-- [ ] Create world flow.
-- [ ] Settings screen.
-- [ ] Pause menu.
+- [ ] Add world select state.
+- [ ] Add create world flow.
+- [ ] Add local splitscreen setup flow.
+- [ ] Add multiplayer host/join flow.
+- [ ] Add typed value entry for settings rows such as resolution, reach, and volume.
+- [ ] Add keybind conflict resolution UI that can jump to the conflicting action.
+- [ ] Add graphics apply safety timeout for fullscreen/resolution changes.
+- [ ] Add gamepad navigation for menus and settings.
+- [ ] Add save/load error report screen.
 
 ## Debug UI
 
-- [x] ImGui.NET dependency selected.
-- [x] Core command backend ready for UI binding.
-- [ ] ImGui renderer integration.
-- [ ] Debug windows for world/player.
-- [x] Toggle debug grid.
-- [x] Command console UI.
+- [ ] Add ImGui renderer integration.
+- [ ] Add debug windows for world/player.
+- [ ] Add debug windows for liquids, status effects, equipment, spawns, and dirty regions.
+- [ ] Add content browser for registries: tiles, items, effects, entities, recipes.
+- [ ] Add in-game profiler overlay for active chunks, dirty systems, and allocations.
+- [ ] Add worldgen seed preview and analysis panel.

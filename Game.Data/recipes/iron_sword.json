@@ -1,0 +1,11 @@
+{
+  "id": "iron_sword",
+  "result": { "itemId": "iron_sword", "count": 1 },
+  "ingredients": [
+    { "itemId": "iron_ore", "count": 10 },
+    { "itemId": "wood", "count": 2 }
+  ],
+  "station": "workbench",
+  "category": "weapons",
+  "sortOrder": 35
+}

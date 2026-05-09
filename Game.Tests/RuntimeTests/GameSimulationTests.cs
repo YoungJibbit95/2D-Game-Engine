@@ -3,6 +3,7 @@ using Game.Core.Combat;
 using Game.Core.Crafting;
 using Game.Core.Data;
 using Game.Core.Entities;
+using Game.Core.Events;
 using Game.Core.Inventory;
 using Game.Core.Items;
 using Game.Core.Loot;
@@ -12,6 +13,7 @@ using Game.Core.Runtime;
 using Game.Core.Spawning;
 using Game.Core.Tiles;
 using Game.Core.World;
+using Game.Core.World.Simulation;
 using System.Numerics;
 using Xunit;
 
@@ -51,6 +53,57 @@ public sealed class GameSimulationTests
         Assert.Equal(90, player.Health);
         Assert.Equal(1, result.PickedUpItems);
         Assert.Equal(2, inventory.CountItem("gel"));
+    }
+
+    [Fact]
+    public void Tick_AdvancesScheduledWorldSimulation()
+    {
+        var content = CreateContent();
+        var world = new World(16, 16, WorldMetadata.CreateDefault(seed: 1));
+        world.SetTile(5, 5, TileInstance.Liquid(255));
+        var player = new PlayerEntity(new Vector2(32, 32), new TileCollisionResolver());
+        var inventory = new Inventory(4, content.Items);
+        var simulation = new GameSimulation(
+            content,
+            world,
+            new BiomeMap("forest"),
+            player,
+            inventory,
+            spawnOptions: new SpawnSchedulerOptions { MaxTotalActiveEnemies = 0 },
+            worldSimulationOptions: new WorldSimulationOptions(LiquidStepIntervalSeconds: 0));
+
+        var result = simulation.Tick(PlayerCommand.None, 0.016f);
+
+        Assert.True(result.WorldSimulation.Liquids.MovedLiquid > 0);
+        Assert.False(world.GetTile(5, 5).HasLiquid);
+        Assert.True(world.GetTile(5, 6).HasLiquid);
+        Assert.True(world.GetOrCreateChunk(new ChunkPos(0, 0)).Metadata.ActiveLiquidTiles > 0);
+    }
+
+    [Fact]
+    public void Tick_ProcessesWorldSimulationRegionsMarkedByEvents()
+    {
+        var content = CreateContent();
+        var world = new World(16, 16, WorldMetadata.CreateDefault(seed: 1));
+        world.SetTile(5, 5, TileInstance.Liquid(255));
+        var player = new PlayerEntity(new Vector2(32, 32), new TileCollisionResolver());
+        var inventory = new Inventory(4, content.Items);
+        var events = new GameEventBus();
+        var simulation = new GameSimulation(
+            content,
+            world,
+            new BiomeMap("forest"),
+            player,
+            inventory,
+            events: events,
+            spawnOptions: new SpawnSchedulerOptions { MaxTotalActiveEnemies = 0 },
+            worldSimulationOptions: new WorldSimulationOptions(LiquidStepIntervalSeconds: 0, SeedExistingLiquids: false));
+
+        events.Publish(new TileMinedEvent(new TilePos(5, 5), KnownTileIds.Dirt, ItemStack.Empty));
+        var result = simulation.Tick(PlayerCommand.None, 0.016f);
+
+        Assert.True(result.WorldSimulation.Liquids.MovedLiquid > 0);
+        Assert.True(result.WorldSimulation.LiquidRegionsProcessed > 0);
     }
 
     private static GameContentDatabase CreateContent()

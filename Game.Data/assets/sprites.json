@@ -1,0 +1,39 @@
+{
+  "sprites": [
+    { "id": "tiles/air", "path": "sprites/world/tiles/air.png", "category": "Tile", "width": 16, "height": 16, "tags": ["world", "tile"] },
+    { "id": "tiles/dirt", "path": "sprites/world/tiles/dirt.png", "category": "Tile", "width": 16, "height": 16, "tags": ["world", "tile", "soil"] },
+    { "id": "tiles/grass", "path": "sprites/world/tiles/grass.png", "category": "Tile", "width": 16, "height": 16, "tags": ["world", "tile", "soil"] },
+    { "id": "tiles/stone", "path": "sprites/world/tiles/stone.png", "category": "Tile", "width": 16, "height": 16, "tags": ["world", "tile", "stone"] },
+    { "id": "tiles/copper_ore", "path": "sprites/world/tiles/copper_ore.png", "category": "Tile", "width": 16, "height": 16, "tags": ["world", "tile", "ore"] },
+    { "id": "tiles/iron_ore", "path": "sprites/world/tiles/iron_ore.png", "category": "Tile", "width": 16, "height": 16, "tags": ["world", "tile", "ore"] },
+    { "id": "tiles/wood", "path": "sprites/world/tiles/wood.png", "category": "Tile", "width": 16, "height": 16, "tags": ["world", "tile", "tree"] },
+    { "id": "tiles/leaves", "path": "sprites/world/tiles/leaves.png", "category": "Tile", "width": 16, "height": 16, "tags": ["world", "tile", "tree"] },
+    { "id": "tiles/workbench", "path": "sprites/world/objects/workbench.png", "category": "WorldObject", "width": 32, "height": 16, "tags": ["world", "station", "crafting"] },
+
+    { "id": "items/copper_coin", "path": "sprites/items/currency/copper_coin.png", "category": "Item", "width": 16, "height": 16, "tags": ["item", "currency"] },
+    { "id": "items/copper_ore", "path": "sprites/items/materials/copper_ore.png", "category": "Item", "width": 16, "height": 16, "tags": ["item", "material", "ore"] },
+    { "id": "items/iron_ore", "path": "sprites/items/materials/iron_ore.png", "category": "Item", "width": 16, "height": 16, "tags": ["item", "material", "ore"] },
+    { "id": "items/dirt_block", "path": "sprites/items/blocks/dirt_block.png", "category": "Item", "width": 16, "height": 16, "tags": ["item", "block"] },
+    { "id": "items/stone_block", "path": "sprites/items/blocks/stone_block.png", "category": "Item", "width": 16, "height": 16, "tags": ["item", "block"] },
+    { "id": "items/wood", "path": "sprites/items/materials/wood.png", "category": "Item", "width": 16, "height": 16, "tags": ["item", "material"] },
+    { "id": "items/gel", "path": "sprites/items/materials/gel.png", "category": "Item", "width": 16, "height": 16, "tags": ["item", "material"] },
+    { "id": "items/copper_pickaxe", "path": "sprites/tools/copper_pickaxe.png", "category": "Tool", "width": 16, "height": 16, "tags": ["item", "tool", "pickaxe"] },
+    { "id": "items/iron_pickaxe", "path": "sprites/tools/iron_pickaxe.png", "category": "Tool", "width": 16, "height": 16, "tags": ["item", "tool", "pickaxe", "iron"] },
+    { "id": "items/wooden_sword", "path": "sprites/weapons/wooden_sword.png", "category": "Weapon", "width": 16, "height": 16, "tags": ["item", "weapon", "melee", "wood"] },
+    { "id": "items/copper_sword", "path": "sprites/weapons/copper_sword.png", "category": "Weapon", "width": 16, "height": 16, "tags": ["item", "weapon", "melee"] },
+    { "id": "items/iron_sword", "path": "sprites/weapons/iron_sword.png", "category": "Weapon", "width": 16, "height": 16, "tags": ["item", "weapon", "melee", "iron"] },
+    { "id": "items/copper_helmet", "path": "sprites/items/armor/copper_helmet.png", "category": "Item", "width": 16, "height": 16, "tags": ["item", "armor", "copper"] },
+    { "id": "items/copper_chestplate", "path": "sprites/items/armor/copper_chestplate.png", "category": "Item", "width": 16, "height": 16, "tags": ["item", "armor", "copper"] },
+    { "id": "items/copper_greaves", "path": "sprites/items/armor/copper_greaves.png", "category": "Item", "width": 16, "height": 16, "tags": ["item", "armor", "copper"] },
+    { "id": "items/wooden_bow", "path": "sprites/weapons/wooden_bow.png", "category": "Weapon", "width": 16, "height": 16, "tags": ["item", "weapon", "ranged"] },
+    { "id": "items/wooden_arrow", "path": "sprites/items/ammo/wooden_arrow.png", "category": "Item", "width": 16, "height": 16, "tags": ["item", "ammo", "arrow"] },
+    { "id": "items/poison_arrow", "path": "sprites/items/ammo/poison_arrow.png", "category": "Item", "width": 16, "height": 16, "tags": ["item", "ammo", "arrow", "poison"] },
+    { "id": "items/workbench", "path": "sprites/items/stations/workbench.png", "category": "Item", "width": 16, "height": 16, "tags": ["item", "station", "crafting"] },
+    { "id": "items/mining_charm", "path": "sprites/items/accessories/mining_charm.png", "category": "Item", "width": 16, "height": 16, "tags": ["item", "accessory", "mining"] },
+    { "id": "items/healing_potion", "path": "sprites/items/consumables/healing_potion.png", "category": "Item", "width": 16, "height": 16, "tags": ["item", "consumable", "healing"] },
+
+    { "id": "entities/slime", "path": "sprites/entities/enemies/slime.png", "category": "Entity", "width": 16, "height": 16, "tags": ["entity", "enemy"] },
+    { "id": "projectiles/wooden_arrow", "path": "sprites/projectiles/wooden_arrow.png", "category": "Projectile", "width": 16, "height": 16, "tags": ["projectile", "arrow"] },
+    { "id": "projectiles/poison_arrow", "path": "sprites/projectiles/poison_arrow.png", "category": "Projectile", "width": 16, "height": 16, "tags": ["projectile", "arrow", "poison"] }
+  ]
+}

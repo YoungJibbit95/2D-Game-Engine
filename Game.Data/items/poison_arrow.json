@@ -1,0 +1,8 @@
+{
+  "id": "poison_arrow",
+  "displayName": "Poison Arrow",
+  "type": "Ammo",
+  "texture": "items/poison_arrow",
+  "maxStack": 999,
+  "tags": ["ammo", "arrow", "poison"]
+}

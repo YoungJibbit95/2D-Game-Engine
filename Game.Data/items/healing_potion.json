@@ -1,0 +1,9 @@
+{
+  "id": "healing_potion",
+  "displayName": "Healing Potion",
+  "type": "Consumable",
+  "texture": "items/healing_potion",
+  "maxStack": 30,
+  "useTime": 0.6,
+  "tags": ["item", "consumable", "healing"]
+}

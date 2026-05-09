@@ -13,6 +13,7 @@ public sealed class CommandRegistry
         registry.Register(new GiveItemCommand());
         registry.Register(new TimeCommand());
         registry.Register(new SpawnCommand());
+        registry.Register(new DebugWorldCommand());
         return registry;
     }
 

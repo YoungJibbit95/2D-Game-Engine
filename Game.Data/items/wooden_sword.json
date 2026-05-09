@@ -1,0 +1,17 @@
+{
+  "id": "wooden_sword",
+  "displayName": "Wooden Sword",
+  "type": "WeaponMelee",
+  "texture": "items/wooden_sword",
+  "maxStack": 1,
+  "useTime": 0.32,
+  "damage": 5,
+  "knockback": 1.1,
+  "attackShape": {
+    "kind": "Rectangle",
+    "range": 36,
+    "width": 36,
+    "height": 24
+  },
+  "tags": ["weapon", "melee", "starter", "wood"]
+}
