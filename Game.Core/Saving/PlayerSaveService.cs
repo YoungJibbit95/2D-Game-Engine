@@ -1,5 +1,6 @@
 using Game.Core.Inventory;
 using Game.Core.Items;
+using Game.Core.Entities;
 using System.Text.Json;
 using InventoryModel = Game.Core.Inventory.Inventory;
 
@@ -37,6 +38,35 @@ public sealed class PlayerSaveService
 
         return JsonSerializer.Deserialize<PlayerSaveData>(File.ReadAllText(filePath), Options)
             ?? throw new InvalidDataException("Player save file was empty.");
+    }
+
+    public PlayerSaveData CreateSaveData(
+        PlayerEntity player,
+        PlayerInventory inventory,
+        string playerId,
+        string displayName,
+        int mana = 0)
+    {
+        ArgumentNullException.ThrowIfNull(player);
+        ArgumentNullException.ThrowIfNull(inventory);
+        ArgumentException.ThrowIfNullOrWhiteSpace(playerId);
+        ArgumentException.ThrowIfNullOrWhiteSpace(displayName);
+
+        return new PlayerSaveData
+        {
+            PlayerId = playerId,
+            DisplayName = displayName,
+            PositionX = player.Body.Position.X,
+            PositionY = player.Body.Position.Y,
+            Health = player.Health,
+            MaxHealth = player.MaxHealth,
+            Mana = mana,
+            SelectedHotbarSlot = inventory.SelectedHotbarSlot,
+            InventorySlots = inventory.Hotbar.Slots
+                .Concat(inventory.Main.Slots)
+                .Select(slot => slot.Stack)
+                .ToArray()
+        };
     }
 
     public InventoryModel ToInventory(PlayerSaveData data, IItemDefinitionProvider itemDefinitions)

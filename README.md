@@ -31,6 +31,7 @@ Milestone 1 and the first core world tasks are scaffolded:
 - First HUD pass with hotbar slots and health bar.
 - World save/load with readable metadata, MessagePack chunk payloads, and LZ4 compression.
 - Packed chunk region-file storage is available for streamed worlds while legacy loose chunk files remain loadable.
+- Coordinated save/autosave service writes world, player, runtime entities, and tile entities through one engine API.
 - Greyscale lighting with sunlight, point lights, render overlay, underground falloff tuning, and configurable ambient floor.
 - Spatial grid for reusable area/entity queries.
 - Game content database loader for base data roots.

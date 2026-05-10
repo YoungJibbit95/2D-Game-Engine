@@ -75,6 +75,8 @@ Chunk storage supports two modes. `LooseFiles` writes one compressed MessagePack
 
 The current region format rewrites a full region file when chunks inside it change. That is acceptable for the first engine-facing persistence layer, but future work should add offset tables, tombstones, compaction, save migration tools, and integrity reports.
 
+`GameSaveCoordinator` is the high-level save entrypoint for runtime sessions. It writes world chunks through `WorldSaveService`, player state through `PlayerSaveService`, runtime entities through `EntitySaveService`, and optional tile entities through `TileEntitySaveService`. It returns `GameSaveResult`, publishes `GameSavedEvent` when a bus is provided, and owns an autosave accumulator through `TickAutosave`. The client now uses this coordinator so the gameplay autosave setting saves the same layout that tools and future server code can use.
+
 Tile changes should always go through `World.SetTile`, `World.RemoveTile`, `World.TrySetTile`, `World.TryRemoveTile`, or `World.ApplyTileEdits` so chunk dirtiness, render rebuilds, lighting updates, and neighbor invalidation stay consistent.
 
 `World.ApplyTileEdits` is the batch mutation path for generation tools, structure placement, liquid solvers, future editors, and scripted events. It validates the whole batch before mutating, coalesces duplicate tile positions with last-write-wins behavior, applies only real changes, computes changed bounds, and returns changed positions plus every loaded dirty chunk touched by the padded invalidation region.

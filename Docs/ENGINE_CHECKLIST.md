@@ -16,7 +16,6 @@ Only open engine work is kept here. Completed items are removed after implementa
 - [ ] Add streaming event history/debug panels and per-frame streaming budget controls.
 - [ ] Add region-file compaction, tombstones, and offset tables so unloaded chunks can be deleted or updated without rewriting a whole region.
 - [ ] Add migration tooling that can convert existing loose chunk folders into packed region files.
-- [ ] Add save lifecycle orchestration for player, entities, tile entities, and streamed world chunks.
 - [ ] Route terrain generation, liquids, and editor tools through the bulk tile edit API where batching improves dirty-region behavior.
 - [ ] Add typed tile mutation events for batch edits so simulation, audio, particles, and undo tooling can consume one result object.
 - [ ] Add background wall data generation and wall mining/placement rules.
@@ -83,6 +82,7 @@ Only open engine work is kept here. Completed items are removed after implementa
 
 - [ ] Save player equipment, active status effects, and expanded tile entities.
 - [ ] Add autosave rotation and backup-before-migration behavior.
+- [ ] Add coordinated load-session orchestration matching `GameSaveCoordinator` save layout.
 - [ ] Add crash logs and save recovery diagnostics.
 - [ ] Add world viewer tooling for chunks, biomes, light, liquid, entities, and ore distribution.
 - [ ] Add item/tile/entity editors backed by the same JSON loaders as the game.

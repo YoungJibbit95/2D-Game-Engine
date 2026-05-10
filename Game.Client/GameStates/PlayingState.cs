@@ -15,6 +15,7 @@ using Game.Core.Items;
 using Game.Core.Lighting;
 using Game.Core.Physics;
 using Game.Core.Projectiles;
+using Game.Core.Saving;
 using Game.Core.Settings;
 using Game.Core.Time;
 using Game.Core.World;
@@ -37,6 +38,7 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
     private readonly PlayerItemUseSystem _itemUse = new();
     private readonly InteractionTargetingSystem _targeting = new();
     private readonly ChunkStreamingService _streaming = new();
+    private readonly GameSaveCoordinator _saves = new();
     private readonly EngineDebugSnapshotBuilder _debugSnapshots = new();
     private readonly CommandDispatcher _commands = new(CommandRegistry.CreateDefault());
     private readonly HudOverlay _hud = new();
@@ -63,6 +65,7 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
     private string? _worldSaveDirectory;
     private ClientTextureRegistry? _textures;
     private ChunkStreamingUpdateResult _lastStreaming = ChunkStreamingUpdateResult.Empty;
+    private GameSaveResult? _lastSave;
 
     public PlayingState(GameStateManager states, LoadedGameSession? loadedSession = null)
     {
@@ -147,6 +150,7 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
         UpdateHotbarSelection(settings.Input);
         _player?.SetCommand(PlayerCommandBuilder.Build(_input, settings.Input.KeyBindings));
         UpdateItemUse((float)deltaSeconds, settings);
+        UpdateAutosave((float)deltaSeconds, settings);
     }
 
     public void Draw(RenderContext context)
@@ -204,6 +208,7 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
             DrawEngineDebugSnapshot(context);
             DrawRenderDebugMetrics(context);
             DrawStreamingDebugMetrics(context);
+            DrawSaveDebugMetrics(context);
         }
 
         if (settings.Gameplay.ShowInteractionTarget)
@@ -432,6 +437,20 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
             2);
     }
 
+    private void DrawSaveDebugMetrics(RenderContext context)
+    {
+        if (_lastSave is null)
+        {
+            return;
+        }
+
+        context.DebugText.Draw(
+            new Vector2(12, 298),
+            $"LAST SAVE: {_lastSave.Reason} chunks:{_lastSave.WorldChunksConsidered} entities:{_lastSave.RuntimeEntitiesSaved}",
+            Color.LightGray,
+            2);
+    }
+
     private void EnsureTextureRegistry(RenderContext context)
     {
         if (_textures is not null || _content is null)
@@ -475,6 +494,36 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
     private void ReturnToMainMenu()
     {
         _states.ChangeState(new MainMenuState(_states, _states.RequestExit));
+    }
+
+    private void UpdateAutosave(float deltaSeconds, GameSettings settings)
+    {
+        if (_world is null ||
+            _player is null ||
+            _inventory is null ||
+            string.IsNullOrWhiteSpace(_worldSaveDirectory))
+        {
+            return;
+        }
+
+        var intervalSeconds = settings.Gameplay.AutosaveMinutes * 60f;
+        var result = _saves.TickAutosave(
+            deltaSeconds,
+            intervalSeconds,
+            new GameSaveRequest(_world, _player, _inventory, _entities),
+            _worldSaveDirectory,
+            new GameSaveCoordinatorOptions
+            {
+                ChunkStorageMode = WorldChunkStorageMode.RegionFiles,
+                WorldSaveMode = WorldSaveMode.DirtyChunksOnly,
+                PlayerDisplayName = _world.Metadata.Name
+            },
+            _events);
+
+        if (result is not null)
+        {
+            _lastSave = result;
+        }
     }
 
     private void EnsureVisibleChunks()
