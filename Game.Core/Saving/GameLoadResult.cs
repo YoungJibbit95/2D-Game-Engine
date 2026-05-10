@@ -1,4 +1,5 @@
 using Game.Core.Entities;
+using Game.Core.Farming;
 using Game.Core.Inventory;
 using Game.Core.World.TileEntities;
 
@@ -15,5 +16,8 @@ public sealed record GameLoadResult(
     bool PlayerLoaded,
     bool RuntimeEntitiesLoaded,
     bool TileEntitiesLoaded,
+    bool FarmPlotsLoaded,
     int RuntimeEntityCount,
-    int TileEntityCount);
+    int TileEntityCount,
+    FarmPlotManager FarmPlots,
+    int FarmPlotCount);

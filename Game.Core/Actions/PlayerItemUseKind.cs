@@ -6,5 +6,9 @@ public enum PlayerItemUseKind
     Mine,
     Build,
     Melee,
-    Shoot
+    Shoot,
+    Till,
+    Water,
+    Plant,
+    Harvest
 }

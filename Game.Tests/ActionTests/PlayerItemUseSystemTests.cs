@@ -4,6 +4,7 @@ using Game.Core.Combat;
 using Game.Core.Crafting;
 using Game.Core.Data;
 using Game.Core.Entities;
+using Game.Core.Farming;
 using Game.Core.Inventory;
 using Game.Core.Items;
 using Game.Core.Loot;
@@ -151,6 +152,39 @@ public sealed class PlayerItemUseSystemTests
         Assert.Equal(1, inventory.CountItem("wooden_arrow"));
     }
 
+    [Fact]
+    public void UseSelectedItem_FarmingActionsTillWaterAndPlant()
+    {
+        var content = CreateContent();
+        var world = new World(16, 16, WorldMetadata.CreateDefault(seed: 1));
+        world.SetTile(4, 4, KnownTileIds.Dirt);
+        var player = new PlayerEntity(new Vector2(64, 64), new TileCollisionResolver());
+        var inventory = new PlayerInventory(content.Items);
+        var plots = new FarmPlotManager();
+        inventory.Hotbar.Slots[0].SetStack(new ItemStack("copper_hoe", 1));
+        inventory.Hotbar.Slots[1].SetStack(new ItemStack("watering_can", 1));
+        inventory.Hotbar.Slots[2].SetStack(new ItemStack("parsnip_seeds", 2));
+        var use = new PlayerItemUseSystem();
+
+        var till = use.UseSelectedItem(world, content, player, inventory, new EntityManager(), new TilePos(4, 4), new Vector2(72, 72), 0.1f, farmPlots: plots);
+        use.Update(1f);
+        inventory.SelectHotbarSlot(1);
+        var water = use.UseSelectedItem(world, content, player, inventory, new EntityManager(), new TilePos(4, 4), new Vector2(72, 72), 0.1f, farmPlots: plots);
+        use.Update(1f);
+        inventory.SelectHotbarSlot(2);
+        var plant = use.UseSelectedItem(world, content, player, inventory, new EntityManager(), new TilePos(4, 4), new Vector2(72, 72), 0.1f, farmPlots: plots, farmSeason: FarmSeason.Spring, currentDay: 3);
+
+        Assert.Equal(PlayerItemUseKind.Till, till.Kind);
+        Assert.Equal(PlayerItemUseKind.Water, water.Kind);
+        Assert.Equal(PlayerItemUseKind.Plant, plant.Kind);
+        Assert.True(plots.TryGetPlot(new TilePos(4, 4), out var plot));
+        Assert.True(plot.IsTilled);
+        Assert.True(plot.IsWatered);
+        Assert.NotNull(plot.Crop);
+        Assert.Equal("parsnip", plot.Crop!.CropId);
+        Assert.Equal(1, inventory.CountItem("parsnip_seeds"));
+    }
+
     private static GameContentDatabase CreateContent()
     {
         return new GameContentDatabase(
@@ -165,7 +199,9 @@ public sealed class PlayerItemUseSystemTests
                     Solid = true,
                     BlocksLight = true,
                     Hardness = 1,
-                    DropItemId = "dirt_block"
+                    DropItemId = "dirt_block",
+                    MergeGroup = "soil",
+                    Tags = new[] { "soil", "farmable" }
                 }
             }),
             ItemRegistry.Create(new[]
@@ -230,6 +266,41 @@ public sealed class PlayerItemUseSystemTests
                     Type = ItemType.Ammo,
                     TexturePath = "items/wooden_arrow",
                     MaxStack = 999
+                },
+                new ItemDefinition
+                {
+                    Id = "copper_hoe",
+                    DisplayName = "Copper Hoe",
+                    Type = ItemType.ToolHoe,
+                    TexturePath = "items/copper_hoe",
+                    MaxStack = 1,
+                    UseTime = 0.25f
+                },
+                new ItemDefinition
+                {
+                    Id = "watering_can",
+                    DisplayName = "Watering Can",
+                    Type = ItemType.ToolWateringCan,
+                    TexturePath = "items/watering_can",
+                    MaxStack = 1,
+                    UseTime = 0.25f
+                },
+                new ItemDefinition
+                {
+                    Id = "parsnip_seeds",
+                    DisplayName = "Parsnip Seeds",
+                    Type = ItemType.Seed,
+                    TexturePath = "items/parsnip_seeds",
+                    MaxStack = 99,
+                    UseTime = 0.1f
+                },
+                new ItemDefinition
+                {
+                    Id = "parsnip",
+                    DisplayName = "Parsnip",
+                    Type = ItemType.Consumable,
+                    TexturePath = "items/parsnip",
+                    MaxStack = 99
                 }
             }),
             RecipeRegistry.Create(Array.Empty<RecipeDefinition>()),
@@ -249,7 +320,22 @@ public sealed class PlayerItemUseSystemTests
                 }
             }),
             EntityDefinitionRegistry.Create(new[] { CreateSlimeDefinition() }),
-            SpawnRuleRegistry.Create(Array.Empty<SpawnRuleDefinition>()));
+            SpawnRuleRegistry.Create(Array.Empty<SpawnRuleDefinition>()))
+        {
+            Crops = CropRegistry.Create(new[]
+            {
+                new CropDefinition
+                {
+                    Id = "parsnip",
+                    DisplayName = "Parsnip",
+                    TexturePath = "crops/parsnip",
+                    SeedItemId = "parsnip_seeds",
+                    HarvestItemId = "parsnip",
+                    GrowthStageDays = new[] { 1, 1 },
+                    Seasons = new[] { FarmSeason.Spring }
+                }
+            })
+        };
     }
 
     private static EntityDefinition CreateSlimeDefinition()

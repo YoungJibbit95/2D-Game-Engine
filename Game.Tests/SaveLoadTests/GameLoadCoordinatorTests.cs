@@ -4,6 +4,7 @@ using Game.Core.Crafting;
 using Game.Core.Data;
 using Game.Core.Entities;
 using Game.Core.Events;
+using Game.Core.Farming;
 using Game.Core.Inventory;
 using Game.Core.Items;
 using Game.Core.Loot;
@@ -45,11 +46,17 @@ public sealed class GameLoadCoordinatorTests : IDisposable
         var chest = new ChestTileEntity(new TilePos(6, 7), _content.Items, slotCount: 6);
         chest.AddItem(new ItemStack("gel", 9));
         tileEntities.Add(chest);
+        var farmPlots = new FarmPlotManager();
+        var farmPlot = farmPlots.GetOrCreatePlot(new TilePos(9, 10));
+        farmPlot.IsTilled = true;
+        farmPlot.IsWatered = true;
+        farmPlot.Crop = new CropInstance("parsnip", plantedDay: 2, daysUntilHarvest: 1);
 
         new GameSaveCoordinator().Save(
             new GameSaveRequest(world, player, inventory, entities)
             {
-                TileEntities = tileEntities
+                TileEntities = tileEntities,
+                FarmPlots = farmPlots
             },
             _root,
             new GameSaveCoordinatorOptions
@@ -77,6 +84,7 @@ public sealed class GameLoadCoordinatorTests : IDisposable
         Assert.True(result.PlayerLoaded);
         Assert.True(result.RuntimeEntitiesLoaded);
         Assert.True(result.TileEntitiesLoaded);
+        Assert.True(result.FarmPlotsLoaded);
         Assert.Equal(KnownTileIds.Dirt, result.World.GetTile(2, 3).TileId);
         Assert.Equal(KnownTileIds.Stone, result.World.GetTile(3, 3).TileId);
         Assert.Equal(new Vector2(88, 144), result.Player.Body.Position);
@@ -92,6 +100,13 @@ public sealed class GameLoadCoordinatorTests : IDisposable
         var loadedChest = Assert.IsType<ChestTileEntity>(Assert.Single(result.TileEntities.Entities));
         Assert.Equal(new TilePos(6, 7), loadedChest.Position);
         Assert.Equal(9, loadedChest.Inventory.CountItem("gel"));
+        var loadedFarmPlot = Assert.Single(result.FarmPlots.Plots);
+        Assert.Equal(new TilePos(9, 10), loadedFarmPlot.Position);
+        Assert.True(loadedFarmPlot.IsTilled);
+        Assert.True(loadedFarmPlot.IsWatered);
+        Assert.NotNull(loadedFarmPlot.Crop);
+        Assert.Equal("parsnip", loadedFarmPlot.Crop!.CropId);
+        Assert.Equal(1, result.FarmPlotCount);
         Assert.NotNull(loadedEvent);
         Assert.Equal(result, loadedEvent.Result);
     }
@@ -134,8 +149,10 @@ public sealed class GameLoadCoordinatorTests : IDisposable
 
         Assert.False(loaded.RuntimeEntitiesLoaded);
         Assert.False(loaded.TileEntitiesLoaded);
+        Assert.False(loaded.FarmPlotsLoaded);
         Assert.Empty(loaded.Entities.Entities);
         Assert.Empty(loaded.TileEntities.Entities);
+        Assert.Empty(loaded.FarmPlots.Plots);
     }
 
     public void Dispose()
@@ -177,6 +194,20 @@ public sealed class GameLoadCoordinatorTests : IDisposable
             BiomeRegistry.Create(Array.Empty<BiomeDefinition>()),
             ProjectileRegistry.Create(Array.Empty<ProjectileDefinition>()),
             EntityDefinitionRegistry.Create(Array.Empty<EntityDefinition>()),
-            SpawnRuleRegistry.Create(Array.Empty<SpawnRuleDefinition>()));
+            SpawnRuleRegistry.Create(Array.Empty<SpawnRuleDefinition>()))
+        {
+            Crops = CropRegistry.Create(new[]
+            {
+                new CropDefinition
+                {
+                    Id = "parsnip",
+                    DisplayName = "Parsnip",
+                    TexturePath = "crops/parsnip",
+                    SeedItemId = "parsnip_seeds",
+                    HarvestItemId = "parsnip",
+                    GrowthStageDays = new[] { 1, 1, 1 }
+                }
+            })
+        };
     }
 }

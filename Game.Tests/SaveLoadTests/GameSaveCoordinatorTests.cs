@@ -1,6 +1,7 @@
 using Game.Core;
 using Game.Core.Entities;
 using Game.Core.Events;
+using Game.Core.Farming;
 using Game.Core.Inventory;
 using Game.Core.Items;
 using Game.Core.Physics;
@@ -28,7 +29,12 @@ public sealed class GameSaveCoordinatorTests : IDisposable
         var chest = new ChestTileEntity(new TilePos(4, 5), _items, slotCount: 4);
         chest.AddItem(new ItemStack("gel", 7));
         tileEntities.Add(chest);
-        request = request with { TileEntities = tileEntities };
+        var farmPlots = new FarmPlotManager();
+        var farmPlot = farmPlots.GetOrCreatePlot(new TilePos(8, 9));
+        farmPlot.IsTilled = true;
+        farmPlot.IsWatered = true;
+        farmPlot.Crop = new CropInstance("parsnip", plantedDay: 2, daysUntilHarvest: 3);
+        request = request with { TileEntities = tileEntities, FarmPlots = farmPlots };
         request.World.SetTile(3, 3, KnownTileIds.Dirt);
         var events = new GameEventBus();
         GameSavedEvent? savedEvent = null;
@@ -55,13 +61,16 @@ public sealed class GameSaveCoordinatorTests : IDisposable
         Assert.True(result.PlayerSaved);
         Assert.True(result.EntitiesSaved);
         Assert.True(result.TileEntitiesSaved);
+        Assert.True(result.FarmPlotsSaved);
         Assert.Equal(1, result.RuntimeEntitiesSaved);
         Assert.Equal(1, result.TileEntityCount);
+        Assert.Equal(1, result.FarmPlotCount);
         Assert.True(result.WorldChunksConsidered > 0);
         Assert.True(File.Exists(Path.Combine(_root, "metadata.json")));
         Assert.True(File.Exists(Path.Combine(_root, "player.json")));
         Assert.True(File.Exists(Path.Combine(_root, "entities.json")));
         Assert.True(File.Exists(Path.Combine(_root, "tile_entities.json")));
+        Assert.True(File.Exists(Path.Combine(_root, "farm_plots.json")));
         Assert.NotEmpty(Directory.EnumerateFiles(Path.Combine(_root, "regions"), "*.region"));
         Assert.All(request.World.Chunks.Values, chunk => Assert.False(chunk.IsDirty));
         Assert.NotNull(savedEvent);
@@ -76,6 +85,14 @@ public sealed class GameSaveCoordinatorTests : IDisposable
         var loadedTileEntities = new TileEntitySaveService().Load(Path.Combine(_root, "tile_entities.json"), _items);
         var loadedChest = Assert.IsType<ChestTileEntity>(Assert.Single(loadedTileEntities.Entities));
         Assert.Equal(7, loadedChest.Inventory.CountItem("gel"));
+
+        var loadedFarmPlots = new FarmPlotSaveService().Load(Path.Combine(_root, "farm_plots.json"), CreateCrops());
+        var loadedPlot = Assert.Single(loadedFarmPlots.Plots);
+        Assert.Equal(new TilePos(8, 9), loadedPlot.Position);
+        Assert.True(loadedPlot.IsTilled);
+        Assert.True(loadedPlot.IsWatered);
+        Assert.NotNull(loadedPlot.Crop);
+        Assert.Equal("parsnip", loadedPlot.Crop!.CropId);
     }
 
     [Fact]
@@ -146,6 +163,22 @@ public sealed class GameSaveCoordinatorTests : IDisposable
                 Type = ItemType.Material,
                 TexturePath = "items/gel",
                 MaxStack = 999
+            }
+        });
+    }
+
+    private static CropRegistry CreateCrops()
+    {
+        return CropRegistry.Create(new[]
+        {
+            new CropDefinition
+            {
+                Id = "parsnip",
+                DisplayName = "Parsnip",
+                TexturePath = "crops/parsnip",
+                SeedItemId = "parsnip_seeds",
+                HarvestItemId = "parsnip",
+                GrowthStageDays = new[] { 1, 1, 1 }
             }
         });
     }

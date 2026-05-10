@@ -12,7 +12,9 @@ public sealed record GameSaveResult(
     bool PlayerSaved,
     bool WorldSaved,
     bool EntitiesSaved,
-    bool TileEntitiesSaved)
+    bool TileEntitiesSaved,
+    int FarmPlotCount = 0,
+    bool FarmPlotsSaved = false)
 {
     public static GameSaveResult NotSaved(string saveDirectory, GameSaveReason reason, DateTimeOffset now)
     {
@@ -28,6 +30,8 @@ public sealed record GameSaveResult(
             PlayerSaved: false,
             WorldSaved: false,
             EntitiesSaved: false,
-            TileEntitiesSaved: false);
+            TileEntitiesSaved: false,
+            FarmPlotCount: 0,
+            FarmPlotsSaved: false);
     }
 }

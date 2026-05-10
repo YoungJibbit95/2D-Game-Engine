@@ -9,6 +9,7 @@ using Game.Core.Data;
 using Game.Core.Diagnostics;
 using Game.Core.Entities;
 using Game.Core.Events;
+using Game.Core.Farming;
 using Game.Core.Interaction;
 using Game.Core.Inventory;
 using Game.Core.Items;
@@ -59,6 +60,7 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
     private GameContentDatabase? _content;
     private PlayerInventory? _inventory;
     private TileEntityManager _tileEntities = new();
+    private FarmPlotManager _farmPlots = new();
     private TilePos? _hoverTile;
     private TilePos? _interactionTile;
     private Rectangle _lastViewportBounds = new(0, 0, 1280, 720);
@@ -70,6 +72,7 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
     private ClientTextureRegistry? _textures;
     private ChunkStreamingUpdateResult _lastStreaming = ChunkStreamingUpdateResult.Empty;
     private GameSaveResult? _lastSave;
+    private int _lastFarmDay = 1;
 
     public PlayingState(GameStateManager states, LoadedGameSession? loadedSession = null)
     {
@@ -100,7 +103,9 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
         _worldTime = session.WorldTime;
         _worldSaveDirectory = session.WorldSaveDirectory;
         _tileEntities = session.TileEntities ?? new TileEntityManager();
+        _farmPlots = session.FarmPlots ?? new FarmPlotManager();
         _selectedHotbarSlot = _inventory.SelectedHotbarSlot;
+        _lastFarmDay = _worldTime.Day;
 
         _camera.Position = new Vector2(_player.Body.Center.X, _player.Body.Center.Y);
         _camera.Zoom = _pauseMenu.Settings.Gameplay.CameraZoom;
@@ -118,7 +123,13 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
             return;
         }
 
+        var previousDay = _worldTime.Day;
         _worldTime.Update(fixedDeltaSeconds);
+        if (_content is not null && _worldTime.Day != previousDay && _worldTime.Day != _lastFarmDay)
+        {
+            new FarmingSystem().AdvanceDay(_content.Crops, _farmPlots, ResolveCurrentFarmSeason());
+            _lastFarmDay = _worldTime.Day;
+        }
 
         if (_world is not null && _player is not null)
         {
@@ -207,6 +218,7 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
         _tilemapRenderer.TileSpriteResolver = ResolveTileSpriteId;
         _tilemapRenderer.Tiles = _content?.Tiles;
         _tilemapRenderer.Draw(context, _world, _camera);
+        DrawFarmPlots(context);
         DrawPlayer(context);
         DrawEntities(context);
         if (settings.Rendering.DrawLightingOverlay)
@@ -256,6 +268,8 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
             {
                 DrawSaveDebugMetrics(context);
             }
+
+            context.DebugText.Draw(new Vector2(12, 322), $"FARM PLOTS: {_farmPlots.Plots.Count}", Color.LightGray, 2);
         }
 
         if (settings.Gameplay.ShowInteractionTarget)
@@ -398,7 +412,10 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
             targetTile,
             new System.Numerics.Vector2(mouseWorld.X, mouseWorld.Y),
             deltaSeconds,
-            _events);
+            _events,
+            _farmPlots,
+            ResolveCurrentFarmSeason(),
+            _worldTime.Day);
     }
 
     private TilePos? ResolveInteractionTarget(Vector2 mouseWorld, float reachPixels)
@@ -419,6 +436,7 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
         {
             ItemType.PlaceableTile => _targeting.FindPlacementTarget(_world, _player.Body.Center, aim, reachPixels),
             ItemType.ToolPickaxe => _targeting.FindMiningTarget(_world, _player.Body.Center, aim, reachPixels),
+            ItemType.ToolHoe or ItemType.ToolWateringCan or ItemType.Seed => _hoverTile is { } hover ? new InteractionTarget(true, hover) : InteractionTarget.None,
             _ => _hoverTile is { } hover ? new InteractionTarget(true, hover) : InteractionTarget.None
         };
 
@@ -463,6 +481,41 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
         context.DebugText.Draw(new Vector2(12, 202), $"SURF: {snapshot.MinSurfaceY}-{snapshot.MaxSurfaceY}", Color.LightGray, 2);
     }
 
+    private void DrawFarmPlots(RenderContext context)
+    {
+        if (_content is null)
+        {
+            return;
+        }
+
+        foreach (var plot in _farmPlots.Plots)
+        {
+            var worldRect = new RectI(
+                plot.Position.X * GameConstants.TileSize,
+                plot.Position.Y * GameConstants.TileSize,
+                GameConstants.TileSize,
+                GameConstants.TileSize);
+
+            DrawWorldRect(context, worldRect, plot.IsWatered ? new Color(81, 116, 130, 150) : new Color(116, 79, 48, 150));
+
+            if (plot.Crop is null || !_content.Crops.TryGetById(plot.Crop.CropId, out var crop))
+            {
+                continue;
+            }
+
+            var stage = plot.Crop.GetGrowthStageIndex(crop);
+            var cropColor = stage >= crop.GrowthStageDays.Count - 1
+                ? new Color(142, 190, 83)
+                : new Color(83, 153, 72);
+            var cropRect = new RectI(
+                worldRect.X + 4,
+                worldRect.Y + Math.Max(2, 10 - stage * 2),
+                8,
+                Math.Min(12, 4 + stage * 3));
+            DrawWorldRect(context, cropRect, cropColor);
+        }
+    }
+
     private void DrawRenderDebugMetrics(RenderContext context)
     {
         var metrics = _tilemapRenderer.LastMetrics;
@@ -496,7 +549,7 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
 
         context.DebugText.Draw(
             new Vector2(12, 298),
-            $"LAST SAVE: {_lastSave.Reason} chunks:{_lastSave.WorldChunksConsidered} entities:{_lastSave.RuntimeEntitiesSaved}",
+            $"LAST SAVE: {_lastSave.Reason} chunks:{_lastSave.WorldChunksConsidered} entities:{_lastSave.RuntimeEntitiesSaved} farm:{_lastSave.FarmPlotCount}",
             Color.LightGray,
             2);
     }
@@ -562,7 +615,8 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
             intervalSeconds,
             new GameSaveRequest(_world, _player, _inventory, _entities)
             {
-                TileEntities = _tileEntities
+                TileEntities = _tileEntities,
+                FarmPlots = _farmPlots
             },
             _worldSaveDirectory,
             new GameSaveCoordinatorOptions
@@ -595,12 +649,23 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
         var streamingSaveDirectory = worldSettings.SaveChunksBeforeUnload
             ? _worldSaveDirectory
             : null;
-        _lastStreaming = _streaming.Update(_world, profile, visibleTiles, streamingSaveDirectory, new ChunkStreamingOptions
+            _lastStreaming = _streaming.Update(_world, profile, visibleTiles, streamingSaveDirectory, new ChunkStreamingOptions
         {
             LoadMarginChunks = worldSettings.ChunkLoadMargin,
             UnloadMarginChunks = worldSettings.ChunkUnloadMargin,
             KeepDirtyChunksLoaded = worldSettings.KeepDirtyChunksLoaded
         }, _events);
+    }
+
+    private FarmSeason ResolveCurrentFarmSeason()
+    {
+        return (((_worldTime.Day - 1) / 28) % 4) switch
+        {
+            0 => FarmSeason.Spring,
+            1 => FarmSeason.Summer,
+            2 => FarmSeason.Fall,
+            _ => FarmSeason.Winter
+        };
     }
 
     private static string GetHotbarBinding(KeyBindingSettings bindings, int slot)

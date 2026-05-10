@@ -138,7 +138,7 @@ The engine is now a playable YjsE prototype shell with a growing reusable 2D san
 - `Game.Core.UI` now provides renderer-neutral UI layout primitives, focus traversal, hit-testing, modal layers, tooltip state, and cursor interaction snapshots.
 - Escape no longer closes the game from the main menu.
 - Base item data includes a first copper armor set with equipment stats and workbench recipes.
-- Farming core includes tilling, watering, seed planting, crop growth, seasonal checks, harvesting, regrow crops, starter hoe/watering can/seed/item data, and crop sprite generation briefs.
+- Farming core includes tilling, watering, seed planting, crop growth, seasonal checks, harvesting, regrow crops, selected-item use routing, farm plot save/load, starter hoe/watering can/seed/item data, and crop sprite generation briefs.
 
 ## Rider
 

@@ -1,6 +1,7 @@
 using Game.Core.Data;
 using Game.Core.Entities;
 using Game.Core.Events;
+using Game.Core.Farming;
 using Game.Core.Inventory;
 using Game.Core.Physics;
 using Game.Core.World.TileEntities;
@@ -16,6 +17,7 @@ public sealed class GameLoadCoordinator
     private readonly PlayerSaveService _players;
     private readonly EntitySaveService _runtimeEntities;
     private readonly TileEntitySaveService _tileEntities;
+    private readonly FarmPlotSaveService _farmPlots;
     private readonly TileCollisionResolver _collisionResolver;
     private readonly Func<DateTimeOffset> _clock;
 
@@ -25,6 +27,7 @@ public sealed class GameLoadCoordinator
             new PlayerSaveService(),
             new EntitySaveService(),
             new TileEntitySaveService(),
+            new FarmPlotSaveService(),
             new TileCollisionResolver())
     {
     }
@@ -36,11 +39,24 @@ public sealed class GameLoadCoordinator
         TileEntitySaveService tileEntities,
         TileCollisionResolver collisionResolver,
         Func<DateTimeOffset>? clock = null)
+        : this(worlds, players, runtimeEntities, tileEntities, farmPlots: null, collisionResolver, clock)
+    {
+    }
+
+    public GameLoadCoordinator(
+        WorldSaveService worlds,
+        PlayerSaveService players,
+        EntitySaveService runtimeEntities,
+        TileEntitySaveService tileEntities,
+        FarmPlotSaveService? farmPlots,
+        TileCollisionResolver collisionResolver,
+        Func<DateTimeOffset>? clock = null)
     {
         _worlds = worlds ?? throw new ArgumentNullException(nameof(worlds));
         _players = players ?? throw new ArgumentNullException(nameof(players));
         _runtimeEntities = runtimeEntities ?? throw new ArgumentNullException(nameof(runtimeEntities));
         _tileEntities = tileEntities ?? throw new ArgumentNullException(nameof(tileEntities));
+        _farmPlots = farmPlots ?? new FarmPlotSaveService();
         _collisionResolver = collisionResolver ?? throw new ArgumentNullException(nameof(collisionResolver));
         _clock = clock ?? (() => DateTimeOffset.UtcNow);
     }
@@ -94,6 +110,15 @@ public sealed class GameLoadCoordinator
             tileEntityManager = _tileEntities.Load(tileEntitiesPath, content.Items);
         }
 
+        var farmPlotManager = new FarmPlotManager();
+        var farmPlotsLoaded = false;
+        if (options.LoadFarmPlots)
+        {
+            var farmPlotsPath = Path.Combine(saveDirectory, options.FarmPlotsFileName);
+            farmPlotsLoaded = File.Exists(farmPlotsPath);
+            farmPlotManager = _farmPlots.Load(farmPlotsPath, content.Crops);
+        }
+
         var result = new GameLoadResult(
             saveDirectory,
             _clock(),
@@ -105,8 +130,11 @@ public sealed class GameLoadCoordinator
             PlayerLoaded: true,
             RuntimeEntitiesLoaded: runtimeEntitiesLoaded,
             TileEntitiesLoaded: tileEntitiesLoaded,
+            FarmPlotsLoaded: farmPlotsLoaded,
             RuntimeEntityCount: entityManager.Entities.Count,
-            TileEntityCount: tileEntityManager.Entities.Count);
+            TileEntityCount: tileEntityManager.Entities.Count,
+            FarmPlots: farmPlotManager,
+            FarmPlotCount: farmPlotManager.Plots.Count);
 
         events?.Publish(new GameLoadedEvent(result));
         return result;

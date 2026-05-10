@@ -1,6 +1,7 @@
 using Game.Core.Data;
 using Game.Core.Entities;
 using Game.Core.Events;
+using Game.Core.Farming;
 using Game.Core.Inventory;
 using Game.Core.Time;
 using Game.Core.World.Generation;
@@ -19,4 +20,5 @@ public sealed record LoadedGameSession(
     WorldTime WorldTime,
     WorldGenerationProfile? WorldGenerationProfile = null,
     string? WorldSaveDirectory = null,
-    TileEntityManager? TileEntities = null);
+    TileEntityManager? TileEntities = null,
+    FarmPlotManager? FarmPlots = null);

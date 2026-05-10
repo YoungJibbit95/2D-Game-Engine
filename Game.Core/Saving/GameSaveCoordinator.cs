@@ -7,11 +7,12 @@ public sealed class GameSaveCoordinator
     private readonly PlayerSaveService _players;
     private readonly EntitySaveService _entities;
     private readonly TileEntitySaveService _tileEntities;
+    private readonly FarmPlotSaveService _farmPlots;
     private readonly Func<DateTimeOffset> _clock;
     private float _autosaveAccumulator;
 
     public GameSaveCoordinator()
-        : this(new PlayerSaveService(), new EntitySaveService(), new TileEntitySaveService())
+        : this(new PlayerSaveService(), new EntitySaveService(), new TileEntitySaveService(), new FarmPlotSaveService())
     {
     }
 
@@ -19,11 +20,13 @@ public sealed class GameSaveCoordinator
         PlayerSaveService players,
         EntitySaveService entities,
         TileEntitySaveService tileEntities,
+        FarmPlotSaveService? farmPlots = null,
         Func<DateTimeOffset>? clock = null)
     {
         _players = players ?? throw new ArgumentNullException(nameof(players));
         _entities = entities ?? throw new ArgumentNullException(nameof(entities));
         _tileEntities = tileEntities ?? throw new ArgumentNullException(nameof(tileEntities));
+        _farmPlots = farmPlots ?? new FarmPlotSaveService();
         _clock = clock ?? (() => DateTimeOffset.UtcNow);
     }
 
@@ -66,6 +69,14 @@ public sealed class GameSaveCoordinator
             _tileEntities.Save(request.TileEntities, Path.Combine(saveDirectory, options.TileEntitiesFileName));
         }
 
+        var farmPlotsSaved = 0;
+        var farmPlotsWereSaved = request.FarmPlots is not null;
+        if (request.FarmPlots is not null)
+        {
+            farmPlotsSaved = request.FarmPlots.Plots.Count;
+            _farmPlots.Save(request.FarmPlots, Path.Combine(saveDirectory, options.FarmPlotsFileName));
+        }
+
         var result = new GameSaveResult(
             saveDirectory,
             reason,
@@ -78,7 +89,9 @@ public sealed class GameSaveCoordinator
             PlayerSaved: true,
             WorldSaved: true,
             EntitiesSaved: true,
-            TileEntitiesSaved: tileEntitiesWereSaved);
+            TileEntitiesSaved: tileEntitiesWereSaved,
+            FarmPlotCount: farmPlotsSaved,
+            FarmPlotsSaved: farmPlotsWereSaved);
 
         events?.Publish(new GameSavedEvent(result));
         return result;

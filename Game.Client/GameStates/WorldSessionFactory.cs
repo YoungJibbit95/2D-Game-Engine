@@ -3,6 +3,7 @@ using Game.Core;
 using Game.Core.Data;
 using Game.Core.Entities;
 using Game.Core.Events;
+using Game.Core.Farming;
 using Game.Core.Inventory;
 using Game.Core.Lighting;
 using Game.Core.Physics;
@@ -57,7 +58,8 @@ public static class WorldSessionFactory
             new WorldTime(),
             world.IsHorizontallyInfinite ? profile : null,
             saveDirectory,
-            new TileEntityManager());
+            new TileEntityManager(),
+            new FarmPlotManager());
     }
 
     private static bool TryLoadExistingSession(
@@ -85,13 +87,17 @@ public static class WorldSessionFactory
             new WorldTime(),
             loaded.World.IsHorizontallyInfinite ? profile : null,
             saveDirectory,
-            loaded.TileEntities);
+            loaded.TileEntities,
+            loaded.FarmPlots);
         return true;
     }
 
     private static void GiveStarterItems(PlayerInventory inventory)
     {
         inventory.AddItem(new ItemStack("copper_pickaxe", 1));
+        inventory.AddItem(new ItemStack("copper_hoe", 1));
+        inventory.AddItem(new ItemStack("watering_can", 1));
+        inventory.AddItem(new ItemStack("parsnip_seeds", 12));
         inventory.AddItem(new ItemStack("dirt_block", 50));
         inventory.AddItem(new ItemStack("stone_block", 25));
     }

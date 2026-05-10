@@ -28,20 +28,20 @@ The count excludes `bin`, `obj`, `.git`, and `.vs`.
 
 | Area | Files | Lines |
 | --- | ---: | ---: |
-| `Game.Core` | 299 | 13,627 |
-| `Game.Client` | 49 | 4,735 |
-| `Game.Tests` | 78 | 6,890 |
+| `Game.Core` | 302 | 13,873 |
+| `Game.Client` | 49 | 4,801 |
+| `Game.Tests` | 78 | 7,035 |
 | `Game.Data` | 62 | 1,531 |
-| `Docs` | 8 | 639 |
+| `Docs` | 8 | 650 |
 
 | Extension | Files | Lines |
 | --- | ---: | ---: |
-| `.cs` | 421 | 25,160 |
+| `.cs` | 424 | 25,617 |
 | `.json` | 64 | 1,550 |
-| `.md` | 9 | 797 |
+| `.md` | 9 | 808 |
 | Project/solution/config files | 17 | 342 |
 
-Total tracked workspace snapshot: 511 files, 27,849 lines.
+Total tracked workspace snapshot: 514 files, 28,317 lines.
 
 ## Core Engine Features
 
@@ -53,7 +53,7 @@ Total tracked workspace snapshot: 511 files, 27,849 lines.
 - Batch tile mutation through `World.ApplyTileEdits`.
 - World region clamping that preserves infinite horizontal coordinates.
 - Packed region-file chunk storage plus legacy loose chunk fallback.
-- Coordinated save/load services for world, player, inventory, runtime entities, and tile entities.
+- Coordinated save/load services for world, player, inventory, runtime entities, tile entities, and farm plots.
 - Session-level autosave and session-level load orchestration.
 - Deterministic finite and streamed world generation.
 - Profile-driven generation for dimensions, terrain, caves, ores, water pockets, trees, and vertical dimension bands.
@@ -68,7 +68,7 @@ Total tracked workspace snapshot: 511 files, 27,849 lines.
 - Mod/content-pack loader with base/mod merge and validation reports.
 - Inventory, hotbar, cursor-item foundation, stack merge/split/swap, pickup logic, equipment, and stat calculation.
 - Crafting query model with known recipes, station checks, ingredient checks, categories, and sort order.
-- Farming foundation for Stardew-like games: crop definitions, seed lookup, farm plots, tilling, watering, planting, seasonal growth, harvesting, and regrow crops.
+- Farming foundation for Stardew-like games: crop definitions, seed lookup, farm plots, tilling, watering, planting, seasonal growth, harvesting, regrow crops, selected-item action routing, and farm plot save/load.
 - Topdown movement controller for RPG, life-sim, adventure, and farm games using shared tile collision.
 - Combat health, damage info, invulnerability, contact damage, projectile damage, melee attacks, loot drops, and status effects.
 - Entity manager with runtime id assignment and spatial query index.
@@ -85,6 +85,7 @@ Total tracked workspace snapshot: 511 files, 27,849 lines.
 - Escape no longer exits from the main menu by accident.
 - Loading state for world/session preparation.
 - Playing state with camera follow, tile/liquid rendering, player rendering, entities, lighting overlay, HUD, inventory overlay, pause menu, and debug console.
+- Playing state can now route hoe, watering can, and seed use into farm plots, draw placeholder farm plots/crops, advance farm growth on new days, and autosave farm plot state.
 - Inventory overlay with hotbar/main slot widgets, core stack click rules, cursor-held stack drawing, shift-click quick move, and item tooltips for stats, effects, tags, and stack limits.
 - Crafting overlay with known recipe list, selected recipe details, nearby station detection, ingredient availability, craft button, and shift-repeat crafting.
 - Pause/settings overlay with tabs for gameplay, world, graphics, rendering, UI, debug, audio, keybinds, and system actions.
@@ -101,11 +102,11 @@ Total tracked workspace snapshot: 511 files, 27,849 lines.
 - Inventory and player inventory stack behavior.
 - Crafting, farming, item actions, mining/building, combat, projectiles, spawning, commands, settings, status effects, topdown movement, and world generation.
 - Entity save/load and tile entity save/load.
-- Coordinated session save/load round trips.
+- Coordinated session save/load round trips, including farm plot persistence.
 - UI animation track/player behavior.
 - UI layout, hit-testing, modal layers, focus traversal, tooltips, and cursor interaction snapshots.
 
-Current test count: 302 passing tests after the crop/farming registry and topdown movement expansion.
+Current test count: 303 passing tests after farm plot save/load and selected-item farming action routing.
 
 ## Current Engine Direction
 
@@ -116,6 +117,6 @@ The engine is now past the first playable prototype shell and is becoming a reus
 - Upgrade rendering to atlas-backed batching, render targets, shader passes, particles, and animation clips for entities.
 - Add RGB region-based lighting and dynamic lights attached to items, projectiles, entities, and furniture.
 - Deepen worldgen with biome transitions, underground walls, larger cavern layers, lakes, structure spacing, chest rooms, and sampled infinite-world quality gates.
-- Add farm plot save/load, crop rendering, weather/rain watering, topdown map layers, shops, shipping bins, NPC schedules, and dialogue data.
+- Add richer crop rendering, weather/rain watering, topdown map layers, shops, shipping bins, NPC schedules, and dialogue data.
 - Add save migrations, integrity reports, autosave rotation, and recovery diagnostics.
 - Add content browser/editor tooling powered by the same data loaders as the runtime.

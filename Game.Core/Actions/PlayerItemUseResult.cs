@@ -1,4 +1,5 @@
 using Game.Core.Combat;
+using Game.Core.Farming;
 using Game.Core.Interaction;
 using Game.Core.Projectiles;
 
@@ -9,12 +10,14 @@ public readonly record struct PlayerItemUseResult(
     MiningResult Mining,
     bool PlacedTile,
     MeleeAttackResult Melee,
-    ProjectileEntity? Projectile = null)
+    ProjectileEntity? Projectile = null,
+    FarmActionResult? Farming = null)
 {
     public static PlayerItemUseResult None { get; } = new(
         PlayerItemUseKind.None,
         MiningResult.None,
         false,
         MeleeAttackResult.None,
+        null,
         null);
 }

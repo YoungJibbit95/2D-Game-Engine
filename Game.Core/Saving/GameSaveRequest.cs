@@ -1,4 +1,5 @@
 using Game.Core.Entities;
+using Game.Core.Farming;
 using Game.Core.Inventory;
 using Game.Core.World.TileEntities;
 
@@ -11,4 +12,6 @@ public sealed record GameSaveRequest(
     EntityManager Entities)
 {
     public TileEntityManager? TileEntities { get; init; }
+
+    public FarmPlotManager? FarmPlots { get; init; }
 }

@@ -2,6 +2,7 @@ using Game.Core.Combat;
 using Game.Core.Data;
 using Game.Core.Entities;
 using Game.Core.Events;
+using Game.Core.Farming;
 using Game.Core.Interaction;
 using Game.Core.Inventory;
 using Game.Core.Items;
@@ -53,7 +54,11 @@ public sealed class PlayerItemUseSystem
         TilePos targetTile,
         Vector2 targetWorldPosition,
         float deltaSeconds,
-        GameEventBus? events = null)
+        GameEventBus? events = null,
+        FarmPlotManager? farmPlots = null,
+        FarmSeason farmSeason = FarmSeason.Any,
+        int currentDay = 1,
+        Random? farmingRandom = null)
     {
         ArgumentNullException.ThrowIfNull(world);
         ArgumentNullException.ThrowIfNull(content);
@@ -80,6 +85,10 @@ public sealed class PlayerItemUseSystem
             ItemActionKind.Mine => TryMine(world, content, player, entities, targetTile, item, action, deltaSeconds, events),
             ItemActionKind.Melee => TryMelee(player, entities, content, item, targetWorldPosition, events),
             ItemActionKind.Shoot => TryShoot(content, player, inventory, entities, item, action, targetWorldPosition),
+            ItemActionKind.Till => TryTill(world, content, farmPlots, targetTile, item),
+            ItemActionKind.Water => TryWater(world, farmPlots, targetTile, item),
+            ItemActionKind.Plant => TryPlant(world, content, inventory, farmPlots, targetTile, selected.ItemId, item, farmSeason, currentDay),
+            ItemActionKind.Harvest => TryHarvest(content, inventory, farmPlots, targetTile, item, farmingRandom),
             _ => PlayerItemUseResult.None
         };
     }
@@ -196,6 +205,91 @@ public sealed class PlayerItemUseSystem
         return StartCooldown(new PlayerItemUseResult(PlayerItemUseKind.Shoot, MiningResult.None, false, MeleeAttackResult.None, projectile), item);
     }
 
+    private PlayerItemUseResult TryTill(
+        World.World world,
+        GameContentDatabase content,
+        FarmPlotManager? farmPlots,
+        TilePos targetTile,
+        ItemDefinition item)
+    {
+        if (farmPlots is null)
+        {
+            return PlayerItemUseResult.None;
+        }
+
+        var result = new FarmingSystem().Till(world, content.Tiles, farmPlots, targetTile);
+        return result.Status == FarmActionStatus.Completed
+            ? StartCooldown(new PlayerItemUseResult(PlayerItemUseKind.Till, MiningResult.None, false, MeleeAttackResult.None, Farming: result), item)
+            : PlayerItemUseResult.None with { Farming = result };
+    }
+
+    private PlayerItemUseResult TryWater(
+        World.World world,
+        FarmPlotManager? farmPlots,
+        TilePos targetTile,
+        ItemDefinition item)
+    {
+        if (farmPlots is null)
+        {
+            return PlayerItemUseResult.None;
+        }
+
+        var result = new FarmingSystem().Water(world, farmPlots, targetTile);
+        return result.Status == FarmActionStatus.Completed
+            ? StartCooldown(new PlayerItemUseResult(PlayerItemUseKind.Water, MiningResult.None, false, MeleeAttackResult.None, Farming: result), item)
+            : PlayerItemUseResult.None with { Farming = result };
+    }
+
+    private PlayerItemUseResult TryPlant(
+        World.World world,
+        GameContentDatabase content,
+        PlayerInventory inventory,
+        FarmPlotManager? farmPlots,
+        TilePos targetTile,
+        string seedItemId,
+        ItemDefinition item,
+        FarmSeason farmSeason,
+        int currentDay)
+    {
+        if (farmPlots is null)
+        {
+            return PlayerItemUseResult.None;
+        }
+
+        var result = new FarmingSystem().PlantSeed(
+            world,
+            content.Crops,
+            farmPlots,
+            inventory,
+            targetTile,
+            seedItemId,
+            currentDay,
+            farmSeason);
+
+        return result.Status == FarmActionStatus.Completed
+            ? StartCooldown(new PlayerItemUseResult(PlayerItemUseKind.Plant, MiningResult.None, false, MeleeAttackResult.None, Farming: result), item)
+            : PlayerItemUseResult.None with { Farming = result };
+    }
+
+    private PlayerItemUseResult TryHarvest(
+        GameContentDatabase content,
+        PlayerInventory inventory,
+        FarmPlotManager? farmPlots,
+        TilePos targetTile,
+        ItemDefinition item,
+        Random? farmingRandom)
+    {
+        if (farmPlots is null)
+        {
+            return PlayerItemUseResult.None;
+        }
+
+        var result = new FarmingSystem().Harvest(content.Crops, farmPlots, inventory, targetTile, farmingRandom);
+        return result.Status == FarmActionStatus.Completed
+            ? StartCooldown(new PlayerItemUseResult(PlayerItemUseKind.Harvest, MiningResult.None, false, MeleeAttackResult.None, Farming: result), item)
+            : PlayerItemUseResult.None with { Farming = result };
+    }
+
     private static float ResolveReach(ItemActionDefinition action)
     {
         return action.ReachPixels > 0 ? action.ReachPixels : DefaultReachPixels;
@@ -213,6 +307,7 @@ public sealed class PlayerItemUseSystem
 
     private static bool UsesDiscreteCooldown(ItemActionDefinition action)
     {
-        return action.Kind is ItemActionKind.Place or ItemActionKind.Melee or ItemActionKind.Shoot or ItemActionKind.Consume or ItemActionKind.Cast;
+        return action.Kind is ItemActionKind.Place or ItemActionKind.Melee or ItemActionKind.Shoot or ItemActionKind.Consume or ItemActionKind.Cast or
+            ItemActionKind.Till or ItemActionKind.Water or ItemActionKind.Plant or ItemActionKind.Harvest;
     }
 }

@@ -12,6 +12,8 @@ public sealed record GameSaveCoordinatorOptions
 
     public string TileEntitiesFileName { get; init; } = "tile_entities.json";
 
+    public string FarmPlotsFileName { get; init; } = "farm_plots.json";
+
     public string PlayerId { get; init; } = "player_001";
 
     public string PlayerDisplayName { get; init; } = "Player";

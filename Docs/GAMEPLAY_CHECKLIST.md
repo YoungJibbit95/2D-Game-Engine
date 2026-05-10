@@ -34,8 +34,7 @@ Only open work is kept here. Completed items are removed after implementation.
 ## Farming And Life-Sim Gameplay
 
 - [ ] Render tilled soil, watered soil, crop stages, and harvest-ready highlights.
-- [ ] Wire hoe, watering can, seed, and harvest actions into selected item use.
-- [ ] Save/load farm plots and crop instances with world/session persistence.
+- [ ] Wire harvest/interact actions into selected item use without requiring a dedicated harvest tool.
 - [ ] Add rain/weather watering and seasonal calendar helpers.
 - [ ] Add shops, shipping bin, money economy, daily summary, and sell prices.
 - [ ] Add topdown map objects: doors, warps, fences, gates, signs, containers, and furniture footprints.

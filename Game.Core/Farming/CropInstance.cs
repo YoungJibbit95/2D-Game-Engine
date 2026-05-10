@@ -2,7 +2,7 @@ namespace Game.Core.Farming;
 
 public sealed class CropInstance
 {
-    public CropInstance(string cropId, int plantedDay, int daysUntilHarvest)
+    public CropInstance(string cropId, int plantedDay, int daysUntilHarvest, int harvestCount = 0)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(cropId);
 
@@ -11,9 +11,15 @@ public sealed class CropInstance
             throw new ArgumentOutOfRangeException(nameof(daysUntilHarvest), "Days until harvest must not be negative.");
         }
 
+        if (harvestCount < 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(harvestCount), "Harvest count must not be negative.");
+        }
+
         CropId = cropId;
         PlantedDay = plantedDay;
         DaysUntilHarvest = daysUntilHarvest;
+        HarvestCount = harvestCount;
     }
 
     public string CropId { get; }

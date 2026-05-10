@@ -12,7 +12,7 @@ World generation is modular and deterministic. It currently generates surface te
 
 The engine also has increasingly useful debug foundations: `EngineDebugSnapshotBuilder`, `/debug world`, `WorldAnalyzer`, dirty-region tracking, global event observation, a bounded `GameEventJournal`, save result events, world raycasts, line-of-sight checks, rectangle/circle/cone entity queries, and tile flood fill. Content definitions support normalized tags, placeable items can declare support rules, and tile entities now have a first manager/save model through chests.
 
-YjsE now has its first explicit non-Terraria genre module. `Game.Core.Farming` supports Stardew-like loops with crop JSON definitions, seed-to-crop lookup, tilled/watered plot state, planting, water-gated daily growth, seasonal restrictions, harvesting, regrow crops, inventory integration, and explicit failure statuses for UI feedback. `TopDownMovementController` adds gravity-free movement over the same tile collision model so topdown RPG/life-sim games can share the core world and interaction stack.
+YjsE now has its first explicit non-Terraria genre module. `Game.Core.Farming` supports Stardew-like loops with crop JSON definitions, seed-to-crop lookup, tilled/watered plot state, planting, water-gated daily growth, seasonal restrictions, harvesting, regrow crops, inventory integration, explicit failure statuses for UI feedback, farm plot save/load, and selected-item farming action routing. `TopDownMovementController` adds gravity-free movement over the same tile collision model so topdown RPG/life-sim games can share the core world and interaction stack.
 
 ## Partial Systems
 
@@ -22,7 +22,7 @@ World simulation has liquid data, baseline liquid flow, dirty-region scheduling,
 
 Interactions can target and use selected hotbar items, including pass-through mineable tiles such as generated trees and non-solid placeables such as the workbench. They still need richer rules for placement anchors, tile entities, furniture footprints, liquids, mining feedback, use cooldown UI, and server-friendly action validation.
 
-Farming is core-complete enough for tests and tools, but not yet rendered or wired into the live client input path. It still needs visible tilled/watered soil overlays, crop sprite rendering, farm action UI feedback, save/load for farm plots, weather/rain watering, shops, shipping bins, NPC schedules, and map-authoring support for topdown farm/town maps.
+Farming is now wired into the live client path for hoe, watering can, seed use, placeholder plot/crop drawing, daily growth, and autosave/load. It still needs proper sprite crop rendering, farm action UI feedback, weather/rain watering, shops, shipping bins, NPC schedules, and map-authoring support for topdown farm/town maps.
 
 Combat can damage enemies with melee/projectiles and resolve loot, and selected item use can spawn projectile attacks with ammo checks. Item, projectile, and enemy definitions can now apply status effects on hit/contact, and melee weapons can use data-driven rectangle, circle, or cone attack shapes. It still needs line-of-sight in every runtime path, attack animation phases, ammo preference rules, better knockback, hit reactions, hurt flash, and combat events for UI/audio/particles.
 

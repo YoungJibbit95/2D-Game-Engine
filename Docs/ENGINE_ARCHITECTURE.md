@@ -177,6 +177,7 @@ The first non-sideview module is `Game.Core.Farming`, aimed at Stardew-like and 
 - `FarmPlotManager` stores tilled/watered plot state and crop instances independently from tile rendering.
 - `FarmingSystem` handles tilling, watering, planting, daily growth, seasonal withering, harvesting, inventory consumption, and regrowing crops.
 - Farm actions return `FarmActionResult` with explicit failure reasons for future UI, audio, particles, NPC jobs, and automation.
+- `FarmPlotSaveService` persists tilled/watered plots and crop instances into `farm_plots.json`, and the coordinated save/load pipeline can include those plots with the rest of a session.
 
 This design keeps farming independent from MonoGame and from a specific map renderer. A Terraria-style world can use the same plots on tile coordinates, while a topdown RPG map can use non-solid ground tiles tagged as soil or farmable.
 
