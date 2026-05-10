@@ -175,6 +175,7 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
         _tilemapRenderer.DrawLiquids = settings.Rendering.DrawLiquids;
         _tilemapRenderer.Textures = _textures;
         _tilemapRenderer.TileSpriteResolver = ResolveTileSpriteId;
+        _tilemapRenderer.Tiles = _content?.Tiles;
         _tilemapRenderer.Draw(context, _world, _camera);
         DrawPlayer(context);
         DrawEntities(context);

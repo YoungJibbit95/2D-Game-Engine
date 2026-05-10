@@ -1,4 +1,5 @@
 using Game.Core;
+using Game.Core.Tiles;
 using Game.Core.World;
 using Microsoft.Xna.Framework;
 
@@ -16,6 +17,8 @@ public sealed class TilemapRenderer
 
     public Func<ushort, string?>? TileSpriteResolver { get; set; }
 
+    public TileRegistry? Tiles { get; set; }
+
     public TilemapRenderMetrics LastMetrics { get; private set; }
 
     public void Draw(RenderContext context, World world, Camera2D camera)
@@ -24,6 +27,7 @@ public sealed class TilemapRenderer
         var rebuiltChunks = 0;
         var tileCommands = 0;
         var liquidCommands = 0;
+        var tiles = Tiles ?? TileRegistry.Create(Array.Empty<TileDefinition>());
 
         foreach (var chunkPosition in camera.GetVisibleChunks())
         {
@@ -33,7 +37,7 @@ public sealed class TilemapRenderer
             }
 
             visibleChunks++;
-            var result = _cache.GetOrBuild(chunk);
+            var result = _cache.GetOrBuild(world, tiles, chunk);
             if (result.Rebuilt)
             {
                 rebuiltChunks++;
@@ -79,7 +83,7 @@ public sealed class TilemapRenderer
 
             if (!command.Tile.IsAir)
             {
-                DrawTile(context, camera, tileX, tileY, command.Tile);
+                DrawTile(context, camera, tileX, tileY, command.Tile, command.AutoTileMask);
                 tileCommands++;
             }
 
@@ -91,7 +95,13 @@ public sealed class TilemapRenderer
         }
     }
 
-    private void DrawTile(RenderContext context, Camera2D camera, int tileX, int tileY, TileInstance tile)
+    private void DrawTile(
+        RenderContext context,
+        Camera2D camera,
+        int tileX,
+        int tileY,
+        TileInstance tile,
+        AutoTileMask autoTileMask)
     {
         var worldPosition = new Vector2(tileX * GameConstants.TileSize, tileY * GameConstants.TileSize);
         var screenPosition = camera.WorldToScreen(worldPosition, context.ViewportBounds);
@@ -103,7 +113,7 @@ public sealed class TilemapRenderer
             (int)tileSize,
             (int)tileSize);
 
-        if (TryDrawSpriteTexture(context, destination, tile.TileId))
+        if (TryDrawSpriteTexture(context, destination, tile.TileId, autoTileMask))
         {
             if (ShowGrid)
             {
@@ -121,7 +131,7 @@ public sealed class TilemapRenderer
         }
     }
 
-    private bool TryDrawSpriteTexture(RenderContext context, Rectangle destination, ushort tileId)
+    private bool TryDrawSpriteTexture(RenderContext context, Rectangle destination, ushort tileId, AutoTileMask autoTileMask)
     {
         if (Textures is null || TileSpriteResolver is null)
         {
@@ -130,7 +140,7 @@ public sealed class TilemapRenderer
 
         var spriteId = TileSpriteResolver(tileId);
         if (string.IsNullOrWhiteSpace(spriteId) ||
-            !Textures.TryGetRealTexture(spriteId, out var sprite))
+            !Textures.TryGetRealTextureForAutoTileMask(spriteId, (int)autoTileMask, out var sprite))
         {
             return false;
         }

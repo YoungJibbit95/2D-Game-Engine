@@ -17,8 +17,12 @@ public sealed class SpriteAssetTests
               "id": "items/copper_pickaxe",
               "path": "sprites/tools/copper_pickaxe.png",
               "category": "Tool",
-              "width": 16,
+              "width": 64,
               "height": 16,
+              "frames": [
+                { "id": "mask_0", "x": 0, "y": 0, "width": 16, "height": 16, "autoTileMask": 0 },
+                { "id": "mask_3", "x": 48, "y": 0, "width": 16, "height": 16, "autoTileMask": 3 }
+              ],
               "tags": ["tool", "pickaxe"]
             }
           ]
@@ -29,6 +33,8 @@ public sealed class SpriteAssetTests
 
         Assert.Equal("items/copper_pickaxe", definition.Id);
         Assert.Equal(SpriteAssetCategory.Tool, definition.Category);
+        Assert.Equal(1, definition.ResolveFrameIndexForAutoTileMask(3));
+        Assert.Equal(0, definition.ResolveFrameIndexForAutoTileMask(8));
         Assert.True(definition.HasTag("pickaxe"));
     }
 
@@ -39,6 +45,35 @@ public sealed class SpriteAssetTests
         {
             CreateSprite("items/wood"),
             CreateSprite("items/wood")
+        };
+
+        Assert.Throws<RegistryValidationException>(() => SpriteAssetRegistry.Create(definitions));
+    }
+
+    [Fact]
+    public void Registry_RejectsFramesOutsideSpriteBounds()
+    {
+        var definitions = new[]
+        {
+            new SpriteAssetDefinition
+            {
+                Id = "tiles/broken",
+                Path = "sprites/world/tiles/broken.png",
+                Category = SpriteAssetCategory.Tile,
+                Width = 16,
+                Height = 16,
+                Frames = new[]
+                {
+                    new SpriteFrameDefinition
+                    {
+                        X = 16,
+                        Y = 0,
+                        Width = 16,
+                        Height = 16,
+                        AutoTileMask = 1
+                    }
+                }
+            }
         };
 
         Assert.Throws<RegistryValidationException>(() => SpriteAssetRegistry.Create(definitions));

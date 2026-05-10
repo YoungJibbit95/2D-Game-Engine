@@ -43,7 +43,7 @@ Only open engine work is kept here. Completed items are removed after implementa
 
 - [ ] Add texture atlas lookup and source-rect resolution.
 - [ ] Move `ChunkRenderCache` from command caching to atlas/render-target backed batching.
-- [ ] Wire autotile masks to render source rectangles.
+- [ ] Generate/import real 16-frame autotile PNG sheets for base terrain tiles.
 - [ ] Add render targets for world, liquids, lighting, particles, UI, and post-processing.
 - [ ] Add HLSL shader loading through `ShaderEffectRegistry`.
 - [ ] Add deeper draw metrics: draw calls, texture switches, render-target timings, and shader timings.

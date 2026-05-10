@@ -1,4 +1,5 @@
 using Game.Core;
+using Game.Core.Tiles;
 using Game.Core.World;
 
 namespace Game.Client.Rendering;
@@ -9,8 +10,12 @@ public sealed class ChunkRenderCache
 
     public int CachedChunkCount => _chunks.Count;
 
-    public ChunkRenderCacheResult GetOrBuild(Chunk chunk)
+    private readonly AutoTileSystem _autoTiles = new();
+
+    public ChunkRenderCacheResult GetOrBuild(World world, TileRegistry tiles, Chunk chunk)
     {
+        ArgumentNullException.ThrowIfNull(world);
+        ArgumentNullException.ThrowIfNull(tiles);
         ArgumentNullException.ThrowIfNull(chunk);
 
         if (_chunks.TryGetValue(chunk.Position, out var cached) && !chunk.NeedsMeshRebuild)
@@ -18,7 +23,7 @@ public sealed class ChunkRenderCache
             return new ChunkRenderCacheResult(cached.Commands, Rebuilt: false);
         }
 
-        var rebuilt = Build(chunk);
+        var rebuilt = Build(world, tiles, chunk);
         _chunks[chunk.Position] = rebuilt;
         chunk.ClearMeshRebuildFlag();
         return new ChunkRenderCacheResult(rebuilt.Commands, Rebuilt: true);
@@ -49,9 +54,10 @@ public sealed class ChunkRenderCache
         _chunks.Clear();
     }
 
-    private static CachedChunk Build(Chunk chunk)
+    private CachedChunk Build(World world, TileRegistry tiles, Chunk chunk)
     {
         var commands = new List<ChunkRenderCommand>(GameConstants.ChunkSize * GameConstants.ChunkSize / 2);
+        var chunkBounds = CoordinateUtils.ChunkTileBounds(chunk.Position);
 
         for (var localY = 0; localY < GameConstants.ChunkSize; localY++)
         {
@@ -63,7 +69,12 @@ public sealed class ChunkRenderCache
                     continue;
                 }
 
-                commands.Add(new ChunkRenderCommand(localX, localY, tile));
+                var tileX = chunkBounds.Left + localX;
+                var tileY = chunkBounds.Top + localY;
+                var mask = tile.IsAir
+                    ? AutoTileMask.None
+                    : _autoTiles.ComputeAutoTileMask(world, tiles, tileX, tileY);
+                commands.Add(new ChunkRenderCommand(localX, localY, tile, mask));
             }
         }
 

@@ -79,6 +79,21 @@ public sealed class SpriteAssetRegistry
             {
                 throw new RegistryValidationException($"Sprite asset '{definition.Id}' contains a frame with invalid dimensions.");
             }
+
+            if (frame.X < 0 || frame.Y < 0)
+            {
+                throw new RegistryValidationException($"Sprite asset '{definition.Id}' contains a frame with negative coordinates.");
+            }
+
+            if (frame.X + frame.Width > definition.Width || frame.Y + frame.Height > definition.Height)
+            {
+                throw new RegistryValidationException($"Sprite asset '{definition.Id}' contains a frame outside the declared sprite bounds.");
+            }
+
+            if (frame.AutoTileMask is { } mask && (mask < 0 || mask > 15))
+            {
+                throw new RegistryValidationException($"Sprite asset '{definition.Id}' contains an invalid autotile mask.");
+            }
         }
     }
 

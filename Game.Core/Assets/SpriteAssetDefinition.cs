@@ -26,4 +26,22 @@ public sealed record SpriteAssetDefinition
     {
         return DefinitionTags.HasTag(Tags, tag);
     }
+
+    public int ResolveFrameIndexForAutoTileMask(int autoTileMask)
+    {
+        if (Frames.Count == 0)
+        {
+            return 0;
+        }
+
+        for (var index = 0; index < Frames.Count; index++)
+        {
+            if (Frames[index].AutoTileMask == autoTileMask)
+            {
+                return index;
+            }
+        }
+
+        return 0;
+    }
 }

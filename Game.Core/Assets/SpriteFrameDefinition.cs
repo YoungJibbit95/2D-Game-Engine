@@ -2,6 +2,8 @@ namespace Game.Core.Assets;
 
 public sealed record SpriteFrameDefinition
 {
+    public string? Id { get; init; }
+
     public int X { get; init; }
 
     public int Y { get; init; }
@@ -15,4 +17,6 @@ public sealed record SpriteFrameDefinition
     public int OriginY { get; init; }
 
     public int DurationMs { get; init; }
+
+    public int? AutoTileMask { get; init; }
 }

@@ -143,9 +143,9 @@ The current station foundation is intentionally engine-level. UI screens can con
 
 ## Assets
 
-`SpriteAssetDefinition` is engine metadata for sprite identity, category, source path, dimensions, optional atlas id, frames, and tags.
+`SpriteAssetDefinition` is engine metadata for sprite identity, category, source path, dimensions, optional atlas id, frames, and tags. Individual frames can declare an `autoTileMask` from 0 to 15; `ClientTextureRegistry` resolves the frame that matches the current tile neighbor mask and falls back to frame 0 when a sheet has no exact variant yet.
 
-`SpriteGenerationBrief` is a generation-time contract that maps a sprite id to an AI prompt, negative prompt, output path, palette hints, and hard requirements. It lives under `Game.Data/asset_briefs` instead of `Game.Data/assets` so runtime loading stays focused on gameplay metadata.
+`SpriteGenerationBrief` is a generation-time contract that maps a sprite id to an AI prompt, negative prompt, output path, palette hints, and hard requirements. It lives under `Game.Data/asset_briefs` instead of `Game.Data/assets` so runtime loading stays focused on gameplay metadata. Terrain tile briefs for dirt, grass, stone, copper ore, and iron ore request 256x16 horizontal strips with 16 frames ordered by the 4-bit autotile mask convention.
 
 The client has a `ClientTextureRegistry` that resolves `SpriteAssetRegistry` ids into MonoGame textures. If the source PNG does not exist yet, it creates a deterministic category-colored placeholder. This lets gameplay and rendering code use stable sprite ids before the real art pass is finished.
 
@@ -159,13 +159,13 @@ The current client still has direct state orchestration in `PlayingState`. Long 
 
 The current client renderer draws tiles, liquids, entities, player, lighting overlay, HUD, and debug text. Tile and lighting passes are aware of horizontally infinite worlds and do not clamp visible chunks to `0..WidthTiles` when the world is infinite. Tile rendering now asks `TileDefinition.TexturePath` for a sprite id and can draw a real loaded texture when the PNG exists; otherwise it keeps the existing readable colored fallback.
 
-`ChunkRenderCache` stores per-chunk tile draw commands. It rebuilds when a chunk has `NeedsMeshRebuild`, then clears only that mesh flag so save dirtiness remains intact. The renderer exposes `TilemapRenderMetrics` for visible chunks, cached chunks, rebuilt chunks, evicted chunks, tile commands, and liquid commands.
+`ChunkRenderCache` stores per-chunk tile draw commands. It rebuilds when a chunk has `NeedsMeshRebuild`, computes a 4-bit autotile neighbor mask for each non-air tile, then clears only that mesh flag so save dirtiness remains intact. `TilemapRenderer` passes those masks into `ClientTextureRegistry`, which selects the best source frame for real terrain sheets and keeps placeholder rendering working until final art exists. The renderer exposes `TilemapRenderMetrics` for visible chunks, cached chunks, rebuilt chunks, evicted chunks, tile commands, and liquid commands.
 
 The next renderer evolution should use:
 
 - Chunk render caches.
 - Render-target or atlas-backed chunk batching.
-- Autotile source rectangles.
+- Real terrain sprite sheets with complete autotile frame metadata.
 - Atlas lookup and source-rect resolution.
 - Render targets for world, lighting, liquids, post effects, and UI.
 - Shader registry entries mapped to actual MonoGame effects.

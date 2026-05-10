@@ -33,18 +33,34 @@ public sealed class ClientTextureRegistry : IDisposable
 
         var asset = _assets.GetById(spriteId);
         var texturePath = Path.Combine(_contentRoot, NormalizePath(asset.Path));
-        var source = ResolveSourceRectangle(asset, frameIndex);
-        var texture = File.Exists(texturePath)
+        var hasRealTexture = File.Exists(texturePath);
+        var texture = hasRealTexture
             ? LoadTexture(texturePath)
             : CreatePlaceholderTexture(asset);
-        var sprite = new SpriteTexture(asset.Id, texture, source, !File.Exists(texturePath));
+        var source = ResolveSourceRectangle(asset, frameIndex, texture.Width, texture.Height);
+        var sprite = new SpriteTexture(asset.Id, texture, source, !hasRealTexture);
         _textures.Add(cacheKey, sprite);
         return sprite;
+    }
+
+    public SpriteTexture GetForAutoTileMask(string spriteId, int autoTileMask)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(spriteId);
+        ThrowIfDisposed();
+
+        var asset = _assets.GetById(spriteId);
+        return Get(spriteId, asset.ResolveFrameIndexForAutoTileMask(autoTileMask));
     }
 
     public bool TryGetRealTexture(string spriteId, out SpriteTexture sprite, int frameIndex = 0)
     {
         sprite = Get(spriteId, frameIndex);
+        return !sprite.IsPlaceholder;
+    }
+
+    public bool TryGetRealTextureForAutoTileMask(string spriteId, int autoTileMask, out SpriteTexture sprite)
+    {
+        sprite = GetForAutoTileMask(spriteId, autoTileMask);
         return !sprite.IsPlaceholder;
     }
 
@@ -100,15 +116,29 @@ public sealed class ClientTextureRegistry : IDisposable
         return texture;
     }
 
-    private static Rectangle ResolveSourceRectangle(SpriteAssetDefinition asset, int frameIndex)
+    private static Rectangle ResolveSourceRectangle(SpriteAssetDefinition asset, int frameIndex, int textureWidth, int textureHeight)
     {
+        if (textureWidth <= 0 || textureHeight <= 0)
+        {
+            return Rectangle.Empty;
+        }
+
         if (asset.Frames.Count == 0)
         {
-            return new Rectangle(0, 0, asset.Width, asset.Height);
+            return new Rectangle(0, 0, Math.Min(asset.Width, textureWidth), Math.Min(asset.Height, textureHeight));
         }
 
         var frame = asset.Frames[Math.Clamp(frameIndex, 0, asset.Frames.Count - 1)];
-        return new Rectangle(frame.X, frame.Y, frame.Width, frame.Height);
+        if (frame.X >= textureWidth || frame.Y >= textureHeight)
+        {
+            return new Rectangle(0, 0, Math.Min(asset.Width, textureWidth), Math.Min(asset.Height, textureHeight));
+        }
+
+        return new Rectangle(
+            frame.X,
+            frame.Y,
+            Math.Max(1, Math.Min(frame.Width, textureWidth - frame.X)),
+            Math.Max(1, Math.Min(frame.Height, textureHeight - frame.Y)));
     }
 
     private static string NormalizePath(string path)
