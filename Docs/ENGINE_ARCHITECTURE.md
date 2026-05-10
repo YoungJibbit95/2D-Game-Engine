@@ -163,6 +163,8 @@ This keeps combat content data-driven while leaving animation timing, weapon arc
 
 The current station foundation is intentionally engine-level. UI screens can consume query results later without duplicating crafting rules.
 
+The client `CraftingOverlay` now consumes `CraftingQueryResult` directly. It shows known recipes, selected recipe details, ingredient counts, station availability, nearby station text, one-click craft, and shift-repeat crafting. `CraftingStationLocator` supports horizontally infinite worlds by preserving negative X while still clamping vertical bounds.
+
 ## UI Toolkit
 
 `Game.Core.UI` is the renderer-neutral UI foundation. It is intentionally independent from MonoGame so runtime UI, tools, editors, tests, and future console-specific clients can share the same layout and interaction rules.

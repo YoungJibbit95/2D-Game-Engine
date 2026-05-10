@@ -21,6 +21,17 @@ public sealed class CraftingStationLocatorTests
     }
 
     [Fact]
+    public void FindStations_SupportsNegativeXInHorizontallyInfiniteWorld()
+    {
+        var world = new World(64, 8, WorldMetadata.CreateDefault(seed: 1), isHorizontallyInfinite: true);
+        world.SetTile(-3, 4, TileInstance.FromTileId(KnownTileIds.Workbench, isSolid: false));
+
+        var stations = new CraftingStationLocator().FindStations(world, CreateTiles(), new TilePos(-5, 4), radiusTiles: 3);
+
+        Assert.Contains("workbench", stations);
+    }
+
+    [Fact]
     public void CreateContext_AllowsStationRecipeWhenStationIsNearby()
     {
         var world = new World(12, 8, WorldMetadata.CreateDefault(seed: 1));

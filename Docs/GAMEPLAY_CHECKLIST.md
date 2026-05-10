@@ -28,7 +28,6 @@ Only open work is kept here. Completed items are removed after implementation.
 ## Crafting
 
 - [ ] Add furnace and anvil station definitions.
-- [ ] Wire nearby crafting station detection into gameplay UI.
 - [ ] Add craft-from-nearby-chests option as a later quality-of-life feature.
 
 ## Combat

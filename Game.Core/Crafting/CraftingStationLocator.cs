@@ -17,8 +17,12 @@ public sealed class CraftingStationLocator
         }
 
         var stations = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-        var minX = Math.Max(0, actorTile.X - radiusTiles);
-        var maxX = Math.Min(world.WidthTiles - 1, actorTile.X + radiusTiles);
+        var minX = world.IsHorizontallyInfinite
+            ? actorTile.X - radiusTiles
+            : Math.Max(0, actorTile.X - radiusTiles);
+        var maxX = world.IsHorizontallyInfinite
+            ? actorTile.X + radiusTiles
+            : Math.Min(world.WidthTiles - 1, actorTile.X + radiusTiles);
         var minY = Math.Max(0, actorTile.Y - radiusTiles);
         var maxY = Math.Min(world.HeightTiles - 1, actorTile.Y + radiusTiles);
 

@@ -26,6 +26,7 @@ Milestone 1 and the first core world tasks are scaffolded:
 - Inventory stack rules, split, merge, swap, and removal behavior.
 - Inventory cursor interaction foundation with left-click pick/place/merge/swap and right-click split/place-one rules.
 - In-game inventory overlay with hotbar/main slots, cursor-held stack rendering, shift-click quick move, and item stat/effect/tag tooltips.
+- In-game crafting overlay with known recipe list, result details, ingredient and station checks, craft button, and shift-repeat crafting.
 - Tilemap rendering with visible chunk iteration.
 - Camera follow.
 - Player entity with keyboard movement, jumping, gravity, and tile collision.

@@ -44,6 +44,7 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
     private readonly CommandDispatcher _commands = new(CommandRegistry.CreateDefault());
     private readonly HudOverlay _hud = new();
     private readonly InventoryOverlay _inventoryOverlay = new();
+    private readonly CraftingOverlay _craftingOverlay = new();
     private readonly DebugConsoleOverlay _debugConsole = new();
     private readonly PauseMenuOverlay _pauseMenu;
     private readonly GameStateManager _states;
@@ -85,7 +86,7 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
 
     public string Name => "Playing";
 
-    public bool CapturesKeyboard => _debugConsole.IsOpen || _pauseMenu.IsOpen || _inventoryOverlay.IsOpen;
+    public bool CapturesKeyboard => _debugConsole.IsOpen || _pauseMenu.IsOpen || _inventoryOverlay.IsOpen || _craftingOverlay.IsOpen;
 
     public void Initialize()
     {
@@ -153,6 +154,17 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
 
         if (_inventory is not null &&
             _content is not null &&
+            _world is not null &&
+            _player is not null &&
+            _craftingOverlay.Update(_input, _inventory, _content, _world, _player, settings))
+        {
+            _player.SetCommand(PlayerCommand.None);
+            UpdateAutosave((float)deltaSeconds, settings);
+            return;
+        }
+
+        if (_inventory is not null &&
+            _content is not null &&
             _inventoryOverlay.Update(_input, _inventory, _content.Items, settings))
         {
             _player?.SetCommand(PlayerCommand.None);
@@ -206,6 +218,10 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
         if (_inventory is not null && _content is not null)
         {
             _inventoryOverlay.Draw(context, _inventory, _content.Items, settings);
+        }
+        if (_content is not null)
+        {
+            _craftingOverlay.Draw(context, _content, settings);
         }
 
         if (settings.Rendering.DrawDebugOverlays && settings.Debug.ShowDebugOverlay)

@@ -28,20 +28,20 @@ The count excludes `bin`, `obj`, `.git`, and `.vs`.
 
 | Area | Files | Lines |
 | --- | ---: | ---: |
-| `Game.Core` | 286 | 12,994 |
-| `Game.Client` | 44 | 3,935 |
-| `Game.Tests` | 75 | 6,574 |
+| `Game.Core` | 286 | 12,998 |
+| `Game.Client` | 45 | 4,235 |
+| `Game.Tests` | 75 | 6,582 |
 | `Game.Data` | 57 | 1,397 |
 | `Docs` | 8 | 616 |
 
 | Extension | Files | Lines |
 | --- | ---: | ---: |
-| `.cs` | 401 | 23,440 |
+| `.cs` | 402 | 23,752 |
 | `.json` | 59 | 1,416 |
 | `.md` | 9 | 769 |
 | Project/solution/config files | 17 | 342 |
 
-Total tracked workspace snapshot: 486 files, 25,967 lines.
+Total tracked workspace snapshot: 487 files, 26,279 lines.
 
 ## Core Engine Features
 
@@ -83,6 +83,7 @@ Total tracked workspace snapshot: 486 files, 25,967 lines.
 - Loading state for world/session preparation.
 - Playing state with camera follow, tile/liquid rendering, player rendering, entities, lighting overlay, HUD, inventory overlay, pause menu, and debug console.
 - Inventory overlay with hotbar/main slot widgets, core stack click rules, cursor-held stack drawing, shift-click quick move, and item tooltips for stats, effects, tags, and stack limits.
+- Crafting overlay with known recipe list, selected recipe details, nearby station detection, ingredient availability, craft button, and shift-repeat crafting.
 - Pause/settings overlay with tabs for gameplay, world, graphics, rendering, UI, debug, audio, keybinds, and system actions.
 - Shared minimalist UI theme helper with dark surfaces, accent colors, hover/selected states, progress bars, and opacity controls.
 - UI animation applied to menu and loading/pause surfaces.
@@ -101,7 +102,7 @@ Total tracked workspace snapshot: 486 files, 25,967 lines.
 - UI animation track/player behavior.
 - UI layout, hit-testing, modal layers, focus traversal, tooltips, and cursor interaction snapshots.
 
-Current test count: 293 passing tests after the core UI toolkit expansion.
+Current test count: 294 passing tests after the crafting UI and infinite station locator expansion.
 
 ## Current Engine Direction
 

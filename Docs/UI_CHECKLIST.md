@@ -23,12 +23,9 @@ Only open work is kept here. Completed items are removed after implementation.
 - [ ] Add stat summary panel for armor/accessory bonuses.
 
 ## Crafting UI
-
-- [ ] Add recipe list.
-- [ ] Add selected recipe details.
-- [ ] Add ingredient availability display.
-- [ ] Add station requirement display.
-- [ ] Add craft button and repeated crafting input behavior.
+- [ ] Add recipe category filters and search.
+- [ ] Add craft amount controls and hold-to-repeat timing.
+- [ ] Add recipe pinning/tracking in HUD.
 
 ## Menus
 
