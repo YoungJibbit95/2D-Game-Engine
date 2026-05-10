@@ -495,7 +495,7 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
             LoadMarginChunks = worldSettings.ChunkLoadMargin,
             UnloadMarginChunks = worldSettings.ChunkUnloadMargin,
             KeepDirtyChunksLoaded = worldSettings.KeepDirtyChunksLoaded
-        });
+        }, _events);
     }
 
     private static string GetHotbarBinding(KeyBindingSettings bindings, int slot)

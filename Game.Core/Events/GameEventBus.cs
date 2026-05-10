@@ -3,6 +3,7 @@ namespace Game.Core.Events;
 public sealed class GameEventBus
 {
     private readonly Dictionary<Type, List<Delegate>> _handlers = new();
+    private readonly List<Action<IGameEvent>> _anyHandlers = new();
 
     public IDisposable Subscribe<TEvent>(Action<TEvent> handler)
         where TEvent : IGameEvent
@@ -20,10 +21,23 @@ public sealed class GameEventBus
         return new Subscription(() => handlers.Remove(handler));
     }
 
+    public IDisposable SubscribeAll(Action<IGameEvent> handler)
+    {
+        ArgumentNullException.ThrowIfNull(handler);
+
+        _anyHandlers.Add(handler);
+        return new Subscription(() => _anyHandlers.Remove(handler));
+    }
+
     public void Publish<TEvent>(TEvent gameEvent)
         where TEvent : IGameEvent
     {
         ArgumentNullException.ThrowIfNull(gameEvent);
+
+        foreach (var handler in _anyHandlers.ToArray())
+        {
+            handler(gameEvent);
+        }
 
         if (!_handlers.TryGetValue(typeof(TEvent), out var handlers))
         {

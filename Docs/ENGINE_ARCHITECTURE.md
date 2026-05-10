@@ -53,7 +53,9 @@ Profiles currently control:
 
 `InfiniteWorldChunkGenerator` is the streaming-oriented generator. It creates a finite-height, horizontally infinite world and can deterministically materialize any chunk at negative or positive X from the same profile and seed. The first version generates terrain, depth dimensions, ores, caves, pass-through mineable trees, and underground water pockets per chunk. Full-world analysis and quality gates still belong to finite generation until a sampled infinite-world analysis pass exists.
 
-`ChunkStreamingPlanner` calculates required, load, and unload sets around a visible tile area. `ChunkStreamingService` owns the lifecycle around that plan: it loads saved chunks first, generates missing chunks deterministically, saves dirty chunks before unloading when a save directory exists, skips dirty unloads when data would be lost, and returns metrics for debug UI. The service uses `WorldSaveService` in region-file mode by default while still benefiting from save-load fallback for older loose chunk files.
+`ChunkStreamingPlanner` calculates required, load, and unload sets around a visible tile area. `ChunkStreamingService` owns the lifecycle around that plan: it loads saved chunks first, generates missing chunks deterministically, saves dirty chunks before unloading when a save directory exists, skips dirty unloads when data would be lost, and returns metrics plus changed chunk position lists for debug UI. The service uses `WorldSaveService` in region-file mode by default while still benefiting from save-load fallback for older loose chunk files.
+
+Streaming publishes typed events through `GameEventBus` when a caller provides one: `ChunkLoadedEvent`, `ChunkGeneratedEvent`, `ChunkSavedEvent`, `ChunkUnloadedEvent`, and `ChunkUnloadSkippedEvent`. Client UI, tools, audio, profiling, editor overlays, and later server replication can subscribe without duplicating lifecycle logic.
 
 ## World Model
 
@@ -99,6 +101,8 @@ The current scheduler handles:
 `LiquidSimulationSystem` now returns changed tile regions, not just counts. `GameSimulation` consumes the scheduler result, refreshes chunk metadata for render-dirty regions, and exposes the world-simulation result through `GameSimulationTickResult`.
 
 `WorldSimulationEventBridge` connects gameplay events to dirty regions. `TileMinedEvent` and `TilePlacedEvent` mark affected tile areas so liquids, lighting, render caches, and chunk metadata can react without every gameplay system manually knowing all downstream systems.
+
+`GameEventBus` supports typed subscriptions and global event observers. `SubscribeAll` is intended for debugging, editor tooling, profiling, event history, and future replay/replication capture. `GameEventJournal` is a bounded in-memory recorder that subscribes globally, stores sequence numbers and timestamps, and can be drained by debug panels without changing gameplay systems.
 
 ## Tiles And Interaction
 

@@ -54,6 +54,7 @@ Milestone 1 and the first core world tasks are scaffolded:
 - Data-driven spawn rules and SpawnSystem using biome, day/night, vertical range, ground checks, chance, and active caps.
 - Modular advanced world generation pipeline with terrain, caves, ore veins, and trees.
 - Core gameplay event bus with events for mining, pickups, projectile hits, deaths, and command execution.
+- Event bus supports global observation plus a bounded event journal for debug tooling and future replay/profiling.
 - Engine-neutral debug command backend with parser, registry, dispatcher, and built-in `/give`, `/time`, and `/spawn` commands.
 - Core settings service with JSON save/load validation for video, audio, gameplay, and debug settings.
 - Client settings path resolution and startup application of resolution, fullscreen, and VSync settings.
@@ -72,6 +73,7 @@ Milestone 1 and the first core world tasks are scaffolded:
 - `PlayerRespawnSystem` restores dead players at the world metadata spawn point after a delay.
 - Chunk streaming planner computes load/unload boundaries around visible tile areas and keeps dirty chunks loaded.
 - Chunk streaming service owns load/generate/save-before-unload lifecycle for infinite worlds and exposes runtime metrics.
+- Chunk streaming publishes typed lifecycle events for loaded, generated, saved, unloaded, and skipped chunks.
 - Structure templates and placer support reusable worldgen structures, with an initial surface shelter generation step.
 - Advanced world generation now includes underground liquid pockets using tile liquid data.
 - `PlayerItemUseSystem` routes selected hotbar items into mining, building, and melee actions.

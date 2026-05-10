@@ -12,8 +12,8 @@ Only open engine work is kept here. Completed items are removed after implementa
 
 ## World, Chunks, And Streaming
 
-- [ ] Add typed chunk streaming events for chunk loaded, generated, saved, unloaded, and skipped.
 - [ ] Add async/background chunk streaming jobs with a main-thread apply queue.
+- [ ] Add streaming event history/debug panels and per-frame streaming budget controls.
 - [ ] Add region-file compaction, tombstones, and offset tables so unloaded chunks can be deleted or updated without rewriting a whole region.
 - [ ] Add migration tooling that can convert existing loose chunk folders into packed region files.
 - [ ] Add save lifecycle orchestration for player, entities, tile entities, and streamed world chunks.

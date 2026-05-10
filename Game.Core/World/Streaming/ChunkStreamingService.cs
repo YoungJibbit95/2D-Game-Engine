@@ -1,3 +1,4 @@
+using Game.Core.Events;
 using Game.Core.Saving;
 using Game.Core.World.Generation;
 
@@ -32,7 +33,8 @@ public sealed class ChunkStreamingService
         WorldGenerationProfile profile,
         RectI visibleTileArea,
         string? worldDirectory = null,
-        ChunkStreamingOptions? options = null)
+        ChunkStreamingOptions? options = null,
+        GameEventBus? events = null)
     {
         ArgumentNullException.ThrowIfNull(world);
         ArgumentNullException.ThrowIfNull(profile);
@@ -48,18 +50,27 @@ public sealed class ChunkStreamingService
         var savedBeforeUnload = 0;
         var unloaded = 0;
         var skippedDirtyUnloads = 0;
+        var loadedPositions = new List<ChunkPos>();
+        var generatedPositions = new List<ChunkPos>();
+        var savedPositions = new List<ChunkPos>();
+        var unloadedPositions = new List<ChunkPos>();
+        var skippedDirtyUnloadPositions = new List<ChunkPos>();
 
         foreach (var position in plan.ChunksToLoad.OrderBy(chunk => chunk.Y).ThenBy(chunk => chunk.X))
         {
             if (!string.IsNullOrWhiteSpace(worldDirectory) && _saves.TryLoadChunk(world, worldDirectory, position))
             {
                 loaded++;
+                loadedPositions.Add(position);
+                events?.Publish(new ChunkLoadedEvent(position, LoadedFromSave: true));
                 continue;
             }
 
             if (_generator.EnsureChunk(world, profile, position))
             {
                 generated++;
+                generatedPositions.Add(position);
+                events?.Publish(new ChunkGeneratedEvent(position));
             }
         }
 
@@ -75,18 +86,24 @@ public sealed class ChunkStreamingService
                 if (string.IsNullOrWhiteSpace(worldDirectory))
                 {
                     skippedDirtyUnloads++;
+                    skippedDirtyUnloadPositions.Add(position);
+                    events?.Publish(new ChunkUnloadSkippedEvent(position, "dirty_without_save_directory"));
                     continue;
                 }
 
                 if (_saves.SaveChunk(world, worldDirectory, position))
                 {
                     savedBeforeUnload++;
+                    savedPositions.Add(position);
+                    events?.Publish(new ChunkSavedEvent(position, SavedBeforeUnload: true));
                 }
             }
 
             if (world.UnloadChunk(position, requireClean: true))
             {
                 unloaded++;
+                unloadedPositions.Add(position);
+                events?.Publish(new ChunkUnloadedEvent(position));
             }
         }
 
@@ -96,6 +113,11 @@ public sealed class ChunkStreamingService
             generated,
             savedBeforeUnload,
             unloaded,
-            skippedDirtyUnloads);
+            skippedDirtyUnloads,
+            loadedPositions,
+            generatedPositions,
+            savedPositions,
+            unloadedPositions,
+            skippedDirtyUnloadPositions);
     }
 }

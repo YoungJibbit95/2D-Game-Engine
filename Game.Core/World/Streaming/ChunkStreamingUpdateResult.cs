@@ -6,7 +6,12 @@ public sealed record ChunkStreamingUpdateResult(
     int GeneratedChunks,
     int SavedChunksBeforeUnload,
     int UnloadedChunks,
-    int SkippedDirtyUnloads)
+    int SkippedDirtyUnloads,
+    IReadOnlyList<ChunkPos> LoadedChunkPositions,
+    IReadOnlyList<ChunkPos> GeneratedChunkPositions,
+    IReadOnlyList<ChunkPos> SavedChunkPositions,
+    IReadOnlyList<ChunkPos> UnloadedChunkPositions,
+    IReadOnlyList<ChunkPos> SkippedDirtyUnloadPositions)
 {
     public static ChunkStreamingUpdateResult Empty { get; } = new(
         new ChunkStreamingPlan(
@@ -17,5 +22,10 @@ public sealed record ChunkStreamingUpdateResult(
         0,
         0,
         0,
-        0);
+        0,
+        Array.Empty<ChunkPos>(),
+        Array.Empty<ChunkPos>(),
+        Array.Empty<ChunkPos>(),
+        Array.Empty<ChunkPos>(),
+        Array.Empty<ChunkPos>());
 }

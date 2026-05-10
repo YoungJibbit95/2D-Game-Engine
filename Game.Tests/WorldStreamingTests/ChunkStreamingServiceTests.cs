@@ -1,4 +1,5 @@
 using Game.Core;
+using Game.Core.Events;
 using Game.Core.Saving;
 using Game.Core.World;
 using Game.Core.World.Generation;
@@ -33,6 +34,7 @@ public sealed class ChunkStreamingServiceTests : IDisposable
 
         Assert.Equal(1, result.LoadedChunks);
         Assert.Equal(0, result.GeneratedChunks);
+        Assert.Equal(new[] { position }, result.LoadedChunkPositions);
         Assert.Equal(KnownTileIds.CopperOre, target.GetTile(tile.X, tile.Y).TileId);
         Assert.False(target.Chunks[position].IsDirty);
     }
@@ -52,6 +54,7 @@ public sealed class ChunkStreamingServiceTests : IDisposable
 
         Assert.Equal(0, result.LoadedChunks);
         Assert.Equal(1, result.GeneratedChunks);
+        Assert.Equal(new[] { position }, result.GeneratedChunkPositions);
         Assert.True(world.TryGetChunk(position, out _));
     }
 
@@ -74,6 +77,8 @@ public sealed class ChunkStreamingServiceTests : IDisposable
 
         Assert.Equal(1, result.SavedChunksBeforeUnload);
         Assert.Equal(1, result.UnloadedChunks);
+        Assert.Equal(new[] { dirtyChunk }, result.SavedChunkPositions);
+        Assert.Equal(new[] { dirtyChunk }, result.UnloadedChunkPositions);
         Assert.False(world.TryGetChunk(dirtyChunk, out _));
 
         var loaded = _generator.CreateWorld(_profile, seed: 99);
@@ -98,7 +103,80 @@ public sealed class ChunkStreamingServiceTests : IDisposable
             NoMarginOptions() with { KeepDirtyChunksLoaded = false });
 
         Assert.Equal(1, result.SkippedDirtyUnloads);
+        Assert.Equal(new[] { dirtyChunk }, result.SkippedDirtyUnloadPositions);
         Assert.True(world.TryGetChunk(dirtyChunk, out _));
+    }
+
+    [Fact]
+    public void Update_PublishesChunkLifecycleEvents()
+    {
+        var loadedChunk = new ChunkPos(-2, 1);
+        var generatedChunk = new ChunkPos(-1, 1);
+        var dirtyChunk = new ChunkPos(4, 1);
+        var visibleArea = new RectI(
+            loadedChunk.X * GameConstants.ChunkSize,
+            loadedChunk.Y * GameConstants.ChunkSize,
+            GameConstants.ChunkSize * 2,
+            GameConstants.ChunkSize);
+        var source = _generator.CreateWorld(_profile, seed: 42);
+        _generator.EnsureChunk(source, _profile, loadedChunk);
+        new WorldSaveService(WorldChunkStorageMode.RegionFiles).SaveChunk(source, _tempDirectory, loadedChunk);
+
+        var world = _generator.CreateWorld(_profile, seed: 42);
+        _generator.EnsureChunk(world, _profile, dirtyChunk);
+        world.SetTile(dirtyChunk.X * GameConstants.ChunkSize, dirtyChunk.Y * GameConstants.ChunkSize + 3, KnownTileIds.IronOre);
+
+        var loadedEvents = new List<ChunkLoadedEvent>();
+        var generatedEvents = new List<ChunkGeneratedEvent>();
+        var savedEvents = new List<ChunkSavedEvent>();
+        var unloadedEvents = new List<ChunkUnloadedEvent>();
+        var bus = new GameEventBus();
+        bus.Subscribe<ChunkLoadedEvent>(loadedEvents.Add);
+        bus.Subscribe<ChunkGeneratedEvent>(generatedEvents.Add);
+        bus.Subscribe<ChunkSavedEvent>(savedEvents.Add);
+        bus.Subscribe<ChunkUnloadedEvent>(unloadedEvents.Add);
+
+        var result = new ChunkStreamingService().Update(
+            world,
+            _profile,
+            visibleArea,
+            _tempDirectory,
+            NoMarginOptions() with { KeepDirtyChunksLoaded = false },
+            bus);
+
+        Assert.Equal(1, result.LoadedChunks);
+        Assert.Equal(1, result.GeneratedChunks);
+        Assert.Equal(1, result.SavedChunksBeforeUnload);
+        Assert.Equal(1, result.UnloadedChunks);
+        Assert.Contains(loadedEvents, gameEvent => gameEvent.Position == loadedChunk && gameEvent.LoadedFromSave);
+        Assert.Contains(generatedEvents, gameEvent => gameEvent.Position == generatedChunk);
+        Assert.Contains(savedEvents, gameEvent => gameEvent.Position == dirtyChunk && gameEvent.SavedBeforeUnload);
+        Assert.Contains(unloadedEvents, gameEvent => gameEvent.Position == dirtyChunk);
+    }
+
+    [Fact]
+    public void Update_PublishesSkippedDirtyUnloadEvent()
+    {
+        var dirtyChunk = new ChunkPos(4, 1);
+        var visibleChunk = new ChunkPos(0, 0);
+        var world = _generator.CreateWorld(_profile, seed: 99);
+        _generator.EnsureChunk(world, _profile, dirtyChunk);
+        world.SetTile(dirtyChunk.X * GameConstants.ChunkSize, dirtyChunk.Y * GameConstants.ChunkSize + 3, KnownTileIds.IronOre);
+        ChunkUnloadSkippedEvent? skipped = null;
+        var bus = new GameEventBus();
+        bus.Subscribe<ChunkUnloadSkippedEvent>(gameEvent => skipped = gameEvent);
+
+        new ChunkStreamingService().Update(
+            world,
+            _profile,
+            CoordinateUtils.ChunkTileBounds(visibleChunk),
+            worldDirectory: null,
+            NoMarginOptions() with { KeepDirtyChunksLoaded = false },
+            bus);
+
+        Assert.NotNull(skipped);
+        Assert.Equal(dirtyChunk, skipped.Position);
+        Assert.Equal("dirty_without_save_directory", skipped.Reason);
     }
 
     public void Dispose()
