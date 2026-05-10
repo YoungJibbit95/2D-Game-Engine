@@ -67,7 +67,13 @@ Chunks also own `ChunkMetadata`, which tracks active liquid tiles, lit tiles, ti
 
 `WorldSaveService` persists the infinite-horizontal flag and can round-trip loaded negative and positive X chunks. It also exposes single-chunk save/load methods for streaming worlds. The client uses those methods to load a saved streamed chunk before falling back to deterministic generation, and to save dirty chunks before unloading them. Longer term, these individual chunk files should be packed into region files and coordinated with player/entity autosaves.
 
-Tile changes should always go through `World.SetTile`, `World.RemoveTile`, or a future bulk-edit API so neighboring chunks are marked dirty.
+Tile changes should always go through `World.SetTile`, `World.RemoveTile`, `World.TrySetTile`, `World.TryRemoveTile`, or `World.ApplyTileEdits` so chunk dirtiness, render rebuilds, lighting updates, and neighbor invalidation stay consistent.
+
+`World.ApplyTileEdits` is the batch mutation path for generation tools, structure placement, liquid solvers, future editors, and scripted events. It validates the whole batch before mutating, coalesces duplicate tile positions with last-write-wins behavior, applies only real changes, computes changed bounds, and returns changed positions plus every loaded dirty chunk touched by the padded invalidation region.
+
+`World.ClampRegionToBounds` is the shared region clamp for finite and horizontally infinite worlds. Finite worlds clamp X/Y to the actual world rectangle, while infinite worlds only clamp vertical bounds and preserve negative or positive X. Simulation systems use this so streamed chunks on negative X keep participating in liquids, lighting, render dirtiness, and future world-event processing.
+
+`StructurePlacer` uses the same batch mutation path. Structure placement results report the changed bounds and dirty chunks, which gives generation code and future editor tooling an immediate hook for previews, undo records, save scheduling, and render invalidation.
 
 ## World Simulation Scheduling
 
@@ -81,6 +87,8 @@ The current scheduler handles:
 - Initial seeding from existing liquid tiles.
 - Fixed-interval liquid stepping.
 - Requeueing changed liquid regions for future simulation.
+- Horizontally infinite dirty-region clamping.
+- Initial liquid seeding from loaded chunks in horizontally infinite worlds.
 
 `LiquidSimulationSystem` now returns changed tile regions, not just counts. `GameSimulation` consumes the scheduler result, refreshes chunk metadata for render-dirty regions, and exposes the world-simulation result through `GameSimulationTickResult`.
 

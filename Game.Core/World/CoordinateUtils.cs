@@ -56,6 +56,25 @@ public static class CoordinateUtils
             GameConstants.ChunkSize);
     }
 
+    public static IEnumerable<ChunkPos> EnumerateChunksOverlapping(RectI tileRegion)
+    {
+        if (tileRegion.IsEmpty)
+        {
+            yield break;
+        }
+
+        var min = TileToChunk(tileRegion.Left, tileRegion.Top);
+        var max = TileToChunk(tileRegion.Right - 1, tileRegion.Bottom - 1);
+
+        for (var cy = min.Y; cy <= max.Y; cy++)
+        {
+            for (var cx = min.X; cx <= max.X; cx++)
+            {
+                yield return new ChunkPos(cx, cy);
+            }
+        }
+    }
+
     private static int FloorDiv(int value, int divisor)
     {
         var quotient = value / divisor;

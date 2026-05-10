@@ -53,6 +53,22 @@ public sealed class WorldTests
     }
 
     [Fact]
+    public void TrySetTile_DoesNotDirtyUnchangedTile()
+    {
+        var world = CreateWorld();
+        world.SetTile(3, 3, KnownTileIds.Dirt);
+        var chunk = world.Chunks[new ChunkPos(0, 0)];
+        chunk.ClearDirtyFlags();
+
+        var changed = world.TrySetTile(3, 3, KnownTileIds.Dirt);
+
+        Assert.False(changed);
+        Assert.False(chunk.IsDirty);
+        Assert.False(chunk.NeedsMeshRebuild);
+        Assert.False(chunk.NeedsLightUpdate);
+    }
+
+    [Fact]
     public void SetTile_OnChunkEdgeMarksLoadedNeighborChunkDirty()
     {
         var world = CreateWorld();
@@ -63,6 +79,54 @@ public sealed class WorldTests
 
         Assert.True(neighbor.IsDirty);
         Assert.True(neighbor.NeedsMeshRebuild);
+    }
+
+    [Fact]
+    public void ApplyTileEdits_CoalescesDuplicatesAndMarksDirtyBoundaryChunks()
+    {
+        var world = CreateWorld();
+        var chunks = new[]
+        {
+            world.GetOrCreateChunk(new ChunkPos(0, 0)),
+            world.GetOrCreateChunk(new ChunkPos(1, 0)),
+            world.GetOrCreateChunk(new ChunkPos(0, 1)),
+            world.GetOrCreateChunk(new ChunkPos(1, 1))
+        };
+        foreach (var chunk in chunks)
+        {
+            chunk.ClearDirtyFlags();
+        }
+
+        var result = world.ApplyTileEdits(
+            new[]
+            {
+                TileEdit.Set(GameConstants.ChunkSize - 1, GameConstants.ChunkSize - 1, KnownTileIds.Dirt),
+                TileEdit.Set(GameConstants.ChunkSize - 1, GameConstants.ChunkSize - 1, KnownTileIds.Stone)
+            },
+            dirtyPaddingTiles: 1);
+
+        Assert.True(result.HasChanges);
+        Assert.Equal(2, result.RequestedEdits);
+        Assert.Equal(1, result.ChangedTiles);
+        Assert.Equal(new RectI(GameConstants.ChunkSize - 1, GameConstants.ChunkSize - 1, 1, 1), result.ChangedBounds);
+        Assert.Equal(KnownTileIds.Stone, world.GetTile(GameConstants.ChunkSize - 1, GameConstants.ChunkSize - 1).TileId);
+        Assert.Equal(new[] { new ChunkPos(0, 0), new ChunkPos(1, 0), new ChunkPos(0, 1), new ChunkPos(1, 1) }, result.DirtyChunks);
+        Assert.All(chunks, chunk => Assert.True(chunk.NeedsMeshRebuild));
+    }
+
+    [Fact]
+    public void ApplyTileEdits_RejectsOutOfBoundsBatchBeforeMutating()
+    {
+        var world = CreateWorld();
+
+        Assert.Throws<ArgumentOutOfRangeException>(() => world.ApplyTileEdits(
+            new[]
+            {
+                TileEdit.Set(1, 1, KnownTileIds.Dirt),
+                TileEdit.Set(-1, 1, KnownTileIds.Stone)
+            }));
+
+        Assert.True(world.GetTile(1, 1).IsAir);
     }
 
     [Fact]
@@ -86,6 +150,16 @@ public sealed class WorldTests
         Assert.Equal(KnownTileIds.Dirt, world.GetTile(-1, 5).TileId);
         Assert.Equal(KnownTileIds.Stone, world.GetTile(4096, 5).TileId);
         Assert.Throws<ArgumentOutOfRangeException>(() => world.SetTile(0, 64, KnownTileIds.Dirt));
+    }
+
+    [Fact]
+    public void ClampRegionToBounds_PreservesNegativeXForInfiniteWorlds()
+    {
+        var finite = CreateWorld();
+        var infinite = new World(GameConstants.ChunkSize, 64, WorldMetadata.CreateDefault(seed: 1234), isHorizontallyInfinite: true);
+
+        Assert.Equal(new RectI(0, 0, 8, 8), finite.ClampRegionToBounds(new RectI(-8, -4, 16, 12)));
+        Assert.Equal(new RectI(-8, 0, 16, 8), infinite.ClampRegionToBounds(new RectI(-8, -4, 16, 12)));
     }
 
     [Fact]

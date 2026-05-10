@@ -1,3 +1,4 @@
+using Game.Core;
 using Game.Core.World;
 using Game.Core.World.Liquids;
 using Xunit;
@@ -68,6 +69,18 @@ public sealed class LiquidSimulationSystemTests
 
         Assert.True(result.MovedLiquid > 0);
         Assert.True(result.ChangedRegions.Count >= 1);
+    }
+
+    [Fact]
+    public void Step_AllowsNegativeXInHorizontallyInfiniteWorld()
+    {
+        var world = new World(GameConstants.ChunkSize, 8, WorldMetadata.CreateDefault(seed: 1), isHorizontallyInfinite: true);
+        world.SetTile(-1, 1, TileInstance.Liquid(255));
+
+        var result = new LiquidSimulationSystem().Step(world, new RectI(-2, 0, 4, 4));
+
+        Assert.True(result.MovedLiquid > 0);
+        Assert.True(world.GetTile(-1, 2).HasLiquid);
     }
 
     private static World CreateWorld()

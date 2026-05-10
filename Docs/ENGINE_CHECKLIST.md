@@ -15,8 +15,8 @@ Only open engine work is kept here. Completed items are removed after implementa
 - [ ] Add chunk streaming ownership around `ChunkStreamingPlanner` with load/unload lifecycle events.
 - [ ] Pack infinite-world streamed chunks into region files instead of one file per chunk.
 - [ ] Add save lifecycle orchestration for player, entities, tile entities, and streamed world chunks.
-- [ ] Add bulk tile edit APIs that mark dirty chunks, dirty render regions, dirty light regions, and save state once per batch.
-- [ ] Add chunk-neighbor invalidation helpers for autotile, lighting, liquid, and render-cache boundaries.
+- [ ] Route terrain generation, liquids, and editor tools through the bulk tile edit API where batching improves dirty-region behavior.
+- [ ] Add typed tile mutation events for batch edits so simulation, audio, particles, and undo tooling can consume one result object.
 - [ ] Add background wall data generation and wall mining/placement rules.
 - [ ] Add platform, ladder, damage tile, and one-way collision material rules.
 - [ ] Add save/load migration and integrity reports for old world versions.

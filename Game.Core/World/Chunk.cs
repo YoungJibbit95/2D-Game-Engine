@@ -26,18 +26,19 @@ public sealed class Chunk
         return Tiles[ToIndex(localX, localY)];
     }
 
-    public void SetTile(int localX, int localY, TileInstance tile)
+    public bool SetTile(int localX, int localY, TileInstance tile)
     {
         ValidateLocalPosition(localX, localY);
 
         var index = ToIndex(localX, localY);
         if (Tiles[index].Equals(tile))
         {
-            return;
+            return false;
         }
 
         Tiles[index] = tile;
         MarkDirty(needsMeshRebuild: true, needsLightUpdate: true);
+        return true;
     }
 
     public void SetTileLight(int localX, int localY, byte light)

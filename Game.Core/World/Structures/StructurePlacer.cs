@@ -17,7 +17,7 @@ public sealed class StructurePlacer
             return StructurePlacementResult.Failed;
         }
 
-        var written = 0;
+        var edits = new List<TileEdit>(template.Width * template.Height);
         for (var y = 0; y < template.Height; y++)
         {
             for (var x = 0; x < template.Width; x++)
@@ -28,12 +28,12 @@ public sealed class StructurePlacer
                     continue;
                 }
 
-                world.SetTile(origin.X + x, origin.Y + y, TileInstance.FromTileId(tileId.Value, flags));
-                written++;
+                edits.Add(new TileEdit(origin.X + x, origin.Y + y, TileInstance.FromTileId(tileId.Value, flags)));
             }
         }
 
-        return new StructurePlacementResult(true, written);
+        var result = world.ApplyTileEdits(edits);
+        return new StructurePlacementResult(true, result.ChangedTiles, result.ChangedBounds, result.DirtyChunks);
     }
 
     public bool CanPlace(World world, TilePos origin, StructureTemplate template, StructurePlacementMode mode)
@@ -41,7 +41,12 @@ public sealed class StructurePlacer
         ArgumentNullException.ThrowIfNull(world);
         ArgumentNullException.ThrowIfNull(template);
 
-        if (origin.X < 0 || origin.Y < 0 || origin.X + template.Width > world.WidthTiles || origin.Y + template.Height > world.HeightTiles)
+        if (origin.Y < 0 || origin.Y + template.Height > world.HeightTiles)
+        {
+            return false;
+        }
+
+        if (!world.IsHorizontallyInfinite && (origin.X < 0 || origin.X + template.Width > world.WidthTiles))
         {
             return false;
         }
@@ -60,7 +65,8 @@ public sealed class StructurePlacer
                     continue;
                 }
 
-                if (!world.GetTile(origin.X + x, origin.Y + y).IsAir)
+                var target = new TilePos(origin.X + x, origin.Y + y);
+                if (!world.IsInBounds(target.X, target.Y) || !world.GetTile(target.X, target.Y).IsAir)
                 {
                     return false;
                 }

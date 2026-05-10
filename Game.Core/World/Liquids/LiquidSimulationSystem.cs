@@ -15,10 +15,11 @@ public sealed class LiquidSimulationSystem
 
         options ??= LiquidSimulationOptions.Default;
 
-        var minX = Math.Max(0, tileRegion.Left);
-        var maxX = Math.Min(world.WidthTiles - 1, tileRegion.Right - 1);
-        var minY = Math.Max(0, tileRegion.Top);
-        var maxY = Math.Min(world.HeightTiles - 1, tileRegion.Bottom - 1);
+        var clampedRegion = world.ClampRegionToBounds(tileRegion);
+        var minX = clampedRegion.Left;
+        var maxX = clampedRegion.Right - 1;
+        var minY = clampedRegion.Top;
+        var maxY = clampedRegion.Bottom - 1;
 
         if (minX > maxX || minY > maxY)
         {

@@ -49,4 +49,26 @@ public sealed class CoordinateUtilsTests
 
         Assert.Equal(new TilePos(expectedLocalX, 0), local);
     }
+
+    [Fact]
+    public void EnumerateChunksOverlapping_ReturnsAllTouchedChunksForNegativeRegions()
+    {
+        var chunks = CoordinateUtils
+            .EnumerateChunksOverlapping(new RectI(-1, 31, 34, 2))
+            .OrderBy(chunk => chunk.Y)
+            .ThenBy(chunk => chunk.X)
+            .ToArray();
+
+        Assert.Equal(
+            new[]
+            {
+                new ChunkPos(-1, 0),
+                new ChunkPos(0, 0),
+                new ChunkPos(1, 0),
+                new ChunkPos(-1, 1),
+                new ChunkPos(0, 1),
+                new ChunkPos(1, 1)
+            },
+            chunks);
+    }
 }

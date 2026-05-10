@@ -1,3 +1,4 @@
+using Game.Core;
 using Game.Core.World;
 using Game.Core.World.Liquids;
 using Game.Core.World.Simulation;
@@ -46,6 +47,18 @@ public sealed class WorldSimulationSchedulerTests
     {
         var world = CreateWorld();
         world.SetTile(1, 1, TileInstance.Liquid(128));
+        var scheduler = new WorldSimulationScheduler();
+
+        scheduler.SeedExistingLiquids(world);
+
+        Assert.True(scheduler.PendingLiquidRegionCount > 0);
+    }
+
+    [Fact]
+    public void SeedExistingLiquids_ScansLoadedChunksInHorizontallyInfiniteWorld()
+    {
+        var world = new World(GameConstants.ChunkSize, 8, WorldMetadata.CreateDefault(seed: 1), isHorizontallyInfinite: true);
+        world.SetTile(-1, 1, TileInstance.Liquid(128));
         var scheduler = new WorldSimulationScheduler();
 
         scheduler.SeedExistingLiquids(world);

@@ -55,13 +55,33 @@ public sealed class WorldSimulationScheduler
     {
         ArgumentNullException.ThrowIfNull(world);
 
-        for (var y = 0; y < world.HeightTiles; y++)
+        if (world.IsHorizontallyInfinite)
         {
-            for (var x = 0; x < world.WidthTiles; x++)
+            foreach (var chunk in world.Chunks.Values)
             {
-                if (world.GetTile(x, y).HasLiquid)
+                var bounds = world.ClampRegionToBounds(CoordinateUtils.ChunkTileBounds(chunk.Position));
+                for (var y = bounds.Top; y < bounds.Bottom; y++)
                 {
-                    MarkLiquidTile(new TilePos(x, y), padding);
+                    for (var x = bounds.Left; x < bounds.Right; x++)
+                    {
+                        if (world.GetTile(x, y).HasLiquid)
+                        {
+                            MarkLiquidTile(new TilePos(x, y), padding);
+                        }
+                    }
+                }
+            }
+        }
+        else
+        {
+            for (var y = 0; y < world.HeightTiles; y++)
+            {
+                for (var x = 0; x < world.WidthTiles; x++)
+                {
+                    if (world.GetTile(x, y).HasLiquid)
+                    {
+                        MarkLiquidTile(new TilePos(x, y), padding);
+                    }
                 }
             }
         }
@@ -138,10 +158,9 @@ public sealed class WorldSimulationScheduler
 
     private IReadOnlyList<RectI> DrainLiquidRegions(World world, int padding)
     {
-        var bounds = new RectI(0, 0, world.WidthTiles, world.HeightTiles);
         return _liquidRegions
             .DrainMerged()
-            .Select(region => region.Inflate(padding).ClampTo(bounds))
+            .Select(region => world.ClampRegionToBounds(region.Inflate(padding)))
             .Where(region => !region.IsEmpty)
             .ToArray();
     }

@@ -1,3 +1,4 @@
+using Game.Core;
 using Game.Core.World;
 using Game.Core.World.Structures;
 using Xunit;
@@ -38,6 +39,8 @@ public sealed class StructurePlacerTests
         Assert.Equal(KnownTileIds.Wood, world.GetTile(5, 5).TileId);
         Assert.Equal(KnownTileIds.Wood, world.GetTile(4, 6).TileId);
         Assert.True(world.GetTile(5, 6).IsAir);
+        Assert.Equal(new RectI(4, 5, 2, 2), result.ChangedBounds);
+        Assert.NotEmpty(result.DirtyChunks);
     }
 
     [Fact]
@@ -53,5 +56,23 @@ public sealed class StructurePlacerTests
 
         Assert.False(result.Placed);
         Assert.Equal(KnownTileIds.Stone, world.GetTile(4, 5).TileId);
+    }
+
+    [Fact]
+    public void TryPlace_AllowsNegativeXInHorizontallyInfiniteWorld()
+    {
+        var world = new World(GameConstants.ChunkSize, 16, WorldMetadata.CreateDefault(seed: 1), isHorizontallyInfinite: true);
+        var template = StructureTemplate.FromRows(
+            new[] { "WW" },
+            new Dictionary<char, ushort> { ['W'] = KnownTileIds.Wood });
+
+        var result = new StructurePlacer().TryPlace(world, new TilePos(-1, 5), template);
+
+        Assert.True(result.Placed);
+        Assert.Equal(2, result.TilesWritten);
+        Assert.Equal(KnownTileIds.Wood, world.GetTile(-1, 5).TileId);
+        Assert.Equal(KnownTileIds.Wood, world.GetTile(0, 5).TileId);
+        Assert.Contains(new ChunkPos(-1, 0), result.DirtyChunks);
+        Assert.Contains(new ChunkPos(0, 0), result.DirtyChunks);
     }
 }
