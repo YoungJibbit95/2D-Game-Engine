@@ -46,7 +46,7 @@ public sealed class SettingsState : IGameState
     public void Update(double deltaSeconds)
     {
         _input.Update();
-        _settingsMenu.Update(_input);
+        _settingsMenu.Update(_input, deltaSeconds);
     }
 
     public void Draw(RenderContext context)

@@ -194,11 +194,11 @@ The next renderer evolution should use:
 
 ## Settings And Pause Flow
 
-`GameSettings` is the shared data contract for video, rendering, audio, gameplay, input, and debug options. The core stores keybinds as string bindings so it stays independent from MonoGame input types.
+`GameSettings` is the shared data contract for video, rendering, UI, audio, gameplay, world streaming, input, and debug options. The core stores keybinds as string bindings so it stays independent from MonoGame input types.
 
 `PauseMenuOverlay` is the current client settings surface. It is used both from gameplay pause and the main-menu settings state. Changes are saved through `GameSettingsService`; gameplay and rendering options that are already wired can affect the active `PlayingState` immediately, and video settings flow through `GameStateManager.ApplySettings` into `MainGame` for live resolution, fullscreen, and VSync changes.
 
-The overlay has its own row/tab hit zones for now. This is intentionally practical rather than final; a richer UI toolkit should later absorb focus, hit-testing, keyboard/gamepad navigation, typed input, confirmation dialogs, and reusable list/tab widgets.
+The client UI now resolves colors and panel treatments through `UiTheme`, while `Game.Core.UI.Animation` provides engine-neutral UI clips, tracks, keyframes, curves, and a runtime animation player. Main menu, loading, and pause/settings surfaces already use this foundation for simple slide/fade transitions. The overlay still has its own row/tab hit zones for now. This is intentionally practical rather than final; a richer UI toolkit should later absorb focus, hit-testing, keyboard/gamepad navigation, typed input, confirmation dialogs, and reusable list/tab widgets.
 
 ## Testing Rules
 

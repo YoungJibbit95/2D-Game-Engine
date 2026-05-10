@@ -42,7 +42,22 @@ public sealed class GameSettingsServiceTests
                 BloomStrength = 0.25f,
                 VignetteStrength = 0.15f,
                 ColorGradeIntensity = 0.5f,
-                ParticleQuality = 3
+                ParticleQuality = 3,
+                LiquidOpacity = 0.65f,
+                LightingBlendStrength = 0.85f,
+                MaxChunkRenderCacheEntries = 1024,
+                EntityInterpolation = false
+            },
+            Ui = new UiSettings
+            {
+                Theme = "Forest",
+                PanelOpacity = 0.8f,
+                HudOpacity = 0.75f,
+                MenuBackdropOpacity = 0.5f,
+                AnimationSpeed = 1.5f,
+                ReducedMotion = true,
+                CompactLists = true,
+                ShowControlHints = false
             },
             Audio = new AudioSettings
             {
@@ -60,7 +75,12 @@ public sealed class GameSettingsServiceTests
                 ShowInteractionTarget = false,
                 HoldToMine = true,
                 PauseOnFocusLost = true,
-                EnemySpawnRateMultiplier = 1.25f
+                EnemySpawnRateMultiplier = 1.25f,
+                AutoPickupItems = false,
+                UseLineOfSightForCombat = false,
+                RespawnDelaySeconds = 4.5f,
+                CameraLookAheadPixels = 64f,
+                ScreenShakeMultiplier = 0.5f
             },
             World = new WorldSettings
             {
@@ -69,7 +89,9 @@ public sealed class GameSettingsServiceTests
                 ChunkLoadMargin = 2,
                 ChunkUnloadMargin = 5,
                 KeepDirtyChunksLoaded = true,
-                PreloadFullVerticalSlice = false
+                PreloadFullVerticalSlice = false,
+                SaveChunksBeforeUnload = false,
+                StreamingBudgetChunksPerFrame = 96
             },
             Input = new InputSettings
             {
@@ -121,6 +143,7 @@ public sealed class GameSettingsServiceTests
         var settings = GameSettings.CreateDefault() with
         {
             Rendering = new RenderingSettings { ParticleQuality = 9 },
+            Ui = new UiSettings { AnimationSpeed = 9f },
             Gameplay = new GameplaySettings { CameraZoom = 12 },
             World = new WorldSettings { WorldProfileId = "", ChunkLoadMargin = 5, ChunkUnloadMargin = 2 },
             Input = new InputSettings { MouseSensitivity = 0 }

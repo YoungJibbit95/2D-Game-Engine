@@ -13,6 +13,10 @@ public sealed class TilemapRenderer
 
     public bool DrawLiquids { get; set; } = true;
 
+    public float LiquidOpacity { get; set; } = 0.72f;
+
+    public int MaxCachedChunks { get; set; } = 512;
+
     public ClientTextureRegistry? Textures { get; set; }
 
     public Func<ushort, string?>? TileSpriteResolver { get; set; }
@@ -47,6 +51,7 @@ public sealed class TilemapRenderer
         }
 
         var evicted = _cache.TrimToLoadedChunks(world.Chunks.Keys);
+        evicted += _cache.TrimToBudget(MaxCachedChunks);
         LastMetrics = new TilemapRenderMetrics(
             visibleChunks,
             _cache.CachedChunkCount,
@@ -89,7 +94,7 @@ public sealed class TilemapRenderer
 
             if (DrawLiquids && command.Tile.HasLiquid)
             {
-                DrawLiquid(context, camera, tileX, tileY, command.Tile);
+                DrawLiquid(context, camera, tileX, tileY, command.Tile, LiquidOpacity);
                 liquidCommands++;
             }
         }
@@ -149,7 +154,7 @@ public sealed class TilemapRenderer
         return true;
     }
 
-    private static void DrawLiquid(RenderContext context, Camera2D camera, int tileX, int tileY, TileInstance tile)
+    private static void DrawLiquid(RenderContext context, Camera2D camera, int tileX, int tileY, TileInstance tile, float opacity)
     {
         var worldPosition = new Vector2(tileX * GameConstants.TileSize, tileY * GameConstants.TileSize);
         var screenPosition = camera.WorldToScreen(worldPosition, context.ViewportBounds);
@@ -163,7 +168,8 @@ public sealed class TilemapRenderer
             (int)tileSize,
             liquidHeight);
 
-        context.SpriteBatch.Draw(context.Pixel, destination, new Color(52, 121, 207, 168));
+        var alpha = Math.Clamp((int)MathF.Round(255f * Math.Clamp(opacity, 0f, 1f)), 0, 255);
+        context.SpriteBatch.Draw(context.Pixel, destination, new Color(52, 121, 207, alpha));
     }
 
     private static void DrawGrid(RenderContext context, Rectangle destination)

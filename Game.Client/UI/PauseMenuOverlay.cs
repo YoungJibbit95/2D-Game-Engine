@@ -1,6 +1,7 @@
 using Game.Client.Input;
 using Game.Client.Rendering;
 using Game.Core.Settings;
+using Game.Core.UI.Animation;
 using Microsoft.Xna.Framework;
 
 namespace Game.Client.UI;
@@ -15,6 +16,7 @@ public sealed class PauseMenuOverlay
     private readonly Action<GameSettings> _settingsChanged;
     private readonly string _title;
     private readonly string _resumeLabel;
+    private readonly UiAnimationPlayer _openAnimation = new();
     private readonly List<MenuSection> _sections = new();
     private readonly List<HitZone> _tabHitZones = new();
     private readonly List<HitZone> _optionHitZones = new();
@@ -56,6 +58,8 @@ public sealed class PauseMenuOverlay
         IsOpen = true;
         _keyCapture = null;
         _status = "PAUSED";
+        var duration = Settings.Ui.ReducedMotion ? 0.001f : 0.18f;
+        _openAnimation.Play(UiAnimationClip.SlideFadeIn(duration, -16f));
     }
 
     public void Close()
@@ -65,7 +69,7 @@ public sealed class PauseMenuOverlay
         _resume();
     }
 
-    public bool Update(InputManager input)
+    public bool Update(InputManager input, double deltaSeconds = 0)
     {
         ArgumentNullException.ThrowIfNull(input);
 
@@ -73,6 +77,8 @@ public sealed class PauseMenuOverlay
         {
             return false;
         }
+
+        _openAnimation.Update((float)deltaSeconds, Settings.Ui.AnimationSpeed);
 
         if (_keyCapture is not null)
         {
@@ -139,34 +145,39 @@ public sealed class PauseMenuOverlay
             return;
         }
 
-        context.SpriteBatch.Draw(context.Pixel, context.ViewportBounds, new Color(0, 0, 0, 148));
+        var palette = UiTheme.Resolve(Settings);
+        var fade = _openAnimation.GetValue(UiAnimationProperty.Opacity, 1f);
+        var offsetY = (int)MathF.Round(_openAnimation.GetValue(UiAnimationProperty.OffsetY, 0f));
+        context.SpriteBatch.Draw(context.Pixel, context.ViewportBounds, UiTheme.WithAlpha(palette.Backdrop, Settings.Ui.MenuBackdropOpacity * fade));
 
         var panelWidth = Math.Min(980, context.ViewportBounds.Width - 56);
         var panelHeight = Math.Min(610, context.ViewportBounds.Height - 48);
         var panel = new Rectangle(
             context.ViewportBounds.Width / 2 - panelWidth / 2,
-            context.ViewportBounds.Height / 2 - panelHeight / 2,
+            context.ViewportBounds.Height / 2 - panelHeight / 2 + offsetY,
             panelWidth,
             panelHeight);
 
-        DrawRect(context, panel, new Color(16, 21, 29, 244));
-        DrawBorder(context, panel, new Color(102, 122, 144), 2);
+        UiTheme.DrawPanel(context, panel, palette, Settings.Ui.PanelOpacity * fade);
 
-        context.DebugText.Draw(new Vector2(panel.X + 24, panel.Y + 20), _title, new Color(245, 224, 151), 4);
-        context.DebugText.Draw(new Vector2(panel.X + 26, panel.Y + 64), "Q/E TABS   UP/DOWN SELECT   LEFT/RIGHT CHANGE   ENTER/CLICK EDIT", new Color(160, 180, 198), 2);
+        context.DebugText.Draw(new Vector2(panel.X + 24, panel.Y + 20), _title, palette.Accent, 4);
+        if (Settings.Ui.ShowControlHints)
+        {
+            context.DebugText.Draw(new Vector2(panel.X + 26, panel.Y + 64), "Q/E TABS   UP/DOWN SELECT   LEFT/RIGHT CHANGE   ENTER/CLICK EDIT", palette.TextMuted, 2);
+        }
 
         _tabHitZones.Clear();
         _optionHitZones.Clear();
-        DrawTabs(context, panel);
-        DrawOptions(context, panel);
+        DrawTabs(context, panel, palette);
+        DrawOptions(context, panel, palette);
 
         var footer = new Rectangle(panel.X + 18, panel.Bottom - 46, panel.Width - 36, 28);
-        DrawRect(context, footer, new Color(8, 12, 18, 215));
-        DrawBorder(context, footer, new Color(58, 74, 92), 1);
+        context.SpriteBatch.Draw(context.Pixel, footer, UiTheme.WithAlpha(palette.Surface, Settings.Ui.PanelOpacity));
+        UiTheme.DrawBorder(context, footer, UiTheme.WithAlpha(palette.SurfaceHover, 0.9f), 1);
         var footerText = _keyCapture is null
             ? _status
             : $"PRESS A KEY FOR {_keyCapture.Label}   ESC CANCEL";
-        context.DebugText.Draw(new Vector2(footer.X + 10, footer.Y + 7), footerText, new Color(245, 214, 126), 2);
+        context.DebugText.Draw(new Vector2(footer.X + 10, footer.Y + 7), footerText, palette.Warning, 2);
     }
 
     private GameSettings LoadSettings()
@@ -188,6 +199,7 @@ public sealed class PauseMenuOverlay
         _sections.Add(new MenuSection("WORLD", BuildWorldOptions()));
         _sections.Add(new MenuSection("GRAPHICS", BuildGraphicsOptions()));
         _sections.Add(new MenuSection("RENDERING", BuildRenderingOptions()));
+        _sections.Add(new MenuSection("UI", BuildUiOptions()));
         _sections.Add(new MenuSection("DEBUG", BuildDebugOptions()));
         _sections.Add(new MenuSection("AUDIO", BuildAudioOptions()));
         _sections.Add(new MenuSection("KEYBINDS", BuildKeybindOptions()));
@@ -205,7 +217,12 @@ public sealed class PauseMenuOverlay
             Toggle("SHOW TARGET TILE", () => Settings.Gameplay.ShowInteractionTarget, value => SetGameplay(g => g with { ShowInteractionTarget = value })),
             Toggle("HOLD TO MINE", () => Settings.Gameplay.HoldToMine, value => SetGameplay(g => g with { HoldToMine = value })),
             Toggle("PAUSE ON FOCUS LOST", () => Settings.Gameplay.PauseOnFocusLost, value => SetGameplay(g => g with { PauseOnFocusLost = value })),
-            Number("SPAWN RATE", () => Settings.Gameplay.EnemySpawnRateMultiplier, 0f, 5f, 0.25f, value => SetGameplay(g => g with { EnemySpawnRateMultiplier = value }))
+            Number("SPAWN RATE", () => Settings.Gameplay.EnemySpawnRateMultiplier, 0f, 5f, 0.25f, value => SetGameplay(g => g with { EnemySpawnRateMultiplier = value })),
+            Toggle("AUTO PICKUP", () => Settings.Gameplay.AutoPickupItems, value => SetGameplay(g => g with { AutoPickupItems = value })),
+            Toggle("COMBAT LINE OF SIGHT", () => Settings.Gameplay.UseLineOfSightForCombat, value => SetGameplay(g => g with { UseLineOfSightForCombat = value })),
+            Number("RESPAWN DELAY", () => Settings.Gameplay.RespawnDelaySeconds, 0f, 30f, 0.5f, value => SetGameplay(g => g with { RespawnDelaySeconds = value })),
+            Number("CAMERA LOOK AHEAD", () => Settings.Gameplay.CameraLookAheadPixels, 0f, 256f, 8f, value => SetGameplay(g => g with { CameraLookAheadPixels = value })),
+            Number("SCREEN SHAKE", () => Settings.Gameplay.ScreenShakeMultiplier, 0f, 4f, 0.1f, value => SetGameplay(g => g with { ScreenShakeMultiplier = value }))
         ];
     }
 
@@ -232,7 +249,9 @@ public sealed class PauseMenuOverlay
             Number("CHUNK LOAD MARGIN", () => Settings.World.ChunkLoadMargin, 0, 16, 1, value => SetWorld(w => w with { ChunkLoadMargin = value })),
             Number("CHUNK UNLOAD MARGIN", () => Settings.World.ChunkUnloadMargin, Settings.World.ChunkLoadMargin, 32, 1, value => SetWorld(w => w with { ChunkUnloadMargin = Math.Max(value, Settings.World.ChunkLoadMargin) })),
             Toggle("KEEP DIRTY CHUNKS", () => Settings.World.KeepDirtyChunksLoaded, value => SetWorld(w => w with { KeepDirtyChunksLoaded = value })),
-            Toggle("PRELOAD VERTICAL SLICE", () => Settings.World.PreloadFullVerticalSlice, value => SetWorld(w => w with { PreloadFullVerticalSlice = value }))
+            Toggle("PRELOAD VERTICAL SLICE", () => Settings.World.PreloadFullVerticalSlice, value => SetWorld(w => w with { PreloadFullVerticalSlice = value })),
+            Toggle("SAVE BEFORE UNLOAD", () => Settings.World.SaveChunksBeforeUnload, value => SetWorld(w => w with { SaveChunksBeforeUnload = value })),
+            Number("STREAMING BUDGET", () => Settings.World.StreamingBudgetChunksPerFrame, 1, 512, 8, value => SetWorld(w => w with { StreamingBudgetChunksPerFrame = value }))
         ];
     }
 
@@ -253,7 +272,26 @@ public sealed class PauseMenuOverlay
             Number("BLOOM", () => Settings.Rendering.BloomStrength, 0f, 1f, 0.05f, value => SetRendering(r => r with { BloomStrength = value })),
             Number("VIGNETTE", () => Settings.Rendering.VignetteStrength, 0f, 1f, 0.05f, value => SetRendering(r => r with { VignetteStrength = value })),
             Number("COLOR GRADE", () => Settings.Rendering.ColorGradeIntensity, 0f, 1f, 0.05f, value => SetRendering(r => r with { ColorGradeIntensity = value })),
-            Choice("PARTICLE QUALITY", ParticleQualityLabel, new[] { "OFF", "LOW", "MEDIUM", "HIGH" }, SetParticleQuality)
+            Choice("PARTICLE QUALITY", ParticleQualityLabel, new[] { "OFF", "LOW", "MEDIUM", "HIGH" }, SetParticleQuality),
+            Number("LIQUID OPACITY", () => Settings.Rendering.LiquidOpacity, 0f, 1f, 0.05f, value => SetRendering(r => r with { LiquidOpacity = value })),
+            Number("LIGHTING BLEND", () => Settings.Rendering.LightingBlendStrength, 0f, 1f, 0.05f, value => SetRendering(r => r with { LightingBlendStrength = value })),
+            Number("CHUNK CACHE LIMIT", () => Settings.Rendering.MaxChunkRenderCacheEntries, 32, 4096, 32, value => SetRendering(r => r with { MaxChunkRenderCacheEntries = value })),
+            Toggle("ENTITY INTERPOLATION", () => Settings.Rendering.EntityInterpolation, value => SetRendering(r => r with { EntityInterpolation = value }))
+        ];
+    }
+
+    private IReadOnlyList<MenuOption> BuildUiOptions()
+    {
+        return
+        [
+            Choice("THEME", () => Settings.Ui.Theme, new[] { "Midnight", "Forest", "Ember" }, value => SetUi(ui => ui with { Theme = value })),
+            Number("PANEL OPACITY", () => Settings.Ui.PanelOpacity, 0.35f, 1f, 0.05f, value => SetUi(ui => ui with { PanelOpacity = value })),
+            Number("HUD OPACITY", () => Settings.Ui.HudOpacity, 0.35f, 1f, 0.05f, value => SetUi(ui => ui with { HudOpacity = value })),
+            Number("BACKDROP OPACITY", () => Settings.Ui.MenuBackdropOpacity, 0f, 1f, 0.05f, value => SetUi(ui => ui with { MenuBackdropOpacity = value })),
+            Number("ANIMATION SPEED", () => Settings.Ui.AnimationSpeed, 0.1f, 4f, 0.1f, value => SetUi(ui => ui with { AnimationSpeed = value })),
+            Toggle("REDUCED MOTION", () => Settings.Ui.ReducedMotion, value => SetUi(ui => ui with { ReducedMotion = value })),
+            Toggle("COMPACT LISTS", () => Settings.Ui.CompactLists, value => SetUi(ui => ui with { CompactLists = value })),
+            Toggle("CONTROL HINTS", () => Settings.Ui.ShowControlHints, value => SetUi(ui => ui with { ShowControlHints = value }))
         ];
     }
 
@@ -274,7 +312,12 @@ public sealed class PauseMenuOverlay
         [
             Toggle("SHOW DEBUG HUD", () => Settings.Debug.ShowDebugOverlay, value => SetDebug(d => d with { ShowDebugOverlay = value })),
             Toggle("SHOW TILE GRID", () => Settings.Debug.ShowGrid, value => SetDebug(d => d with { ShowGrid = value })),
-            Toggle("RENDER DEBUG TEXT", () => Settings.Rendering.DrawDebugOverlays, value => SetRendering(r => r with { DrawDebugOverlays = value }))
+            Toggle("RENDER DEBUG TEXT", () => Settings.Rendering.DrawDebugOverlays, value => SetRendering(r => r with { DrawDebugOverlays = value })),
+            Toggle("SAVE METRICS", () => Settings.Debug.ShowSaveMetrics, value => SetDebug(d => d with { ShowSaveMetrics = value })),
+            Toggle("STREAMING METRICS", () => Settings.Debug.ShowStreamingMetrics, value => SetDebug(d => d with { ShowStreamingMetrics = value })),
+            Toggle("RENDER METRICS", () => Settings.Debug.ShowRenderMetrics, value => SetDebug(d => d with { ShowRenderMetrics = value })),
+            Toggle("MOUSE TILE", () => Settings.Debug.ShowMouseTile, value => SetDebug(d => d with { ShowMouseTile = value })),
+            Toggle("EVENT JOURNAL", () => Settings.Debug.ShowEventJournal, value => SetDebug(d => d with { ShowEventJournal = value }))
         ];
     }
 
@@ -378,7 +421,7 @@ public sealed class PauseMenuOverlay
         }
     }
 
-    private void DrawTabs(RenderContext context, Rectangle panel)
+    private void DrawTabs(RenderContext context, Rectangle panel, UiPalette palette)
     {
         var tabX = panel.X + 22;
         var tabY = panel.Y + 96;
@@ -389,20 +432,19 @@ public sealed class PauseMenuOverlay
             var bounds = new Rectangle(tabX, tabY, width, 28);
             var selected = index == _sectionIndex;
             var hovered = index == _hoveredSectionIndex;
-            DrawRect(context, bounds, selected ? new Color(58, 72, 88, 235) : hovered ? new Color(34, 42, 52, 230) : new Color(24, 30, 38, 225));
-            DrawBorder(context, bounds, selected ? new Color(245, 214, 126) : hovered ? new Color(120, 144, 168) : new Color(72, 88, 104), selected ? 2 : 1);
-            context.DebugText.Draw(new Vector2(bounds.X + 10, bounds.Y + 7), title, selected ? Color.White : new Color(160, 178, 194), 1);
+            UiTheme.DrawButton(context, bounds, palette, selected, hovered);
+            context.DebugText.Draw(new Vector2(bounds.X + 10, bounds.Y + 7), title, selected ? palette.Text : palette.TextMuted, 1);
             _tabHitZones.Add(new HitZone(bounds, index));
             tabX += width + 8;
         }
     }
 
-    private void DrawOptions(RenderContext context, Rectangle panel)
+    private void DrawOptions(RenderContext context, Rectangle panel, UiPalette palette)
     {
         var section = _sections[_sectionIndex];
         var list = section.Options;
         var startY = panel.Y + 140;
-        var rowHeight = 30;
+        var rowHeight = Settings.Ui.CompactLists ? 26 : 30;
         var visibleRows = Math.Max(1, (panel.Bottom - 198 - startY) / rowHeight);
         var scroll = Math.Clamp(_optionIndex - visibleRows + 1, 0, Math.Max(0, list.Count - visibleRows));
         var end = Math.Min(list.Count, scroll + visibleRows);
@@ -417,24 +459,23 @@ public sealed class PauseMenuOverlay
 
             if (selected)
             {
-                DrawRect(context, bounds, new Color(48, 61, 76, 235));
-                DrawBorder(context, bounds, new Color(245, 214, 126), 1);
+                UiTheme.DrawButton(context, bounds, palette, selected: true, hovered: false);
             }
             else if (hovered)
             {
-                DrawRect(context, bounds, new Color(32, 42, 54, 225));
+                UiTheme.DrawButton(context, bounds, palette, selected: false, hovered: true);
             }
 
-            context.DebugText.Draw(new Vector2(bounds.X + 10, bounds.Y + 6), option.Label, selected ? Color.White : new Color(204, 214, 224), 1);
+            context.DebugText.Draw(new Vector2(bounds.X + 10, bounds.Y + 6), option.Label, selected ? palette.Text : palette.TextMuted, 1);
             var value = option.Value();
             var valueX = bounds.Right - Math.Min(360, Math.Max(118, value.Length * 9 + 12));
-            context.DebugText.Draw(new Vector2(valueX, bounds.Y + 6), value, selected ? new Color(245, 224, 151) : new Color(150, 170, 188), 1);
+            context.DebugText.Draw(new Vector2(valueX, bounds.Y + 6), value, selected ? palette.Warning : palette.TextMuted, 1);
             _optionHitZones.Add(new HitZone(bounds, index));
         }
 
         if (list.Count > visibleRows)
         {
-            context.DebugText.Draw(new Vector2(panel.Right - 118, panel.Bottom - 84), $"{_optionIndex + 1}/{list.Count}", new Color(150, 170, 188), 1);
+            context.DebugText.Draw(new Vector2(panel.Right - 118, panel.Bottom - 84), $"{_optionIndex + 1}/{list.Count}", palette.TextMuted, 1);
         }
     }
 
@@ -618,6 +659,11 @@ public sealed class PauseMenuOverlay
         Settings = Settings with { Rendering = update(Settings.Rendering) };
     }
 
+    private void SetUi(Func<UiSettings, UiSettings> update)
+    {
+        Settings = Settings with { Ui = update(Settings.Ui) };
+    }
+
     private void SetAudio(Func<AudioSettings, AudioSettings> update)
     {
         Settings = Settings with { Audio = update(Settings.Audio) };
@@ -641,19 +687,6 @@ public sealed class PauseMenuOverlay
     private void SetKeyBindings(Func<KeyBindingSettings, KeyBindingSettings> update)
     {
         SetInput(input => input with { KeyBindings = update(input.KeyBindings) });
-    }
-
-    private static void DrawRect(RenderContext context, Rectangle bounds, Color color)
-    {
-        context.SpriteBatch.Draw(context.Pixel, bounds, color);
-    }
-
-    private static void DrawBorder(RenderContext context, Rectangle bounds, Color color, int thickness)
-    {
-        context.SpriteBatch.Draw(context.Pixel, new Rectangle(bounds.X, bounds.Y, bounds.Width, thickness), color);
-        context.SpriteBatch.Draw(context.Pixel, new Rectangle(bounds.X, bounds.Bottom - thickness, bounds.Width, thickness), color);
-        context.SpriteBatch.Draw(context.Pixel, new Rectangle(bounds.X, bounds.Y, thickness, bounds.Height), color);
-        context.SpriteBatch.Draw(context.Pixel, new Rectangle(bounds.Right - thickness, bounds.Y, thickness, bounds.Height), color);
     }
 
     private static int IndexOf(IReadOnlyList<string> values, string value)

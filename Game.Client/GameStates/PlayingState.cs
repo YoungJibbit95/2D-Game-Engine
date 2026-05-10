@@ -132,7 +132,7 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
 
         if (_pauseMenu.IsOpen)
         {
-            _pauseMenu.Update(_input);
+            _pauseMenu.Update(_input, deltaSeconds);
             _player?.SetCommand(PlayerCommand.None);
             return;
         }
@@ -168,7 +168,7 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
         var settings = _pauseMenu.Settings;
         EnsureTextureRegistry(context);
         _camera.Zoom = settings.Gameplay.CameraZoom;
-        var cameraTarget = GetCameraTarget();
+        var cameraTarget = GetCameraTarget(settings);
         _camera.Follow(cameraTarget, context.ViewportBounds, smoothing: 0.18f);
         EnsureVisibleChunks();
 
@@ -179,6 +179,8 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
 
         _tilemapRenderer.ShowGrid = _showGrid;
         _tilemapRenderer.DrawLiquids = settings.Rendering.DrawLiquids;
+        _tilemapRenderer.LiquidOpacity = settings.Rendering.LiquidOpacity;
+        _tilemapRenderer.MaxCachedChunks = settings.Rendering.MaxChunkRenderCacheEntries;
         _tilemapRenderer.Textures = _textures;
         _tilemapRenderer.TileSpriteResolver = ResolveTileSpriteId;
         _tilemapRenderer.Tiles = _content?.Tiles;
@@ -190,7 +192,7 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
             _lightingRenderer.Draw(context, _world, _camera);
         }
 
-        _hud.Draw(context, _selectedHotbarSlot, _player?.Health ?? 0, _player?.MaxHealth ?? 100);
+        _hud.Draw(context, _selectedHotbarSlot, _player?.Health ?? 0, _player?.MaxHealth ?? 100, settings);
 
         if (settings.Rendering.DrawDebugOverlays && settings.Debug.ShowDebugOverlay)
         {
@@ -204,15 +206,26 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
                 context.DebugText.Draw(new Vector2(12, 130), $"PLAYER TILE: {playerTile.X}:{playerTile.Y}", Color.LightGray, 2);
             }
 
-            if (_hoverTile is { } hoverTile)
+            if (settings.Debug.ShowMouseTile && _hoverTile is { } hoverTile)
             {
                 context.DebugText.Draw(new Vector2(12, 154), $"MOUSE TILE: {hoverTile.X}:{hoverTile.Y}", Color.LightGray, 2);
             }
 
             DrawEngineDebugSnapshot(context);
-            DrawRenderDebugMetrics(context);
-            DrawStreamingDebugMetrics(context);
-            DrawSaveDebugMetrics(context);
+            if (settings.Debug.ShowRenderMetrics)
+            {
+                DrawRenderDebugMetrics(context);
+            }
+
+            if (settings.Debug.ShowStreamingMetrics)
+            {
+                DrawStreamingDebugMetrics(context);
+            }
+
+            if (settings.Debug.ShowSaveMetrics)
+            {
+                DrawSaveDebugMetrics(context);
+            }
         }
 
         if (settings.Gameplay.ShowInteractionTarget)
@@ -234,14 +247,17 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
         _debugConsole.OnTextInput(character);
     }
 
-    private Vector2 GetCameraTarget()
+    private Vector2 GetCameraTarget(GameSettings settings)
     {
         if (_player is null)
         {
             return Vector2.Zero;
         }
 
-        return new Vector2(_player.Body.Center.X, _player.Body.Center.Y);
+        var lookAhead = settings.Gameplay.CameraLookAheadPixels;
+        var velocity = _player.Body.Velocity;
+        var offsetX = Math.Abs(velocity.X) < 1f ? 0f : MathF.Sign(velocity.X) * lookAhead;
+        return new Vector2(_player.Body.Center.X + offsetX, _player.Body.Center.Y);
     }
 
     private void DrawPlayer(RenderContext context)
@@ -546,7 +562,10 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
         var maxTile = CoordinateUtils.WorldToTile(_camera.VisibleWorldRect.Right, _camera.VisibleWorldRect.Bottom);
         var visibleTiles = RectI.FromInclusiveTileBounds(minTile.X, minTile.Y, maxTile.X, maxTile.Y);
         var worldSettings = _pauseMenu.Settings.World;
-        _lastStreaming = _streaming.Update(_world, profile, visibleTiles, _worldSaveDirectory, new ChunkStreamingOptions
+        var streamingSaveDirectory = worldSettings.SaveChunksBeforeUnload
+            ? _worldSaveDirectory
+            : null;
+        _lastStreaming = _streaming.Update(_world, profile, visibleTiles, streamingSaveDirectory, new ChunkStreamingOptions
         {
             LoadMarginChunks = worldSettings.ChunkLoadMargin,
             UnloadMarginChunks = worldSettings.ChunkUnloadMargin,

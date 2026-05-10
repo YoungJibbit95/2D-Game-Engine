@@ -6,6 +6,8 @@ public sealed record GameSettings
 
     public RenderingSettings Rendering { get; init; } = new();
 
+    public UiSettings Ui { get; init; } = new();
+
     public AudioSettings Audio { get; init; } = new();
 
     public GameplaySettings Gameplay { get; init; } = new();
@@ -56,6 +58,33 @@ public sealed record RenderingSettings
     public float ColorGradeIntensity { get; init; }
 
     public int ParticleQuality { get; init; } = 2;
+
+    public float LiquidOpacity { get; init; } = 0.72f;
+
+    public float LightingBlendStrength { get; init; } = 1f;
+
+    public int MaxChunkRenderCacheEntries { get; init; } = 512;
+
+    public bool EntityInterpolation { get; init; } = true;
+}
+
+public sealed record UiSettings
+{
+    public string Theme { get; init; } = "Midnight";
+
+    public float PanelOpacity { get; init; } = 0.92f;
+
+    public float HudOpacity { get; init; } = 0.88f;
+
+    public float MenuBackdropOpacity { get; init; } = 0.58f;
+
+    public float AnimationSpeed { get; init; } = 1f;
+
+    public bool ReducedMotion { get; init; }
+
+    public bool CompactLists { get; init; }
+
+    public bool ShowControlHints { get; init; } = true;
 }
 
 public sealed record AudioSettings
@@ -86,6 +115,16 @@ public sealed record GameplaySettings
     public bool PauseOnFocusLost { get; init; } = true;
 
     public float EnemySpawnRateMultiplier { get; init; } = 1f;
+
+    public bool AutoPickupItems { get; init; } = true;
+
+    public bool UseLineOfSightForCombat { get; init; } = true;
+
+    public float RespawnDelaySeconds { get; init; } = 3f;
+
+    public float CameraLookAheadPixels { get; init; } = 32f;
+
+    public float ScreenShakeMultiplier { get; init; } = 1f;
 }
 
 public sealed record WorldSettings
@@ -101,6 +140,10 @@ public sealed record WorldSettings
     public bool KeepDirtyChunksLoaded { get; init; } = true;
 
     public bool PreloadFullVerticalSlice { get; init; } = true;
+
+    public bool SaveChunksBeforeUnload { get; init; } = true;
+
+    public int StreamingBudgetChunksPerFrame { get; init; } = 32;
 }
 
 public sealed record InputSettings
@@ -162,4 +205,14 @@ public sealed record DebugSettings
     public bool ShowDebugOverlay { get; init; } = true;
 
     public bool ShowGrid { get; init; }
+
+    public bool ShowSaveMetrics { get; init; } = true;
+
+    public bool ShowStreamingMetrics { get; init; } = true;
+
+    public bool ShowRenderMetrics { get; init; } = true;
+
+    public bool ShowMouseTile { get; init; } = true;
+
+    public bool ShowEventJournal { get; init; }
 }

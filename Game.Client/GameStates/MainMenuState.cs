@@ -1,6 +1,9 @@
+using Game.Client.Configuration;
 using Game.Client.Input;
 using Game.Client.Rendering;
 using Game.Client.UI;
+using Game.Core.Settings;
+using Game.Core.UI.Animation;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Input;
@@ -14,6 +17,8 @@ public sealed class MainMenuState : IGameState
     private readonly InputManager _input = new();
     private readonly List<MenuItem> _items;
     private readonly List<Rectangle> _itemBounds = new();
+    private readonly UiAnimationPlayer _introAnimation = new();
+    private GameSettings _settings = GameSettings.CreateDefault();
     private int _selectedIndex;
 
     public MainMenuState(GameStateManager states, Action exit)
@@ -34,6 +39,9 @@ public sealed class MainMenuState : IGameState
 
     public void Initialize()
     {
+        _settings = LoadSettings();
+        var duration = _settings.Ui.ReducedMotion ? 0.001f : 0.28f;
+        _introAnimation.Play(UiAnimationClip.SlideFadeIn(duration, -20f));
     }
 
     public void LoadContent(ContentManager content)
@@ -47,6 +55,7 @@ public sealed class MainMenuState : IGameState
     public void Update(double deltaSeconds)
     {
         _input.Update();
+        _introAnimation.Update((float)deltaSeconds, _settings.Ui.AnimationSpeed);
 
         if (_input.IsKeyPressed(Keys.Down) || _input.IsKeyPressed(Keys.S))
         {
@@ -64,22 +73,22 @@ public sealed class MainMenuState : IGameState
             ActivateSelected();
         }
 
-        if (_input.IsKeyPressed(Keys.Escape))
-        {
-            _exit();
-        }
+        // Escape is intentionally ignored here so a stray key press never closes the game from the main menu.
     }
 
     public void Draw(RenderContext context)
     {
-        DrawBackground(context);
+        var palette = UiTheme.Resolve(_settings);
+        var fade = _introAnimation.GetValue(UiAnimationProperty.Opacity, 1f);
+        var offsetY = (int)MathF.Round(_introAnimation.GetValue(UiAnimationProperty.OffsetY, 0f));
+        DrawBackground(context, palette);
 
         var titleX = Math.Max(36, context.ViewportBounds.Width / 2 - 250);
-        context.DebugText.Draw(new Vector2(titleX, 64), "TERRARIA LIKE ENGINE", new Color(245, 224, 151), 4);
-        context.DebugText.Draw(new Vector2(titleX + 4, 112), "SANDBOX ACTION GAMEBUILDING CORE", new Color(190, 214, 230), 2);
+        context.DebugText.Draw(new Vector2(titleX, 64 + offsetY), "TERRARIA LIKE ENGINE", palette.Accent, 4);
+        context.DebugText.Draw(new Vector2(titleX + 4, 112 + offsetY), "SANDBOX ACTION GAMEBUILDING CORE", palette.TextMuted, 2);
 
         _itemBounds.Clear();
-        var startY = 172;
+        var startY = 172 + offsetY;
         var width = Math.Min(520, context.ViewportBounds.Width - 72);
         var x = Math.Max(36, context.ViewportBounds.Width / 2 - width / 2);
 
@@ -87,44 +96,45 @@ public sealed class MainMenuState : IGameState
         {
             var bounds = new Rectangle(x, startY + index * 62, width, 48);
             _itemBounds.Add(bounds);
-            DrawMenuItem(context, _items[index], bounds, index == _selectedIndex);
+            DrawMenuItem(context, _items[index], bounds, index == _selectedIndex, palette, fade);
         }
 
         var footerY = context.ViewportBounds.Height - 48;
-        context.DebugText.Draw(new Vector2(36, footerY), "ENTER SELECT   ESC EXIT   F10 CONSOLE IN GAME", new Color(144, 159, 174), 2);
+        if (_settings.Ui.ShowControlHints)
+        {
+            context.DebugText.Draw(new Vector2(36, footerY), "ENTER SELECT   ESC STAYS HERE   F10 CONSOLE IN GAME", palette.TextMuted, 2);
+        }
     }
 
     public void Dispose()
     {
     }
 
-    private void DrawMenuItem(RenderContext context, MenuItem item, Rectangle bounds, bool selected)
+    private void DrawMenuItem(RenderContext context, MenuItem item, Rectangle bounds, bool selected, UiPalette palette, float fade)
     {
-        var fill = selected ? new Color(50, 62, 76, 230) : new Color(18, 24, 32, 210);
-        var border = selected ? new Color(245, 214, 126) : new Color(82, 96, 112);
-        var text = item.Enabled ? Color.White : new Color(116, 126, 136);
-        var hint = item.Enabled ? new Color(154, 176, 190) : new Color(84, 92, 102);
+        var hovered = bounds.Contains(_input.MousePosition);
+        UiTheme.DrawButton(context, bounds, palette, selected, hovered, item.Enabled);
 
-        context.SpriteBatch.Draw(context.Pixel, bounds, fill);
-        DrawBorder(context, bounds, border, selected ? 3 : 1);
+        var text = item.Enabled ? palette.Text : UiTheme.WithAlpha(palette.TextMuted, 0.62f * fade);
+        var hint = item.Enabled ? palette.TextMuted : UiTheme.WithAlpha(palette.TextMuted, 0.45f * fade);
         context.DebugText.Draw(new Vector2(bounds.X + 16, bounds.Y + 8), item.Label, text, 2);
         context.DebugText.Draw(new Vector2(bounds.X + 16, bounds.Y + 28), item.Hint, hint, 1);
 
         if (!item.Enabled)
         {
-            context.DebugText.Draw(new Vector2(bounds.Right - 118, bounds.Y + 17), "LOCKED", new Color(130, 92, 92), 2);
+            context.DebugText.Draw(new Vector2(bounds.Right - 118, bounds.Y + 17), "PLANNED", palette.Warning, 2);
         }
     }
 
-    private void DrawBackground(RenderContext context)
+    private static void DrawBackground(RenderContext context, UiPalette palette)
     {
-        context.SpriteBatch.Draw(context.Pixel, context.ViewportBounds, new Color(14, 20, 29));
+        context.SpriteBatch.Draw(context.Pixel, context.ViewportBounds, palette.Backdrop);
         var horizon = new Rectangle(0, context.ViewportBounds.Height / 2, context.ViewportBounds.Width, context.ViewportBounds.Height / 2);
-        context.SpriteBatch.Draw(context.Pixel, horizon, new Color(36, 64, 72));
+        context.SpriteBatch.Draw(context.Pixel, horizon, UiTheme.WithAlpha(palette.AccentSoft, 0.55f));
         var ground = new Rectangle(0, context.ViewportBounds.Height - 86, context.ViewportBounds.Width, 86);
-        context.SpriteBatch.Draw(context.Pixel, ground, new Color(58, 45, 35));
+        context.SpriteBatch.Draw(context.Pixel, ground, new Color(45, 39, 35));
         var grass = new Rectangle(0, ground.Y, context.ViewportBounds.Width, 8);
-        context.SpriteBatch.Draw(context.Pixel, grass, new Color(80, 136, 68));
+        context.SpriteBatch.Draw(context.Pixel, grass, palette.Accent);
     }
 
     private void MoveSelection(int direction)
@@ -182,12 +192,16 @@ public sealed class MainMenuState : IGameState
     {
     }
 
-    private static void DrawBorder(RenderContext context, Rectangle bounds, Color color, int thickness)
+    private static GameSettings LoadSettings()
     {
-        context.SpriteBatch.Draw(context.Pixel, new Rectangle(bounds.X, bounds.Y, bounds.Width, thickness), color);
-        context.SpriteBatch.Draw(context.Pixel, new Rectangle(bounds.X, bounds.Bottom - thickness, bounds.Width, thickness), color);
-        context.SpriteBatch.Draw(context.Pixel, new Rectangle(bounds.X, bounds.Y, thickness, bounds.Height), color);
-        context.SpriteBatch.Draw(context.Pixel, new Rectangle(bounds.Right - thickness, bounds.Y, thickness, bounds.Height), color);
+        try
+        {
+            return new GameSettingsService().LoadOrCreate(ClientPaths.SettingsPath());
+        }
+        catch (InvalidDataException)
+        {
+            return GameSettings.CreateDefault();
+        }
     }
 
     private sealed record MenuItem(string Label, string Hint, bool Enabled, Action Action);

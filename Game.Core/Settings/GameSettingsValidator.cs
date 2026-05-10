@@ -9,6 +9,7 @@ public sealed class GameSettingsValidator
         var result = new SettingsValidationResult();
         ValidateVideo(settings.Video, result);
         ValidateRendering(settings.Rendering, result);
+        ValidateUi(settings.Ui, result);
         ValidateAudio(settings.Audio, result);
         ValidateGameplay(settings.Gameplay, result);
         ValidateWorld(settings.World, result);
@@ -49,6 +50,31 @@ public sealed class GameSettingsValidator
         {
             result.Add("rendering.particleQuality", "Particle quality must be between 0 and 3.");
         }
+
+        ValidateUnitRange(rendering.LiquidOpacity, "rendering.liquidOpacity", result);
+        ValidateUnitRange(rendering.LightingBlendStrength, "rendering.lightingBlendStrength", result);
+
+        if (rendering.MaxChunkRenderCacheEntries < 32 || rendering.MaxChunkRenderCacheEntries > 4096)
+        {
+            result.Add("rendering.maxChunkRenderCacheEntries", "Max chunk render cache entries must be between 32 and 4096.");
+        }
+    }
+
+    private static void ValidateUi(UiSettings ui, SettingsValidationResult result)
+    {
+        if (string.IsNullOrWhiteSpace(ui.Theme))
+        {
+            result.Add("ui.theme", "UI theme must not be empty.");
+        }
+
+        ValidateUnitRange(ui.PanelOpacity, "ui.panelOpacity", result);
+        ValidateUnitRange(ui.HudOpacity, "ui.hudOpacity", result);
+        ValidateUnitRange(ui.MenuBackdropOpacity, "ui.menuBackdropOpacity", result);
+
+        if (ui.AnimationSpeed < 0.1f || ui.AnimationSpeed > 4f)
+        {
+            result.Add("ui.animationSpeed", "UI animation speed must be between 0.1 and 4.");
+        }
     }
 
     private static void ValidateAudio(AudioSettings audio, SettingsValidationResult result)
@@ -84,6 +110,21 @@ public sealed class GameSettingsValidator
         if (gameplay.EnemySpawnRateMultiplier < 0f || gameplay.EnemySpawnRateMultiplier > 5f)
         {
             result.Add("gameplay.enemySpawnRateMultiplier", "Enemy spawn rate multiplier must be between 0 and 5.");
+        }
+
+        if (gameplay.RespawnDelaySeconds < 0f || gameplay.RespawnDelaySeconds > 30f)
+        {
+            result.Add("gameplay.respawnDelaySeconds", "Respawn delay must be between 0 and 30 seconds.");
+        }
+
+        if (gameplay.CameraLookAheadPixels < 0f || gameplay.CameraLookAheadPixels > 256f)
+        {
+            result.Add("gameplay.cameraLookAheadPixels", "Camera look-ahead must be between 0 and 256 pixels.");
+        }
+
+        if (gameplay.ScreenShakeMultiplier < 0f || gameplay.ScreenShakeMultiplier > 4f)
+        {
+            result.Add("gameplay.screenShakeMultiplier", "Screen shake multiplier must be between 0 and 4.");
         }
     }
 
@@ -122,6 +163,11 @@ public sealed class GameSettingsValidator
         if (world.ChunkUnloadMargin < world.ChunkLoadMargin || world.ChunkUnloadMargin > 32)
         {
             result.Add("world.chunkUnloadMargin", "Chunk unload margin must be between the load margin and 32.");
+        }
+
+        if (world.StreamingBudgetChunksPerFrame < 1 || world.StreamingBudgetChunksPerFrame > 512)
+        {
+            result.Add("world.streamingBudgetChunksPerFrame", "Streaming budget must be between 1 and 512 chunks per frame.");
         }
     }
 

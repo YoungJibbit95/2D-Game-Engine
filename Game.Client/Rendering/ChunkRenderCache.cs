@@ -7,6 +7,7 @@ namespace Game.Client.Rendering;
 public sealed class ChunkRenderCache
 {
     private readonly Dictionary<ChunkPos, CachedChunk> _chunks = new();
+    private long _useTick;
 
     public int CachedChunkCount => _chunks.Count;
 
@@ -20,10 +21,12 @@ public sealed class ChunkRenderCache
 
         if (_chunks.TryGetValue(chunk.Position, out var cached) && !chunk.NeedsMeshRebuild)
         {
+            cached.LastUsedTick = ++_useTick;
             return new ChunkRenderCacheResult(cached.Commands, Rebuilt: false);
         }
 
         var rebuilt = Build(world, tiles, chunk);
+        rebuilt.LastUsedTick = ++_useTick;
         _chunks[chunk.Position] = rebuilt;
         chunk.ClearMeshRebuildFlag();
         return new ChunkRenderCacheResult(rebuilt.Commands, Rebuilt: true);
@@ -42,6 +45,27 @@ public sealed class ChunkRenderCache
                 continue;
             }
 
+            _chunks.Remove(position);
+            removed++;
+        }
+
+        return removed;
+    }
+
+    public int TrimToBudget(int maxCachedChunks)
+    {
+        if (maxCachedChunks <= 0 || _chunks.Count <= maxCachedChunks)
+        {
+            return 0;
+        }
+
+        var removed = 0;
+        foreach (var position in _chunks
+                     .OrderBy(pair => pair.Value.LastUsedTick)
+                     .Select(pair => pair.Key)
+                     .Take(_chunks.Count - maxCachedChunks)
+                     .ToArray())
+        {
             _chunks.Remove(position);
             removed++;
         }
@@ -81,5 +105,15 @@ public sealed class ChunkRenderCache
         return new CachedChunk(commands.ToArray());
     }
 
-    private sealed record CachedChunk(IReadOnlyList<ChunkRenderCommand> Commands);
+    private sealed class CachedChunk
+    {
+        public CachedChunk(IReadOnlyList<ChunkRenderCommand> commands)
+        {
+            Commands = commands;
+        }
+
+        public IReadOnlyList<ChunkRenderCommand> Commands { get; }
+
+        public long LastUsedTick { get; set; }
+    }
 }

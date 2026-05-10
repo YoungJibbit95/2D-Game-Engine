@@ -109,6 +109,7 @@ Milestone 1 and the first core world tasks are scaffolded:
 - AI sprite generation briefs in `Game.Data/asset_briefs` define exact prompts, output paths, sizes, palettes, and constraints for another model to generate the base sprites.
 - The client has a `ClientTextureRegistry` that can load generated PNGs from sprite manifests and create deterministic placeholders while art is missing.
 - Tile rendering now uses a per-chunk render command cache and exposes debug metrics for visible chunks, cached chunks, rebuilt chunks, evictions, tile commands, and liquid commands.
+- Chunk render caches now support an LRU-style cache budget controlled by rendering settings.
 - Item definitions now support data-driven primary actions for mine, place, melee, shoot, consume, cast, and interact flows.
 - Placeable items can declare placement support rules such as adjacent solid support, wall/solid support, or solid ground.
 - Area queries support rectangles, circles, cones, and tile flood fill as shared foundations for attacks, AI, triggers, and interaction tooling.
@@ -124,14 +125,21 @@ Milestone 1 and the first core world tasks are scaffolded:
 - `WorldGenerationService` produces generated worlds together with analysis metrics and quality-gate reports for menus, tools, and seed validation.
 - Melee weapons can use data-driven attack shapes from item JSON; projectiles, weapons, and enemy contact damage can apply status effects from content data.
 - Shared settings now cover video, rendering, audio, gameplay, input/keybinds, and debug options.
+- Shared settings now also include UI theme, opacity, animation, streaming, render-cache, and debug metric visibility options.
 - Gameplay has an in-game pause menu with editable settings tabs; the same settings surface is reachable from the main menu.
 - Settings rows and tabs support mouse selection, keybind capture warns about conflicts, keybind reset requires confirmation, and resolution/fullscreen/VSync changes apply live.
 - The pause/settings surface now includes world streaming options and debug toggles for the debug HUD and tile grid.
+- The client UI uses a shared minimalist theme helper and a core UI animation pipeline for menu/loading/pause transitions.
+- Escape no longer closes the game from the main menu.
 - Base item data includes a first copper armor set with equipment stats and workbench recipes.
 
 ## Rider
 
 Open `TerrariaLike.sln` in JetBrains Rider and run the shared `Game.Client` configuration. See `Docs/RIDER_SETUP.md` for the exact setup and runtime controls.
+
+## Inventory
+
+See `Docs/ENGINE_INVENTORY.md` for the current tech stack, feature inventory, and LOC snapshot.
 
 ## Dependencies
 
