@@ -203,6 +203,7 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
             }
 
             DrawEngineDebugSnapshot(context);
+            DrawRenderDebugMetrics(context);
         }
 
         if (settings.Gameplay.ShowInteractionTarget)
@@ -405,6 +406,21 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
         var snapshot = _debugSnapshot;
         context.DebugText.Draw(new Vector2(12, 178), $"DIRTY: {snapshot.DirtyChunkCount} LIQ: {snapshot.LiquidTileCount}", Color.LightGray, 2);
         context.DebugText.Draw(new Vector2(12, 202), $"SURF: {snapshot.MinSurfaceY}-{snapshot.MaxSurfaceY}", Color.LightGray, 2);
+    }
+
+    private void DrawRenderDebugMetrics(RenderContext context)
+    {
+        var metrics = _tilemapRenderer.LastMetrics;
+        context.DebugText.Draw(
+            new Vector2(12, 226),
+            $"RENDER CHUNKS: {metrics.VisibleChunks} CACHE: {metrics.CachedChunks} REBUILT: {metrics.RebuiltChunks}",
+            Color.LightGray,
+            2);
+        context.DebugText.Draw(
+            new Vector2(12, 250),
+            $"TILE CMDS: {metrics.RenderedTileCommands} LIQ CMDS: {metrics.RenderedLiquidCommands} EVICT: {metrics.EvictedChunks}",
+            Color.LightGray,
+            2);
     }
 
     private void EnsureTextureRegistry(RenderContext context)

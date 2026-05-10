@@ -42,11 +42,11 @@ Only open engine work is kept here. Completed items are removed after implementa
 ## Rendering And Shaders
 
 - [ ] Add texture atlas lookup and source-rect resolution.
-- [ ] Add `ChunkRenderCache` with rebuilds only for dirty visible chunks.
+- [ ] Move `ChunkRenderCache` from command caching to atlas/render-target backed batching.
 - [ ] Wire autotile masks to render source rectangles.
 - [ ] Add render targets for world, liquids, lighting, particles, UI, and post-processing.
 - [ ] Add HLSL shader loading through `ShaderEffectRegistry`.
-- [ ] Add draw metrics: visible chunks, rendered tiles, rebuilt chunks, draw calls, and render-target timings.
+- [ ] Add deeper draw metrics: draw calls, texture switches, render-target timings, and shader timings.
 - [ ] Add screenshot or smoke verification for nonblank client rendering.
 
 ## Lighting

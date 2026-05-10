@@ -88,6 +88,19 @@ public sealed class WorldTests
         Assert.Throws<ArgumentOutOfRangeException>(() => world.SetTile(0, 64, KnownTileIds.Dirt));
     }
 
+    [Fact]
+    public void ClearMeshRebuildFlag_PreservesSaveAndLightDirtyState()
+    {
+        var chunk = new Chunk(ChunkPos.Zero);
+        chunk.MarkDirty(needsMeshRebuild: true, needsLightUpdate: true);
+
+        chunk.ClearMeshRebuildFlag();
+
+        Assert.True(chunk.IsDirty);
+        Assert.False(chunk.NeedsMeshRebuild);
+        Assert.True(chunk.NeedsLightUpdate);
+    }
+
     private static World CreateWorld()
     {
         return new World(64, 64, WorldMetadata.CreateDefault(seed: 1234));

@@ -85,6 +85,16 @@ public sealed class Chunk
         NeedsLightUpdate = false;
     }
 
+    public void ClearMeshRebuildFlag()
+    {
+        NeedsMeshRebuild = false;
+    }
+
+    public void ClearLightUpdateFlag()
+    {
+        NeedsLightUpdate = false;
+    }
+
     public void UpdateMetadata(ChunkMetadata metadata)
     {
         ArgumentNullException.ThrowIfNull(metadata);

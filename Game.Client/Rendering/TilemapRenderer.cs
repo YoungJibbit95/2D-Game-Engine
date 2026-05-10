@@ -6,6 +6,8 @@ namespace Game.Client.Rendering;
 
 public sealed class TilemapRenderer
 {
+    private readonly ChunkRenderCache _cache = new();
+
     public bool ShowGrid { get; set; }
 
     public bool DrawLiquids { get; set; } = true;
@@ -14,8 +16,15 @@ public sealed class TilemapRenderer
 
     public Func<ushort, string?>? TileSpriteResolver { get; set; }
 
+    public TilemapRenderMetrics LastMetrics { get; private set; }
+
     public void Draw(RenderContext context, World world, Camera2D camera)
     {
+        var visibleChunks = 0;
+        var rebuiltChunks = 0;
+        var tileCommands = 0;
+        var liquidCommands = 0;
+
         foreach (var chunkPosition in camera.GetVisibleChunks())
         {
             if (!world.TryGetChunk(chunkPosition, out var chunk) || chunk is null)
@@ -23,37 +32,61 @@ public sealed class TilemapRenderer
                 continue;
             }
 
-            DrawChunk(context, world, chunk, camera);
+            visibleChunks++;
+            var result = _cache.GetOrBuild(chunk);
+            if (result.Rebuilt)
+            {
+                rebuiltChunks++;
+            }
+
+            DrawChunk(context, world, chunk, result.Commands, camera, ref tileCommands, ref liquidCommands);
         }
+
+        var evicted = _cache.TrimToLoadedChunks(world.Chunks.Keys);
+        LastMetrics = new TilemapRenderMetrics(
+            visibleChunks,
+            _cache.CachedChunkCount,
+            rebuiltChunks,
+            evicted,
+            tileCommands,
+            liquidCommands);
     }
 
-    private void DrawChunk(RenderContext context, World world, Chunk chunk, Camera2D camera)
+    public void ClearCache()
+    {
+        _cache.Clear();
+        LastMetrics = default;
+    }
+
+    private void DrawChunk(
+        RenderContext context,
+        World world,
+        Chunk chunk,
+        IReadOnlyList<ChunkRenderCommand> commands,
+        Camera2D camera,
+        ref int tileCommands,
+        ref int liquidCommands)
     {
         var chunkBounds = CoordinateUtils.ChunkTileBounds(chunk.Position);
-        var minX = world.IsHorizontallyInfinite ? chunkBounds.Left : Math.Max(chunkBounds.Left, 0);
-        var maxX = world.IsHorizontallyInfinite ? chunkBounds.Right : Math.Min(chunkBounds.Right, world.WidthTiles);
-        var minY = Math.Max(chunkBounds.Top, 0);
-        var maxY = Math.Min(chunkBounds.Bottom, world.HeightTiles);
-
-        for (var y = minY; y < maxY; y++)
+        foreach (var command in commands)
         {
-            for (var x = minX; x < maxX; x++)
+            var tileX = chunkBounds.Left + command.LocalX;
+            var tileY = chunkBounds.Top + command.LocalY;
+            if (!world.IsInBounds(tileX, tileY))
             {
-                var tile = world.GetTile(x, y);
-                if (tile.IsAir && !tile.HasLiquid)
-                {
-                    continue;
-                }
+                continue;
+            }
 
-                if (!tile.IsAir)
-                {
-                    DrawTile(context, camera, x, y, tile);
-                }
+            if (!command.Tile.IsAir)
+            {
+                DrawTile(context, camera, tileX, tileY, command.Tile);
+                tileCommands++;
+            }
 
-                if (DrawLiquids && tile.HasLiquid)
-                {
-                    DrawLiquid(context, camera, x, y, tile);
-                }
+            if (DrawLiquids && command.Tile.HasLiquid)
+            {
+                DrawLiquid(context, camera, tileX, tileY, command.Tile);
+                liquidCommands++;
             }
         }
     }

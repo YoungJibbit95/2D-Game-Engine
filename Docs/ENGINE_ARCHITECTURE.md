@@ -159,9 +159,12 @@ The current client still has direct state orchestration in `PlayingState`. Long 
 
 The current client renderer draws tiles, liquids, entities, player, lighting overlay, HUD, and debug text. Tile and lighting passes are aware of horizontally infinite worlds and do not clamp visible chunks to `0..WidthTiles` when the world is infinite. Tile rendering now asks `TileDefinition.TexturePath` for a sprite id and can draw a real loaded texture when the PNG exists; otherwise it keeps the existing readable colored fallback.
 
+`ChunkRenderCache` stores per-chunk tile draw commands. It rebuilds when a chunk has `NeedsMeshRebuild`, then clears only that mesh flag so save dirtiness remains intact. The renderer exposes `TilemapRenderMetrics` for visible chunks, cached chunks, rebuilt chunks, evicted chunks, tile commands, and liquid commands.
+
 The next renderer evolution should use:
 
 - Chunk render caches.
+- Render-target or atlas-backed chunk batching.
 - Autotile source rectangles.
 - Atlas lookup and source-rect resolution.
 - Render targets for world, lighting, liquids, post effects, and UI.
