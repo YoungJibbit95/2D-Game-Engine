@@ -20,7 +20,7 @@ This file is a contributor-facing snapshot of the current project shape. Open wo
 | Debug UI Foundation | ImGui.NET dependency present, custom debug overlays active |
 | Scripting Foundation | MoonSharp dependency present for later Lua mod scripting |
 | Worldgen Noise | Udun.FastNoiseLite |
-| IDE Setup | Rider-ready solution, launch profile, and setup doc |
+| IDE Setup | Rider-ready `YjsE.sln`, launch profile, and setup doc |
 
 ## Size Snapshot
 
@@ -29,19 +29,19 @@ The count excludes `bin`, `obj`, `.git`, and `.vs`.
 | Area | Files | Lines |
 | --- | ---: | ---: |
 | `Game.Core` | 286 | 12,998 |
-| `Game.Client` | 45 | 4,235 |
+| `Game.Client` | 49 | 4,735 |
 | `Game.Tests` | 75 | 6,582 |
 | `Game.Data` | 57 | 1,397 |
-| `Docs` | 8 | 616 |
+| `Docs` | 8 | 614 |
 
 | Extension | Files | Lines |
 | --- | ---: | ---: |
-| `.cs` | 402 | 23,752 |
+| `.cs` | 405 | 24,223 |
 | `.json` | 59 | 1,416 |
 | `.md` | 9 | 769 |
 | Project/solution/config files | 17 | 342 |
 
-Total tracked workspace snapshot: 487 files, 26,279 lines.
+Total tracked workspace snapshot: 490 files, 26,750 lines.
 
 ## Core Engine Features
 
@@ -78,7 +78,8 @@ Total tracked workspace snapshot: 487 files, 26,279 lines.
 ## Client Features
 
 - MonoGame window/game loop with fixed-step update and variable rendering.
-- Main menu with Singleplayer, planned splitscreen, planned multiplayer, settings, and exit.
+- YjsE-branded main menu with Singleplayer, planned splitscreen, planned multiplayer, settings, and exit.
+- World-select and create-world screens with saved-world metadata listing, typed world names, seed entry, random seeds, and resume through the loading flow.
 - Escape no longer exits from the main menu by accident.
 - Loading state for world/session preparation.
 - Playing state with camera follow, tile/liquid rendering, player rendering, entities, lighting overlay, HUD, inventory overlay, pause menu, and debug console.
@@ -102,14 +103,14 @@ Total tracked workspace snapshot: 487 files, 26,279 lines.
 - UI animation track/player behavior.
 - UI layout, hit-testing, modal layers, focus traversal, tooltips, and cursor interaction snapshots.
 
-Current test count: 294 passing tests after the crafting UI and infinite station locator expansion.
+Current test count: 294 passing tests after the YjsE rename and world select/create flow.
 
 ## Current Engine Direction
 
 The engine is now past the first playable prototype shell and is becoming a reusable Terraria-like 2D gamebuilding core. The most important next engine-grade steps are:
 
 - Move more gameplay orchestration out of `PlayingState` into core simulation services.
-- Add a real UI toolkit with focus, layout primitives, modal layering, tooltips, inventory widgets, and crafting screens.
+- Wire the renderer-neutral UI toolkit into more client screens and add reusable renderer widgets for panels, buttons, labels, slots, lists, tabs, splitters, and windows.
 - Upgrade rendering to atlas-backed batching, render targets, shader passes, particles, and animation clips for entities.
 - Add RGB region-based lighting and dynamic lights attached to items, projectiles, entities, and furniture.
 - Deepen worldgen with biome transitions, underground walls, larger cavern layers, lakes, structure spacing, chest rooms, and sampled infinite-world quality gates.

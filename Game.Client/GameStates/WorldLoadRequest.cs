@@ -12,6 +12,11 @@ public sealed record WorldLoadRequest(
         return new WorldLoadRequest("SINGLEPLAYER", seed, "New World", LocalPlayerCount: 1);
     }
 
+    public static WorldLoadRequest Singleplayer(int seed, string worldName)
+    {
+        return new WorldLoadRequest("SINGLEPLAYER", seed, string.IsNullOrWhiteSpace(worldName) ? "New World" : worldName.Trim(), LocalPlayerCount: 1);
+    }
+
     public static WorldLoadRequest SplitScreen(int seed, int localPlayerCount)
     {
         return new WorldLoadRequest("COOP SPLITSCREEN", seed, "Shared Local World", Math.Max(2, localPlayerCount));

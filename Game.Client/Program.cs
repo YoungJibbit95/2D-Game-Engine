@@ -14,7 +14,7 @@ public static class Program
 
         try
         {
-            Log.Information("Starting TerrariaLike client");
+            Log.Information("Starting YjsE client");
             using var game = new MainGame();
             game.Run();
         }

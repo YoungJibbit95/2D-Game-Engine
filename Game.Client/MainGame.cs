@@ -41,7 +41,7 @@ public sealed class MainGame : Microsoft.Xna.Framework.Game
 
         Content.RootDirectory = "Content";
         IsMouseVisible = true;
-        Window.Title = "TerrariaLike";
+        Window.Title = "YjsE";
         Window.TextInput += OnTextInput;
     }
 

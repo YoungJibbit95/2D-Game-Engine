@@ -29,8 +29,6 @@ Only open work is kept here. Completed items are removed after implementation.
 
 ## Menus
 
-- [ ] Add world select state.
-- [ ] Add create world flow.
 - [ ] Add local splitscreen setup flow.
 - [ ] Add multiplayer host/join flow.
 - [ ] Add typed value entry for settings rows such as resolution, reach, and volume.

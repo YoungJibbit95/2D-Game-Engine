@@ -2,16 +2,27 @@ namespace Game.Client.Configuration;
 
 public static class ClientPaths
 {
+    public const string AppName = "YjsE";
+
     public static string SettingsPath()
     {
+        return Path.Combine(AppDataRoot(), "settings.json");
+    }
+
+    public static string AppDataRoot()
+    {
         var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-        return Path.Combine(appData, "TerrariaLike", "settings.json");
+        return Path.Combine(appData, AppName);
+    }
+
+    public static string WorldSavesRoot()
+    {
+        return Path.Combine(AppDataRoot(), "Saves", "Worlds");
     }
 
     public static string WorldSaveDirectory(string worldName, int seed)
     {
-        var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-        return Path.Combine(appData, "TerrariaLike", "Saves", "Worlds", $"{SanitizePathSegment(worldName)}_{seed}");
+        return Path.Combine(WorldSavesRoot(), $"{SanitizePathSegment(worldName)}_{seed}");
     }
 
     public static string FindGameDataRoot()

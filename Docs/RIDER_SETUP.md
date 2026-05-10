@@ -8,7 +8,7 @@
 
 ## Open And Run
 
-1. Open `TerrariaLike.sln` in Rider.
+1. Open `YjsE.sln` in Rider.
 2. Wait for NuGet restore to finish.
 3. Select the shared `Game.Client` run configuration.
 4. Press Run or Debug.
@@ -33,8 +33,8 @@ Example debug commands:
 ## Fallback CLI Commands
 
 ```powershell
-dotnet restore TerrariaLike.sln
-dotnet test TerrariaLike.sln
+dotnet restore YjsE.sln
+dotnet test YjsE.sln
 dotnet run --project Game.Client
 ```
 

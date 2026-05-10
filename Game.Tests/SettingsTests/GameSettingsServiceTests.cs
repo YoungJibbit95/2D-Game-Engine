@@ -154,6 +154,6 @@ public sealed class GameSettingsServiceTests
 
     private static string CreateTempPath()
     {
-        return Path.Combine(Path.GetTempPath(), "TerrariaLikeTests", Guid.NewGuid().ToString("N"), "settings.json");
+        return Path.Combine(Path.GetTempPath(), "YjsETests", Guid.NewGuid().ToString("N"), "settings.json");
     }
 }

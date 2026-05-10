@@ -27,7 +27,7 @@ public sealed class MainMenuState : IGameState
         _exit = exit;
         _items =
         [
-            new MenuItem("SINGLEPLAYER", "CREATE A LOCAL WORLD", true, StartSingleplayer),
+            new MenuItem("SINGLEPLAYER", "SELECT OR CREATE WORLD", true, StartSingleplayer),
             new MenuItem("COOP SPLITSCREEN", "PLANNED FOR CONSOLE SUPPORT", false, Noop),
             new MenuItem("MULTIPLAYER", "PLANNED SERVER CLIENT SUPPORT", false, Noop),
             new MenuItem("SETTINGS", "VIDEO AUDIO INPUT DEBUG", true, OpenSettings),
@@ -84,8 +84,8 @@ public sealed class MainMenuState : IGameState
         DrawBackground(context, palette);
 
         var titleX = Math.Max(36, context.ViewportBounds.Width / 2 - 250);
-        context.DebugText.Draw(new Vector2(titleX, 64 + offsetY), "TERRARIA LIKE ENGINE", palette.Accent, 4);
-        context.DebugText.Draw(new Vector2(titleX + 4, 112 + offsetY), "SANDBOX ACTION GAMEBUILDING CORE", palette.TextMuted, 2);
+        context.DebugText.Draw(new Vector2(titleX, 64 + offsetY), "YJSE", palette.Accent, 4);
+        context.DebugText.Draw(new Vector2(titleX + 4, 112 + offsetY), "YOUNGJIBBITS ENGINE", palette.TextMuted, 2);
 
         _itemBounds.Clear();
         var startY = 172 + offsetY;
@@ -180,7 +180,7 @@ public sealed class MainMenuState : IGameState
 
     private void StartSingleplayer()
     {
-        _states.ChangeState(new LoadingWorldState(_states, WorldLoadRequest.Singleplayer(seed: 1337)));
+        _states.ChangeState(new WorldSelectState(_states, this));
     }
 
     private void OpenSettings()

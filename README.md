@@ -1,6 +1,6 @@
-# 2D Game Engine
+# YjsE
 
-This repository starts a small MonoGame-based 2D sandbox action-adventure engine.
+YoungJibbit's Engine is a small MonoGame-based 2D sandbox action-adventure engine.
 
 ## Projects
 
@@ -10,7 +10,7 @@ This repository starts a small MonoGame-based 2D sandbox action-adventure engine
 
 ## Current Status
 
-Milestone 1 and the first core world tasks are scaffolded:
+The engine is now a playable YjsE prototype shell with a growing reusable 2D sandbox core:
 
 - .NET 8 SDK-style solution.
 - MonoGame DesktopGL client.
@@ -93,7 +93,8 @@ Milestone 1 and the first core world tasks are scaffolded:
 - Interaction targeting can choose mining and placement targets from actor reach and world raycasts.
 - Melee attacks can optionally respect world line-of-sight.
 - Client tile rendering now visualizes tile liquid amounts, and rendering has initial layer, shader registry, and post-processing settings scaffolding.
-- Startup now enters a main menu with Singleplayer, planned local splitscreen, planned multiplayer, settings, and exit entries.
+- Startup now enters a YjsE-branded main menu with Singleplayer, planned local splitscreen, planned multiplayer, settings, and exit entries.
+- Singleplayer now has a world-select screen and create-world flow with typed world name, seed entry, random seed, save listing, and resume from saved world metadata.
 - A loading state prepares the singleplayer world session before entering gameplay.
 - Existing singleplayer save folders are resumed automatically from the same save layout used by autosave.
 - World generation profiles define starter small, medium, and large Terraria-like world sizes and tuning targets.
@@ -138,7 +139,7 @@ Milestone 1 and the first core world tasks are scaffolded:
 
 ## Rider
 
-Open `TerrariaLike.sln` in JetBrains Rider and run the shared `Game.Client` configuration. See `Docs/RIDER_SETUP.md` for the exact setup and runtime controls.
+Open `YjsE.sln` in JetBrains Rider and run the shared `Game.Client` configuration. See `Docs/RIDER_SETUP.md` for the exact setup and runtime controls.
 
 ## Inventory
 
