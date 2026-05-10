@@ -64,6 +64,7 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
     private bool _showGrid;
     private int _selectedHotbarSlot;
     private string? _worldSaveDirectory;
+    private ClientTextureRegistry? _textures;
 
     public PlayingState(GameStateManager states, LoadedGameSession? loadedSession = null)
     {
@@ -159,6 +160,7 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
 
         _lastViewportBounds = context.ViewportBounds;
         var settings = _pauseMenu.Settings;
+        EnsureTextureRegistry(context);
         _camera.Zoom = settings.Gameplay.CameraZoom;
         var cameraTarget = GetCameraTarget();
         _camera.Follow(cameraTarget, context.ViewportBounds, smoothing: 0.18f);
@@ -171,6 +173,8 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
 
         _tilemapRenderer.ShowGrid = _showGrid;
         _tilemapRenderer.DrawLiquids = settings.Rendering.DrawLiquids;
+        _tilemapRenderer.Textures = _textures;
+        _tilemapRenderer.TileSpriteResolver = ResolveTileSpriteId;
         _tilemapRenderer.Draw(context, _world, _camera);
         DrawPlayer(context);
         DrawEntities(context);
@@ -212,6 +216,7 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
 
     public void Dispose()
     {
+        _textures?.Dispose();
     }
 
     public void OnTextInput(char character)
@@ -400,6 +405,26 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
         var snapshot = _debugSnapshot;
         context.DebugText.Draw(new Vector2(12, 178), $"DIRTY: {snapshot.DirtyChunkCount} LIQ: {snapshot.LiquidTileCount}", Color.LightGray, 2);
         context.DebugText.Draw(new Vector2(12, 202), $"SURF: {snapshot.MinSurfaceY}-{snapshot.MaxSurfaceY}", Color.LightGray, 2);
+    }
+
+    private void EnsureTextureRegistry(RenderContext context)
+    {
+        if (_textures is not null || _content is null)
+        {
+            return;
+        }
+
+        _textures = new ClientTextureRegistry(context.GraphicsDevice, ClientPaths.FindGameDataRoot(), _content.SpriteAssets);
+    }
+
+    private string? ResolveTileSpriteId(ushort tileId)
+    {
+        if (_content is null)
+        {
+            return null;
+        }
+
+        return _content.Tiles.GetByNumericId(tileId).TexturePath;
     }
 
     private CommandResult ExecuteDebugCommand(string command)

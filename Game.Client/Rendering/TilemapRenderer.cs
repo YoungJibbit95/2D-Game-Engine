@@ -10,6 +10,10 @@ public sealed class TilemapRenderer
 
     public bool DrawLiquids { get; set; } = true;
 
+    public ClientTextureRegistry? Textures { get; set; }
+
+    public Func<ushort, string?>? TileSpriteResolver { get; set; }
+
     public void Draw(RenderContext context, World world, Camera2D camera)
     {
         foreach (var chunkPosition in camera.GetVisibleChunks())
@@ -66,12 +70,40 @@ public sealed class TilemapRenderer
             (int)tileSize,
             (int)tileSize);
 
+        if (TryDrawSpriteTexture(context, destination, tile.TileId))
+        {
+            if (ShowGrid)
+            {
+                DrawGrid(context, destination);
+            }
+
+            return;
+        }
+
         context.SpriteBatch.Draw(context.Pixel, destination, GetTileColor(tile.TileId));
 
         if (ShowGrid)
         {
             DrawGrid(context, destination);
         }
+    }
+
+    private bool TryDrawSpriteTexture(RenderContext context, Rectangle destination, ushort tileId)
+    {
+        if (Textures is null || TileSpriteResolver is null)
+        {
+            return false;
+        }
+
+        var spriteId = TileSpriteResolver(tileId);
+        if (string.IsNullOrWhiteSpace(spriteId) ||
+            !Textures.TryGetRealTexture(spriteId, out var sprite))
+        {
+            return false;
+        }
+
+        context.SpriteBatch.Draw(sprite.Texture, destination, sprite.SourceRectangle, Color.White);
+        return true;
     }
 
     private static void DrawLiquid(RenderContext context, Camera2D camera, int tileX, int tileY, TileInstance tile)

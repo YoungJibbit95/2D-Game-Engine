@@ -5,6 +5,7 @@
 /modules.xml
 /contentModel.xml
 /projectSettingsUpdater.xml
+/vcs.xml
 /.idea.TerrariaLike.iml
 # Editor-based HTTP Client requests
 /httpRequests/

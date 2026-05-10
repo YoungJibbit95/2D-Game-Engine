@@ -41,7 +41,6 @@ Only open engine work is kept here. Completed items are removed after implementa
 
 ## Rendering And Shaders
 
-- [ ] Build a client texture registry from `SpriteAssetRegistry`.
 - [ ] Add texture atlas lookup and source-rect resolution.
 - [ ] Add `ChunkRenderCache` with rebuilds only for dirty visible chunks.
 - [ ] Wire autotile masks to render source rectangles.
@@ -66,7 +65,7 @@ Only open engine work is kept here. Completed items are removed after implementa
 - [ ] Add explicit mod load order configuration.
 - [ ] Add content hot reload command and safe reload report.
 - [ ] Add debug content browser for tiles, items, recipes, entities, effects, loot, spawns, sprites, and worldgen profiles.
-- [ ] Add missing texture/sound/effect fallbacks per asset category.
+- [ ] Add missing sound/effect fallbacks per asset category.
 - [ ] Add MoonSharp script discovery and sandbox boundaries after the data contract is stable.
 
 ## Interaction, Combat, And Gameplay Systems

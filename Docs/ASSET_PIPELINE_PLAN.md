@@ -1,17 +1,67 @@
-# Asset Pipeline Plan
+# Asset Pipeline And AI Sprite Briefs
 
-This is the working asset plan for the Terraria-like engine. It defines how sprites should be organized before the real art pass begins.
+This document is the handoff contract for another AI model, artist, or tool that generates sprites for the Terraria-like engine. The goal is that an asset generator can read the plan, read `Game.Data/assets/*.json`, read `Game.Data/asset_briefs/*.json`, and produce PNG files without guessing style, paths, sizes, or naming.
 
-## Goals
+## Generation Contract
 
-- Keep gameplay definitions stable even if source files move.
-- Let tools and mods validate missing sprites early.
-- Support atlas packing later without changing item, tile, or entity definitions.
-- Keep sprite categories clear for artists, designers, and engine code.
+Use the machine-readable briefs in `Game.Data/asset_briefs/base_sprite_generation_briefs.json` as the source of truth for AI generation. Each brief maps one logical sprite id to one output PNG.
+
+For every brief:
+
+- Generate exactly one PNG at `outputPath`.
+- Use the exact `width` and `height`.
+- Preserve transparent background unless the brief says the sprite fills a tile.
+- Do not add text, logos, watermarks, signatures, UI frames, mockups, or background scenery.
+- Use crisp pixel art with hard edges, no anti-aliasing, no blur, no photographic rendering, and no sub-pixel gradients.
+- Keep the sprite aligned to the pixel grid and readable at native size.
+- Keep lighting consistent from the upper-left.
+- Prefer 2-4 shade clusters per material.
+
+The asset generator should write files relative to `Game.Content/` or another chosen source-art root, while preserving the path after `sprites/`. Example:
+
+```text
+spriteId: tiles/dirt
+outputPath: sprites/world/tiles/dirt.png
+final source file: Game.Content/Sprites/World/Tiles/dirt.png
+runtime copy path later: Game.Data/sprites/world/tiles/dirt.png or packed atlas entry
+```
+
+## AI Model Prompt Template
+
+For each entry in `Game.Data/asset_briefs/*.json`, build the generation prompt like this:
+
+```text
+SYSTEM:
+You generate production-ready 2D pixel art sprites for a Terraria-like sandbox game.
+Return only the image. No text, frame, watermark, mockup, or extra canvas.
+
+STYLE:
+{globalStyle}
+
+SPRITE:
+id: {spriteId}
+subject: {subject}
+canvas: {width}x{height}
+background: {background}
+palette hints: {palette}
+
+PROMPT:
+{prompt}
+
+REQUIREMENTS:
+{globalRequirements}
+{requirements}
+
+NEGATIVE:
+{globalNegativePrompt}
+{negativePrompt}
+```
+
+If the model supports a negative prompt field, put all negative text there instead of in the main prompt.
 
 ## Sprite Id Convention
 
-Sprite ids are logical ids. They are used by JSON definitions and should remain stable.
+Sprite ids are stable logical ids. Gameplay definitions reference ids, not file paths.
 
 - `tiles/dirt`
 - `tiles/workbench`
@@ -32,48 +82,46 @@ Recommended source layout for real art:
 
 ```text
 Game.Content/
-├─ Sprites/
-│  ├─ World/
-│  │  ├─ Tiles/
-│  │  ├─ Walls/
-│  │  ├─ Objects/
-│  │  ├─ Liquids/
-│  │  └─ Backgrounds/
-│  ├─ Items/
-│  │  ├─ Blocks/
-│  │  ├─ Materials/
-│  │  ├─ Tools/
-│  │  ├─ Weapons/
-│  │  ├─ Armor/
-│  │  ├─ Accessories/
-│  │  ├─ Consumables/
-│  │  └─ Stations/
-│  ├─ Entities/
-│  │  ├─ Player/
-│  │  ├─ NPCs/
-│  │  ├─ Enemies/
-│  │  └─ Critters/
-│  ├─ Projectiles/
-│  ├─ Particles/
-│  ├─ Effects/
-│  └─ UI/
-│     ├─ HUD/
-│     ├─ Inventory/
-│     ├─ Crafting/
-│     ├─ Menus/
-│     └─ Debug/
-└─ Atlases/
-   ├─ world.atlas.json
-   ├─ items.atlas.json
-   ├─ entities.atlas.json
-   └─ ui.atlas.json
+|-- Sprites/
+|   |-- World/
+|   |   |-- Tiles/
+|   |   |-- Walls/
+|   |   |-- Objects/
+|   |   |-- Liquids/
+|   |   `-- Backgrounds/
+|   |-- Items/
+|   |   |-- Blocks/
+|   |   |-- Materials/
+|   |   |-- Tools/
+|   |   |-- Weapons/
+|   |   |-- Armor/
+|   |   |-- Accessories/
+|   |   |-- Consumables/
+|   |   `-- Stations/
+|   |-- Entities/
+|   |   |-- Player/
+|   |   |-- NPCs/
+|   |   |-- Enemies/
+|   |   `-- Critters/
+|   |-- Projectiles/
+|   |-- Particles/
+|   |-- Effects/
+|   `-- UI/
+|       |-- HUD/
+|       |-- Inventory/
+|       |-- Crafting/
+|       |-- Menus/
+|       `-- Debug/
+`-- Atlases/
+    |-- world.atlas.json
+    |-- items.atlas.json
+    |-- entities.atlas.json
+    `-- ui.atlas.json
 ```
 
-## Current Data Contract
+## Runtime Data Contract
 
 Sprite metadata lives in `Game.Data/assets/*.json`.
-
-Example:
 
 ```json
 {
@@ -99,24 +147,37 @@ Definition files use the logical id:
 }
 ```
 
-## Categories
+Generation briefs live separately in `Game.Data/asset_briefs/*.json` so gameplay loading does not depend on generation-only prompt text.
 
-- `Tile`: tile sprites.
-- `Wall`: background wall sprites.
-- `Item`: generic inventory icons.
-- `Tool`: tools such as pickaxes and axes.
-- `Weapon`: melee, ranged, magic, and thrown weapons.
-- `Entity`: player, NPC, enemy, and critter sprites.
-- `Projectile`: arrows, bullets, magic bolts, thrown objects.
-- `Particle`: dust, sparks, debris, hit particles.
-- `Effect`: temporary visual effects.
-- `Ui`: HUD, inventory, crafting, menu, and debug interface sprites.
-- `Background`: sky, parallax, biome backgrounds.
-- `WorldObject`: furniture, stations, decorations, structures.
+## Category Rules
+
+- `Tile`: usually 16x16. Terrain tiles must fill the canvas and state whether they tile on all edges or only horizontally.
+- `Wall`: background wall sprites, lower contrast than terrain.
+- `WorldObject`: furniture, stations, and decorations. Usually transparent, grounded at the bottom of the canvas.
+- `Item`, `Tool`, `Weapon`: inventory icons. Use transparent background and leave 1-2 pixels of padding when possible.
+- `Armor`: currently encoded as `Item` category with `armor` tags.
+- `Entity`: side-view runtime creature sprites. Must be grounded at the bottom and fit the entity's definition body.
+- `Projectile`: small readable motion sprites. Usually long, thin, and transparent.
+- `Particle` and `Effect`: tiny visual feedback pieces, no UI framing.
+- `Ui`: interface pieces. Use clear edges and avoid decorative noise.
+- `Background`: larger parallax or sky assets. These can use full-canvas backgrounds and are not item icons.
+
+## Current Base Generation Set
+
+The current base brief file covers all sprite ids in `Game.Data/assets/sprites.json`:
+
+- Terrain and world: air, dirt, grass, stone, copper ore, iron ore, wood, leaves, workbench.
+- Materials and blocks: dirt block, stone block, wood, gel, copper ore, iron ore, copper coin.
+- Tools and weapons: copper pickaxe, iron pickaxe, wooden sword, copper sword, iron sword, wooden bow.
+- Armor and accessories: copper helmet, copper chestplate, copper greaves, mining charm.
+- Consumables/ammo: healing potion, wooden arrow, poison arrow.
+- Runtime sprites: slime, wooden arrow projectile, poison arrow projectile.
+
+When new sprites are added to `Game.Data/assets`, add a matching brief in `Game.Data/asset_briefs` in the same change. The tests enforce this.
 
 ## Atlas Strategy
 
-Initial renderer can load individual textures or placeholders. The next production step should pack sprites into atlases:
+Initial renderer can load individual textures or placeholders through `ClientTextureRegistry`. The next production step should pack sprites into atlases:
 
 - `world`: tiles, walls, liquids, foliage, furniture.
 - `items`: all inventory icons.
@@ -126,21 +187,22 @@ Initial renderer can load individual textures or placeholders. The next producti
 
 `SpriteAssetDefinition.AtlasId` is already reserved for this.
 
-## Authoring Rules
+## Acceptance Checklist For Generated Sprites
 
-- Default tile size is 16x16.
-- Inventory icons should start at 16x16 or 32x32 source size.
-- Entity sprites should define logical body size separately in entity definitions.
-- Animation frames should be represented in sprite metadata, not hardcoded in renderers.
-- File paths may change; sprite ids should not.
-- Mods may override sprite ids, but content reports should show the override.
+- [ ] Every generated PNG exists at the path requested by its brief.
+- [ ] Width and height match the brief exactly.
+- [ ] Transparent-background sprites have real alpha, not a flat background color.
+- [ ] Terrain tiles tile correctly as specified.
+- [ ] Inventory items remain readable at 1x scale.
+- [ ] Related materials share palette language: copper is warm orange, iron is muted pale tan, wood is warm brown, stone is neutral grey.
+- [ ] No sprite contains text, watermark, signature, prompt artifacts, or UI frame unless specifically requested.
+- [ ] Sprite ids in `Game.Data/assets` and briefs in `Game.Data/asset_briefs` stay in sync.
 
 ## Next Pipeline Steps
 
-- Add client-side `TextureRegistry` that resolves `SpriteAssetDefinition` into MonoGame textures.
-- Add placeholder texture generation for missing sprite ids.
-- Add atlas build reports and duplicate-source checks.
-- Add animation clip metadata.
+- Add atlas packing and source-rect reports.
+- Add animation clip metadata for player, enemies, liquids, and effects.
 - Add Aseprite export conventions.
 - Add sprite preview/editor tooling.
+- Add duplicate-source and missing-PNG validation.
 - Add asset provenance in content reports for base game vs mods.

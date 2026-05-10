@@ -8,7 +8,7 @@ This document explains how the engine is intended to fit together. Checklist fil
 
 `Game.Client` adapts MonoGame to the core. It owns the window, SpriteBatch rendering, keyboard/mouse input, game states, debug overlays, and temporary placeholder drawing.
 
-`Game.Data` contains base-game definitions. These files are the first version of the modding contract: tiles, items, recipes, loot, biomes, entities, projectiles, status effects, spawns, worldgen profiles, and sprite asset manifests.
+`Game.Data` contains base-game definitions. These files are the first version of the modding contract: tiles, items, recipes, loot, biomes, entities, projectiles, status effects, spawns, worldgen profiles, sprite asset manifests, and sprite generation briefs.
 
 `Game.Tests` is the safety net for core behavior. Any engine rule that can run without graphics should be tested here.
 
@@ -145,7 +145,9 @@ The current station foundation is intentionally engine-level. UI screens can con
 
 `SpriteAssetDefinition` is engine metadata for sprite identity, category, source path, dimensions, optional atlas id, frames, and tags.
 
-The renderer does not use this registry deeply yet. Its purpose is to make content references explicit now, so atlas packing, editor tooling, mod validation, and renderer texture loading can all converge on one data contract.
+`SpriteGenerationBrief` is a generation-time contract that maps a sprite id to an AI prompt, negative prompt, output path, palette hints, and hard requirements. It lives under `Game.Data/asset_briefs` instead of `Game.Data/assets` so runtime loading stays focused on gameplay metadata.
+
+The client has a `ClientTextureRegistry` that resolves `SpriteAssetRegistry` ids into MonoGame textures. If the source PNG does not exist yet, it creates a deterministic category-colored placeholder. This lets gameplay and rendering code use stable sprite ids before the real art pass is finished.
 
 ## Simulation
 
@@ -155,14 +157,13 @@ The current client still has direct state orchestration in `PlayingState`. Long 
 
 ## Rendering
 
-The current client renderer is placeholder-driven. It draws tiles, liquids, entities, player, lighting overlay, HUD, and debug text. Tile and lighting passes are aware of horizontally infinite worlds and do not clamp visible chunks to `0..WidthTiles` when the world is infinite.
+The current client renderer draws tiles, liquids, entities, player, lighting overlay, HUD, and debug text. Tile and lighting passes are aware of horizontally infinite worlds and do not clamp visible chunks to `0..WidthTiles` when the world is infinite. Tile rendering now asks `TileDefinition.TexturePath` for a sprite id and can draw a real loaded texture when the PNG exists; otherwise it keeps the existing readable colored fallback.
 
 The next renderer evolution should use:
 
-- `SpriteAssetRegistry` for texture ids.
-- A texture registry in the client.
 - Chunk render caches.
 - Autotile source rectangles.
+- Atlas lookup and source-rect resolution.
 - Render targets for world, lighting, liquids, post effects, and UI.
 - Shader registry entries mapped to actual MonoGame effects.
 

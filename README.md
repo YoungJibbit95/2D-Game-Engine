@@ -99,6 +99,8 @@ Milestone 1 and the first core world tasks are scaffolded:
 - The debug console includes `/debug world` for compact world, chunk, entity, liquid, and surface metrics.
 - Tile and item definitions now support normalized tags for material-style gameplay rules and tooling filters.
 - Sprite asset manifests now define stable logical sprite ids, categories, dimensions, tags, and future atlas hooks.
+- AI sprite generation briefs in `Game.Data/asset_briefs` define exact prompts, output paths, sizes, palettes, and constraints for another model to generate the base sprites.
+- The client has a `ClientTextureRegistry` that can load generated PNGs from sprite manifests and create deterministic placeholders while art is missing.
 - Item definitions now support data-driven primary actions for mine, place, melee, shoot, consume, cast, and interact flows.
 - Placeable items can declare placement support rules such as adjacent solid support, wall/solid support, or solid ground.
 - Area queries support rectangles, circles, cones, and tile flood fill as shared foundations for attacks, AI, triggers, and interaction tooling.
