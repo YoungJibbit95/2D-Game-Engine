@@ -71,6 +71,7 @@ Milestone 1 and the first core world tasks are scaffolded:
 - `MeleeAttackSystem` resolves player melee hitboxes, cooldowns, enemy damage, death events, and loot drops.
 - `PlayerRespawnSystem` restores dead players at the world metadata spawn point after a delay.
 - Chunk streaming planner computes load/unload boundaries around visible tile areas and keeps dirty chunks loaded.
+- Chunk streaming service owns load/generate/save-before-unload lifecycle for infinite worlds and exposes runtime metrics.
 - Structure templates and placer support reusable worldgen structures, with an initial surface shelter generation step.
 - Advanced world generation now includes underground liquid pockets using tile liquid data.
 - `PlayerItemUseSystem` routes selected hotbar items into mining, building, and melee actions.

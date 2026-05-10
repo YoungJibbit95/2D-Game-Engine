@@ -16,7 +16,6 @@ using Game.Core.Lighting;
 using Game.Core.Physics;
 using Game.Core.Projectiles;
 using Game.Core.Settings;
-using Game.Core.Saving;
 using Game.Core.Time;
 using Game.Core.World;
 using Game.Core.World.Generation;
@@ -37,9 +36,7 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
     private readonly TileCollisionResolver _collisionResolver = new();
     private readonly PlayerItemUseSystem _itemUse = new();
     private readonly InteractionTargetingSystem _targeting = new();
-    private readonly InfiniteWorldChunkGenerator _infiniteWorldgen = new();
-    private readonly ChunkStreamingPlanner _streamingPlanner = new();
-    private readonly WorldSaveService _worldSaves = new();
+    private readonly ChunkStreamingService _streaming = new();
     private readonly EngineDebugSnapshotBuilder _debugSnapshots = new();
     private readonly CommandDispatcher _commands = new(CommandRegistry.CreateDefault());
     private readonly HudOverlay _hud = new();
@@ -65,6 +62,7 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
     private int _selectedHotbarSlot;
     private string? _worldSaveDirectory;
     private ClientTextureRegistry? _textures;
+    private ChunkStreamingUpdateResult _lastStreaming = ChunkStreamingUpdateResult.Empty;
 
     public PlayingState(GameStateManager states, LoadedGameSession? loadedSession = null)
     {
@@ -205,6 +203,7 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
 
             DrawEngineDebugSnapshot(context);
             DrawRenderDebugMetrics(context);
+            DrawStreamingDebugMetrics(context);
         }
 
         if (settings.Gameplay.ShowInteractionTarget)
@@ -424,6 +423,15 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
             2);
     }
 
+    private void DrawStreamingDebugMetrics(RenderContext context)
+    {
+        context.DebugText.Draw(
+            new Vector2(12, 274),
+            $"STREAM LOAD:{_lastStreaming.LoadedChunks} GEN:{_lastStreaming.GeneratedChunks} SAVE:{_lastStreaming.SavedChunksBeforeUnload} UNLOAD:{_lastStreaming.UnloadedChunks}",
+            Color.LightGray,
+            2);
+    }
+
     private void EnsureTextureRegistry(RenderContext context)
     {
         if (_textures is not null || _content is null)
@@ -482,54 +490,12 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
         var maxTile = CoordinateUtils.WorldToTile(_camera.VisibleWorldRect.Right, _camera.VisibleWorldRect.Bottom);
         var visibleTiles = RectI.FromInclusiveTileBounds(minTile.X, minTile.Y, maxTile.X, maxTile.Y);
         var worldSettings = _pauseMenu.Settings.World;
-        var plan = _streamingPlanner.Plan(_world, visibleTiles, new ChunkStreamingOptions
+        _lastStreaming = _streaming.Update(_world, profile, visibleTiles, _worldSaveDirectory, new ChunkStreamingOptions
         {
             LoadMarginChunks = worldSettings.ChunkLoadMargin,
             UnloadMarginChunks = worldSettings.ChunkUnloadMargin,
             KeepDirtyChunksLoaded = worldSettings.KeepDirtyChunksLoaded
         });
-        LoadOrGenerateRequiredChunks(profile, plan);
-        SaveAndUnloadChunks(plan);
-    }
-
-    private void LoadOrGenerateRequiredChunks(WorldGenerationProfile profile, ChunkStreamingPlan plan)
-    {
-        if (_world is null)
-        {
-            return;
-        }
-
-        foreach (var position in plan.ChunksToLoad)
-        {
-            if (!string.IsNullOrWhiteSpace(_worldSaveDirectory) &&
-                _worldSaves.TryLoadChunk(_world, _worldSaveDirectory, position))
-            {
-                continue;
-            }
-
-            _infiniteWorldgen.EnsureChunk(_world, profile, position);
-        }
-    }
-
-    private void SaveAndUnloadChunks(ChunkStreamingPlan plan)
-    {
-        if (_world is null)
-        {
-            return;
-        }
-
-        foreach (var position in plan.ChunksToUnload)
-        {
-            if (_world.TryGetChunk(position, out var chunk) &&
-                chunk is not null &&
-                chunk.IsDirty &&
-                !string.IsNullOrWhiteSpace(_worldSaveDirectory))
-            {
-                _worldSaves.SaveChunk(_world, _worldSaveDirectory, position);
-            }
-
-            _world.UnloadChunk(position);
-        }
     }
 
     private static string GetHotbarBinding(KeyBindingSettings bindings, int slot)

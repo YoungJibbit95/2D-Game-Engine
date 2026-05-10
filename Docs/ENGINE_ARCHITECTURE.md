@@ -53,6 +53,8 @@ Profiles currently control:
 
 `InfiniteWorldChunkGenerator` is the streaming-oriented generator. It creates a finite-height, horizontally infinite world and can deterministically materialize any chunk at negative or positive X from the same profile and seed. The first version generates terrain, depth dimensions, ores, caves, pass-through mineable trees, and underground water pockets per chunk. Full-world analysis and quality gates still belong to finite generation until a sampled infinite-world analysis pass exists.
 
+`ChunkStreamingPlanner` calculates required, load, and unload sets around a visible tile area. `ChunkStreamingService` owns the lifecycle around that plan: it loads saved chunks first, generates missing chunks deterministically, saves dirty chunks before unloading when a save directory exists, skips dirty unloads when data would be lost, and returns metrics for debug UI. The service uses `WorldSaveService` in region-file mode by default while still benefiting from save-load fallback for older loose chunk files.
+
 ## World Model
 
 The world is tile-based. It can be finite in both axes or horizontally infinite with finite vertical bounds. Global tile coordinates map to chunk coordinates through `CoordinateUtils`, including negative tile and chunk X.

@@ -97,7 +97,7 @@ public static class WorldSessionFactory
         bool fullVerticalSlice,
         string saveDirectory)
     {
-        var saves = new WorldSaveService();
+        var saves = new WorldSaveService(WorldChunkStorageMode.RegionFiles);
         var spawnChunk = CoordinateUtils.TileToChunk(world.Metadata.SpawnTile);
         var minChunkY = fullVerticalSlice ? 0 : Math.Max(0, spawnChunk.Y - 2);
         var maxChunkY = fullVerticalSlice
