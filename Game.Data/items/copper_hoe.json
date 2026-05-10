@@ -1,0 +1,13 @@
+{
+  "id": "copper_hoe",
+  "displayName": "Copper Hoe",
+  "type": "ToolHoe",
+  "texture": "items/copper_hoe",
+  "maxStack": 1,
+  "useTime": 0.25,
+  "toolPower": 10,
+  "actions": [
+    { "kind": "Till", "reachPixels": 56 }
+  ],
+  "tags": ["tool", "farming", "hoe", "starter"]
+}

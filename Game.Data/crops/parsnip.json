@@ -1,0 +1,14 @@
+{
+  "id": "parsnip",
+  "displayName": "Parsnip",
+  "texture": "crops/parsnip",
+  "seedItem": "parsnip_seeds",
+  "harvestItem": "parsnip",
+  "baseYield": 1,
+  "extraYieldChancePercent": 0,
+  "regrowDays": 0,
+  "requiresWater": true,
+  "growthStageDays": [1, 1, 1, 1],
+  "seasons": ["Spring"],
+  "tags": ["starter", "vegetable", "spring"]
+}

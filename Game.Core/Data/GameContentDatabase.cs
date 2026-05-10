@@ -3,6 +3,7 @@ using Game.Core.Biomes;
 using Game.Core.Crafting;
 using Game.Core.Effects;
 using Game.Core.Entities;
+using Game.Core.Farming;
 using Game.Core.Items;
 using Game.Core.Loot;
 using Game.Core.Projectiles;
@@ -28,4 +29,6 @@ public sealed record GameContentDatabase(
 
     public WorldGenerationProfileRegistry WorldGenerationProfiles { get; init; } =
         WorldGenerationProfileRegistry.Create(Array.Empty<WorldGenerationProfile>());
+
+    public CropRegistry Crops { get; init; } = CropRegistry.Create(Array.Empty<CropDefinition>());
 }

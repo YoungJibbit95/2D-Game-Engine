@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "globalStyle": "Create crisp 2D pixel art for a Terraria-like sandbox action-adventure. Use exact low-resolution pixel shapes, hard edges, no anti-aliasing, no blur, no text, no watermark, transparent background, readable silhouette, restrained saturation, and a hand-authored game sprite look. Keep lighting from upper-left and use 2-4 shade clusters per material.",
+  "globalStyle": "Create crisp 2D pixel art for a C# 2D gamebuilding engine that supports Terraria-like sandbox action and Stardew-like topdown farming. Use exact low-resolution pixel shapes, hard edges, no anti-aliasing, no blur, no text, no watermark, transparent background, readable silhouette, restrained saturation, and a hand-authored game sprite look. Keep lighting from upper-left and use 2-4 shade clusters per material.",
   "globalNegativePrompt": "photorealistic, 3d render, smooth gradients, anti-aliased edges, blurry, noisy background, text, logo, watermark, UI mockup, oversized canvas, cropped object, perspective distortion",
   "globalRequirements": [
     "Export a PNG at the exact requested width and height.",
@@ -337,6 +337,61 @@
       "requirements": ["Transparent background.", "Bottle silhouette must be readable at 16x16."],
       "palette": ["#5c351f", "#a82f3a", "#e45462", "#b8e1f1"],
       "tags": ["item", "consumable", "healing"]
+    },
+    {
+      "spriteId": "items/copper_hoe",
+      "outputPath": "sprites/tools/copper_hoe.png",
+      "width": 16,
+      "height": 16,
+      "subject": "copper hoe farming tool icon",
+      "prompt": "Diagonal copper hoe with a short wooden handle and small copper blade, readable as a farming tilling tool for topdown life-sim gameplay.",
+      "requirements": ["Transparent background.", "Fits within 16x16.", "Distinct from the pickaxe silhouette.", "Blade should be copper-orange and angled like a hoe."],
+      "palette": ["#5c351f", "#8a512b", "#b26335", "#d98c4c"],
+      "tags": ["item", "tool", "farming", "hoe"]
+    },
+    {
+      "spriteId": "items/watering_can",
+      "outputPath": "sprites/tools/watering_can.png",
+      "width": 16,
+      "height": 16,
+      "subject": "watering can farming tool icon",
+      "prompt": "Small metal watering can icon with handle, short spout, and a few blue water pixels near the spout. Topdown farming tool, compact but readable.",
+      "requirements": ["Transparent background.", "Fits within 16x16.", "Do not add text or UI labels.", "Can silhouette must be distinct from potion bottles."],
+      "palette": ["#5f6875", "#8793a3", "#b8c2cf", "#4aa6d8"],
+      "tags": ["item", "tool", "farming", "watering"]
+    },
+    {
+      "spriteId": "items/parsnip_seeds",
+      "outputPath": "sprites/items/seeds/parsnip_seeds.png",
+      "width": 16,
+      "height": 16,
+      "subject": "parsnip seed packet item icon",
+      "prompt": "Tiny open seed pouch or packet with tan parsnip seeds visible, spring farming inventory icon. No printed letters or symbols.",
+      "requirements": ["Transparent background.", "Readable at 16x16.", "Do not include text.", "Use a few seed dots but keep the silhouette simple."],
+      "palette": ["#6a4a2e", "#b87943", "#d6b77c", "#f1d7a1"],
+      "tags": ["item", "seed", "farming", "spring"]
+    },
+    {
+      "spriteId": "items/parsnip",
+      "outputPath": "sprites/items/crops/parsnip.png",
+      "width": 16,
+      "height": 16,
+      "subject": "harvested parsnip crop item icon",
+      "prompt": "Small harvested parsnip vegetable icon with cream root body, leafy green top, and earthy pixel outline. Inventory crop item.",
+      "requirements": ["Transparent background.", "Root and leaves must both be readable.", "No face, text, basket, or background."],
+      "palette": ["#4f7f38", "#74a84d", "#d8c58d", "#f0dfaa"],
+      "tags": ["item", "crop", "food", "spring"]
+    },
+    {
+      "spriteId": "crops/parsnip",
+      "outputPath": "sprites/world/crops/parsnip.png",
+      "width": 64,
+      "height": 16,
+      "subject": "four-stage parsnip crop world strip",
+      "prompt": "Horizontal 64x16 strip containing exactly four 16x16 parsnip crop growth stages for topdown farming soil. Stage 0 is tiny sprouts, stage 1 is small leaves, stage 2 is leafy plant with root hint, stage 3 is mature parsnip leaves ready to harvest. Transparent background.",
+      "requirements": ["Create exactly 4 frames arranged left to right.", "Each frame is exactly 16x16 pixels.", "Do not add spacing, labels, borders, or guide marks.", "Plant bases should sit near the bottom center of each frame.", "Must read cleanly when drawn on tilled soil."],
+      "palette": ["#3f7a39", "#66a84f", "#d8c58d", "#f0dfaa"],
+      "tags": ["crop", "world", "farming", "spring", "growth-strip"]
     },
     {
       "spriteId": "entities/slime",

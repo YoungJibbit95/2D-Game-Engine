@@ -1,0 +1,12 @@
+{
+  "id": "watering_can",
+  "displayName": "Watering Can",
+  "type": "ToolWateringCan",
+  "texture": "items/watering_can",
+  "maxStack": 1,
+  "useTime": 0.35,
+  "actions": [
+    { "kind": "Water", "reachPixels": 56 }
+  ],
+  "tags": ["tool", "farming", "watering"]
+}

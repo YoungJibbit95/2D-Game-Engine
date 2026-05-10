@@ -6,7 +6,7 @@ namespace Game.Tests.DataTests;
 
 public sealed class GameContentLoaderTests : IDisposable
 {
-    private readonly string _contentRoot = Path.Combine(Path.GetTempPath(), "terraria-like-content-tests", Guid.NewGuid().ToString("N"));
+    private readonly string _contentRoot = Path.Combine(Path.GetTempPath(), "yjse-content-tests", Guid.NewGuid().ToString("N"));
 
     [Fact]
     public void LoadFromRoot_LoadsTileAndItemRegistries()
@@ -21,6 +21,7 @@ public sealed class GameContentLoaderTests : IDisposable
         Directory.CreateDirectory(Path.Combine(_contentRoot, "entities"));
         Directory.CreateDirectory(Path.Combine(_contentRoot, "effects"));
         Directory.CreateDirectory(Path.Combine(_contentRoot, "worldgen"));
+        Directory.CreateDirectory(Path.Combine(_contentRoot, "crops"));
 
         File.WriteAllText(Path.Combine(_contentRoot, "tiles", "dirt.json"), """
         {
@@ -45,6 +46,26 @@ public sealed class GameContentLoaderTests : IDisposable
           "texture": "items/dirt_block",
           "maxStack": 999,
           "placesTile": "dirt"
+        }
+        """);
+
+        File.WriteAllText(Path.Combine(_contentRoot, "items", "parsnip_seeds.json"), """
+        {
+          "id": "parsnip_seeds",
+          "displayName": "Parsnip Seeds",
+          "type": "Seed",
+          "texture": "items/parsnip_seeds",
+          "maxStack": 999
+        }
+        """);
+
+        File.WriteAllText(Path.Combine(_contentRoot, "items", "parsnip.json"), """
+        {
+          "id": "parsnip",
+          "displayName": "Parsnip",
+          "type": "Consumable",
+          "texture": "items/parsnip",
+          "maxStack": 999
         }
         """);
 
@@ -121,11 +142,26 @@ public sealed class GameContentLoaderTests : IDisposable
         }
         """);
 
+        File.WriteAllText(Path.Combine(_contentRoot, "crops", "parsnip.json"), """
+        {
+          "id": "parsnip",
+          "displayName": "Parsnip",
+          "texture": "crops/parsnip",
+          "seedItem": "parsnip_seeds",
+          "harvestItem": "parsnip",
+          "growthStageDays": [1, 1, 1],
+          "seasons": ["Spring"]
+        }
+        """);
+
         File.WriteAllText(Path.Combine(_contentRoot, "assets", "sprites.json"), """
         {
           "sprites": [
             { "id": "tiles/dirt", "path": "sprites/world/tiles/dirt.png", "category": "Tile", "width": 16, "height": 16 },
             { "id": "items/dirt_block", "path": "sprites/items/blocks/dirt_block.png", "category": "Item", "width": 16, "height": 16 },
+            { "id": "items/parsnip_seeds", "path": "sprites/items/seeds/parsnip_seeds.png", "category": "Item", "width": 16, "height": 16 },
+            { "id": "items/parsnip", "path": "sprites/items/crops/parsnip.png", "category": "Item", "width": 16, "height": 16 },
+            { "id": "crops/parsnip", "path": "sprites/world/crops/parsnip.png", "category": "Crop", "width": 48, "height": 16 },
             { "id": "projectiles/wooden_arrow", "path": "sprites/projectiles/wooden_arrow.png", "category": "Projectile", "width": 16, "height": 16 },
             { "id": "entities/slime", "path": "sprites/entities/slime.png", "category": "Entity", "width": 16, "height": 16 }
           ]
@@ -144,6 +180,8 @@ public sealed class GameContentLoaderTests : IDisposable
         Assert.True(database.StatusEffects.TryGetById("poisoned", out _));
         Assert.True(database.SpriteAssets.TryGetById("items/dirt_block", out _));
         Assert.True(database.WorldGenerationProfiles.TryGetById("tiny", out _));
+        Assert.True(database.Crops.TryGetBySeedItemId("parsnip_seeds", out var parsnip));
+        Assert.Equal(3, parsnip.TotalGrowthDays);
     }
 
     [Fact]
@@ -349,6 +387,8 @@ public sealed class GameContentLoaderTests : IDisposable
         Assert.NotEmpty(smallProfile.Ores);
         Assert.True(result.Database.Items.TryGetById("copper_chestplate", out var copperChestplate));
         Assert.Equal(Game.Core.Equipment.EquipmentSlotType.Body, copperChestplate.EquipmentSlot);
+        Assert.True(result.Database.Crops.TryGetBySeedItemId("parsnip_seeds", out var parsnip));
+        Assert.True(parsnip.CanGrowIn(Game.Core.Farming.FarmSeason.Spring));
     }
 
     public void Dispose()

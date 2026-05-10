@@ -1,0 +1,12 @@
+{
+  "id": "parsnip_seeds",
+  "displayName": "Parsnip Seeds",
+  "type": "Seed",
+  "texture": "items/parsnip_seeds",
+  "maxStack": 999,
+  "useTime": 0.2,
+  "actions": [
+    { "kind": "Plant", "reachPixels": 56 }
+  ],
+  "tags": ["seed", "farming", "spring"]
+}

@@ -156,6 +156,25 @@
     { "id": "items/workbench", "path": "sprites/items/stations/workbench.png", "category": "Item", "width": 16, "height": 16, "tags": ["item", "station", "crafting"] },
     { "id": "items/mining_charm", "path": "sprites/items/accessories/mining_charm.png", "category": "Item", "width": 16, "height": 16, "tags": ["item", "accessory", "mining"] },
     { "id": "items/healing_potion", "path": "sprites/items/consumables/healing_potion.png", "category": "Item", "width": 16, "height": 16, "tags": ["item", "consumable", "healing"] },
+    { "id": "items/copper_hoe", "path": "sprites/tools/copper_hoe.png", "category": "Tool", "width": 16, "height": 16, "tags": ["item", "tool", "farming", "hoe"] },
+    { "id": "items/watering_can", "path": "sprites/tools/watering_can.png", "category": "Tool", "width": 16, "height": 16, "tags": ["item", "tool", "farming", "watering"] },
+    { "id": "items/parsnip_seeds", "path": "sprites/items/seeds/parsnip_seeds.png", "category": "Item", "width": 16, "height": 16, "tags": ["item", "seed", "farming", "spring"] },
+    { "id": "items/parsnip", "path": "sprites/items/crops/parsnip.png", "category": "Item", "width": 16, "height": 16, "tags": ["item", "crop", "food", "spring"] },
+
+    {
+      "id": "crops/parsnip",
+      "path": "sprites/world/crops/parsnip.png",
+      "category": "Crop",
+      "width": 64,
+      "height": 16,
+      "frames": [
+        { "id": "stage_0", "x": 0, "y": 0, "width": 16, "height": 16 },
+        { "id": "stage_1", "x": 16, "y": 0, "width": 16, "height": 16 },
+        { "id": "stage_2", "x": 32, "y": 0, "width": 16, "height": 16 },
+        { "id": "stage_3", "x": 48, "y": 0, "width": 16, "height": 16 }
+      ],
+      "tags": ["world", "crop", "farming", "spring"]
+    },
 
     { "id": "entities/slime", "path": "sprites/entities/enemies/slime.png", "category": "Entity", "width": 16, "height": 16, "tags": ["entity", "enemy"] },
     { "id": "projectiles/wooden_arrow", "path": "sprites/projectiles/wooden_arrow.png", "category": "Projectile", "width": 16, "height": 16, "tags": ["projectile", "arrow"] },

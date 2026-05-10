@@ -1,0 +1,9 @@
+{
+  "id": "parsnip",
+  "displayName": "Parsnip",
+  "type": "Consumable",
+  "texture": "items/parsnip",
+  "maxStack": 999,
+  "useTime": 0.25,
+  "tags": ["crop", "food", "spring", "sellable"]
+}

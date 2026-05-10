@@ -23,6 +23,7 @@ The engine is now a playable YjsE prototype shell with a growing reusable 2D san
 - Deterministic `SimpleWorldGenerator` with FastNoiseLite-backed surface noise.
 - JSON-driven tile definitions and registry.
 - JSON-driven item definitions and registry.
+- JSON-driven crop definitions and registry for Stardew-like farming loops.
 - Inventory stack rules, split, merge, swap, and removal behavior.
 - Inventory cursor interaction foundation with left-click pick/place/merge/swap and right-click split/place-one rules.
 - In-game inventory overlay with hotbar/main slots, cursor-held stack rendering, shift-click quick move, and item stat/effect/tag tooltips.
@@ -30,6 +31,7 @@ The engine is now a playable YjsE prototype shell with a growing reusable 2D san
 - Tilemap rendering with visible chunk iteration.
 - Camera follow.
 - Player entity with keyboard movement, jumping, gravity, and tile collision.
+- Topdown movement controller for Stardew-like, Zelda-like, RPG, and life-sim games using the shared tile collision model.
 - First HUD pass with hotbar slots and health bar.
 - World save/load with readable metadata, MessagePack chunk payloads, and LZ4 compression.
 - Packed chunk region-file storage is available for streamed worlds while legacy loose chunk files remain loadable.
@@ -136,6 +138,7 @@ The engine is now a playable YjsE prototype shell with a growing reusable 2D san
 - `Game.Core.UI` now provides renderer-neutral UI layout primitives, focus traversal, hit-testing, modal layers, tooltip state, and cursor interaction snapshots.
 - Escape no longer closes the game from the main menu.
 - Base item data includes a first copper armor set with equipment stats and workbench recipes.
+- Farming core includes tilling, watering, seed planting, crop growth, seasonal checks, harvesting, regrow crops, starter hoe/watering can/seed/item data, and crop sprite generation briefs.
 
 ## Rider
 

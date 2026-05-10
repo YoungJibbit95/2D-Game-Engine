@@ -8,7 +8,7 @@ This document explains how the engine is intended to fit together. Checklist fil
 
 `Game.Client` adapts MonoGame to the core. It owns the window, SpriteBatch rendering, keyboard/mouse input, game states, debug overlays, and temporary placeholder drawing.
 
-`Game.Data` contains base-game definitions. These files are the first version of the modding contract: tiles, items, recipes, loot, biomes, entities, projectiles, status effects, spawns, worldgen profiles, sprite asset manifests, and sprite generation briefs.
+`Game.Data` contains base-game definitions. These files are the first version of the modding contract: tiles, items, crops, recipes, loot, biomes, entities, projectiles, status effects, spawns, worldgen profiles, sprite asset manifests, and sprite generation briefs.
 
 `Game.Tests` is the safety net for core behavior. Any engine rule that can run without graphics should be tested here.
 
@@ -31,6 +31,7 @@ The database currently exposes registries for:
 - Status effects.
 - Sprite assets.
 - World generation profiles.
+- Crops and farming definitions.
 
 Definitions reference sprites by stable sprite asset id, not by renderer texture object. For example, a tile can use `"texture": "tiles/dirt"`, while the asset manifest maps `tiles/dirt` to an actual source path.
 
@@ -164,6 +165,24 @@ This keeps combat content data-driven while leaving animation timing, weapon arc
 The current station foundation is intentionally engine-level. UI screens can consume query results later without duplicating crafting rules.
 
 The client `CraftingOverlay` now consumes `CraftingQueryResult` directly. It shows known recipes, selected recipe details, ingredient counts, station availability, nearby station text, one-click craft, and shift-repeat crafting. `CraftingStationLocator` supports horizontally infinite worlds by preserving negative X while still clamping vertical bounds.
+
+## Genre Modules
+
+YjsE is still being grown from a Terraria-like sandbox prototype, but core systems are intentionally genre-neutral where possible. New gameplay should prefer reusable modules over client-only rules.
+
+The first non-sideview module is `Game.Core.Farming`, aimed at Stardew-like and Harvest-Moon-like games:
+
+- `CropDefinition` is a data contract for seed item, harvest item, sprite id, growth stage days, seasons, water requirement, yield, regrow days, and tags.
+- `CropRegistry` maps crop ids and seed item ids so planting can stay data-driven.
+- `FarmPlotManager` stores tilled/watered plot state and crop instances independently from tile rendering.
+- `FarmingSystem` handles tilling, watering, planting, daily growth, seasonal withering, harvesting, inventory consumption, and regrowing crops.
+- Farm actions return `FarmActionResult` with explicit failure reasons for future UI, audio, particles, NPC jobs, and automation.
+
+This design keeps farming independent from MonoGame and from a specific map renderer. A Terraria-style world can use the same plots on tile coordinates, while a topdown RPG map can use non-solid ground tiles tagged as soil or farmable.
+
+`TopDownMovementController` is the matching movement foundation for Stardew-like, Zelda-like, RPG, and town/life-sim games. It uses the existing `PhysicsBody` and tile collision resolver without gravity, normalizes diagonal movement, supports optional single-axis movement, and remains compatible with tile solidity.
+
+Future genre modules should follow the same shape: data definitions, registry, deterministic runtime state, clear result objects, and core tests before client UI.
 
 ## UI Toolkit
 

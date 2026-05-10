@@ -9,5 +9,9 @@ public enum ItemActionKind
     Shoot,
     Consume,
     Cast,
-    Interact
+    Interact,
+    Till,
+    Water,
+    Plant,
+    Harvest
 }

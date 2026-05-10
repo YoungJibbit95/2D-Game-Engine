@@ -7,6 +7,7 @@ Only open work is kept here. Completed items are removed after implementation.
 - [ ] Add armor/accessory equip flow.
 - [ ] Add consumable use flow that applies status effects.
 - [ ] Add configurable reach, mining speed, movement speed, and damage from final player stats.
+- [ ] Add client mode switch or controller profile for sideview sandbox movement vs topdown RPG/life-sim movement.
 
 ## Mining, Building, And Interaction
 
@@ -29,6 +30,17 @@ Only open work is kept here. Completed items are removed after implementation.
 
 - [ ] Add furnace and anvil station definitions.
 - [ ] Add craft-from-nearby-chests option as a later quality-of-life feature.
+
+## Farming And Life-Sim Gameplay
+
+- [ ] Render tilled soil, watered soil, crop stages, and harvest-ready highlights.
+- [ ] Wire hoe, watering can, seed, and harvest actions into selected item use.
+- [ ] Save/load farm plots and crop instances with world/session persistence.
+- [ ] Add rain/weather watering and seasonal calendar helpers.
+- [ ] Add shops, shipping bin, money economy, daily summary, and sell prices.
+- [ ] Add topdown map objects: doors, warps, fences, gates, signs, containers, and furniture footprints.
+- [ ] Add NPC schedules, dialogue, relationship data, gifts, and daily routines.
+- [ ] Add farm map authoring support for ground/object/building layers.
 
 ## Combat
 

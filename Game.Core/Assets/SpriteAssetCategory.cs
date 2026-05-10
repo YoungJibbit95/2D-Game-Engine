@@ -9,6 +9,7 @@ public enum SpriteAssetCategory
     Weapon,
     Entity,
     Projectile,
+    Crop,
     Particle,
     Effect,
     Ui,

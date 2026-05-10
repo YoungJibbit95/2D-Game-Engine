@@ -19,6 +19,7 @@ public sealed class ContentReferenceValidator
         ValidateProjectiles(database, report);
         ValidateEntities(database, report);
         ValidateSpawnRules(database, report);
+        ValidateCrops(database, report);
         ValidateWorldGenerationProfiles(database, report);
         ValidateSpriteReferences(database, report);
     }
@@ -171,6 +172,22 @@ public sealed class ContentReferenceValidator
         }
     }
 
+    private static void ValidateCrops(GameContentDatabase database, ContentLoadReport report)
+    {
+        foreach (var crop in database.Crops.Definitions)
+        {
+            if (!database.Items.TryGetById(crop.SeedItemId, out _))
+            {
+                AddMissingReference(report, "crop", crop.Id, "seed item", crop.SeedItemId);
+            }
+
+            if (!database.Items.TryGetById(crop.HarvestItemId, out _))
+            {
+                AddMissingReference(report, "crop", crop.Id, "harvest item", crop.HarvestItemId);
+            }
+        }
+    }
+
     private static void ValidateWorldGenerationProfiles(GameContentDatabase database, ContentLoadReport report)
     {
         foreach (var profile in database.WorldGenerationProfiles.Profiles)
@@ -240,6 +257,11 @@ public sealed class ContentReferenceValidator
         foreach (var projectile in database.Projectiles.Definitions)
         {
             RequireSprite(database, report, "projectile", projectile.Id, projectile.TexturePath);
+        }
+
+        foreach (var crop in database.Crops.Definitions)
+        {
+            RequireSprite(database, report, "crop", crop.Id, crop.TexturePath);
         }
     }
 

@@ -1,6 +1,6 @@
 # Asset Pipeline And AI Sprite Briefs
 
-This document is the handoff contract for another AI model, artist, or tool that generates sprites for the Terraria-like engine. The goal is that an asset generator can read the plan, read `Game.Data/assets/*.json`, read `Game.Data/asset_briefs/*.json`, and produce PNG files without guessing style, paths, sizes, or naming.
+This document is the handoff contract for another AI model, artist, or tool that generates sprites for YjsE, a multi-genre 2D engine that starts with Terraria-like sandbox action and is expanding toward Stardew-like topdown farming, RPGs, and action-adventure games. The goal is that an asset generator can read the plan, read `Game.Data/assets/*.json`, read `Game.Data/asset_briefs/*.json`, and produce PNG files without guessing style, paths, sizes, or naming.
 
 ## Generation Contract
 
@@ -32,7 +32,7 @@ For each entry in `Game.Data/asset_briefs/*.json`, build the generation prompt l
 
 ```text
 SYSTEM:
-You generate production-ready 2D pixel art sprites for a Terraria-like sandbox game.
+You generate production-ready 2D pixel art sprites for a C# 2D engine supporting Terraria-like sandbox action, Stardew-like topdown farming, RPGs, and action-adventure games.
 Return only the image. No text, frame, watermark, mockup, or extra canvas.
 
 STYLE:
@@ -69,6 +69,8 @@ Sprite ids are stable logical ids. Gameplay definitions reference ids, not file 
 - `items/dirt_block`
 - `items/workbench`
 - `items/copper_pickaxe`
+- `items/parsnip_seeds`
+- `crops/parsnip`
 - `entities/slime`
 - `projectiles/wooden_arrow`
 - `particles/tile_dust_dirt`
@@ -87,6 +89,7 @@ Game.Content/
 |   |   |-- Tiles/
 |   |   |-- Walls/
 |   |   |-- Objects/
+|   |   |-- Crops/
 |   |   |-- Liquids/
 |   |   `-- Backgrounds/
 |   |-- Items/
@@ -97,6 +100,7 @@ Game.Content/
 |   |   |-- Armor/
 |   |   |-- Accessories/
 |   |   |-- Consumables/
+|   |   |-- Seeds/
 |   |   `-- Stations/
 |   |-- Entities/
 |   |   |-- Player/
@@ -154,6 +158,7 @@ Generation briefs live separately in `Game.Data/asset_briefs/*.json` so gameplay
 - `Tile`: usually 16x16. Terrain tiles must fill the canvas and state whether they tile on all edges or only horizontally.
 - `Wall`: background wall sprites, lower contrast than terrain.
 - `WorldObject`: furniture, stations, and decorations. Usually transparent, grounded at the bottom of the canvas.
+- `Crop`: world crop sprites. Prefer horizontal growth strips where each 16x16 frame is one stage, transparent background, grounded to the lower center so it reads on tilled soil.
 - `Item`, `Tool`, `Weapon`: inventory icons. Use transparent background and leave 1-2 pixels of padding when possible.
 - `Armor`: currently encoded as `Item` category with `armor` tags.
 - `Entity`: side-view runtime creature sprites. Must be grounded at the bottom and fit the entity's definition body.
@@ -171,6 +176,7 @@ The current base brief file covers all sprite ids in `Game.Data/assets/sprites.j
 - Tools and weapons: copper pickaxe, iron pickaxe, wooden sword, copper sword, iron sword, wooden bow.
 - Armor and accessories: copper helmet, copper chestplate, copper greaves, mining charm.
 - Consumables/ammo: healing potion, wooden arrow, poison arrow.
+- Farming: copper hoe, watering can, parsnip seeds, harvested parsnip, and four-stage parsnip crop strip.
 - Runtime sprites: slime, wooden arrow projectile, poison arrow projectile.
 
 When new sprites are added to `Game.Data/assets`, add a matching brief in `Game.Data/asset_briefs` in the same change. The tests enforce this.
@@ -180,6 +186,7 @@ When new sprites are added to `Game.Data/assets`, add a matching brief in `Game.
 Initial renderer can load individual textures or placeholders through `ClientTextureRegistry`. The next production step should pack sprites into atlases:
 
 - `world`: tiles, walls, liquids, foliage, furniture.
+- `crops`: crop growth strips, tilled soil overlays, watered soil overlays, farm objects.
 - `items`: all inventory icons.
 - `entities`: player, NPCs, enemies, critters.
 - `effects`: projectiles, particles, combat effects.
@@ -195,6 +202,7 @@ Initial renderer can load individual textures or placeholders through `ClientTex
 - [ ] Terrain tiles tile correctly as specified.
 - [ ] Inventory items remain readable at 1x scale.
 - [ ] Related materials share palette language: copper is warm orange, iron is muted pale tan, wood is warm brown, stone is neutral grey.
+- [ ] Crop growth strips have exactly the requested frame count and each stage remains readable on both dry and watered soil.
 - [ ] No sprite contains text, watermark, signature, prompt artifacts, or UI frame unless specifically requested.
 - [ ] Sprite ids in `Game.Data/assets` and briefs in `Game.Data/asset_briefs` stay in sync.
 

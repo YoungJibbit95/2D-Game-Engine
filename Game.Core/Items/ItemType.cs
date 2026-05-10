@@ -12,5 +12,8 @@ public enum ItemType
     Armor,
     Accessory,
     Ammo,
+    Seed,
+    ToolHoe,
+    ToolWateringCan,
     QuestItem
 }
