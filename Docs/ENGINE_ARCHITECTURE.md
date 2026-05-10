@@ -163,6 +163,23 @@ This keeps combat content data-driven while leaving animation timing, weapon arc
 
 The current station foundation is intentionally engine-level. UI screens can consume query results later without duplicating crafting rules.
 
+## UI Toolkit
+
+`Game.Core.UI` is the renderer-neutral UI foundation. It is intentionally independent from MonoGame so runtime UI, tools, editors, tests, and future console-specific clients can share the same layout and interaction rules.
+
+The toolkit currently provides:
+
+- Primitive geometry: `UiPoint`, `UiSize`, `UiRect`, and `UiThickness`.
+- A retained `UiElement` tree with visibility, enabled state, hit-test state, focusability, z-index, margins, padding, tooltip text, and layout metadata.
+- `UiLayoutEngine` with free, stack, grid, scroll, tabs, splitter, and dock layout modes.
+- `UiHitTestService` with topmost child selection, z-order handling, and selected-tab awareness.
+- `UiLayerStack` for modal and non-modal layer ordering.
+- `UiFocusManager` for focus traversal across visible/enabled/focusable elements.
+- `UiTooltipController` for delayed hover tooltips and pinned debug/tooling tooltips.
+- `UiInteractionSnapshot` so UI routing can carry pointer, hit, focus, and cursor-item drag state together.
+
+The current MonoGame overlays still draw themselves directly. The next step is to migrate those overlays onto the core UI model and add renderer widgets for inventory slots, crafting lists, settings rows, and debug windows.
+
 ## Assets
 
 `SpriteAssetDefinition` is engine metadata for sprite identity, category, source path, dimensions, optional atlas id, frames, and tags. Individual frames can declare an `autoTileMask` from 0 to 15; `ClientTextureRegistry` resolves the frame that matches the current tile neighbor mask and falls back to frame 0 when a sheet has no exact variant yet.

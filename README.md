@@ -130,6 +130,7 @@ Milestone 1 and the first core world tasks are scaffolded:
 - Settings rows and tabs support mouse selection, keybind capture warns about conflicts, keybind reset requires confirmation, and resolution/fullscreen/VSync changes apply live.
 - The pause/settings surface now includes world streaming options and debug toggles for the debug HUD and tile grid.
 - The client UI uses a shared minimalist theme helper and a core UI animation pipeline for menu/loading/pause transitions.
+- `Game.Core.UI` now provides renderer-neutral UI layout primitives, focus traversal, hit-testing, modal layers, tooltip state, and cursor interaction snapshots.
 - Escape no longer closes the game from the main menu.
 - Base item data includes a first copper armor set with equipment stats and workbench recipes.
 

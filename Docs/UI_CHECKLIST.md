@@ -4,11 +4,9 @@ Only open work is kept here. Completed items are removed after implementation.
 
 ## Architecture
 
-- [ ] Add focus handling and keyboard navigation.
-- [ ] Add tooltip layer with delayed hover and pinned debug mode.
 - [ ] Wire core cursor item drag state into UI focus, hover, and hit-test flow.
-- [ ] Add modal/window layering and topmost hit-testing rules.
-- [ ] Add reusable layout primitives: grid, stack, scroll, tabs, splitter, and dock panel.
+- [ ] Integrate `Game.Core.UI` layout/focus/hit-testing into the existing client overlays.
+- [ ] Add renderer widgets for core UI primitives: panel, button, label, image, slot, list, tab, splitter, and window.
 
 ## HUD
 

@@ -28,20 +28,20 @@ The count excludes `bin`, `obj`, `.git`, and `.vs`.
 
 | Area | Files | Lines |
 | --- | ---: | ---: |
-| `Game.Core` | 269 | 12,396 |
+| `Game.Core` | 286 | 12,994 |
 | `Game.Client` | 43 | 3,630 |
-| `Game.Tests` | 74 | 6,383 |
+| `Game.Tests` | 75 | 6,574 |
 | `Game.Data` | 57 | 1,397 |
-| `Docs` | 8 | 610 |
+| `Docs` | 8 | 622 |
 
 | Extension | Files | Lines |
 | --- | ---: | ---: |
-| `.cs` | 382 | 22,346 |
+| `.cs` | 400 | 23,135 |
 | `.json` | 59 | 1,416 |
-| `.md` | 9 | 761 |
+| `.md` | 9 | 774 |
 | Project/solution/config files | 17 | 342 |
 
-Total tracked workspace snapshot: 467 files, 24,865 lines.
+Total tracked workspace snapshot: 485 files, 25,667 lines.
 
 ## Core Engine Features
 
@@ -73,6 +73,7 @@ Total tracked workspace snapshot: 467 files, 24,865 lines.
 - Shared world queries for raycasts, line of sight, shape queries, and tile flood fill.
 - Core settings model with video, rendering, UI, audio, gameplay, world, input, and debug sections.
 - Engine-neutral UI animation pipeline with clips, tracks, keyframes, curves, and a runtime player.
+- Renderer-neutral UI toolkit with retained elements, free/stack/grid/scroll/tabs/splitter/dock layout, topmost hit-testing, modal layers, focus traversal, tooltip state, and cursor item interaction snapshots.
 
 ## Client Features
 
@@ -97,8 +98,9 @@ Total tracked workspace snapshot: 467 files, 24,865 lines.
 - Entity save/load and tile entity save/load.
 - Coordinated session save/load round trips.
 - UI animation track/player behavior.
+- UI layout, hit-testing, modal layers, focus traversal, tooltips, and cursor interaction snapshots.
 
-Current test count: 285 passing tests after the UI animation/settings expansion.
+Current test count: 293 passing tests after the core UI toolkit expansion.
 
 ## Current Engine Direction
 
