@@ -37,7 +37,7 @@ Only open work is kept here. Completed items are removed after implementation.
 - [ ] Wire harvest/interact actions into selected item use without requiring a dedicated harvest tool.
 - [ ] Add rain/weather watering and seasonal calendar helpers.
 - [ ] Add shops, shipping bin, money economy, daily summary, and sell prices.
-- [ ] Wire topdown map warps, signs, containers, shops, NPC spawns, and farm areas into client gameplay.
+- [ ] Wire core topdown map sessions, movement, transitions, signs, containers, shops, NPC spawns, and farm areas into client gameplay.
 - [ ] Expand topdown map objects with doors, fences, gates, furniture footprints, and scripted interaction hooks.
 - [ ] Add NPC schedules, dialogue, relationship data, gifts, and daily routines.
 - [ ] Add farm map authoring support for ground/object/building layers.

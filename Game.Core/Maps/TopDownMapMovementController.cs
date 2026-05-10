@@ -1,0 +1,149 @@
+using System.Numerics;
+using Game.Core.Physics;
+using Game.Core.World;
+
+namespace Game.Core.Maps;
+
+public sealed class TopDownMapMovementController
+{
+    private readonly TopDownMapQueryService _queries;
+
+    public TopDownMapMovementController(TopDownMapQueryService? queries = null)
+    {
+        _queries = queries ?? new TopDownMapQueryService();
+    }
+
+    public TopDownMapMovementResult Move(
+        MapDefinition map,
+        TopDownMapBody body,
+        Vector2 direction,
+        float deltaSeconds,
+        TopDownMovementOptions? options = null)
+    {
+        ArgumentNullException.ThrowIfNull(map);
+        ArgumentNullException.ThrowIfNull(body);
+
+        options ??= new TopDownMovementOptions();
+        var previous = body.Position;
+
+        if (deltaSeconds <= 0)
+        {
+            body.Velocity = Vector2.Zero;
+            return BuildResult(map, body, previous, blockedX: false, blockedY: false);
+        }
+
+        var movement = ResolveDirection(direction, options);
+        if (movement.LengthSquared() > float.Epsilon)
+        {
+            body.Facing = TopDownFacingExtensions.FromVector(movement, body.Facing);
+        }
+
+        body.Velocity = movement * options.MoveSpeedPixelsPerSecond;
+
+        var delta = body.Velocity * deltaSeconds;
+        var blockedX = MoveAxis(map, body, delta.X, Axis.X);
+        var blockedY = MoveAxis(map, body, delta.Y, Axis.Y);
+
+        if (blockedX)
+        {
+            body.Velocity = new Vector2(0, body.Velocity.Y);
+        }
+
+        if (blockedY)
+        {
+            body.Velocity = new Vector2(body.Velocity.X, 0);
+        }
+
+        return BuildResult(map, body, previous, blockedX, blockedY);
+    }
+
+    private TopDownMapMovementResult BuildResult(MapDefinition map, TopDownMapBody body, Vector2 previous, bool blockedX, bool blockedY)
+    {
+        _queries.TryResolveWarp(map, body.CenterTile(map.TileSize), out var warp);
+        return new TopDownMapMovementResult(previous, body.Position, body.Velocity, body.Facing, blockedX, blockedY, warp);
+    }
+
+    private bool MoveAxis(MapDefinition map, TopDownMapBody body, float amount, Axis axis)
+    {
+        if (MathF.Abs(amount) <= float.Epsilon)
+        {
+            return false;
+        }
+
+        var previous = body.Position;
+        body.Position = axis == Axis.X
+            ? new Vector2(body.Position.X + amount, body.Position.Y)
+            : new Vector2(body.Position.X, body.Position.Y + amount);
+
+        var blocker = FindFirstBlockingTile(map, body);
+        if (blocker is null)
+        {
+            return false;
+        }
+
+        if (axis == Axis.X)
+        {
+            var x = amount > 0
+                ? blocker.Value.X * map.TileSize - body.Size.X
+                : (blocker.Value.X + 1) * map.TileSize;
+
+            body.Position = new Vector2(x, previous.Y);
+        }
+        else
+        {
+            var y = amount > 0
+                ? blocker.Value.Y * map.TileSize - body.Size.Y
+                : (blocker.Value.Y + 1) * map.TileSize;
+
+            body.Position = new Vector2(previous.X, y);
+        }
+
+        return true;
+    }
+
+    private TilePos? FindFirstBlockingTile(MapDefinition map, TopDownMapBody body)
+    {
+        var tileBounds = body.BoundsTiles(map.TileSize);
+        for (var y = tileBounds.Top; y < tileBounds.Bottom; y++)
+        {
+            for (var x = tileBounds.Left; x < tileBounds.Right; x++)
+            {
+                var tile = new TilePos(x, y);
+                if (_queries.IsBlocked(map, tile))
+                {
+                    return tile;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    private static Vector2 ResolveDirection(Vector2 direction, TopDownMovementOptions options)
+    {
+        if (direction.LengthSquared() <= float.Epsilon)
+        {
+            return Vector2.Zero;
+        }
+
+        if (!options.AllowDiagonalMovement)
+        {
+            direction = MathF.Abs(direction.X) >= MathF.Abs(direction.Y)
+                ? new Vector2(MathF.Sign(direction.X), 0)
+                : new Vector2(0, MathF.Sign(direction.Y));
+        }
+
+        if (options.NormalizeDiagonalSpeed && direction.LengthSquared() > 1f)
+        {
+            direction = Vector2.Normalize(direction);
+        }
+
+        return direction;
+    }
+
+    private enum Axis
+    {
+        X,
+        Y
+    }
+}

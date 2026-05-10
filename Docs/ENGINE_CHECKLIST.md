@@ -74,8 +74,8 @@ Only open engine work is kept here. Completed items are removed after implementa
 - [ ] Add world-aware line-of-sight to every runtime combat path, not only optional melee calls.
 - [ ] Add combat animation phases, attack arcs, multi-hit timing, and per-frame hit windows.
 - [ ] Add projectile knockback, spread, charge, reload, and ammo preference rules.
-- [ ] Add interaction actions for chests, doors, signs, NPCs, crafting stations, and tile entities.
-- [ ] Add tile/entity interaction result objects with failure reasons for UI feedback.
+- [ ] Wire resolved map/tile/entity interactions into concrete actions for chests, doors, signs, NPCs, crafting stations, shops, containers, and tile entities.
+- [ ] Add shared tile/entity interaction result objects for sideview world interactions with failure reasons for UI feedback.
 - [ ] Add particle/audio/event hooks for mining, placement, hit, kill, pickup, craft, and blocked-use feedback.
 
 ## Persistence And Tools

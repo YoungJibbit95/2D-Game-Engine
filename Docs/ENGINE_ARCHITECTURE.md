@@ -191,6 +191,10 @@ This design keeps farming independent from MonoGame and from a specific map rend
 - `MapObjectDefinition` supports generic objects, farm areas, signs, containers, shops, NPC spawns, and warps with optional target map/spawn ids.
 - `MapRegistry` validates duplicate ids, layer dimensions, object bounds, spawn bounds, and tile-data length.
 - `TopDownMapQueryService` resolves blocked tiles, interactable objects, object regions, spawn positions, and warp targets.
+- `TopDownMapBody`, `TopDownMapMovementController`, and `TopDownMapMovementResult` provide pixel movement over authored maps with normalized diagonal movement, facing updates, separate-axis collision, blocking object checks, and warp detection.
+- `TopDownMapSession` owns the active map id, active spawn id, actor body, and spawn positioning so a client or server can start a Stardew-like/RPG session without knowing map JSON details.
+- `TopDownMapInteractionService` resolves the best interactable object in facing reach and returns explicit hit/miss data for signs, containers, shops, NPCs, doors, scripted objects, and future UI prompts.
+- `TopDownMapTransitionSystem` applies warp objects by resolving target map/spawn definitions and moving the session body to the destination spawn with destination facing.
 
 Map data is loaded from `Game.Data/maps` and participates in base/mod merging and cross-reference validation. This gives Stardew-like and RPG-style games a separate map route instead of forcing every game type through procedural sideview terrain.
 
