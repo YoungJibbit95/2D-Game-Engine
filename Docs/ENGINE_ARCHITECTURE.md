@@ -65,7 +65,11 @@ The world is tile-based. It can be finite in both axes or horizontally infinite 
 
 Chunks also own `ChunkMetadata`, which tracks active liquid tiles, lit tiles, tile entity count, and the last save tick. `ChunkMetadataService` can refresh all chunks, refresh touched regions, or mark chunks as saved. This metadata is intentionally separate from save payloads so runtime systems can rebuild it from world state.
 
-`WorldSaveService` persists the infinite-horizontal flag and can round-trip loaded negative and positive X chunks. It also exposes single-chunk save/load methods for streaming worlds. The client uses those methods to load a saved streamed chunk before falling back to deterministic generation, and to save dirty chunks before unloading them. Longer term, these individual chunk files should be packed into region files and coordinated with player/entity autosaves.
+`WorldSaveService` persists the infinite-horizontal flag and can round-trip loaded negative and positive X chunks. It exposes single-chunk save/load methods for streaming worlds. The client uses those methods to load a saved streamed chunk before falling back to deterministic generation, and to save dirty chunks before unloading them.
+
+Chunk storage supports two modes. `LooseFiles` writes one compressed MessagePack/LZ4 `.bin` file per chunk under `chunks/`, which keeps debugging simple and preserves existing saves. `RegionFiles` writes chunks into packed `.region` files under `regions/` through `ChunkRegionStore`, grouping chunks by `ChunkRegionPos` with floor-division support for negative chunk coordinates. Region saves still reuse `ChunkBinarySerializer` for each chunk payload, so the chunk binary contract stays centralized. `WorldSaveService.Load` reads the storage mode from metadata and falls back to the other format when needed, which keeps old saves loadable while allowing streaming worlds to move toward packed persistence.
+
+The current region format rewrites a full region file when chunks inside it change. That is acceptable for the first engine-facing persistence layer, but future work should add offset tables, tombstones, compaction, save migration tools, and integrity reports.
 
 Tile changes should always go through `World.SetTile`, `World.RemoveTile`, `World.TrySetTile`, `World.TryRemoveTile`, or `World.ApplyTileEdits` so chunk dirtiness, render rebuilds, lighting updates, and neighbor invalidation stay consistent.
 

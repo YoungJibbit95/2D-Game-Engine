@@ -16,6 +16,8 @@ public sealed record WorldSaveMetadata
 
     public bool IsHorizontallyInfinite { get; init; }
 
+    public string ChunkStorageMode { get; init; } = WorldChunkStorageMode.LooseFiles.ToString();
+
     public int SpawnTileX { get; init; }
 
     public int SpawnTileY { get; init; }

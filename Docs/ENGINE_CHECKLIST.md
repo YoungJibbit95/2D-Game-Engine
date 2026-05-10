@@ -13,7 +13,8 @@ Only open engine work is kept here. Completed items are removed after implementa
 ## World, Chunks, And Streaming
 
 - [ ] Add chunk streaming ownership around `ChunkStreamingPlanner` with load/unload lifecycle events.
-- [ ] Pack infinite-world streamed chunks into region files instead of one file per chunk.
+- [ ] Add region-file compaction, tombstones, and offset tables so unloaded chunks can be deleted or updated without rewriting a whole region.
+- [ ] Add migration tooling that can convert existing loose chunk folders into packed region files.
 - [ ] Add save lifecycle orchestration for player, entities, tile entities, and streamed world chunks.
 - [ ] Route terrain generation, liquids, and editor tools through the bulk tile edit API where batching improves dirty-region behavior.
 - [ ] Add typed tile mutation events for batch edits so simulation, audio, particles, and undo tooling can consume one result object.

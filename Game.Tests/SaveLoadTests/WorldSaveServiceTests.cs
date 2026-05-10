@@ -87,6 +87,31 @@ public sealed class WorldSaveServiceTests : IDisposable
     }
 
     [Fact]
+    public void SaveAndLoad_RegionFilesRoundTripHorizontallyInfiniteChunks()
+    {
+        var world = new World(32, 96, WorldMetadata.CreateDefault(seed: 77), isHorizontallyInfinite: true);
+        world.SetTile(-41, 20, KnownTileIds.Dirt);
+        world.SetTile(87, 44, KnownTileIds.Stone);
+        world.SetTile(-1, 63, TileInstance.Liquid(255));
+
+        new WorldSaveService(WorldChunkStorageMode.RegionFiles).Save(world, _tempDirectory);
+
+        var regionDirectory = Path.Combine(_tempDirectory, "regions");
+        Assert.True(Directory.Exists(regionDirectory));
+        Assert.NotEmpty(Directory.EnumerateFiles(regionDirectory, "*.region"));
+        Assert.False(Directory.Exists(Path.Combine(_tempDirectory, "chunks")));
+        Assert.Contains("RegionFiles", File.ReadAllText(Path.Combine(_tempDirectory, "metadata.json")));
+
+        var loaded = new WorldSaveService().Load(_tempDirectory);
+
+        Assert.True(loaded.IsHorizontallyInfinite);
+        Assert.Equal(KnownTileIds.Dirt, loaded.GetTile(-41, 20).TileId);
+        Assert.Equal(KnownTileIds.Stone, loaded.GetTile(87, 44).TileId);
+        Assert.True(loaded.GetTile(-1, 63).HasLiquid);
+        Assert.All(loaded.Chunks.Values, chunk => Assert.False(chunk.IsDirty));
+    }
+
+    [Fact]
     public void SaveChunkAndTryLoadChunk_RoundTripsSingleNegativeChunk()
     {
         var source = new World(32, 96, WorldMetadata.CreateDefault(seed: 77), isHorizontallyInfinite: true);
@@ -104,6 +129,31 @@ public sealed class WorldSaveServiceTests : IDisposable
         Assert.Equal(KnownTileIds.Dirt, target.GetTile(-40, 20).TileId);
         Assert.True(target.GetTile(-39, 21).HasLiquid);
         Assert.False(target.Chunks[position].IsDirty);
+    }
+
+    [Fact]
+    public void SaveChunk_RegionFilesPreservesExistingChunksInSameRegion()
+    {
+        var source = new World(32, 96, WorldMetadata.CreateDefault(seed: 77), isHorizontallyInfinite: true);
+        source.SetTile(-1, 20, KnownTileIds.Dirt);
+        source.SetTile(-40, 21, KnownTileIds.Stone);
+        var first = CoordinateUtils.TileToChunk(-1, 20);
+        var second = CoordinateUtils.TileToChunk(-40, 21);
+        var service = new WorldSaveService(WorldChunkStorageMode.RegionFiles);
+
+        Assert.True(service.SaveChunk(source, _tempDirectory, first));
+        Assert.True(service.SaveChunk(source, _tempDirectory, second));
+
+        var regionFiles = Directory.EnumerateFiles(Path.Combine(_tempDirectory, "regions"), "*.region").ToArray();
+        Assert.Single(regionFiles);
+
+        var target = new World(32, 96, WorldMetadata.CreateDefault(seed: 77), isHorizontallyInfinite: true);
+        var defaultLoader = new WorldSaveService();
+
+        Assert.True(defaultLoader.TryLoadChunk(target, _tempDirectory, first));
+        Assert.True(defaultLoader.TryLoadChunk(target, _tempDirectory, second));
+        Assert.Equal(KnownTileIds.Dirt, target.GetTile(-1, 20).TileId);
+        Assert.Equal(KnownTileIds.Stone, target.GetTile(-40, 21).TileId);
     }
 
     public void Dispose()

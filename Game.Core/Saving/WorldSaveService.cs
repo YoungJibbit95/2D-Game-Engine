@@ -7,6 +7,7 @@ public sealed class WorldSaveService
 {
     private const string MetadataFileName = "metadata.json";
     private const string ChunkDirectoryName = "chunks";
+    private const string RegionDirectoryName = "regions";
 
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
@@ -14,7 +15,9 @@ public sealed class WorldSaveService
     };
 
     private readonly ChunkBinarySerializer _chunkSerializer;
+    private readonly ChunkRegionStore _regionStore;
     private readonly ChunkMetadataService _chunkMetadata;
+    private readonly WorldChunkStorageMode _chunkStorageMode;
     private long _saveTick;
 
     public WorldSaveService()
@@ -22,10 +25,21 @@ public sealed class WorldSaveService
     {
     }
 
-    public WorldSaveService(ChunkBinarySerializer chunkSerializer, ChunkMetadataService? chunkMetadata = null)
+    public WorldSaveService(WorldChunkStorageMode chunkStorageMode)
+        : this(new ChunkBinarySerializer(), new ChunkMetadataService(), chunkStorageMode)
     {
-        _chunkSerializer = chunkSerializer;
+    }
+
+    public WorldSaveService(
+        ChunkBinarySerializer chunkSerializer,
+        ChunkMetadataService? chunkMetadata = null,
+        WorldChunkStorageMode chunkStorageMode = WorldChunkStorageMode.LooseFiles,
+        ChunkRegionStore? regionStore = null)
+    {
+        _chunkSerializer = chunkSerializer ?? throw new ArgumentNullException(nameof(chunkSerializer));
+        _regionStore = regionStore ?? new ChunkRegionStore(chunkSerializer);
         _chunkMetadata = chunkMetadata ?? new ChunkMetadataService();
+        _chunkStorageMode = chunkStorageMode;
     }
 
     public void Save(World.World world, string worldDirectory, WorldSaveMode mode = WorldSaveMode.AllChunks)
@@ -34,7 +48,7 @@ public sealed class WorldSaveService
         ArgumentException.ThrowIfNullOrWhiteSpace(worldDirectory);
 
         Directory.CreateDirectory(worldDirectory);
-        var chunkDirectory = Path.Combine(worldDirectory, ChunkDirectoryName);
+        var chunkDirectory = GetChunkStorageDirectory(worldDirectory);
         Directory.CreateDirectory(chunkDirectory);
 
         SaveMetadata(world, worldDirectory);
@@ -54,13 +68,21 @@ public sealed class WorldSaveService
         }
 
         Directory.CreateDirectory(worldDirectory);
-        var chunkDirectory = Path.Combine(worldDirectory, ChunkDirectoryName);
+        var chunkDirectory = GetChunkStorageDirectory(worldDirectory);
         Directory.CreateDirectory(chunkDirectory);
 
         SaveMetadata(world, worldDirectory);
         _saveTick++;
-        var path = Path.Combine(chunkDirectory, GetChunkFileName(position));
-        File.WriteAllBytes(path, _chunkSerializer.Serialize(chunk));
+        if (_chunkStorageMode == WorldChunkStorageMode.RegionFiles)
+        {
+            _regionStore.SaveChunk(chunkDirectory, chunk);
+        }
+        else
+        {
+            var path = Path.Combine(chunkDirectory, GetChunkFileName(position));
+            File.WriteAllBytes(path, _chunkSerializer.Serialize(chunk));
+        }
+
         _chunkMetadata.MarkSaved(chunk, _saveTick);
         chunk.ClearDirtyFlags();
         return true;
@@ -89,16 +111,21 @@ public sealed class WorldSaveService
                 new TilePos(metadata.SpawnTileX, metadata.SpawnTileY)),
             metadata.IsHorizontallyInfinite);
 
-        var chunkDirectory = Path.Combine(worldDirectory, ChunkDirectoryName);
-        if (!Directory.Exists(chunkDirectory))
-        {
-            return world;
-        }
+        var storageMode = ResolveStorageMode(metadata);
+        var loadedAny = storageMode == WorldChunkStorageMode.RegionFiles
+            ? LoadRegionChunks(world, Path.Combine(worldDirectory, RegionDirectoryName))
+            : LoadLooseChunks(world, Path.Combine(worldDirectory, ChunkDirectoryName));
 
-        foreach (var chunkFile in Directory.EnumerateFiles(chunkDirectory, "*.bin", SearchOption.TopDirectoryOnly))
+        if (!loadedAny)
         {
-            var chunk = _chunkSerializer.Deserialize(File.ReadAllBytes(chunkFile));
-            world.GetOrCreateChunk(chunk.Position).LoadTiles(chunk.Tiles);
+            if (storageMode == WorldChunkStorageMode.RegionFiles)
+            {
+                LoadLooseChunks(world, Path.Combine(worldDirectory, ChunkDirectoryName));
+            }
+            else
+            {
+                LoadRegionChunks(world, Path.Combine(worldDirectory, RegionDirectoryName));
+            }
         }
 
         _chunkMetadata.RefreshAll(world);
@@ -110,6 +137,14 @@ public sealed class WorldSaveService
     {
         ArgumentNullException.ThrowIfNull(world);
         ArgumentException.ThrowIfNullOrWhiteSpace(worldDirectory);
+
+        var regionDirectory = Path.Combine(worldDirectory, RegionDirectoryName);
+        if (_regionStore.TryLoadChunk(regionDirectory, position, out var regionChunk) && regionChunk is not null)
+        {
+            world.GetOrCreateChunk(position).LoadTiles(regionChunk.Tiles);
+            _chunkMetadata.RefreshChunk(world, position);
+            return true;
+        }
 
         var path = Path.Combine(worldDirectory, ChunkDirectoryName, GetChunkFileName(position));
         if (!File.Exists(path))
@@ -129,7 +164,7 @@ public sealed class WorldSaveService
         return true;
     }
 
-    private static void SaveMetadata(World.World world, string worldDirectory)
+    private void SaveMetadata(World.World world, string worldDirectory)
     {
         var metadata = new WorldSaveMetadata
         {
@@ -139,6 +174,7 @@ public sealed class WorldSaveService
             WidthTiles = world.WidthTiles,
             HeightTiles = world.HeightTiles,
             IsHorizontallyInfinite = world.IsHorizontallyInfinite,
+            ChunkStorageMode = _chunkStorageMode.ToString(),
             SpawnTileX = world.Metadata.SpawnTile.X,
             SpawnTileY = world.Metadata.SpawnTile.Y
         };
@@ -148,6 +184,7 @@ public sealed class WorldSaveService
 
     private void SaveChunks(World.World world, string chunkDirectory, WorldSaveMode mode)
     {
+        var chunksToSave = new List<Chunk>();
         foreach (var chunk in world.Chunks.Values.OrderBy(chunk => chunk.Position.Y).ThenBy(chunk => chunk.Position.X))
         {
             if (mode == WorldSaveMode.DirtyChunksOnly && !chunk.IsDirty)
@@ -155,10 +192,69 @@ public sealed class WorldSaveService
                 continue;
             }
 
+            chunksToSave.Add(chunk);
+        }
+
+        if (_chunkStorageMode == WorldChunkStorageMode.RegionFiles)
+        {
+            _regionStore.SaveChunks(chunkDirectory, chunksToSave);
+            foreach (var chunk in chunksToSave)
+            {
+                _chunkMetadata.MarkSaved(chunk, _saveTick);
+            }
+
+            return;
+        }
+
+        foreach (var chunk in chunksToSave)
+        {
             var path = Path.Combine(chunkDirectory, GetChunkFileName(chunk.Position));
             File.WriteAllBytes(path, _chunkSerializer.Serialize(chunk));
             _chunkMetadata.MarkSaved(chunk, _saveTick);
         }
+    }
+
+    private bool LoadLooseChunks(World.World world, string chunkDirectory)
+    {
+        if (!Directory.Exists(chunkDirectory))
+        {
+            return false;
+        }
+
+        var loaded = false;
+        foreach (var chunkFile in Directory.EnumerateFiles(chunkDirectory, "*.bin", SearchOption.TopDirectoryOnly))
+        {
+            var chunk = _chunkSerializer.Deserialize(File.ReadAllBytes(chunkFile));
+            world.GetOrCreateChunk(chunk.Position).LoadTiles(chunk.Tiles);
+            loaded = true;
+        }
+
+        return loaded;
+    }
+
+    private bool LoadRegionChunks(World.World world, string regionDirectory)
+    {
+        var chunks = _regionStore.LoadAllChunks(regionDirectory);
+        foreach (var chunk in chunks)
+        {
+            world.GetOrCreateChunk(chunk.Position).LoadTiles(chunk.Tiles);
+        }
+
+        return chunks.Count > 0;
+    }
+
+    private string GetChunkStorageDirectory(string worldDirectory)
+    {
+        return Path.Combine(
+            worldDirectory,
+            _chunkStorageMode == WorldChunkStorageMode.RegionFiles ? RegionDirectoryName : ChunkDirectoryName);
+    }
+
+    private static WorldChunkStorageMode ResolveStorageMode(WorldSaveMetadata metadata)
+    {
+        return Enum.TryParse<WorldChunkStorageMode>(metadata.ChunkStorageMode, ignoreCase: true, out var mode)
+            ? mode
+            : WorldChunkStorageMode.LooseFiles;
     }
 
     private static string GetChunkFileName(ChunkPos position)
