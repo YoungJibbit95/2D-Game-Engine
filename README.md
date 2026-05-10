@@ -25,6 +25,7 @@ Milestone 1 and the first core world tasks are scaffolded:
 - JSON-driven item definitions and registry.
 - Inventory stack rules, split, merge, swap, and removal behavior.
 - Inventory cursor interaction foundation with left-click pick/place/merge/swap and right-click split/place-one rules.
+- In-game inventory overlay with hotbar/main slots, cursor-held stack rendering, shift-click quick move, and item stat/effect/tag tooltips.
 - Tilemap rendering with visible chunk iteration.
 - Camera follow.
 - Player entity with keyboard movement, jumping, gravity, and tile collision.

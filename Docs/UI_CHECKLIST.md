@@ -19,12 +19,7 @@ Only open work is kept here. Completed items are removed after implementation.
 
 ## Inventory And Equipment UI
 
-- [ ] Add inventory screen toggle.
-- [ ] Add inventory slot widgets.
 - [ ] Add equipment slot widgets.
-- [ ] Wire core slot click rules into visible inventory widgets.
-- [ ] Add shift-click quick move.
-- [ ] Add item tooltip with damage, defense, tool power, status effects, and stat modifiers.
 - [ ] Add stat summary panel for armor/accessory bonuses.
 
 ## Crafting UI

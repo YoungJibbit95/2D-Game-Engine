@@ -43,6 +43,7 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
     private readonly EngineDebugSnapshotBuilder _debugSnapshots = new();
     private readonly CommandDispatcher _commands = new(CommandRegistry.CreateDefault());
     private readonly HudOverlay _hud = new();
+    private readonly InventoryOverlay _inventoryOverlay = new();
     private readonly DebugConsoleOverlay _debugConsole = new();
     private readonly PauseMenuOverlay _pauseMenu;
     private readonly GameStateManager _states;
@@ -84,7 +85,7 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
 
     public string Name => "Playing";
 
-    public bool CapturesKeyboard => _debugConsole.IsOpen || _pauseMenu.IsOpen;
+    public bool CapturesKeyboard => _debugConsole.IsOpen || _pauseMenu.IsOpen || _inventoryOverlay.IsOpen;
 
     public void Initialize()
     {
@@ -150,6 +151,15 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
             return;
         }
 
+        if (_inventory is not null &&
+            _content is not null &&
+            _inventoryOverlay.Update(_input, _inventory, _content.Items, settings))
+        {
+            _player?.SetCommand(PlayerCommand.None);
+            UpdateAutosave((float)deltaSeconds, settings);
+            return;
+        }
+
         _showGrid = settings.Debug.ShowGrid || _input.IsBindingDown(settings.Input.KeyBindings.DebugToggle);
         UpdateHotbarSelection(settings.Input);
         _player?.SetCommand(PlayerCommandBuilder.Build(_input, settings.Input.KeyBindings));
@@ -193,6 +203,10 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
         }
 
         _hud.Draw(context, _selectedHotbarSlot, _player?.Health ?? 0, _player?.MaxHealth ?? 100, settings);
+        if (_inventory is not null && _content is not null)
+        {
+            _inventoryOverlay.Draw(context, _inventory, _content.Items, settings);
+        }
 
         if (settings.Rendering.DrawDebugOverlays && settings.Debug.ShowDebugOverlay)
         {

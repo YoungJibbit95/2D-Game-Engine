@@ -4,7 +4,6 @@ Only open work is kept here. Completed items are removed after implementation.
 
 ## Player And Controls
 
-- [ ] Add inventory screen toggle and input capture.
 - [ ] Add armor/accessory equip flow.
 - [ ] Add consumable use flow that applies status effects.
 - [ ] Add configurable reach, mining speed, movement speed, and damage from final player stats.
@@ -24,7 +23,6 @@ Only open work is kept here. Completed items are removed after implementation.
 - [ ] Add first consumables: healing potion, regeneration food, antidote.
 - [ ] Add equipment persistence.
 - [ ] Add status effect persistence.
-- [ ] Add item tooltip stat formatting.
 - [ ] Add item use cooldown display and blocked-use feedback.
 
 ## Crafting
