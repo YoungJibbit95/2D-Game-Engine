@@ -6,6 +6,7 @@ using Game.Core.Entities;
 using Game.Core.Farming;
 using Game.Core.Items;
 using Game.Core.Loot;
+using Game.Core.Maps;
 using Game.Core.Projectiles;
 using Game.Core.Spawning;
 using Game.Core.Tiles;
@@ -31,4 +32,6 @@ public sealed record GameContentDatabase(
         WorldGenerationProfileRegistry.Create(Array.Empty<WorldGenerationProfile>());
 
     public CropRegistry Crops { get; init; } = CropRegistry.Create(Array.Empty<CropDefinition>());
+
+    public MapRegistry Maps { get; init; } = MapRegistry.Create(Array.Empty<MapDefinition>());
 }

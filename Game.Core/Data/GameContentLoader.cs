@@ -6,6 +6,7 @@ using Game.Core.Entities;
 using Game.Core.Farming;
 using Game.Core.Items;
 using Game.Core.Loot;
+using Game.Core.Maps;
 using Game.Core.Mods;
 using Game.Core.Projectiles;
 using Game.Core.Spawning;
@@ -29,6 +30,7 @@ public sealed class GameContentLoader
     private readonly SpriteAssetJsonLoader _spriteAssetLoader;
     private readonly WorldGenerationProfileJsonLoader _worldGenerationProfileLoader;
     private readonly CropDefinitionJsonLoader _cropLoader;
+    private readonly MapDefinitionJsonLoader _mapLoader;
 
     public GameContentLoader()
         : this(
@@ -43,7 +45,8 @@ public sealed class GameContentLoader
             new StatusEffectDefinitionJsonLoader(),
             new SpriteAssetJsonLoader(),
             new WorldGenerationProfileJsonLoader(),
-            new CropDefinitionJsonLoader())
+            new CropDefinitionJsonLoader(),
+            new MapDefinitionJsonLoader())
     {
     }
 
@@ -59,7 +62,8 @@ public sealed class GameContentLoader
         StatusEffectDefinitionJsonLoader statusEffectLoader,
         SpriteAssetJsonLoader spriteAssetLoader,
         WorldGenerationProfileJsonLoader? worldGenerationProfileLoader = null,
-        CropDefinitionJsonLoader? cropLoader = null)
+        CropDefinitionJsonLoader? cropLoader = null,
+        MapDefinitionJsonLoader? mapLoader = null)
     {
         _tileLoader = tileLoader;
         _itemLoader = itemLoader;
@@ -73,6 +77,7 @@ public sealed class GameContentLoader
         _spriteAssetLoader = spriteAssetLoader;
         _worldGenerationProfileLoader = worldGenerationProfileLoader ?? new WorldGenerationProfileJsonLoader();
         _cropLoader = cropLoader ?? new CropDefinitionJsonLoader();
+        _mapLoader = mapLoader ?? new MapDefinitionJsonLoader();
     }
 
     public GameContentDatabase LoadFromRoot(string contentRoot)
@@ -121,7 +126,8 @@ public sealed class GameContentLoader
             _statusEffectLoader.LoadDefinitionsFromDirectory(Path.Combine(root, "effects")),
             _spriteAssetLoader.LoadDefinitionsFromDirectory(Path.Combine(root, "assets")),
             _worldGenerationProfileLoader.LoadProfilesFromDirectory(Path.Combine(root, "worldgen")),
-            _cropLoader.LoadDefinitionsFromDirectory(Path.Combine(root, "crops")));
+            _cropLoader.LoadDefinitionsFromDirectory(Path.Combine(root, "crops")),
+            _mapLoader.LoadDefinitionsFromDirectory(Path.Combine(root, "maps")));
     }
 
     private static ContentPackManifest LoadManifest(string modDirectory)
@@ -154,7 +160,8 @@ public sealed class GameContentLoader
         IReadOnlyList<StatusEffectDefinition> StatusEffects,
         IReadOnlyList<SpriteAssetDefinition> SpriteAssets,
         IReadOnlyList<WorldGenerationProfile> WorldGenerationProfiles,
-        IReadOnlyList<CropDefinition> Crops);
+        IReadOnlyList<CropDefinition> Crops,
+        IReadOnlyList<MapDefinition> Maps);
 
     private sealed class ContentDatabaseBuilder
     {
@@ -172,6 +179,7 @@ public sealed class GameContentLoader
         private readonly Dictionary<string, Packed<SpriteAssetDefinition>> _spriteAssets = new(StringComparer.OrdinalIgnoreCase);
         private readonly Dictionary<string, Packed<WorldGenerationProfile>> _worldGenerationProfiles = new(StringComparer.OrdinalIgnoreCase);
         private readonly Dictionary<string, Packed<CropDefinition>> _crops = new(StringComparer.OrdinalIgnoreCase);
+        private readonly Dictionary<string, Packed<MapDefinition>> _maps = new(StringComparer.OrdinalIgnoreCase);
 
         public ContentDatabaseBuilder(ContentLoadReport report)
         {
@@ -196,6 +204,7 @@ public sealed class GameContentLoader
             MergeById(_spriteAssets, definitions.SpriteAssets, sprite => sprite.Id, "sprite", packId);
             MergeById(_worldGenerationProfiles, definitions.WorldGenerationProfiles, profile => profile.Id, "worldgen", packId);
             MergeById(_crops, definitions.Crops, crop => crop.Id, "crop", packId);
+            MergeById(_maps, definitions.Maps, map => map.Id, "map", packId);
         }
 
         public GameContentDatabase Build()
@@ -213,7 +222,8 @@ public sealed class GameContentLoader
                 StatusEffects = StatusEffectRegistry.Create(_statusEffects.Values.Select(value => value.Definition)),
                 SpriteAssets = SpriteAssetRegistry.Create(_spriteAssets.Values.Select(value => value.Definition)),
                 WorldGenerationProfiles = WorldGenerationProfileRegistry.Create(_worldGenerationProfiles.Values.Select(value => value.Definition)),
-                Crops = CropRegistry.Create(_crops.Values.Select(value => value.Definition))
+                Crops = CropRegistry.Create(_crops.Values.Select(value => value.Definition)),
+                Maps = MapRegistry.Create(_maps.Values.Select(value => value.Definition))
             };
         }
 

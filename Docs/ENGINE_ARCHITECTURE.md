@@ -32,6 +32,7 @@ The database currently exposes registries for:
 - Sprite assets.
 - World generation profiles.
 - Crops and farming definitions.
+- Topdown maps for RPG, town, farm, and life-sim layouts.
 
 Definitions reference sprites by stable sprite asset id, not by renderer texture object. For example, a tile can use `"texture": "tiles/dirt"`, while the asset manifest maps `tiles/dirt` to an actual source path.
 
@@ -182,6 +183,16 @@ The first non-sideview module is `Game.Core.Farming`, aimed at Stardew-like and 
 This design keeps farming independent from MonoGame and from a specific map renderer. A Terraria-style world can use the same plots on tile coordinates, while a topdown RPG map can use non-solid ground tiles tagged as soil or farmable.
 
 `TopDownMovementController` is the matching movement foundation for Stardew-like, Zelda-like, RPG, and town/life-sim games. It uses the existing `PhysicsBody` and tile collision resolver without gravity, normalizes diagonal movement, supports optional single-axis movement, and remains compatible with tile solidity.
+
+`Game.Core.Maps` is the topdown map foundation:
+
+- `MapDefinition` describes fixed-size tile maps with tile size, tags, layers, objects, and spawn points.
+- `MapTileLayerDefinition` supports visual layers and collision layers. A layer blocks movement when `blocksMovement` is true and a tile value is non-zero.
+- `MapObjectDefinition` supports generic objects, farm areas, signs, containers, shops, NPC spawns, and warps with optional target map/spawn ids.
+- `MapRegistry` validates duplicate ids, layer dimensions, object bounds, spawn bounds, and tile-data length.
+- `TopDownMapQueryService` resolves blocked tiles, interactable objects, object regions, spawn positions, and warp targets.
+
+Map data is loaded from `Game.Data/maps` and participates in base/mod merging and cross-reference validation. This gives Stardew-like and RPG-style games a separate map route instead of forcing every game type through procedural sideview terrain.
 
 Future genre modules should follow the same shape: data definitions, registry, deterministic runtime state, clear result objects, and core tests before client UI.
 

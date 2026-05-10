@@ -65,7 +65,7 @@ Only open engine work is kept here. Completed items are removed after implementa
 - [ ] Track content provenance per definition: base game vs mod id.
 - [ ] Add explicit mod load order configuration.
 - [ ] Add content hot reload command and safe reload report.
-- [ ] Add debug content browser for tiles, items, crops, recipes, entities, effects, loot, spawns, sprites, and worldgen profiles.
+- [ ] Add debug content browser for tiles, items, crops, maps, recipes, entities, effects, loot, spawns, sprites, and worldgen profiles.
 - [ ] Add missing sound/effect fallbacks per asset category.
 - [ ] Add MoonSharp script discovery and sandbox boundaries after the data contract is stable.
 

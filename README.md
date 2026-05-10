@@ -32,6 +32,7 @@ The engine is now a playable YjsE prototype shell with a growing reusable 2D san
 - Camera follow.
 - Player entity with keyboard movement, jumping, gravity, and tile collision.
 - Topdown movement controller for Stardew-like, Zelda-like, RPG, and life-sim games using the shared tile collision model.
+- Topdown map registry with JSON maps, layers, objects, collision, spawn points, warps, and query services for Stardew-like/RPG games.
 - First HUD pass with hotbar slots and health bar.
 - World save/load with readable metadata, MessagePack chunk payloads, and LZ4 compression.
 - Packed chunk region-file storage is available for streamed worlds while legacy loose chunk files remain loadable.

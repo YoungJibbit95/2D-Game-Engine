@@ -28,20 +28,20 @@ The count excludes `bin`, `obj`, `.git`, and `.vs`.
 
 | Area | Files | Lines |
 | --- | ---: | ---: |
-| `Game.Core` | 302 | 13,873 |
+| `Game.Core` | 312 | 14,356 |
 | `Game.Client` | 49 | 4,801 |
-| `Game.Tests` | 78 | 7,035 |
-| `Game.Data` | 62 | 1,531 |
-| `Docs` | 8 | 650 |
+| `Game.Tests` | 80 | 7,230 |
+| `Game.Data` | 63 | 1,634 |
+| `Docs` | 8 | 651 |
 
 | Extension | Files | Lines |
 | --- | ---: | ---: |
-| `.cs` | 424 | 25,617 |
-| `.json` | 64 | 1,550 |
-| `.md` | 9 | 808 |
+| `.cs` | 436 | 26,295 |
+| `.json` | 65 | 1,653 |
+| `.md` | 9 | 809 |
 | Project/solution/config files | 17 | 342 |
 
-Total tracked workspace snapshot: 514 files, 28,317 lines.
+Total tracked workspace snapshot: 527 files, 29,099 lines.
 
 ## Core Engine Features
 
@@ -64,12 +64,13 @@ Total tracked workspace snapshot: 514 files, 28,317 lines.
 - Greyscale lighting with sunlight, point lights, and underground falloff.
 - Core event bus with typed subscriptions and global observation.
 - Bounded event journal for debugging, profiling, and future replay/replication.
-- Data-driven registries for tiles, items, crops, recipes, loot, biomes, entities, projectiles, status effects, spawns, sprites, and worldgen profiles.
+- Data-driven registries for tiles, items, crops, maps, recipes, loot, biomes, entities, projectiles, status effects, spawns, sprites, and worldgen profiles.
 - Mod/content-pack loader with base/mod merge and validation reports.
 - Inventory, hotbar, cursor-item foundation, stack merge/split/swap, pickup logic, equipment, and stat calculation.
 - Crafting query model with known recipes, station checks, ingredient checks, categories, and sort order.
 - Farming foundation for Stardew-like games: crop definitions, seed lookup, farm plots, tilling, watering, planting, seasonal growth, harvesting, regrow crops, selected-item action routing, and farm plot save/load.
 - Topdown movement controller for RPG, life-sim, adventure, and farm games using shared tile collision.
+- Topdown map foundation with JSON map definitions, tile layers, collision layers, objects, interactables, spawn points, warps, registry validation, mod merge support, and runtime map queries.
 - Combat health, damage info, invulnerability, contact damage, projectile damage, melee attacks, loot drops, and status effects.
 - Entity manager with runtime id assignment and spatial query index.
 - Shared world queries for raycasts, line of sight, shape queries, and tile flood fill.
@@ -100,13 +101,13 @@ Total tracked workspace snapshot: 514 files, 28,317 lines.
 - Coordinate conversion, including negative coordinates.
 - World tile get/set, chunk dirtiness, and save/load.
 - Inventory and player inventory stack behavior.
-- Crafting, farming, item actions, mining/building, combat, projectiles, spawning, commands, settings, status effects, topdown movement, and world generation.
+- Crafting, farming, maps, item actions, mining/building, combat, projectiles, spawning, commands, settings, status effects, topdown movement, and world generation.
 - Entity save/load and tile entity save/load.
 - Coordinated session save/load round trips, including farm plot persistence.
 - UI animation track/player behavior.
 - UI layout, hit-testing, modal layers, focus traversal, tooltips, and cursor interaction snapshots.
 
-Current test count: 303 passing tests after farm plot save/load and selected-item farming action routing.
+Current test count: 308 passing tests after the topdown map content and query foundation.
 
 ## Current Engine Direction
 
@@ -117,6 +118,6 @@ The engine is now past the first playable prototype shell and is becoming a reus
 - Upgrade rendering to atlas-backed batching, render targets, shader passes, particles, and animation clips for entities.
 - Add RGB region-based lighting and dynamic lights attached to items, projectiles, entities, and furniture.
 - Deepen worldgen with biome transitions, underground walls, larger cavern layers, lakes, structure spacing, chest rooms, and sampled infinite-world quality gates.
-- Add richer crop rendering, weather/rain watering, topdown map layers, shops, shipping bins, NPC schedules, and dialogue data.
+- Add richer crop rendering, topdown map rendering, weather/rain watering, shops, shipping bins, NPC schedules, and dialogue data.
 - Add save migrations, integrity reports, autosave rotation, and recovery diagnostics.
 - Add content browser/editor tooling powered by the same data loaders as the runtime.

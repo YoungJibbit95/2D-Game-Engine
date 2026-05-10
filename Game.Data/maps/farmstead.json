@@ -1,0 +1,103 @@
+{
+  "id": "farmstead",
+  "displayName": "Starter Farmstead",
+  "widthTiles": 12,
+  "heightTiles": 8,
+  "tileSize": 16,
+  "tags": ["topdown", "farm", "starter", "life-sim"],
+  "layers": [
+    {
+      "id": "ground",
+      "kind": "Ground",
+      "width": 12,
+      "height": 8,
+      "zIndex": 0,
+      "isVisible": true,
+      "blocksMovement": false,
+      "tiles": [
+        1,1,1,1,1,1,1,1,1,1,1,1,
+        1,1,1,1,1,1,1,1,1,1,1,1,
+        1,1,1,1,1,1,1,1,1,1,1,1,
+        1,1,1,1,1,1,1,1,1,1,1,1,
+        1,1,1,1,1,1,1,1,1,1,1,1,
+        1,1,1,1,1,1,1,1,1,1,1,1,
+        1,1,1,1,1,1,1,1,1,1,1,1,
+        1,1,1,1,1,1,1,1,1,1,1,1
+      ]
+    },
+    {
+      "id": "collision",
+      "kind": "Collision",
+      "width": 12,
+      "height": 8,
+      "zIndex": 99,
+      "isVisible": false,
+      "blocksMovement": true,
+      "tiles": [
+        1,1,1,1,1,1,1,1,1,1,1,1,
+        1,0,0,0,0,0,0,0,0,0,0,1,
+        1,0,0,0,0,0,0,0,0,0,0,1,
+        1,0,0,0,0,0,0,0,0,0,0,1,
+        1,0,0,0,0,0,0,0,0,0,0,1,
+        1,0,0,0,0,0,0,0,0,0,0,1,
+        1,0,0,0,0,0,0,0,0,0,0,1,
+        1,1,1,1,1,1,1,1,1,1,1,1
+      ]
+    }
+  ],
+  "objects": [
+    {
+      "id": "farmhouse",
+      "kind": "Generic",
+      "tileX": 2,
+      "tileY": 1,
+      "width": 3,
+      "height": 2,
+      "blocksMovement": true,
+      "isInteractable": false,
+      "properties": {
+        "sprite": "world/farmhouse_placeholder"
+      }
+    },
+    {
+      "id": "shipping_bin",
+      "kind": "Container",
+      "tileX": 6,
+      "tileY": 2,
+      "width": 1,
+      "height": 1,
+      "blocksMovement": true,
+      "isInteractable": true,
+      "interactionId": "shipping_bin"
+    },
+    {
+      "id": "farm_plot_area",
+      "kind": "FarmArea",
+      "tileX": 3,
+      "tileY": 4,
+      "width": 5,
+      "height": 3,
+      "blocksMovement": false,
+      "isInteractable": false,
+      "properties": {
+        "soil": "true"
+      }
+    },
+    {
+      "id": "east_path",
+      "kind": "Warp",
+      "tileX": 10,
+      "tileY": 4,
+      "width": 1,
+      "height": 1,
+      "blocksMovement": false,
+      "isInteractable": false,
+      "targetMapId": "farmstead",
+      "targetSpawnId": "home"
+    }
+  ],
+  "spawnPoints": [
+    { "id": "home", "tileX": 5, "tileY": 3, "facing": "down" },
+    { "id": "east_path", "tileX": 9, "tileY": 4, "facing": "left" }
+  ]
+}

@@ -20,6 +20,7 @@ public sealed class ContentReferenceValidator
         ValidateEntities(database, report);
         ValidateSpawnRules(database, report);
         ValidateCrops(database, report);
+        ValidateMaps(database, report);
         ValidateWorldGenerationProfiles(database, report);
         ValidateSpriteReferences(database, report);
     }
@@ -184,6 +185,32 @@ public sealed class ContentReferenceValidator
             if (!database.Items.TryGetById(crop.HarvestItemId, out _))
             {
                 AddMissingReference(report, "crop", crop.Id, "harvest item", crop.HarvestItemId);
+            }
+        }
+    }
+
+    private static void ValidateMaps(GameContentDatabase database, ContentLoadReport report)
+    {
+        foreach (var map in database.Maps.Definitions)
+        {
+            foreach (var mapObject in map.Objects)
+            {
+                if (string.IsNullOrWhiteSpace(mapObject.TargetMapId))
+                {
+                    continue;
+                }
+
+                if (!database.Maps.TryGetById(mapObject.TargetMapId, out var targetMap))
+                {
+                    AddMissingReference(report, "map", map.Id, "target map", mapObject.TargetMapId);
+                    continue;
+                }
+
+                if (!string.IsNullOrWhiteSpace(mapObject.TargetSpawnId) &&
+                    !targetMap.TryGetSpawn(mapObject.TargetSpawnId, out _))
+                {
+                    AddMissingReference(report, "map", map.Id, "target spawn", $"{mapObject.TargetMapId}:{mapObject.TargetSpawnId}");
+                }
             }
         }
     }

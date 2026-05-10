@@ -22,6 +22,7 @@ public sealed class GameContentLoaderTests : IDisposable
         Directory.CreateDirectory(Path.Combine(_contentRoot, "effects"));
         Directory.CreateDirectory(Path.Combine(_contentRoot, "worldgen"));
         Directory.CreateDirectory(Path.Combine(_contentRoot, "crops"));
+        Directory.CreateDirectory(Path.Combine(_contentRoot, "maps"));
 
         File.WriteAllText(Path.Combine(_contentRoot, "tiles", "dirt.json"), """
         {
@@ -154,6 +155,24 @@ public sealed class GameContentLoaderTests : IDisposable
         }
         """);
 
+        File.WriteAllText(Path.Combine(_contentRoot, "maps", "farm.json"), """
+        {
+          "id": "farm",
+          "displayName": "Farm",
+          "widthTiles": 3,
+          "heightTiles": 2,
+          "layers": [
+            { "id": "ground", "kind": "Ground", "width": 3, "height": 2, "tiles": [1,1,1,1,1,1] }
+          ],
+          "objects": [
+            { "id": "door", "kind": "Warp", "tileX": 2, "tileY": 1, "targetMapId": "farm", "targetSpawnId": "home" }
+          ],
+          "spawnPoints": [
+            { "id": "home", "tileX": 1, "tileY": 1 }
+          ]
+        }
+        """);
+
         File.WriteAllText(Path.Combine(_contentRoot, "assets", "sprites.json"), """
         {
           "sprites": [
@@ -182,6 +201,8 @@ public sealed class GameContentLoaderTests : IDisposable
         Assert.True(database.WorldGenerationProfiles.TryGetById("tiny", out _));
         Assert.True(database.Crops.TryGetBySeedItemId("parsnip_seeds", out var parsnip));
         Assert.Equal(3, parsnip.TotalGrowthDays);
+        Assert.True(database.Maps.TryGetById("farm", out var farm));
+        Assert.True(farm.TryGetSpawn("home", out _));
     }
 
     [Fact]
@@ -389,6 +410,8 @@ public sealed class GameContentLoaderTests : IDisposable
         Assert.Equal(Game.Core.Equipment.EquipmentSlotType.Body, copperChestplate.EquipmentSlot);
         Assert.True(result.Database.Crops.TryGetBySeedItemId("parsnip_seeds", out var parsnip));
         Assert.True(parsnip.CanGrowIn(Game.Core.Farming.FarmSeason.Spring));
+        Assert.True(result.Database.Maps.TryGetById("farmstead", out var farmstead));
+        Assert.Contains(farmstead.Objects, item => item.Kind == Game.Core.Maps.MapObjectKind.FarmArea);
     }
 
     public void Dispose()
