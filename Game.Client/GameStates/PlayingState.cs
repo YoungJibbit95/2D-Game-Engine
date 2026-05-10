@@ -21,6 +21,7 @@ using Game.Core.Time;
 using Game.Core.World;
 using Game.Core.World.Generation;
 using Game.Core.World.Streaming;
+using Game.Core.World.TileEntities;
 using System.Globalization;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
@@ -55,6 +56,7 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
     private WorldTime _worldTime = new();
     private GameContentDatabase? _content;
     private PlayerInventory? _inventory;
+    private TileEntityManager _tileEntities = new();
     private TilePos? _hoverTile;
     private TilePos? _interactionTile;
     private Rectangle _lastViewportBounds = new(0, 0, 1280, 720);
@@ -95,6 +97,8 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
         _events = session.Events;
         _worldTime = session.WorldTime;
         _worldSaveDirectory = session.WorldSaveDirectory;
+        _tileEntities = session.TileEntities ?? new TileEntityManager();
+        _selectedHotbarSlot = _inventory.SelectedHotbarSlot;
 
         _camera.Position = new Vector2(_player.Body.Center.X, _player.Body.Center.Y);
         _camera.Zoom = _pauseMenu.Settings.Gameplay.CameraZoom;
@@ -510,7 +514,10 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
         var result = _saves.TickAutosave(
             deltaSeconds,
             intervalSeconds,
-            new GameSaveRequest(_world, _player, _inventory, _entities),
+            new GameSaveRequest(_world, _player, _inventory, _entities)
+            {
+                TileEntities = _tileEntities
+            },
             _worldSaveDirectory,
             new GameSaveCoordinatorOptions
             {

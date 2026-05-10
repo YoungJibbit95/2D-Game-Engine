@@ -32,6 +32,7 @@ Milestone 1 and the first core world tasks are scaffolded:
 - World save/load with readable metadata, MessagePack chunk payloads, and LZ4 compression.
 - Packed chunk region-file storage is available for streamed worlds while legacy loose chunk files remain loadable.
 - Coordinated save/autosave service writes world, player, runtime entities, and tile entities through one engine API.
+- Coordinated session loading restores world, player, inventory, runtime entities, and tile entities through the matching engine API.
 - Greyscale lighting with sunlight, point lights, render overlay, underground falloff tuning, and configurable ambient floor.
 - Spatial grid for reusable area/entity queries.
 - Game content database loader for base data roots.
@@ -92,6 +93,7 @@ Milestone 1 and the first core world tasks are scaffolded:
 - Client tile rendering now visualizes tile liquid amounts, and rendering has initial layer, shader registry, and post-processing settings scaffolding.
 - Startup now enters a main menu with Singleplayer, planned local splitscreen, planned multiplayer, settings, and exit entries.
 - A loading state prepares the singleplayer world session before entering gameplay.
+- Existing singleplayer save folders are resumed automatically from the same save layout used by autosave.
 - World generation profiles define starter small, medium, and large Terraria-like world sizes and tuning targets.
 - Base worldgen data now includes `small`, `medium`, and `large` JSON profiles with vertical dimension bands for sky, surface, underground, and deep layers.
 - Horizontally infinite worlds can stream deterministic chunks in both negative and positive X while keeping top/bottom finite.

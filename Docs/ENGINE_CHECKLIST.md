@@ -82,7 +82,6 @@ Only open engine work is kept here. Completed items are removed after implementa
 
 - [ ] Save player equipment, active status effects, and expanded tile entities.
 - [ ] Add autosave rotation and backup-before-migration behavior.
-- [ ] Add coordinated load-session orchestration matching `GameSaveCoordinator` save layout.
 - [ ] Add crash logs and save recovery diagnostics.
 - [ ] Add world viewer tooling for chunks, biomes, light, liquid, entities, and ore distribution.
 - [ ] Add item/tile/entity editors backed by the same JSON loaders as the game.

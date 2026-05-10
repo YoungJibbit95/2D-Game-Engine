@@ -4,6 +4,7 @@ using Game.Core.Events;
 using Game.Core.Inventory;
 using Game.Core.Time;
 using Game.Core.World.Generation;
+using Game.Core.World.TileEntities;
 using GameWorld = Game.Core.World.World;
 
 namespace Game.Client.GameStates;
@@ -17,4 +18,5 @@ public sealed record LoadedGameSession(
     GameEventBus Events,
     WorldTime WorldTime,
     WorldGenerationProfile? WorldGenerationProfile = null,
-    string? WorldSaveDirectory = null);
+    string? WorldSaveDirectory = null,
+    TileEntityManager? TileEntities = null);

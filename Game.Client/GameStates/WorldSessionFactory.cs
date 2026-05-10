@@ -11,6 +11,7 @@ using Game.Core.Settings;
 using Game.Core.Time;
 using Game.Core.World;
 using Game.Core.World.Generation;
+using Game.Core.World.TileEntities;
 using System.Numerics;
 
 namespace Game.Client.GameStates;
@@ -21,14 +22,19 @@ public static class WorldSessionFactory
     {
         var content = new GameContentLoader().LoadWithMods(ClientPaths.FindGameDataRoot(), ClientPaths.ModsRoot()).Database;
         var settings = LoadSettings();
-        var inventory = new PlayerInventory(content.Items);
-        GiveStarterItems(inventory);
-
         var profileId = settings.World.WorldProfileId;
         var profile = content.WorldGenerationProfiles.TryGetById(profileId, out var loadedProfile)
             ? loadedProfile
             : WorldGenerationProfile.Small;
         var saveDirectory = ClientPaths.WorldSaveDirectory(worldName, seed);
+
+        if (TryLoadExistingSession(content, profile, saveDirectory, out var loadedSession))
+        {
+            return loadedSession;
+        }
+
+        var inventory = new PlayerInventory(content.Items);
+        GiveStarterItems(inventory);
 
         var world = settings.World.InfiniteHorizontalGeneration
             ? CreateInfiniteWorld(profile, seed, worldName, settings, saveDirectory)
@@ -50,7 +56,37 @@ public static class WorldSessionFactory
             new GameEventBus(),
             new WorldTime(),
             world.IsHorizontallyInfinite ? profile : null,
-            saveDirectory);
+            saveDirectory,
+            new TileEntityManager());
+    }
+
+    private static bool TryLoadExistingSession(
+        GameContentDatabase content,
+        WorldGenerationProfile profile,
+        string saveDirectory,
+        out LoadedGameSession session)
+    {
+        session = null!;
+        var events = new GameEventBus();
+        var loader = new GameLoadCoordinator();
+        if (!loader.CanLoad(saveDirectory))
+        {
+            return false;
+        }
+
+        var loaded = loader.Load(saveDirectory, content, events: events);
+        session = new LoadedGameSession(
+            content,
+            loaded.World,
+            loaded.Player,
+            loaded.Inventory,
+            loaded.Entities,
+            events,
+            new WorldTime(),
+            loaded.World.IsHorizontallyInfinite ? profile : null,
+            saveDirectory,
+            loaded.TileEntities);
+        return true;
     }
 
     private static void GiveStarterItems(PlayerInventory inventory)
