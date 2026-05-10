@@ -40,6 +40,44 @@ public sealed class TopDownMapTransitionSystem
             return TopDownMapTransitionResult.Failed(currentMap.Id, previousPosition, "no_warp_at_source_tile");
         }
 
+        return ApplyWarp(maps, session, currentMap, warp, previousPosition);
+    }
+
+    public TopDownMapTransitionResult TryApplyWarpObject(
+        MapRegistry maps,
+        TopDownMapSession session,
+        MapDefinition currentMap,
+        MapObjectDefinition warpObject)
+    {
+        ArgumentNullException.ThrowIfNull(maps);
+        ArgumentNullException.ThrowIfNull(session);
+        ArgumentNullException.ThrowIfNull(currentMap);
+        ArgumentNullException.ThrowIfNull(warpObject);
+
+        var previousPosition = session.Body.Position;
+        if (warpObject.Kind != MapObjectKind.Warp ||
+            string.IsNullOrWhiteSpace(warpObject.TargetMapId) ||
+            string.IsNullOrWhiteSpace(warpObject.TargetSpawnId))
+        {
+            return TopDownMapTransitionResult.Failed(currentMap.Id, previousPosition, "object_is_not_a_valid_warp");
+        }
+
+        var warp = new MapWarpTarget(
+            warpObject.TargetMapId!,
+            warpObject.TargetSpawnId!,
+            new TilePos(warpObject.TileX, warpObject.TileY),
+            warpObject.Id);
+
+        return ApplyWarp(maps, session, currentMap, warp, previousPosition);
+    }
+
+    private static TopDownMapTransitionResult ApplyWarp(
+        MapRegistry maps,
+        TopDownMapSession session,
+        MapDefinition currentMap,
+        MapWarpTarget warp,
+        System.Numerics.Vector2 previousPosition)
+    {
         if (!maps.TryGetById(warp.TargetMapId, out var targetMap))
         {
             return TopDownMapTransitionResult.Failed(currentMap.Id, previousPosition, "target_map_missing");

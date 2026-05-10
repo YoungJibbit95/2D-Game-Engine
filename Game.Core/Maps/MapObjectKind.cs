@@ -9,5 +9,10 @@ public enum MapObjectKind
     Shop,
     NpcSpawn,
     FarmArea,
-    Decoration
+    Decoration,
+    Door,
+    Gate,
+    Furniture,
+    Trigger,
+    ShippingBin
 }

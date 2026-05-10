@@ -15,7 +15,8 @@ public sealed class TopDownMapInteractionService
         MapDefinition map,
         TopDownMapBody body,
         int reachTiles = 1,
-        bool includeOverlap = true)
+        bool includeOverlap = true,
+        TopDownMapRuntimeState? runtimeState = null)
     {
         ArgumentNullException.ThrowIfNull(map);
         ArgumentNullException.ThrowIfNull(body);
@@ -32,7 +33,7 @@ public sealed class TopDownMapInteractionService
             actorTile.Y + (int)facing.Y * Math.Max(1, reachTiles));
 
         var region = BuildQueryRegion(actorTile, targetTile, reachTiles, includeOverlap);
-        var candidates = _queries.QueryObjects(map, region, interactableOnly: true);
+        var candidates = _queries.QueryObjects(map, region, interactableOnly: true, runtimeState);
         if (candidates.Count == 0)
         {
             return TopDownMapInteractionResult.Miss(actorTile, targetTile, region, "no_interactable_in_reach");

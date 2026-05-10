@@ -28,20 +28,20 @@ The count excludes `bin`, `obj`, `.git`, and `.vs`.
 
 | Area | Files | Lines |
 | --- | ---: | ---: |
-| `Game.Core` | 321 | 14,800 |
+| `Game.Core` | 329 | 15,251 |
 | `Game.Client` | 48 | 4,772 |
-| `Game.Tests` | 81 | 7,465 |
-| `Game.Data` | 63 | 1,634 |
-| `Docs` | 8 | 665 |
+| `Game.Tests` | 81 | 7,692 |
+| `Game.Data` | 63 | 1,665 |
+| `Docs` | 8 | 669 |
 
 | Extension | Files | Lines |
 | --- | ---: | ---: |
-| `.cs` | 446 | 26,974 |
-| `.json` | 65 | 1,653 |
-| `.md` | 9 | 824 |
+| `.cs` | 454 | 27,652 |
+| `.json` | 65 | 1,684 |
+| `.md` | 9 | 828 |
 | Project/solution/config files | 17 | 342 |
 
-Total tracked workspace snapshot: 537 files, 29,793 lines.
+Total tracked workspace snapshot: 545 files, 30,506 lines.
 
 ## Core Engine Features
 
@@ -70,7 +70,7 @@ Total tracked workspace snapshot: 537 files, 29,793 lines.
 - Crafting query model with known recipes, station checks, ingredient checks, categories, and sort order.
 - Farming foundation for Stardew-like games: crop definitions, seed lookup, farm plots, tilling, watering, planting, seasonal growth, harvesting, regrow crops, selected-item action routing, and farm plot save/load.
 - Topdown movement controller for RPG, life-sim, adventure, and farm games using shared tile collision.
-- Topdown map foundation with JSON map definitions, tile layers, collision layers, objects, interactables, spawn points, warps, registry validation, mod merge support, runtime map queries, map sessions, map-specific pixel movement, facing, interaction targeting, and warp transition application.
+- Topdown map foundation with JSON map definitions, tile layers, collision layers, objects, interactables, spawn points, warps, registry validation, mod merge support, runtime map queries, map sessions, map-specific pixel movement, facing, interaction targeting, runtime object state, door/gate passability, object action resolution, interaction events, and warp transition application.
 - Combat health, damage info, invulnerability, contact damage, projectile damage, melee attacks, loot drops, and status effects.
 - Entity manager with runtime id assignment and spatial query index.
 - Shared world queries for raycasts, line of sight, shape queries, and tile flood fill.
@@ -101,13 +101,13 @@ Total tracked workspace snapshot: 537 files, 29,793 lines.
 - Coordinate conversion, including negative coordinates.
 - World tile get/set, chunk dirtiness, and save/load.
 - Inventory and player inventory stack behavior.
-- Crafting, farming, maps, topdown map sessions/movement/interactions/transitions, item actions, mining/building, combat, projectiles, spawning, commands, settings, status effects, topdown movement, and world generation.
+- Crafting, farming, maps, topdown map sessions/movement/interactions/actions/transitions, item actions, mining/building, combat, projectiles, spawning, commands, settings, status effects, topdown movement, and world generation.
 - Entity save/load and tile entity save/load.
 - Coordinated session save/load round trips, including farm plot persistence.
 - UI animation track/player behavior.
 - UI layout, hit-testing, modal layers, focus traversal, tooltips, and cursor interaction snapshots.
 
-Current test count: 308 passing tests after the topdown map content and query foundation.
+Current test count: 324 passing tests after the topdown map runtime and object action foundation.
 
 ## Current Engine Direction
 

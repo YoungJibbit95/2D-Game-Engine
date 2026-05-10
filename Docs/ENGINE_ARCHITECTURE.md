@@ -195,6 +195,8 @@ This design keeps farming independent from MonoGame and from a specific map rend
 - `TopDownMapSession` owns the active map id, active spawn id, actor body, and spawn positioning so a client or server can start a Stardew-like/RPG session without knowing map JSON details.
 - `TopDownMapInteractionService` resolves the best interactable object in facing reach and returns explicit hit/miss data for signs, containers, shops, NPCs, doors, scripted objects, and future UI prompts.
 - `TopDownMapTransitionSystem` applies warp objects by resolving target map/spawn definitions and moving the session body to the destination spawn with destination facing.
+- `TopDownMapRuntimeStateStore` keeps per-map object state such as enabled/disabled, open/closed, interaction count, and last interaction tick. Query, movement, and targeting services consume that state so opened doors stop blocking and disabled objects cannot be targeted.
+- `TopDownMapObjectInteractionSystem` turns resolved objects into engine actions: messages, containers, shipping bins, shops, door/gate toggles, scripted triggers, dialogue starts, farm-area use, and interactive warps. It publishes typed events for object interaction and map transitions.
 
 Map data is loaded from `Game.Data/maps` and participates in base/mod merging and cross-reference validation. This gives Stardew-like and RPG-style games a separate map route instead of forcing every game type through procedural sideview terrain.
 

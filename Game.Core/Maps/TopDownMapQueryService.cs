@@ -6,6 +6,11 @@ public sealed class TopDownMapQueryService
 {
     public bool IsBlocked(MapDefinition map, TilePos position)
     {
+        return IsBlocked(map, position, runtimeState: null);
+    }
+
+    public bool IsBlocked(MapDefinition map, TilePos position, TopDownMapRuntimeState? runtimeState)
+    {
         ArgumentNullException.ThrowIfNull(map);
 
         if (!map.IsInBounds(position))
@@ -14,10 +19,14 @@ public sealed class TopDownMapQueryService
         }
 
         return map.Layers.Any(layer => layer.BlocksAt(position.X, position.Y)) ||
-               map.Objects.Any(item => item.BlocksMovement && item.Bounds.Contains(position));
+               map.Objects.Any(item => IsObjectBlocking(item, runtimeState) && item.Bounds.Contains(position));
     }
 
-    public IReadOnlyList<MapObjectDefinition> QueryObjects(MapDefinition map, RectI region, bool interactableOnly = false)
+    public IReadOnlyList<MapObjectDefinition> QueryObjects(
+        MapDefinition map,
+        RectI region,
+        bool interactableOnly = false,
+        TopDownMapRuntimeState? runtimeState = null)
     {
         ArgumentNullException.ThrowIfNull(map);
 
@@ -27,16 +36,22 @@ public sealed class TopDownMapQueryService
         }
 
         return map.Objects
-            .Where(item => (!interactableOnly || item.IsInteractable) && item.Bounds.Intersects(region))
+            .Where(item => IsObjectEnabled(item, runtimeState) &&
+                           (!interactableOnly || item.IsInteractable) &&
+                           item.Bounds.Intersects(region))
             .OrderBy(item => item.TileY)
             .ThenBy(item => item.TileX)
             .ThenBy(item => item.Id, StringComparer.OrdinalIgnoreCase)
             .ToArray();
     }
 
-    public IReadOnlyList<MapObjectDefinition> FindObjectsAt(MapDefinition map, TilePos position, bool interactableOnly = false)
+    public IReadOnlyList<MapObjectDefinition> FindObjectsAt(
+        MapDefinition map,
+        TilePos position,
+        bool interactableOnly = false,
+        TopDownMapRuntimeState? runtimeState = null)
     {
-        return QueryObjects(map, new RectI(position.X, position.Y, 1, 1), interactableOnly);
+        return QueryObjects(map, new RectI(position.X, position.Y, 1, 1), interactableOnly, runtimeState);
     }
 
     public bool TryGetSpawn(MapDefinition map, string spawnId, out TilePos position)
@@ -56,9 +71,19 @@ public sealed class TopDownMapQueryService
 
     public bool TryResolveWarp(MapDefinition map, TilePos sourceTile, out MapWarpTarget warp)
     {
+        return TryResolveWarp(map, sourceTile, runtimeState: null, out warp);
+    }
+
+    public bool TryResolveWarp(
+        MapDefinition map,
+        TilePos sourceTile,
+        TopDownMapRuntimeState? runtimeState,
+        out MapWarpTarget warp)
+    {
         ArgumentNullException.ThrowIfNull(map);
 
         var source = map.Objects.FirstOrDefault(item =>
+            IsObjectEnabled(item, runtimeState) &&
             item.Kind == MapObjectKind.Warp &&
             item.Bounds.Contains(sourceTile) &&
             !string.IsNullOrWhiteSpace(item.TargetMapId) &&
@@ -72,5 +97,15 @@ public sealed class TopDownMapQueryService
 
         warp = new MapWarpTarget(source.TargetMapId!, source.TargetSpawnId!, sourceTile, source.Id);
         return true;
+    }
+
+    private static bool IsObjectEnabled(MapObjectDefinition mapObject, TopDownMapRuntimeState? runtimeState)
+    {
+        return runtimeState?.IsObjectEnabled(mapObject) ?? true;
+    }
+
+    private static bool IsObjectBlocking(MapObjectDefinition mapObject, TopDownMapRuntimeState? runtimeState)
+    {
+        return runtimeState?.IsObjectBlocking(mapObject) ?? mapObject.BlocksMovement;
     }
 }

@@ -61,14 +61,45 @@
     },
     {
       "id": "shipping_bin",
-      "kind": "Container",
+      "kind": "ShippingBin",
       "tileX": 6,
       "tileY": 2,
       "width": 1,
       "height": 1,
       "blocksMovement": true,
       "isInteractable": true,
-      "interactionId": "shipping_bin"
+      "interactionId": "shipping_bin",
+      "properties": {
+        "shippingBinId": "farm_shipping_bin"
+      }
+    },
+    {
+      "id": "farmhouse_door",
+      "kind": "Door",
+      "tileX": 3,
+      "tileY": 3,
+      "width": 1,
+      "height": 1,
+      "blocksMovement": true,
+      "isInteractable": true,
+      "interactionId": "farmhouse_door",
+      "properties": {
+        "doorId": "starter_farmhouse_door"
+      }
+    },
+    {
+      "id": "welcome_sign",
+      "kind": "Sign",
+      "tileX": 8,
+      "tileY": 2,
+      "width": 1,
+      "height": 1,
+      "blocksMovement": false,
+      "isInteractable": true,
+      "interactionId": "welcome_sign",
+      "properties": {
+        "text": "A quiet patch of land. Make it yours."
+      }
     },
     {
       "id": "farm_plot_area",

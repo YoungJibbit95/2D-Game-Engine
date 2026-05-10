@@ -18,7 +18,8 @@ public sealed class TopDownMapMovementController
         TopDownMapBody body,
         Vector2 direction,
         float deltaSeconds,
-        TopDownMovementOptions? options = null)
+        TopDownMovementOptions? options = null,
+        TopDownMapRuntimeState? runtimeState = null)
     {
         ArgumentNullException.ThrowIfNull(map);
         ArgumentNullException.ThrowIfNull(body);
@@ -29,7 +30,7 @@ public sealed class TopDownMapMovementController
         if (deltaSeconds <= 0)
         {
             body.Velocity = Vector2.Zero;
-            return BuildResult(map, body, previous, blockedX: false, blockedY: false);
+            return BuildResult(map, body, previous, blockedX: false, blockedY: false, runtimeState);
         }
 
         var movement = ResolveDirection(direction, options);
@@ -41,8 +42,8 @@ public sealed class TopDownMapMovementController
         body.Velocity = movement * options.MoveSpeedPixelsPerSecond;
 
         var delta = body.Velocity * deltaSeconds;
-        var blockedX = MoveAxis(map, body, delta.X, Axis.X);
-        var blockedY = MoveAxis(map, body, delta.Y, Axis.Y);
+        var blockedX = MoveAxis(map, body, delta.X, Axis.X, runtimeState);
+        var blockedY = MoveAxis(map, body, delta.Y, Axis.Y, runtimeState);
 
         if (blockedX)
         {
@@ -54,16 +55,27 @@ public sealed class TopDownMapMovementController
             body.Velocity = new Vector2(body.Velocity.X, 0);
         }
 
-        return BuildResult(map, body, previous, blockedX, blockedY);
+        return BuildResult(map, body, previous, blockedX, blockedY, runtimeState);
     }
 
-    private TopDownMapMovementResult BuildResult(MapDefinition map, TopDownMapBody body, Vector2 previous, bool blockedX, bool blockedY)
+    private TopDownMapMovementResult BuildResult(
+        MapDefinition map,
+        TopDownMapBody body,
+        Vector2 previous,
+        bool blockedX,
+        bool blockedY,
+        TopDownMapRuntimeState? runtimeState)
     {
-        _queries.TryResolveWarp(map, body.CenterTile(map.TileSize), out var warp);
+        _queries.TryResolveWarp(map, body.CenterTile(map.TileSize), runtimeState, out var warp);
         return new TopDownMapMovementResult(previous, body.Position, body.Velocity, body.Facing, blockedX, blockedY, warp);
     }
 
-    private bool MoveAxis(MapDefinition map, TopDownMapBody body, float amount, Axis axis)
+    private bool MoveAxis(
+        MapDefinition map,
+        TopDownMapBody body,
+        float amount,
+        Axis axis,
+        TopDownMapRuntimeState? runtimeState)
     {
         if (MathF.Abs(amount) <= float.Epsilon)
         {
@@ -75,7 +87,7 @@ public sealed class TopDownMapMovementController
             ? new Vector2(body.Position.X + amount, body.Position.Y)
             : new Vector2(body.Position.X, body.Position.Y + amount);
 
-        var blocker = FindFirstBlockingTile(map, body);
+        var blocker = FindFirstBlockingTile(map, body, runtimeState);
         if (blocker is null)
         {
             return false;
@@ -101,7 +113,7 @@ public sealed class TopDownMapMovementController
         return true;
     }
 
-    private TilePos? FindFirstBlockingTile(MapDefinition map, TopDownMapBody body)
+    private TilePos? FindFirstBlockingTile(MapDefinition map, TopDownMapBody body, TopDownMapRuntimeState? runtimeState)
     {
         var tileBounds = body.BoundsTiles(map.TileSize);
         for (var y = tileBounds.Top; y < tileBounds.Bottom; y++)
@@ -109,7 +121,7 @@ public sealed class TopDownMapMovementController
             for (var x = tileBounds.Left; x < tileBounds.Right; x++)
             {
                 var tile = new TilePos(x, y);
-                if (_queries.IsBlocked(map, tile))
+                if (_queries.IsBlocked(map, tile, runtimeState))
                 {
                     return tile;
                 }
