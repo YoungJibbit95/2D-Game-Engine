@@ -28,20 +28,20 @@ The count excludes `bin`, `obj`, `.git`, and `.vs`.
 
 | Area | Files | Lines |
 | --- | ---: | ---: |
-| `Game.Core` | 345 | 16,036 |
-| `Game.Client` | 48 | 4,772 |
-| `Game.Tests` | 83 | 8,052 |
+| `Game.Core` | 351 | 16,283 |
+| `Game.Client` | 48 | 4,850 |
+| `Game.Tests` | 84 | 8,194 |
 | `Game.Data` | 65 | 1,752 |
-| `Docs` | 8 | 674 |
+| `Docs` | 9 | 742 |
 
 | Extension | Files | Lines |
 | --- | ---: | ---: |
-| `.cs` | 472 | 28,797 |
-| `.json` | 67 | 1,771 |
-| `.md` | 9 | 833 |
+| `.cs` | 479 | 29,264 |
+| `.json` | 68 | 1,784 |
+| `.md` | 11 | 926 |
 | Project/solution/config files | 17 | 342 |
 
-Total tracked workspace snapshot: 556 files, 31,540 lines.
+Total tracked workspace snapshot: 566 files, 32,113 lines.
 
 ## Core Engine Features
 
@@ -66,6 +66,7 @@ Total tracked workspace snapshot: 556 files, 31,540 lines.
 - Bounded event journal for debugging, profiling, and future replay/replication.
 - Data-driven registries for tiles, items, crops, maps, dialogues, shops, recipes, loot, biomes, entities, projectiles, status effects, spawns, sprites, and worldgen profiles.
 - Mod/content-pack loader with base/mod merge and validation reports.
+- Game project manifest support through `yjse.game.json`, project/content/mod path resolution, project-scoped save/settings roots, and external game repo loading via `YJSE_GAME_ROOT` or `YJSE_GAME_DATA`.
 - Inventory, hotbar, cursor-item foundation, stack merge/split/swap, pickup logic, equipment, and stat calculation.
 - Crafting query model with known recipes, station checks, ingredient checks, categories, and sort order.
 - Farming foundation for Stardew-like games: crop definitions, seed lookup, farm plots, tilling, watering, planting, seasonal growth, harvesting, regrow crops, selected-item action routing, and farm plot save/load.
@@ -104,12 +105,13 @@ Total tracked workspace snapshot: 556 files, 31,540 lines.
 - World tile get/set, chunk dirtiness, and save/load.
 - Inventory and player inventory stack behavior.
 - Crafting, farming, maps, topdown map sessions/movement/interactions/actions/transitions, dialogues, shops, item actions, mining/building, combat, projectiles, spawning, commands, settings, status effects, topdown movement, and world generation.
+- Game project manifest loading, path resolution, fallback loose-content roots, and project content loading.
 - Entity save/load and tile entity save/load.
 - Coordinated session save/load round trips, including farm plot persistence.
 - UI animation track/player behavior.
 - UI layout, hit-testing, modal layers, focus traversal, tooltips, and cursor interaction snapshots.
 
-Current test count: 335 passing tests after the dialogue and shop content foundation.
+Current test count: 341 passing tests after the game-project separation foundation.
 
 ## Current Engine Direction
 
@@ -120,6 +122,7 @@ The engine is now past the first playable prototype shell and is becoming a reus
 - Upgrade rendering to atlas-backed batching, render targets, shader passes, particles, and animation clips for entities.
 - Add RGB region-based lighting and dynamic lights attached to items, projectiles, entities, and furniture.
 - Deepen worldgen with biome transitions, underground walls, larger cavern layers, lakes, structure spacing, chest rooms, and sampled infinite-world quality gates.
+- Continue moving toward stable engine package names and a physical standalone game repository that references the engine.
 - Add richer crop rendering, client topdown map rendering/input integration, weather/rain watering, shop/dialogue UI, shipping bins, NPC schedules, and relationship data.
 - Add save migrations, integrity reports, autosave rotation, and recovery diagnostics.
 - Add content browser/editor tooling powered by the same data loaders as the runtime.

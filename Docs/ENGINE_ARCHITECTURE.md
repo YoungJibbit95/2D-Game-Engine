@@ -12,11 +12,15 @@ This document explains how the engine is intended to fit together. Checklist fil
 
 `Game.Tests` is the safety net for core behavior. Any engine rule that can run without graphics should be tested here.
 
+`yjse.game.json` is the boundary between the engine repo and a concrete game repo. The local manifest points at the sample `Game.Data`, while external games can provide their own manifest and content root. `Game.Core.Projects` resolves that manifest and gives client/tools a stable project path contract.
+
 ## Content Load Flow
 
 The client calls `GameContentLoader.LoadWithMods(baseDataRoot, modsRoot)`.
 
 The loader reads each definition folder, merges base data and mods by id, validates cross-registry references, and returns a `GameContentDatabase` plus a `ContentLoadReport`.
+
+For standalone game repositories, `GameProjectContentLoader` first resolves `yjse.game.json`, then delegates to `GameContentLoader` with the manifest's content and mods roots. This keeps engine code and game content physically separable while preserving the same validation pipeline.
 
 The database currently exposes registries for:
 

@@ -7,6 +7,7 @@ using Game.Core.Farming;
 using Game.Core.Inventory;
 using Game.Core.Lighting;
 using Game.Core.Physics;
+using Game.Core.Projects;
 using Game.Core.Saving;
 using Game.Core.Settings;
 using Game.Core.Time;
@@ -21,12 +22,10 @@ public static class WorldSessionFactory
 {
     public static LoadedGameSession CreateSingleplayer(int seed, string worldName)
     {
-        var content = new GameContentLoader().LoadWithMods(ClientPaths.FindGameDataRoot(), ClientPaths.ModsRoot()).Database;
+        var projectContent = new GameProjectContentLoader().Load(ClientPaths.FindGameProjectPaths().ProjectRoot);
+        var content = projectContent.Content.Database;
         var settings = LoadSettings();
-        var profileId = settings.World.WorldProfileId;
-        var profile = content.WorldGenerationProfiles.TryGetById(profileId, out var loadedProfile)
-            ? loadedProfile
-            : WorldGenerationProfile.Small;
+        var profile = ResolveWorldProfile(content, projectContent.Manifest, settings);
         var saveDirectory = ClientPaths.WorldSaveDirectory(worldName, seed);
 
         if (TryLoadExistingSession(content, profile, saveDirectory, out var loadedSession))
@@ -90,6 +89,25 @@ public static class WorldSessionFactory
             loaded.TileEntities,
             loaded.FarmPlots);
         return true;
+    }
+
+    private static WorldGenerationProfile ResolveWorldProfile(
+        GameContentDatabase content,
+        GameProjectManifest manifest,
+        GameSettings settings)
+    {
+        if (content.WorldGenerationProfiles.TryGetById(settings.World.WorldProfileId, out var settingsProfile))
+        {
+            return settingsProfile;
+        }
+
+        if (!string.IsNullOrWhiteSpace(manifest.DefaultWorldProfileId) &&
+            content.WorldGenerationProfiles.TryGetById(manifest.DefaultWorldProfileId, out var manifestProfile))
+        {
+            return manifestProfile;
+        }
+
+        return WorldGenerationProfile.Small;
     }
 
     private static void GiveStarterItems(PlayerInventory inventory)

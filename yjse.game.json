@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "id": "yjse_sample_sandbox",
+  "displayName": "YjsE Sample Sandbox",
+  "version": "0.1.0",
+  "engineVersion": "local",
+  "contentRoot": "Game.Data",
+  "modsRoot": "Mods",
+  "savesRootName": "Saves",
+  "defaultWorldProfileId": "small",
+  "startupMapId": "farmstead",
+  "tags": ["sample", "sandbox", "terraria-like", "stardew-like"]
+}

@@ -1,8 +1,15 @@
+using Game.Core.Data;
+using Game.Core.Projects;
+using System.Text.Json;
+
 namespace Game.Client.Configuration;
 
 public static class ClientPaths
 {
     public const string AppName = "YjsE";
+    public const string GameRootEnvironmentVariable = "YJSE_GAME_ROOT";
+    public const string GameDataEnvironmentVariable = "YJSE_GAME_DATA";
+    public const string ModsRootEnvironmentVariable = "YJSE_MODS_ROOT";
 
     public static string SettingsPath()
     {
@@ -12,12 +19,14 @@ public static class ClientPaths
     public static string AppDataRoot()
     {
         var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-        return Path.Combine(appData, AppName);
+        var projectId = TryLoadGameProjectManifest()?.Id ?? AppName;
+        return Path.Combine(appData, AppName, SanitizePathSegment(projectId));
     }
 
     public static string WorldSavesRoot()
     {
-        return Path.Combine(AppDataRoot(), "Saves", "Worlds");
+        var savesRootName = TryLoadGameProjectManifest()?.SavesRootName ?? "Saves";
+        return Path.Combine(AppDataRoot(), SanitizePathSegment(savesRootName), "Worlds");
     }
 
     public static string WorldSaveDirectory(string worldName, int seed)
@@ -27,25 +36,87 @@ public static class ClientPaths
 
     public static string FindGameDataRoot()
     {
-        foreach (var root in CandidateRoots())
+        return FindGameProjectPaths().ContentRoot;
+    }
+
+    public static GameProjectPaths FindGameProjectPaths()
+    {
+        var resolver = new GameProjectResolver();
+
+        var explicitDataRoot = Environment.GetEnvironmentVariable(GameDataEnvironmentVariable);
+        if (!string.IsNullOrWhiteSpace(explicitDataRoot))
         {
-            var gameData = Path.Combine(root, "Game.Data");
-            if (Directory.Exists(gameData))
-            {
-                return gameData;
-            }
+            return resolver.Resolve(explicitDataRoot);
         }
 
-        throw new DirectoryNotFoundException("Could not locate Game.Data next to the workspace or output directory.");
+        var explicitGameRoot = Environment.GetEnvironmentVariable(GameRootEnvironmentVariable);
+        if (!string.IsNullOrWhiteSpace(explicitGameRoot))
+        {
+            return resolver.Resolve(explicitGameRoot);
+        }
+
+        return resolver.ResolveFirstExisting(CandidateProjectRoots());
+    }
+
+    public static GameProjectManifest LoadGameProjectManifest()
+    {
+        var resolver = new GameProjectResolver();
+        return resolver.LoadManifest(FindGameProjectPaths());
     }
 
     public static string ModsRoot()
     {
-        var dataRoot = FindGameDataRoot();
-        return Path.Combine(Directory.GetParent(dataRoot)!.FullName, "Mods");
+        var explicitModsRoot = Environment.GetEnvironmentVariable(ModsRootEnvironmentVariable);
+        if (!string.IsNullOrWhiteSpace(explicitModsRoot))
+        {
+            return Path.GetFullPath(explicitModsRoot);
+        }
+
+        return FindGameProjectPaths().ModsRoot;
     }
 
-    private static IEnumerable<string> CandidateRoots()
+    private static GameProjectManifest? TryLoadGameProjectManifest()
+    {
+        try
+        {
+            return LoadGameProjectManifest();
+        }
+        catch (DirectoryNotFoundException)
+        {
+            return null;
+        }
+        catch (IOException)
+        {
+            return null;
+        }
+        catch (RegistryValidationException)
+        {
+            return null;
+        }
+        catch (JsonException)
+        {
+            return null;
+        }
+        catch (InvalidDataException)
+        {
+            return null;
+        }
+        catch (UnauthorizedAccessException)
+        {
+            return null;
+        }
+    }
+
+    private static IEnumerable<string> CandidateProjectRoots()
+    {
+        foreach (var root in CandidateBaseRoots())
+        {
+            yield return root;
+            yield return Path.Combine(root, "Game.Data");
+        }
+    }
+
+    private static IEnumerable<string> CandidateBaseRoots()
     {
         yield return Directory.GetCurrentDirectory();
         yield return AppContext.BaseDirectory;

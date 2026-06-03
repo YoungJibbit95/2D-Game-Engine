@@ -5,6 +5,7 @@ Only open engine work is kept here. Completed items are removed after implementa
 ## Core Architecture
 
 - [ ] Move more gameplay orchestration from `Game.Client` into core runtime services.
+- [ ] Rename/package public engine assemblies from temporary `Game.*` names toward stable `YjsE.*` package names once the API boundary settles.
 - [ ] Add a lightweight service registry for runtime systems that need shared access without a god class.
 - [ ] Add deterministic RNG streams for worldgen, loot, AI, particles, and future replays.
 - [ ] Add a deterministic replay harness for core simulation ticks.

@@ -4,9 +4,12 @@ YoungJibbit's Engine is a small MonoGame-based 2D sandbox action-adventure engin
 
 ## Projects
 
-- `Game.Core`: engine and gameplay logic without MonoGame references.
-- `Game.Client`: MonoGame DesktopGL client, game loop, states, rendering shell.
+- `Game.Core`: reusable engine and gameplay systems without MonoGame references.
+- `Game.Client`: MonoGame DesktopGL host/client, game loop, states, rendering shell.
 - `Game.Tests`: unit tests for core systems.
+- `Game.Data`: sample/dev game content pack used to validate the engine locally.
+
+The engine and game content are now separated by a `yjse.game.json` manifest. A future game can live in its own repository and point this client at that repo with `YJSE_GAME_ROOT`. See `Docs/ENGINE_GAME_SEPARATION.md`.
 
 ## Current Status
 
@@ -140,6 +143,7 @@ The engine is now a playable YjsE prototype shell with a growing reusable 2D san
 - Escape no longer closes the game from the main menu.
 - Base item data includes a first copper armor set with equipment stats and workbench recipes.
 - Farming core includes tilling, watering, seed planting, crop growth, seasonal checks, harvesting, regrow crops, selected-item use routing, farm plot save/load, starter hoe/watering can/seed/item data, and crop sprite generation briefs.
+- Game project manifests (`yjse.game.json`) let external game repositories provide their own content root, mods root, save root name, startup map, and default world profile while using this engine.
 
 ## Rider
 
@@ -148,6 +152,17 @@ Open `YjsE.sln` in JetBrains Rider and run the shared `Game.Client` configuratio
 ## Inventory
 
 See `Docs/ENGINE_INVENTORY.md` for the current tech stack, feature inventory, and LOC snapshot.
+
+## External Game Projects
+
+To run a separate game repository against this engine:
+
+```powershell
+$env:YJSE_GAME_ROOT = "F:\Games\MyYjsEGame"
+dotnet run --project Game.Client
+```
+
+The external repo should contain a `yjse.game.json` plus its own content root. Without that variable, the local sample `Game.Data` is used.
 
 ## Dependencies
 
