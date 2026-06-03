@@ -23,6 +23,8 @@ public sealed class GameContentLoaderTests : IDisposable
         Directory.CreateDirectory(Path.Combine(_contentRoot, "worldgen"));
         Directory.CreateDirectory(Path.Combine(_contentRoot, "crops"));
         Directory.CreateDirectory(Path.Combine(_contentRoot, "maps"));
+        Directory.CreateDirectory(Path.Combine(_contentRoot, "dialogue"));
+        Directory.CreateDirectory(Path.Combine(_contentRoot, "shops"));
 
         File.WriteAllText(Path.Combine(_contentRoot, "tiles", "dirt.json"), """
         {
@@ -66,6 +68,16 @@ public sealed class GameContentLoaderTests : IDisposable
           "displayName": "Parsnip",
           "type": "Consumable",
           "texture": "items/parsnip",
+          "maxStack": 999
+        }
+        """);
+
+        File.WriteAllText(Path.Combine(_contentRoot, "items", "copper_coin.json"), """
+        {
+          "id": "copper_coin",
+          "displayName": "Copper Coin",
+          "type": "Material",
+          "texture": "items/copper_coin",
           "maxStack": 999
         }
         """);
@@ -165,10 +177,37 @@ public sealed class GameContentLoaderTests : IDisposable
             { "id": "ground", "kind": "Ground", "width": 3, "height": 2, "tiles": [1,1,1,1,1,1] }
           ],
           "objects": [
-            { "id": "door", "kind": "Warp", "tileX": 2, "tileY": 1, "targetMapId": "farm", "targetSpawnId": "home" }
+            { "id": "door", "kind": "Warp", "tileX": 2, "tileY": 1, "targetMapId": "farm", "targetSpawnId": "home" },
+            { "id": "farmer", "kind": "NpcSpawn", "tileX": 1, "tileY": 0, "isInteractable": true, "properties": { "dialogueId": "farm_intro" } },
+            { "id": "seed_shop", "kind": "Shop", "tileX": 0, "tileY": 1, "isInteractable": true, "properties": { "shopId": "seed_shop" } }
           ],
           "spawnPoints": [
             { "id": "home", "tileX": 1, "tileY": 1 }
+          ]
+        }
+        """);
+
+        File.WriteAllText(Path.Combine(_contentRoot, "dialogue", "farm_intro.json"), """
+        {
+          "id": "farm_intro",
+          "displayName": "Farm Intro",
+          "startNodeId": "hello",
+          "nodes": [
+            { "id": "hello", "speakerId": "farmer", "text": "Welcome.", "endsConversation": true }
+          ]
+        }
+        """);
+
+        File.WriteAllText(Path.Combine(_contentRoot, "shops", "seed_shop.json"), """
+        {
+          "id": "seed_shop",
+          "displayName": "Seed Shop",
+          "currencyItemId": "copper_coin",
+          "stock": [
+            { "itemId": "parsnip_seeds", "count": 1, "price": 5 }
+          ],
+          "sellPrices": [
+            { "itemId": "parsnip", "price": 8 }
           ]
         }
         """);
@@ -178,6 +217,7 @@ public sealed class GameContentLoaderTests : IDisposable
           "sprites": [
             { "id": "tiles/dirt", "path": "sprites/world/tiles/dirt.png", "category": "Tile", "width": 16, "height": 16 },
             { "id": "items/dirt_block", "path": "sprites/items/blocks/dirt_block.png", "category": "Item", "width": 16, "height": 16 },
+            { "id": "items/copper_coin", "path": "sprites/items/currency/copper_coin.png", "category": "Item", "width": 16, "height": 16 },
             { "id": "items/parsnip_seeds", "path": "sprites/items/seeds/parsnip_seeds.png", "category": "Item", "width": 16, "height": 16 },
             { "id": "items/parsnip", "path": "sprites/items/crops/parsnip.png", "category": "Item", "width": 16, "height": 16 },
             { "id": "crops/parsnip", "path": "sprites/world/crops/parsnip.png", "category": "Crop", "width": 48, "height": 16 },
@@ -203,6 +243,10 @@ public sealed class GameContentLoaderTests : IDisposable
         Assert.Equal(3, parsnip.TotalGrowthDays);
         Assert.True(database.Maps.TryGetById("farm", out var farm));
         Assert.True(farm.TryGetSpawn("home", out _));
+        Assert.True(database.Dialogues.TryGetById("farm_intro", out var intro));
+        Assert.Equal("hello", intro.StartNodeId);
+        Assert.True(database.Shops.TryGetById("seed_shop", out var shop));
+        Assert.True(shop.TryGetStock("parsnip_seeds", out _));
     }
 
     [Fact]
@@ -392,6 +436,53 @@ public sealed class GameContentLoaderTests : IDisposable
     }
 
     [Fact]
+    public void LoadWithMods_ReportsMissingShopDialogueAndShopItemReferences()
+    {
+        WriteMinimalBaseContent(_contentRoot);
+        Directory.CreateDirectory(Path.Combine(_contentRoot, "maps"));
+        Directory.CreateDirectory(Path.Combine(_contentRoot, "shops"));
+
+        File.WriteAllText(Path.Combine(_contentRoot, "maps", "bad_refs.json"), """
+        {
+          "id": "bad_refs",
+          "displayName": "Bad References",
+          "widthTiles": 3,
+          "heightTiles": 3,
+          "objects": [
+            { "id": "shop", "kind": "Shop", "tileX": 1, "tileY": 1, "isInteractable": true, "properties": { "shopId": "missing_shop" } },
+            { "id": "npc", "kind": "NpcSpawn", "tileX": 2, "tileY": 1, "isInteractable": true, "properties": { "dialogueId": "missing_dialogue" } }
+          ],
+          "spawnPoints": [
+            { "id": "home", "tileX": 1, "tileY": 2 }
+          ]
+        }
+        """);
+
+        File.WriteAllText(Path.Combine(_contentRoot, "shops", "bad_shop.json"), """
+        {
+          "id": "bad_shop",
+          "displayName": "Bad Shop",
+          "currencyItemId": "missing_coin",
+          "stock": [
+            { "itemId": "missing_seed", "count": 1, "price": 5 }
+          ],
+          "sellPrices": [
+            { "itemId": "missing_crop", "price": 8 }
+          ]
+        }
+        """);
+
+        var result = new GameContentLoader().LoadWithMods(_contentRoot, modsRoot: null);
+
+        Assert.True(result.Report.HasErrors);
+        Assert.Contains(result.Report.Issues, issue => issue.ContentKind == "map" && issue.Message.Contains("shop", StringComparison.OrdinalIgnoreCase));
+        Assert.Contains(result.Report.Issues, issue => issue.ContentKind == "map" && issue.Message.Contains("dialogue", StringComparison.OrdinalIgnoreCase));
+        Assert.Contains(result.Report.Issues, issue => issue.ContentKind == "shop" && issue.Message.Contains("currency item", StringComparison.OrdinalIgnoreCase));
+        Assert.Contains(result.Report.Issues, issue => issue.ContentKind == "shop" && issue.Message.Contains("stock item", StringComparison.OrdinalIgnoreCase));
+        Assert.Contains(result.Report.Issues, issue => issue.ContentKind == "shop" && issue.Message.Contains("sell item", StringComparison.OrdinalIgnoreCase));
+    }
+
+    [Fact]
     public void LoadWithMods_RepositoryGameDataHasNoContentErrors()
     {
         var dataRoot = FindRepositoryGameData();
@@ -412,6 +503,9 @@ public sealed class GameContentLoaderTests : IDisposable
         Assert.True(parsnip.CanGrowIn(Game.Core.Farming.FarmSeason.Spring));
         Assert.True(result.Database.Maps.TryGetById("farmstead", out var farmstead));
         Assert.Contains(farmstead.Objects, item => item.Kind == Game.Core.Maps.MapObjectKind.FarmArea);
+        Assert.True(result.Database.Dialogues.TryGetById("farm_welcome", out _));
+        Assert.True(result.Database.Shops.TryGetById("seed_shop", out var seedShop));
+        Assert.Contains(seedShop.Stock, item => item.ItemId == "parsnip_seeds");
     }
 
     public void Dispose()

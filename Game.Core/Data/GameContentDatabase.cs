@@ -1,6 +1,7 @@
 using Game.Core.Assets;
 using Game.Core.Biomes;
 using Game.Core.Crafting;
+using Game.Core.Dialogue;
 using Game.Core.Effects;
 using Game.Core.Entities;
 using Game.Core.Farming;
@@ -8,6 +9,7 @@ using Game.Core.Items;
 using Game.Core.Loot;
 using Game.Core.Maps;
 using Game.Core.Projectiles;
+using Game.Core.Shops;
 using Game.Core.Spawning;
 using Game.Core.Tiles;
 using Game.Core.World.Generation;
@@ -34,4 +36,8 @@ public sealed record GameContentDatabase(
     public CropRegistry Crops { get; init; } = CropRegistry.Create(Array.Empty<CropDefinition>());
 
     public MapRegistry Maps { get; init; } = MapRegistry.Create(Array.Empty<MapDefinition>());
+
+    public DialogueRegistry Dialogues { get; init; } = DialogueRegistry.Create(Array.Empty<DialogueDefinition>());
+
+    public ShopRegistry Shops { get; init; } = ShopRegistry.Create(Array.Empty<ShopDefinition>());
 }

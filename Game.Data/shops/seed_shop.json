@@ -1,0 +1,30 @@
+{
+  "id": "seed_shop",
+  "displayName": "Seed Shop",
+  "currencyItemId": "copper_coin",
+  "tags": ["starter", "farm", "shop", "seeds"],
+  "stock": [
+    {
+      "itemId": "parsnip_seeds",
+      "count": 1,
+      "price": 5,
+      "sortOrder": 10
+    },
+    {
+      "itemId": "watering_can",
+      "count": 1,
+      "price": 20,
+      "sortOrder": 20
+    }
+  ],
+  "sellPrices": [
+    {
+      "itemId": "parsnip",
+      "price": 8
+    },
+    {
+      "itemId": "gel",
+      "price": 1
+    }
+  ]
+}

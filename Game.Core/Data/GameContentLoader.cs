@@ -1,6 +1,7 @@
 using Game.Core.Assets;
 using Game.Core.Biomes;
 using Game.Core.Crafting;
+using Game.Core.Dialogue;
 using Game.Core.Effects;
 using Game.Core.Entities;
 using Game.Core.Farming;
@@ -9,6 +10,7 @@ using Game.Core.Loot;
 using Game.Core.Maps;
 using Game.Core.Mods;
 using Game.Core.Projectiles;
+using Game.Core.Shops;
 using Game.Core.Spawning;
 using Game.Core.Tiles;
 using Game.Core.World.Generation;
@@ -31,6 +33,8 @@ public sealed class GameContentLoader
     private readonly WorldGenerationProfileJsonLoader _worldGenerationProfileLoader;
     private readonly CropDefinitionJsonLoader _cropLoader;
     private readonly MapDefinitionJsonLoader _mapLoader;
+    private readonly DialogueDefinitionJsonLoader _dialogueLoader;
+    private readonly ShopDefinitionJsonLoader _shopLoader;
 
     public GameContentLoader()
         : this(
@@ -63,7 +67,9 @@ public sealed class GameContentLoader
         SpriteAssetJsonLoader spriteAssetLoader,
         WorldGenerationProfileJsonLoader? worldGenerationProfileLoader = null,
         CropDefinitionJsonLoader? cropLoader = null,
-        MapDefinitionJsonLoader? mapLoader = null)
+        MapDefinitionJsonLoader? mapLoader = null,
+        DialogueDefinitionJsonLoader? dialogueLoader = null,
+        ShopDefinitionJsonLoader? shopLoader = null)
     {
         _tileLoader = tileLoader;
         _itemLoader = itemLoader;
@@ -78,6 +84,8 @@ public sealed class GameContentLoader
         _worldGenerationProfileLoader = worldGenerationProfileLoader ?? new WorldGenerationProfileJsonLoader();
         _cropLoader = cropLoader ?? new CropDefinitionJsonLoader();
         _mapLoader = mapLoader ?? new MapDefinitionJsonLoader();
+        _dialogueLoader = dialogueLoader ?? new DialogueDefinitionJsonLoader();
+        _shopLoader = shopLoader ?? new ShopDefinitionJsonLoader();
     }
 
     public GameContentDatabase LoadFromRoot(string contentRoot)
@@ -127,7 +135,9 @@ public sealed class GameContentLoader
             _spriteAssetLoader.LoadDefinitionsFromDirectory(Path.Combine(root, "assets")),
             _worldGenerationProfileLoader.LoadProfilesFromDirectory(Path.Combine(root, "worldgen")),
             _cropLoader.LoadDefinitionsFromDirectory(Path.Combine(root, "crops")),
-            _mapLoader.LoadDefinitionsFromDirectory(Path.Combine(root, "maps")));
+            _mapLoader.LoadDefinitionsFromDirectory(Path.Combine(root, "maps")),
+            _dialogueLoader.LoadDefinitionsFromDirectory(Path.Combine(root, "dialogue")),
+            _shopLoader.LoadDefinitionsFromDirectory(Path.Combine(root, "shops")));
     }
 
     private static ContentPackManifest LoadManifest(string modDirectory)
@@ -161,7 +171,9 @@ public sealed class GameContentLoader
         IReadOnlyList<SpriteAssetDefinition> SpriteAssets,
         IReadOnlyList<WorldGenerationProfile> WorldGenerationProfiles,
         IReadOnlyList<CropDefinition> Crops,
-        IReadOnlyList<MapDefinition> Maps);
+        IReadOnlyList<MapDefinition> Maps,
+        IReadOnlyList<DialogueDefinition> Dialogues,
+        IReadOnlyList<ShopDefinition> Shops);
 
     private sealed class ContentDatabaseBuilder
     {
@@ -180,6 +192,8 @@ public sealed class GameContentLoader
         private readonly Dictionary<string, Packed<WorldGenerationProfile>> _worldGenerationProfiles = new(StringComparer.OrdinalIgnoreCase);
         private readonly Dictionary<string, Packed<CropDefinition>> _crops = new(StringComparer.OrdinalIgnoreCase);
         private readonly Dictionary<string, Packed<MapDefinition>> _maps = new(StringComparer.OrdinalIgnoreCase);
+        private readonly Dictionary<string, Packed<DialogueDefinition>> _dialogues = new(StringComparer.OrdinalIgnoreCase);
+        private readonly Dictionary<string, Packed<ShopDefinition>> _shops = new(StringComparer.OrdinalIgnoreCase);
 
         public ContentDatabaseBuilder(ContentLoadReport report)
         {
@@ -205,6 +219,8 @@ public sealed class GameContentLoader
             MergeById(_worldGenerationProfiles, definitions.WorldGenerationProfiles, profile => profile.Id, "worldgen", packId);
             MergeById(_crops, definitions.Crops, crop => crop.Id, "crop", packId);
             MergeById(_maps, definitions.Maps, map => map.Id, "map", packId);
+            MergeById(_dialogues, definitions.Dialogues, dialogue => dialogue.Id, "dialogue", packId);
+            MergeById(_shops, definitions.Shops, shop => shop.Id, "shop", packId);
         }
 
         public GameContentDatabase Build()
@@ -223,7 +239,9 @@ public sealed class GameContentLoader
                 SpriteAssets = SpriteAssetRegistry.Create(_spriteAssets.Values.Select(value => value.Definition)),
                 WorldGenerationProfiles = WorldGenerationProfileRegistry.Create(_worldGenerationProfiles.Values.Select(value => value.Definition)),
                 Crops = CropRegistry.Create(_crops.Values.Select(value => value.Definition)),
-                Maps = MapRegistry.Create(_maps.Values.Select(value => value.Definition))
+                Maps = MapRegistry.Create(_maps.Values.Select(value => value.Definition)),
+                Dialogues = DialogueRegistry.Create(_dialogues.Values.Select(value => value.Definition)),
+                Shops = ShopRegistry.Create(_shops.Values.Select(value => value.Definition))
             };
         }
 

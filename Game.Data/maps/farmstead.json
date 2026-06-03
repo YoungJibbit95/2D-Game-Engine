@@ -102,6 +102,34 @@
       }
     },
     {
+      "id": "seed_shop_stall",
+      "kind": "Shop",
+      "tileX": 8,
+      "tileY": 3,
+      "width": 1,
+      "height": 1,
+      "blocksMovement": true,
+      "isInteractable": true,
+      "interactionId": "seed_shop",
+      "properties": {
+        "shopId": "seed_shop"
+      }
+    },
+    {
+      "id": "farmhand_spawn",
+      "kind": "NpcSpawn",
+      "tileX": 9,
+      "tileY": 3,
+      "width": 1,
+      "height": 1,
+      "blocksMovement": false,
+      "isInteractable": true,
+      "interactionId": "farm_welcome",
+      "properties": {
+        "dialogueId": "farm_welcome"
+      }
+    },
+    {
       "id": "farm_plot_area",
       "kind": "FarmArea",
       "tileX": 3,

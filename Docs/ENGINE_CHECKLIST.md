@@ -65,7 +65,7 @@ Only open engine work is kept here. Completed items are removed after implementa
 - [ ] Track content provenance per definition: base game vs mod id.
 - [ ] Add explicit mod load order configuration.
 - [ ] Add content hot reload command and safe reload report.
-- [ ] Add debug content browser for tiles, items, crops, maps, recipes, entities, effects, loot, spawns, sprites, and worldgen profiles.
+- [ ] Add debug content browser for tiles, items, crops, maps, dialogues, shops, recipes, entities, effects, loot, spawns, sprites, and worldgen profiles.
 - [ ] Add missing sound/effect fallbacks per asset category.
 - [ ] Add MoonSharp script discovery and sandbox boundaries after the data contract is stable.
 
@@ -75,7 +75,7 @@ Only open engine work is kept here. Completed items are removed after implementa
 - [ ] Add combat animation phases, attack arcs, multi-hit timing, and per-frame hit windows.
 - [ ] Add projectile knockback, spread, charge, reload, and ammo preference rules.
 - [ ] Wire sideview tile/entity interactions into concrete actions for chests, doors, signs, NPCs, crafting stations, machines, and tile entities.
-- [ ] Add concrete client/gameplay handlers for topdown shop, dialogue, container, shipping-bin, and scripted trigger action results.
+- [ ] Add concrete client/gameplay screens for topdown shop, dialogue, container, shipping-bin, and scripted trigger action results.
 - [ ] Add shared tile/entity interaction result objects for sideview world interactions with failure reasons for UI feedback.
 - [ ] Add particle/audio/event hooks for mining, placement, hit, kill, pickup, craft, and blocked-use feedback.
 

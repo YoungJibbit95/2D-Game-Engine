@@ -36,9 +36,9 @@ Only open work is kept here. Completed items are removed after implementation.
 - [ ] Render tilled soil, watered soil, crop stages, and harvest-ready highlights.
 - [ ] Wire harvest/interact actions into selected item use without requiring a dedicated harvest tool.
 - [ ] Add rain/weather watering and seasonal calendar helpers.
-- [ ] Add shops, shipping bin, money economy, daily summary, and sell prices.
+- [ ] Wire shop transaction results into client UI and add shipping-bin daily payout flow.
 - [ ] Wire core topdown map sessions, movement, transitions, and object action results into client gameplay.
-- [ ] Add actual screens/data for topdown shops, shipping bins, containers, dialogue, and scripted interaction hooks.
+- [ ] Add actual screens for topdown shops, shipping bins, containers, dialogue, and scripted interaction hooks.
 - [ ] Expand authored topdown object content with fences, furniture footprints, buildings, and farm/town decoration sets.
 - [ ] Add NPC schedules, dialogue, relationship data, gifts, and daily routines.
 - [ ] Add farm map authoring support for ground/object/building layers.

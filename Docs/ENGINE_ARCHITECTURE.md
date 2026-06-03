@@ -33,6 +33,8 @@ The database currently exposes registries for:
 - World generation profiles.
 - Crops and farming definitions.
 - Topdown maps for RPG, town, farm, and life-sim layouts.
+- Dialogue graphs for signs, NPCs, tutorials, quests, and scripted conversations.
+- Shop definitions for stock, sell prices, currency items, and economy surfaces.
 
 Definitions reference sprites by stable sprite asset id, not by renderer texture object. For example, a tile can use `"texture": "tiles/dirt"`, while the asset manifest maps `tiles/dirt` to an actual source path.
 
@@ -199,6 +201,8 @@ This design keeps farming independent from MonoGame and from a specific map rend
 - `TopDownMapObjectInteractionSystem` turns resolved objects into engine actions: messages, containers, shipping bins, shops, door/gate toggles, scripted triggers, dialogue starts, farm-area use, and interactive warps. It publishes typed events for object interaction and map transitions.
 
 Map data is loaded from `Game.Data/maps` and participates in base/mod merging and cross-reference validation. This gives Stardew-like and RPG-style games a separate map route instead of forcing every game type through procedural sideview terrain.
+
+Dialogue and shop definitions now follow the same data-driven path. `DialogueRegistry` validates graph nodes, start nodes, option targets, and sequential links. `DialogueSystem` owns session movement through dialogue nodes and keeps option selection deterministic. `ShopRegistry` validates stock and sell prices, while `ShopTransactionService` buys and sells through `PlayerInventory` with explicit failure reasons for UI, audio, multiplayer validation, and tools. Map objects can reference `dialogueId` and `shopId`; the content validator reports broken references before gameplay begins.
 
 Future genre modules should follow the same shape: data definitions, registry, deterministic runtime state, clear result objects, and core tests before client UI.
 

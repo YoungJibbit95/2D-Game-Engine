@@ -28,20 +28,20 @@ The count excludes `bin`, `obj`, `.git`, and `.vs`.
 
 | Area | Files | Lines |
 | --- | ---: | ---: |
-| `Game.Core` | 329 | 15,251 |
+| `Game.Core` | 345 | 16,036 |
 | `Game.Client` | 48 | 4,772 |
-| `Game.Tests` | 81 | 7,692 |
-| `Game.Data` | 63 | 1,665 |
-| `Docs` | 8 | 669 |
+| `Game.Tests` | 83 | 8,052 |
+| `Game.Data` | 65 | 1,752 |
+| `Docs` | 8 | 674 |
 
 | Extension | Files | Lines |
 | --- | ---: | ---: |
-| `.cs` | 454 | 27,652 |
-| `.json` | 65 | 1,684 |
-| `.md` | 9 | 828 |
+| `.cs` | 472 | 28,797 |
+| `.json` | 67 | 1,771 |
+| `.md` | 9 | 833 |
 | Project/solution/config files | 17 | 342 |
 
-Total tracked workspace snapshot: 545 files, 30,506 lines.
+Total tracked workspace snapshot: 556 files, 31,540 lines.
 
 ## Core Engine Features
 
@@ -64,13 +64,15 @@ Total tracked workspace snapshot: 545 files, 30,506 lines.
 - Greyscale lighting with sunlight, point lights, and underground falloff.
 - Core event bus with typed subscriptions and global observation.
 - Bounded event journal for debugging, profiling, and future replay/replication.
-- Data-driven registries for tiles, items, crops, maps, recipes, loot, biomes, entities, projectiles, status effects, spawns, sprites, and worldgen profiles.
+- Data-driven registries for tiles, items, crops, maps, dialogues, shops, recipes, loot, biomes, entities, projectiles, status effects, spawns, sprites, and worldgen profiles.
 - Mod/content-pack loader with base/mod merge and validation reports.
 - Inventory, hotbar, cursor-item foundation, stack merge/split/swap, pickup logic, equipment, and stat calculation.
 - Crafting query model with known recipes, station checks, ingredient checks, categories, and sort order.
 - Farming foundation for Stardew-like games: crop definitions, seed lookup, farm plots, tilling, watering, planting, seasonal growth, harvesting, regrow crops, selected-item action routing, and farm plot save/load.
 - Topdown movement controller for RPG, life-sim, adventure, and farm games using shared tile collision.
 - Topdown map foundation with JSON map definitions, tile layers, collision layers, objects, interactables, spawn points, warps, registry validation, mod merge support, runtime map queries, map sessions, map-specific pixel movement, facing, interaction targeting, runtime object state, door/gate passability, object action resolution, interaction events, and warp transition application.
+- Dialogue foundation with JSON graph definitions, node/option validation, sessions, deterministic advancement, option selection, and explicit failure reasons.
+- Shop/economy foundation with JSON shop definitions, stock, sell prices, per-entry currency overrides, inventory-backed buy/sell transactions, and explicit failure reasons.
 - Combat health, damage info, invulnerability, contact damage, projectile damage, melee attacks, loot drops, and status effects.
 - Entity manager with runtime id assignment and spatial query index.
 - Shared world queries for raycasts, line of sight, shape queries, and tile flood fill.
@@ -101,13 +103,13 @@ Total tracked workspace snapshot: 545 files, 30,506 lines.
 - Coordinate conversion, including negative coordinates.
 - World tile get/set, chunk dirtiness, and save/load.
 - Inventory and player inventory stack behavior.
-- Crafting, farming, maps, topdown map sessions/movement/interactions/actions/transitions, item actions, mining/building, combat, projectiles, spawning, commands, settings, status effects, topdown movement, and world generation.
+- Crafting, farming, maps, topdown map sessions/movement/interactions/actions/transitions, dialogues, shops, item actions, mining/building, combat, projectiles, spawning, commands, settings, status effects, topdown movement, and world generation.
 - Entity save/load and tile entity save/load.
 - Coordinated session save/load round trips, including farm plot persistence.
 - UI animation track/player behavior.
 - UI layout, hit-testing, modal layers, focus traversal, tooltips, and cursor interaction snapshots.
 
-Current test count: 324 passing tests after the topdown map runtime and object action foundation.
+Current test count: 335 passing tests after the dialogue and shop content foundation.
 
 ## Current Engine Direction
 
@@ -118,6 +120,6 @@ The engine is now past the first playable prototype shell and is becoming a reus
 - Upgrade rendering to atlas-backed batching, render targets, shader passes, particles, and animation clips for entities.
 - Add RGB region-based lighting and dynamic lights attached to items, projectiles, entities, and furniture.
 - Deepen worldgen with biome transitions, underground walls, larger cavern layers, lakes, structure spacing, chest rooms, and sampled infinite-world quality gates.
-- Add richer crop rendering, client topdown map rendering/input integration, weather/rain watering, shops, shipping bins, NPC schedules, and dialogue data.
+- Add richer crop rendering, client topdown map rendering/input integration, weather/rain watering, shop/dialogue UI, shipping bins, NPC schedules, and relationship data.
 - Add save migrations, integrity reports, autosave rotation, and recovery diagnostics.
 - Add content browser/editor tooling powered by the same data loaders as the runtime.

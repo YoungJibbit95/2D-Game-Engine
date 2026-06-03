@@ -1,6 +1,7 @@
 using Game.Core.Mods;
 using Game.Core.Items;
 using Game.Core.Effects;
+using Game.Core.Maps;
 
 namespace Game.Core.Data;
 
@@ -21,6 +22,7 @@ public sealed class ContentReferenceValidator
         ValidateSpawnRules(database, report);
         ValidateCrops(database, report);
         ValidateMaps(database, report);
+        ValidateShops(database, report);
         ValidateWorldGenerationProfiles(database, report);
         ValidateSpriteReferences(database, report);
     }
@@ -195,6 +197,8 @@ public sealed class ContentReferenceValidator
         {
             foreach (var mapObject in map.Objects)
             {
+                ValidateMapObjectActionReferences(database, report, map.Id, mapObject);
+
                 if (string.IsNullOrWhiteSpace(mapObject.TargetMapId))
                 {
                     continue;
@@ -210,6 +214,64 @@ public sealed class ContentReferenceValidator
                     !targetMap.TryGetSpawn(mapObject.TargetSpawnId, out _))
                 {
                     AddMissingReference(report, "map", map.Id, "target spawn", $"{mapObject.TargetMapId}:{mapObject.TargetSpawnId}");
+                }
+            }
+        }
+    }
+
+    private static void ValidateMapObjectActionReferences(
+        GameContentDatabase database,
+        ContentLoadReport report,
+        string mapId,
+        MapObjectDefinition mapObject)
+    {
+        if (TryResolveProperty(mapObject, out var shopId, "shopId", "storeId") &&
+            !database.Shops.TryGetById(shopId, out _))
+        {
+            AddMissingReference(report, "map", mapId, "shop", shopId);
+        }
+
+        if (TryResolveProperty(mapObject, out var dialogueId, "dialogueId") &&
+            !database.Dialogues.TryGetById(dialogueId, out _))
+        {
+            AddMissingReference(report, "map", mapId, "dialogue", dialogueId);
+        }
+    }
+
+    private static void ValidateShops(GameContentDatabase database, ContentLoadReport report)
+    {
+        foreach (var shop in database.Shops.Definitions)
+        {
+            if (!database.Items.TryGetById(shop.CurrencyItemId, out _))
+            {
+                AddMissingReference(report, "shop", shop.Id, "currency item", shop.CurrencyItemId);
+            }
+
+            foreach (var stock in shop.Stock)
+            {
+                if (!database.Items.TryGetById(stock.ItemId, out _))
+                {
+                    AddMissingReference(report, "shop", shop.Id, "stock item", stock.ItemId);
+                }
+
+                if (!string.IsNullOrWhiteSpace(stock.CurrencyItemId) &&
+                    !database.Items.TryGetById(stock.CurrencyItemId, out _))
+                {
+                    AddMissingReference(report, "shop", shop.Id, "stock currency item", stock.CurrencyItemId);
+                }
+            }
+
+            foreach (var sellPrice in shop.SellPrices)
+            {
+                if (!database.Items.TryGetById(sellPrice.ItemId, out _))
+                {
+                    AddMissingReference(report, "shop", shop.Id, "sell item", sellPrice.ItemId);
+                }
+
+                if (!string.IsNullOrWhiteSpace(sellPrice.CurrencyItemId) &&
+                    !database.Items.TryGetById(sellPrice.CurrencyItemId, out _))
+                {
+                    AddMissingReference(report, "shop", shop.Id, "sell currency item", sellPrice.CurrencyItemId);
                 }
             }
         }
@@ -336,5 +398,19 @@ public sealed class ContentReferenceValidator
             contentKind,
             contentId,
             $"Missing {referenceKind} reference '{referenceId}'.");
+    }
+
+    private static bool TryResolveProperty(MapObjectDefinition mapObject, out string value, params string[] keys)
+    {
+        foreach (var key in keys)
+        {
+            if (mapObject.Properties.TryGetValue(key, out value!) && !string.IsNullOrWhiteSpace(value))
+            {
+                return true;
+            }
+        }
+
+        value = string.Empty;
+        return false;
     }
 }

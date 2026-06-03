@@ -1,0 +1,29 @@
+{
+  "id": "farm_welcome",
+  "displayName": "Farm Welcome",
+  "startNodeId": "hello",
+  "tags": ["starter", "farm", "tutorial"],
+  "nodes": [
+    {
+      "id": "hello",
+      "speakerId": "farmhand",
+      "text": "Welcome to the farmstead. The soil is rough, but it is ready for work.",
+      "options": [
+        {
+          "text": "What should I do first?",
+          "targetNodeId": "first_steps"
+        },
+        {
+          "text": "I know my way around.",
+          "endsConversation": true
+        }
+      ]
+    },
+    {
+      "id": "first_steps",
+      "speakerId": "farmhand",
+      "text": "Till a few patches, water them, plant seeds, then check the shipping bin when crops are ready.",
+      "endsConversation": true
+    }
+  ]
+}
