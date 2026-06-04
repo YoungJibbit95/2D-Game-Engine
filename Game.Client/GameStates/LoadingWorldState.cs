@@ -1,5 +1,6 @@
 using Game.Client.Rendering;
 using Game.Client.UI;
+using Game.Core.Sessions;
 using Game.Core.UI.Animation;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;

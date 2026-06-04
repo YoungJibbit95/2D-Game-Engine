@@ -28,20 +28,20 @@ The count excludes `bin`, `obj`, `.git`, and `.vs`.
 
 | Area | Files | Lines |
 | --- | ---: | ---: |
-| `Game.Core` | 360 | 16,730 |
-| `Game.Client` | 48 | 4,856 |
-| `Game.Tests` | 85 | 8,355 |
+| `Game.Core` | 365 | 17,033 |
+| `Game.Client` | 47 | 4,686 |
+| `Game.Tests` | 86 | 8,558 |
 | `Game.Data` | 66 | 1,768 |
 | `Docs` | 9 | 754 |
 
 | Extension | Files | Lines |
 | --- | ---: | ---: |
-| `.cs` | 489 | 29,878 |
+| `.cs` | 494 | 30,214 |
 | `.json` | 69 | 1,801 |
 | `.md` | 11 | 939 |
-| Project/solution/config files | 17 | 342 |
+| Project/solution/config files | 7 | 108 |
 
-Total tracked workspace snapshot: 577 files, 32,757 lines.
+Total tracked workspace snapshot: 588 files, 33,141 lines.
 
 ## Core Engine Features
 
@@ -67,6 +67,7 @@ Total tracked workspace snapshot: 577 files, 32,757 lines.
 - Data-driven registries for tiles, items, crops, maps, dialogues, shops, startup profiles, recipes, loot, biomes, entities, projectiles, status effects, spawns, sprites, and worldgen profiles.
 - Mod/content-pack loader with base/mod merge and validation reports.
 - Game project manifest support through `yjse.game.json`, project/content/mod path resolution, project-scoped save/settings roots, and external game repo loading via `YJSE_GAME_ROOT` or `YJSE_GAME_DATA`.
+- Core session bootstrapper that loads project content, resolves startup/world profile/settings, resumes saves, creates starter inventory, generates finite or infinite worlds, preloads spawn chunks, and returns a reusable `LoadedGameSession`.
 - Inventory, hotbar, cursor-item foundation, stack merge/split/swap, pickup logic, equipment, and stat calculation.
 - Crafting query model with known recipes, station checks, ingredient checks, categories, and sort order.
 - Farming foundation for Stardew-like games: crop definitions, seed lookup, farm plots, tilling, watering, planting, seasonal growth, harvesting, regrow crops, selected-item action routing, and farm plot save/load.
@@ -108,23 +109,24 @@ Total tracked workspace snapshot: 577 files, 32,757 lines.
 - Crafting, farming, maps, topdown map sessions/movement/interactions/actions/transitions, dialogues, shops, item actions, mining/building, combat, projectiles, spawning, commands, settings, status effects, topdown movement, and world generation.
 - Game project manifest loading, path resolution, fallback loose-content roots, and project content loading.
 - Startup profile loading, starter inventory exact-slot behavior, fallback auto-placement, and reference validation.
+- Core session bootstrapping for new sessions and existing save resume without client orchestration.
 - Entity save/load and tile entity save/load.
 - Coordinated session save/load round trips, including farm plot persistence.
 - UI animation track/player behavior.
 - UI layout, hit-testing, modal layers, focus traversal, tooltips, and cursor interaction snapshots.
 
-Current test count: 345 passing tests after the data-driven startup profile foundation.
+Current test count: 347 passing tests after the core session bootstrap foundation.
 
 ## Current Engine Direction
 
 The engine is now past the first playable prototype shell and is becoming a reusable multi-genre 2D gamebuilding core for Terraria-like, Stardew-like, RPG, action-adventure, and tool-driven sandbox games. The most important next engine-grade steps are:
 
-- Move more gameplay orchestration out of `PlayingState` into core simulation services.
+- Move more frame orchestration out of `PlayingState` into core simulation/session services.
 - Wire the renderer-neutral UI toolkit into more client screens and add reusable renderer widgets for panels, buttons, labels, slots, lists, tabs, splitters, and windows.
 - Upgrade rendering to atlas-backed batching, render targets, shader passes, particles, and animation clips for entities.
 - Add RGB region-based lighting and dynamic lights attached to items, projectiles, entities, and furniture.
 - Deepen worldgen with biome transitions, underground walls, larger cavern layers, lakes, structure spacing, chest rooms, and sampled infinite-world quality gates.
-- Continue moving toward stable engine package names and a physical standalone game repository that references the engine.
+- Continue moving toward stable engine package names, a multi-session host API, and a physical standalone game repository that references the engine.
 - Add richer crop rendering, client topdown map rendering/input integration, weather/rain watering, shop/dialogue UI, shipping bins, NPC schedules, and relationship data.
 - Add save migrations, integrity reports, autosave rotation, and recovery diagnostics.
 - Add content browser/editor tooling powered by the same data loaders as the runtime.

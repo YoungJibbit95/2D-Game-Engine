@@ -22,6 +22,8 @@ The loader reads each definition folder, merges base data and mods by id, valida
 
 For standalone game repositories, `GameProjectContentLoader` first resolves `yjse.game.json`, then delegates to `GameContentLoader` with the manifest's content and mods roots. This keeps engine code and game content physically separable while preserving the same validation pipeline.
 
+`GameSessionBootstrapper` is the core entrypoint for starting or resuming a playable session from a project root, save directory, seed, world name, settings, manifest, startup definition, and content database. It loads existing saves first when possible; otherwise it resolves the world profile, builds the starter inventory from startup JSON, generates finite or horizontally infinite terrain, preloads the infinite spawn area, creates the player at world spawn, and returns one `LoadedGameSession`.
+
 The database currently exposes registries for:
 
 - Tiles and tile numeric ids.
@@ -86,7 +88,7 @@ The current region format rewrites a full region file when chunks inside it chan
 
 `GameSaveCoordinator` is the high-level save entrypoint for runtime sessions. It writes world chunks through `WorldSaveService`, player state through `PlayerSaveService`, runtime entities through `EntitySaveService`, and optional tile entities through `TileEntitySaveService`. It returns `GameSaveResult`, publishes `GameSavedEvent` when a bus is provided, and owns an autosave accumulator through `TickAutosave`. The client uses this coordinator so the gameplay autosave setting saves the same layout that tools and future server code can use.
 
-`GameLoadCoordinator` is the matching high-level load entrypoint. It validates the session layout, loads world chunks, restores the player body and health, reconstructs `PlayerInventory`, repopulates `EntityManager`, restores `TileEntityManager`, returns `GameLoadResult`, and publishes `GameLoadedEvent`. `WorldSessionFactory` now resumes an existing singleplayer save folder through this coordinator before falling back to fresh generation.
+`GameLoadCoordinator` is the matching high-level load entrypoint. It validates the session layout, loads world chunks, restores the player body and health, reconstructs `PlayerInventory`, repopulates `EntityManager`, restores `TileEntityManager`, returns `GameLoadResult`, and publishes `GameLoadedEvent`. `GameSessionBootstrapper` now resumes an existing save folder through this coordinator before falling back to fresh generation.
 
 Tile changes should always go through `World.SetTile`, `World.RemoveTile`, `World.TrySetTile`, `World.TryRemoveTile`, or `World.ApplyTileEdits` so chunk dirtiness, render rebuilds, lighting updates, and neighbor invalidation stay consistent.
 
@@ -209,7 +211,7 @@ Map data is loaded from `Game.Data/maps` and participates in base/mod merging an
 
 Dialogue and shop definitions now follow the same data-driven path. `DialogueRegistry` validates graph nodes, start nodes, option targets, and sequential links. `DialogueSystem` owns session movement through dialogue nodes and keeps option selection deterministic. `ShopRegistry` validates stock and sell prices, while `ShopTransactionService` buys and sells through `PlayerInventory` with explicit failure reasons for UI, audio, multiplayer validation, and tools. Map objects can reference `dialogueId` and `shopId`; the content validator reports broken references before gameplay begins.
 
-Startup definitions finish the first pass at game-owned session setup. `GameStartupRegistry` loads JSON startup profiles, validates targeted hotbar/main-inventory slots, and references world profiles, maps, and starter item ids through the same content report. `GameStartupInventoryService` builds the initial `PlayerInventory` from that data. The client no longer hard-codes copper tools, seeds, or blocks into `WorldSessionFactory`.
+Startup definitions finish the first pass at game-owned session setup. `GameStartupRegistry` loads JSON startup profiles, validates targeted hotbar/main-inventory slots, and references world profiles, maps, and starter item ids through the same content report. `GameStartupInventoryService` builds the initial `PlayerInventory` from that data. `Game.Core.Sessions` consumes those startup definitions, so the client no longer hard-codes copper tools, seeds, blocks, world profile choice, save resume, or initial player construction.
 
 Future genre modules should follow the same shape: data definitions, registry, deterministic runtime state, clear result objects, and core tests before client UI.
 
@@ -242,7 +244,7 @@ The client has a `ClientTextureRegistry` that resolves `SpriteAssetRegistry` ids
 
 `GameSimulation` is the core gameplay tick host for tests and future server-friendly logic. It updates time, world simulation, player, entities, projectiles, contact damage, pickups, spawning, respawn, and chunk metadata refreshes.
 
-The current client still has direct state orchestration in `PlayingState`. Long term, more gameplay should move into core simulation services and the client should mostly feed input and render snapshots.
+`GameSessionBootstrapper` is the matching session-construction host. It creates or resumes the runtime object graph before simulation begins. The current client still has direct frame orchestration in `PlayingState`; long term, more gameplay should move into core simulation services and the client should mostly feed input and render snapshots.
 
 ## Rendering
 

@@ -8,9 +8,9 @@ Only open engine work is kept here. Completed items are removed after implementa
 - [ ] Rename/package public engine assemblies from temporary `Game.*` names toward stable `YjsE.*` package names once the API boundary settles.
 - [ ] Add a lightweight service registry for runtime systems that need shared access without a god class.
 - [ ] Add deterministic RNG streams for worldgen, loot, AI, particles, and future replays.
-- [ ] Add a project bootstrap service that creates full gameplay sessions from manifest, startup, settings, save, and content data without client orchestration.
 - [ ] Add a deterministic replay harness for core simulation ticks.
 - [ ] Add allocation and frame-budget diagnostics for update, render, lighting, liquids, UI, and content loading.
+- [ ] Add a multi-session host API for future splitscreen, multiplayer server sessions, map sessions, and tool/editor sessions.
 
 ## World, Chunks, And Streaming
 

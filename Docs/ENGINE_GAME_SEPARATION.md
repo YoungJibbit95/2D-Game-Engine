@@ -43,7 +43,7 @@ Every game repo can define a root-level `yjse.game.json`.
 }
 ```
 
-`Game.Core.Projects` loads this manifest, resolves content/mod/save paths, and can load the project through `GameProjectContentLoader`.
+`Game.Core.Projects` loads this manifest, resolves content/mod/save paths, and can load the project through `GameProjectContentLoader`. `Game.Core.Sessions` then turns the resolved project, settings, startup profile, seed, and save directory into a `LoadedGameSession`.
 
 Game-owned startup rules live in the content root under `startup/*.json`. The manifest can select one with `startupDefinitionId`; otherwise the engine looks for `default` and then falls back to the first available startup profile.
 
@@ -64,6 +64,8 @@ dotnet run --project Game.Client
 
 When no environment variable is set, the client resolves the local `yjse.game.json` and uses this repo's sample `Game.Data`.
 
+The MonoGame client keeps a small adapter called `WorldSessionFactory`, but the actual session creation and save-resume logic now lives in `GameSessionBootstrapper`. External tools, future servers, or a separate game client can call the same core service without referencing MonoGame.
+
 ## Save And Settings Isolation
 
 Client settings and saves are now scoped by game project id under:
@@ -79,6 +81,7 @@ This keeps separate games from sharing settings, worlds, keybinds, and autosaves
 - Engine-grade systems go into `Game.Core` and must not depend on MonoGame.
 - Game-specific balancing and authored content go into a game content root, not hard-coded engine switches.
 - Starter items, selected hotbar slot, startup map, and game-specific default world profile belong in startup JSON or the game manifest, not in client code.
+- Session creation should flow through `GameSessionBootstrapper` so save loading, startup inventory, world profile resolution, infinite-world preload, and player construction stay consistent across clients.
 - New content types need JSON loaders, registries, validation, tests, and docs before client UI depends on them.
 - Client features should consume core result objects rather than duplicating gameplay rules.
 - Sample `Game.Data` may remain in this repo as an engine validation pack, but it should be treated as replaceable.

@@ -3,12 +3,14 @@ using Game.Core.Entities;
 using Game.Core.Events;
 using Game.Core.Farming;
 using Game.Core.Inventory;
+using Game.Core.Projects;
+using Game.Core.Startup;
 using Game.Core.Time;
 using Game.Core.World.Generation;
 using Game.Core.World.TileEntities;
 using GameWorld = Game.Core.World.World;
 
-namespace Game.Client.GameStates;
+namespace Game.Core.Sessions;
 
 public sealed record LoadedGameSession(
     GameContentDatabase Content,
@@ -21,4 +23,9 @@ public sealed record LoadedGameSession(
     WorldGenerationProfile? WorldGenerationProfile = null,
     string? WorldSaveDirectory = null,
     TileEntityManager? TileEntities = null,
-    FarmPlotManager? FarmPlots = null);
+    FarmPlotManager? FarmPlots = null,
+    GameProjectManifest? Manifest = null,
+    GameProjectPaths? ProjectPaths = null,
+    GameStartupDefinition? Startup = null,
+    StarterInventoryResult? StartupInventory = null,
+    bool LoadedFromSave = false);
