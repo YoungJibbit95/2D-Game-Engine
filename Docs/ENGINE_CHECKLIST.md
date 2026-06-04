@@ -68,6 +68,7 @@ Only open engine work is kept here. Completed items are removed after implementa
 - [ ] Add explicit mod load order configuration.
 - [ ] Add content hot reload command and safe reload report.
 - [ ] Add debug content browser for tiles, items, crops, maps, dialogues, shops, recipes, entities, effects, loot, spawns, sprites, and worldgen profiles.
+- [ ] Wire `SpriteAssetAuditService` into CI, debug commands, and future asset-packaging tools.
 - [ ] Add missing sound/effect fallbacks per asset category.
 - [ ] Add MoonSharp script discovery and sandbox boundaries after the data contract is stable.
 

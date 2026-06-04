@@ -238,6 +238,8 @@ The current MonoGame overlays still draw themselves directly. The next step is t
 
 `SpriteGenerationBrief` is a generation-time contract that maps a sprite id to an AI prompt, negative prompt, output path, palette hints, and hard requirements. It lives under `Game.Data/asset_briefs` instead of `Game.Data/assets` so runtime loading stays focused on gameplay metadata. Terrain tile briefs for dirt, grass, stone, copper ore, and iron ore request 256x16 horizontal strips with 16 frames ordered by the 4-bit autotile mask convention.
 
+`SpriteAssetAuditService` is the engine-side bridge between manifests, generation briefs, and real files on disk. It resolves every sprite path against a content root, checks PNG header dimensions without bringing an image library into `Game.Core`, verifies generation-brief path/size matches, and reports missing files, unreadable files, dimension mismatches, and incomplete 0..15 autotile frame coverage. Tools and CI can use this before packaging a game or accepting generated assets.
+
 The client has a `ClientTextureRegistry` that resolves `SpriteAssetRegistry` ids into MonoGame textures. If the source PNG does not exist yet, it creates a deterministic category-colored placeholder. This lets gameplay and rendering code use stable sprite ids before the real art pass is finished.
 
 ## Simulation

@@ -28,20 +28,21 @@ The count excludes `bin`, `obj`, `.git`, and `.vs`.
 
 | Area | Files | Lines |
 | --- | ---: | ---: |
-| `Game.Core` | 365 | 17,033 |
+| `Game.Core` | 373 | 17,343 |
 | `Game.Client` | 47 | 4,686 |
-| `Game.Tests` | 86 | 8,558 |
-| `Game.Data` | 66 | 1,768 |
-| `Docs` | 9 | 754 |
+| `Game.Tests` | 86 | 8,738 |
+| `Game.Data` | 75 | 1,768 |
+| `Docs` | 9 | 764 |
 
 | Extension | Files | Lines |
 | --- | ---: | ---: |
-| `.cs` | 494 | 30,214 |
+| `.cs` | 502 | 30,704 |
 | `.json` | 69 | 1,801 |
-| `.md` | 11 | 939 |
+| `.md` | 11 | 951 |
+| `.png` | 9 | 0 |
 | Project/solution/config files | 7 | 108 |
 
-Total tracked workspace snapshot: 588 files, 33,141 lines.
+Total tracked workspace snapshot: 605 files, 33,558 text lines plus 9 PNG assets.
 
 ## Core Engine Features
 
@@ -76,6 +77,8 @@ Total tracked workspace snapshot: 588 files, 33,141 lines.
 - Dialogue foundation with JSON graph definitions, node/option validation, sessions, deterministic advancement, option selection, and explicit failure reasons.
 - Shop/economy foundation with JSON shop definitions, stock, sell prices, per-entry currency overrides, inventory-backed buy/sell transactions, and explicit failure reasons.
 - Startup profile foundation with JSON definitions, starter inventory targeting, selected hotbar slot, default world profile/startup map references, validation, and inventory creation service.
+- Sprite asset audit foundation that checks manifest file existence, PNG header dimensions, generation brief path/size matches, missing briefs, and complete autotile mask coverage.
+- First generated starter PNG assets for dirt, grass, stone, copper ore, iron ore, copper pickaxe, dirt block, stone block, and parsnip seeds.
 - Combat health, damage info, invulnerability, contact damage, projectile damage, melee attacks, loot drops, and status effects.
 - Entity manager with runtime id assignment and spatial query index.
 - Shared world queries for raycasts, line of sight, shape queries, and tile flood fill.
@@ -110,12 +113,13 @@ Total tracked workspace snapshot: 588 files, 33,141 lines.
 - Game project manifest loading, path resolution, fallback loose-content roots, and project content loading.
 - Startup profile loading, starter inventory exact-slot behavior, fallback auto-placement, and reference validation.
 - Core session bootstrapping for new sessions and existing save resume without client orchestration.
+- Sprite asset audit behavior for present files, missing files, brief mismatches, dimension mismatches, and incomplete autotile definitions.
 - Entity save/load and tile entity save/load.
 - Coordinated session save/load round trips, including farm plot persistence.
 - UI animation track/player behavior.
 - UI layout, hit-testing, modal layers, focus traversal, tooltips, and cursor interaction snapshots.
 
-Current test count: 347 passing tests after the core session bootstrap foundation.
+Current test count: 351 passing tests after the sprite asset audit and starter asset import.
 
 ## Current Engine Direction
 
@@ -124,6 +128,7 @@ The engine is now past the first playable prototype shell and is becoming a reus
 - Move more frame orchestration out of `PlayingState` into core simulation/session services.
 - Wire the renderer-neutral UI toolkit into more client screens and add reusable renderer widgets for panels, buttons, labels, slots, lists, tabs, splitters, and windows.
 - Upgrade rendering to atlas-backed batching, render targets, shader passes, particles, and animation clips for entities.
+- Wire sprite asset audits into CI, debug commands, packaging, and editor tooling.
 - Add RGB region-based lighting and dynamic lights attached to items, projectiles, entities, and furniture.
 - Deepen worldgen with biome transitions, underground walls, larger cavern layers, lakes, structure spacing, chest rooms, and sampled infinite-world quality gates.
 - Continue moving toward stable engine package names, a multi-session host API, and a physical standalone game repository that references the engine.

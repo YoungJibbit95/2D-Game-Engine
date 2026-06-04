@@ -1,4 +1,5 @@
 using Game.Core.Assets;
+using Game.Core.Assets.Audit;
 using Game.Core.Assets.Generation;
 using Game.Core.Data;
 using Xunit;
@@ -129,6 +130,156 @@ public sealed class SpriteAssetTests
         Assert.Empty(missing);
     }
 
+    [Fact]
+    public void RepositorySpriteAudit_RecognizesGeneratedStarterAssets()
+    {
+        var dataRoot = FindRepositoryGameData();
+        var sprites = SpriteAssetRegistry.Create(new SpriteAssetJsonLoader().LoadDefinitionsFromDirectory(Path.Combine(dataRoot, "assets")));
+        var briefs = SpriteGenerationBriefRegistry.Create(
+            new SpriteGenerationBriefJsonLoader().LoadBriefsFromDirectory(Path.Combine(dataRoot, "asset_briefs")));
+
+        var report = new SpriteAssetAuditService().Audit(dataRoot, sprites, briefs);
+        var starterSpriteIds = new[]
+        {
+            "tiles/dirt",
+            "tiles/grass",
+            "tiles/stone",
+            "tiles/copper_ore",
+            "tiles/iron_ore",
+            "items/copper_pickaxe",
+            "items/dirt_block",
+            "items/stone_block",
+            "items/parsnip_seeds"
+        };
+
+        Assert.False(report.HasErrors, string.Join(Environment.NewLine, report.Issues.Select(issue => issue.Message)));
+        foreach (var spriteId in starterSpriteIds)
+        {
+            var entry = Assert.Single(report.Entries, entry => entry.SpriteId == spriteId);
+            Assert.Equal(SpriteAssetFileStatus.Present, entry.FileStatus);
+            Assert.Equal(entry.DeclaredWidth, entry.ActualWidth);
+            Assert.Equal(entry.DeclaredHeight, entry.ActualHeight);
+            Assert.True(entry.HasGenerationBrief);
+        }
+    }
+
+    [Fact]
+    public void AssetAudit_ReportsPresentFilesAndMatchingBriefs()
+    {
+        using var temp = new TempAssetRoot();
+        WritePngHeader(Path.Combine(temp.Root, "sprites", "tools", "pickaxe.png"), width: 16, height: 16);
+        var assets = SpriteAssetRegistry.Create(new[]
+        {
+            new SpriteAssetDefinition
+            {
+                Id = "items/pickaxe",
+                Path = "sprites/tools/pickaxe.png",
+                Category = SpriteAssetCategory.Tool,
+                Width = 16,
+                Height = 16
+            }
+        });
+        var briefs = SpriteGenerationBriefRegistry.Create(new[]
+        {
+            new SpriteGenerationBrief
+            {
+                SpriteId = "items/pickaxe",
+                OutputPath = "sprites/tools/pickaxe.png",
+                Width = 16,
+                Height = 16
+            }
+        });
+
+        var report = new SpriteAssetAuditService().Audit(temp.Root, assets, briefs);
+
+        var entry = Assert.Single(report.Entries);
+        Assert.Equal(SpriteAssetFileStatus.Present, entry.FileStatus);
+        Assert.Equal(16, entry.ActualWidth);
+        Assert.Equal(16, entry.ActualHeight);
+        Assert.True(entry.HasGenerationBrief);
+        Assert.False(report.HasErrors);
+        Assert.Empty(report.Issues);
+    }
+
+    [Fact]
+    public void AssetAudit_ReportsMissingFilesAndBriefProblems()
+    {
+        using var temp = new TempAssetRoot();
+        var assets = SpriteAssetRegistry.Create(new[]
+        {
+            new SpriteAssetDefinition
+            {
+                Id = "items/pickaxe",
+                Path = "sprites/tools/pickaxe.png",
+                Category = SpriteAssetCategory.Tool,
+                Width = 16,
+                Height = 16
+            }
+        });
+        var briefs = SpriteGenerationBriefRegistry.Create(new[]
+        {
+            new SpriteGenerationBrief
+            {
+                SpriteId = "items/pickaxe",
+                OutputPath = "sprites/tools/wrong.png",
+                Width = 32,
+                Height = 16
+            }
+        });
+
+        var report = new SpriteAssetAuditService().Audit(
+            temp.Root,
+            assets,
+            briefs,
+            new SpriteAssetAuditOptions { TreatMissingFilesAsErrors = true });
+
+        Assert.True(report.HasErrors);
+        Assert.Contains(report.Issues, issue => issue.Code == SpriteAssetAuditCodes.MissingFile);
+        Assert.Contains(report.Issues, issue => issue.Code == SpriteAssetAuditCodes.BriefPathMismatch);
+        Assert.Contains(report.Issues, issue => issue.Code == SpriteAssetAuditCodes.BriefSizeMismatch);
+    }
+
+    [Fact]
+    public void AssetAudit_ReportsPngDimensionMismatchAndIncompleteAutotiles()
+    {
+        using var temp = new TempAssetRoot();
+        WritePngHeader(Path.Combine(temp.Root, "sprites", "world", "tiles", "dirt.png"), width: 16, height: 16);
+        var assets = SpriteAssetRegistry.Create(new[]
+        {
+            new SpriteAssetDefinition
+            {
+                Id = "tiles/dirt",
+                Path = "sprites/world/tiles/dirt.png",
+                Category = SpriteAssetCategory.Tile,
+                Width = 256,
+                Height = 16,
+                Tags = new[] { "autotile" },
+                Frames = new[]
+                {
+                    new SpriteFrameDefinition
+                    {
+                        Id = "mask_0",
+                        X = 0,
+                        Y = 0,
+                        Width = 16,
+                        Height = 16,
+                        AutoTileMask = 0
+                    }
+                }
+            }
+        });
+
+        var report = new SpriteAssetAuditService().Audit(
+            temp.Root,
+            assets,
+            generationBriefs: null,
+            new SpriteAssetAuditOptions { RequireGenerationBriefs = false });
+
+        Assert.True(report.HasErrors);
+        Assert.Contains(report.Issues, issue => issue.Code == SpriteAssetAuditCodes.DimensionMismatch);
+        Assert.Contains(report.Issues, issue => issue.Code == SpriteAssetAuditCodes.IncompleteAutoTileMasks);
+    }
+
     private static SpriteAssetDefinition CreateSprite(string id)
     {
         return new SpriteAssetDefinition
@@ -139,6 +290,33 @@ public sealed class SpriteAssetTests
             Width = 16,
             Height = 16
         };
+    }
+
+    private static void WritePngHeader(string path, int width, int height)
+    {
+        Directory.CreateDirectory(Path.GetDirectoryName(path)!);
+        var bytes = new byte[24];
+        var signature = new byte[] { 137, 80, 78, 71, 13, 10, 26, 10 };
+        Array.Copy(signature, bytes, signature.Length);
+        bytes[8] = 0;
+        bytes[9] = 0;
+        bytes[10] = 0;
+        bytes[11] = 13;
+        bytes[12] = (byte)'I';
+        bytes[13] = (byte)'H';
+        bytes[14] = (byte)'D';
+        bytes[15] = (byte)'R';
+        WriteBigEndian(bytes, 16, width);
+        WriteBigEndian(bytes, 20, height);
+        File.WriteAllBytes(path, bytes);
+    }
+
+    private static void WriteBigEndian(byte[] bytes, int offset, int value)
+    {
+        bytes[offset] = (byte)((value >> 24) & 0xff);
+        bytes[offset + 1] = (byte)((value >> 16) & 0xff);
+        bytes[offset + 2] = (byte)((value >> 8) & 0xff);
+        bytes[offset + 3] = (byte)(value & 0xff);
     }
 
     private static string FindRepositoryGameData()
@@ -156,5 +334,24 @@ public sealed class SpriteAssetTests
         }
 
         throw new DirectoryNotFoundException("Could not locate repository Game.Data directory.");
+    }
+
+    private sealed class TempAssetRoot : IDisposable
+    {
+        public TempAssetRoot()
+        {
+            Root = Path.Combine(Path.GetTempPath(), "yjse-asset-audit-tests", Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(Root);
+        }
+
+        public string Root { get; }
+
+        public void Dispose()
+        {
+            if (Directory.Exists(Root))
+            {
+                Directory.Delete(Root, recursive: true);
+            }
+        }
     }
 }

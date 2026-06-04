@@ -116,6 +116,8 @@ The engine is now a playable YjsE prototype shell with a growing reusable 2D san
 - Tile and item definitions now support normalized tags for material-style gameplay rules and tooling filters.
 - Sprite asset manifests now define stable logical sprite ids, categories, dimensions, tags, and future atlas hooks.
 - AI sprite generation briefs in `Game.Data/asset_briefs` define exact prompts, output paths, sizes, palettes, and constraints for another model to generate the base sprites.
+- Sprite asset auditing can compare manifests, generation briefs, and actual PNG header dimensions before packaging generated art.
+- First generated PNG assets are present for core terrain tiles and starter item icons.
 - The client has a `ClientTextureRegistry` that can load generated PNGs from sprite manifests and create deterministic placeholders while art is missing.
 - Tile rendering now uses a per-chunk render command cache and exposes debug metrics for visible chunks, cached chunks, rebuilt chunks, evictions, tile commands, and liquid commands.
 - Chunk render caches now support an LRU-style cache budget controlled by rendering settings.
