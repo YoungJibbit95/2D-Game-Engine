@@ -11,6 +11,7 @@ using Game.Core.Maps;
 using Game.Core.Projectiles;
 using Game.Core.Shops;
 using Game.Core.Spawning;
+using Game.Core.Startup;
 using Game.Core.Tiles;
 using Game.Core.World.Generation;
 
@@ -40,4 +41,6 @@ public sealed record GameContentDatabase(
     public DialogueRegistry Dialogues { get; init; } = DialogueRegistry.Create(Array.Empty<DialogueDefinition>());
 
     public ShopRegistry Shops { get; init; } = ShopRegistry.Create(Array.Empty<ShopDefinition>());
+
+    public GameStartupRegistry GameStartups { get; init; } = GameStartupRegistry.Create(Array.Empty<GameStartupDefinition>());
 }

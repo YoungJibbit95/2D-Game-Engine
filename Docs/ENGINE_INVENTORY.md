@@ -28,20 +28,20 @@ The count excludes `bin`, `obj`, `.git`, and `.vs`.
 
 | Area | Files | Lines |
 | --- | ---: | ---: |
-| `Game.Core` | 351 | 16,283 |
-| `Game.Client` | 48 | 4,850 |
-| `Game.Tests` | 84 | 8,194 |
-| `Game.Data` | 65 | 1,752 |
-| `Docs` | 9 | 742 |
+| `Game.Core` | 360 | 16,730 |
+| `Game.Client` | 48 | 4,856 |
+| `Game.Tests` | 85 | 8,355 |
+| `Game.Data` | 66 | 1,768 |
+| `Docs` | 9 | 754 |
 
 | Extension | Files | Lines |
 | --- | ---: | ---: |
-| `.cs` | 479 | 29,264 |
-| `.json` | 68 | 1,784 |
-| `.md` | 11 | 926 |
+| `.cs` | 489 | 29,878 |
+| `.json` | 69 | 1,801 |
+| `.md` | 11 | 939 |
 | Project/solution/config files | 17 | 342 |
 
-Total tracked workspace snapshot: 566 files, 32,113 lines.
+Total tracked workspace snapshot: 577 files, 32,757 lines.
 
 ## Core Engine Features
 
@@ -64,7 +64,7 @@ Total tracked workspace snapshot: 566 files, 32,113 lines.
 - Greyscale lighting with sunlight, point lights, and underground falloff.
 - Core event bus with typed subscriptions and global observation.
 - Bounded event journal for debugging, profiling, and future replay/replication.
-- Data-driven registries for tiles, items, crops, maps, dialogues, shops, recipes, loot, biomes, entities, projectiles, status effects, spawns, sprites, and worldgen profiles.
+- Data-driven registries for tiles, items, crops, maps, dialogues, shops, startup profiles, recipes, loot, biomes, entities, projectiles, status effects, spawns, sprites, and worldgen profiles.
 - Mod/content-pack loader with base/mod merge and validation reports.
 - Game project manifest support through `yjse.game.json`, project/content/mod path resolution, project-scoped save/settings roots, and external game repo loading via `YJSE_GAME_ROOT` or `YJSE_GAME_DATA`.
 - Inventory, hotbar, cursor-item foundation, stack merge/split/swap, pickup logic, equipment, and stat calculation.
@@ -74,6 +74,7 @@ Total tracked workspace snapshot: 566 files, 32,113 lines.
 - Topdown map foundation with JSON map definitions, tile layers, collision layers, objects, interactables, spawn points, warps, registry validation, mod merge support, runtime map queries, map sessions, map-specific pixel movement, facing, interaction targeting, runtime object state, door/gate passability, object action resolution, interaction events, and warp transition application.
 - Dialogue foundation with JSON graph definitions, node/option validation, sessions, deterministic advancement, option selection, and explicit failure reasons.
 - Shop/economy foundation with JSON shop definitions, stock, sell prices, per-entry currency overrides, inventory-backed buy/sell transactions, and explicit failure reasons.
+- Startup profile foundation with JSON definitions, starter inventory targeting, selected hotbar slot, default world profile/startup map references, validation, and inventory creation service.
 - Combat health, damage info, invulnerability, contact damage, projectile damage, melee attacks, loot drops, and status effects.
 - Entity manager with runtime id assignment and spatial query index.
 - Shared world queries for raycasts, line of sight, shape queries, and tile flood fill.
@@ -106,12 +107,13 @@ Total tracked workspace snapshot: 566 files, 32,113 lines.
 - Inventory and player inventory stack behavior.
 - Crafting, farming, maps, topdown map sessions/movement/interactions/actions/transitions, dialogues, shops, item actions, mining/building, combat, projectiles, spawning, commands, settings, status effects, topdown movement, and world generation.
 - Game project manifest loading, path resolution, fallback loose-content roots, and project content loading.
+- Startup profile loading, starter inventory exact-slot behavior, fallback auto-placement, and reference validation.
 - Entity save/load and tile entity save/load.
 - Coordinated session save/load round trips, including farm plot persistence.
 - UI animation track/player behavior.
 - UI layout, hit-testing, modal layers, focus traversal, tooltips, and cursor interaction snapshots.
 
-Current test count: 341 passing tests after the game-project separation foundation.
+Current test count: 345 passing tests after the data-driven startup profile foundation.
 
 ## Current Engine Direction
 

@@ -39,6 +39,7 @@ The database currently exposes registries for:
 - Topdown maps for RPG, town, farm, and life-sim layouts.
 - Dialogue graphs for signs, NPCs, tutorials, quests, and scripted conversations.
 - Shop definitions for stock, sell prices, currency items, and economy surfaces.
+- Game startup definitions for starter inventory, selected hotbar slot, default startup map, and default world profile.
 
 Definitions reference sprites by stable sprite asset id, not by renderer texture object. For example, a tile can use `"texture": "tiles/dirt"`, while the asset manifest maps `tiles/dirt` to an actual source path.
 
@@ -207,6 +208,8 @@ This design keeps farming independent from MonoGame and from a specific map rend
 Map data is loaded from `Game.Data/maps` and participates in base/mod merging and cross-reference validation. This gives Stardew-like and RPG-style games a separate map route instead of forcing every game type through procedural sideview terrain.
 
 Dialogue and shop definitions now follow the same data-driven path. `DialogueRegistry` validates graph nodes, start nodes, option targets, and sequential links. `DialogueSystem` owns session movement through dialogue nodes and keeps option selection deterministic. `ShopRegistry` validates stock and sell prices, while `ShopTransactionService` buys and sells through `PlayerInventory` with explicit failure reasons for UI, audio, multiplayer validation, and tools. Map objects can reference `dialogueId` and `shopId`; the content validator reports broken references before gameplay begins.
+
+Startup definitions finish the first pass at game-owned session setup. `GameStartupRegistry` loads JSON startup profiles, validates targeted hotbar/main-inventory slots, and references world profiles, maps, and starter item ids through the same content report. `GameStartupInventoryService` builds the initial `PlayerInventory` from that data. The client no longer hard-codes copper tools, seeds, or blocks into `WorldSessionFactory`.
 
 Future genre modules should follow the same shape: data definitions, registry, deterministic runtime state, clear result objects, and core tests before client UI.
 

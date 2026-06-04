@@ -10,6 +10,7 @@ using Game.Core.Physics;
 using Game.Core.Projects;
 using Game.Core.Saving;
 using Game.Core.Settings;
+using Game.Core.Startup;
 using Game.Core.Time;
 using Game.Core.World;
 using Game.Core.World.Generation;
@@ -25,7 +26,8 @@ public static class WorldSessionFactory
         var projectContent = new GameProjectContentLoader().Load(ClientPaths.FindGameProjectPaths().ProjectRoot);
         var content = projectContent.Content.Database;
         var settings = LoadSettings();
-        var profile = ResolveWorldProfile(content, projectContent.Manifest, settings);
+        var startup = ResolveStartup(content, projectContent.Manifest);
+        var profile = ResolveWorldProfile(content, projectContent.Manifest, startup, settings);
         var saveDirectory = ClientPaths.WorldSaveDirectory(worldName, seed);
 
         if (TryLoadExistingSession(content, profile, saveDirectory, out var loadedSession))
@@ -33,8 +35,9 @@ public static class WorldSessionFactory
             return loadedSession;
         }
 
-        var inventory = new PlayerInventory(content.Items);
-        GiveStarterItems(inventory);
+        var inventory = new GameStartupInventoryService()
+            .BuildPlayerInventory(content.Items, startup)
+            .Inventory;
 
         var world = settings.World.InfiniteHorizontalGeneration
             ? CreateInfiniteWorld(profile, seed, worldName, settings, saveDirectory)
@@ -94,11 +97,18 @@ public static class WorldSessionFactory
     private static WorldGenerationProfile ResolveWorldProfile(
         GameContentDatabase content,
         GameProjectManifest manifest,
+        GameStartupDefinition? startup,
         GameSettings settings)
     {
         if (content.WorldGenerationProfiles.TryGetById(settings.World.WorldProfileId, out var settingsProfile))
         {
             return settingsProfile;
+        }
+
+        if (!string.IsNullOrWhiteSpace(startup?.WorldProfileId) &&
+            content.WorldGenerationProfiles.TryGetById(startup.WorldProfileId, out var startupProfile))
+        {
+            return startupProfile;
         }
 
         if (!string.IsNullOrWhiteSpace(manifest.DefaultWorldProfileId) &&
@@ -110,14 +120,11 @@ public static class WorldSessionFactory
         return WorldGenerationProfile.Small;
     }
 
-    private static void GiveStarterItems(PlayerInventory inventory)
+    private static GameStartupDefinition? ResolveStartup(GameContentDatabase content, GameProjectManifest manifest)
     {
-        inventory.AddItem(new ItemStack("copper_pickaxe", 1));
-        inventory.AddItem(new ItemStack("copper_hoe", 1));
-        inventory.AddItem(new ItemStack("watering_can", 1));
-        inventory.AddItem(new ItemStack("parsnip_seeds", 12));
-        inventory.AddItem(new ItemStack("dirt_block", 50));
-        inventory.AddItem(new ItemStack("stone_block", 25));
+        return content.GameStartups.TryGetDefault(manifest.StartupDefinitionId, out var startup)
+            ? startup
+            : null;
     }
 
     private static World CreateInfiniteWorld(

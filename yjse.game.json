@@ -9,5 +9,6 @@
   "savesRootName": "Saves",
   "defaultWorldProfileId": "small",
   "startupMapId": "farmstead",
+  "startupDefinitionId": "default",
   "tags": ["sample", "sandbox", "terraria-like", "stardew-like"]
 }

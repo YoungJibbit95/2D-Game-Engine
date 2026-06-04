@@ -2,6 +2,7 @@ using Game.Core.Mods;
 using Game.Core.Items;
 using Game.Core.Effects;
 using Game.Core.Maps;
+using Game.Core.Startup;
 
 namespace Game.Core.Data;
 
@@ -23,6 +24,7 @@ public sealed class ContentReferenceValidator
         ValidateCrops(database, report);
         ValidateMaps(database, report);
         ValidateShops(database, report);
+        ValidateGameStartups(database, report);
         ValidateWorldGenerationProfiles(database, report);
         ValidateSpriteReferences(database, report);
     }
@@ -272,6 +274,45 @@ public sealed class ContentReferenceValidator
                     !database.Items.TryGetById(sellPrice.CurrencyItemId, out _))
                 {
                     AddMissingReference(report, "shop", shop.Id, "sell currency item", sellPrice.CurrencyItemId);
+                }
+            }
+        }
+    }
+
+    private static void ValidateGameStartups(GameContentDatabase database, ContentLoadReport report)
+    {
+        foreach (var startup in database.GameStartups.Definitions)
+        {
+            if (!string.IsNullOrWhiteSpace(startup.WorldProfileId) &&
+                !database.WorldGenerationProfiles.TryGetById(startup.WorldProfileId, out _))
+            {
+                AddMissingReference(report, "startup", startup.Id, "world profile", startup.WorldProfileId);
+            }
+
+            if (!string.IsNullOrWhiteSpace(startup.StartupMapId) &&
+                !database.Maps.TryGetById(startup.StartupMapId, out _))
+            {
+                AddMissingReference(report, "startup", startup.Id, "startup map", startup.StartupMapId);
+            }
+
+            foreach (var item in startup.StarterItems)
+            {
+                if (!database.Items.TryGetById(item.ItemId, out var itemDefinition))
+                {
+                    AddMissingReference(report, "startup", startup.Id, "starter item", item.ItemId);
+                    continue;
+                }
+
+                if (item.Target != StarterInventoryTarget.Auto &&
+                    item.Slot.HasValue &&
+                    item.Count > itemDefinition.MaxStack)
+                {
+                    report.AddIssue(
+                        ContentIssueSeverity.Error,
+                        "validation",
+                        "startup",
+                        startup.Id,
+                        $"Starter item '{item.ItemId}' targets one slot with count {item.Count}, but max stack is {itemDefinition.MaxStack}.");
                 }
             }
         }

@@ -1,0 +1,16 @@
+{
+  "id": "default",
+  "displayName": "Default Sandbox Start",
+  "worldProfileId": "small",
+  "startupMapId": "farmstead",
+  "selectedHotbarSlot": 0,
+  "tags": ["sample", "sandbox", "starter"],
+  "starterItems": [
+    { "itemId": "copper_pickaxe", "count": 1, "target": "Hotbar", "slot": 0, "sortOrder": 10 },
+    { "itemId": "copper_hoe", "count": 1, "target": "Hotbar", "slot": 1, "sortOrder": 20 },
+    { "itemId": "watering_can", "count": 1, "target": "Hotbar", "slot": 2, "sortOrder": 30 },
+    { "itemId": "parsnip_seeds", "count": 12, "target": "Hotbar", "slot": 3, "sortOrder": 40 },
+    { "itemId": "dirt_block", "count": 50, "target": "Main", "sortOrder": 50 },
+    { "itemId": "stone_block", "count": 25, "target": "Main", "sortOrder": 60 }
+  ]
+}

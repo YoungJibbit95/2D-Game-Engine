@@ -24,6 +24,8 @@ public sealed record GameProjectManifest
 
     public string? StartupMapId { get; init; }
 
+    public string? StartupDefinitionId { get; init; }
+
     public IReadOnlyList<string> Tags { get; init; } = Array.Empty<string>();
 
     public bool HasTag(string tag)

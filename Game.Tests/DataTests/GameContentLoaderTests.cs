@@ -25,6 +25,7 @@ public sealed class GameContentLoaderTests : IDisposable
         Directory.CreateDirectory(Path.Combine(_contentRoot, "maps"));
         Directory.CreateDirectory(Path.Combine(_contentRoot, "dialogue"));
         Directory.CreateDirectory(Path.Combine(_contentRoot, "shops"));
+        Directory.CreateDirectory(Path.Combine(_contentRoot, "startup"));
 
         File.WriteAllText(Path.Combine(_contentRoot, "tiles", "dirt.json"), """
         {
@@ -212,6 +213,20 @@ public sealed class GameContentLoaderTests : IDisposable
         }
         """);
 
+        File.WriteAllText(Path.Combine(_contentRoot, "startup", "default.json"), """
+        {
+          "id": "default",
+          "displayName": "Default Start",
+          "worldProfileId": "tiny",
+          "startupMapId": "farm",
+          "selectedHotbarSlot": 0,
+          "starterItems": [
+            { "itemId": "dirt_block", "count": 10, "target": "Hotbar", "slot": 0 },
+            { "itemId": "parsnip_seeds", "count": 3, "target": "Hotbar", "slot": 1 }
+          ]
+        }
+        """);
+
         File.WriteAllText(Path.Combine(_contentRoot, "assets", "sprites.json"), """
         {
           "sprites": [
@@ -247,6 +262,9 @@ public sealed class GameContentLoaderTests : IDisposable
         Assert.Equal("hello", intro.StartNodeId);
         Assert.True(database.Shops.TryGetById("seed_shop", out var shop));
         Assert.True(shop.TryGetStock("parsnip_seeds", out _));
+        Assert.True(database.GameStartups.TryGetDefault("default", out var startup));
+        Assert.Equal("tiny", startup.WorldProfileId);
+        Assert.Equal(2, startup.StarterItems.Count);
     }
 
     [Fact]
@@ -441,6 +459,7 @@ public sealed class GameContentLoaderTests : IDisposable
         WriteMinimalBaseContent(_contentRoot);
         Directory.CreateDirectory(Path.Combine(_contentRoot, "maps"));
         Directory.CreateDirectory(Path.Combine(_contentRoot, "shops"));
+        Directory.CreateDirectory(Path.Combine(_contentRoot, "startup"));
 
         File.WriteAllText(Path.Combine(_contentRoot, "maps", "bad_refs.json"), """
         {
@@ -472,6 +491,18 @@ public sealed class GameContentLoaderTests : IDisposable
         }
         """);
 
+        File.WriteAllText(Path.Combine(_contentRoot, "startup", "bad_start.json"), """
+        {
+          "id": "bad_start",
+          "displayName": "Bad Start",
+          "worldProfileId": "missing_profile",
+          "startupMapId": "missing_map",
+          "starterItems": [
+            { "itemId": "missing_start_item", "count": 1 }
+          ]
+        }
+        """);
+
         var result = new GameContentLoader().LoadWithMods(_contentRoot, modsRoot: null);
 
         Assert.True(result.Report.HasErrors);
@@ -480,6 +511,9 @@ public sealed class GameContentLoaderTests : IDisposable
         Assert.Contains(result.Report.Issues, issue => issue.ContentKind == "shop" && issue.Message.Contains("currency item", StringComparison.OrdinalIgnoreCase));
         Assert.Contains(result.Report.Issues, issue => issue.ContentKind == "shop" && issue.Message.Contains("stock item", StringComparison.OrdinalIgnoreCase));
         Assert.Contains(result.Report.Issues, issue => issue.ContentKind == "shop" && issue.Message.Contains("sell item", StringComparison.OrdinalIgnoreCase));
+        Assert.Contains(result.Report.Issues, issue => issue.ContentKind == "startup" && issue.Message.Contains("world profile", StringComparison.OrdinalIgnoreCase));
+        Assert.Contains(result.Report.Issues, issue => issue.ContentKind == "startup" && issue.Message.Contains("startup map", StringComparison.OrdinalIgnoreCase));
+        Assert.Contains(result.Report.Issues, issue => issue.ContentKind == "startup" && issue.Message.Contains("starter item", StringComparison.OrdinalIgnoreCase));
     }
 
     [Fact]
@@ -506,6 +540,8 @@ public sealed class GameContentLoaderTests : IDisposable
         Assert.True(result.Database.Dialogues.TryGetById("farm_welcome", out _));
         Assert.True(result.Database.Shops.TryGetById("seed_shop", out var seedShop));
         Assert.Contains(seedShop.Stock, item => item.ItemId == "parsnip_seeds");
+        Assert.True(result.Database.GameStartups.TryGetDefault("default", out var startup));
+        Assert.Contains(startup.StarterItems, item => item.ItemId == "copper_pickaxe");
     }
 
     public void Dispose()

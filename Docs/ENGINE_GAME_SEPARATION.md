@@ -18,6 +18,7 @@ A future game repository should own game-specific material:
 - Its own content root, usually `Game.Data` or `Content`.
 - Game-specific sprite/audio/source assets.
 - Game-specific balance, worldgen profiles, maps, dialogue, shops, recipes, enemies, loot, and progression.
+- Game-specific startup profiles that define starter inventory, selected hotbar slot, and startup defaults.
 - Optional `Mods` folder or mod-pack distribution.
 - Game-specific README, changelog, roadmap, and releases.
 
@@ -37,11 +38,14 @@ Every game repo can define a root-level `yjse.game.json`.
   "savesRootName": "Saves",
   "defaultWorldProfileId": "small",
   "startupMapId": "farmstead",
+  "startupDefinitionId": "default",
   "tags": ["sandbox", "rpg"]
 }
 ```
 
 `Game.Core.Projects` loads this manifest, resolves content/mod/save paths, and can load the project through `GameProjectContentLoader`.
+
+Game-owned startup rules live in the content root under `startup/*.json`. The manifest can select one with `startupDefinitionId`; otherwise the engine looks for `default` and then falls back to the first available startup profile.
 
 ## Running An External Game Repo
 
@@ -74,6 +78,7 @@ This keeps separate games from sharing settings, worlds, keybinds, and autosaves
 
 - Engine-grade systems go into `Game.Core` and must not depend on MonoGame.
 - Game-specific balancing and authored content go into a game content root, not hard-coded engine switches.
+- Starter items, selected hotbar slot, startup map, and game-specific default world profile belong in startup JSON or the game manifest, not in client code.
 - New content types need JSON loaders, registries, validation, tests, and docs before client UI depends on them.
 - Client features should consume core result objects rather than duplicating gameplay rules.
 - Sample `Game.Data` may remain in this repo as an engine validation pack, but it should be treated as replaceable.

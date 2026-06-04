@@ -19,7 +19,7 @@ Only open work is kept here. Completed items are removed after implementation.
 
 ## Items, Equipment, And Effects
 
-- [ ] Expand starter progression beyond current wood/copper/iron weapons/tools and first copper armor pieces.
+- [ ] Expand startup profiles and starter progression beyond current wood/copper/iron weapons/tools and first copper armor pieces.
 - [ ] Add first accessories with movement, mining, defense, and light bonuses.
 - [ ] Add first consumables: healing potion, regeneration food, antidote.
 - [ ] Add equipment persistence.

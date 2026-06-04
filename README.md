@@ -144,6 +144,7 @@ The engine is now a playable YjsE prototype shell with a growing reusable 2D san
 - Base item data includes a first copper armor set with equipment stats and workbench recipes.
 - Farming core includes tilling, watering, seed planting, crop growth, seasonal checks, harvesting, regrow crops, selected-item use routing, farm plot save/load, starter hoe/watering can/seed/item data, and crop sprite generation briefs.
 - Game project manifests (`yjse.game.json`) let external game repositories provide their own content root, mods root, save root name, startup map, and default world profile while using this engine.
+- Startup profiles in content define starter inventory, selected hotbar slot, startup map, and default world profile without hard-coded client rules.
 
 ## Rider
 

@@ -23,6 +23,7 @@ public sealed class GameProjectManifestTests : IDisposable
           "savesRootName": "Profiles",
           "defaultWorldProfileId": "medium",
           "startupMapId": "farm",
+          "startupDefinitionId": "default",
           "tags": ["RPG", "Farm"]
         }
         """);
@@ -34,6 +35,7 @@ public sealed class GameProjectManifestTests : IDisposable
         Assert.Equal("Profiles", manifest.SavesRootName);
         Assert.Equal("medium", manifest.DefaultWorldProfileId);
         Assert.Equal("farm", manifest.StartupMapId);
+        Assert.Equal("default", manifest.StartupDefinitionId);
         Assert.True(manifest.HasTag("rpg"));
     }
 
@@ -108,6 +110,18 @@ public sealed class GameProjectManifestTests : IDisposable
         }
         """);
 
+        var startupRoot = Path.Combine(_root, "Content", "startup");
+        Directory.CreateDirectory(startupRoot);
+        File.WriteAllText(Path.Combine(startupRoot, "default.json"), """
+        {
+          "id": "default",
+          "displayName": "Default Start",
+          "starterItems": [
+            { "itemId": "starter_seed", "count": 2 }
+          ]
+        }
+        """);
+
         var modItems = Path.Combine(_root, "Mods", "StackMod", "items");
         Directory.CreateDirectory(modItems);
         File.WriteAllText(Path.Combine(_root, "Mods", "StackMod", "mod.json"), """
@@ -129,6 +143,8 @@ public sealed class GameProjectManifestTests : IDisposable
         var result = new GameProjectContentLoader().Load(_root);
 
         Assert.Equal("separate_game", result.Manifest.Id);
+        Assert.True(result.Content.Database.GameStartups.TryGetDefault(result.Manifest.StartupDefinitionId, out var startup));
+        Assert.Equal("starter_seed", Assert.Single(startup.StarterItems).ItemId);
         Assert.Equal(99, result.Content.Database.Items.GetById("starter_seed").MaxStack);
         Assert.Contains(result.Content.Report.Overrides, item => item.ContentKind == "item" && item.ContentId == "starter_seed");
         Assert.False(result.Content.Report.HasErrors);
@@ -154,7 +170,7 @@ public sealed class GameProjectManifestTests : IDisposable
           "contentRoot": "Content",
           "modsRoot": "Mods",
           "savesRootName": "Profiles",
-          "defaultWorldProfileId": "small",
+          "startupDefinitionId": "default",
           "tags": ["external"]
         }
         """);

@@ -110,6 +110,8 @@ public sealed class GameProjectManifestLoader
 
         public string? StartupMapId { get; init; }
 
+        public string? StartupDefinitionId { get; init; }
+
         public string[] Tags { get; init; } = Array.Empty<string>();
 
         public GameProjectManifest ToManifest()
@@ -126,6 +128,7 @@ public sealed class GameProjectManifestLoader
                 SavesRootName = SavesRootName,
                 DefaultWorldProfileId = DefaultWorldProfileId,
                 StartupMapId = StartupMapId,
+                StartupDefinitionId = StartupDefinitionId,
                 Tags = DefinitionTags.Normalize(Tags)
             };
         }

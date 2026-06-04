@@ -12,6 +12,7 @@ using Game.Core.Mods;
 using Game.Core.Projectiles;
 using Game.Core.Shops;
 using Game.Core.Spawning;
+using Game.Core.Startup;
 using Game.Core.Tiles;
 using Game.Core.World.Generation;
 using System.Text.Json;
@@ -35,6 +36,7 @@ public sealed class GameContentLoader
     private readonly MapDefinitionJsonLoader _mapLoader;
     private readonly DialogueDefinitionJsonLoader _dialogueLoader;
     private readonly ShopDefinitionJsonLoader _shopLoader;
+    private readonly GameStartupDefinitionJsonLoader _startupLoader;
 
     public GameContentLoader()
         : this(
@@ -69,7 +71,8 @@ public sealed class GameContentLoader
         CropDefinitionJsonLoader? cropLoader = null,
         MapDefinitionJsonLoader? mapLoader = null,
         DialogueDefinitionJsonLoader? dialogueLoader = null,
-        ShopDefinitionJsonLoader? shopLoader = null)
+        ShopDefinitionJsonLoader? shopLoader = null,
+        GameStartupDefinitionJsonLoader? startupLoader = null)
     {
         _tileLoader = tileLoader;
         _itemLoader = itemLoader;
@@ -86,6 +89,7 @@ public sealed class GameContentLoader
         _mapLoader = mapLoader ?? new MapDefinitionJsonLoader();
         _dialogueLoader = dialogueLoader ?? new DialogueDefinitionJsonLoader();
         _shopLoader = shopLoader ?? new ShopDefinitionJsonLoader();
+        _startupLoader = startupLoader ?? new GameStartupDefinitionJsonLoader();
     }
 
     public GameContentDatabase LoadFromRoot(string contentRoot)
@@ -137,7 +141,8 @@ public sealed class GameContentLoader
             _cropLoader.LoadDefinitionsFromDirectory(Path.Combine(root, "crops")),
             _mapLoader.LoadDefinitionsFromDirectory(Path.Combine(root, "maps")),
             _dialogueLoader.LoadDefinitionsFromDirectory(Path.Combine(root, "dialogue")),
-            _shopLoader.LoadDefinitionsFromDirectory(Path.Combine(root, "shops")));
+            _shopLoader.LoadDefinitionsFromDirectory(Path.Combine(root, "shops")),
+            _startupLoader.LoadDefinitionsFromDirectory(Path.Combine(root, "startup")));
     }
 
     private static ContentPackManifest LoadManifest(string modDirectory)
@@ -173,7 +178,8 @@ public sealed class GameContentLoader
         IReadOnlyList<CropDefinition> Crops,
         IReadOnlyList<MapDefinition> Maps,
         IReadOnlyList<DialogueDefinition> Dialogues,
-        IReadOnlyList<ShopDefinition> Shops);
+        IReadOnlyList<ShopDefinition> Shops,
+        IReadOnlyList<GameStartupDefinition> GameStartups);
 
     private sealed class ContentDatabaseBuilder
     {
@@ -194,6 +200,7 @@ public sealed class GameContentLoader
         private readonly Dictionary<string, Packed<MapDefinition>> _maps = new(StringComparer.OrdinalIgnoreCase);
         private readonly Dictionary<string, Packed<DialogueDefinition>> _dialogues = new(StringComparer.OrdinalIgnoreCase);
         private readonly Dictionary<string, Packed<ShopDefinition>> _shops = new(StringComparer.OrdinalIgnoreCase);
+        private readonly Dictionary<string, Packed<GameStartupDefinition>> _gameStartups = new(StringComparer.OrdinalIgnoreCase);
 
         public ContentDatabaseBuilder(ContentLoadReport report)
         {
@@ -221,6 +228,7 @@ public sealed class GameContentLoader
             MergeById(_maps, definitions.Maps, map => map.Id, "map", packId);
             MergeById(_dialogues, definitions.Dialogues, dialogue => dialogue.Id, "dialogue", packId);
             MergeById(_shops, definitions.Shops, shop => shop.Id, "shop", packId);
+            MergeById(_gameStartups, definitions.GameStartups, startup => startup.Id, "startup", packId);
         }
 
         public GameContentDatabase Build()
@@ -241,7 +249,8 @@ public sealed class GameContentLoader
                 Crops = CropRegistry.Create(_crops.Values.Select(value => value.Definition)),
                 Maps = MapRegistry.Create(_maps.Values.Select(value => value.Definition)),
                 Dialogues = DialogueRegistry.Create(_dialogues.Values.Select(value => value.Definition)),
-                Shops = ShopRegistry.Create(_shops.Values.Select(value => value.Definition))
+                Shops = ShopRegistry.Create(_shops.Values.Select(value => value.Definition)),
+                GameStartups = GameStartupRegistry.Create(_gameStartups.Values.Select(value => value.Definition))
             };
         }
 
