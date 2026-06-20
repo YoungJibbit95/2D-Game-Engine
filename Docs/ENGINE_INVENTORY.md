@@ -28,21 +28,21 @@ The count excludes `bin`, `obj`, `.git`, and `.vs`.
 
 | Area | Files | Lines |
 | --- | ---: | ---: |
-| `Game.Core` | 373 | 17,343 |
-| `Game.Client` | 47 | 4,686 |
-| `Game.Tests` | 86 | 8,738 |
-| `Game.Data` | 75 | 1,768 |
-| `Docs` | 9 | 764 |
+| `Game.Core` | 373 | 17,353 |
+| `Game.Client` | 47 | 4,706 |
+| `Game.Tests` | 86 | 8,754 |
+| `Game.Data` | 91 | 1,768 |
+| `Docs` | 9 | 766 |
 
 | Extension | Files | Lines |
 | --- | ---: | ---: |
-| `.cs` | 502 | 30,704 |
+| `.cs` | 502 | 30,750 |
 | `.json` | 69 | 1,801 |
-| `.md` | 11 | 951 |
-| `.png` | 9 | 0 |
+| `.md` | 11 | 954 |
+| `.png` | 25 | 0 |
 | Project/solution/config files | 7 | 108 |
 
-Total tracked workspace snapshot: 605 files, 33,558 text lines plus 9 PNG assets.
+Total tracked workspace snapshot: 621 files, 33,607 text lines plus 25 PNG assets.
 
 ## Core Engine Features
 
@@ -69,7 +69,7 @@ Total tracked workspace snapshot: 605 files, 33,558 text lines plus 9 PNG assets
 - Mod/content-pack loader with base/mod merge and validation reports.
 - Game project manifest support through `yjse.game.json`, project/content/mod path resolution, project-scoped save/settings roots, and external game repo loading via `YJSE_GAME_ROOT` or `YJSE_GAME_DATA`.
 - Core session bootstrapper that loads project content, resolves startup/world profile/settings, resumes saves, creates starter inventory, generates finite or infinite worlds, preloads spawn chunks, and returns a reusable `LoadedGameSession`.
-- Inventory, hotbar, cursor-item foundation, stack merge/split/swap, pickup logic, equipment, and stat calculation.
+- Inventory, hotbar, cursor-item foundation, stack merge/split/swap, live player-inventory pickup logic, equipment, and stat calculation.
 - Crafting query model with known recipes, station checks, ingredient checks, categories, and sort order.
 - Farming foundation for Stardew-like games: crop definitions, seed lookup, farm plots, tilling, watering, planting, seasonal growth, harvesting, regrow crops, selected-item action routing, and farm plot save/load.
 - Topdown movement controller for RPG, life-sim, adventure, and farm games using shared tile collision.
@@ -78,7 +78,7 @@ Total tracked workspace snapshot: 605 files, 33,558 text lines plus 9 PNG assets
 - Shop/economy foundation with JSON shop definitions, stock, sell prices, per-entry currency overrides, inventory-backed buy/sell transactions, and explicit failure reasons.
 - Startup profile foundation with JSON definitions, starter inventory targeting, selected hotbar slot, default world profile/startup map references, validation, and inventory creation service.
 - Sprite asset audit foundation that checks manifest file existence, PNG header dimensions, generation brief path/size matches, missing briefs, and complete autotile mask coverage.
-- First generated starter PNG assets for dirt, grass, stone, copper ore, iron ore, copper pickaxe, dirt block, stone block, and parsnip seeds.
+- Generated base PNG assets now cover core terrain, tree tiles, workbench, starter blocks, ores, coin/materials, pickaxes, swords, bow, arrow, projectile, and slime.
 - Combat health, damage info, invulnerability, contact damage, projectile damage, melee attacks, loot drops, and status effects.
 - Entity manager with runtime id assignment and spatial query index.
 - Shared world queries for raycasts, line of sight, shape queries, and tile flood fill.
@@ -119,7 +119,7 @@ Total tracked workspace snapshot: 605 files, 33,558 text lines plus 9 PNG assets
 - UI animation track/player behavior.
 - UI layout, hit-testing, modal layers, focus traversal, tooltips, and cursor interaction snapshots.
 
-Current test count: 351 passing tests after the sprite asset audit and starter asset import.
+Current test count: 352 passing tests after the live player-inventory pickup fix and expanded base asset import.
 
 ## Current Engine Direction
 

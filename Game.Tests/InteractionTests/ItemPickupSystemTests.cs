@@ -27,6 +27,20 @@ public sealed class ItemPickupSystemTests
     }
 
     [Fact]
+    public void PickupItems_AddsDroppedItemToPlayerInventory()
+    {
+        var entities = new EntityManager(spatialCellSize: 16);
+        var droppedItem = new DroppedItemEntity(new ItemStack("dirt_block", 3), Vector2.Zero, new TileCollisionResolver());
+        entities.Add(droppedItem);
+        var inventory = new PlayerInventory(CreateItems());
+
+        var pickedUp = new ItemPickupSystem().PickupItems(entities, inventory, new RectI(-4, -4, 20, 20));
+
+        Assert.Equal(1, pickedUp);
+        Assert.Equal(3, inventory.CountItem("dirt_block"));
+        Assert.False(droppedItem.IsActive);
+    }
+    [Fact]
     public void PickupItems_LeavesItemWhenInventoryIsFull()
     {
         var entities = new EntityManager(spatialCellSize: 16);
@@ -43,7 +57,12 @@ public sealed class ItemPickupSystemTests
 
     private static Inventory CreateInventory(int slots)
     {
-        return new Inventory(slots, ItemRegistry.Create(new[]
+        return new Inventory(slots, CreateItems());
+    }
+
+    private static ItemRegistry CreateItems()
+    {
+        return ItemRegistry.Create(new[]
         {
             new ItemDefinition
             {
@@ -61,6 +80,6 @@ public sealed class ItemPickupSystemTests
                 TexturePath = "items/stone_block",
                 MaxStack = 999
             }
-        }));
+        });
     }
 }

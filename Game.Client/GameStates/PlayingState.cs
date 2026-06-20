@@ -40,6 +40,7 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
     private readonly TileCollisionResolver _collisionResolver = new();
     private readonly PlayerItemUseSystem _itemUse = new();
     private readonly InteractionTargetingSystem _targeting = new();
+    private readonly ItemPickupSystem _pickup = new();
     private readonly ChunkStreamingService _streaming = new();
     private readonly GameSaveCoordinator _saves = new();
     private readonly EngineDebugSnapshotBuilder _debugSnapshots = new();
@@ -74,6 +75,7 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
     private ChunkStreamingUpdateResult _lastStreaming = ChunkStreamingUpdateResult.Empty;
     private GameSaveResult? _lastSave;
     private int _lastFarmDay = 1;
+    private int _lastPickedUpItems;
 
     public PlayingState(GameStateManager states, LoadedGameSession? loadedSession = null)
     {
@@ -136,6 +138,7 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
         {
             _player.Update(_world, fixedDeltaSeconds);
             _entities.UpdateAll(_world, fixedDeltaSeconds);
+            UpdateItemPickup();
         }
     }
 
@@ -271,6 +274,7 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
             }
 
             context.DebugText.Draw(new Vector2(12, 322), $"FARM PLOTS: {_farmPlots.Plots.Count}", Color.LightGray, 2);
+            context.DebugText.Draw(new Vector2(12, 346), $"PICKUP LAST: {_lastPickedUpItems}", Color.LightGray, 2);
         }
 
         if (settings.Gameplay.ShowInteractionTarget)
@@ -634,6 +638,23 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
         }
     }
 
+    private void UpdateItemPickup()
+    {
+        if (_player is null ||
+            _inventory is null ||
+            !_pauseMenu.Settings.Gameplay.AutoPickupItems ||
+            _player.HealthComponent.IsDead)
+        {
+            _lastPickedUpItems = 0;
+            return;
+        }
+
+        _lastPickedUpItems = _pickup.PickupItems(
+            _entities,
+            _inventory,
+            _player.Bounds.Inflate(12),
+            _events);
+    }
     private void EnsureVisibleChunks()
     {
         if (_world is null ||

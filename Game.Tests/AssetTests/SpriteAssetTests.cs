@@ -149,7 +149,23 @@ public sealed class SpriteAssetTests
             "items/copper_pickaxe",
             "items/dirt_block",
             "items/stone_block",
-            "items/parsnip_seeds"
+            "items/parsnip_seeds",
+            "tiles/wood",
+            "tiles/leaves",
+            "tiles/workbench",
+            "items/copper_coin",
+            "items/copper_ore",
+            "items/iron_ore",
+            "items/wood",
+            "items/gel",
+            "items/iron_pickaxe",
+            "items/wooden_sword",
+            "items/copper_sword",
+            "items/iron_sword",
+            "items/wooden_bow",
+            "items/wooden_arrow",
+            "projectiles/wooden_arrow",
+            "entities/slime"
         };
 
         Assert.False(report.HasErrors, string.Join(Environment.NewLine, report.Issues.Select(issue => issue.Message)));

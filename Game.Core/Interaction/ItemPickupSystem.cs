@@ -12,6 +12,19 @@ public sealed class ItemPickupSystem
         ArgumentNullException.ThrowIfNull(entities);
         ArgumentNullException.ThrowIfNull(inventory);
 
+        return PickupItems(entities, inventory.AddItem, pickupArea, events);
+    }
+
+    public int PickupItems(EntityManager entities, PlayerInventory inventory, RectI pickupArea, GameEventBus? events = null)
+    {
+        ArgumentNullException.ThrowIfNull(entities);
+        ArgumentNullException.ThrowIfNull(inventory);
+
+        return PickupItems(entities, inventory.AddItem, pickupArea, events);
+    }
+
+    private static int PickupItems(EntityManager entities, Func<ItemStack, bool> tryAddItem, RectI pickupArea, GameEventBus? events)
+    {
         var pickedUp = 0;
         foreach (var droppedItem in entities.Query(pickupArea).OfType<DroppedItemEntity>().ToArray())
         {
@@ -21,7 +34,7 @@ public sealed class ItemPickupSystem
             }
 
             var stack = droppedItem.Stack;
-            if (!inventory.AddItem(stack))
+            if (!tryAddItem(stack))
             {
                 continue;
             }
