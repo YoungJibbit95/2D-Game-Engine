@@ -176,6 +176,62 @@
       "tags": ["world", "crop", "farming", "spring"]
     },
 
+    {
+      "id": "entities/player/base_actions",
+      "path": "sprites/entities/player/player_base_actions.png",
+      "category": "Entity",
+      "width": 192,
+      "height": 32,
+      "frames": [
+        { "id": "idle_0", "x": 0, "y": 0, "width": 16, "height": 32, "originX": 8, "originY": 16 },
+        { "id": "idle_1", "x": 16, "y": 0, "width": 16, "height": 32, "originX": 8, "originY": 16 },
+        { "id": "walk_0", "x": 32, "y": 0, "width": 16, "height": 32, "originX": 8, "originY": 16 },
+        { "id": "walk_1", "x": 48, "y": 0, "width": 16, "height": 32, "originX": 8, "originY": 16 },
+        { "id": "walk_2", "x": 64, "y": 0, "width": 16, "height": 32, "originX": 8, "originY": 16 },
+        { "id": "walk_3", "x": 80, "y": 0, "width": 16, "height": 32, "originX": 8, "originY": 16 },
+        { "id": "jump", "x": 96, "y": 0, "width": 16, "height": 32, "originX": 8, "originY": 16 },
+        { "id": "fall", "x": 112, "y": 0, "width": 16, "height": 32, "originX": 8, "originY": 16 },
+        { "id": "mine_0", "x": 128, "y": 0, "width": 16, "height": 32, "originX": 8, "originY": 16 },
+        { "id": "mine_1", "x": 144, "y": 0, "width": 16, "height": 32, "originX": 8, "originY": 16 },
+        { "id": "attack_0", "x": 160, "y": 0, "width": 16, "height": 32, "originX": 8, "originY": 16 },
+        { "id": "attack_1", "x": 176, "y": 0, "width": 16, "height": 32, "originX": 8, "originY": 16 }
+      ],
+      "tags": ["entity", "player", "character", "animated", "side-view"]
+    },    {
+      "id": "entities/player/hair_variants",
+      "path": "sprites/entities/player/player_hair_variants.png",
+      "category": "Entity",
+      "width": 64,
+      "height": 32,
+      "frames": [
+        { "id": "short", "x": 0, "y": 0, "width": 16, "height": 32 },
+        { "id": "messy", "x": 16, "y": 0, "width": 16, "height": 32 },
+        { "id": "bob", "x": 32, "y": 0, "width": 16, "height": 32 },
+        { "id": "ponytail", "x": 48, "y": 0, "width": 16, "height": 32 }
+      ],
+      "tags": ["entity", "player", "character", "editor", "hair"]
+    },
+    {
+      "id": "entities/player/clothes_variants",
+      "path": "sprites/entities/player/player_clothes_variants.png",
+      "category": "Entity",
+      "width": 64,
+      "height": 32,
+      "frames": [
+        { "id": "starter", "x": 0, "y": 0, "width": 16, "height": 32 },
+        { "id": "work", "x": 16, "y": 0, "width": 16, "height": 32 },
+        { "id": "adventurer", "x": 32, "y": 0, "width": 16, "height": 32 },
+        { "id": "farmer", "x": 48, "y": 0, "width": 16, "height": 32 }
+      ],
+      "tags": ["entity", "player", "character", "editor", "clothes"]
+    },
+    { "id": "entities/critters/rabbit", "path": "sprites/entities/critters/rabbit.png", "category": "Entity", "width": 64, "height": 16, "frames": [ { "id": "idle_0", "x": 0, "y": 0, "width": 16, "height": 16 }, { "id": "idle_1", "x": 16, "y": 0, "width": 16, "height": 16 }, { "id": "hop_0", "x": 32, "y": 0, "width": 16, "height": 16 }, { "id": "hop_1", "x": 48, "y": 0, "width": 16, "height": 16 } ], "tags": ["entity", "critter", "forest", "animated"] },
+    { "id": "entities/critters/bird", "path": "sprites/entities/critters/bird.png", "category": "Entity", "width": 64, "height": 16, "frames": [ { "id": "idle", "x": 0, "y": 0, "width": 16, "height": 16 }, { "id": "hop", "x": 16, "y": 0, "width": 16, "height": 16 }, { "id": "wing_0", "x": 32, "y": 0, "width": 16, "height": 16 }, { "id": "wing_1", "x": 48, "y": 0, "width": 16, "height": 16 } ], "tags": ["entity", "critter", "forest", "animated"] },
+    { "id": "entities/enemies/bat", "path": "sprites/entities/enemies/bat.png", "category": "Entity", "width": 64, "height": 16, "frames": [ { "id": "fly_0", "x": 0, "y": 0, "width": 16, "height": 16 }, { "id": "fly_1", "x": 16, "y": 0, "width": 16, "height": 16 }, { "id": "fly_2", "x": 32, "y": 0, "width": 16, "height": 16 }, { "id": "hurt", "x": 48, "y": 0, "width": 16, "height": 16 } ], "tags": ["entity", "enemy", "cave", "animated"] },
+    { "id": "entities/enemies/cave_worm", "path": "sprites/entities/enemies/cave_worm.png", "category": "Entity", "width": 64, "height": 16, "frames": [ { "id": "crawl_0", "x": 0, "y": 0, "width": 16, "height": 16 }, { "id": "crawl_1", "x": 16, "y": 0, "width": 16, "height": 16 }, { "id": "crawl_2", "x": 32, "y": 0, "width": 16, "height": 16 }, { "id": "hurt", "x": 48, "y": 0, "width": 16, "height": 16 } ], "tags": ["entity", "enemy", "cave", "animated"] },
+    { "id": "world/decor/plants_foliage_props", "path": "sprites/world/decor/plants_foliage_props.png", "category": "WorldObject", "width": 64, "height": 16, "frames": [ { "id": "grass_tuft", "x": 0, "y": 0, "width": 16, "height": 16 }, { "id": "fern", "x": 16, "y": 0, "width": 16, "height": 16 }, { "id": "flower", "x": 32, "y": 0, "width": 16, "height": 16 }, { "id": "mushroom", "x": 48, "y": 0, "width": 16, "height": 16 } ], "tags": ["world", "decor", "plant", "foliage"] },
+    { "id": "world/backgrounds/forest_parallax_layer", "path": "sprites/world/backgrounds/forest_parallax_layer.png", "category": "Background", "width": 256, "height": 64, "tags": ["background", "forest", "parallax"] },
+    { "id": "world/backgrounds/cave_parallax_layer", "path": "sprites/world/backgrounds/cave_parallax_layer.png", "category": "Background", "width": 256, "height": 64, "tags": ["background", "cave", "parallax"] },
     { "id": "entities/slime", "path": "sprites/entities/enemies/slime.png", "category": "Entity", "width": 16, "height": 16, "tags": ["entity", "enemy"] },
     { "id": "projectiles/wooden_arrow", "path": "sprites/projectiles/wooden_arrow.png", "category": "Projectile", "width": 16, "height": 16, "tags": ["projectile", "arrow"] },
     { "id": "projectiles/poison_arrow", "path": "sprites/projectiles/poison_arrow.png", "category": "Projectile", "width": 16, "height": 16, "tags": ["projectile", "arrow", "poison"] }

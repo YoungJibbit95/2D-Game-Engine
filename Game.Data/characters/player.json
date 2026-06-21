@@ -1,0 +1,30 @@
+{
+  "id": "player",
+  "displayName": "Player",
+  "width": 12,
+  "height": 28,
+  "defaultAppearance": {
+    "bodySpriteId": "entities/player/base_actions",
+    "skinTone": "#c98f62",
+    "hairStyleId": "short",
+    "hairColor": "#5b3825",
+    "shirtColor": "#4f7fb8",
+    "pantsColor": "#2f3f5f",
+    "eyeColor": "#243043"
+  },
+  "animationSet": {
+    "id": "player.default",
+    "displayName": "Default Player Animation Set",
+    "defaultClipId": "player.idle",
+    "states": {
+      "Idle": "player.idle",
+      "Walk": "player.walk",
+      "Jump": "player.jump",
+      "Fall": "player.fall",
+      "Mine": "player.mine",
+      "Attack": "player.attack",
+      "UseItem": "player.attack"
+    }
+  },
+  "tags": ["player", "editable", "side-view"]
+}

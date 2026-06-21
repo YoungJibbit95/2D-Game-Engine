@@ -44,9 +44,8 @@ Only open engine work is kept here. Completed items are removed after implementa
 
 ## Rendering And Shaders
 
-- [ ] Add texture atlas lookup and source-rect resolution.
+- [ ] Add texture atlas lookup while preserving current sprite-manifest frame source-rect resolution.
 - [ ] Move `ChunkRenderCache` from command caching to atlas/render-target backed batching.
-- [ ] Generate/import real 16-frame autotile PNG sheets for base terrain tiles.
 - [ ] Add render targets for world, liquids, lighting, particles, UI, and post-processing.
 - [ ] Add HLSL shader loading through `ShaderEffectRegistry`.
 - [ ] Add deeper draw metrics: draw calls, texture switches, render-target timings, and shader timings.
@@ -75,7 +74,7 @@ Only open engine work is kept here. Completed items are removed after implementa
 ## Interaction, Combat, And Gameplay Systems
 
 - [ ] Add world-aware line-of-sight to every runtime combat path, not only optional melee calls.
-- [ ] Add combat animation phases, attack arcs, multi-hit timing, and per-frame hit windows.
+- [ ] Move player action-animation triggers out of `PlayingState` and add reusable combat animation phases, attack arcs, multi-hit timing, and per-frame hit windows.
 - [ ] Add projectile knockback, spread, charge, reload, and ammo preference rules.
 - [ ] Wire sideview tile/entity interactions into concrete actions for chests, doors, signs, NPCs, crafting stations, machines, and tile entities.
 - [ ] Add concrete client/gameplay screens for topdown shop, dialogue, container, shipping-bin, and scripted trigger action results.

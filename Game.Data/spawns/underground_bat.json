@@ -1,0 +1,9 @@
+{
+  "id": "underground_bat",
+  "entityId": "bat",
+  "biomeId": "forest",
+  "minTileY": 85,
+  "maxTileY": 260,
+  "chance": 0.22,
+  "maxActive": 6
+}

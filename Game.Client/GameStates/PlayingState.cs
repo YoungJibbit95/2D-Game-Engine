@@ -1,5 +1,7 @@
 using Game.Client.Input;
 using Game.Client.Rendering;
+using Game.Core.Animations;
+using Game.Core.Characters;
 using Game.Client.UI;
 using Game.Core;
 using Game.Core.Actions;
@@ -28,6 +30,7 @@ using System.Globalization;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace Game.Client.GameStates;
 
@@ -52,6 +55,8 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
     private readonly PauseMenuOverlay _pauseMenu;
     private readonly GameStateManager _states;
     private readonly EntityFactory _entityFactory;
+    private readonly SpriteAnimator _playerAnimator = new();
+    private readonly CharacterAnimationStateResolver _playerAnimationResolver = new();
     private readonly LoadedGameSession? _loadedSession;
 
     private World? _world;
@@ -76,6 +81,10 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
     private GameSaveResult? _lastSave;
     private int _lastFarmDay = 1;
     private int _lastPickedUpItems;
+    private CharacterAnimationState _playerAnimationState = CharacterAnimationState.Idle;
+    private CharacterAnimationState? _playerActionAnimation;
+    private float _playerActionAnimationTimer;
+    private bool _playerFacingLeft;
 
     public PlayingState(GameStateManager states, LoadedGameSession? loadedSession = null)
     {
@@ -316,6 +325,11 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
             return;
         }
 
+        if (TryDrawPlayerSprite(context))
+        {
+            return;
+        }
+
         var screenPosition = _camera.WorldToScreen(
             new Vector2(_player.Body.Position.X, _player.Body.Position.Y),
             context.ViewportBounds);
@@ -330,11 +344,98 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
         context.SpriteBatch.Draw(context.Pixel, new Rectangle(destination.X, destination.Y, destination.Width, 2), new Color(80, 52, 48));
     }
 
+    private bool TryDrawPlayerSprite(RenderContext context)
+    {
+        if (_player is null || _textures is null || _playerAnimator.CurrentFrame is not { } frame)
+        {
+            return false;
+        }
+
+        var sprite = _textures.Get(frame.SpriteId, frame.FrameIndex);
+        if (sprite.SourceRectangle.Width <= 0 || sprite.SourceRectangle.Height <= 0)
+        {
+            return false;
+        }
+
+        var source = sprite.SourceRectangle;
+        var worldPosition = new Vector2(
+            _player.Body.Center.X - source.Width * 0.5f + frame.OffsetX,
+            _player.Body.Position.Y + _player.Body.Size.Y - source.Height + frame.OffsetY);
+        var screenPosition = _camera.WorldToScreen(worldPosition, context.ViewportBounds);
+        var destination = new Rectangle(
+            (int)MathF.Floor(screenPosition.X),
+            (int)MathF.Floor(screenPosition.Y),
+            Math.Max(1, (int)MathF.Ceiling(source.Width * _camera.Zoom)),
+            Math.Max(1, (int)MathF.Ceiling(source.Height * _camera.Zoom)));
+        var effects = _playerFacingLeft ? SpriteEffects.FlipHorizontally : SpriteEffects.None;
+
+        context.SpriteBatch.Draw(sprite.Texture, destination, source, Color.White, 0f, Vector2.Zero, effects, 0f);
+        return true;
+    }
+
+    private bool TryDrawEntitySprite(RenderContext context, Entity entity)
+    {
+        if (_textures is null || _content is null || !TryResolveEntitySpriteId(entity, out var spriteId))
+        {
+            return false;
+        }
+
+        var sprite = _textures.Get(spriteId);
+        if (sprite.SourceRectangle.Width <= 0 || sprite.SourceRectangle.Height <= 0)
+        {
+            return false;
+        }
+
+        var bounds = entity.Bounds;
+        var source = sprite.SourceRectangle;
+        var worldPosition = new Vector2(
+            bounds.X + bounds.Width * 0.5f - source.Width * 0.5f,
+            bounds.Y + bounds.Height - source.Height);
+        var screenPosition = _camera.WorldToScreen(worldPosition, context.ViewportBounds);
+        var destination = new Rectangle(
+            (int)MathF.Floor(screenPosition.X),
+            (int)MathF.Floor(screenPosition.Y),
+            Math.Max(1, (int)MathF.Ceiling(source.Width * _camera.Zoom)),
+            Math.Max(1, (int)MathF.Ceiling(source.Height * _camera.Zoom)));
+
+        context.SpriteBatch.Draw(sprite.Texture, destination, source, Color.White);
+        return true;
+    }
+
+    private bool TryResolveEntitySpriteId(Entity entity, out string spriteId)
+    {
+        spriteId = string.Empty;
+        if (_content is null)
+        {
+            return false;
+        }
+
+        switch (entity)
+        {
+            case EnemyEntity enemy when _content.Entities.TryGetById(enemy.DefinitionId, out var enemyDefinition):
+                spriteId = enemyDefinition.TexturePath;
+                return true;
+            case DroppedItemEntity dropped when _content.Items.TryGetById(dropped.Stack.ItemId, out var itemDefinition):
+                spriteId = itemDefinition.TexturePath;
+                return true;
+            case ProjectileEntity projectile when _content.Projectiles.TryGetById(projectile.ProjectileId, out var projectileDefinition):
+                spriteId = projectileDefinition.TexturePath;
+                return true;
+            default:
+                return false;
+        }
+    }
+
     private void DrawEntities(RenderContext context)
     {
         foreach (var entity in _entities.Entities)
         {
             if (!entity.IsActive)
+            {
+                continue;
+            }
+
+            if (TryDrawEntitySprite(context, entity))
             {
                 continue;
             }
@@ -361,6 +462,101 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
             Math.Max(1, (int)MathF.Ceiling(bounds.Height * _camera.Zoom)));
 
         context.SpriteBatch.Draw(context.Pixel, destination, color);
+    }
+
+    private void UpdatePlayerAnimation(float deltaSeconds)
+    {
+        if (_player is null || _content is null)
+        {
+            return;
+        }
+
+        if (_player.Body.Velocity.X < -2f)
+        {
+            _playerFacingLeft = true;
+        }
+        else if (_player.Body.Velocity.X > 2f)
+        {
+            _playerFacingLeft = false;
+        }
+
+        if (_playerActionAnimationTimer > 0)
+        {
+            _playerActionAnimationTimer = Math.Max(0, _playerActionAnimationTimer - deltaSeconds);
+        }
+        else
+        {
+            _playerActionAnimation = null;
+        }
+
+        var resolvedState = _playerActionAnimation ?? _playerAnimationResolver.Resolve(
+            _player.Body,
+            isDead: _player.HealthComponent.IsDead);
+        _playerAnimationState = resolvedState;
+
+        if (TryResolvePlayerAnimationClip(resolvedState, out var clip) &&
+            !string.Equals(_playerAnimator.Clip?.Id, clip.Id, StringComparison.OrdinalIgnoreCase))
+        {
+            _playerAnimator.Play(clip, restartIfSame: true);
+        }
+
+        _playerAnimator.Update(deltaSeconds);
+    }
+
+    private bool TryResolvePlayerAnimationClip(CharacterAnimationState state, out SpriteAnimationClip clip)
+    {
+        clip = null!;
+        if (_content is null)
+        {
+            return false;
+        }
+
+        var clipId = _content.Characters.TryGetById("player", out var character)
+            ? character.AnimationSet.ResolveClipId(state)
+            : ResolveFallbackPlayerClipId(state);
+
+        return !string.IsNullOrWhiteSpace(clipId) && _content.Animations.TryGetById(clipId, out clip!);
+    }
+
+    private static string ResolveFallbackPlayerClipId(CharacterAnimationState state)
+    {
+        return state switch
+        {
+            CharacterAnimationState.Walk => "player.walk",
+            CharacterAnimationState.Jump => "player.jump",
+            CharacterAnimationState.Fall => "player.fall",
+            CharacterAnimationState.Attack => "player.attack",
+            CharacterAnimationState.Mine => "player.mine",
+            CharacterAnimationState.UseItem => "player.attack",
+            _ => "player.idle"
+        };
+    }
+
+    private CharacterAnimationState? ResolvePlayerActionState(ItemStack stack)
+    {
+        if (_content is null || stack.IsEmpty || !_content.Items.TryGetById(stack.ItemId, out var item))
+        {
+            return null;
+        }
+
+        return item.Type switch
+        {
+            ItemType.ToolPickaxe or ItemType.ToolAxe or ItemType.ToolHoe or ItemType.ToolWateringCan => CharacterAnimationState.Mine,
+            ItemType.WeaponMelee or ItemType.WeaponRanged => CharacterAnimationState.Attack,
+            ItemType.PlaceableTile or ItemType.Consumable or ItemType.Seed => CharacterAnimationState.UseItem,
+            _ => null
+        };
+    }
+
+    private void TriggerPlayerActionAnimation(CharacterAnimationState? state)
+    {
+        if (!state.HasValue)
+        {
+            return;
+        }
+
+        _playerActionAnimation = state.Value;
+        _playerActionAnimationTimer = state.Value == CharacterAnimationState.Attack ? 0.22f : 0.18f;
     }
 
     private void UpdateHotbarSelection(InputSettings inputSettings)
@@ -407,6 +603,8 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
         {
             return;
         }
+
+        TriggerPlayerActionAnimation(ResolvePlayerActionState(_inventory.SelectedStack));
 
         _itemUse.UseSelectedItem(
             _world,

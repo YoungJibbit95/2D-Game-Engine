@@ -1,6 +1,6 @@
 # Engine Inventory
 
-Last updated: 2026-05-10
+Last updated: 2026-06-21
 
 This file is a contributor-facing snapshot of the current project shape. Open work still lives in the checklist files.
 
@@ -28,21 +28,21 @@ The count excludes `bin`, `obj`, `.git`, and `.vs`.
 
 | Area | Files | Lines |
 | --- | ---: | ---: |
-| `Game.Core` | 373 | 17,353 |
-| `Game.Client` | 47 | 4,706 |
-| `Game.Tests` | 86 | 8,754 |
-| `Game.Data` | 91 | 1,768 |
-| `Docs` | 9 | 766 |
+| `Game.Core` | 388 | 18,056 |
+| `Game.Client` | 47 | 4,877 |
+| `Game.Tests` | 88 | 8,986 |
+| `Game.Data` | 112 | 2,131 |
+| `Docs` | 10 | 848 |
 
 | Extension | Files | Lines |
 | --- | ---: | ---: |
-| `.cs` | 502 | 30,750 |
-| `.json` | 69 | 1,801 |
-| `.md` | 11 | 954 |
-| `.png` | 25 | 0 |
+| `.cs` | 519 | 31,856 |
+| `.json` | 80 | 2,164 |
+| `.md` | 12 | 1,036 |
+| `.png` | 35 | 0 |
 | Project/solution/config files | 7 | 108 |
 
-Total tracked workspace snapshot: 621 files, 33,607 text lines plus 25 PNG assets.
+Total workspace snapshot: 677 files, 34,113 text lines plus 35 PNG assets.
 
 ## Core Engine Features
 
@@ -65,7 +65,7 @@ Total tracked workspace snapshot: 621 files, 33,607 text lines plus 25 PNG asset
 - Greyscale lighting with sunlight, point lights, and underground falloff.
 - Core event bus with typed subscriptions and global observation.
 - Bounded event journal for debugging, profiling, and future replay/replication.
-- Data-driven registries for tiles, items, crops, maps, dialogues, shops, startup profiles, recipes, loot, biomes, entities, projectiles, status effects, spawns, sprites, and worldgen profiles.
+- Data-driven registries for tiles, items, crops, maps, dialogues, shops, startup profiles, recipes, loot, biomes, entities, projectiles, status effects, spawns, sprites, runtime animations, characters, and worldgen profiles.
 - Mod/content-pack loader with base/mod merge and validation reports.
 - Game project manifest support through `yjse.game.json`, project/content/mod path resolution, project-scoped save/settings roots, and external game repo loading via `YJSE_GAME_ROOT` or `YJSE_GAME_DATA`.
 - Core session bootstrapper that loads project content, resolves startup/world profile/settings, resumes saves, creates starter inventory, generates finite or infinite worlds, preloads spawn chunks, and returns a reusable `LoadedGameSession`.
@@ -78,12 +78,13 @@ Total tracked workspace snapshot: 621 files, 33,607 text lines plus 25 PNG asset
 - Shop/economy foundation with JSON shop definitions, stock, sell prices, per-entry currency overrides, inventory-backed buy/sell transactions, and explicit failure reasons.
 - Startup profile foundation with JSON definitions, starter inventory targeting, selected hotbar slot, default world profile/startup map references, validation, and inventory creation service.
 - Sprite asset audit foundation that checks manifest file existence, PNG header dimensions, generation brief path/size matches, missing briefs, and complete autotile mask coverage.
-- Generated base PNG assets now cover core terrain, tree tiles, workbench, starter blocks, ores, coin/materials, pickaxes, swords, bow, arrow, projectile, and slime.
+- Generated/base PNG assets now cover core terrain, tree tiles, workbench, starter blocks, ores, coin/materials, pickaxes, swords, bow, arrow, projectile, slime, player action animation sheet, player hair/clothes variants, rabbit, bird, bat, cave worm, foliage props, and forest/cave background layers.
 - Combat health, damage info, invulnerability, contact damage, projectile damage, melee attacks, loot drops, and status effects.
 - Entity manager with runtime id assignment and spatial query index.
 - Shared world queries for raycasts, line of sight, shape queries, and tile flood fill.
 - Core settings model with video, rendering, UI, audio, gameplay, world, input, and debug sections.
 - Engine-neutral UI animation pipeline with clips, tracks, keyframes, curves, and a runtime player.
+- Runtime sprite animation clips, loop modes, JSON loader, sprite animator, character definitions, character animation state resolver, and first character editor session foundation.
 - Renderer-neutral UI toolkit with retained elements, free/stack/grid/scroll/tabs/splitter/dock layout, topmost hit-testing, modal layers, focus traversal, tooltip state, and cursor item interaction snapshots.
 
 ## Client Features
@@ -93,7 +94,7 @@ Total tracked workspace snapshot: 621 files, 33,607 text lines plus 25 PNG asset
 - World-select and create-world screens with saved-world metadata listing, typed world names, seed entry, random seeds, and resume through the loading flow.
 - Escape no longer exits from the main menu by accident.
 - Loading state for world/session preparation.
-- Playing state with camera follow, tile/liquid rendering, player rendering, entities, lighting overlay, HUD, inventory overlay, pause menu, and debug console.
+- Playing state with camera follow, tile/liquid rendering, animated sprite-backed player rendering, sprite-backed entity/item/projectile rendering, lighting overlay, HUD, inventory overlay, pause menu, and debug console.
 - Playing state can now route hoe, watering can, and seed use into farm plots, draw placeholder farm plots/crops, advance farm growth on new days, and autosave farm plot state.
 - Inventory overlay with hotbar/main slot widgets, core stack click rules, cursor-held stack drawing, shift-click quick move, and item tooltips for stats, effects, tags, and stack limits.
 - Crafting overlay with known recipe list, selected recipe details, nearby station detection, ingredient availability, craft button, and shift-repeat crafting.
@@ -102,7 +103,7 @@ Total tracked workspace snapshot: 621 files, 33,607 text lines plus 25 PNG asset
 - UI animation applied to menu and loading/pause surfaces.
 - Runtime settings for theme, panel opacity, HUD opacity, animation speed, reduced motion, render cache budget, liquid opacity, streaming behavior, and debug metric visibility.
 - Chunk render command cache with LRU-style budget trimming.
-- Tile rendering can use real sprite assets when PNGs exist, or deterministic placeholders while assets are missing.
+- Tile/entity/item/projectile rendering can use real sprite assets when PNGs exist, or deterministic placeholders/debug rectangles while assets are missing.
 
 ## Test Coverage Highlights
 
@@ -119,7 +120,7 @@ Total tracked workspace snapshot: 621 files, 33,607 text lines plus 25 PNG asset
 - UI animation track/player behavior.
 - UI layout, hit-testing, modal layers, focus traversal, tooltips, and cursor interaction snapshots.
 
-Current test count: 352 passing tests after the live player-inventory pickup fix and expanded base asset import.
+Current test count: 361 passing tests after the animation/character foundation and character asset-wave integration.
 
 ## Current Engine Direction
 
@@ -127,7 +128,7 @@ The engine is now past the first playable prototype shell and is becoming a reus
 
 - Move more frame orchestration out of `PlayingState` into core simulation/session services.
 - Wire the renderer-neutral UI toolkit into more client screens and add reusable renderer widgets for panels, buttons, labels, slots, lists, tabs, splitters, and windows.
-- Upgrade rendering to atlas-backed batching, render targets, shader passes, particles, and animation clips for entities.
+- Upgrade rendering to atlas-backed batching, render targets, shader passes, particles, and reusable animation controllers for all entities.
 - Wire sprite asset audits into CI, debug commands, packaging, and editor tooling.
 - Add RGB region-based lighting and dynamic lights attached to items, projectiles, entities, and furniture.
 - Deepen worldgen with biome transitions, underground walls, larger cavern layers, lakes, structure spacing, chest rooms, and sampled infinite-world quality gates.

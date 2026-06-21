@@ -1,0 +1,9 @@
+{
+  "id": "deep_cave_worm",
+  "entityId": "cave_worm",
+  "biomeId": "forest",
+  "minTileY": 130,
+  "maxTileY": 320,
+  "chance": 0.14,
+  "maxActive": 4
+}

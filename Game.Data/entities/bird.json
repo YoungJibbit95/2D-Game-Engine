@@ -1,0 +1,10 @@
+{
+  "id": "bird",
+  "displayName": "Bird",
+  "texture": "entities/critters/bird",
+  "maxHealth": 4,
+  "width": 10,
+  "height": 8,
+  "contactDamage": 0,
+  "contactKnockback": 0
+}

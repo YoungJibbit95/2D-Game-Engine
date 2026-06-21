@@ -1,0 +1,10 @@
+{
+  "id": "forest_day_rabbit",
+  "entityId": "rabbit",
+  "biomeId": "forest",
+  "requiresNight": false,
+  "minTileY": 0,
+  "maxTileY": 96,
+  "chance": 0.18,
+  "maxActive": 5
+}

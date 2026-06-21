@@ -1,0 +1,68 @@
+{
+  "animations": [
+    {
+      "id": "player.idle",
+      "displayName": "Player Idle",
+      "sprite": "entities/player/base_actions",
+      "frameStart": 0,
+      "frameCount": 2,
+      "frameDuration": 0.35,
+      "loopMode": "PingPong",
+      "tags": ["player", "movement", "idle"]
+    },
+    {
+      "id": "player.walk",
+      "displayName": "Player Walk",
+      "sprite": "entities/player/base_actions",
+      "frameStart": 2,
+      "frameCount": 4,
+      "frameDuration": 0.1,
+      "loopMode": "Loop",
+      "tags": ["player", "movement", "walk"]
+    },
+    {
+      "id": "player.jump",
+      "displayName": "Player Jump",
+      "sprite": "entities/player/base_actions",
+      "frameStart": 6,
+      "frameCount": 1,
+      "frameDuration": 0.12,
+      "loopMode": "Once",
+      "tags": ["player", "movement", "air"]
+    },
+    {
+      "id": "player.fall",
+      "displayName": "Player Fall",
+      "sprite": "entities/player/base_actions",
+      "frameStart": 7,
+      "frameCount": 1,
+      "frameDuration": 0.12,
+      "loopMode": "Once",
+      "tags": ["player", "movement", "air"]
+    },
+    {
+      "id": "player.mine",
+      "displayName": "Player Mine",
+      "sprite": "entities/player/base_actions",
+      "frames": [
+        { "frame": 8, "durationMs": 80, "eventId": "tool_raise" },
+        { "frame": 9, "durationMs": 90, "eventId": "tool_swing" },
+        { "frame": 8, "durationMs": 80 }
+      ],
+      "loopMode": "Loop",
+      "tags": ["player", "action", "mine"]
+    },
+    {
+      "id": "player.attack",
+      "displayName": "Player Attack",
+      "sprite": "entities/player/base_actions",
+      "frames": [
+        { "frame": 10, "durationMs": 65, "eventId": "attack_start" },
+        { "frame": 11, "durationMs": 90, "eventId": "attack_hit" },
+        { "frame": 10, "durationMs": 65 }
+      ],
+      "loopMode": "Once",
+      "tags": ["player", "action", "attack"]
+    }
+  ]
+}

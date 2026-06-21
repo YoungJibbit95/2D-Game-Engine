@@ -1,0 +1,10 @@
+{
+  "id": "rabbit",
+  "displayName": "Rabbit",
+  "texture": "entities/critters/rabbit",
+  "maxHealth": 5,
+  "width": 12,
+  "height": 10,
+  "contactDamage": 0,
+  "contactKnockback": 0
+}

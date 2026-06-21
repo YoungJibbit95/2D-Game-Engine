@@ -1,0 +1,10 @@
+{
+  "id": "forest_day_bird",
+  "entityId": "bird",
+  "biomeId": "forest",
+  "requiresNight": false,
+  "minTileY": 0,
+  "maxTileY": 96,
+  "chance": 0.12,
+  "maxActive": 4
+}

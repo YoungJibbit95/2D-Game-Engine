@@ -1,4 +1,6 @@
+using Game.Core.Animations;
 using Game.Core.Assets;
+using Game.Core.Characters;
 using Game.Core.Biomes;
 using Game.Core.Crafting;
 using Game.Core.Dialogue;
@@ -37,6 +39,8 @@ public sealed class GameContentLoader
     private readonly DialogueDefinitionJsonLoader _dialogueLoader;
     private readonly ShopDefinitionJsonLoader _shopLoader;
     private readonly GameStartupDefinitionJsonLoader _startupLoader;
+    private readonly SpriteAnimationJsonLoader _animationLoader;
+    private readonly CharacterDefinitionJsonLoader _characterLoader;
 
     public GameContentLoader()
         : this(
@@ -72,7 +76,9 @@ public sealed class GameContentLoader
         MapDefinitionJsonLoader? mapLoader = null,
         DialogueDefinitionJsonLoader? dialogueLoader = null,
         ShopDefinitionJsonLoader? shopLoader = null,
-        GameStartupDefinitionJsonLoader? startupLoader = null)
+        GameStartupDefinitionJsonLoader? startupLoader = null,
+        SpriteAnimationJsonLoader? animationLoader = null,
+        CharacterDefinitionJsonLoader? characterLoader = null)
     {
         _tileLoader = tileLoader;
         _itemLoader = itemLoader;
@@ -90,6 +96,8 @@ public sealed class GameContentLoader
         _dialogueLoader = dialogueLoader ?? new DialogueDefinitionJsonLoader();
         _shopLoader = shopLoader ?? new ShopDefinitionJsonLoader();
         _startupLoader = startupLoader ?? new GameStartupDefinitionJsonLoader();
+        _animationLoader = animationLoader ?? new SpriteAnimationJsonLoader();
+        _characterLoader = characterLoader ?? new CharacterDefinitionJsonLoader();
     }
 
     public GameContentDatabase LoadFromRoot(string contentRoot)
@@ -142,7 +150,9 @@ public sealed class GameContentLoader
             _mapLoader.LoadDefinitionsFromDirectory(Path.Combine(root, "maps")),
             _dialogueLoader.LoadDefinitionsFromDirectory(Path.Combine(root, "dialogue")),
             _shopLoader.LoadDefinitionsFromDirectory(Path.Combine(root, "shops")),
-            _startupLoader.LoadDefinitionsFromDirectory(Path.Combine(root, "startup")));
+            _startupLoader.LoadDefinitionsFromDirectory(Path.Combine(root, "startup")),
+            _animationLoader.LoadClipsFromDirectory(Path.Combine(root, "animations")),
+            _characterLoader.LoadDefinitionsFromDirectory(Path.Combine(root, "characters")));
     }
 
     private static ContentPackManifest LoadManifest(string modDirectory)
@@ -179,7 +189,9 @@ public sealed class GameContentLoader
         IReadOnlyList<MapDefinition> Maps,
         IReadOnlyList<DialogueDefinition> Dialogues,
         IReadOnlyList<ShopDefinition> Shops,
-        IReadOnlyList<GameStartupDefinition> GameStartups);
+        IReadOnlyList<GameStartupDefinition> GameStartups,
+        IReadOnlyList<SpriteAnimationClip> Animations,
+        IReadOnlyList<CharacterDefinition> Characters);
 
     private sealed class ContentDatabaseBuilder
     {
@@ -201,6 +213,8 @@ public sealed class GameContentLoader
         private readonly Dictionary<string, Packed<DialogueDefinition>> _dialogues = new(StringComparer.OrdinalIgnoreCase);
         private readonly Dictionary<string, Packed<ShopDefinition>> _shops = new(StringComparer.OrdinalIgnoreCase);
         private readonly Dictionary<string, Packed<GameStartupDefinition>> _gameStartups = new(StringComparer.OrdinalIgnoreCase);
+        private readonly Dictionary<string, Packed<SpriteAnimationClip>> _animations = new(StringComparer.OrdinalIgnoreCase);
+        private readonly Dictionary<string, Packed<CharacterDefinition>> _characters = new(StringComparer.OrdinalIgnoreCase);
 
         public ContentDatabaseBuilder(ContentLoadReport report)
         {
@@ -229,6 +243,8 @@ public sealed class GameContentLoader
             MergeById(_dialogues, definitions.Dialogues, dialogue => dialogue.Id, "dialogue", packId);
             MergeById(_shops, definitions.Shops, shop => shop.Id, "shop", packId);
             MergeById(_gameStartups, definitions.GameStartups, startup => startup.Id, "startup", packId);
+            MergeById(_animations, definitions.Animations, animation => animation.Id, "animation", packId);
+            MergeById(_characters, definitions.Characters, character => character.Id, "character", packId);
         }
 
         public GameContentDatabase Build()
@@ -250,7 +266,9 @@ public sealed class GameContentLoader
                 Maps = MapRegistry.Create(_maps.Values.Select(value => value.Definition)),
                 Dialogues = DialogueRegistry.Create(_dialogues.Values.Select(value => value.Definition)),
                 Shops = ShopRegistry.Create(_shops.Values.Select(value => value.Definition)),
-                GameStartups = GameStartupRegistry.Create(_gameStartups.Values.Select(value => value.Definition))
+                GameStartups = GameStartupRegistry.Create(_gameStartups.Values.Select(value => value.Definition)),
+                Animations = SpriteAnimationRegistry.Create(_animations.Values.Select(value => value.Definition)),
+                Characters = CharacterDefinitionRegistry.Create(_characters.Values.Select(value => value.Definition))
             };
         }
 

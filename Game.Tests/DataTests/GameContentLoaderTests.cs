@@ -26,6 +26,8 @@ public sealed class GameContentLoaderTests : IDisposable
         Directory.CreateDirectory(Path.Combine(_contentRoot, "dialogue"));
         Directory.CreateDirectory(Path.Combine(_contentRoot, "shops"));
         Directory.CreateDirectory(Path.Combine(_contentRoot, "startup"));
+        Directory.CreateDirectory(Path.Combine(_contentRoot, "animations"));
+        Directory.CreateDirectory(Path.Combine(_contentRoot, "characters"));
 
         File.WriteAllText(Path.Combine(_contentRoot, "tiles", "dirt.json"), """
         {
@@ -213,6 +215,26 @@ public sealed class GameContentLoaderTests : IDisposable
         }
         """);
 
+        File.WriteAllText(Path.Combine(_contentRoot, "animations", "player.json"), """
+        {
+          "animations": [
+            { "id": "player.idle", "sprite": "entities/player/base_actions", "frameStart": 0, "frameCount": 1, "frameDuration": 0.2 }
+          ]
+        }
+        """);
+
+        File.WriteAllText(Path.Combine(_contentRoot, "characters", "player.json"), """
+        {
+          "id": "player",
+          "displayName": "Player",
+          "defaultAppearance": { "bodySpriteId": "entities/player/base_actions" },
+          "animationSet": {
+            "id": "player.default",
+            "states": { "Idle": "player.idle" }
+          }
+        }
+        """);
+
         File.WriteAllText(Path.Combine(_contentRoot, "startup", "default.json"), """
         {
           "id": "default",
@@ -237,7 +259,8 @@ public sealed class GameContentLoaderTests : IDisposable
             { "id": "items/parsnip", "path": "sprites/items/crops/parsnip.png", "category": "Item", "width": 16, "height": 16 },
             { "id": "crops/parsnip", "path": "sprites/world/crops/parsnip.png", "category": "Crop", "width": 48, "height": 16 },
             { "id": "projectiles/wooden_arrow", "path": "sprites/projectiles/wooden_arrow.png", "category": "Projectile", "width": 16, "height": 16 },
-            { "id": "entities/slime", "path": "sprites/entities/slime.png", "category": "Entity", "width": 16, "height": 16 }
+            { "id": "entities/slime", "path": "sprites/entities/slime.png", "category": "Entity", "width": 16, "height": 16 },
+            { "id": "entities/player/base_actions", "path": "sprites/entities/player/base_actions.png", "category": "Entity", "width": 16, "height": 32 }
           ]
         }
         """);
@@ -265,6 +288,9 @@ public sealed class GameContentLoaderTests : IDisposable
         Assert.True(database.GameStartups.TryGetDefault("default", out var startup));
         Assert.Equal("tiny", startup.WorldProfileId);
         Assert.Equal(2, startup.StarterItems.Count);
+        Assert.True(database.Animations.TryGetById("player.idle", out _));
+        Assert.True(database.Characters.TryGetById("player", out var player));
+        Assert.Equal("player.idle", player.AnimationSet.ResolveClipId(Game.Core.Characters.CharacterAnimationState.Idle));
     }
 
     [Fact]
@@ -460,6 +486,8 @@ public sealed class GameContentLoaderTests : IDisposable
         Directory.CreateDirectory(Path.Combine(_contentRoot, "maps"));
         Directory.CreateDirectory(Path.Combine(_contentRoot, "shops"));
         Directory.CreateDirectory(Path.Combine(_contentRoot, "startup"));
+        Directory.CreateDirectory(Path.Combine(_contentRoot, "animations"));
+        Directory.CreateDirectory(Path.Combine(_contentRoot, "characters"));
 
         File.WriteAllText(Path.Combine(_contentRoot, "maps", "bad_refs.json"), """
         {
@@ -542,6 +570,9 @@ public sealed class GameContentLoaderTests : IDisposable
         Assert.Contains(seedShop.Stock, item => item.ItemId == "parsnip_seeds");
         Assert.True(result.Database.GameStartups.TryGetDefault("default", out var startup));
         Assert.Contains(startup.StarterItems, item => item.ItemId == "copper_pickaxe");
+        Assert.True(result.Database.Animations.TryGetById("player.walk", out _));
+        Assert.True(result.Database.Characters.TryGetById("player", out var player));
+        Assert.Equal("player.idle", player.AnimationSet.ResolveClipId(Game.Core.Characters.CharacterAnimationState.Idle));
     }
 
     public void Dispose()

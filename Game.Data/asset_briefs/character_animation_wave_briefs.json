@@ -1,0 +1,131 @@
+{
+  "version": 1,
+  "scope": "character_animation_wave",
+  "globalStyle": "Crisp 2D pixel art for a Terraria-like sandbox game. Hard pixel edges, transparent background, no anti-aliasing, no blur, no text, no watermark, readable silhouettes, upper-left lighting, restrained saturation, 2-4 shade clusters per material.",
+  "globalRequirements": [
+    "Export PNG files at the exact requested dimensions.",
+    "Use transparent background for all sprite sheets and parallax overlay layers.",
+    "Keep frames aligned to a 16 pixel grid where frame data is listed.",
+    "Do not add spacing, labels, borders, guide marks, text, logos, or watermarks."
+  ],
+  "briefs": [
+    {
+      "spriteId": "entities/player/base_actions",
+      "outputPath": "sprites/entities/player/player_base_actions.png",
+      "width": 192,
+      "height": 32,
+      "frameWidth": 16,
+      "frameHeight": 32,
+      "subject": "player base action sprite sheet",
+      "frames": [
+        { "id": "idle_0", "x": 0, "y": 0, "width": 16, "height": 32 },
+        { "id": "idle_1", "x": 16, "y": 0, "width": 16, "height": 32 },
+        { "id": "walk_0", "x": 32, "y": 0, "width": 16, "height": 32 },
+        { "id": "walk_1", "x": 48, "y": 0, "width": 16, "height": 32 },
+        { "id": "walk_2", "x": 64, "y": 0, "width": 16, "height": 32 },
+        { "id": "walk_3", "x": 80, "y": 0, "width": 16, "height": 32 },
+        { "id": "jump", "x": 96, "y": 0, "width": 16, "height": 32 },
+        { "id": "fall", "x": 112, "y": 0, "width": 16, "height": 32 },
+        { "id": "mine_0", "x": 128, "y": 0, "width": 16, "height": 32 },
+        { "id": "mine_1", "x": 144, "y": 0, "width": 16, "height": 32 },
+        { "id": "attack_0", "x": 160, "y": 0, "width": 16, "height": 32 },
+        { "id": "attack_1", "x": 176, "y": 0, "width": 16, "height": 32 }
+      ],
+      "tags": ["entity", "player", "character", "animation", "actions"]
+    },
+    {
+      "spriteId": "entities/player/hair_variants",
+      "outputPath": "sprites/entities/player/player_hair_variants.png",
+      "width": 64,
+      "height": 32,
+      "frameWidth": 16,
+      "frameHeight": 32,
+      "frames": [
+        { "id": "brown", "x": 0, "y": 0, "width": 16, "height": 32 },
+        { "id": "black", "x": 16, "y": 0, "width": 16, "height": 32 },
+        { "id": "blond", "x": 32, "y": 0, "width": 16, "height": 32 },
+        { "id": "copper", "x": 48, "y": 0, "width": 16, "height": 32 }
+      ],
+      "tags": ["entity", "player", "variant", "hair", "palette"]
+    },
+    {
+      "spriteId": "entities/player/clothes_variants",
+      "outputPath": "sprites/entities/player/player_clothes_variants.png",
+      "width": 64,
+      "height": 32,
+      "frameWidth": 16,
+      "frameHeight": 32,
+      "frames": [
+        { "id": "blue", "x": 0, "y": 0, "width": 16, "height": 32 },
+        { "id": "green", "x": 16, "y": 0, "width": 16, "height": 32 },
+        { "id": "red", "x": 32, "y": 0, "width": 16, "height": 32 },
+        { "id": "violet", "x": 48, "y": 0, "width": 16, "height": 32 }
+      ],
+      "tags": ["entity", "player", "variant", "clothes", "palette"]
+    },
+    {
+      "spriteId": "entities/critters/rabbit",
+      "outputPath": "sprites/entities/critters/rabbit.png",
+      "width": 64,
+      "height": 16,
+      "frameWidth": 16,
+      "frameHeight": 16,
+      "frames": ["idle_0", "idle_1", "hop_0", "hop_1"],
+      "tags": ["entity", "critter", "animal", "rabbit", "ambient"]
+    },
+    {
+      "spriteId": "entities/critters/bird",
+      "outputPath": "sprites/entities/critters/bird.png",
+      "width": 64,
+      "height": 16,
+      "frameWidth": 16,
+      "frameHeight": 16,
+      "frames": ["perch", "flap_up", "flap_down", "glide"],
+      "tags": ["entity", "critter", "animal", "bird", "ambient"]
+    },
+    {
+      "spriteId": "entities/enemies/bat",
+      "outputPath": "sprites/entities/enemies/bat.png",
+      "width": 64,
+      "height": 16,
+      "frameWidth": 16,
+      "frameHeight": 16,
+      "frames": ["flap_high", "flap_mid_0", "flap_low", "flap_mid_1"],
+      "tags": ["entity", "enemy", "bat", "early-game", "cave"]
+    },
+    {
+      "spriteId": "entities/enemies/cave_worm",
+      "outputPath": "sprites/entities/enemies/cave_worm.png",
+      "width": 64,
+      "height": 16,
+      "frameWidth": 16,
+      "frameHeight": 16,
+      "frames": ["slither_0", "slither_1", "slither_2", "slither_3"],
+      "tags": ["entity", "enemy", "worm", "early-game", "cave"]
+    },
+    {
+      "spriteId": "world/decor/plants_foliage_props",
+      "outputPath": "sprites/world/decor/plants_foliage_props.png",
+      "width": 64,
+      "height": 16,
+      "frameWidth": 16,
+      "frameHeight": 16,
+      "frames": ["grass_tuft", "fern", "wildflower", "sapling_bush"],
+      "tags": ["world", "decor", "plant", "foliage", "props"]
+    },
+    {
+      "spriteId": "world/backgrounds/forest_parallax_layer",
+      "outputPath": "sprites/world/backgrounds/forest_parallax_layer.png",
+      "width": 256,
+      "height": 64,
+      "tags": ["world", "background", "parallax", "forest"]
+    },
+    {
+      "spriteId": "world/backgrounds/cave_parallax_layer",
+      "outputPath": "sprites/world/backgrounds/cave_parallax_layer.png",
+      "width": 256,
+      "height": 64,
+      "tags": ["world", "background", "parallax", "cave"]
+    }
+  ]
+}

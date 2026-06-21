@@ -4,7 +4,7 @@ This document is the handoff contract for another AI model, artist, or tool that
 
 ## Generation Contract
 
-Use the machine-readable briefs in `Game.Data/asset_briefs/base_sprite_generation_briefs.json` as the source of truth for AI generation. Each brief maps one logical sprite id to one output PNG.
+Use the machine-readable briefs in `Game.Data/asset_briefs/*.json` as the source of truth for AI generation. `base_sprite_generation_briefs.json` covers the starter world/items set; `character_animation_wave_briefs.json` covers the first character, ambient life, enemy, foliage, and background wave. Each brief maps one logical sprite id to one output PNG.
 
 For every brief:
 
@@ -177,7 +177,7 @@ The current base brief file covers all sprite ids in `Game.Data/assets/sprites.j
 - Armor and accessories: copper helmet, copper chestplate, copper greaves, mining charm.
 - Consumables/ammo: healing potion, wooden arrow, poison arrow.
 - Farming: copper hoe, watering can, parsnip seeds, harvested parsnip, and four-stage parsnip crop strip.
-- Runtime sprites: slime, wooden arrow projectile, poison arrow projectile.
+- Runtime sprites: slime, player action sheet, player editor overlays, rabbit, bird, bat, cave worm, foliage props, forest/cave parallax layers, wooden arrow projectile, poison arrow projectile.
 
 When new sprites are added to `Game.Data/assets`, add a matching brief in `Game.Data/asset_briefs` in the same change. The tests enforce this.
 
@@ -209,7 +209,7 @@ Initial renderer can load individual textures or placeholders through `ClientTex
 ## Next Pipeline Steps
 
 - Add atlas packing and source-rect reports.
-- Add animation clip metadata for player, enemies, liquids, and effects.
+- Extend animation clip metadata beyond the player into enemies, critters, projectiles, liquids, crops, and effects.
 - Add Aseprite export conventions.
 - Add sprite preview/editor tooling.
 - Add duplicate-source and missing-PNG validation.

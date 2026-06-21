@@ -25,6 +25,8 @@ public sealed class ContentReferenceValidator
         ValidateMaps(database, report);
         ValidateShops(database, report);
         ValidateGameStartups(database, report);
+        ValidateAnimations(database, report);
+        ValidateCharacters(database, report);
         ValidateWorldGenerationProfiles(database, report);
         ValidateSpriteReferences(database, report);
     }
@@ -314,6 +316,52 @@ public sealed class ContentReferenceValidator
                         startup.Id,
                         $"Starter item '{item.ItemId}' targets one slot with count {item.Count}, but max stack is {itemDefinition.MaxStack}.");
                 }
+            }
+        }
+    }
+
+
+    private static void ValidateAnimations(GameContentDatabase database, ContentLoadReport report)
+    {
+        if (!database.SpriteAssets.HasExplicitAssets)
+        {
+            return;
+        }
+
+        foreach (var animation in database.Animations.Clips)
+        {
+            foreach (var frame in animation.Frames)
+            {
+                if (!database.SpriteAssets.TryGetById(frame.SpriteId, out _))
+                {
+                    AddMissingReference(report, "animation", animation.Id, "sprite asset", frame.SpriteId);
+                }
+            }
+        }
+    }
+
+    private static void ValidateCharacters(GameContentDatabase database, ContentLoadReport report)
+    {
+        foreach (var character in database.Characters.Definitions)
+        {
+            if (database.SpriteAssets.HasExplicitAssets &&
+                !database.SpriteAssets.TryGetById(character.DefaultAppearance.BodySpriteId, out _))
+            {
+                AddMissingReference(report, "character", character.Id, "body sprite asset", character.DefaultAppearance.BodySpriteId);
+            }
+
+            foreach (var clipId in character.AnimationSet.StateClips.Values)
+            {
+                if (!database.Animations.TryGetById(clipId, out _))
+                {
+                    AddMissingReference(report, "character", character.Id, "animation clip", clipId);
+                }
+            }
+
+            if (!string.IsNullOrWhiteSpace(character.AnimationSet.DefaultClipId) &&
+                !database.Animations.TryGetById(character.AnimationSet.DefaultClipId, out _))
+            {
+                AddMissingReference(report, "character", character.Id, "default animation clip", character.AnimationSet.DefaultClipId);
             }
         }
     }

@@ -1,0 +1,10 @@
+{
+  "id": "bat",
+  "displayName": "Cave Bat",
+  "texture": "entities/enemies/bat",
+  "maxHealth": 14,
+  "width": 14,
+  "height": 10,
+  "contactDamage": 8,
+  "contactKnockback": 150
+}

@@ -1,0 +1,10 @@
+{
+  "id": "cave_worm",
+  "displayName": "Cave Worm",
+  "texture": "entities/enemies/cave_worm",
+  "maxHealth": 28,
+  "width": 18,
+  "height": 10,
+  "contactDamage": 12,
+  "contactKnockback": 170
+}

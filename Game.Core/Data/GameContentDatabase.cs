@@ -1,4 +1,6 @@
+using Game.Core.Animations;
 using Game.Core.Assets;
+using Game.Core.Characters;
 using Game.Core.Biomes;
 using Game.Core.Crafting;
 using Game.Core.Dialogue;
@@ -43,4 +45,8 @@ public sealed record GameContentDatabase(
     public ShopRegistry Shops { get; init; } = ShopRegistry.Create(Array.Empty<ShopDefinition>());
 
     public GameStartupRegistry GameStartups { get; init; } = GameStartupRegistry.Create(Array.Empty<GameStartupDefinition>());
+
+    public SpriteAnimationRegistry Animations { get; init; } = SpriteAnimationRegistry.Create(Array.Empty<SpriteAnimationClip>());
+
+    public CharacterDefinitionRegistry Characters { get; init; } = CharacterDefinitionRegistry.Create(Array.Empty<CharacterDefinition>());
 }
