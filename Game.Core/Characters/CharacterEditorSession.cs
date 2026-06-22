@@ -16,6 +16,10 @@ public sealed class CharacterEditorSession
 
     public bool SetHairStyle(string value) => SetIfAllowed(Options.HairStyles, value, appearance => Appearance = appearance with { HairStyleId = value });
 
+    public bool SetClothesStyle(string value) => SetIfAllowed(Options.ClothesStyles, value, appearance => Appearance = appearance with { ClothesStyleId = value });
+
+    public bool SetAccessory(string value) => SetIfAllowed(Options.Accessories, value, appearance => Appearance = appearance with { AccessoryId = value });
+
     public bool SetHairColor(string value) => SetIfAllowed(Options.HairColors, value, appearance => Appearance = appearance with { HairColor = value });
 
     public bool SetShirtColor(string value) => SetIfAllowed(Options.ShirtColors, value, appearance => Appearance = appearance with { ShirtColor = value });

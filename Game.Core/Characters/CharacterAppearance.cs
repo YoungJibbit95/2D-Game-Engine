@@ -8,6 +8,10 @@ public sealed record CharacterAppearance
 
     public string HairStyleId { get; init; } = "short";
 
+    public string ClothesStyleId { get; init; } = "blue_jeans";
+
+    public string AccessoryId { get; init; } = "none";
+
     public string HairColor { get; init; } = "#5b3825";
 
     public string ShirtColor { get; init; } = "#4f7fb8";

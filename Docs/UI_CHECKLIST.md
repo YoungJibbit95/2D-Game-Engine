@@ -21,16 +21,19 @@ Only open work is kept here. Completed items are removed after implementation.
 
 - [ ] Add equipment slot widgets.
 - [ ] Add stat summary panel for armor/accessory bonuses.
+- [ ] Add sorting, stack compaction, and category filters.
 
 ## Crafting UI
 - [ ] Add recipe category filters and search.
 - [ ] Add craft amount controls and hold-to-repeat timing.
 - [ ] Add recipe pinning/tracking in HUD.
+- [ ] Add station-range indicator and recipe unlock source hints.
 
 ## Menus
 
 - [ ] Add local splitscreen setup flow.
 - [ ] Add multiplayer host/join flow.
+- [ ] Persist character editor appearance into player saves and expose it before world launch.
 - [ ] Add typed value entry for settings rows such as resolution, reach, and volume.
 - [ ] Add keybind conflict resolution UI that can jump to the conflicting action.
 - [ ] Add graphics apply safety timeout for fullscreen/resolution changes.

@@ -10,7 +10,7 @@ YjsE now has an engine-level runtime animation and character definition foundati
 - `Game.Core.Animations.SpriteAnimationJsonLoader`: loads single clips or manifests from `Game.Data/animations/**/*.json`.
 - `Game.Core.Characters.CharacterDefinition`: editable character contract with size, default appearance, animation set, and tags.
 - `Game.Core.Characters.CharacterAnimationStateResolver`: maps physics/action state into `Idle`, `Walk`, `Jump`, `Fall`, `Mine`, `Attack`, `UseItem`, `Hurt`, or `Dead`.
-- `Game.Core.Characters.CharacterEditorSession`: first engine-neutral editor session for appearance palette choices.
+- `Game.Core.Characters.CharacterEditorSession`: first engine-neutral editor session for appearance palette, hair, clothes, and accessory choices.
 
 ## Data Flow
 
@@ -54,17 +54,17 @@ The current player character uses `entities/player/base_actions`, backed by `spr
 
 ## Current Client Integration
 
-`Game.Client.GameStates.PlayingState` now uses the player character animation set for idle, walk, jump, fall, mining/use, and attack hints. Enemy, dropped item, and projectile rendering also try real sprite assets first and fall back to debug rectangles/placeholders when no PNG exists.
+`Game.Client.GameStates.PlayingState` now uses the player character animation set for idle, walk, jump, fall, mining/use, and attack hints. The player renderer composes body, clothes, hair, and accessory layers from sprite sheets over the base action sheet. Enemy, critter, dropped item, and projectile rendering also try real sprite assets first and fall back to debug rectangles/placeholders when no PNG exists. Animated entity sheets tagged `animated` advance frames in the client.
 
 ## Character Editor Foundation
 
-The first editor layer is data-safe and UI-neutral: `CharacterAppearance`, `CharacterEditorOptionSet`, and `CharacterEditorSession`. A future client screen should bind sliders/swatches/tabs to this session, preview the composed character, and persist the resulting appearance in player save data.
+The first editor layer is data-safe and UI-neutral: `CharacterAppearance`, `CharacterEditorOptionSet`, and `CharacterEditorSession`. The MonoGame client now has an F2 in-game character editor overlay with live animation preview, skin/hair/shirt/pants swatches, hair style rows, clothing style rows, and accessory rows. The next persistence step is saving `CharacterAppearance` in player save data and exposing the same editor before world launch.
 
 ## Next Steps
 
 - Move action-animation triggers out of `PlayingState` into a reusable player presentation/controller service.
 - Add animation sets for critters, slime, bat, cave worm, projectiles, crops, and world objects.
-- Add sprite-layer composition for body, hair, clothes, armor, held item, and accessories.
+- Add armor and held-item layers on top of the current body, hair, clothes, and accessory composition.
 - Persist `CharacterAppearance` in player saves.
-- Add a character editor menu with swatches, tabs, live preview, randomize, and reset.
+- Add randomize, reset, save-slot selection, and pre-game character creation flow.
 - Add animation events for hit windows, mining impact, particles, sounds, and footstep timing.

@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "globalStyle": "Create crisp 2D pixel art for a C# 2D gamebuilding engine that supports Terraria-like sandbox action and Stardew-like topdown farming. Use exact low-resolution pixel shapes, hard edges, no anti-aliasing, no blur, no text, no watermark, transparent background, readable silhouette, restrained saturation, and a hand-authored game sprite look. Keep lighting from upper-left and use 2-4 shade clusters per material.",
   "globalNegativePrompt": "photorealistic, 3d render, smooth gradients, anti-aliased edges, blurry, noisy background, text, logo, watermark, UI mockup, oversized canvas, cropped object, perspective distortion",
   "globalRequirements": [
@@ -16,8 +16,15 @@
       "height": 16,
       "subject": "empty air tile",
       "prompt": "Fully transparent 16x16 tile used for empty air. No visible pixels.",
-      "requirements": ["All pixels must be transparent.", "Do not draw a border."],
-      "tags": ["tile", "world", "transparent"]
+      "requirements": [
+        "All pixels must be transparent.",
+        "Do not draw a border."
+      ],
+      "tags": [
+        "tile",
+        "world",
+        "transparent"
+      ]
     },
     {
       "spriteId": "tiles/dirt",
@@ -26,9 +33,24 @@
       "height": 16,
       "subject": "16-frame dirt terrain autotile strip",
       "prompt": "Horizontal 256x16 strip containing 16 crisp 16x16 dirt terrain variants for a 4-bit autotile mask. Brown dirt blocks with compact soil clumps, tiny darker pebbles, and subtle organic variation. Each frame should visually open edges that do not connect and blend edges that do connect.",
-      "requirements": ["Create exactly 16 frames arranged left to right.", "Each frame is exactly 16x16 pixels.", "Frame order is mask 0 through mask 15, where bits are top=1, right=2, bottom=4, left=8.", "No grass on any frame.", "Do not add spacing, labels, borders, or guide marks."],
-      "palette": ["#5a3522", "#72472c", "#8b5a35", "#a06a3f"],
-      "tags": ["tile", "terrain", "soil"]
+      "requirements": [
+        "Create exactly 16 frames arranged left to right.",
+        "Each frame is exactly 16x16 pixels.",
+        "Frame order is mask 0 through mask 15, where bits are top=1, right=2, bottom=4, left=8.",
+        "No grass on any frame.",
+        "Do not add spacing, labels, borders, or guide marks."
+      ],
+      "palette": [
+        "#5a3522",
+        "#72472c",
+        "#8b5a35",
+        "#a06a3f"
+      ],
+      "tags": [
+        "tile",
+        "terrain",
+        "soil"
+      ]
     },
     {
       "spriteId": "tiles/grass",
@@ -37,9 +59,24 @@
       "height": 16,
       "subject": "16-frame grass-over-dirt terrain autotile strip",
       "prompt": "Horizontal 256x16 strip containing 16 crisp 16x16 grass-over-dirt terrain variants for a 4-bit autotile mask. Dirt body below with green grassy cap where the top edge is exposed, small uneven grass blades, and connected soil edges where neighboring soil exists.",
-      "requirements": ["Create exactly 16 frames arranged left to right.", "Each frame is exactly 16x16 pixels.", "Frame order is mask 0 through mask 15, where bits are top=1, right=2, bottom=4, left=8.", "Show grass on exposed top edges; when the top bit connects, make the top read as connected soil/grass transition instead of an isolated cap.", "Do not add spacing, labels, borders, or guide marks."],
-      "palette": ["#3f7a39", "#579947", "#72472c", "#8b5a35"],
-      "tags": ["tile", "terrain", "grass"]
+      "requirements": [
+        "Create exactly 16 frames arranged left to right.",
+        "Each frame is exactly 16x16 pixels.",
+        "Frame order is mask 0 through mask 15, where bits are top=1, right=2, bottom=4, left=8.",
+        "Show grass on exposed top edges; when the top bit connects, make the top read as connected soil/grass transition instead of an isolated cap.",
+        "Do not add spacing, labels, borders, or guide marks."
+      ],
+      "palette": [
+        "#3f7a39",
+        "#579947",
+        "#72472c",
+        "#8b5a35"
+      ],
+      "tags": [
+        "tile",
+        "terrain",
+        "grass"
+      ]
     },
     {
       "spriteId": "tiles/stone",
@@ -48,9 +85,24 @@
       "height": 16,
       "subject": "16-frame stone terrain autotile strip",
       "prompt": "Horizontal 256x16 strip containing 16 crisp 16x16 grey stone terrain variants for a 4-bit autotile mask. Angular rock planes, small cracks, darker embedded flecks, and connected edges where neighboring stone exists.",
-      "requirements": ["Create exactly 16 frames arranged left to right.", "Each frame is exactly 16x16 pixels.", "Frame order is mask 0 through mask 15, where bits are top=1, right=2, bottom=4, left=8.", "Do not add ore colors.", "Do not add spacing, labels, borders, or guide marks."],
-      "palette": ["#4f5058", "#656772", "#7b7d87", "#989aa4"],
-      "tags": ["tile", "terrain", "stone"]
+      "requirements": [
+        "Create exactly 16 frames arranged left to right.",
+        "Each frame is exactly 16x16 pixels.",
+        "Frame order is mask 0 through mask 15, where bits are top=1, right=2, bottom=4, left=8.",
+        "Do not add ore colors.",
+        "Do not add spacing, labels, borders, or guide marks."
+      ],
+      "palette": [
+        "#4f5058",
+        "#656772",
+        "#7b7d87",
+        "#989aa4"
+      ],
+      "tags": [
+        "tile",
+        "terrain",
+        "stone"
+      ]
     },
     {
       "spriteId": "tiles/copper_ore",
@@ -59,9 +111,25 @@
       "height": 16,
       "subject": "16-frame copper ore stone autotile strip",
       "prompt": "Horizontal 256x16 strip containing 16 crisp 16x16 stone terrain variants with embedded copper ore for a 4-bit autotile mask. Grey rock base with irregular copper-orange flecks and short vein lines embedded in connected stone edges.",
-      "requirements": ["Create exactly 16 frames arranged left to right.", "Each frame is exactly 16x16 pixels.", "Frame order is mask 0 through mask 15, where bits are top=1, right=2, bottom=4, left=8.", "Ore should cover about 20 percent of each frame without breaking connected stone readability.", "Do not add spacing, labels, borders, or guide marks."],
-      "palette": ["#575962", "#777985", "#a8663d", "#d08a4c"],
-      "tags": ["tile", "terrain", "ore", "copper"]
+      "requirements": [
+        "Create exactly 16 frames arranged left to right.",
+        "Each frame is exactly 16x16 pixels.",
+        "Frame order is mask 0 through mask 15, where bits are top=1, right=2, bottom=4, left=8.",
+        "Ore should cover about 20 percent of each frame without breaking connected stone readability.",
+        "Do not add spacing, labels, borders, or guide marks."
+      ],
+      "palette": [
+        "#575962",
+        "#777985",
+        "#a8663d",
+        "#d08a4c"
+      ],
+      "tags": [
+        "tile",
+        "terrain",
+        "ore",
+        "copper"
+      ]
     },
     {
       "spriteId": "tiles/iron_ore",
@@ -70,9 +138,25 @@
       "height": 16,
       "subject": "16-frame iron ore stone autotile strip",
       "prompt": "Horizontal 256x16 strip containing 16 crisp 16x16 stone terrain variants with embedded iron ore for a 4-bit autotile mask. Grey rock base with muted tan iron chunks and pale metallic flecks embedded in connected stone edges.",
-      "requirements": ["Create exactly 16 frames arranged left to right.", "Each frame is exactly 16x16 pixels.", "Frame order is mask 0 through mask 15, where bits are top=1, right=2, bottom=4, left=8.", "Ore should cover about 18 percent of each frame without breaking connected stone readability.", "Do not add spacing, labels, borders, or guide marks."],
-      "palette": ["#575962", "#777985", "#9b896f", "#c0aa86"],
-      "tags": ["tile", "terrain", "ore", "iron"]
+      "requirements": [
+        "Create exactly 16 frames arranged left to right.",
+        "Each frame is exactly 16x16 pixels.",
+        "Frame order is mask 0 through mask 15, where bits are top=1, right=2, bottom=4, left=8.",
+        "Ore should cover about 18 percent of each frame without breaking connected stone readability.",
+        "Do not add spacing, labels, borders, or guide marks."
+      ],
+      "palette": [
+        "#575962",
+        "#777985",
+        "#9b896f",
+        "#c0aa86"
+      ],
+      "tags": [
+        "tile",
+        "terrain",
+        "ore",
+        "iron"
+      ]
     },
     {
       "spriteId": "tiles/wood",
@@ -81,9 +165,23 @@
       "height": 16,
       "subject": "tree trunk tile",
       "prompt": "Vertical tree trunk tile with bark bands, knots, and warm brown wood grain. It should work stacked as a thin Terraria-like tree.",
-      "requirements": ["Tile vertically.", "Transparent background around the trunk silhouette.", "Trunk should occupy the middle 8-10 pixels."],
-      "palette": ["#5a321d", "#774625", "#9b6335", "#c1854a"],
-      "tags": ["tile", "tree", "wood", "pass-through"]
+      "requirements": [
+        "Tile vertically.",
+        "Transparent background around the trunk silhouette.",
+        "Trunk should occupy the middle 8-10 pixels."
+      ],
+      "palette": [
+        "#5a321d",
+        "#774625",
+        "#9b6335",
+        "#c1854a"
+      ],
+      "tags": [
+        "tile",
+        "tree",
+        "wood",
+        "pass-through"
+      ]
     },
     {
       "spriteId": "tiles/leaves",
@@ -92,9 +190,23 @@
       "height": 16,
       "subject": "leaf cluster tile",
       "prompt": "Compact leafy canopy cluster with irregular green blob silhouette and darker inner leaf pixels.",
-      "requirements": ["Transparent corners are allowed.", "Should merge visually with neighboring leaf tiles.", "No trunk pixels."],
-      "palette": ["#2f6b33", "#438542", "#5aa452", "#7bc66a"],
-      "tags": ["tile", "tree", "leaves", "pass-through"]
+      "requirements": [
+        "Transparent corners are allowed.",
+        "Should merge visually with neighboring leaf tiles.",
+        "No trunk pixels."
+      ],
+      "palette": [
+        "#2f6b33",
+        "#438542",
+        "#5aa452",
+        "#7bc66a"
+      ],
+      "tags": [
+        "tile",
+        "tree",
+        "leaves",
+        "pass-through"
+      ]
     },
     {
       "spriteId": "tiles/workbench",
@@ -103,9 +215,22 @@
       "height": 16,
       "subject": "wooden workbench world object",
       "prompt": "Small wooden crafting workbench, side view, two-tile wide, plank top, sturdy legs, tiny tool marks.",
-      "requirements": ["Use a 32x16 canvas.", "Transparent background.", "Grounded at bottom of canvas."],
-      "palette": ["#5c351f", "#85512d", "#b87943", "#d49a5b"],
-      "tags": ["world-object", "station", "crafting"]
+      "requirements": [
+        "Use a 32x16 canvas.",
+        "Transparent background.",
+        "Grounded at bottom of canvas."
+      ],
+      "palette": [
+        "#5c351f",
+        "#85512d",
+        "#b87943",
+        "#d49a5b"
+      ],
+      "tags": [
+        "world-object",
+        "station",
+        "crafting"
+      ]
     },
     {
       "spriteId": "items/copper_coin",
@@ -114,9 +239,20 @@
       "height": 16,
       "subject": "copper coin item icon",
       "prompt": "Small copper coin icon with round readable silhouette, warm highlight, and tiny stamped center mark without text.",
-      "requirements": ["Transparent background.", "Object should fit within 12x12 pixels."],
-      "palette": ["#7a3f22", "#b26335", "#d98c4c", "#f0bc73"],
-      "tags": ["item", "currency"]
+      "requirements": [
+        "Transparent background.",
+        "Object should fit within 12x12 pixels."
+      ],
+      "palette": [
+        "#7a3f22",
+        "#b26335",
+        "#d98c4c",
+        "#f0bc73"
+      ],
+      "tags": [
+        "item",
+        "currency"
+      ]
     },
     {
       "spriteId": "items/copper_ore",
@@ -125,9 +261,22 @@
       "height": 16,
       "subject": "copper ore material item",
       "prompt": "Loose chunk of grey rock with copper-orange ore exposed, inventory icon angle, chunky silhouette.",
-      "requirements": ["Transparent background.", "Do not make it look like a full tile block."],
-      "palette": ["#55545c", "#777680", "#a8663d", "#d98c4c"],
-      "tags": ["item", "material", "ore", "copper"]
+      "requirements": [
+        "Transparent background.",
+        "Do not make it look like a full tile block."
+      ],
+      "palette": [
+        "#55545c",
+        "#777680",
+        "#a8663d",
+        "#d98c4c"
+      ],
+      "tags": [
+        "item",
+        "material",
+        "ore",
+        "copper"
+      ]
     },
     {
       "spriteId": "items/iron_ore",
@@ -136,9 +285,22 @@
       "height": 16,
       "subject": "iron ore material item",
       "prompt": "Loose chunk of grey rock with pale tan iron ore exposed, inventory icon angle, chunky silhouette.",
-      "requirements": ["Transparent background.", "Do not make it look like a full tile block."],
-      "palette": ["#55545c", "#777680", "#9b896f", "#c0aa86"],
-      "tags": ["item", "material", "ore", "iron"]
+      "requirements": [
+        "Transparent background.",
+        "Do not make it look like a full tile block."
+      ],
+      "palette": [
+        "#55545c",
+        "#777680",
+        "#9b896f",
+        "#c0aa86"
+      ],
+      "tags": [
+        "item",
+        "material",
+        "ore",
+        "iron"
+      ]
     },
     {
       "spriteId": "items/dirt_block",
@@ -147,9 +309,21 @@
       "height": 16,
       "subject": "dirt block inventory item",
       "prompt": "Small isometric-ish inventory icon of a dirt block, chunky square silhouette, brown soil clumps.",
-      "requirements": ["Transparent background.", "Readable as a placeable block item."],
-      "palette": ["#5a3522", "#72472c", "#8b5a35", "#a06a3f"],
-      "tags": ["item", "block", "dirt"]
+      "requirements": [
+        "Transparent background.",
+        "Readable as a placeable block item."
+      ],
+      "palette": [
+        "#5a3522",
+        "#72472c",
+        "#8b5a35",
+        "#a06a3f"
+      ],
+      "tags": [
+        "item",
+        "block",
+        "dirt"
+      ]
     },
     {
       "spriteId": "items/stone_block",
@@ -158,9 +332,21 @@
       "height": 16,
       "subject": "stone block inventory item",
       "prompt": "Small inventory icon of a grey stone block, chunky square silhouette, angular cracks.",
-      "requirements": ["Transparent background.", "Readable as a placeable block item."],
-      "palette": ["#4f5058", "#656772", "#7b7d87", "#989aa4"],
-      "tags": ["item", "block", "stone"]
+      "requirements": [
+        "Transparent background.",
+        "Readable as a placeable block item."
+      ],
+      "palette": [
+        "#4f5058",
+        "#656772",
+        "#7b7d87",
+        "#989aa4"
+      ],
+      "tags": [
+        "item",
+        "block",
+        "stone"
+      ]
     },
     {
       "spriteId": "items/wood",
@@ -169,9 +355,21 @@
       "height": 16,
       "subject": "wood material item",
       "prompt": "Short bundle of wood logs or plank scraps tied together, warm brown pixels, inventory icon.",
-      "requirements": ["Transparent background.", "Object should fit within 14x14 pixels."],
-      "palette": ["#5c351f", "#85512d", "#b87943", "#d49a5b"],
-      "tags": ["item", "material", "wood"]
+      "requirements": [
+        "Transparent background.",
+        "Object should fit within 14x14 pixels."
+      ],
+      "palette": [
+        "#5c351f",
+        "#85512d",
+        "#b87943",
+        "#d49a5b"
+      ],
+      "tags": [
+        "item",
+        "material",
+        "wood"
+      ]
     },
     {
       "spriteId": "items/gel",
@@ -180,9 +378,21 @@
       "height": 16,
       "subject": "blue slime gel item",
       "prompt": "Small glossy blue gel blob, simple highlight, soft pixel silhouette, inventory material.",
-      "requirements": ["Transparent background.", "No face or eyes."],
-      "palette": ["#214c8f", "#2f75c7", "#65aceb", "#a8d8ff"],
-      "tags": ["item", "material", "gel"]
+      "requirements": [
+        "Transparent background.",
+        "No face or eyes."
+      ],
+      "palette": [
+        "#214c8f",
+        "#2f75c7",
+        "#65aceb",
+        "#a8d8ff"
+      ],
+      "tags": [
+        "item",
+        "material",
+        "gel"
+      ]
     },
     {
       "spriteId": "items/copper_pickaxe",
@@ -191,9 +401,23 @@
       "height": 16,
       "subject": "copper pickaxe tool icon",
       "prompt": "Diagonal copper pickaxe with wooden handle and copper head, readable tool silhouette.",
-      "requirements": ["Transparent background.", "Fits within 16x16.", "Handle from lower-left to upper-right."],
-      "palette": ["#5c351f", "#b26335", "#d98c4c", "#e9b96e"],
-      "tags": ["item", "tool", "pickaxe", "copper"]
+      "requirements": [
+        "Transparent background.",
+        "Fits within 16x16.",
+        "Handle from lower-left to upper-right."
+      ],
+      "palette": [
+        "#5c351f",
+        "#b26335",
+        "#d98c4c",
+        "#e9b96e"
+      ],
+      "tags": [
+        "item",
+        "tool",
+        "pickaxe",
+        "copper"
+      ]
     },
     {
       "spriteId": "items/iron_pickaxe",
@@ -202,9 +426,23 @@
       "height": 16,
       "subject": "iron pickaxe tool icon",
       "prompt": "Diagonal iron pickaxe with wooden handle and pale iron head, stronger silhouette than copper version.",
-      "requirements": ["Transparent background.", "Fits within 16x16.", "Handle from lower-left to upper-right."],
-      "palette": ["#5c351f", "#8b7d66", "#b8aa8e", "#d8ccb0"],
-      "tags": ["item", "tool", "pickaxe", "iron"]
+      "requirements": [
+        "Transparent background.",
+        "Fits within 16x16.",
+        "Handle from lower-left to upper-right."
+      ],
+      "palette": [
+        "#5c351f",
+        "#8b7d66",
+        "#b8aa8e",
+        "#d8ccb0"
+      ],
+      "tags": [
+        "item",
+        "tool",
+        "pickaxe",
+        "iron"
+      ]
     },
     {
       "spriteId": "items/wooden_sword",
@@ -213,9 +451,22 @@
       "height": 16,
       "subject": "wooden sword weapon icon",
       "prompt": "Simple diagonal wooden sword with plank blade and small crossguard, primitive starter weapon.",
-      "requirements": ["Transparent background.", "Readable diagonal weapon silhouette."],
-      "palette": ["#5c351f", "#85512d", "#b87943", "#d49a5b"],
-      "tags": ["item", "weapon", "melee", "wood"]
+      "requirements": [
+        "Transparent background.",
+        "Readable diagonal weapon silhouette."
+      ],
+      "palette": [
+        "#5c351f",
+        "#85512d",
+        "#b87943",
+        "#d49a5b"
+      ],
+      "tags": [
+        "item",
+        "weapon",
+        "melee",
+        "wood"
+      ]
     },
     {
       "spriteId": "items/copper_sword",
@@ -224,9 +475,22 @@
       "height": 16,
       "subject": "copper sword weapon icon",
       "prompt": "Diagonal copper short sword with warm metal blade, small guard, wooden grip.",
-      "requirements": ["Transparent background.", "Blade should be copper-orange, not steel."],
-      "palette": ["#5c351f", "#9b542e", "#d98c4c", "#f0bc73"],
-      "tags": ["item", "weapon", "melee", "copper"]
+      "requirements": [
+        "Transparent background.",
+        "Blade should be copper-orange, not steel."
+      ],
+      "palette": [
+        "#5c351f",
+        "#9b542e",
+        "#d98c4c",
+        "#f0bc73"
+      ],
+      "tags": [
+        "item",
+        "weapon",
+        "melee",
+        "copper"
+      ]
     },
     {
       "spriteId": "items/iron_sword",
@@ -235,9 +499,22 @@
       "height": 16,
       "subject": "iron sword weapon icon",
       "prompt": "Diagonal iron sword with pale metallic blade, darker outline, small guard, wooden grip.",
-      "requirements": ["Transparent background.", "Blade should look stronger than copper sword."],
-      "palette": ["#5c351f", "#79776f", "#b8b6aa", "#ece2c4"],
-      "tags": ["item", "weapon", "melee", "iron"]
+      "requirements": [
+        "Transparent background.",
+        "Blade should look stronger than copper sword."
+      ],
+      "palette": [
+        "#5c351f",
+        "#79776f",
+        "#b8b6aa",
+        "#ece2c4"
+      ],
+      "tags": [
+        "item",
+        "weapon",
+        "melee",
+        "iron"
+      ]
     },
     {
       "spriteId": "items/copper_helmet",
@@ -246,9 +523,22 @@
       "height": 16,
       "subject": "copper helmet armor icon",
       "prompt": "Small copper helmet icon with simple brow ridge and cheek guards, warm metal highlights.",
-      "requirements": ["Transparent background.", "Centered armor icon."],
-      "palette": ["#7a3f22", "#b26335", "#d98c4c", "#f0bc73"],
-      "tags": ["item", "armor", "copper", "head"]
+      "requirements": [
+        "Transparent background.",
+        "Centered armor icon."
+      ],
+      "palette": [
+        "#7a3f22",
+        "#b26335",
+        "#d98c4c",
+        "#f0bc73"
+      ],
+      "tags": [
+        "item",
+        "armor",
+        "copper",
+        "head"
+      ]
     },
     {
       "spriteId": "items/copper_chestplate",
@@ -257,9 +547,22 @@
       "height": 16,
       "subject": "copper chestplate armor icon",
       "prompt": "Copper chest armor icon with shoulder plates and central breastplate, compact readable silhouette.",
-      "requirements": ["Transparent background.", "Centered armor icon."],
-      "palette": ["#7a3f22", "#b26335", "#d98c4c", "#f0bc73"],
-      "tags": ["item", "armor", "copper", "body"]
+      "requirements": [
+        "Transparent background.",
+        "Centered armor icon."
+      ],
+      "palette": [
+        "#7a3f22",
+        "#b26335",
+        "#d98c4c",
+        "#f0bc73"
+      ],
+      "tags": [
+        "item",
+        "armor",
+        "copper",
+        "body"
+      ]
     },
     {
       "spriteId": "items/copper_greaves",
@@ -268,9 +571,22 @@
       "height": 16,
       "subject": "copper greaves armor icon",
       "prompt": "Pair of copper leg armor pieces with knee plates, compact inventory icon.",
-      "requirements": ["Transparent background.", "Two leg pieces must be readable."],
-      "palette": ["#7a3f22", "#b26335", "#d98c4c", "#f0bc73"],
-      "tags": ["item", "armor", "copper", "legs"]
+      "requirements": [
+        "Transparent background.",
+        "Two leg pieces must be readable."
+      ],
+      "palette": [
+        "#7a3f22",
+        "#b26335",
+        "#d98c4c",
+        "#f0bc73"
+      ],
+      "tags": [
+        "item",
+        "armor",
+        "copper",
+        "legs"
+      ]
     },
     {
       "spriteId": "items/wooden_bow",
@@ -279,9 +595,22 @@
       "height": 16,
       "subject": "wooden bow weapon icon",
       "prompt": "Curved wooden bow with taut string, side view, simple starter ranged weapon.",
-      "requirements": ["Transparent background.", "Bow curve should occupy most of the canvas height."],
-      "palette": ["#5c351f", "#85512d", "#d49a5b", "#e8d8b8"],
-      "tags": ["item", "weapon", "ranged", "wood"]
+      "requirements": [
+        "Transparent background.",
+        "Bow curve should occupy most of the canvas height."
+      ],
+      "palette": [
+        "#5c351f",
+        "#85512d",
+        "#d49a5b",
+        "#e8d8b8"
+      ],
+      "tags": [
+        "item",
+        "weapon",
+        "ranged",
+        "wood"
+      ]
     },
     {
       "spriteId": "items/wooden_arrow",
@@ -290,9 +619,22 @@
       "height": 16,
       "subject": "wooden arrow ammo icon",
       "prompt": "Small diagonal wooden arrow with stone or wooden point and pale feathers.",
-      "requirements": ["Transparent background.", "Arrow should point upper-right."],
-      "palette": ["#5c351f", "#b87943", "#ded2b0", "#777985"],
-      "tags": ["item", "ammo", "arrow", "wood"]
+      "requirements": [
+        "Transparent background.",
+        "Arrow should point upper-right."
+      ],
+      "palette": [
+        "#5c351f",
+        "#b87943",
+        "#ded2b0",
+        "#777985"
+      ],
+      "tags": [
+        "item",
+        "ammo",
+        "arrow",
+        "wood"
+      ]
     },
     {
       "spriteId": "items/poison_arrow",
@@ -301,9 +643,23 @@
       "height": 16,
       "subject": "poison arrow ammo icon",
       "prompt": "Diagonal arrow with green poison-coated tip and subtle toxic pixel glint.",
-      "requirements": ["Transparent background.", "Arrow should point upper-right.", "Must remain readable as arrow ammo."],
-      "palette": ["#5c351f", "#b87943", "#4baa44", "#9be66c"],
-      "tags": ["item", "ammo", "arrow", "poison"]
+      "requirements": [
+        "Transparent background.",
+        "Arrow should point upper-right.",
+        "Must remain readable as arrow ammo."
+      ],
+      "palette": [
+        "#5c351f",
+        "#b87943",
+        "#4baa44",
+        "#9be66c"
+      ],
+      "tags": [
+        "item",
+        "ammo",
+        "arrow",
+        "poison"
+      ]
     },
     {
       "spriteId": "items/workbench",
@@ -312,9 +668,21 @@
       "height": 16,
       "subject": "workbench inventory icon",
       "prompt": "Tiny wooden workbench item icon with plank top and legs, compressed to fit 16x16.",
-      "requirements": ["Transparent background.", "Must match the world object design."],
-      "palette": ["#5c351f", "#85512d", "#b87943", "#d49a5b"],
-      "tags": ["item", "station", "crafting"]
+      "requirements": [
+        "Transparent background.",
+        "Must match the world object design."
+      ],
+      "palette": [
+        "#5c351f",
+        "#85512d",
+        "#b87943",
+        "#d49a5b"
+      ],
+      "tags": [
+        "item",
+        "station",
+        "crafting"
+      ]
     },
     {
       "spriteId": "items/mining_charm",
@@ -323,9 +691,21 @@
       "height": 16,
       "subject": "mining charm accessory icon",
       "prompt": "Small charm necklace with tiny pickaxe symbol and copper/iron beads, magical but grounded.",
-      "requirements": ["Transparent background.", "No letters or runes that look like text."],
-      "palette": ["#5c351f", "#b26335", "#b8aa8e", "#65aceb"],
-      "tags": ["item", "accessory", "mining"]
+      "requirements": [
+        "Transparent background.",
+        "No letters or runes that look like text."
+      ],
+      "palette": [
+        "#5c351f",
+        "#b26335",
+        "#b8aa8e",
+        "#65aceb"
+      ],
+      "tags": [
+        "item",
+        "accessory",
+        "mining"
+      ]
     },
     {
       "spriteId": "items/healing_potion",
@@ -334,9 +714,21 @@
       "height": 16,
       "subject": "healing potion consumable icon",
       "prompt": "Small glass potion bottle with red liquid, cork top, bright highlight.",
-      "requirements": ["Transparent background.", "Bottle silhouette must be readable at 16x16."],
-      "palette": ["#5c351f", "#a82f3a", "#e45462", "#b8e1f1"],
-      "tags": ["item", "consumable", "healing"]
+      "requirements": [
+        "Transparent background.",
+        "Bottle silhouette must be readable at 16x16."
+      ],
+      "palette": [
+        "#5c351f",
+        "#a82f3a",
+        "#e45462",
+        "#b8e1f1"
+      ],
+      "tags": [
+        "item",
+        "consumable",
+        "healing"
+      ]
     },
     {
       "spriteId": "items/copper_hoe",
@@ -345,9 +737,24 @@
       "height": 16,
       "subject": "copper hoe farming tool icon",
       "prompt": "Diagonal copper hoe with a short wooden handle and small copper blade, readable as a farming tilling tool for topdown life-sim gameplay.",
-      "requirements": ["Transparent background.", "Fits within 16x16.", "Distinct from the pickaxe silhouette.", "Blade should be copper-orange and angled like a hoe."],
-      "palette": ["#5c351f", "#8a512b", "#b26335", "#d98c4c"],
-      "tags": ["item", "tool", "farming", "hoe"]
+      "requirements": [
+        "Transparent background.",
+        "Fits within 16x16.",
+        "Distinct from the pickaxe silhouette.",
+        "Blade should be copper-orange and angled like a hoe."
+      ],
+      "palette": [
+        "#5c351f",
+        "#8a512b",
+        "#b26335",
+        "#d98c4c"
+      ],
+      "tags": [
+        "item",
+        "tool",
+        "farming",
+        "hoe"
+      ]
     },
     {
       "spriteId": "items/watering_can",
@@ -356,9 +763,24 @@
       "height": 16,
       "subject": "watering can farming tool icon",
       "prompt": "Small metal watering can icon with handle, short spout, and a few blue water pixels near the spout. Topdown farming tool, compact but readable.",
-      "requirements": ["Transparent background.", "Fits within 16x16.", "Do not add text or UI labels.", "Can silhouette must be distinct from potion bottles."],
-      "palette": ["#5f6875", "#8793a3", "#b8c2cf", "#4aa6d8"],
-      "tags": ["item", "tool", "farming", "watering"]
+      "requirements": [
+        "Transparent background.",
+        "Fits within 16x16.",
+        "Do not add text or UI labels.",
+        "Can silhouette must be distinct from potion bottles."
+      ],
+      "palette": [
+        "#5f6875",
+        "#8793a3",
+        "#b8c2cf",
+        "#4aa6d8"
+      ],
+      "tags": [
+        "item",
+        "tool",
+        "farming",
+        "watering"
+      ]
     },
     {
       "spriteId": "items/parsnip_seeds",
@@ -367,9 +789,24 @@
       "height": 16,
       "subject": "parsnip seed packet item icon",
       "prompt": "Tiny open seed pouch or packet with tan parsnip seeds visible, spring farming inventory icon. No printed letters or symbols.",
-      "requirements": ["Transparent background.", "Readable at 16x16.", "Do not include text.", "Use a few seed dots but keep the silhouette simple."],
-      "palette": ["#6a4a2e", "#b87943", "#d6b77c", "#f1d7a1"],
-      "tags": ["item", "seed", "farming", "spring"]
+      "requirements": [
+        "Transparent background.",
+        "Readable at 16x16.",
+        "Do not include text.",
+        "Use a few seed dots but keep the silhouette simple."
+      ],
+      "palette": [
+        "#6a4a2e",
+        "#b87943",
+        "#d6b77c",
+        "#f1d7a1"
+      ],
+      "tags": [
+        "item",
+        "seed",
+        "farming",
+        "spring"
+      ]
     },
     {
       "spriteId": "items/parsnip",
@@ -378,9 +815,23 @@
       "height": 16,
       "subject": "harvested parsnip crop item icon",
       "prompt": "Small harvested parsnip vegetable icon with cream root body, leafy green top, and earthy pixel outline. Inventory crop item.",
-      "requirements": ["Transparent background.", "Root and leaves must both be readable.", "No face, text, basket, or background."],
-      "palette": ["#4f7f38", "#74a84d", "#d8c58d", "#f0dfaa"],
-      "tags": ["item", "crop", "food", "spring"]
+      "requirements": [
+        "Transparent background.",
+        "Root and leaves must both be readable.",
+        "No face, text, basket, or background."
+      ],
+      "palette": [
+        "#4f7f38",
+        "#74a84d",
+        "#d8c58d",
+        "#f0dfaa"
+      ],
+      "tags": [
+        "item",
+        "crop",
+        "food",
+        "spring"
+      ]
     },
     {
       "spriteId": "crops/parsnip",
@@ -389,9 +840,26 @@
       "height": 16,
       "subject": "four-stage parsnip crop world strip",
       "prompt": "Horizontal 64x16 strip containing exactly four 16x16 parsnip crop growth stages for topdown farming soil. Stage 0 is tiny sprouts, stage 1 is small leaves, stage 2 is leafy plant with root hint, stage 3 is mature parsnip leaves ready to harvest. Transparent background.",
-      "requirements": ["Create exactly 4 frames arranged left to right.", "Each frame is exactly 16x16 pixels.", "Do not add spacing, labels, borders, or guide marks.", "Plant bases should sit near the bottom center of each frame.", "Must read cleanly when drawn on tilled soil."],
-      "palette": ["#3f7a39", "#66a84f", "#d8c58d", "#f0dfaa"],
-      "tags": ["crop", "world", "farming", "spring", "growth-strip"]
+      "requirements": [
+        "Create exactly 4 frames arranged left to right.",
+        "Each frame is exactly 16x16 pixels.",
+        "Do not add spacing, labels, borders, or guide marks.",
+        "Plant bases should sit near the bottom center of each frame.",
+        "Must read cleanly when drawn on tilled soil."
+      ],
+      "palette": [
+        "#3f7a39",
+        "#66a84f",
+        "#d8c58d",
+        "#f0dfaa"
+      ],
+      "tags": [
+        "crop",
+        "world",
+        "farming",
+        "spring",
+        "growth-strip"
+      ]
     },
     {
       "spriteId": "entities/slime",
@@ -400,9 +868,22 @@
       "height": 16,
       "subject": "green slime enemy sprite",
       "prompt": "Cute but hostile green slime enemy, squat blob body, tiny shine, simple face, side-view action sprite.",
-      "requirements": ["Transparent background.", "Grounded at bottom of canvas.", "Readable as enemy at small size."],
-      "palette": ["#2f6b33", "#438542", "#5aa452", "#9be66c"],
-      "tags": ["entity", "enemy", "slime"]
+      "requirements": [
+        "Transparent background.",
+        "Grounded at bottom of canvas.",
+        "Readable as enemy at small size."
+      ],
+      "palette": [
+        "#2f6b33",
+        "#438542",
+        "#5aa452",
+        "#9be66c"
+      ],
+      "tags": [
+        "entity",
+        "enemy",
+        "slime"
+      ]
     },
     {
       "spriteId": "projectiles/wooden_arrow",
@@ -411,9 +892,22 @@
       "height": 16,
       "subject": "wooden arrow projectile",
       "prompt": "Thin wooden arrow projectile, side/diagonal sprite, smaller and sharper than inventory icon.",
-      "requirements": ["Transparent background.", "Arrow should point right or upper-right.", "Keep most pixels along one line."],
-      "palette": ["#5c351f", "#b87943", "#ded2b0", "#777985"],
-      "tags": ["projectile", "arrow", "wood"]
+      "requirements": [
+        "Transparent background.",
+        "Arrow should point right or upper-right.",
+        "Keep most pixels along one line."
+      ],
+      "palette": [
+        "#5c351f",
+        "#b87943",
+        "#ded2b0",
+        "#777985"
+      ],
+      "tags": [
+        "projectile",
+        "arrow",
+        "wood"
+      ]
     },
     {
       "spriteId": "projectiles/poison_arrow",
@@ -422,9 +916,163 @@
       "height": 16,
       "subject": "poison arrow projectile",
       "prompt": "Thin arrow projectile with green poison tip, side/diagonal sprite, small toxic highlight.",
-      "requirements": ["Transparent background.", "Arrow should point right or upper-right.", "Keep most pixels along one line."],
-      "palette": ["#5c351f", "#b87943", "#4baa44", "#9be66c"],
-      "tags": ["projectile", "arrow", "poison"]
+      "requirements": [
+        "Transparent background.",
+        "Arrow should point right or upper-right.",
+        "Keep most pixels along one line."
+      ],
+      "palette": [
+        "#5c351f",
+        "#b87943",
+        "#4baa44",
+        "#9be66c"
+      ],
+      "tags": [
+        "projectile",
+        "arrow",
+        "poison"
+      ]
+    },
+    {
+      "spriteId": "tiles/dirt_autotile",
+      "outputPath": "sprites/world/tiles/dirt_autotile.png",
+      "width": 256,
+      "height": 16,
+      "subject": "improved fully opaque dirt blockface autotile strip",
+      "prompt": "Horizontal 256x16 pixel-art sheet with 16 seamless 16x16 improved fully opaque dirt blockface autotile strip. Use mask order top=1, right=2, bottom=4, left=8. Connected edges must tile flush with no gaps; exposed edges may use darker rim shading but remain fully opaque.",
+      "requirements": [
+        "Create exactly 16 frames arranged left to right.",
+        "Each frame is exactly 16x16 pixels.",
+        "Tilefaces must be fully opaque; do not use alpha holes or transparent seams.",
+        "No spacing, labels, borders, or guide marks."
+      ],
+      "palette": [
+        "#4a2a1c",
+        "#6f4229",
+        "#8c5a35",
+        "#b17845"
+      ],
+      "tags": [
+        "tile",
+        "terrain",
+        "soil",
+        "autotile",
+        "blockface"
+      ]
+    },
+    {
+      "spriteId": "tiles/grass_autotile",
+      "outputPath": "sprites/world/tiles/grass_autotile.png",
+      "width": 256,
+      "height": 16,
+      "subject": "improved fully opaque grass-over-dirt blockface autotile strip",
+      "prompt": "Horizontal 256x16 pixel-art sheet with 16 seamless 16x16 improved fully opaque grass-over-dirt blockface autotile strip. Use mask order top=1, right=2, bottom=4, left=8. Connected edges must tile flush with no gaps; exposed edges may use darker rim shading but remain fully opaque.",
+      "requirements": [
+        "Create exactly 16 frames arranged left to right.",
+        "Each frame is exactly 16x16 pixels.",
+        "Tilefaces must be fully opaque; do not use alpha holes or transparent seams.",
+        "No spacing, labels, borders, or guide marks."
+      ],
+      "palette": [
+        "#275a2e",
+        "#4a2a1c",
+        "#70452c",
+        "#62a84f"
+      ],
+      "tags": [
+        "tile",
+        "terrain",
+        "grass",
+        "autotile",
+        "blockface"
+      ]
+    },
+    {
+      "spriteId": "tiles/stone_autotile",
+      "outputPath": "sprites/world/tiles/stone_autotile.png",
+      "width": 256,
+      "height": 16,
+      "subject": "improved fully opaque stone blockface autotile strip",
+      "prompt": "Horizontal 256x16 pixel-art sheet with 16 seamless 16x16 improved fully opaque stone blockface autotile strip. Use mask order top=1, right=2, bottom=4, left=8. Connected edges must tile flush with no gaps; exposed edges may use darker rim shading but remain fully opaque.",
+      "requirements": [
+        "Create exactly 16 frames arranged left to right.",
+        "Each frame is exactly 16x16 pixels.",
+        "Tilefaces must be fully opaque; do not use alpha holes or transparent seams.",
+        "No spacing, labels, borders, or guide marks."
+      ],
+      "palette": [
+        "#3f4149",
+        "#5f626c",
+        "#7b7e89",
+        "#a3a6b0"
+      ],
+      "tags": [
+        "tile",
+        "terrain",
+        "stone",
+        "autotile",
+        "blockface"
+      ]
+    },
+    {
+      "spriteId": "tiles/leaves_autotile",
+      "outputPath": "sprites/world/tiles/leaves_autotile.png",
+      "width": 256,
+      "height": 16,
+      "subject": "leaf canopy blockface autotile strip",
+      "prompt": "Horizontal 256x16 pixel-art sheet with 16 seamless 16x16 leaf canopy blockface autotile strip. Use mask order top=1, right=2, bottom=4, left=8. Connected edges must tile flush with no gaps; exposed edges may use darker rim shading but remain fully opaque.",
+      "requirements": [
+        "Create exactly 16 frames arranged left to right.",
+        "Each frame is exactly 16x16 pixels.",
+        "Tilefaces must be fully opaque; do not use alpha holes or transparent seams.",
+        "No spacing, labels, borders, or guide marks."
+      ],
+      "palette": [
+        "#234f28",
+        "#347437",
+        "#4c9949",
+        "#82c96b"
+      ],
+      "tags": [
+        "tile",
+        "tree",
+        "leaves",
+        "autotile",
+        "blockface"
+      ]
+    },
+    {
+      "spriteId": "tiles/wood_autotile",
+      "outputPath": "sprites/world/tiles/wood_autotile.png",
+      "width": 256,
+      "height": 16,
+      "subject": "tree trunk and wood blockface autotile strip",
+      "prompt": "Horizontal 256x16 pixel-art sheet with 16 seamless 16x16 tree trunk and wood blockface autotile strip. Use mask order top=1, right=2, bottom=4, left=8. Connected edges must tile flush with no gaps; exposed edges may use darker rim shading but remain fully opaque.",
+      "requirements": [
+        "Create exactly 16 frames arranged left to right.",
+        "Each frame is exactly 16x16 pixels.",
+        "Tilefaces must be fully opaque; do not use alpha holes or transparent seams.",
+        "No spacing, labels, borders, or guide marks."
+      ],
+      "palette": [
+        "#4d2b18",
+        "#744521",
+        "#9b6332",
+        "#d09a58"
+      ],
+      "tags": [
+        "tile",
+        "tree",
+        "wood",
+        "autotile",
+        "blockface"
+      ]
     }
-  ]
+  ],
+  "assetConventions": {
+    "worldTiles": "Autotile blockface sheets use 16 frames in one horizontal 256x16 strip. Each 16x16 frame is fully opaque unless the tile is explicitly air or decorative pass-through foliage. Frame order is 4-bit mask top=1, right=2, bottom=4, left=8. Avoid spacing, borders, labels, or transparent cracks between connected blocks.",
+    "itemsAndTools": "Inventory icons use 16x16 transparent PNGs, centered silhouettes, hard alpha edges, and 2-4 shade clusters. Tools and weapons should read from silhouette first, with material color second.",
+    "characterParts": "Character part sheets use transparent 16x32 frames aligned to the player rig. Hair, clothes, skin/body, and hats/accessories should be layerable over the same origin without shifting the feet or head anchor.",
+    "entities": "Small creature and enemy sheets use transparent 16x16 frames in horizontal strips. Prefer readable silhouettes and two-frame reversible motion over tiny details."
+  }
 }

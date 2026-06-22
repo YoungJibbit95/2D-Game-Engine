@@ -332,6 +332,7 @@ public sealed class PauseMenuOverlay
             Key("SECONDARY USE", () => Settings.Input.KeyBindings.AttackSecondary, value => SetKeyBindings(k => k with { AttackSecondary = value })),
             Key("INVENTORY", () => Settings.Input.KeyBindings.OpenInventory, value => SetKeyBindings(k => k with { OpenInventory = value })),
             Key("CRAFTING", () => Settings.Input.KeyBindings.OpenCrafting, value => SetKeyBindings(k => k with { OpenCrafting = value })),
+            Key("CHARACTER EDITOR", () => Settings.Input.KeyBindings.OpenCharacterEditor, value => SetKeyBindings(k => k with { OpenCharacterEditor = value })),
             Key("INTERACT", () => Settings.Input.KeyBindings.Interact, value => SetKeyBindings(k => k with { Interact = value })),
             Key("PAUSE", () => Settings.Input.KeyBindings.Pause, value => SetKeyBindings(k => k with { Pause = value })),
             Key("DEBUG CONSOLE", () => Settings.Input.KeyBindings.DebugConsole, value => SetKeyBindings(k => k with { DebugConsole = value })),
@@ -730,6 +731,7 @@ public sealed class PauseMenuOverlay
         yield return ("SECONDARY USE", bindings.AttackSecondary);
         yield return ("INVENTORY", bindings.OpenInventory);
         yield return ("CRAFTING", bindings.OpenCrafting);
+        yield return ("CHARACTER EDITOR", bindings.OpenCharacterEditor);
         yield return ("INTERACT", bindings.Interact);
         yield return ("PAUSE", bindings.Pause);
         yield return ("DEBUG CONSOLE", bindings.DebugConsole);

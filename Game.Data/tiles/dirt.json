@@ -2,7 +2,7 @@
   "id": "dirt",
   "numericId": 1,
   "displayName": "Dirt Block",
-  "texture": "tiles/dirt",
+  "texture": "tiles/dirt_autotile",
   "solid": true,
   "blocksLight": true,
   "hardness": 1.0,

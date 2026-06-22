@@ -2,7 +2,7 @@
   "id": "stone",
   "numericId": 3,
   "displayName": "Stone Block",
-  "texture": "tiles/stone",
+  "texture": "tiles/stone_autotile",
   "solid": true,
   "blocksLight": true,
   "hardness": 2.5,

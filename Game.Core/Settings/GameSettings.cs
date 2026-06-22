@@ -171,6 +171,8 @@ public sealed record KeyBindingSettings
 
     public string OpenCrafting { get; init; } = "C";
 
+    public string OpenCharacterEditor { get; init; } = "F2";
+
     public string Interact { get; init; } = "E";
 
     public string Pause { get; init; } = "Escape";

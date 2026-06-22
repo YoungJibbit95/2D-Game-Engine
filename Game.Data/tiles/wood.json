@@ -2,7 +2,7 @@
   "id": "wood",
   "numericId": 6,
   "displayName": "Wood",
-  "texture": "tiles/wood",
+  "texture": "tiles/wood_autotile",
   "solid": true,
   "blocksLight": true,
   "hardness": 1.2,

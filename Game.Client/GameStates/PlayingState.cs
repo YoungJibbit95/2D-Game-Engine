@@ -39,6 +39,7 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
     private readonly InputManager _input = new();
     private readonly Camera2D _camera = new();
     private readonly TilemapRenderer _tilemapRenderer = new();
+    private readonly ParallaxBackgroundRenderer _backgroundRenderer = new();
     private readonly LightingRenderer _lightingRenderer = new();
     private readonly TileCollisionResolver _collisionResolver = new();
     private readonly PlayerItemUseSystem _itemUse = new();
@@ -51,6 +52,7 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
     private readonly HudOverlay _hud = new();
     private readonly InventoryOverlay _inventoryOverlay = new();
     private readonly CraftingOverlay _craftingOverlay = new();
+    private readonly CharacterEditorOverlay _characterEditorOverlay = new();
     private readonly DebugConsoleOverlay _debugConsole = new();
     private readonly PauseMenuOverlay _pauseMenu;
     private readonly GameStateManager _states;
@@ -101,7 +103,7 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
 
     public string Name => "Playing";
 
-    public bool CapturesKeyboard => _debugConsole.IsOpen || _pauseMenu.IsOpen || _inventoryOverlay.IsOpen || _craftingOverlay.IsOpen;
+    public bool CapturesKeyboard => _debugConsole.IsOpen || _pauseMenu.IsOpen || _inventoryOverlay.IsOpen || _craftingOverlay.IsOpen || _characterEditorOverlay.IsOpen;
 
     public void Initialize()
     {
@@ -148,6 +150,7 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
             _player.Update(_world, fixedDeltaSeconds);
             _entities.UpdateAll(_world, fixedDeltaSeconds);
             UpdateItemPickup();
+            UpdatePlayerAnimation(fixedDeltaSeconds);
         }
     }
 
@@ -173,6 +176,13 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
         {
             _pauseMenu.Open();
             _player?.SetCommand(PlayerCommand.None);
+            return;
+        }
+
+        if (_content is not null && _characterEditorOverlay.Update(_input, _content, settings, deltaSeconds))
+        {
+            _player?.SetCommand(PlayerCommand.None);
+            UpdateAutosave((float)deltaSeconds, settings);
             return;
         }
 
@@ -218,10 +228,7 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
         _camera.Follow(cameraTarget, context.ViewportBounds, smoothing: 0.18f);
         EnsureVisibleChunks();
 
-        context.SpriteBatch.Draw(
-            context.Pixel,
-            context.ViewportBounds,
-            new Color(91, 155, 213));
+        _backgroundRenderer.Draw(context, _textures, _camera, _world);
 
         _tilemapRenderer.ShowGrid = _showGrid;
         _tilemapRenderer.DrawLiquids = settings.Rendering.DrawLiquids;
@@ -239,14 +246,15 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
             _lightingRenderer.Draw(context, _world, _camera);
         }
 
-        _hud.Draw(context, _selectedHotbarSlot, _player?.Health ?? 0, _player?.MaxHealth ?? 100, settings);
+        _hud.Draw(context, _inventory, _content?.Items, _textures, _player?.Health ?? 0, _player?.MaxHealth ?? 100, settings);
         if (_inventory is not null && _content is not null)
         {
-            _inventoryOverlay.Draw(context, _inventory, _content.Items, settings);
+            _inventoryOverlay.Draw(context, _inventory, _content.Items, _textures, settings);
         }
         if (_content is not null)
         {
-            _craftingOverlay.Draw(context, _content, settings);
+            _craftingOverlay.Draw(context, _content, _textures, settings);
+            _characterEditorOverlay.Draw(context, _content, _textures, settings);
         }
 
         if (settings.Rendering.DrawDebugOverlays && settings.Debug.ShowDebugOverlay)
@@ -370,7 +378,41 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
         var effects = _playerFacingLeft ? SpriteEffects.FlipHorizontally : SpriteEffects.None;
 
         context.SpriteBatch.Draw(sprite.Texture, destination, source, Color.White, 0f, Vector2.Zero, effects, 0f);
+        DrawPlayerAppearanceParts(context, destination, effects);
         return true;
+    }
+
+    private void DrawPlayerAppearanceParts(RenderContext context, Rectangle destination, SpriteEffects effects)
+    {
+        if (_textures is null)
+        {
+            return;
+        }
+
+        var appearance = _characterEditorOverlay.Appearance;
+        DrawPlayerPart(context, destination, effects, "entities/player/body_variants", ResolveSkinFrame(appearance.SkinTone), ParseHexColor(appearance.SkinTone));
+        DrawPlayerPart(context, destination, effects, "entities/player/clothes_variants_v2", ResolveClothesFrame(appearance.ClothesStyleId), ParseHexColor(appearance.ShirtColor));
+        DrawPlayerPart(context, destination, effects, "entities/player/hair_variants_v2", ResolveHairFrame(appearance.HairStyleId), ParseHexColor(appearance.HairColor));
+        if (!string.Equals(appearance.AccessoryId, "none", StringComparison.OrdinalIgnoreCase))
+        {
+            DrawPlayerPart(context, destination, effects, "entities/player/accessories_hats", Math.Max(0, ResolveAccessoryFrame(appearance.AccessoryId) - 1), Color.White);
+        }
+    }
+
+    private void DrawPlayerPart(RenderContext context, Rectangle destination, SpriteEffects effects, string spriteId, int frameIndex, Color color)
+    {
+        if (_textures is null)
+        {
+            return;
+        }
+
+        var sprite = _textures.Get(spriteId, frameIndex);
+        if (sprite.IsPlaceholder || sprite.SourceRectangle.Width <= 0 || sprite.SourceRectangle.Height <= 0)
+        {
+            return;
+        }
+
+        context.SpriteBatch.Draw(sprite.Texture, destination, sprite.SourceRectangle, color, 0f, Vector2.Zero, effects, 0f);
     }
 
     private bool TryDrawEntitySprite(RenderContext context, Entity entity)
@@ -380,7 +422,8 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
             return false;
         }
 
-        var sprite = _textures.Get(spriteId);
+        var frameIndex = ResolveEntityFrameIndex(entity, spriteId, context.Time.TotalSeconds);
+        var sprite = _textures.Get(spriteId, frameIndex);
         if (sprite.SourceRectangle.Width <= 0 || sprite.SourceRectangle.Height <= 0)
         {
             return false;
@@ -400,6 +443,23 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
 
         context.SpriteBatch.Draw(sprite.Texture, destination, source, Color.White);
         return true;
+    }
+
+    private int ResolveEntityFrameIndex(Entity entity, string spriteId, double totalSeconds)
+    {
+        if (_content is null ||
+            !_content.SpriteAssets.TryGetById(spriteId, out var asset) ||
+            asset.Frames.Count <= 1 ||
+            !asset.HasTag("animated") ||
+            entity is DroppedItemEntity or ProjectileEntity)
+        {
+            return 0;
+        }
+
+        var frameRate = entity is EnemyEntity enemy && enemy.DefinitionId.Contains("bat", StringComparison.OrdinalIgnoreCase)
+            ? 10.0
+            : 6.0;
+        return (int)Math.Floor(totalSeconds * frameRate + entity.Id * 0.37) % asset.Frames.Count;
     }
 
     private bool TryResolveEntitySpriteId(Entity entity, out string spriteId)
@@ -847,11 +907,38 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
             return;
         }
 
+        AttractNearbyDroppedItems();
         _lastPickedUpItems = _pickup.PickupItems(
             _entities,
             _inventory,
-            _player.Bounds.Inflate(12),
+            _player.Bounds.Inflate(28),
             _events);
+    }
+
+    private void AttractNearbyDroppedItems()
+    {
+        if (_player is null)
+        {
+            return;
+        }
+
+        const float magnetRadius = 92f;
+        const float magnetStrength = 360f;
+        var playerCenter = _player.Body.Center;
+        foreach (var dropped in _entities.Query(_player.Bounds.Inflate((int)magnetRadius)).OfType<DroppedItemEntity>())
+        {
+            var itemCenter = dropped.Body.Center;
+            var offset = playerCenter - itemCenter;
+            var distance = offset.Length();
+            if (distance <= 0.001f || distance > magnetRadius)
+            {
+                continue;
+            }
+
+            var direction = offset / distance;
+            var strength = (1f - distance / magnetRadius) * magnetStrength;
+            dropped.Body.Velocity += direction * strength * (1f / 60f);
+        }
     }
     private void EnsureVisibleChunks()
     {
@@ -903,6 +990,76 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
             8 => bindings.Hotbar9,
             _ => bindings.Hotbar10
         };
+    }
+
+    private static int ResolveHairFrame(string hairStyle)
+    {
+        return hairStyle.ToUpperInvariant() switch
+        {
+            "MESSY" => 1,
+            "BOB" => 2,
+            "PONYTAIL" => 3,
+            "BRAIDS" => 4,
+            "MOHAWK" => 5,
+            "LONG" => 6,
+            "CAP" => 7,
+            _ => 0
+        };
+    }
+
+    private static int ResolveClothesFrame(string clothesStyle)
+    {
+        return clothesStyle.ToUpperInvariant() switch
+        {
+            "GREEN_WORK" => 1,
+            "RED_TRAIL" => 2,
+            "VIOLET_MAGE" => 3,
+            "TAN_WORKER" => 4,
+            "GREY_MINER" => 5,
+            "TEAL_SCOUT" => 6,
+            "OCHRE_FARMER" => 7,
+            _ => 0
+        };
+    }
+
+    private static int ResolveAccessoryFrame(string accessoryId)
+    {
+        return accessoryId.ToUpperInvariant() switch
+        {
+            "STRAW_HAT" => 1,
+            "MINER_HELMET" => 2,
+            "RED_BANDANA" => 3,
+            "GLASSES" => 4,
+            "LEAF_CROWN" => 5,
+            "HOOD" => 6,
+            _ => 0
+        };
+    }
+
+    private static int ResolveSkinFrame(string skinTone)
+    {
+        return skinTone.ToUpperInvariant() switch
+        {
+            "#F0CFA3" => 0,
+            "#E0B687" => 1,
+            "#C98F62" => 2,
+            "#8F563B" => 3,
+            _ => 1
+        };
+    }
+
+    private static Color ParseHexColor(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value) || value.Length != 7 || value[0] != '#')
+        {
+            return Color.White;
+        }
+
+        return byte.TryParse(value.AsSpan(1, 2), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var r) &&
+               byte.TryParse(value.AsSpan(3, 2), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var g) &&
+               byte.TryParse(value.AsSpan(5, 2), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var b)
+            ? new Color(r, g, b)
+            : Color.White;
     }
 
 }

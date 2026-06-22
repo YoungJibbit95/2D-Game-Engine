@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "scope": "character_animation_wave",
   "globalStyle": "Crisp 2D pixel art for a Terraria-like sandbox game. Hard pixel edges, transparent background, no anti-aliasing, no blur, no text, no watermark, readable silhouettes, upper-left lighting, restrained saturation, 2-4 shade clusters per material.",
   "globalRequirements": [
@@ -18,20 +18,98 @@
       "frameHeight": 32,
       "subject": "player base action sprite sheet",
       "frames": [
-        { "id": "idle_0", "x": 0, "y": 0, "width": 16, "height": 32 },
-        { "id": "idle_1", "x": 16, "y": 0, "width": 16, "height": 32 },
-        { "id": "walk_0", "x": 32, "y": 0, "width": 16, "height": 32 },
-        { "id": "walk_1", "x": 48, "y": 0, "width": 16, "height": 32 },
-        { "id": "walk_2", "x": 64, "y": 0, "width": 16, "height": 32 },
-        { "id": "walk_3", "x": 80, "y": 0, "width": 16, "height": 32 },
-        { "id": "jump", "x": 96, "y": 0, "width": 16, "height": 32 },
-        { "id": "fall", "x": 112, "y": 0, "width": 16, "height": 32 },
-        { "id": "mine_0", "x": 128, "y": 0, "width": 16, "height": 32 },
-        { "id": "mine_1", "x": 144, "y": 0, "width": 16, "height": 32 },
-        { "id": "attack_0", "x": 160, "y": 0, "width": 16, "height": 32 },
-        { "id": "attack_1", "x": 176, "y": 0, "width": 16, "height": 32 }
+        {
+          "id": "idle_0",
+          "x": 0,
+          "y": 0,
+          "width": 16,
+          "height": 32
+        },
+        {
+          "id": "idle_1",
+          "x": 16,
+          "y": 0,
+          "width": 16,
+          "height": 32
+        },
+        {
+          "id": "walk_0",
+          "x": 32,
+          "y": 0,
+          "width": 16,
+          "height": 32
+        },
+        {
+          "id": "walk_1",
+          "x": 48,
+          "y": 0,
+          "width": 16,
+          "height": 32
+        },
+        {
+          "id": "walk_2",
+          "x": 64,
+          "y": 0,
+          "width": 16,
+          "height": 32
+        },
+        {
+          "id": "walk_3",
+          "x": 80,
+          "y": 0,
+          "width": 16,
+          "height": 32
+        },
+        {
+          "id": "jump",
+          "x": 96,
+          "y": 0,
+          "width": 16,
+          "height": 32
+        },
+        {
+          "id": "fall",
+          "x": 112,
+          "y": 0,
+          "width": 16,
+          "height": 32
+        },
+        {
+          "id": "mine_0",
+          "x": 128,
+          "y": 0,
+          "width": 16,
+          "height": 32
+        },
+        {
+          "id": "mine_1",
+          "x": 144,
+          "y": 0,
+          "width": 16,
+          "height": 32
+        },
+        {
+          "id": "attack_0",
+          "x": 160,
+          "y": 0,
+          "width": 16,
+          "height": 32
+        },
+        {
+          "id": "attack_1",
+          "x": 176,
+          "y": 0,
+          "width": 16,
+          "height": 32
+        }
       ],
-      "tags": ["entity", "player", "character", "animation", "actions"]
+      "tags": [
+        "entity",
+        "player",
+        "character",
+        "animation",
+        "actions"
+      ]
     },
     {
       "spriteId": "entities/player/hair_variants",
@@ -41,12 +119,42 @@
       "frameWidth": 16,
       "frameHeight": 32,
       "frames": [
-        { "id": "brown", "x": 0, "y": 0, "width": 16, "height": 32 },
-        { "id": "black", "x": 16, "y": 0, "width": 16, "height": 32 },
-        { "id": "blond", "x": 32, "y": 0, "width": 16, "height": 32 },
-        { "id": "copper", "x": 48, "y": 0, "width": 16, "height": 32 }
+        {
+          "id": "brown",
+          "x": 0,
+          "y": 0,
+          "width": 16,
+          "height": 32
+        },
+        {
+          "id": "black",
+          "x": 16,
+          "y": 0,
+          "width": 16,
+          "height": 32
+        },
+        {
+          "id": "blond",
+          "x": 32,
+          "y": 0,
+          "width": 16,
+          "height": 32
+        },
+        {
+          "id": "copper",
+          "x": 48,
+          "y": 0,
+          "width": 16,
+          "height": 32
+        }
       ],
-      "tags": ["entity", "player", "variant", "hair", "palette"]
+      "tags": [
+        "entity",
+        "player",
+        "variant",
+        "hair",
+        "palette"
+      ]
     },
     {
       "spriteId": "entities/player/clothes_variants",
@@ -56,12 +164,42 @@
       "frameWidth": 16,
       "frameHeight": 32,
       "frames": [
-        { "id": "blue", "x": 0, "y": 0, "width": 16, "height": 32 },
-        { "id": "green", "x": 16, "y": 0, "width": 16, "height": 32 },
-        { "id": "red", "x": 32, "y": 0, "width": 16, "height": 32 },
-        { "id": "violet", "x": 48, "y": 0, "width": 16, "height": 32 }
+        {
+          "id": "blue",
+          "x": 0,
+          "y": 0,
+          "width": 16,
+          "height": 32
+        },
+        {
+          "id": "green",
+          "x": 16,
+          "y": 0,
+          "width": 16,
+          "height": 32
+        },
+        {
+          "id": "red",
+          "x": 32,
+          "y": 0,
+          "width": 16,
+          "height": 32
+        },
+        {
+          "id": "violet",
+          "x": 48,
+          "y": 0,
+          "width": 16,
+          "height": 32
+        }
       ],
-      "tags": ["entity", "player", "variant", "clothes", "palette"]
+      "tags": [
+        "entity",
+        "player",
+        "variant",
+        "clothes",
+        "palette"
+      ]
     },
     {
       "spriteId": "entities/critters/rabbit",
@@ -70,8 +208,26 @@
       "height": 16,
       "frameWidth": 16,
       "frameHeight": 16,
-      "frames": ["idle_0", "idle_1", "hop_0", "hop_1"],
-      "tags": ["entity", "critter", "animal", "rabbit", "ambient"]
+      "frames": [
+        "idle_0",
+        "idle_1",
+        "hop_0",
+        "hop_1"
+      ],
+      "tags": [
+        "entity",
+        "critter",
+        "animal",
+        "rabbit",
+        "ambient"
+      ],
+      "subject": "readable four-frame rabbit critter sheet",
+      "requirements": [
+        "Transparent background.",
+        "Four 16x16 frames arranged left to right.",
+        "Silhouette should remain readable at 1x scale.",
+        "Animation should loop without large origin jumps."
+      ]
     },
     {
       "spriteId": "entities/critters/bird",
@@ -80,8 +236,26 @@
       "height": 16,
       "frameWidth": 16,
       "frameHeight": 16,
-      "frames": ["perch", "flap_up", "flap_down", "glide"],
-      "tags": ["entity", "critter", "animal", "bird", "ambient"]
+      "frames": [
+        "perch",
+        "hop",
+        "wing_up",
+        "wing_down"
+      ],
+      "tags": [
+        "entity",
+        "critter",
+        "animal",
+        "bird",
+        "ambient"
+      ],
+      "subject": "readable four-frame bird critter sheet",
+      "requirements": [
+        "Transparent background.",
+        "Four 16x16 frames arranged left to right.",
+        "Silhouette should remain readable at 1x scale.",
+        "Animation should loop without large origin jumps."
+      ]
     },
     {
       "spriteId": "entities/enemies/bat",
@@ -90,8 +264,26 @@
       "height": 16,
       "frameWidth": 16,
       "frameHeight": 16,
-      "frames": ["flap_high", "flap_mid_0", "flap_low", "flap_mid_1"],
-      "tags": ["entity", "enemy", "bat", "early-game", "cave"]
+      "frames": [
+        "flap_high",
+        "flap_mid_0",
+        "flap_low",
+        "flap_mid_1"
+      ],
+      "tags": [
+        "entity",
+        "enemy",
+        "bat",
+        "early-game",
+        "cave"
+      ],
+      "subject": "readable four-frame cave bat enemy sheet",
+      "requirements": [
+        "Transparent background.",
+        "Four 16x16 frames arranged left to right.",
+        "Silhouette should remain readable at 1x scale.",
+        "Animation should loop without large origin jumps."
+      ]
     },
     {
       "spriteId": "entities/enemies/cave_worm",
@@ -100,8 +292,26 @@
       "height": 16,
       "frameWidth": 16,
       "frameHeight": 16,
-      "frames": ["slither_0", "slither_1", "slither_2", "slither_3"],
-      "tags": ["entity", "enemy", "worm", "early-game", "cave"]
+      "frames": [
+        "crawl_0",
+        "crawl_1",
+        "crawl_2",
+        "crawl_3"
+      ],
+      "tags": [
+        "entity",
+        "enemy",
+        "worm",
+        "early-game",
+        "cave"
+      ],
+      "subject": "readable four-frame cave worm enemy sheet",
+      "requirements": [
+        "Transparent background.",
+        "Four 16x16 frames arranged left to right.",
+        "Silhouette should remain readable at 1x scale.",
+        "Animation should loop without large origin jumps."
+      ]
     },
     {
       "spriteId": "world/decor/plants_foliage_props",
@@ -110,22 +320,174 @@
       "height": 16,
       "frameWidth": 16,
       "frameHeight": 16,
-      "frames": ["grass_tuft", "fern", "wildflower", "sapling_bush"],
-      "tags": ["world", "decor", "plant", "foliage", "props"]
+      "frames": [
+        "grass_tuft",
+        "fern",
+        "wildflower",
+        "sapling_bush"
+      ],
+      "tags": [
+        "world",
+        "decor",
+        "plant",
+        "foliage",
+        "props"
+      ]
     },
     {
       "spriteId": "world/backgrounds/forest_parallax_layer",
       "outputPath": "sprites/world/backgrounds/forest_parallax_layer.png",
       "width": 256,
       "height": 64,
-      "tags": ["world", "background", "parallax", "forest"]
+      "tags": [
+        "world",
+        "background",
+        "parallax",
+        "forest"
+      ]
     },
     {
       "spriteId": "world/backgrounds/cave_parallax_layer",
       "outputPath": "sprites/world/backgrounds/cave_parallax_layer.png",
       "width": 256,
       "height": 64,
-      "tags": ["world", "background", "parallax", "cave"]
+      "tags": [
+        "world",
+        "background",
+        "parallax",
+        "cave"
+      ]
+    },
+    {
+      "spriteId": "entities/player/hair_variants_v2",
+      "outputPath": "sprites/entities/player/player_hair_variants_v2.png",
+      "width": 128,
+      "height": 32,
+      "frameWidth": 16,
+      "frameHeight": 32,
+      "subject": "eight player hair variants with distinct silhouettes",
+      "frames": [
+        "short_brown",
+        "messy_black",
+        "bob_blond",
+        "ponytail_copper",
+        "braids_brown",
+        "mohawk_black",
+        "long_blond",
+        "cap_copper"
+      ],
+      "requirements": [
+        "Transparent background.",
+        "Eight frames arranged left to right.",
+        "Each frame overlays the same 16x32 player rig without shifting anchors.",
+        "Hair must be readable against light and dark skin palettes."
+      ],
+      "tags": [
+        "entity",
+        "player",
+        "variant",
+        "hair",
+        "editor"
+      ]
+    },
+    {
+      "spriteId": "entities/player/clothes_variants_v2",
+      "outputPath": "sprites/entities/player/player_clothes_variants_v2.png",
+      "width": 128,
+      "height": 32,
+      "frameWidth": 16,
+      "frameHeight": 32,
+      "subject": "eight player shirt and pants color variants",
+      "frames": [
+        "blue_jeans",
+        "green_work",
+        "red_trail",
+        "violet_mage",
+        "tan_worker",
+        "grey_miner",
+        "teal_scout",
+        "ochre_farmer"
+      ],
+      "requirements": [
+        "Transparent background.",
+        "Eight frames arranged left to right.",
+        "Keep torso, arms, legs, and feet aligned to the base player rig.",
+        "Each variant needs distinct shirt and pants colors with 2-3 shade clusters."
+      ],
+      "tags": [
+        "entity",
+        "player",
+        "variant",
+        "clothes",
+        "editor"
+      ]
+    },
+    {
+      "spriteId": "entities/player/body_variants",
+      "outputPath": "sprites/entities/player/player_body_variants.png",
+      "width": 64,
+      "height": 32,
+      "frameWidth": 16,
+      "frameHeight": 32,
+      "subject": "four player skin and body base variants",
+      "frames": [
+        "light",
+        "tan",
+        "warm",
+        "dark"
+      ],
+      "requirements": [
+        "Transparent background.",
+        "Four frames arranged left to right.",
+        "Preserve the same pose and foot anchor across all frames.",
+        "Skin tones should be distinct but use the same lighting direction."
+      ],
+      "tags": [
+        "entity",
+        "player",
+        "variant",
+        "skin",
+        "body",
+        "editor"
+      ]
+    },
+    {
+      "spriteId": "entities/player/accessories_hats",
+      "outputPath": "sprites/entities/player/player_accessories_hats.png",
+      "width": 96,
+      "height": 32,
+      "frameWidth": 16,
+      "frameHeight": 32,
+      "subject": "six player accessory and hat overlay frames",
+      "frames": [
+        "straw_hat",
+        "miner_helmet",
+        "red_bandana",
+        "glasses",
+        "leaf_crown",
+        "hood"
+      ],
+      "requirements": [
+        "Transparent background.",
+        "Six frames arranged left to right.",
+        "Accessory pixels should overlay the base rig cleanly.",
+        "Avoid text, logos, or oversized masks."
+      ],
+      "tags": [
+        "entity",
+        "player",
+        "variant",
+        "accessory",
+        "hat",
+        "editor"
+      ]
     }
-  ]
+  ],
+  "assetConventions": {
+    "playerParts": "All player customization sheets are transparent 16x32 frames. Keep head, torso, arms, legs, and feet in the same rig positions as entities/player/base_actions. Variant sheets may add frames but should not change frame size.",
+    "hair": "Hair variants should cover the head area only, with optional pixels behind the neck for long styles. Avoid covering the whole face unless the frame is explicitly a hood or cap hair style.",
+    "clothes": "Clothing variants should include coordinated shirt and pants colors with simple highlights. Preserve readable arms and legs for compositing.",
+    "accessories": "Accessory and hat frames should sit on top of the base rig and remain sparse enough to combine with hair/body layers.",
+    "entities": "Rabbit, bird, bat, and cave worm sheets are 64x16, four frames, 16x16 each. Use larger silhouettes and clear motion poses."
+  }
 }

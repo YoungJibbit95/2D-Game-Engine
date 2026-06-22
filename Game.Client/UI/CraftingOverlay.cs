@@ -87,7 +87,7 @@ public sealed class CraftingOverlay
         return true;
     }
 
-    public void Draw(RenderContext context, GameContentDatabase content, GameSettings settings)
+    public void Draw(RenderContext context, GameContentDatabase content, ClientTextureRegistry? textures, GameSettings settings)
     {
         if (!IsOpen)
         {
@@ -114,8 +114,8 @@ public sealed class CraftingOverlay
 
         var listBounds = new Rectangle(panel.X + 20, panel.Y + 80, 314, panel.Height - 122);
         var detailBounds = new Rectangle(listBounds.Right + 18, listBounds.Y, panel.Right - listBounds.Right - 38, listBounds.Height);
-        DrawRecipeList(context, palette, listBounds, content.Items);
-        DrawRecipeDetails(context, palette, detailBounds, content.Items);
+        DrawRecipeList(context, palette, listBounds, content.Items, textures);
+        DrawRecipeDetails(context, palette, detailBounds, content.Items, textures);
 
         if (!string.IsNullOrWhiteSpace(_status))
         {
@@ -221,7 +221,7 @@ public sealed class CraftingOverlay
             : BuildBlockedReason(_lastResults[_selectedIndex]);
     }
 
-    private void DrawRecipeList(RenderContext context, UiPalette palette, Rectangle bounds, IItemDefinitionProvider items)
+    private void DrawRecipeList(RenderContext context, UiPalette palette, Rectangle bounds, IItemDefinitionProvider items, ClientTextureRegistry? textures)
     {
         UiTheme.DrawPanel(context, bounds, palette, 0.72f, raised: false);
         context.DebugText.Draw(new Vector2(bounds.X + 10, bounds.Y + 10), "RECIPES", palette.Text, 2);
@@ -248,7 +248,9 @@ public sealed class CraftingOverlay
             var countSuffix = result.Recipe.Result.Count > 1
                 ? $" X{result.Recipe.Result.Count}"
                 : string.Empty;
-            context.DebugText.Draw(new Vector2(rowBounds.X + 8, rowBounds.Y + 7), AbbreviateText(item.DisplayName, 22) + countSuffix, result.CanCraft ? palette.Text : palette.TextMuted, 1);
+            var iconBounds = new Rectangle(rowBounds.X + 4, rowBounds.Y + 3, 20, 20);
+            ItemIconRenderer.TryDrawSprite(context, textures, item.TexturePath, iconBounds, result.CanCraft ? 1f : 0.42f);
+            context.DebugText.Draw(new Vector2(rowBounds.X + 30, rowBounds.Y + 7), AbbreviateText(item.DisplayName, 18) + countSuffix, result.CanCraft ? palette.Text : palette.TextMuted, 1);
             context.DebugText.Draw(new Vector2(rowBounds.Right - 62, rowBounds.Y + 7), result.CanCraft ? "READY" : "BLOCK", result.CanCraft ? palette.Warning : palette.Danger, 1);
             _recipeHitZones.Add(new RecipeHitZone(rowBounds, index));
         }
@@ -256,7 +258,7 @@ public sealed class CraftingOverlay
         context.DebugText.Draw(new Vector2(bounds.X + 10, bounds.Bottom - 18), $"{_selectedIndex + 1}/{_lastResults.Count}", palette.TextMuted, 1);
     }
 
-    private void DrawRecipeDetails(RenderContext context, UiPalette palette, Rectangle bounds, IItemDefinitionProvider items)
+    private void DrawRecipeDetails(RenderContext context, UiPalette palette, Rectangle bounds, IItemDefinitionProvider items, ClientTextureRegistry? textures)
     {
         UiTheme.DrawPanel(context, bounds, palette, 0.72f, raised: false);
         if (_lastResults.Count == 0 || _selectedIndex >= _lastResults.Count)
@@ -267,9 +269,12 @@ public sealed class CraftingOverlay
         var result = _lastResults[_selectedIndex];
         var recipe = result.Recipe;
         var item = items.GetById(recipe.Result.ItemId);
-        context.DebugText.Draw(new Vector2(bounds.X + 12, bounds.Y + 10), AbbreviateText(item.DisplayName, 28), palette.Text, 2);
-        context.DebugText.Draw(new Vector2(bounds.X + 12, bounds.Y + 36), $"CATEGORY {recipe.Category.ToUpperInvariant()}", palette.TextMuted, 1);
-        context.DebugText.Draw(new Vector2(bounds.X + 12, bounds.Y + 52), $"RESULT {recipe.Result.Count}X {recipe.Result.ItemId.ToUpperInvariant()}", palette.Warning, 1);
+        var resultIcon = new Rectangle(bounds.X + 12, bounds.Y + 12, 52, 52);
+        UiTheme.DrawButton(context, resultIcon, palette, selected: true, hovered: false);
+        ItemIconRenderer.DrawItemStack(context, textures, items, recipe.Result, resultIcon, palette);
+        context.DebugText.Draw(new Vector2(bounds.X + 76, bounds.Y + 12), AbbreviateText(item.DisplayName, 26), palette.Text, 2);
+        context.DebugText.Draw(new Vector2(bounds.X + 76, bounds.Y + 38), $"CATEGORY {recipe.Category.ToUpperInvariant()}", palette.TextMuted, 1);
+        context.DebugText.Draw(new Vector2(bounds.X + 76, bounds.Y + 54), $"RESULT {recipe.Result.Count}X {recipe.Result.ItemId.ToUpperInvariant()}", palette.Warning, 1);
 
         var y = bounds.Y + 82;
         context.DebugText.Draw(new Vector2(bounds.X + 12, y), "INGREDIENTS", palette.Text, 1);
@@ -279,8 +284,11 @@ public sealed class CraftingOverlay
             var have = _lastContext?.Inventory.CountItem(ingredient.ItemId) ?? 0;
             var ingredientItem = items.GetById(ingredient.ItemId);
             var color = have >= ingredient.Count ? palette.TextMuted : palette.Danger;
-            context.DebugText.Draw(new Vector2(bounds.X + 18, y), $"{AbbreviateText(ingredientItem.DisplayName, 22)} {have}/{ingredient.Count}", color, 1);
-            y += 16;
+            var rowBounds = new Rectangle(bounds.X + 16, y - 4, bounds.Width - 32, 28);
+            context.SpriteBatch.Draw(context.Pixel, rowBounds, UiTheme.WithAlpha(have >= ingredient.Count ? palette.Surface : palette.Danger, have >= ingredient.Count ? 0.38f : 0.16f));
+            ItemIconRenderer.TryDrawSprite(context, textures, ingredientItem.TexturePath, new Rectangle(rowBounds.X + 4, rowBounds.Y + 4, 20, 20), have >= ingredient.Count ? 0.9f : 0.45f);
+            context.DebugText.Draw(new Vector2(rowBounds.X + 32, rowBounds.Y + 8), $"{AbbreviateText(ingredientItem.DisplayName, 22)} {have}/{ingredient.Count}", color, 1);
+            y += 30;
         }
 
         y += 8;

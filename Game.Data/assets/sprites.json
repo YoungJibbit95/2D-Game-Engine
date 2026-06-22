@@ -1,6 +1,16 @@
 {
   "sprites": [
-    { "id": "tiles/air", "path": "sprites/world/tiles/air.png", "category": "Tile", "width": 16, "height": 16, "tags": ["world", "tile"] },
+    {
+      "id": "tiles/air",
+      "path": "sprites/world/tiles/air.png",
+      "category": "Tile",
+      "width": 16,
+      "height": 16,
+      "tags": [
+        "world",
+        "tile"
+      ]
+    },
     {
       "id": "tiles/dirt",
       "path": "sprites/world/tiles/dirt.png",
@@ -8,24 +18,142 @@
       "width": 256,
       "height": 16,
       "frames": [
-        { "id": "mask_0", "x": 0, "y": 0, "width": 16, "height": 16, "autoTileMask": 0 },
-        { "id": "mask_1", "x": 16, "y": 0, "width": 16, "height": 16, "autoTileMask": 1 },
-        { "id": "mask_2", "x": 32, "y": 0, "width": 16, "height": 16, "autoTileMask": 2 },
-        { "id": "mask_3", "x": 48, "y": 0, "width": 16, "height": 16, "autoTileMask": 3 },
-        { "id": "mask_4", "x": 64, "y": 0, "width": 16, "height": 16, "autoTileMask": 4 },
-        { "id": "mask_5", "x": 80, "y": 0, "width": 16, "height": 16, "autoTileMask": 5 },
-        { "id": "mask_6", "x": 96, "y": 0, "width": 16, "height": 16, "autoTileMask": 6 },
-        { "id": "mask_7", "x": 112, "y": 0, "width": 16, "height": 16, "autoTileMask": 7 },
-        { "id": "mask_8", "x": 128, "y": 0, "width": 16, "height": 16, "autoTileMask": 8 },
-        { "id": "mask_9", "x": 144, "y": 0, "width": 16, "height": 16, "autoTileMask": 9 },
-        { "id": "mask_10", "x": 160, "y": 0, "width": 16, "height": 16, "autoTileMask": 10 },
-        { "id": "mask_11", "x": 176, "y": 0, "width": 16, "height": 16, "autoTileMask": 11 },
-        { "id": "mask_12", "x": 192, "y": 0, "width": 16, "height": 16, "autoTileMask": 12 },
-        { "id": "mask_13", "x": 208, "y": 0, "width": 16, "height": 16, "autoTileMask": 13 },
-        { "id": "mask_14", "x": 224, "y": 0, "width": 16, "height": 16, "autoTileMask": 14 },
-        { "id": "mask_15", "x": 240, "y": 0, "width": 16, "height": 16, "autoTileMask": 15 }
+        {
+          "id": "mask_0",
+          "x": 0,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 0
+        },
+        {
+          "id": "mask_1",
+          "x": 16,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 1
+        },
+        {
+          "id": "mask_2",
+          "x": 32,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 2
+        },
+        {
+          "id": "mask_3",
+          "x": 48,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 3
+        },
+        {
+          "id": "mask_4",
+          "x": 64,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 4
+        },
+        {
+          "id": "mask_5",
+          "x": 80,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 5
+        },
+        {
+          "id": "mask_6",
+          "x": 96,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 6
+        },
+        {
+          "id": "mask_7",
+          "x": 112,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 7
+        },
+        {
+          "id": "mask_8",
+          "x": 128,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 8
+        },
+        {
+          "id": "mask_9",
+          "x": 144,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 9
+        },
+        {
+          "id": "mask_10",
+          "x": 160,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 10
+        },
+        {
+          "id": "mask_11",
+          "x": 176,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 11
+        },
+        {
+          "id": "mask_12",
+          "x": 192,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 12
+        },
+        {
+          "id": "mask_13",
+          "x": 208,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 13
+        },
+        {
+          "id": "mask_14",
+          "x": 224,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 14
+        },
+        {
+          "id": "mask_15",
+          "x": 240,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 15
+        }
       ],
-      "tags": ["world", "tile", "soil", "autotile"]
+      "tags": [
+        "autotile",
+        "tile",
+        "world",
+        "soil",
+        "blockface"
+      ]
     },
     {
       "id": "tiles/grass",
@@ -34,24 +162,142 @@
       "width": 256,
       "height": 16,
       "frames": [
-        { "id": "mask_0", "x": 0, "y": 0, "width": 16, "height": 16, "autoTileMask": 0 },
-        { "id": "mask_1", "x": 16, "y": 0, "width": 16, "height": 16, "autoTileMask": 1 },
-        { "id": "mask_2", "x": 32, "y": 0, "width": 16, "height": 16, "autoTileMask": 2 },
-        { "id": "mask_3", "x": 48, "y": 0, "width": 16, "height": 16, "autoTileMask": 3 },
-        { "id": "mask_4", "x": 64, "y": 0, "width": 16, "height": 16, "autoTileMask": 4 },
-        { "id": "mask_5", "x": 80, "y": 0, "width": 16, "height": 16, "autoTileMask": 5 },
-        { "id": "mask_6", "x": 96, "y": 0, "width": 16, "height": 16, "autoTileMask": 6 },
-        { "id": "mask_7", "x": 112, "y": 0, "width": 16, "height": 16, "autoTileMask": 7 },
-        { "id": "mask_8", "x": 128, "y": 0, "width": 16, "height": 16, "autoTileMask": 8 },
-        { "id": "mask_9", "x": 144, "y": 0, "width": 16, "height": 16, "autoTileMask": 9 },
-        { "id": "mask_10", "x": 160, "y": 0, "width": 16, "height": 16, "autoTileMask": 10 },
-        { "id": "mask_11", "x": 176, "y": 0, "width": 16, "height": 16, "autoTileMask": 11 },
-        { "id": "mask_12", "x": 192, "y": 0, "width": 16, "height": 16, "autoTileMask": 12 },
-        { "id": "mask_13", "x": 208, "y": 0, "width": 16, "height": 16, "autoTileMask": 13 },
-        { "id": "mask_14", "x": 224, "y": 0, "width": 16, "height": 16, "autoTileMask": 14 },
-        { "id": "mask_15", "x": 240, "y": 0, "width": 16, "height": 16, "autoTileMask": 15 }
+        {
+          "id": "mask_0",
+          "x": 0,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 0
+        },
+        {
+          "id": "mask_1",
+          "x": 16,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 1
+        },
+        {
+          "id": "mask_2",
+          "x": 32,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 2
+        },
+        {
+          "id": "mask_3",
+          "x": 48,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 3
+        },
+        {
+          "id": "mask_4",
+          "x": 64,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 4
+        },
+        {
+          "id": "mask_5",
+          "x": 80,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 5
+        },
+        {
+          "id": "mask_6",
+          "x": 96,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 6
+        },
+        {
+          "id": "mask_7",
+          "x": 112,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 7
+        },
+        {
+          "id": "mask_8",
+          "x": 128,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 8
+        },
+        {
+          "id": "mask_9",
+          "x": 144,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 9
+        },
+        {
+          "id": "mask_10",
+          "x": 160,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 10
+        },
+        {
+          "id": "mask_11",
+          "x": 176,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 11
+        },
+        {
+          "id": "mask_12",
+          "x": 192,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 12
+        },
+        {
+          "id": "mask_13",
+          "x": 208,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 13
+        },
+        {
+          "id": "mask_14",
+          "x": 224,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 14
+        },
+        {
+          "id": "mask_15",
+          "x": 240,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 15
+        }
       ],
-      "tags": ["world", "tile", "soil", "autotile"]
+      "tags": [
+        "autotile",
+        "tile",
+        "world",
+        "soil",
+        "blockface"
+      ]
     },
     {
       "id": "tiles/stone",
@@ -60,24 +306,142 @@
       "width": 256,
       "height": 16,
       "frames": [
-        { "id": "mask_0", "x": 0, "y": 0, "width": 16, "height": 16, "autoTileMask": 0 },
-        { "id": "mask_1", "x": 16, "y": 0, "width": 16, "height": 16, "autoTileMask": 1 },
-        { "id": "mask_2", "x": 32, "y": 0, "width": 16, "height": 16, "autoTileMask": 2 },
-        { "id": "mask_3", "x": 48, "y": 0, "width": 16, "height": 16, "autoTileMask": 3 },
-        { "id": "mask_4", "x": 64, "y": 0, "width": 16, "height": 16, "autoTileMask": 4 },
-        { "id": "mask_5", "x": 80, "y": 0, "width": 16, "height": 16, "autoTileMask": 5 },
-        { "id": "mask_6", "x": 96, "y": 0, "width": 16, "height": 16, "autoTileMask": 6 },
-        { "id": "mask_7", "x": 112, "y": 0, "width": 16, "height": 16, "autoTileMask": 7 },
-        { "id": "mask_8", "x": 128, "y": 0, "width": 16, "height": 16, "autoTileMask": 8 },
-        { "id": "mask_9", "x": 144, "y": 0, "width": 16, "height": 16, "autoTileMask": 9 },
-        { "id": "mask_10", "x": 160, "y": 0, "width": 16, "height": 16, "autoTileMask": 10 },
-        { "id": "mask_11", "x": 176, "y": 0, "width": 16, "height": 16, "autoTileMask": 11 },
-        { "id": "mask_12", "x": 192, "y": 0, "width": 16, "height": 16, "autoTileMask": 12 },
-        { "id": "mask_13", "x": 208, "y": 0, "width": 16, "height": 16, "autoTileMask": 13 },
-        { "id": "mask_14", "x": 224, "y": 0, "width": 16, "height": 16, "autoTileMask": 14 },
-        { "id": "mask_15", "x": 240, "y": 0, "width": 16, "height": 16, "autoTileMask": 15 }
+        {
+          "id": "mask_0",
+          "x": 0,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 0
+        },
+        {
+          "id": "mask_1",
+          "x": 16,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 1
+        },
+        {
+          "id": "mask_2",
+          "x": 32,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 2
+        },
+        {
+          "id": "mask_3",
+          "x": 48,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 3
+        },
+        {
+          "id": "mask_4",
+          "x": 64,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 4
+        },
+        {
+          "id": "mask_5",
+          "x": 80,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 5
+        },
+        {
+          "id": "mask_6",
+          "x": 96,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 6
+        },
+        {
+          "id": "mask_7",
+          "x": 112,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 7
+        },
+        {
+          "id": "mask_8",
+          "x": 128,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 8
+        },
+        {
+          "id": "mask_9",
+          "x": 144,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 9
+        },
+        {
+          "id": "mask_10",
+          "x": 160,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 10
+        },
+        {
+          "id": "mask_11",
+          "x": 176,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 11
+        },
+        {
+          "id": "mask_12",
+          "x": 192,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 12
+        },
+        {
+          "id": "mask_13",
+          "x": 208,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 13
+        },
+        {
+          "id": "mask_14",
+          "x": 224,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 14
+        },
+        {
+          "id": "mask_15",
+          "x": 240,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 15
+        }
       ],
-      "tags": ["world", "tile", "stone", "autotile"]
+      "tags": [
+        "autotile",
+        "tile",
+        "world",
+        "stone",
+        "blockface"
+      ]
     },
     {
       "id": "tiles/copper_ore",
@@ -86,24 +450,141 @@
       "width": 256,
       "height": 16,
       "frames": [
-        { "id": "mask_0", "x": 0, "y": 0, "width": 16, "height": 16, "autoTileMask": 0 },
-        { "id": "mask_1", "x": 16, "y": 0, "width": 16, "height": 16, "autoTileMask": 1 },
-        { "id": "mask_2", "x": 32, "y": 0, "width": 16, "height": 16, "autoTileMask": 2 },
-        { "id": "mask_3", "x": 48, "y": 0, "width": 16, "height": 16, "autoTileMask": 3 },
-        { "id": "mask_4", "x": 64, "y": 0, "width": 16, "height": 16, "autoTileMask": 4 },
-        { "id": "mask_5", "x": 80, "y": 0, "width": 16, "height": 16, "autoTileMask": 5 },
-        { "id": "mask_6", "x": 96, "y": 0, "width": 16, "height": 16, "autoTileMask": 6 },
-        { "id": "mask_7", "x": 112, "y": 0, "width": 16, "height": 16, "autoTileMask": 7 },
-        { "id": "mask_8", "x": 128, "y": 0, "width": 16, "height": 16, "autoTileMask": 8 },
-        { "id": "mask_9", "x": 144, "y": 0, "width": 16, "height": 16, "autoTileMask": 9 },
-        { "id": "mask_10", "x": 160, "y": 0, "width": 16, "height": 16, "autoTileMask": 10 },
-        { "id": "mask_11", "x": 176, "y": 0, "width": 16, "height": 16, "autoTileMask": 11 },
-        { "id": "mask_12", "x": 192, "y": 0, "width": 16, "height": 16, "autoTileMask": 12 },
-        { "id": "mask_13", "x": 208, "y": 0, "width": 16, "height": 16, "autoTileMask": 13 },
-        { "id": "mask_14", "x": 224, "y": 0, "width": 16, "height": 16, "autoTileMask": 14 },
-        { "id": "mask_15", "x": 240, "y": 0, "width": 16, "height": 16, "autoTileMask": 15 }
+        {
+          "id": "mask_0",
+          "x": 0,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 0
+        },
+        {
+          "id": "mask_1",
+          "x": 16,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 1
+        },
+        {
+          "id": "mask_2",
+          "x": 32,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 2
+        },
+        {
+          "id": "mask_3",
+          "x": 48,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 3
+        },
+        {
+          "id": "mask_4",
+          "x": 64,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 4
+        },
+        {
+          "id": "mask_5",
+          "x": 80,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 5
+        },
+        {
+          "id": "mask_6",
+          "x": 96,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 6
+        },
+        {
+          "id": "mask_7",
+          "x": 112,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 7
+        },
+        {
+          "id": "mask_8",
+          "x": 128,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 8
+        },
+        {
+          "id": "mask_9",
+          "x": 144,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 9
+        },
+        {
+          "id": "mask_10",
+          "x": 160,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 10
+        },
+        {
+          "id": "mask_11",
+          "x": 176,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 11
+        },
+        {
+          "id": "mask_12",
+          "x": 192,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 12
+        },
+        {
+          "id": "mask_13",
+          "x": 208,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 13
+        },
+        {
+          "id": "mask_14",
+          "x": 224,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 14
+        },
+        {
+          "id": "mask_15",
+          "x": 240,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 15
+        }
       ],
-      "tags": ["world", "tile", "ore", "autotile"]
+      "tags": [
+        "world",
+        "tile",
+        "ore",
+        "autotile"
+      ]
     },
     {
       "id": "tiles/iron_ore",
@@ -112,55 +593,481 @@
       "width": 256,
       "height": 16,
       "frames": [
-        { "id": "mask_0", "x": 0, "y": 0, "width": 16, "height": 16, "autoTileMask": 0 },
-        { "id": "mask_1", "x": 16, "y": 0, "width": 16, "height": 16, "autoTileMask": 1 },
-        { "id": "mask_2", "x": 32, "y": 0, "width": 16, "height": 16, "autoTileMask": 2 },
-        { "id": "mask_3", "x": 48, "y": 0, "width": 16, "height": 16, "autoTileMask": 3 },
-        { "id": "mask_4", "x": 64, "y": 0, "width": 16, "height": 16, "autoTileMask": 4 },
-        { "id": "mask_5", "x": 80, "y": 0, "width": 16, "height": 16, "autoTileMask": 5 },
-        { "id": "mask_6", "x": 96, "y": 0, "width": 16, "height": 16, "autoTileMask": 6 },
-        { "id": "mask_7", "x": 112, "y": 0, "width": 16, "height": 16, "autoTileMask": 7 },
-        { "id": "mask_8", "x": 128, "y": 0, "width": 16, "height": 16, "autoTileMask": 8 },
-        { "id": "mask_9", "x": 144, "y": 0, "width": 16, "height": 16, "autoTileMask": 9 },
-        { "id": "mask_10", "x": 160, "y": 0, "width": 16, "height": 16, "autoTileMask": 10 },
-        { "id": "mask_11", "x": 176, "y": 0, "width": 16, "height": 16, "autoTileMask": 11 },
-        { "id": "mask_12", "x": 192, "y": 0, "width": 16, "height": 16, "autoTileMask": 12 },
-        { "id": "mask_13", "x": 208, "y": 0, "width": 16, "height": 16, "autoTileMask": 13 },
-        { "id": "mask_14", "x": 224, "y": 0, "width": 16, "height": 16, "autoTileMask": 14 },
-        { "id": "mask_15", "x": 240, "y": 0, "width": 16, "height": 16, "autoTileMask": 15 }
+        {
+          "id": "mask_0",
+          "x": 0,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 0
+        },
+        {
+          "id": "mask_1",
+          "x": 16,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 1
+        },
+        {
+          "id": "mask_2",
+          "x": 32,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 2
+        },
+        {
+          "id": "mask_3",
+          "x": 48,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 3
+        },
+        {
+          "id": "mask_4",
+          "x": 64,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 4
+        },
+        {
+          "id": "mask_5",
+          "x": 80,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 5
+        },
+        {
+          "id": "mask_6",
+          "x": 96,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 6
+        },
+        {
+          "id": "mask_7",
+          "x": 112,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 7
+        },
+        {
+          "id": "mask_8",
+          "x": 128,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 8
+        },
+        {
+          "id": "mask_9",
+          "x": 144,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 9
+        },
+        {
+          "id": "mask_10",
+          "x": 160,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 10
+        },
+        {
+          "id": "mask_11",
+          "x": 176,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 11
+        },
+        {
+          "id": "mask_12",
+          "x": 192,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 12
+        },
+        {
+          "id": "mask_13",
+          "x": 208,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 13
+        },
+        {
+          "id": "mask_14",
+          "x": 224,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 14
+        },
+        {
+          "id": "mask_15",
+          "x": 240,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 15
+        }
       ],
-      "tags": ["world", "tile", "ore", "autotile"]
+      "tags": [
+        "world",
+        "tile",
+        "ore",
+        "autotile"
+      ]
     },
-    { "id": "tiles/wood", "path": "sprites/world/tiles/wood.png", "category": "Tile", "width": 16, "height": 16, "tags": ["world", "tile", "tree"] },
-    { "id": "tiles/leaves", "path": "sprites/world/tiles/leaves.png", "category": "Tile", "width": 16, "height": 16, "tags": ["world", "tile", "tree"] },
-    { "id": "tiles/workbench", "path": "sprites/world/objects/workbench.png", "category": "WorldObject", "width": 32, "height": 16, "tags": ["world", "station", "crafting"] },
-
-    { "id": "items/copper_coin", "path": "sprites/items/currency/copper_coin.png", "category": "Item", "width": 16, "height": 16, "tags": ["item", "currency"] },
-    { "id": "items/copper_ore", "path": "sprites/items/materials/copper_ore.png", "category": "Item", "width": 16, "height": 16, "tags": ["item", "material", "ore"] },
-    { "id": "items/iron_ore", "path": "sprites/items/materials/iron_ore.png", "category": "Item", "width": 16, "height": 16, "tags": ["item", "material", "ore"] },
-    { "id": "items/dirt_block", "path": "sprites/items/blocks/dirt_block.png", "category": "Item", "width": 16, "height": 16, "tags": ["item", "block"] },
-    { "id": "items/stone_block", "path": "sprites/items/blocks/stone_block.png", "category": "Item", "width": 16, "height": 16, "tags": ["item", "block"] },
-    { "id": "items/wood", "path": "sprites/items/materials/wood.png", "category": "Item", "width": 16, "height": 16, "tags": ["item", "material"] },
-    { "id": "items/gel", "path": "sprites/items/materials/gel.png", "category": "Item", "width": 16, "height": 16, "tags": ["item", "material"] },
-    { "id": "items/copper_pickaxe", "path": "sprites/tools/copper_pickaxe.png", "category": "Tool", "width": 16, "height": 16, "tags": ["item", "tool", "pickaxe"] },
-    { "id": "items/iron_pickaxe", "path": "sprites/tools/iron_pickaxe.png", "category": "Tool", "width": 16, "height": 16, "tags": ["item", "tool", "pickaxe", "iron"] },
-    { "id": "items/wooden_sword", "path": "sprites/weapons/wooden_sword.png", "category": "Weapon", "width": 16, "height": 16, "tags": ["item", "weapon", "melee", "wood"] },
-    { "id": "items/copper_sword", "path": "sprites/weapons/copper_sword.png", "category": "Weapon", "width": 16, "height": 16, "tags": ["item", "weapon", "melee"] },
-    { "id": "items/iron_sword", "path": "sprites/weapons/iron_sword.png", "category": "Weapon", "width": 16, "height": 16, "tags": ["item", "weapon", "melee", "iron"] },
-    { "id": "items/copper_helmet", "path": "sprites/items/armor/copper_helmet.png", "category": "Item", "width": 16, "height": 16, "tags": ["item", "armor", "copper"] },
-    { "id": "items/copper_chestplate", "path": "sprites/items/armor/copper_chestplate.png", "category": "Item", "width": 16, "height": 16, "tags": ["item", "armor", "copper"] },
-    { "id": "items/copper_greaves", "path": "sprites/items/armor/copper_greaves.png", "category": "Item", "width": 16, "height": 16, "tags": ["item", "armor", "copper"] },
-    { "id": "items/wooden_bow", "path": "sprites/weapons/wooden_bow.png", "category": "Weapon", "width": 16, "height": 16, "tags": ["item", "weapon", "ranged"] },
-    { "id": "items/wooden_arrow", "path": "sprites/items/ammo/wooden_arrow.png", "category": "Item", "width": 16, "height": 16, "tags": ["item", "ammo", "arrow"] },
-    { "id": "items/poison_arrow", "path": "sprites/items/ammo/poison_arrow.png", "category": "Item", "width": 16, "height": 16, "tags": ["item", "ammo", "arrow", "poison"] },
-    { "id": "items/workbench", "path": "sprites/items/stations/workbench.png", "category": "Item", "width": 16, "height": 16, "tags": ["item", "station", "crafting"] },
-    { "id": "items/mining_charm", "path": "sprites/items/accessories/mining_charm.png", "category": "Item", "width": 16, "height": 16, "tags": ["item", "accessory", "mining"] },
-    { "id": "items/healing_potion", "path": "sprites/items/consumables/healing_potion.png", "category": "Item", "width": 16, "height": 16, "tags": ["item", "consumable", "healing"] },
-    { "id": "items/copper_hoe", "path": "sprites/tools/copper_hoe.png", "category": "Tool", "width": 16, "height": 16, "tags": ["item", "tool", "farming", "hoe"] },
-    { "id": "items/watering_can", "path": "sprites/tools/watering_can.png", "category": "Tool", "width": 16, "height": 16, "tags": ["item", "tool", "farming", "watering"] },
-    { "id": "items/parsnip_seeds", "path": "sprites/items/seeds/parsnip_seeds.png", "category": "Item", "width": 16, "height": 16, "tags": ["item", "seed", "farming", "spring"] },
-    { "id": "items/parsnip", "path": "sprites/items/crops/parsnip.png", "category": "Item", "width": 16, "height": 16, "tags": ["item", "crop", "food", "spring"] },
-
+    {
+      "id": "tiles/wood",
+      "path": "sprites/world/tiles/wood.png",
+      "category": "Tile",
+      "width": 16,
+      "height": 16,
+      "tags": [
+        "world",
+        "tile",
+        "tree"
+      ]
+    },
+    {
+      "id": "tiles/leaves",
+      "path": "sprites/world/tiles/leaves.png",
+      "category": "Tile",
+      "width": 16,
+      "height": 16,
+      "tags": [
+        "world",
+        "tile",
+        "tree"
+      ]
+    },
+    {
+      "id": "tiles/workbench",
+      "path": "sprites/world/objects/workbench.png",
+      "category": "WorldObject",
+      "width": 32,
+      "height": 16,
+      "tags": [
+        "world",
+        "station",
+        "crafting"
+      ]
+    },
+    {
+      "id": "items/copper_coin",
+      "path": "sprites/items/currency/copper_coin.png",
+      "category": "Item",
+      "width": 16,
+      "height": 16,
+      "tags": [
+        "item",
+        "currency"
+      ]
+    },
+    {
+      "id": "items/copper_ore",
+      "path": "sprites/items/materials/copper_ore.png",
+      "category": "Item",
+      "width": 16,
+      "height": 16,
+      "tags": [
+        "item",
+        "material",
+        "ore"
+      ]
+    },
+    {
+      "id": "items/iron_ore",
+      "path": "sprites/items/materials/iron_ore.png",
+      "category": "Item",
+      "width": 16,
+      "height": 16,
+      "tags": [
+        "item",
+        "material",
+        "ore"
+      ]
+    },
+    {
+      "id": "items/dirt_block",
+      "path": "sprites/items/blocks/dirt_block.png",
+      "category": "Item",
+      "width": 16,
+      "height": 16,
+      "tags": [
+        "item",
+        "block"
+      ]
+    },
+    {
+      "id": "items/stone_block",
+      "path": "sprites/items/blocks/stone_block.png",
+      "category": "Item",
+      "width": 16,
+      "height": 16,
+      "tags": [
+        "item",
+        "block"
+      ]
+    },
+    {
+      "id": "items/wood",
+      "path": "sprites/items/materials/wood.png",
+      "category": "Item",
+      "width": 16,
+      "height": 16,
+      "tags": [
+        "item",
+        "material"
+      ]
+    },
+    {
+      "id": "items/gel",
+      "path": "sprites/items/materials/gel.png",
+      "category": "Item",
+      "width": 16,
+      "height": 16,
+      "tags": [
+        "item",
+        "material"
+      ]
+    },
+    {
+      "id": "items/copper_pickaxe",
+      "path": "sprites/tools/copper_pickaxe.png",
+      "category": "Tool",
+      "width": 16,
+      "height": 16,
+      "tags": [
+        "item",
+        "tool",
+        "pickaxe"
+      ]
+    },
+    {
+      "id": "items/iron_pickaxe",
+      "path": "sprites/tools/iron_pickaxe.png",
+      "category": "Tool",
+      "width": 16,
+      "height": 16,
+      "tags": [
+        "item",
+        "tool",
+        "pickaxe",
+        "iron"
+      ]
+    },
+    {
+      "id": "items/wooden_sword",
+      "path": "sprites/weapons/wooden_sword.png",
+      "category": "Weapon",
+      "width": 16,
+      "height": 16,
+      "tags": [
+        "item",
+        "weapon",
+        "melee",
+        "wood"
+      ]
+    },
+    {
+      "id": "items/copper_sword",
+      "path": "sprites/weapons/copper_sword.png",
+      "category": "Weapon",
+      "width": 16,
+      "height": 16,
+      "tags": [
+        "item",
+        "weapon",
+        "melee"
+      ]
+    },
+    {
+      "id": "items/iron_sword",
+      "path": "sprites/weapons/iron_sword.png",
+      "category": "Weapon",
+      "width": 16,
+      "height": 16,
+      "tags": [
+        "item",
+        "weapon",
+        "melee",
+        "iron"
+      ]
+    },
+    {
+      "id": "items/copper_helmet",
+      "path": "sprites/items/armor/copper_helmet.png",
+      "category": "Item",
+      "width": 16,
+      "height": 16,
+      "tags": [
+        "item",
+        "armor",
+        "copper"
+      ]
+    },
+    {
+      "id": "items/copper_chestplate",
+      "path": "sprites/items/armor/copper_chestplate.png",
+      "category": "Item",
+      "width": 16,
+      "height": 16,
+      "tags": [
+        "item",
+        "armor",
+        "copper"
+      ]
+    },
+    {
+      "id": "items/copper_greaves",
+      "path": "sprites/items/armor/copper_greaves.png",
+      "category": "Item",
+      "width": 16,
+      "height": 16,
+      "tags": [
+        "item",
+        "armor",
+        "copper"
+      ]
+    },
+    {
+      "id": "items/wooden_bow",
+      "path": "sprites/weapons/wooden_bow.png",
+      "category": "Weapon",
+      "width": 16,
+      "height": 16,
+      "tags": [
+        "item",
+        "weapon",
+        "ranged"
+      ]
+    },
+    {
+      "id": "items/wooden_arrow",
+      "path": "sprites/items/ammo/wooden_arrow.png",
+      "category": "Item",
+      "width": 16,
+      "height": 16,
+      "tags": [
+        "item",
+        "ammo",
+        "arrow"
+      ]
+    },
+    {
+      "id": "items/poison_arrow",
+      "path": "sprites/items/ammo/poison_arrow.png",
+      "category": "Item",
+      "width": 16,
+      "height": 16,
+      "tags": [
+        "item",
+        "ammo",
+        "arrow",
+        "poison"
+      ]
+    },
+    {
+      "id": "items/workbench",
+      "path": "sprites/items/stations/workbench.png",
+      "category": "Item",
+      "width": 16,
+      "height": 16,
+      "tags": [
+        "item",
+        "station",
+        "crafting"
+      ]
+    },
+    {
+      "id": "items/mining_charm",
+      "path": "sprites/items/accessories/mining_charm.png",
+      "category": "Item",
+      "width": 16,
+      "height": 16,
+      "tags": [
+        "item",
+        "accessory",
+        "mining"
+      ]
+    },
+    {
+      "id": "items/healing_potion",
+      "path": "sprites/items/consumables/healing_potion.png",
+      "category": "Item",
+      "width": 16,
+      "height": 16,
+      "tags": [
+        "item",
+        "consumable",
+        "healing"
+      ]
+    },
+    {
+      "id": "items/copper_hoe",
+      "path": "sprites/tools/copper_hoe.png",
+      "category": "Tool",
+      "width": 16,
+      "height": 16,
+      "tags": [
+        "item",
+        "tool",
+        "farming",
+        "hoe"
+      ]
+    },
+    {
+      "id": "items/watering_can",
+      "path": "sprites/tools/watering_can.png",
+      "category": "Tool",
+      "width": 16,
+      "height": 16,
+      "tags": [
+        "item",
+        "tool",
+        "farming",
+        "watering"
+      ]
+    },
+    {
+      "id": "items/parsnip_seeds",
+      "path": "sprites/items/seeds/parsnip_seeds.png",
+      "category": "Item",
+      "width": 16,
+      "height": 16,
+      "tags": [
+        "item",
+        "seed",
+        "farming",
+        "spring"
+      ]
+    },
+    {
+      "id": "items/parsnip",
+      "path": "sprites/items/crops/parsnip.png",
+      "category": "Item",
+      "width": 16,
+      "height": 16,
+      "tags": [
+        "item",
+        "crop",
+        "food",
+        "spring"
+      ]
+    },
     {
       "id": "crops/parsnip",
       "path": "sprites/world/crops/parsnip.png",
@@ -168,14 +1075,42 @@
       "width": 64,
       "height": 16,
       "frames": [
-        { "id": "stage_0", "x": 0, "y": 0, "width": 16, "height": 16 },
-        { "id": "stage_1", "x": 16, "y": 0, "width": 16, "height": 16 },
-        { "id": "stage_2", "x": 32, "y": 0, "width": 16, "height": 16 },
-        { "id": "stage_3", "x": 48, "y": 0, "width": 16, "height": 16 }
+        {
+          "id": "stage_0",
+          "x": 0,
+          "y": 0,
+          "width": 16,
+          "height": 16
+        },
+        {
+          "id": "stage_1",
+          "x": 16,
+          "y": 0,
+          "width": 16,
+          "height": 16
+        },
+        {
+          "id": "stage_2",
+          "x": 32,
+          "y": 0,
+          "width": 16,
+          "height": 16
+        },
+        {
+          "id": "stage_3",
+          "x": 48,
+          "y": 0,
+          "width": 16,
+          "height": 16
+        }
       ],
-      "tags": ["world", "crop", "farming", "spring"]
+      "tags": [
+        "world",
+        "crop",
+        "farming",
+        "spring"
+      ]
     },
-
     {
       "id": "entities/player/base_actions",
       "path": "sprites/entities/player/player_base_actions.png",
@@ -183,33 +1118,166 @@
       "width": 192,
       "height": 32,
       "frames": [
-        { "id": "idle_0", "x": 0, "y": 0, "width": 16, "height": 32, "originX": 8, "originY": 16 },
-        { "id": "idle_1", "x": 16, "y": 0, "width": 16, "height": 32, "originX": 8, "originY": 16 },
-        { "id": "walk_0", "x": 32, "y": 0, "width": 16, "height": 32, "originX": 8, "originY": 16 },
-        { "id": "walk_1", "x": 48, "y": 0, "width": 16, "height": 32, "originX": 8, "originY": 16 },
-        { "id": "walk_2", "x": 64, "y": 0, "width": 16, "height": 32, "originX": 8, "originY": 16 },
-        { "id": "walk_3", "x": 80, "y": 0, "width": 16, "height": 32, "originX": 8, "originY": 16 },
-        { "id": "jump", "x": 96, "y": 0, "width": 16, "height": 32, "originX": 8, "originY": 16 },
-        { "id": "fall", "x": 112, "y": 0, "width": 16, "height": 32, "originX": 8, "originY": 16 },
-        { "id": "mine_0", "x": 128, "y": 0, "width": 16, "height": 32, "originX": 8, "originY": 16 },
-        { "id": "mine_1", "x": 144, "y": 0, "width": 16, "height": 32, "originX": 8, "originY": 16 },
-        { "id": "attack_0", "x": 160, "y": 0, "width": 16, "height": 32, "originX": 8, "originY": 16 },
-        { "id": "attack_1", "x": 176, "y": 0, "width": 16, "height": 32, "originX": 8, "originY": 16 }
+        {
+          "id": "idle_0",
+          "x": 0,
+          "y": 0,
+          "width": 16,
+          "height": 32,
+          "originX": 8,
+          "originY": 16
+        },
+        {
+          "id": "idle_1",
+          "x": 16,
+          "y": 0,
+          "width": 16,
+          "height": 32,
+          "originX": 8,
+          "originY": 16
+        },
+        {
+          "id": "walk_0",
+          "x": 32,
+          "y": 0,
+          "width": 16,
+          "height": 32,
+          "originX": 8,
+          "originY": 16
+        },
+        {
+          "id": "walk_1",
+          "x": 48,
+          "y": 0,
+          "width": 16,
+          "height": 32,
+          "originX": 8,
+          "originY": 16
+        },
+        {
+          "id": "walk_2",
+          "x": 64,
+          "y": 0,
+          "width": 16,
+          "height": 32,
+          "originX": 8,
+          "originY": 16
+        },
+        {
+          "id": "walk_3",
+          "x": 80,
+          "y": 0,
+          "width": 16,
+          "height": 32,
+          "originX": 8,
+          "originY": 16
+        },
+        {
+          "id": "jump",
+          "x": 96,
+          "y": 0,
+          "width": 16,
+          "height": 32,
+          "originX": 8,
+          "originY": 16
+        },
+        {
+          "id": "fall",
+          "x": 112,
+          "y": 0,
+          "width": 16,
+          "height": 32,
+          "originX": 8,
+          "originY": 16
+        },
+        {
+          "id": "mine_0",
+          "x": 128,
+          "y": 0,
+          "width": 16,
+          "height": 32,
+          "originX": 8,
+          "originY": 16
+        },
+        {
+          "id": "mine_1",
+          "x": 144,
+          "y": 0,
+          "width": 16,
+          "height": 32,
+          "originX": 8,
+          "originY": 16
+        },
+        {
+          "id": "attack_0",
+          "x": 160,
+          "y": 0,
+          "width": 16,
+          "height": 32,
+          "originX": 8,
+          "originY": 16
+        },
+        {
+          "id": "attack_1",
+          "x": 176,
+          "y": 0,
+          "width": 16,
+          "height": 32,
+          "originX": 8,
+          "originY": 16
+        }
       ],
-      "tags": ["entity", "player", "character", "animated", "side-view"]
-    },    {
+      "tags": [
+        "entity",
+        "player",
+        "character",
+        "animated",
+        "side-view"
+      ]
+    },
+    {
       "id": "entities/player/hair_variants",
       "path": "sprites/entities/player/player_hair_variants.png",
       "category": "Entity",
       "width": 64,
       "height": 32,
       "frames": [
-        { "id": "short", "x": 0, "y": 0, "width": 16, "height": 32 },
-        { "id": "messy", "x": 16, "y": 0, "width": 16, "height": 32 },
-        { "id": "bob", "x": 32, "y": 0, "width": 16, "height": 32 },
-        { "id": "ponytail", "x": 48, "y": 0, "width": 16, "height": 32 }
+        {
+          "id": "short",
+          "x": 0,
+          "y": 0,
+          "width": 16,
+          "height": 32
+        },
+        {
+          "id": "messy",
+          "x": 16,
+          "y": 0,
+          "width": 16,
+          "height": 32
+        },
+        {
+          "id": "bob",
+          "x": 32,
+          "y": 0,
+          "width": 16,
+          "height": 32
+        },
+        {
+          "id": "ponytail",
+          "x": 48,
+          "y": 0,
+          "width": 16,
+          "height": 32
+        }
       ],
-      "tags": ["entity", "player", "character", "editor", "hair"]
+      "tags": [
+        "entity",
+        "player",
+        "character",
+        "editor",
+        "hair"
+      ]
     },
     {
       "id": "entities/player/clothes_variants",
@@ -218,22 +1286,1288 @@
       "width": 64,
       "height": 32,
       "frames": [
-        { "id": "starter", "x": 0, "y": 0, "width": 16, "height": 32 },
-        { "id": "work", "x": 16, "y": 0, "width": 16, "height": 32 },
-        { "id": "adventurer", "x": 32, "y": 0, "width": 16, "height": 32 },
-        { "id": "farmer", "x": 48, "y": 0, "width": 16, "height": 32 }
+        {
+          "id": "starter",
+          "x": 0,
+          "y": 0,
+          "width": 16,
+          "height": 32
+        },
+        {
+          "id": "work",
+          "x": 16,
+          "y": 0,
+          "width": 16,
+          "height": 32
+        },
+        {
+          "id": "adventurer",
+          "x": 32,
+          "y": 0,
+          "width": 16,
+          "height": 32
+        },
+        {
+          "id": "farmer",
+          "x": 48,
+          "y": 0,
+          "width": 16,
+          "height": 32
+        }
       ],
-      "tags": ["entity", "player", "character", "editor", "clothes"]
+      "tags": [
+        "entity",
+        "player",
+        "character",
+        "editor",
+        "clothes"
+      ]
     },
-    { "id": "entities/critters/rabbit", "path": "sprites/entities/critters/rabbit.png", "category": "Entity", "width": 64, "height": 16, "frames": [ { "id": "idle_0", "x": 0, "y": 0, "width": 16, "height": 16 }, { "id": "idle_1", "x": 16, "y": 0, "width": 16, "height": 16 }, { "id": "hop_0", "x": 32, "y": 0, "width": 16, "height": 16 }, { "id": "hop_1", "x": 48, "y": 0, "width": 16, "height": 16 } ], "tags": ["entity", "critter", "forest", "animated"] },
-    { "id": "entities/critters/bird", "path": "sprites/entities/critters/bird.png", "category": "Entity", "width": 64, "height": 16, "frames": [ { "id": "idle", "x": 0, "y": 0, "width": 16, "height": 16 }, { "id": "hop", "x": 16, "y": 0, "width": 16, "height": 16 }, { "id": "wing_0", "x": 32, "y": 0, "width": 16, "height": 16 }, { "id": "wing_1", "x": 48, "y": 0, "width": 16, "height": 16 } ], "tags": ["entity", "critter", "forest", "animated"] },
-    { "id": "entities/enemies/bat", "path": "sprites/entities/enemies/bat.png", "category": "Entity", "width": 64, "height": 16, "frames": [ { "id": "fly_0", "x": 0, "y": 0, "width": 16, "height": 16 }, { "id": "fly_1", "x": 16, "y": 0, "width": 16, "height": 16 }, { "id": "fly_2", "x": 32, "y": 0, "width": 16, "height": 16 }, { "id": "hurt", "x": 48, "y": 0, "width": 16, "height": 16 } ], "tags": ["entity", "enemy", "cave", "animated"] },
-    { "id": "entities/enemies/cave_worm", "path": "sprites/entities/enemies/cave_worm.png", "category": "Entity", "width": 64, "height": 16, "frames": [ { "id": "crawl_0", "x": 0, "y": 0, "width": 16, "height": 16 }, { "id": "crawl_1", "x": 16, "y": 0, "width": 16, "height": 16 }, { "id": "crawl_2", "x": 32, "y": 0, "width": 16, "height": 16 }, { "id": "hurt", "x": 48, "y": 0, "width": 16, "height": 16 } ], "tags": ["entity", "enemy", "cave", "animated"] },
-    { "id": "world/decor/plants_foliage_props", "path": "sprites/world/decor/plants_foliage_props.png", "category": "WorldObject", "width": 64, "height": 16, "frames": [ { "id": "grass_tuft", "x": 0, "y": 0, "width": 16, "height": 16 }, { "id": "fern", "x": 16, "y": 0, "width": 16, "height": 16 }, { "id": "flower", "x": 32, "y": 0, "width": 16, "height": 16 }, { "id": "mushroom", "x": 48, "y": 0, "width": 16, "height": 16 } ], "tags": ["world", "decor", "plant", "foliage"] },
-    { "id": "world/backgrounds/forest_parallax_layer", "path": "sprites/world/backgrounds/forest_parallax_layer.png", "category": "Background", "width": 256, "height": 64, "tags": ["background", "forest", "parallax"] },
-    { "id": "world/backgrounds/cave_parallax_layer", "path": "sprites/world/backgrounds/cave_parallax_layer.png", "category": "Background", "width": 256, "height": 64, "tags": ["background", "cave", "parallax"] },
-    { "id": "entities/slime", "path": "sprites/entities/enemies/slime.png", "category": "Entity", "width": 16, "height": 16, "tags": ["entity", "enemy"] },
-    { "id": "projectiles/wooden_arrow", "path": "sprites/projectiles/wooden_arrow.png", "category": "Projectile", "width": 16, "height": 16, "tags": ["projectile", "arrow"] },
-    { "id": "projectiles/poison_arrow", "path": "sprites/projectiles/poison_arrow.png", "category": "Projectile", "width": 16, "height": 16, "tags": ["projectile", "arrow", "poison"] }
+    {
+      "id": "entities/critters/rabbit",
+      "path": "sprites/entities/critters/rabbit.png",
+      "category": "Entity",
+      "width": 64,
+      "height": 16,
+      "frames": [
+        {
+          "id": "idle_0",
+          "x": 0,
+          "y": 0,
+          "width": 16,
+          "height": 16
+        },
+        {
+          "id": "idle_1",
+          "x": 16,
+          "y": 0,
+          "width": 16,
+          "height": 16
+        },
+        {
+          "id": "hop_0",
+          "x": 32,
+          "y": 0,
+          "width": 16,
+          "height": 16
+        },
+        {
+          "id": "hop_1",
+          "x": 48,
+          "y": 0,
+          "width": 16,
+          "height": 16
+        }
+      ],
+      "tags": [
+        "entity",
+        "critter",
+        "forest",
+        "animated"
+      ]
+    },
+    {
+      "id": "entities/critters/bird",
+      "path": "sprites/entities/critters/bird.png",
+      "category": "Entity",
+      "width": 64,
+      "height": 16,
+      "frames": [
+        {
+          "id": "idle",
+          "x": 0,
+          "y": 0,
+          "width": 16,
+          "height": 16
+        },
+        {
+          "id": "hop",
+          "x": 16,
+          "y": 0,
+          "width": 16,
+          "height": 16
+        },
+        {
+          "id": "wing_0",
+          "x": 32,
+          "y": 0,
+          "width": 16,
+          "height": 16
+        },
+        {
+          "id": "wing_1",
+          "x": 48,
+          "y": 0,
+          "width": 16,
+          "height": 16
+        }
+      ],
+      "tags": [
+        "entity",
+        "critter",
+        "forest",
+        "animated"
+      ]
+    },
+    {
+      "id": "entities/enemies/bat",
+      "path": "sprites/entities/enemies/bat.png",
+      "category": "Entity",
+      "width": 64,
+      "height": 16,
+      "frames": [
+        {
+          "id": "fly_0",
+          "x": 0,
+          "y": 0,
+          "width": 16,
+          "height": 16
+        },
+        {
+          "id": "fly_1",
+          "x": 16,
+          "y": 0,
+          "width": 16,
+          "height": 16
+        },
+        {
+          "id": "fly_2",
+          "x": 32,
+          "y": 0,
+          "width": 16,
+          "height": 16
+        },
+        {
+          "id": "hurt",
+          "x": 48,
+          "y": 0,
+          "width": 16,
+          "height": 16
+        }
+      ],
+      "tags": [
+        "entity",
+        "enemy",
+        "cave",
+        "animated"
+      ]
+    },
+    {
+      "id": "entities/enemies/cave_worm",
+      "path": "sprites/entities/enemies/cave_worm.png",
+      "category": "Entity",
+      "width": 64,
+      "height": 16,
+      "frames": [
+        {
+          "id": "crawl_0",
+          "x": 0,
+          "y": 0,
+          "width": 16,
+          "height": 16
+        },
+        {
+          "id": "crawl_1",
+          "x": 16,
+          "y": 0,
+          "width": 16,
+          "height": 16
+        },
+        {
+          "id": "crawl_2",
+          "x": 32,
+          "y": 0,
+          "width": 16,
+          "height": 16
+        },
+        {
+          "id": "hurt",
+          "x": 48,
+          "y": 0,
+          "width": 16,
+          "height": 16
+        }
+      ],
+      "tags": [
+        "entity",
+        "enemy",
+        "cave",
+        "animated"
+      ]
+    },
+    {
+      "id": "world/decor/plants_foliage_props",
+      "path": "sprites/world/decor/plants_foliage_props.png",
+      "category": "WorldObject",
+      "width": 64,
+      "height": 16,
+      "frames": [
+        {
+          "id": "grass_tuft",
+          "x": 0,
+          "y": 0,
+          "width": 16,
+          "height": 16
+        },
+        {
+          "id": "fern",
+          "x": 16,
+          "y": 0,
+          "width": 16,
+          "height": 16
+        },
+        {
+          "id": "flower",
+          "x": 32,
+          "y": 0,
+          "width": 16,
+          "height": 16
+        },
+        {
+          "id": "mushroom",
+          "x": 48,
+          "y": 0,
+          "width": 16,
+          "height": 16
+        }
+      ],
+      "tags": [
+        "world",
+        "decor",
+        "plant",
+        "foliage"
+      ]
+    },
+    {
+      "id": "world/backgrounds/forest_parallax_layer",
+      "path": "sprites/world/backgrounds/forest_parallax_layer.png",
+      "category": "Background",
+      "width": 256,
+      "height": 64,
+      "tags": [
+        "background",
+        "forest",
+        "parallax"
+      ]
+    },
+    {
+      "id": "world/backgrounds/cave_parallax_layer",
+      "path": "sprites/world/backgrounds/cave_parallax_layer.png",
+      "category": "Background",
+      "width": 256,
+      "height": 64,
+      "tags": [
+        "background",
+        "cave",
+        "parallax"
+      ]
+    },
+    {
+      "id": "entities/slime",
+      "path": "sprites/entities/enemies/slime.png",
+      "category": "Entity",
+      "width": 16,
+      "height": 16,
+      "tags": [
+        "entity",
+        "enemy"
+      ]
+    },
+    {
+      "id": "projectiles/wooden_arrow",
+      "path": "sprites/projectiles/wooden_arrow.png",
+      "category": "Projectile",
+      "width": 16,
+      "height": 16,
+      "tags": [
+        "projectile",
+        "arrow"
+      ]
+    },
+    {
+      "id": "projectiles/poison_arrow",
+      "path": "sprites/projectiles/poison_arrow.png",
+      "category": "Projectile",
+      "width": 16,
+      "height": 16,
+      "tags": [
+        "projectile",
+        "arrow",
+        "poison"
+      ]
+    },
+    {
+      "id": "tiles/dirt_autotile",
+      "path": "sprites/world/tiles/dirt_autotile.png",
+      "category": "Tile",
+      "width": 256,
+      "height": 16,
+      "frames": [
+        {
+          "id": "mask_0",
+          "x": 0,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 0
+        },
+        {
+          "id": "mask_1",
+          "x": 16,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 1
+        },
+        {
+          "id": "mask_2",
+          "x": 32,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 2
+        },
+        {
+          "id": "mask_3",
+          "x": 48,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 3
+        },
+        {
+          "id": "mask_4",
+          "x": 64,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 4
+        },
+        {
+          "id": "mask_5",
+          "x": 80,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 5
+        },
+        {
+          "id": "mask_6",
+          "x": 96,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 6
+        },
+        {
+          "id": "mask_7",
+          "x": 112,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 7
+        },
+        {
+          "id": "mask_8",
+          "x": 128,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 8
+        },
+        {
+          "id": "mask_9",
+          "x": 144,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 9
+        },
+        {
+          "id": "mask_10",
+          "x": 160,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 10
+        },
+        {
+          "id": "mask_11",
+          "x": 176,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 11
+        },
+        {
+          "id": "mask_12",
+          "x": 192,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 12
+        },
+        {
+          "id": "mask_13",
+          "x": 208,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 13
+        },
+        {
+          "id": "mask_14",
+          "x": 224,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 14
+        },
+        {
+          "id": "mask_15",
+          "x": 240,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 15
+        }
+      ],
+      "tags": [
+        "world",
+        "tile",
+        "soil",
+        "autotile",
+        "blockface"
+      ]
+    },
+    {
+      "id": "tiles/grass_autotile",
+      "path": "sprites/world/tiles/grass_autotile.png",
+      "category": "Tile",
+      "width": 256,
+      "height": 16,
+      "frames": [
+        {
+          "id": "mask_0",
+          "x": 0,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 0
+        },
+        {
+          "id": "mask_1",
+          "x": 16,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 1
+        },
+        {
+          "id": "mask_2",
+          "x": 32,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 2
+        },
+        {
+          "id": "mask_3",
+          "x": 48,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 3
+        },
+        {
+          "id": "mask_4",
+          "x": 64,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 4
+        },
+        {
+          "id": "mask_5",
+          "x": 80,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 5
+        },
+        {
+          "id": "mask_6",
+          "x": 96,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 6
+        },
+        {
+          "id": "mask_7",
+          "x": 112,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 7
+        },
+        {
+          "id": "mask_8",
+          "x": 128,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 8
+        },
+        {
+          "id": "mask_9",
+          "x": 144,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 9
+        },
+        {
+          "id": "mask_10",
+          "x": 160,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 10
+        },
+        {
+          "id": "mask_11",
+          "x": 176,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 11
+        },
+        {
+          "id": "mask_12",
+          "x": 192,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 12
+        },
+        {
+          "id": "mask_13",
+          "x": 208,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 13
+        },
+        {
+          "id": "mask_14",
+          "x": 224,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 14
+        },
+        {
+          "id": "mask_15",
+          "x": 240,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 15
+        }
+      ],
+      "tags": [
+        "world",
+        "tile",
+        "soil",
+        "grass",
+        "autotile",
+        "blockface"
+      ]
+    },
+    {
+      "id": "tiles/stone_autotile",
+      "path": "sprites/world/tiles/stone_autotile.png",
+      "category": "Tile",
+      "width": 256,
+      "height": 16,
+      "frames": [
+        {
+          "id": "mask_0",
+          "x": 0,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 0
+        },
+        {
+          "id": "mask_1",
+          "x": 16,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 1
+        },
+        {
+          "id": "mask_2",
+          "x": 32,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 2
+        },
+        {
+          "id": "mask_3",
+          "x": 48,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 3
+        },
+        {
+          "id": "mask_4",
+          "x": 64,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 4
+        },
+        {
+          "id": "mask_5",
+          "x": 80,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 5
+        },
+        {
+          "id": "mask_6",
+          "x": 96,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 6
+        },
+        {
+          "id": "mask_7",
+          "x": 112,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 7
+        },
+        {
+          "id": "mask_8",
+          "x": 128,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 8
+        },
+        {
+          "id": "mask_9",
+          "x": 144,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 9
+        },
+        {
+          "id": "mask_10",
+          "x": 160,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 10
+        },
+        {
+          "id": "mask_11",
+          "x": 176,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 11
+        },
+        {
+          "id": "mask_12",
+          "x": 192,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 12
+        },
+        {
+          "id": "mask_13",
+          "x": 208,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 13
+        },
+        {
+          "id": "mask_14",
+          "x": 224,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 14
+        },
+        {
+          "id": "mask_15",
+          "x": 240,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 15
+        }
+      ],
+      "tags": [
+        "world",
+        "tile",
+        "stone",
+        "autotile",
+        "blockface"
+      ]
+    },
+    {
+      "id": "tiles/leaves_autotile",
+      "path": "sprites/world/tiles/leaves_autotile.png",
+      "category": "Tile",
+      "width": 256,
+      "height": 16,
+      "frames": [
+        {
+          "id": "mask_0",
+          "x": 0,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 0
+        },
+        {
+          "id": "mask_1",
+          "x": 16,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 1
+        },
+        {
+          "id": "mask_2",
+          "x": 32,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 2
+        },
+        {
+          "id": "mask_3",
+          "x": 48,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 3
+        },
+        {
+          "id": "mask_4",
+          "x": 64,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 4
+        },
+        {
+          "id": "mask_5",
+          "x": 80,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 5
+        },
+        {
+          "id": "mask_6",
+          "x": 96,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 6
+        },
+        {
+          "id": "mask_7",
+          "x": 112,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 7
+        },
+        {
+          "id": "mask_8",
+          "x": 128,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 8
+        },
+        {
+          "id": "mask_9",
+          "x": 144,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 9
+        },
+        {
+          "id": "mask_10",
+          "x": 160,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 10
+        },
+        {
+          "id": "mask_11",
+          "x": 176,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 11
+        },
+        {
+          "id": "mask_12",
+          "x": 192,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 12
+        },
+        {
+          "id": "mask_13",
+          "x": 208,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 13
+        },
+        {
+          "id": "mask_14",
+          "x": 224,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 14
+        },
+        {
+          "id": "mask_15",
+          "x": 240,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 15
+        }
+      ],
+      "tags": [
+        "world",
+        "tile",
+        "tree",
+        "leaves",
+        "autotile",
+        "blockface"
+      ]
+    },
+    {
+      "id": "tiles/wood_autotile",
+      "path": "sprites/world/tiles/wood_autotile.png",
+      "category": "Tile",
+      "width": 256,
+      "height": 16,
+      "frames": [
+        {
+          "id": "mask_0",
+          "x": 0,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 0
+        },
+        {
+          "id": "mask_1",
+          "x": 16,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 1
+        },
+        {
+          "id": "mask_2",
+          "x": 32,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 2
+        },
+        {
+          "id": "mask_3",
+          "x": 48,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 3
+        },
+        {
+          "id": "mask_4",
+          "x": 64,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 4
+        },
+        {
+          "id": "mask_5",
+          "x": 80,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 5
+        },
+        {
+          "id": "mask_6",
+          "x": 96,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 6
+        },
+        {
+          "id": "mask_7",
+          "x": 112,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 7
+        },
+        {
+          "id": "mask_8",
+          "x": 128,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 8
+        },
+        {
+          "id": "mask_9",
+          "x": 144,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 9
+        },
+        {
+          "id": "mask_10",
+          "x": 160,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 10
+        },
+        {
+          "id": "mask_11",
+          "x": 176,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 11
+        },
+        {
+          "id": "mask_12",
+          "x": 192,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 12
+        },
+        {
+          "id": "mask_13",
+          "x": 208,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 13
+        },
+        {
+          "id": "mask_14",
+          "x": 224,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 14
+        },
+        {
+          "id": "mask_15",
+          "x": 240,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 15
+        }
+      ],
+      "tags": [
+        "world",
+        "tile",
+        "tree",
+        "wood",
+        "autotile",
+        "blockface"
+      ]
+    },
+    {
+      "id": "entities/player/hair_variants_v2",
+      "path": "sprites/entities/player/player_hair_variants_v2.png",
+      "category": "Entity",
+      "width": 128,
+      "height": 32,
+      "frames": [
+        {
+          "id": "short_brown",
+          "x": 0,
+          "y": 0,
+          "width": 16,
+          "height": 32
+        },
+        {
+          "id": "messy_black",
+          "x": 16,
+          "y": 0,
+          "width": 16,
+          "height": 32
+        },
+        {
+          "id": "bob_blond",
+          "x": 32,
+          "y": 0,
+          "width": 16,
+          "height": 32
+        },
+        {
+          "id": "ponytail_copper",
+          "x": 48,
+          "y": 0,
+          "width": 16,
+          "height": 32
+        },
+        {
+          "id": "braids_brown",
+          "x": 64,
+          "y": 0,
+          "width": 16,
+          "height": 32
+        },
+        {
+          "id": "mohawk_black",
+          "x": 80,
+          "y": 0,
+          "width": 16,
+          "height": 32
+        },
+        {
+          "id": "long_blond",
+          "x": 96,
+          "y": 0,
+          "width": 16,
+          "height": 32
+        },
+        {
+          "id": "cap_copper",
+          "x": 112,
+          "y": 0,
+          "width": 16,
+          "height": 32
+        }
+      ],
+      "tags": [
+        "entity",
+        "player",
+        "character",
+        "editor",
+        "hair",
+        "variants"
+      ]
+    },
+    {
+      "id": "entities/player/clothes_variants_v2",
+      "path": "sprites/entities/player/player_clothes_variants_v2.png",
+      "category": "Entity",
+      "width": 128,
+      "height": 32,
+      "frames": [
+        {
+          "id": "blue_jeans",
+          "x": 0,
+          "y": 0,
+          "width": 16,
+          "height": 32
+        },
+        {
+          "id": "green_work",
+          "x": 16,
+          "y": 0,
+          "width": 16,
+          "height": 32
+        },
+        {
+          "id": "red_trail",
+          "x": 32,
+          "y": 0,
+          "width": 16,
+          "height": 32
+        },
+        {
+          "id": "violet_mage",
+          "x": 48,
+          "y": 0,
+          "width": 16,
+          "height": 32
+        },
+        {
+          "id": "tan_worker",
+          "x": 64,
+          "y": 0,
+          "width": 16,
+          "height": 32
+        },
+        {
+          "id": "grey_miner",
+          "x": 80,
+          "y": 0,
+          "width": 16,
+          "height": 32
+        },
+        {
+          "id": "teal_scout",
+          "x": 96,
+          "y": 0,
+          "width": 16,
+          "height": 32
+        },
+        {
+          "id": "ochre_farmer",
+          "x": 112,
+          "y": 0,
+          "width": 16,
+          "height": 32
+        }
+      ],
+      "tags": [
+        "entity",
+        "player",
+        "character",
+        "editor",
+        "clothes",
+        "palette"
+      ]
+    },
+    {
+      "id": "entities/player/body_variants",
+      "path": "sprites/entities/player/player_body_variants.png",
+      "category": "Entity",
+      "width": 64,
+      "height": 32,
+      "frames": [
+        {
+          "id": "light",
+          "x": 0,
+          "y": 0,
+          "width": 16,
+          "height": 32
+        },
+        {
+          "id": "tan",
+          "x": 16,
+          "y": 0,
+          "width": 16,
+          "height": 32
+        },
+        {
+          "id": "warm",
+          "x": 32,
+          "y": 0,
+          "width": 16,
+          "height": 32
+        },
+        {
+          "id": "dark",
+          "x": 48,
+          "y": 0,
+          "width": 16,
+          "height": 32
+        }
+      ],
+      "tags": [
+        "entity",
+        "player",
+        "character",
+        "editor",
+        "skin",
+        "body"
+      ]
+    },
+    {
+      "id": "entities/player/accessories_hats",
+      "path": "sprites/entities/player/player_accessories_hats.png",
+      "category": "Entity",
+      "width": 96,
+      "height": 32,
+      "frames": [
+        {
+          "id": "straw_hat",
+          "x": 0,
+          "y": 0,
+          "width": 16,
+          "height": 32
+        },
+        {
+          "id": "miner_helmet",
+          "x": 16,
+          "y": 0,
+          "width": 16,
+          "height": 32
+        },
+        {
+          "id": "red_bandana",
+          "x": 32,
+          "y": 0,
+          "width": 16,
+          "height": 32
+        },
+        {
+          "id": "glasses",
+          "x": 48,
+          "y": 0,
+          "width": 16,
+          "height": 32
+        },
+        {
+          "id": "leaf_crown",
+          "x": 64,
+          "y": 0,
+          "width": 16,
+          "height": 32
+        },
+        {
+          "id": "hood",
+          "x": 80,
+          "y": 0,
+          "width": 16,
+          "height": 32
+        }
+      ],
+      "tags": [
+        "entity",
+        "player",
+        "character",
+        "editor",
+        "accessory",
+        "hat"
+      ]
+    }
   ]
 }

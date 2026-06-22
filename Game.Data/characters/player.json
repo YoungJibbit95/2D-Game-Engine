@@ -7,6 +7,8 @@
     "bodySpriteId": "entities/player/base_actions",
     "skinTone": "#c98f62",
     "hairStyleId": "short",
+    "clothesStyleId": "blue_jeans",
+    "accessoryId": "none",
     "hairColor": "#5b3825",
     "shirtColor": "#4f7fb8",
     "pantsColor": "#2f3f5f",

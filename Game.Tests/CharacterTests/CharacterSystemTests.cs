@@ -64,8 +64,12 @@ public sealed class CharacterSystemTests
         var session = new CharacterEditorSession(new CharacterAppearance());
 
         Assert.True(session.SetHairStyle("messy"));
+        Assert.True(session.SetClothesStyle("grey_miner"));
+        Assert.True(session.SetAccessory("miner_helmet"));
         Assert.False(session.SetHairStyle("missing_style"));
         Assert.Equal("messy", session.Appearance.HairStyleId);
+        Assert.Equal("grey_miner", session.Appearance.ClothesStyleId);
+        Assert.Equal("miner_helmet", session.Appearance.AccessoryId);
     }
 
     [Fact]

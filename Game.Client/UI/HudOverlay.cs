@@ -1,4 +1,6 @@
 using Game.Client.Rendering;
+using Game.Core.Inventory;
+using Game.Core.Items;
 using Game.Core.Settings;
 using Microsoft.Xna.Framework;
 
@@ -10,18 +12,32 @@ public sealed class HudOverlay
     private const int SlotSize = 42;
     private const int SlotGap = 4;
 
-    public void Draw(RenderContext context, int selectedHotbarSlot, int health, int maxHealth, GameSettings settings)
+    public void Draw(
+        RenderContext context,
+        PlayerInventory? inventory,
+        IItemDefinitionProvider? items,
+        ClientTextureRegistry? textures,
+        int health,
+        int maxHealth,
+        GameSettings settings)
     {
         var palette = UiTheme.Resolve(settings);
-        DrawHotbar(context, selectedHotbarSlot, palette, settings.Ui.HudOpacity);
+        DrawHotbar(context, inventory, items, textures, palette, settings.Ui.HudOpacity);
         DrawHealthBar(context, health, maxHealth, palette, settings.Ui.HudOpacity);
     }
 
-    private static void DrawHotbar(RenderContext context, int selectedSlot, UiPalette palette, float opacity)
+    private static void DrawHotbar(
+        RenderContext context,
+        PlayerInventory? inventory,
+        IItemDefinitionProvider? items,
+        ClientTextureRegistry? textures,
+        UiPalette palette,
+        float opacity)
     {
         var totalWidth = HotbarSlots * SlotSize + (HotbarSlots - 1) * SlotGap;
         var startX = (context.ViewportBounds.Width - totalWidth) / 2;
         var y = context.ViewportBounds.Height - SlotSize - 18;
+        var selectedSlot = inventory?.SelectedHotbarSlot ?? 0;
 
         for (var slot = 0; slot < HotbarSlots; slot++)
         {
@@ -32,7 +48,20 @@ public sealed class HudOverlay
             UiTheme.DrawBorder(context, bounds, UiTheme.WithAlpha(selected ? palette.Accent : palette.SurfaceHover, selected ? 1f : 0.72f), selected ? 2 : 1);
 
             var label = slot == 9 ? "0" : (slot + 1).ToString(System.Globalization.CultureInfo.InvariantCulture);
-            context.DebugText.Draw(new Vector2(x + 5, y + 5), label, selected ? palette.Text : palette.TextMuted, 2);
+            context.DebugText.Draw(new Vector2(x + 4, y + 4), label, selected ? palette.Text : palette.TextMuted, 1);
+
+            if (inventory is not null && items is not null)
+            {
+                ItemIconRenderer.DrawItemStack(
+                    context,
+                    textures,
+                    items,
+                    inventory.Hotbar.Slots[slot].Stack,
+                    bounds,
+                    palette,
+                    drawCount: true,
+                    opacity);
+            }
         }
     }
 

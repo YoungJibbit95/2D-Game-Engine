@@ -63,7 +63,7 @@ If the model supports a negative prompt field, put all negative text there inste
 
 Sprite ids are stable logical ids. Gameplay definitions reference ids, not file paths.
 
-- `tiles/dirt`
+- `tiles/dirt_autotile`
 - `tiles/workbench`
 - `walls/dirt_wall`
 - `items/dirt_block`
@@ -77,6 +77,14 @@ Sprite ids are stable logical ids. Gameplay definitions reference ids, not file 
 - `effects/hit_flash`
 - `ui/hotbar_slot`
 - `backgrounds/forest_day`
+
+Terrain blockface sprites that should visually connect use the suffix `_autotile` and provide 16 horizontal frames for masks `0..15`. The runtime tile definitions should reference these logical ids directly:
+
+- `tiles/dirt_autotile`
+- `tiles/grass_autotile`
+- `tiles/stone_autotile`
+- `tiles/wood_autotile`
+- `tiles/leaves_autotile`
 
 ## Source Folder Plan
 
@@ -177,7 +185,9 @@ The current base brief file covers all sprite ids in `Game.Data/assets/sprites.j
 - Armor and accessories: copper helmet, copper chestplate, copper greaves, mining charm.
 - Consumables/ammo: healing potion, wooden arrow, poison arrow.
 - Farming: copper hoe, watering can, parsnip seeds, harvested parsnip, and four-stage parsnip crop strip.
-- Runtime sprites: slime, player action sheet, player editor overlays, rabbit, bird, bat, cave worm, foliage props, forest/cave parallax layers, wooden arrow projectile, poison arrow projectile.
+- Runtime sprites: slime, player action sheet, player editor overlays, v2 body/hair/clothes/accessory sheets, rabbit, bird, bat, cave worm, foliage props, forest/cave parallax layers, wooden arrow projectile, poison arrow projectile.
+
+The latest programmer-art pass also adds corrected blockface sheets for dirt, grass, stone, wood, and leaves. These are deterministic starter assets, not final art direction, but they are valid production-shaped inputs for autotile rendering and asset validation.
 
 When new sprites are added to `Game.Data/assets`, add a matching brief in `Game.Data/asset_briefs` in the same change. The tests enforce this.
 

@@ -142,6 +142,7 @@ public sealed class GameSettingsValidator
         ValidateBinding(input.KeyBindings.AttackSecondary, "input.keyBindings.attackSecondary", result);
         ValidateBinding(input.KeyBindings.OpenInventory, "input.keyBindings.openInventory", result);
         ValidateBinding(input.KeyBindings.OpenCrafting, "input.keyBindings.openCrafting", result);
+        ValidateBinding(input.KeyBindings.OpenCharacterEditor, "input.keyBindings.openCharacterEditor", result);
         ValidateBinding(input.KeyBindings.Interact, "input.keyBindings.interact", result);
         ValidateBinding(input.KeyBindings.Pause, "input.keyBindings.pause", result);
         ValidateBinding(input.KeyBindings.DebugConsole, "input.keyBindings.debugConsole", result);

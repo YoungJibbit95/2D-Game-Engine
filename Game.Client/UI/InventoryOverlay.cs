@@ -86,7 +86,12 @@ public sealed class InventoryOverlay
         return true;
     }
 
-    public void Draw(RenderContext context, PlayerInventory inventory, IItemDefinitionProvider items, GameSettings settings)
+    public void Draw(
+        RenderContext context,
+        PlayerInventory inventory,
+        IItemDefinitionProvider items,
+        ClientTextureRegistry? textures,
+        GameSettings settings)
     {
         if (!IsOpen)
         {
@@ -114,13 +119,13 @@ public sealed class InventoryOverlay
 
         _slotHitZones.Clear();
         var hotbarStart = new Point(panel.X + 22, panel.Y + 78);
-        DrawSection(context, palette, "HOTBAR", inventory.Hotbar, SlotSection.Hotbar, hotbarStart, HotbarColumns);
+        DrawSection(context, palette, "HOTBAR", inventory.Hotbar, SlotSection.Hotbar, hotbarStart, HotbarColumns, textures);
 
         var mainStart = new Point(panel.X + 22, panel.Y + 150);
-        DrawSection(context, palette, "PACK", inventory.Main, SlotSection.Main, mainStart, MainColumns);
+        DrawSection(context, palette, "PACK", inventory.Main, SlotSection.Main, mainStart, MainColumns, textures);
 
         DrawTooltip(context, palette, panel, settings);
-        DrawCursorStack(context, palette, context.ViewportBounds);
+        DrawCursorStack(context, palette, context.ViewportBounds, textures);
 
         if (!string.IsNullOrWhiteSpace(_status))
         {
@@ -167,7 +172,8 @@ public sealed class InventoryOverlay
         Inventory inventory,
         SlotSection section,
         Point start,
-        int columns)
+        int columns,
+        ClientTextureRegistry? textures)
     {
         context.DebugText.Draw(new Vector2(start.X, start.Y - 18), title, palette.TextMuted, 1);
 
@@ -182,11 +188,11 @@ public sealed class InventoryOverlay
                 SlotSize);
             var zone = new SlotHitZone(bounds, inventory.Slots[index], section, index);
             _slotHitZones.Add(zone);
-            DrawSlot(context, palette, zone, section == SlotSection.Hotbar && _inventory?.SelectedHotbarSlot == index);
+            DrawSlot(context, palette, zone, section == SlotSection.Hotbar && _inventory?.SelectedHotbarSlot == index, textures);
         }
     }
 
-    private void DrawSlot(RenderContext context, UiPalette palette, SlotHitZone zone, bool selected)
+    private void DrawSlot(RenderContext context, UiPalette palette, SlotHitZone zone, bool selected, ClientTextureRegistry? textures)
     {
         var hovered = zone.Bounds.Contains(Mouse.GetState().Position);
         UiTheme.DrawButton(context, zone.Bounds, palette, selected, hovered);
@@ -196,14 +202,9 @@ public sealed class InventoryOverlay
             return;
         }
 
-        var item = _items?.GetById(zone.Slot.Stack.ItemId);
-        var label = Abbreviate(item?.DisplayName ?? zone.Slot.Stack.ItemId);
-        context.DebugText.Draw(new Vector2(zone.Bounds.X + 5, zone.Bounds.Y + 6), label, palette.Text, 1);
-
-        if (zone.Slot.Stack.Count > 1)
+        if (_items is not null)
         {
-            var count = zone.Slot.Stack.Count.ToString(System.Globalization.CultureInfo.InvariantCulture);
-            context.DebugText.Draw(new Vector2(zone.Bounds.Right - Math.Min(28, count.Length * 6 + 4), zone.Bounds.Bottom - 13), count, palette.Warning, 1);
+            ItemIconRenderer.DrawItemStack(context, textures, _items, zone.Slot.Stack, zone.Bounds, palette);
         }
     }
 
@@ -233,7 +234,7 @@ public sealed class InventoryOverlay
         }
     }
 
-    private void DrawCursorStack(RenderContext context, UiPalette palette, Rectangle viewport)
+    private void DrawCursorStack(RenderContext context, UiPalette palette, Rectangle viewport, ClientTextureRegistry? textures)
     {
         if (!_cursor.IsHoldingItem)
         {
@@ -247,11 +248,9 @@ public sealed class InventoryOverlay
             SlotSize,
             SlotSize);
         UiTheme.DrawButton(context, bounds, palette, selected: true, hovered: false);
-        var item = _items?.GetById(_cursor.HeldStack.ItemId);
-        context.DebugText.Draw(new Vector2(bounds.X + 5, bounds.Y + 6), Abbreviate(item?.DisplayName ?? _cursor.HeldStack.ItemId), palette.Text, 1);
-        if (_cursor.HeldStack.Count > 1)
+        if (_items is not null)
         {
-            context.DebugText.Draw(new Vector2(bounds.X + 5, bounds.Bottom - 13), _cursor.HeldStack.Count.ToString(System.Globalization.CultureInfo.InvariantCulture), palette.Warning, 1);
+            ItemIconRenderer.DrawItemStack(context, textures, _items, _cursor.HeldStack, bounds, palette);
         }
     }
 
@@ -318,24 +317,6 @@ public sealed class InventoryOverlay
         {
             yield return $"TAGS {string.Join(" ", item.Tags.Take(3).Select(tag => tag.ToUpperInvariant()))}";
         }
-    }
-
-    private static string Abbreviate(string text)
-    {
-        if (string.IsNullOrWhiteSpace(text))
-        {
-            return "?";
-        }
-
-        var words = text.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-        if (words.Length > 1)
-        {
-            return string.Concat(words.Select(word => char.ToUpperInvariant(word[0]))).Substring(0, Math.Min(4, words.Length));
-        }
-
-        return text.Length <= 4
-            ? text.ToUpperInvariant()
-            : text[..4].ToUpperInvariant();
     }
 
     private enum SlotSection
