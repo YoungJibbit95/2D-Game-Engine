@@ -109,6 +109,18 @@ public sealed class ItemDefinitionJsonLoader
 
         public float MiningSpeedBonus { get; init; }
 
+        public int MaxManaBonus { get; init; }
+
+        public float MagicDamageBonus { get; init; }
+
+        public float ManaCostReduction { get; init; }
+
+        public float ManaRegenBonus { get; init; }
+
+        public int ManaCost { get; init; }
+
+        public int ManaRestore { get; init; }
+
         public List<ItemActionDefinitionDto> Actions { get; init; } = new();
 
         public AttackShapeDefinition? AttackShape { get; init; }
@@ -139,6 +151,12 @@ public sealed class ItemDefinitionJsonLoader
                 MeleeDamageBonus = MeleeDamageBonus,
                 RangedDamageBonus = RangedDamageBonus,
                 MiningSpeedBonus = MiningSpeedBonus,
+                MaxManaBonus = MaxManaBonus,
+                MagicDamageBonus = MagicDamageBonus,
+                ManaCostReduction = ManaCostReduction,
+                ManaRegenBonus = ManaRegenBonus,
+                ManaCost = ManaCost,
+                ManaRestore = ManaRestore,
                 Actions = Actions.Count > 0
                     ? Actions.Select(action => action.ToDefinition()).ToArray()
                     : new[] { ItemActionResolver.InferFromLegacyType(Type) }.Where(action => action.Kind != ItemActionKind.None).ToArray(),

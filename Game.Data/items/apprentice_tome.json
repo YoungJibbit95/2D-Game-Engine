@@ -1,0 +1,19 @@
+{
+  "id": "apprentice_tome",
+  "displayName": "Apprentice Tome",
+  "type": "WeaponMagic",
+  "texture": "items/apprentice_tome",
+  "maxStack": 1,
+  "useTime": 0.52,
+  "damage": 5,
+  "knockback": 1.4,
+  "manaCost": 10,
+  "actions": [
+    {
+      "kind": "Cast",
+      "projectile": "arcane_mote",
+      "projectileSpeedMultiplier": 0.94
+    }
+  ],
+  "tags": ["item", "weapon", "magic", "book"]
+}

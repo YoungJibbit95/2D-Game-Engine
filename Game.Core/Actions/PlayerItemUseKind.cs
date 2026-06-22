@@ -7,6 +7,8 @@ public enum PlayerItemUseKind
     Build,
     Melee,
     Shoot,
+    Cast,
+    Consume,
     Till,
     Water,
     Plant,

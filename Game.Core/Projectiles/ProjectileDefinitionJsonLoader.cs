@@ -1,4 +1,5 @@
 using Game.Core.Effects;
+using Game.Core.Combat;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -75,6 +76,8 @@ public sealed class ProjectileDefinitionJsonLoader
 
         public int Damage { get; init; }
 
+        public DamageType DamageType { get; init; } = DamageType.Ranged;
+
         public float Gravity { get; init; }
 
         public int Pierce { get; init; }
@@ -91,6 +94,7 @@ public sealed class ProjectileDefinitionJsonLoader
                 TexturePath = TexturePath ?? Texture ?? string.Empty,
                 Speed = Speed,
                 Damage = Damage,
+                DamageType = DamageType,
                 Gravity = Gravity,
                 Pierce = Pierce,
                 Lifetime = Lifetime,

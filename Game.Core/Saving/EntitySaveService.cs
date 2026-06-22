@@ -141,6 +141,7 @@ public sealed class EntitySaveService
             new Vector2(data.PositionX, data.PositionY),
             new Vector2(data.VelocityX, data.VelocityY),
             definition.Damage,
+            definition.DamageType,
             definition.Gravity,
             data.Pierce,
             definition.Lifetime,

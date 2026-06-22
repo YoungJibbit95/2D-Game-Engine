@@ -1,0 +1,12 @@
+{
+  "id": "mana_crystal",
+  "displayName": "Mana Crystal",
+  "type": "Accessory",
+  "texture": "items/mana_crystal",
+  "maxStack": 1,
+  "equipmentSlot": "Accessory1",
+  "maxManaBonus": 20,
+  "magicDamageBonus": 0.08,
+  "manaRegenBonus": 0.18,
+  "tags": ["item", "accessory", "magic", "mana"]
+}

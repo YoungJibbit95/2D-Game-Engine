@@ -1,0 +1,12 @@
+{
+  "id": "apprentice_tome",
+  "result": { "itemId": "apprentice_tome", "count": 1 },
+  "ingredients": [
+    { "itemId": "wood", "count": 12 },
+    { "itemId": "gel", "count": 8 },
+    { "itemId": "iron_ore", "count": 3 }
+  ],
+  "station": "workbench",
+  "category": "magic",
+  "sortOrder": 36
+}

@@ -19,12 +19,10 @@ Only open work is kept here. Completed items are removed after implementation.
 
 ## Inventory And Equipment UI
 
-- [ ] Add equipment slot widgets.
-- [ ] Add stat summary panel for armor/accessory bonuses.
 - [ ] Add sorting, stack compaction, and category filters.
 
 ## Crafting UI
-- [ ] Add recipe category filters and search.
+- [ ] Add recipe search.
 - [ ] Add craft amount controls and hold-to-repeat timing.
 - [ ] Add recipe pinning/tracking in HUD.
 - [ ] Add station-range indicator and recipe unlock source hints.

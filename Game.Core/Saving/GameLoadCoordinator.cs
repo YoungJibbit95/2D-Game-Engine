@@ -146,6 +146,7 @@ public sealed class GameLoadCoordinator
             new Vector2(data.PositionX, data.PositionY),
             _collisionResolver,
             data.MaxHealth,
-            data.Health);
+            data.Health,
+            currentMana: data.Mana);
     }
 }

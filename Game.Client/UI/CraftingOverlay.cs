@@ -17,15 +17,18 @@ public sealed class CraftingOverlay
 {
     private const int RowHeight = 28;
     private const int VisibleRecipeRows = 11;
+    private static readonly string[] CategoryFilters = ["ALL", "BLOCKS", "TOOLS", "WEAPONS", "MAGIC", "FURNITURE"];
 
     private readonly CraftingSystem _crafting = new();
     private readonly CraftingStationLocator _stations = new();
     private readonly List<RecipeHitZone> _recipeHitZones = new();
+    private readonly List<CategoryHitZone> _categoryHitZones = new();
     private Rectangle _craftButtonBounds;
     private IReadOnlyList<CraftingQueryResult> _lastResults = Array.Empty<CraftingQueryResult>();
     private CraftingContext? _lastContext;
     private int _selectedIndex;
     private int _scroll;
+    private int _categoryIndex;
     private string? _status;
 
     public bool IsOpen { get; private set; }
@@ -112,7 +115,10 @@ public sealed class CraftingOverlay
             context.DebugText.Draw(new Vector2(panel.X + 22, panel.Y + 52), "UP DOWN SELECT   ENTER CRAFT   SHIFT ENTER REPEAT   C ESC CLOSE", palette.TextMuted, 1);
         }
 
-        var listBounds = new Rectangle(panel.X + 20, panel.Y + 80, 314, panel.Height - 122);
+        var tabBounds = new Rectangle(panel.X + 20, panel.Y + 78, panel.Width - 40, 30);
+        DrawCategoryTabs(context, palette, tabBounds);
+
+        var listBounds = new Rectangle(panel.X + 20, panel.Y + 118, 314, panel.Height - 160);
         var detailBounds = new Rectangle(listBounds.Right + 18, listBounds.Y, panel.Right - listBounds.Right - 38, listBounds.Height);
         DrawRecipeList(context, palette, listBounds, content.Items, textures);
         DrawRecipeDetails(context, palette, detailBounds, content.Items, textures);
@@ -135,6 +141,7 @@ public sealed class CraftingOverlay
         _lastContext = _stations.CreateContext(inventory, world, content.Tiles, actorTile, radiusTiles);
         _lastResults = _crafting.QueryRecipes(_lastContext, content.Recipes)
             .Where(result => result.IsKnown)
+            .Where(result => MatchesCategory(result, content.Items))
             .ToArray();
         _selectedIndex = Math.Clamp(_selectedIndex, 0, Math.Max(0, _lastResults.Count - 1));
         _scroll = Math.Clamp(_scroll, 0, Math.Max(0, _lastResults.Count - VisibleRecipeRows));
@@ -189,9 +196,35 @@ public sealed class CraftingOverlay
             }
         }
 
+        var hoveredCategory = _categoryHitZones.LastOrDefault(zone => zone.Bounds.Contains(input.MousePosition));
+        if (hoveredCategory is not null && input.IsLeftMousePressed)
+        {
+            _categoryIndex = hoveredCategory.Index;
+            _selectedIndex = 0;
+            _scroll = 0;
+            _status = $"FILTER {CategoryFilters[_categoryIndex]}";
+            return;
+        }
+
         if (_craftButtonBounds.Contains(input.MousePosition) && input.IsLeftMousePressed)
         {
             CraftSelected(repeat: input.IsKeyDown(Keys.LeftShift) || input.IsKeyDown(Keys.RightShift));
+        }
+    }
+
+    private void DrawCategoryTabs(RenderContext context, UiPalette palette, Rectangle bounds)
+    {
+        _categoryHitZones.Clear();
+        var gap = 6;
+        var tabWidth = Math.Max(72, (bounds.Width - gap * (CategoryFilters.Length - 1)) / CategoryFilters.Length);
+        for (var index = 0; index < CategoryFilters.Length; index++)
+        {
+            var tab = new Rectangle(bounds.X + index * (tabWidth + gap), bounds.Y, tabWidth, bounds.Height);
+            var selected = index == _categoryIndex;
+            var hovered = tab.Contains(Microsoft.Xna.Framework.Input.Mouse.GetState().Position);
+            UiTheme.DrawButton(context, tab, palette, selected, hovered);
+            context.DebugText.Draw(new Vector2(tab.X + 9, tab.Y + 10), CategoryFilters[index], selected ? palette.Text : palette.TextMuted, 1);
+            _categoryHitZones.Add(new CategoryHitZone(tab, index));
         }
     }
 
@@ -327,6 +360,33 @@ public sealed class CraftingOverlay
         return result.CanCraft ? "CRAFTABLE" : "NO SPACE";
     }
 
+    private bool MatchesCategory(CraftingQueryResult result, IItemDefinitionProvider items)
+    {
+        var filter = CategoryFilters[Math.Clamp(_categoryIndex, 0, CategoryFilters.Length - 1)];
+        if (filter == "ALL")
+        {
+            return true;
+        }
+
+        var recipe = result.Recipe;
+        var category = recipe.Category.ToUpperInvariant();
+        if (category.Contains(filter, StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
+        }
+
+        var item = items.GetById(recipe.Result.ItemId);
+        return filter switch
+        {
+            "BLOCKS" => item.Type == ItemType.PlaceableTile || item.HasTag("block") || item.HasTag("placeable"),
+            "TOOLS" => item.Type is ItemType.ToolPickaxe or ItemType.ToolAxe or ItemType.ToolHoe or ItemType.ToolWateringCan,
+            "WEAPONS" => item.Type is ItemType.WeaponMelee or ItemType.WeaponRanged or ItemType.WeaponMagic || item.HasTag("weapon"),
+            "MAGIC" => item.Type == ItemType.WeaponMagic || item.HasTag("magic") || item.ManaCost > 0 || item.MaxManaBonus != 0,
+            "FURNITURE" => item.HasTag("furniture") || item.HasTag("station") || category.Contains("FURNITURE", StringComparison.OrdinalIgnoreCase),
+            _ => true
+        };
+    }
+
     private static string AbbreviateText(string value, int maxLength)
     {
         if (string.IsNullOrWhiteSpace(value) || value.Length <= maxLength)
@@ -338,4 +398,6 @@ public sealed class CraftingOverlay
     }
 
     private sealed record RecipeHitZone(Rectangle Bounds, int Index);
+
+    private sealed record CategoryHitZone(Rectangle Bounds, int Index);
 }

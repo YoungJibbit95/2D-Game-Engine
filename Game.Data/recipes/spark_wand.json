@@ -1,0 +1,12 @@
+{
+  "id": "spark_wand",
+  "result": { "itemId": "spark_wand", "count": 1 },
+  "ingredients": [
+    { "itemId": "wood", "count": 8 },
+    { "itemId": "gel", "count": 4 },
+    { "itemId": "copper_ore", "count": 3 }
+  ],
+  "station": "workbench",
+  "category": "magic",
+  "sortOrder": 34
+}

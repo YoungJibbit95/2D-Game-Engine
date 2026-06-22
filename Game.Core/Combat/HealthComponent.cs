@@ -64,6 +64,21 @@ public sealed class HealthComponent
         Current = Math.Min(Max, Current + amount);
     }
 
+    public void SetMax(int maxHealth, bool preserveRatio = true)
+    {
+        if (maxHealth <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(maxHealth), "Max health must be greater than zero.");
+        }
+
+        var oldMax = Max;
+        var oldCurrent = Current;
+        Max = maxHealth;
+        Current = preserveRatio && oldMax > 0
+            ? Math.Clamp((int)MathF.Round(Max * (oldCurrent / (float)oldMax)), 0, Max)
+            : Math.Clamp(oldCurrent, 0, Max);
+    }
+
     public void RestoreFull()
     {
         Current = Max;

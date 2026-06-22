@@ -1,4 +1,5 @@
 using Game.Core.Effects;
+using Game.Core.Combat;
 
 namespace Game.Core.Projectiles;
 
@@ -11,6 +12,8 @@ public sealed record ProjectileDefinition
     public required float Speed { get; init; }
 
     public required int Damage { get; init; }
+
+    public DamageType DamageType { get; init; } = DamageType.Ranged;
 
     public float Gravity { get; init; }
 

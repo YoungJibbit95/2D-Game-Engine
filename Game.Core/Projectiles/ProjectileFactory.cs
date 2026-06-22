@@ -1,4 +1,5 @@
 using System.Numerics;
+using Game.Core.Combat;
 
 namespace Game.Core.Projectiles;
 
@@ -8,7 +9,9 @@ public sealed class ProjectileFactory
         ProjectileDefinition definition,
         Vector2 position,
         Vector2 direction,
-        int? ownerEntityId = null)
+        int? ownerEntityId = null,
+        int? damageOverride = null,
+        DamageType? damageTypeOverride = null)
     {
         ArgumentNullException.ThrowIfNull(definition);
 
@@ -23,7 +26,8 @@ public sealed class ProjectileFactory
             definition.Id,
             position,
             direction * definition.Speed,
-            definition.Damage,
+            damageOverride ?? definition.Damage,
+            damageTypeOverride ?? definition.DamageType,
             definition.Gravity,
             definition.Pierce,
             definition.Lifetime,

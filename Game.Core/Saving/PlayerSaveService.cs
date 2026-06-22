@@ -45,7 +45,7 @@ public sealed class PlayerSaveService
         PlayerInventory inventory,
         string playerId,
         string displayName,
-        int mana = 0)
+        int? mana = null)
     {
         ArgumentNullException.ThrowIfNull(player);
         ArgumentNullException.ThrowIfNull(inventory);
@@ -60,7 +60,7 @@ public sealed class PlayerSaveService
             PositionY = player.Body.Position.Y,
             Health = player.Health,
             MaxHealth = player.MaxHealth,
-            Mana = mana,
+            Mana = mana ?? player.Mana,
             SelectedHotbarSlot = inventory.SelectedHotbarSlot,
             InventorySlots = inventory.Hotbar.Slots
                 .Concat(inventory.Main.Slots)

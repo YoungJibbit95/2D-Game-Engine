@@ -85,6 +85,8 @@ public sealed class PlayerItemUseSystem
             ItemActionKind.Mine => TryMine(world, content, player, entities, targetTile, item, action, deltaSeconds, events),
             ItemActionKind.Melee => TryMelee(player, entities, content, item, targetWorldPosition, events),
             ItemActionKind.Shoot => TryShoot(content, player, inventory, entities, item, action, targetWorldPosition),
+            ItemActionKind.Cast => TryCast(content, player, entities, item, action, targetWorldPosition),
+            ItemActionKind.Consume => TryConsume(player, inventory, selected.ItemId, item),
             ItemActionKind.Till => TryTill(world, content, farmPlots, targetTile, item),
             ItemActionKind.Water => TryWater(world, farmPlots, targetTile, item),
             ItemActionKind.Plant => TryPlant(world, content, inventory, farmPlots, targetTile, selected.ItemId, item, farmSeason, currentDay),
@@ -138,7 +140,7 @@ public sealed class PlayerItemUseSystem
             player.Body.Center,
             ResolveReach(action),
             item.ToolPower,
-            deltaSeconds,
+            deltaSeconds * player.Stats.MiningSpeedMultiplier,
             events);
 
         if (mining.Completed && !mining.DroppedItem.IsEmpty)
@@ -193,16 +195,75 @@ public sealed class PlayerItemUseSystem
         }
 
         var direction = targetWorldPosition - player.Body.Center;
+        var projectileDamage = Math.Max(1, (int)MathF.Round((definition.Damage + item.Damage) * player.Stats.RangedDamageMultiplier));
         var projectile = _projectiles.Create(
             definition,
             player.Body.Center,
             direction,
-            player.Id == 0 ? null : player.Id);
+            player.Id == 0 ? null : player.Id,
+            damageOverride: projectileDamage);
 
         projectile.Velocity *= action.ProjectileSpeedMultiplier;
         entities.Add(projectile);
 
         return StartCooldown(new PlayerItemUseResult(PlayerItemUseKind.Shoot, MiningResult.None, false, MeleeAttackResult.None, projectile), item);
+    }
+
+    private PlayerItemUseResult TryCast(
+        GameContentDatabase content,
+        PlayerEntity player,
+        EntityManager entities,
+        ItemDefinition item,
+        ItemActionDefinition action,
+        Vector2 targetWorldPosition)
+    {
+        if (string.IsNullOrWhiteSpace(action.ProjectileId) || !content.Projectiles.TryGetById(action.ProjectileId, out var definition))
+        {
+            return PlayerItemUseResult.None;
+        }
+
+        var manaCost = Math.Max(0, (int)MathF.Ceiling(item.ManaCost * player.Stats.ManaCostMultiplier));
+        if (!player.ManaComponent.TrySpend(manaCost))
+        {
+            return PlayerItemUseResult.None;
+        }
+
+        var damage = Math.Max(1, (int)MathF.Round((definition.Damage + item.Damage) * player.Stats.MagicDamageMultiplier));
+        var direction = targetWorldPosition - player.Body.Center;
+        var projectile = _projectiles.Create(
+            definition,
+            player.Body.Center,
+            direction,
+            player.Id == 0 ? null : player.Id,
+            damageOverride: damage,
+            damageTypeOverride: DamageType.Magic);
+
+        projectile.Velocity *= action.ProjectileSpeedMultiplier;
+        entities.Add(projectile);
+
+        return StartCooldown(new PlayerItemUseResult(PlayerItemUseKind.Cast, MiningResult.None, false, MeleeAttackResult.None, projectile), item);
+    }
+
+    private PlayerItemUseResult TryConsume(
+        PlayerEntity player,
+        PlayerInventory inventory,
+        string itemId,
+        ItemDefinition item)
+    {
+        var changed = false;
+        if (item.ManaRestore > 0 && player.Mana < player.MaxMana)
+        {
+            player.ManaComponent.Restore(item.ManaRestore);
+            changed = true;
+        }
+
+        if (!changed)
+        {
+            return PlayerItemUseResult.None;
+        }
+
+        inventory.RemoveItem(itemId, 1);
+        return StartCooldown(new PlayerItemUseResult(PlayerItemUseKind.Consume, MiningResult.None, false, MeleeAttackResult.None), item);
     }
 
     private PlayerItemUseResult TryTill(

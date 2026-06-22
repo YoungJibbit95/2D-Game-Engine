@@ -22,6 +22,21 @@ public sealed class ProjectileEntity : Entity
         float lifetime,
         int? ownerEntityId = null,
         float age = 0)
+        : this(projectileId, position, velocity, damage, DamageType.Ranged, gravity, pierce, lifetime, ownerEntityId, age)
+    {
+    }
+
+    public ProjectileEntity(
+        string projectileId,
+        Vector2 position,
+        Vector2 velocity,
+        int damage,
+        DamageType damageType,
+        float gravity,
+        int pierce,
+        float lifetime,
+        int? ownerEntityId = null,
+        float age = 0)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(projectileId);
 
@@ -29,6 +44,7 @@ public sealed class ProjectileEntity : Entity
         Position = position;
         Velocity = velocity;
         Damage = damage;
+        DamageType = damageType;
         Gravity = gravity;
         Pierce = pierce;
         Lifetime = lifetime;
@@ -42,6 +58,8 @@ public sealed class ProjectileEntity : Entity
 
     public int Damage { get; }
 
+    public DamageType DamageType { get; }
+
     public float Gravity { get; }
 
     public int Pierce { get; private set; }
@@ -52,7 +70,7 @@ public sealed class ProjectileEntity : Entity
 
     public float Age => _age;
 
-    public DamageInfo DamageInfo => new(Damage, DamageType.Ranged, OwnerEntityId, Vector2.Normalize(Velocity == Vector2.Zero ? Vector2.UnitX : Velocity), 1f);
+    public DamageInfo DamageInfo => new(Damage, DamageType, OwnerEntityId, Vector2.Normalize(Velocity == Vector2.Zero ? Vector2.UnitX : Velocity), 1f);
 
     public override RectI Bounds => new(
         (int)MathF.Floor(Position.X),

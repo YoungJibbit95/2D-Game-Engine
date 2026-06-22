@@ -1,0 +1,19 @@
+{
+  "id": "spark_wand",
+  "displayName": "Spark Wand",
+  "type": "WeaponMagic",
+  "texture": "items/spark_wand",
+  "maxStack": 1,
+  "useTime": 0.35,
+  "damage": 3,
+  "knockback": 1.0,
+  "manaCost": 6,
+  "actions": [
+    {
+      "kind": "Cast",
+      "projectile": "spark_bolt",
+      "projectileSpeedMultiplier": 1.08
+    }
+  ],
+  "tags": ["item", "weapon", "magic", "starter"]
+}

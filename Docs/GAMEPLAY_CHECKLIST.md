@@ -4,9 +4,8 @@ Only open work is kept here. Completed items are removed after implementation.
 
 ## Player And Controls
 
-- [ ] Add armor/accessory equip flow.
 - [ ] Add consumable use flow that applies status effects.
-- [ ] Add configurable reach, mining speed, movement speed, and damage from final player stats.
+- [ ] Add configurable reach from final player stats.
 - [ ] Add client mode switch or controller profile for sideview sandbox movement vs topdown RPG/life-sim movement.
 
 ## Mining, Building, And Interaction
@@ -20,7 +19,6 @@ Only open work is kept here. Completed items are removed after implementation.
 ## Items, Equipment, And Effects
 
 - [ ] Expand startup profiles and starter progression beyond current wood/copper/iron weapons/tools and first copper armor pieces.
-- [ ] Add first accessories with movement, mining, defense, and light bonuses.
 - [ ] Add first consumables: healing potion, regeneration food, antidote.
 - [ ] Add equipment persistence.
 - [ ] Add status effect persistence.

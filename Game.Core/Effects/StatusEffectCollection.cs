@@ -83,6 +83,10 @@ public sealed class StatusEffectCollection
         var melee = stats.MeleeDamageMultiplier;
         var ranged = stats.RangedDamageMultiplier;
         var mining = stats.MiningSpeedMultiplier;
+        var maxMana = stats.MaxMana;
+        var magic = stats.MagicDamageMultiplier;
+        var manaCost = stats.ManaCostMultiplier;
+        var manaRegen = stats.ManaRegenMultiplier;
 
         foreach (var effect in _active.Values)
         {
@@ -101,7 +105,11 @@ public sealed class StatusEffectCollection
             MovementSpeedMultiplier: Math.Max(0.1f, movement),
             MeleeDamageMultiplier: Math.Max(0.1f, melee),
             RangedDamageMultiplier: Math.Max(0.1f, ranged),
-            MiningSpeedMultiplier: Math.Max(0.1f, mining));
+            MiningSpeedMultiplier: Math.Max(0.1f, mining),
+            MaxMana: Math.Max(0, maxMana),
+            MagicDamageMultiplier: Math.Max(0.1f, magic),
+            ManaCostMultiplier: Math.Clamp(manaCost, 0.1f, 3f),
+            ManaRegenMultiplier: Math.Max(0f, manaRegen));
     }
 
     private static void ApplyTicks(

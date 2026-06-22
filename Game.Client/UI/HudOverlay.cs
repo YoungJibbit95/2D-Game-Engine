@@ -19,11 +19,14 @@ public sealed class HudOverlay
         ClientTextureRegistry? textures,
         int health,
         int maxHealth,
+        int mana,
+        int maxMana,
         GameSettings settings)
     {
         var palette = UiTheme.Resolve(settings);
         DrawHotbar(context, inventory, items, textures, palette, settings.Ui.HudOpacity);
         DrawHealthBar(context, health, maxHealth, palette, settings.Ui.HudOpacity);
+        DrawManaBar(context, textures, mana, maxMana, palette, settings.Ui.HudOpacity);
     }
 
     private static void DrawHotbar(
@@ -44,8 +47,7 @@ public sealed class HudOverlay
             var x = startX + slot * (SlotSize + SlotGap);
             var bounds = new Rectangle(x, y, SlotSize, SlotSize);
             var selected = slot == selectedSlot;
-            context.SpriteBatch.Draw(context.Pixel, bounds, UiTheme.WithAlpha(selected ? palette.SurfaceHover : palette.Surface, opacity));
-            UiTheme.DrawBorder(context, bounds, UiTheme.WithAlpha(selected ? palette.Accent : palette.SurfaceHover, selected ? 1f : 0.72f), selected ? 2 : 1);
+            UiTheme.DrawSlot(context, bounds, palette, selected, hovered: false, opacity);
 
             var label = slot == 9 ? "0" : (slot + 1).ToString(System.Globalization.CultureInfo.InvariantCulture);
             context.DebugText.Draw(new Vector2(x + 4, y + 4), label, selected ? palette.Text : palette.TextMuted, 1);
@@ -77,5 +79,39 @@ public sealed class HudOverlay
         context.SpriteBatch.Draw(context.Pixel, bounds, UiTheme.WithAlpha(palette.Surface, opacity));
         context.SpriteBatch.Draw(context.Pixel, new Rectangle(x, y, fillWidth, height), UiTheme.WithAlpha(palette.Danger, 0.94f));
         UiTheme.DrawBorder(context, bounds, UiTheme.WithAlpha(palette.Warning, 0.9f), 1);
+        context.DebugText.Draw(new Vector2(bounds.X + 6, bounds.Y + 4), $"{health}/{maxHealth}", palette.Text, 1);
+    }
+
+    private static void DrawManaBar(RenderContext context, ClientTextureRegistry? textures, int mana, int maxMana, UiPalette palette, float opacity)
+    {
+        var width = 190;
+        var height = 14;
+        var x = context.ViewportBounds.Width - width - 18;
+        var y = 42;
+        var bounds = new Rectangle(x, y, width, height);
+        var fillWidth = maxMana <= 0 ? 0 : (int)MathF.Round(width * MathHelper.Clamp(mana / (float)maxMana, 0, 1));
+
+        context.SpriteBatch.Draw(context.Pixel, bounds, UiTheme.WithAlpha(palette.Surface, opacity));
+        context.SpriteBatch.Draw(context.Pixel, new Rectangle(x, y, fillWidth, height), UiTheme.WithAlpha(new Color(74, 132, 226), 0.94f));
+        UiTheme.DrawBorder(context, bounds, UiTheme.WithAlpha(new Color(128, 184, 255), 0.9f), 1);
+        context.DebugText.Draw(new Vector2(bounds.X + 6, bounds.Y + 3), $"{mana}/{maxMana}", palette.Text, 1);
+
+        if (textures is null)
+        {
+            return;
+        }
+
+        var starSize = 14;
+        var starCount = Math.Min(10, Math.Max(0, (int)MathF.Ceiling(maxMana / 20f)));
+        for (var i = 0; i < starCount; i++)
+        {
+            var starBounds = new Rectangle(x + i * (starSize + 3), y + height + 5, starSize, starSize);
+            var alpha = mana >= (i + 1) * 20 ? 1f : 0.32f;
+            if (!ItemIconRenderer.TryDrawSprite(context, textures, "ui/mana_star", starBounds, alpha))
+            {
+                context.SpriteBatch.Draw(context.Pixel, starBounds, UiTheme.WithAlpha(new Color(84, 139, 232), alpha * 0.85f));
+                UiTheme.DrawBorder(context, starBounds, UiTheme.WithAlpha(palette.AccentSoft, alpha), 1);
+            }
+        }
     }
 }

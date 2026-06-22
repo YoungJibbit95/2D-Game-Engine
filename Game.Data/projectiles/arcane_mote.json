@@ -1,0 +1,10 @@
+{
+  "id": "arcane_mote",
+  "texture": "projectiles/arcane_mote",
+  "speed": 220,
+  "damage": 6,
+  "damageType": "Magic",
+  "gravity": -0.02,
+  "pierce": 2,
+  "lifetime": 3.8
+}

@@ -47,6 +47,10 @@ public sealed class EquipmentLoadoutTests
         Assert.Equal(2, stats.Defense);
         Assert.Equal(1.15f, stats.MovementSpeedMultiplier, precision: 3);
         Assert.Equal(1.10f, stats.MiningSpeedMultiplier, precision: 3);
+        Assert.Equal(40, stats.MaxMana);
+        Assert.Equal(1.20f, stats.MagicDamageMultiplier, precision: 3);
+        Assert.Equal(0.90f, stats.ManaCostMultiplier, precision: 3);
+        Assert.Equal(1.25f, stats.ManaRegenMultiplier, precision: 3);
     }
 
     [Fact]
@@ -60,13 +64,21 @@ public sealed class EquipmentLoadoutTests
           "texture": "items/copper_helmet",
           "equipmentSlot": "Head",
           "defense": 2,
-          "maxHealthBonus": 20
+          "maxHealthBonus": 20,
+          "maxManaBonus": 10,
+          "magicDamageBonus": 0.15,
+          "manaCostReduction": 0.05,
+          "manaRegenBonus": 0.20
         }
         """);
 
         Assert.Equal(EquipmentSlotType.Head, definition.EquipmentSlot);
         Assert.Equal(2, definition.Defense);
         Assert.Equal(20, definition.MaxHealthBonus);
+        Assert.Equal(10, definition.MaxManaBonus);
+        Assert.Equal(0.15f, definition.MagicDamageBonus, precision: 3);
+        Assert.Equal(0.05f, definition.ManaCostReduction, precision: 3);
+        Assert.Equal(0.20f, definition.ManaRegenBonus, precision: 3);
     }
 
     private static ItemRegistry CreateItems()
@@ -82,7 +94,8 @@ public sealed class EquipmentLoadoutTests
                 MaxStack = 1,
                 EquipmentSlot = EquipmentSlotType.Head,
                 Defense = 2,
-                MaxHealthBonus = 20
+                MaxHealthBonus = 20,
+                MaxManaBonus = 10
             },
             new ItemDefinition
             {
@@ -92,7 +105,11 @@ public sealed class EquipmentLoadoutTests
                 TexturePath = "items/swift_charm",
                 MaxStack = 1,
                 MovementSpeedBonus = 0.15f,
-                MiningSpeedBonus = 0.10f
+                MiningSpeedBonus = 0.10f,
+                MaxManaBonus = 10,
+                MagicDamageBonus = 0.20f,
+                ManaCostReduction = 0.10f,
+                ManaRegenBonus = 0.25f
             }
         ]);
     }

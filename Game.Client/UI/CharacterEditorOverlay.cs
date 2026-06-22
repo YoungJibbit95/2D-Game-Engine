@@ -11,11 +11,17 @@ namespace Game.Client.UI;
 
 public sealed class CharacterEditorOverlay
 {
+    private static readonly string[] Tabs = ["BODY", "OUTFIT", "COLORS", "MOTION"];
+
     private readonly SpriteAnimator _previewAnimator = new();
     private readonly List<EditorRow> _rows = new();
     private readonly List<HitZone> _hitZones = new();
+    private readonly List<HitZone> _tabZones = new();
+    private readonly List<ActionHitZone> _actionZones = new();
     private CharacterEditorSession? _session;
+    private CharacterAppearance _defaultAppearance = new();
     private int _rowIndex;
+    private int _tabIndex;
     private CharacterAnimationState _previewState = CharacterAnimationState.Idle;
     private string _status = "CHARACTER EDITOR";
 
@@ -69,7 +75,7 @@ public sealed class CharacterEditorOverlay
             return true;
         }
 
-        UpdateMouse(input);
+        var mouseConsumed = UpdateMouse(input);
         if (input.IsKeyPressed(Keys.Down) || input.IsKeyPressed(Keys.S))
         {
             _rowIndex = (_rowIndex + 1) % _rows.Count;
@@ -79,11 +85,11 @@ public sealed class CharacterEditorOverlay
             _rowIndex = ((_rowIndex - 1) % _rows.Count + _rows.Count) % _rows.Count;
         }
 
-        if (input.IsKeyPressed(Keys.Left) || input.IsKeyPressed(Keys.A) || input.IsRightMousePressed)
+        if (!mouseConsumed && (input.IsKeyPressed(Keys.Left) || input.IsKeyPressed(Keys.A) || input.IsRightMousePressed))
         {
             _rows[_rowIndex].Change(-1);
         }
-        else if (input.IsKeyPressed(Keys.Right) || input.IsKeyPressed(Keys.D) || input.IsLeftMousePressed)
+        else if (!mouseConsumed && (input.IsKeyPressed(Keys.Right) || input.IsKeyPressed(Keys.D) || input.IsLeftMousePressed))
         {
             _rows[_rowIndex].Change(1);
         }
@@ -115,12 +121,16 @@ public sealed class CharacterEditorOverlay
 
         UiTheme.DrawPanel(context, panel, palette, settings.Ui.PanelOpacity);
         context.DebugText.Draw(new Vector2(panel.X + 22, panel.Y + 18), "CHARACTER", palette.Accent, 3);
-        context.DebugText.Draw(new Vector2(panel.X + 24, panel.Y + 50), "F2 ESC CLOSE   UP/DOWN SELECT   LEFT/RIGHT CHANGE", palette.TextMuted, 1);
+        context.DebugText.Draw(new Vector2(panel.X + 24, panel.Y + 50), "F2 ESC CLOSE   TAB/CLICK SECTION   UP/DOWN SELECT   LEFT/RIGHT CHANGE", palette.TextMuted, 1);
 
-        var previewBounds = new Rectangle(panel.X + 26, panel.Y + 86, 268, panel.Height - 132);
+        var tabBounds = new Rectangle(panel.X + 24, panel.Y + 76, panel.Width - 48, 30);
+        DrawTabs(context, palette, tabBounds);
+
+        var previewBounds = new Rectangle(panel.X + 26, panel.Y + 122, 286, panel.Height - 168);
         var editorBounds = new Rectangle(previewBounds.Right + 22, previewBounds.Y, panel.Right - previewBounds.Right - 48, previewBounds.Height);
         DrawPreview(context, content, textures, palette, previewBounds);
         DrawRows(context, palette, editorBounds);
+        DrawActions(context, palette, new Rectangle(editorBounds.X, editorBounds.Bottom - 44, editorBounds.Width, 32));
 
         context.DebugText.Draw(new Vector2(panel.X + 24, panel.Bottom - 28), _status, palette.Warning, 1);
     }
@@ -135,6 +145,7 @@ public sealed class CharacterEditorOverlay
         var appearance = content.Characters.TryGetById("player", out var character)
             ? character.DefaultAppearance
             : new CharacterAppearance();
+        _defaultAppearance = appearance;
         _session = new CharacterEditorSession(appearance, CharacterEditorOptionSet.CreateDefault());
     }
 
@@ -146,15 +157,46 @@ public sealed class CharacterEditorOverlay
         }
 
         _rows.Clear();
-        _rows.Add(new EditorRow("SKIN", _session.Appearance.SkinTone, direction => Cycle(_session.Options.SkinTones, _session.Appearance.SkinTone, direction, _session.SetSkinTone)));
-        _rows.Add(new EditorRow("HAIR STYLE", _session.Appearance.HairStyleId, direction => Cycle(_session.Options.HairStyles, _session.Appearance.HairStyleId, direction, _session.SetHairStyle)));
-        _rows.Add(new EditorRow("CLOTHES", _session.Appearance.ClothesStyleId, direction => Cycle(_session.Options.ClothesStyles, _session.Appearance.ClothesStyleId, direction, _session.SetClothesStyle)));
-        _rows.Add(new EditorRow("ACCESSORY", _session.Appearance.AccessoryId, direction => Cycle(_session.Options.Accessories, _session.Appearance.AccessoryId, direction, _session.SetAccessory)));
-        _rows.Add(new EditorRow("HAIR COLOR", _session.Appearance.HairColor, direction => Cycle(_session.Options.HairColors, _session.Appearance.HairColor, direction, _session.SetHairColor)));
-        _rows.Add(new EditorRow("SHIRT", _session.Appearance.ShirtColor, direction => Cycle(_session.Options.ShirtColors, _session.Appearance.ShirtColor, direction, _session.SetShirtColor)));
-        _rows.Add(new EditorRow("PANTS", _session.Appearance.PantsColor, direction => Cycle(_session.Options.PantsColors, _session.Appearance.PantsColor, direction, _session.SetPantsColor)));
-        _rows.Add(new EditorRow("ANIMATION", _previewState.ToString().ToUpperInvariant(), CyclePreviewState));
+        switch (Tabs[Math.Clamp(_tabIndex, 0, Tabs.Length - 1)])
+        {
+            case "BODY":
+                _rows.Add(new EditorRow("SKIN", _session.Appearance.SkinTone, direction => Cycle(_session.Options.SkinTones, _session.Appearance.SkinTone, direction, _session.SetSkinTone)));
+                _rows.Add(new EditorRow("HAIR STYLE", _session.Appearance.HairStyleId, direction => Cycle(_session.Options.HairStyles, _session.Appearance.HairStyleId, direction, _session.SetHairStyle)));
+                _rows.Add(new EditorRow("ACCESSORY", _session.Appearance.AccessoryId, direction => Cycle(_session.Options.Accessories, _session.Appearance.AccessoryId, direction, _session.SetAccessory)));
+                break;
+            case "OUTFIT":
+                _rows.Add(new EditorRow("CLOTHES", _session.Appearance.ClothesStyleId, direction => Cycle(_session.Options.ClothesStyles, _session.Appearance.ClothesStyleId, direction, _session.SetClothesStyle)));
+                _rows.Add(new EditorRow("ACCESSORY", _session.Appearance.AccessoryId, direction => Cycle(_session.Options.Accessories, _session.Appearance.AccessoryId, direction, _session.SetAccessory)));
+                _rows.Add(new EditorRow("ANIMATION", _previewState.ToString().ToUpperInvariant(), CyclePreviewState));
+                break;
+            case "COLORS":
+                _rows.Add(new EditorRow("HAIR COLOR", _session.Appearance.HairColor, direction => Cycle(_session.Options.HairColors, _session.Appearance.HairColor, direction, _session.SetHairColor)));
+                _rows.Add(new EditorRow("SHIRT", _session.Appearance.ShirtColor, direction => Cycle(_session.Options.ShirtColors, _session.Appearance.ShirtColor, direction, _session.SetShirtColor)));
+                _rows.Add(new EditorRow("PANTS", _session.Appearance.PantsColor, direction => Cycle(_session.Options.PantsColors, _session.Appearance.PantsColor, direction, _session.SetPantsColor)));
+                _rows.Add(new EditorRow("SKIN", _session.Appearance.SkinTone, direction => Cycle(_session.Options.SkinTones, _session.Appearance.SkinTone, direction, _session.SetSkinTone)));
+                break;
+            default:
+                _rows.Add(new EditorRow("ANIMATION", _previewState.ToString().ToUpperInvariant(), CyclePreviewState));
+                _rows.Add(new EditorRow("HAIR STYLE", _session.Appearance.HairStyleId, direction => Cycle(_session.Options.HairStyles, _session.Appearance.HairStyleId, direction, _session.SetHairStyle)));
+                _rows.Add(new EditorRow("CLOTHES", _session.Appearance.ClothesStyleId, direction => Cycle(_session.Options.ClothesStyles, _session.Appearance.ClothesStyleId, direction, _session.SetClothesStyle)));
+                break;
+        }
         _rowIndex = Math.Clamp(_rowIndex, 0, _rows.Count - 1);
+    }
+
+    private void DrawTabs(RenderContext context, UiPalette palette, Rectangle bounds)
+    {
+        _tabZones.Clear();
+        var gap = 6;
+        var tabWidth = Math.Max(86, (bounds.Width - gap * (Tabs.Length - 1)) / Tabs.Length);
+        for (var index = 0; index < Tabs.Length; index++)
+        {
+            var tab = new Rectangle(bounds.X + index * (tabWidth + gap), bounds.Y, tabWidth, bounds.Height);
+            var selected = index == _tabIndex;
+            UiTheme.DrawButton(context, tab, palette, selected, tab.Contains(Mouse.GetState().Position));
+            context.DebugText.Draw(new Vector2(tab.X + 12, tab.Y + 10), Tabs[index], selected ? palette.Text : palette.TextMuted, 1);
+            _tabZones.Add(new HitZone(tab, index));
+        }
     }
 
     private void DrawPreview(RenderContext context, GameContentDatabase content, ClientTextureRegistry? textures, UiPalette palette, Rectangle bounds)
@@ -197,6 +239,7 @@ public sealed class CharacterEditorOverlay
         DrawSwatch(context, new Rectangle(bounds.X + 96, swatchY, 28, 28), ParseHex(_session.Appearance.ShirtColor), palette);
         DrawSwatch(context, new Rectangle(bounds.X + 134, swatchY, 28, 28), ParseHex(_session.Appearance.PantsColor), palette);
         context.DebugText.Draw(new Vector2(bounds.X + 20, swatchY + 38), _session.Appearance.HairStyleId.ToUpperInvariant(), palette.TextMuted, 1);
+        context.DebugText.Draw(new Vector2(bounds.X + 20, bounds.Bottom - 30), $"{_previewState.ToString().ToUpperInvariant()}  {_session.Appearance.ClothesStyleId.ToUpperInvariant()}", palette.Warning, 1);
     }
 
     private static void DrawPart(RenderContext context, ClientTextureRegistry textures, string spriteId, Rectangle destination, int frameIndex, Color color)
@@ -226,6 +269,19 @@ public sealed class CharacterEditorOverlay
         }
     }
 
+    private void DrawActions(RenderContext context, UiPalette palette, Rectangle bounds)
+    {
+        _actionZones.Clear();
+        var random = new Rectangle(bounds.X, bounds.Y, 112, bounds.Height);
+        var reset = new Rectangle(random.Right + 10, bounds.Y, 112, bounds.Height);
+        UiTheme.DrawButton(context, random, palette, selected: false, hovered: random.Contains(Mouse.GetState().Position));
+        UiTheme.DrawButton(context, reset, palette, selected: false, hovered: reset.Contains(Mouse.GetState().Position));
+        context.DebugText.Draw(new Vector2(random.X + 18, random.Y + 10), "RANDOM", palette.Text, 1);
+        context.DebugText.Draw(new Vector2(reset.X + 25, reset.Y + 10), "RESET", palette.Text, 1);
+        _actionZones.Add(new ActionHitZone(random, "random"));
+        _actionZones.Add(new ActionHitZone(reset, "reset"));
+    }
+
     private void UpdatePreviewAnimation(GameContentDatabase content, float deltaSeconds)
     {
         var clipId = content.Characters.TryGetById("player", out var character)
@@ -241,16 +297,88 @@ public sealed class CharacterEditorOverlay
         _previewAnimator.Update(Math.Max(0.001f, deltaSeconds));
     }
 
-    private void UpdateMouse(InputManager input)
+    private bool UpdateMouse(InputManager input)
     {
+        for (var index = 0; index < _tabZones.Count; index++)
+        {
+            if (_tabZones[index].Bounds.Contains(input.MousePosition) && input.IsLeftMousePressed)
+            {
+                _tabIndex = _tabZones[index].Index;
+                _rowIndex = 0;
+                _status = Tabs[_tabIndex];
+                return true;
+            }
+        }
+
+        for (var index = 0; index < _actionZones.Count; index++)
+        {
+            if (!_actionZones[index].Bounds.Contains(input.MousePosition) || !input.IsLeftMousePressed)
+            {
+                continue;
+            }
+
+            if (_actionZones[index].ActionId == "random")
+            {
+                RandomizeAppearance();
+            }
+            else
+            {
+                ResetAppearance();
+            }
+
+            return true;
+        }
+
         for (var index = 0; index < _hitZones.Count; index++)
         {
             if (_hitZones[index].Bounds.Contains(input.MousePosition))
             {
                 _rowIndex = _hitZones[index].Index;
-                return;
+                return false;
             }
         }
+
+        return false;
+    }
+
+    private void RandomizeAppearance()
+    {
+        if (_session is null)
+        {
+            return;
+        }
+
+        Pick(_session.Options.SkinTones, _session.SetSkinTone);
+        Pick(_session.Options.HairStyles, _session.SetHairStyle);
+        Pick(_session.Options.ClothesStyles, _session.SetClothesStyle);
+        Pick(_session.Options.Accessories, _session.SetAccessory);
+        Pick(_session.Options.HairColors, _session.SetHairColor);
+        Pick(_session.Options.ShirtColors, _session.SetShirtColor);
+        Pick(_session.Options.PantsColors, _session.SetPantsColor);
+        _status = "RANDOMIZED";
+    }
+
+    private void ResetAppearance()
+    {
+        if (_session is null)
+        {
+            return;
+        }
+
+        _session = new CharacterEditorSession(_defaultAppearance, _session.Options);
+        _previewState = CharacterAnimationState.Idle;
+        _previewAnimator.Stop();
+        _status = "RESET";
+    }
+
+    private static void Pick(IReadOnlyList<string> options, Func<string, bool> set)
+    {
+        if (options.Count == 0)
+        {
+            return;
+        }
+
+        set(options[Random.Shared.Next(options.Count)]);
     }
 
     private void CyclePreviewState(int direction)
@@ -338,4 +466,6 @@ public sealed class CharacterEditorOverlay
     private sealed record EditorRow(string Label, string Value, Action<int> Change);
 
     private readonly record struct HitZone(Rectangle Bounds, int Index);
+
+    private readonly record struct ActionHitZone(Rectangle Bounds, string ActionId);
 }

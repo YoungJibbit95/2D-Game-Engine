@@ -54,7 +54,7 @@ public sealed class GameSaveCoordinator
             request.Inventory,
             options.PlayerId,
             options.PlayerDisplayName,
-            options.PlayerMana);
+            options.PlayerMana > 0 ? options.PlayerMana : null);
         _players.Save(playerData, playerPath);
 
         var entitiesPath = Path.Combine(saveDirectory, options.EntitiesFileName);

@@ -1,0 +1,11 @@
+{
+  "id": "mana_potion",
+  "result": { "itemId": "mana_potion", "count": 2 },
+  "ingredients": [
+    { "itemId": "gel", "count": 2 },
+    { "itemId": "wood", "count": 1 }
+  ],
+  "station": null,
+  "category": "magic",
+  "sortOrder": 44
+}

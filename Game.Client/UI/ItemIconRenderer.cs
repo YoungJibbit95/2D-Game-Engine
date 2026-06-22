@@ -53,7 +53,7 @@ public static class ItemIconRenderer
         }
 
         var sprite = textures.Get(spriteId, frameIndex);
-        if (sprite.SourceRectangle.Width <= 0 || sprite.SourceRectangle.Height <= 0)
+        if (sprite.IsPlaceholder || sprite.SourceRectangle.Width <= 0 || sprite.SourceRectangle.Height <= 0)
         {
             return false;
         }

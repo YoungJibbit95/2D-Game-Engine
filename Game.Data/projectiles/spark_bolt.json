@@ -1,0 +1,10 @@
+{
+  "id": "spark_bolt",
+  "texture": "projectiles/spark_bolt",
+  "speed": 270,
+  "damage": 4,
+  "damageType": "Magic",
+  "gravity": 0.0,
+  "pierce": 1,
+  "lifetime": 3.2
+}

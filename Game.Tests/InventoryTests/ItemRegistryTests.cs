@@ -113,6 +113,33 @@ public sealed class ItemRegistryTests
         Assert.Throws<RegistryValidationException>(() => ItemRegistry.Create(new[] { badItem }));
     }
 
+    [Fact]
+    public void Loader_ReadsMagicItemFields()
+    {
+        const string json = """
+        {
+          "id": "spark_wand",
+          "displayName": "Spark Wand",
+          "type": "WeaponMagic",
+          "texture": "items/spark_wand",
+          "maxStack": 1,
+          "damage": 3,
+          "manaCost": 6,
+          "actions": [
+            { "kind": "Cast", "projectile": "spark_bolt", "projectileSpeedMultiplier": 1.1 }
+          ]
+        }
+        """;
+
+        var definition = new ItemDefinitionJsonLoader().LoadDefinitionFromJson(json);
+        var action = Assert.Single(definition.Actions);
+
+        Assert.Equal(ItemType.WeaponMagic, definition.Type);
+        Assert.Equal(6, definition.ManaCost);
+        Assert.Equal(ItemActionKind.Cast, action.Kind);
+        Assert.Equal("spark_bolt", action.ProjectileId);
+    }
+
     private static ItemDefinition CreateDirtBlockDefinition()
     {
         return new ItemDefinition

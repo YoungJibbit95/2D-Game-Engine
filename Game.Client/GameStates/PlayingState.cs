@@ -10,6 +10,7 @@ using Game.Core.Commands;
 using Game.Core.Data;
 using Game.Core.Diagnostics;
 using Game.Core.Entities;
+using Game.Core.Equipment;
 using Game.Core.Events;
 using Game.Core.Farming;
 using Game.Core.Interaction;
@@ -59,6 +60,8 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
     private readonly EntityFactory _entityFactory;
     private readonly SpriteAnimator _playerAnimator = new();
     private readonly CharacterAnimationStateResolver _playerAnimationResolver = new();
+    private readonly EquipmentLoadout _equipmentLoadout = new();
+    private readonly EquipmentStatCalculator _equipmentStats = new();
     private readonly LoadedGameSession? _loadedSession;
 
     private World? _world;
@@ -147,6 +150,7 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
 
         if (_world is not null && _player is not null)
         {
+            ApplyPlayerStats();
             _player.Update(_world, fixedDeltaSeconds);
             _entities.UpdateAll(_world, fixedDeltaSeconds);
             UpdateItemPickup();
@@ -199,7 +203,7 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
 
         if (_inventory is not null &&
             _content is not null &&
-            _inventoryOverlay.Update(_input, _inventory, _content.Items, settings))
+            _inventoryOverlay.Update(_input, _inventory, _content.Items, _equipmentLoadout, settings))
         {
             _player?.SetCommand(PlayerCommand.None);
             UpdateAutosave((float)deltaSeconds, settings);
@@ -228,7 +232,7 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
         _camera.Follow(cameraTarget, context.ViewportBounds, smoothing: 0.18f);
         EnsureVisibleChunks();
 
-        _backgroundRenderer.Draw(context, _textures, _camera, _world);
+        _backgroundRenderer.Draw(context, _textures, _camera, _world, _worldTime);
 
         _tilemapRenderer.ShowGrid = _showGrid;
         _tilemapRenderer.DrawLiquids = settings.Rendering.DrawLiquids;
@@ -246,10 +250,29 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
             _lightingRenderer.Draw(context, _world, _camera);
         }
 
-        _hud.Draw(context, _inventory, _content?.Items, _textures, _player?.Health ?? 0, _player?.MaxHealth ?? 100, settings);
+        var playerStats = ResolvePlayerStats();
+        _hud.Draw(
+            context,
+            _inventory,
+            _content?.Items,
+            _textures,
+            _player?.Health ?? 0,
+            _player?.MaxHealth ?? 100,
+            _player?.Mana ?? 0,
+            _player?.MaxMana ?? playerStats.MaxMana,
+            settings);
         if (_inventory is not null && _content is not null)
         {
-            _inventoryOverlay.Draw(context, _inventory, _content.Items, _textures, settings);
+            _inventoryOverlay.Draw(
+                context,
+                _inventory,
+                _content.Items,
+                _textures,
+                settings,
+                _equipmentLoadout,
+                playerStats,
+                _player?.Mana ?? 0,
+                _player?.MaxMana ?? playerStats.MaxMana);
         }
         if (_content is not null)
         {
@@ -369,6 +392,7 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
         var worldPosition = new Vector2(
             _player.Body.Center.X - source.Width * 0.5f + frame.OffsetX,
             _player.Body.Position.Y + _player.Body.Size.Y - source.Height + frame.OffsetY);
+        worldPosition += ResolveEntityVisualOffset(_player, context.Time.TotalSeconds);
         var screenPosition = _camera.WorldToScreen(worldPosition, context.ViewportBounds);
         var destination = new Rectangle(
             (int)MathF.Floor(screenPosition.X),
@@ -441,8 +465,49 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
             Math.Max(1, (int)MathF.Ceiling(source.Width * _camera.Zoom)),
             Math.Max(1, (int)MathF.Ceiling(source.Height * _camera.Zoom)));
 
-        context.SpriteBatch.Draw(sprite.Texture, destination, source, Color.White);
+        var effects = ResolveEntitySpriteEffects(entity);
+        var tint = ResolveEntityTint(entity, context.Time.TotalSeconds);
+        context.SpriteBatch.Draw(sprite.Texture, destination, source, tint, 0f, Vector2.Zero, effects, 0f);
         return true;
+    }
+
+    private static SpriteEffects ResolveEntitySpriteEffects(Entity entity)
+    {
+        return entity switch
+        {
+            EnemyEntity enemy when enemy.Body.Velocity.X < -1f => SpriteEffects.FlipHorizontally,
+            EnemyEntity => SpriteEffects.None,
+            DroppedItemEntity => SpriteEffects.None,
+            ProjectileEntity projectile when projectile.Velocity.X < 0 => SpriteEffects.FlipHorizontally,
+            _ => SpriteEffects.None
+        };
+    }
+
+    private static Color ResolveEntityTint(Entity entity, double totalSeconds)
+    {
+        if (entity is EnemyEntity { Health.InvulnerabilityTimeRemaining: > 0 })
+        {
+            return Math.Floor(totalSeconds * 18) % 2 == 0
+                ? new Color(255, 210, 210)
+                : Color.White;
+        }
+
+        if (entity is ProjectileEntity projectile && projectile.DamageType == Game.Core.Combat.DamageType.Magic)
+        {
+            return new Color(170, 210, 255);
+        }
+
+        return Color.White;
+    }
+
+    private static Vector2 ResolveEntityVisualOffset(Entity entity, double totalSeconds)
+    {
+        return entity switch
+        {
+            DroppedItemEntity => new Vector2(0, MathF.Sin((float)(totalSeconds * 5.5 + entity.Id)) * 2f),
+            EnemyEntity enemy when enemy.DefinitionId.Contains("bat", StringComparison.OrdinalIgnoreCase) => new Vector2(0, MathF.Sin((float)(totalSeconds * 6 + entity.Id)) * 3f),
+            _ => Vector2.Zero
+        };
     }
 
     private int ResolveEntityFrameIndex(Entity entity, string spriteId, double totalSeconds)
@@ -602,7 +667,7 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
         return item.Type switch
         {
             ItemType.ToolPickaxe or ItemType.ToolAxe or ItemType.ToolHoe or ItemType.ToolWateringCan => CharacterAnimationState.Mine,
-            ItemType.WeaponMelee or ItemType.WeaponRanged => CharacterAnimationState.Attack,
+            ItemType.WeaponMelee or ItemType.WeaponRanged or ItemType.WeaponMagic => CharacterAnimationState.Attack,
             ItemType.PlaceableTile or ItemType.Consumable or ItemType.Seed => CharacterAnimationState.UseItem,
             _ => null
         };
@@ -973,6 +1038,27 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
             2 => FarmSeason.Fall,
             _ => FarmSeason.Winter
         };
+    }
+
+    private PlayerStatBlock ResolvePlayerStats()
+    {
+        if (_content is null)
+        {
+            return PlayerStatBlock.Base;
+        }
+
+        var equipmentStats = _equipmentStats.Calculate(PlayerStatBlock.Base, _equipmentLoadout, _content.Items);
+        return _player?.StatusEffects.ApplyStatModifiers(equipmentStats) ?? equipmentStats;
+    }
+
+    private void ApplyPlayerStats()
+    {
+        if (_player is null)
+        {
+            return;
+        }
+
+        _player.ApplyStats(ResolvePlayerStats());
     }
 
     private static string GetHotbarBinding(KeyBindingSettings bindings, int slot)

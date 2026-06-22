@@ -145,11 +145,13 @@ The current action kinds are:
 - `Cast`
 - `Interact`
 
-The runtime selected-item path resolves the primary action and routes it through `PlayerItemUseSystem`. The implemented gameplay actions are mining, building, melee, and shooting. Shooting can spawn a projectile and consume an ammo item from the full player inventory.
+The runtime selected-item path resolves the primary action and routes it through `PlayerItemUseSystem`. The implemented gameplay actions are mining, building, melee, shooting, casting, consume, till, water, plant, and harvest. Shooting can spawn a projectile and consume an ammo item from the full player inventory. Casting spawns magic projectiles, consumes player mana, and uses the player's current stat block for magic damage and mana cost.
 
 `useTime` is treated as a discrete action cooldown for placement, melee, shooting, consume, and cast actions. Mining remains continuous so progress can build while the input is held.
 
 Legacy item types still infer default actions when JSON does not provide an explicit `actions` array. This keeps older data working while allowing new content to be fully data-driven.
+
+`PlayerStatBlock` is the runtime bridge between equipment, effects, and action systems. It currently carries max health, defense, movement, melee/ranged/magic damage, mining speed, max mana, mana cost, and mana regeneration multipliers. `EquipmentStatCalculator` builds a stat block from `EquipmentLoadout`, and `PlayerEntity.ApplyStats` pushes max-health/max-mana plus movement and mana regeneration into the player runtime. `PlayerItemUseSystem` consumes the same stat block for mining speed, ranged projectile damage, magic projectile damage, and mana cost.
 
 ## Combat And Effects
 
@@ -250,7 +252,7 @@ The client has a `ClientTextureRegistry` that resolves `SpriteAssetRegistry` ids
 
 ## Rendering
 
-The current client renderer draws tiles, liquids, entities, player, lighting overlay, HUD, and debug text. Tile and lighting passes are aware of horizontally infinite worlds and do not clamp visible chunks to `0..WidthTiles` when the world is infinite. Tile rendering now asks `TileDefinition.TexturePath` for a sprite id and can draw a real loaded texture when the PNG exists; otherwise it keeps the existing readable colored fallback.
+The current client renderer draws tiles, liquids, entities, player, lighting overlay, HUD, and debug text. Tile and lighting passes are aware of horizontally infinite worlds and do not clamp visible chunks to `0..WidthTiles` when the world is infinite. Tile rendering now asks `TileDefinition.TexturePath` for a sprite id and can draw a real loaded texture when the PNG exists; otherwise it keeps the existing readable colored fallback. `ParallaxBackgroundRenderer` now blends day/night sky colors and switches layered background scenes by depth: forest, night forest, magical grove, cave, and deep cave. Runtime entity drawing flips sprites by movement direction, bobs dropped items and flying enemies, and tints hurt enemies and magic projectiles.
 
 `ChunkRenderCache` stores per-chunk tile draw commands. It rebuilds when a chunk has `NeedsMeshRebuild`, computes a 4-bit autotile neighbor mask for each non-air tile, then clears only that mesh flag so save dirtiness remains intact. `TilemapRenderer` passes those masks into `ClientTextureRegistry`, which selects the best source frame for real terrain sheets and keeps placeholder rendering working until final art exists. The renderer exposes `TilemapRenderMetrics` for visible chunks, cached chunks, rebuilt chunks, evicted chunks, tile commands, and liquid commands.
 

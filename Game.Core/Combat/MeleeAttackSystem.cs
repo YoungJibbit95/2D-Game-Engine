@@ -116,9 +116,10 @@ public sealed class MeleeAttackSystem
                 direction = Vector2.UnitX;
             }
 
-            var damage = new DamageInfo(item.Damage, DamageType.Melee, player.Id, direction, item.Knockback);
+            var scaledDamage = Math.Max(1, (int)MathF.Round(item.Damage * player.Stats.MeleeDamageMultiplier));
+            var damage = new DamageInfo(scaledDamage, DamageType.Melee, player.Id, direction, item.Knockback);
             var applied = enemy.ApplyDamage(damage);
-            events?.Publish(new MeleeHitEvent(player.Id, enemy.Id, item.Damage));
+            events?.Publish(new MeleeHitEvent(player.Id, enemy.Id, scaledDamage));
             if (applied && statusEffectRegistry is not null && item.OnHitEffects.Count > 0)
             {
                 effectsApplied += _statusEffects.Apply(enemy.StatusEffects, statusEffectRegistry, item.OnHitEffects);

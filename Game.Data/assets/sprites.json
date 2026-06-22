@@ -1017,6 +1017,46 @@
       ]
     },
     {
+      "id": "items/mana_crystal",
+      "path": "sprites/items/accessories/mana_crystal.png",
+      "category": "Item",
+      "width": 16,
+      "height": 16,
+      "tags": [
+        "item",
+        "accessory",
+        "magic",
+        "mana",
+        "crystal"
+      ]
+    },
+    {
+      "id": "items/spark_wand",
+      "path": "sprites/weapons/spark_wand.png",
+      "category": "Weapon",
+      "width": 16,
+      "height": 16,
+      "tags": [
+        "item",
+        "weapon",
+        "magic",
+        "wand"
+      ]
+    },
+    {
+      "id": "items/apprentice_tome",
+      "path": "sprites/weapons/apprentice_tome.png",
+      "category": "Weapon",
+      "width": 16,
+      "height": 16,
+      "tags": [
+        "item",
+        "weapon",
+        "magic",
+        "book"
+      ]
+    },
+    {
       "id": "items/copper_hoe",
       "path": "sprites/tools/copper_hoe.png",
       "category": "Tool",
@@ -1542,24 +1582,28 @@
       "id": "world/backgrounds/forest_parallax_layer",
       "path": "sprites/world/backgrounds/forest_parallax_layer.png",
       "category": "Background",
-      "width": 256,
-      "height": 64,
+      "width": 512,
+      "height": 128,
       "tags": [
         "background",
         "forest",
-        "parallax"
+        "parallax",
+        "tileable",
+        "world"
       ]
     },
     {
       "id": "world/backgrounds/cave_parallax_layer",
       "path": "sprites/world/backgrounds/cave_parallax_layer.png",
       "category": "Background",
-      "width": 256,
-      "height": 64,
+      "width": 512,
+      "height": 128,
       "tags": [
         "background",
         "cave",
-        "parallax"
+        "parallax",
+        "tileable",
+        "world"
       ]
     },
     {
@@ -1594,6 +1638,31 @@
         "projectile",
         "arrow",
         "poison"
+      ]
+    },
+    {
+      "id": "projectiles/spark_bolt",
+      "path": "sprites/projectiles/spark_bolt.png",
+      "category": "Projectile",
+      "width": 16,
+      "height": 16,
+      "tags": [
+        "projectile",
+        "magic",
+        "spark"
+      ]
+    },
+    {
+      "id": "projectiles/arcane_mote",
+      "path": "sprites/projectiles/arcane_mote.png",
+      "category": "Projectile",
+      "width": 16,
+      "height": 16,
+      "tags": [
+        "projectile",
+        "magic",
+        "arcane",
+        "particle"
       ]
     },
     {
@@ -2567,6 +2636,3861 @@
         "editor",
         "accessory",
         "hat"
+      ]
+    },
+    {
+      "id": "tiles/sand_autotile",
+      "path": "sprites/world/tiles/sand_autotile.png",
+      "category": "Tile",
+      "width": 256,
+      "height": 16,
+      "frames": [
+        {
+          "id": "mask_0",
+          "x": 0,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 0
+        },
+        {
+          "id": "mask_1",
+          "x": 16,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 1
+        },
+        {
+          "id": "mask_2",
+          "x": 32,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 2
+        },
+        {
+          "id": "mask_3",
+          "x": 48,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 3
+        },
+        {
+          "id": "mask_4",
+          "x": 64,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 4
+        },
+        {
+          "id": "mask_5",
+          "x": 80,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 5
+        },
+        {
+          "id": "mask_6",
+          "x": 96,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 6
+        },
+        {
+          "id": "mask_7",
+          "x": 112,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 7
+        },
+        {
+          "id": "mask_8",
+          "x": 128,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 8
+        },
+        {
+          "id": "mask_9",
+          "x": 144,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 9
+        },
+        {
+          "id": "mask_10",
+          "x": 160,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 10
+        },
+        {
+          "id": "mask_11",
+          "x": 176,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 11
+        },
+        {
+          "id": "mask_12",
+          "x": 192,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 12
+        },
+        {
+          "id": "mask_13",
+          "x": 208,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 13
+        },
+        {
+          "id": "mask_14",
+          "x": 224,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 14
+        },
+        {
+          "id": "mask_15",
+          "x": 240,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 15
+        }
+      ],
+      "tags": [
+        "world",
+        "tile",
+        "autotile",
+        "blockface",
+        "soil"
+      ]
+    },
+    {
+      "id": "tiles/clay_autotile",
+      "path": "sprites/world/tiles/clay_autotile.png",
+      "category": "Tile",
+      "width": 256,
+      "height": 16,
+      "frames": [
+        {
+          "id": "mask_0",
+          "x": 0,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 0
+        },
+        {
+          "id": "mask_1",
+          "x": 16,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 1
+        },
+        {
+          "id": "mask_2",
+          "x": 32,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 2
+        },
+        {
+          "id": "mask_3",
+          "x": 48,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 3
+        },
+        {
+          "id": "mask_4",
+          "x": 64,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 4
+        },
+        {
+          "id": "mask_5",
+          "x": 80,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 5
+        },
+        {
+          "id": "mask_6",
+          "x": 96,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 6
+        },
+        {
+          "id": "mask_7",
+          "x": 112,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 7
+        },
+        {
+          "id": "mask_8",
+          "x": 128,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 8
+        },
+        {
+          "id": "mask_9",
+          "x": 144,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 9
+        },
+        {
+          "id": "mask_10",
+          "x": 160,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 10
+        },
+        {
+          "id": "mask_11",
+          "x": 176,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 11
+        },
+        {
+          "id": "mask_12",
+          "x": 192,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 12
+        },
+        {
+          "id": "mask_13",
+          "x": 208,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 13
+        },
+        {
+          "id": "mask_14",
+          "x": 224,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 14
+        },
+        {
+          "id": "mask_15",
+          "x": 240,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 15
+        }
+      ],
+      "tags": [
+        "world",
+        "tile",
+        "autotile",
+        "blockface",
+        "soil"
+      ]
+    },
+    {
+      "id": "tiles/mud_autotile",
+      "path": "sprites/world/tiles/mud_autotile.png",
+      "category": "Tile",
+      "width": 256,
+      "height": 16,
+      "frames": [
+        {
+          "id": "mask_0",
+          "x": 0,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 0
+        },
+        {
+          "id": "mask_1",
+          "x": 16,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 1
+        },
+        {
+          "id": "mask_2",
+          "x": 32,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 2
+        },
+        {
+          "id": "mask_3",
+          "x": 48,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 3
+        },
+        {
+          "id": "mask_4",
+          "x": 64,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 4
+        },
+        {
+          "id": "mask_5",
+          "x": 80,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 5
+        },
+        {
+          "id": "mask_6",
+          "x": 96,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 6
+        },
+        {
+          "id": "mask_7",
+          "x": 112,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 7
+        },
+        {
+          "id": "mask_8",
+          "x": 128,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 8
+        },
+        {
+          "id": "mask_9",
+          "x": 144,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 9
+        },
+        {
+          "id": "mask_10",
+          "x": 160,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 10
+        },
+        {
+          "id": "mask_11",
+          "x": 176,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 11
+        },
+        {
+          "id": "mask_12",
+          "x": 192,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 12
+        },
+        {
+          "id": "mask_13",
+          "x": 208,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 13
+        },
+        {
+          "id": "mask_14",
+          "x": 224,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 14
+        },
+        {
+          "id": "mask_15",
+          "x": 240,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 15
+        }
+      ],
+      "tags": [
+        "world",
+        "tile",
+        "autotile",
+        "blockface",
+        "soil"
+      ]
+    },
+    {
+      "id": "tiles/snow_autotile",
+      "path": "sprites/world/tiles/snow_autotile.png",
+      "category": "Tile",
+      "width": 256,
+      "height": 16,
+      "frames": [
+        {
+          "id": "mask_0",
+          "x": 0,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 0
+        },
+        {
+          "id": "mask_1",
+          "x": 16,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 1
+        },
+        {
+          "id": "mask_2",
+          "x": 32,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 2
+        },
+        {
+          "id": "mask_3",
+          "x": 48,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 3
+        },
+        {
+          "id": "mask_4",
+          "x": 64,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 4
+        },
+        {
+          "id": "mask_5",
+          "x": 80,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 5
+        },
+        {
+          "id": "mask_6",
+          "x": 96,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 6
+        },
+        {
+          "id": "mask_7",
+          "x": 112,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 7
+        },
+        {
+          "id": "mask_8",
+          "x": 128,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 8
+        },
+        {
+          "id": "mask_9",
+          "x": 144,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 9
+        },
+        {
+          "id": "mask_10",
+          "x": 160,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 10
+        },
+        {
+          "id": "mask_11",
+          "x": 176,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 11
+        },
+        {
+          "id": "mask_12",
+          "x": 192,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 12
+        },
+        {
+          "id": "mask_13",
+          "x": 208,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 13
+        },
+        {
+          "id": "mask_14",
+          "x": 224,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 14
+        },
+        {
+          "id": "mask_15",
+          "x": 240,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 15
+        }
+      ],
+      "tags": [
+        "world",
+        "tile",
+        "autotile",
+        "blockface",
+        "snow"
+      ]
+    },
+    {
+      "id": "tiles/ice_autotile",
+      "path": "sprites/world/tiles/ice_autotile.png",
+      "category": "Tile",
+      "width": 256,
+      "height": 16,
+      "frames": [
+        {
+          "id": "mask_0",
+          "x": 0,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 0
+        },
+        {
+          "id": "mask_1",
+          "x": 16,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 1
+        },
+        {
+          "id": "mask_2",
+          "x": 32,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 2
+        },
+        {
+          "id": "mask_3",
+          "x": 48,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 3
+        },
+        {
+          "id": "mask_4",
+          "x": 64,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 4
+        },
+        {
+          "id": "mask_5",
+          "x": 80,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 5
+        },
+        {
+          "id": "mask_6",
+          "x": 96,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 6
+        },
+        {
+          "id": "mask_7",
+          "x": 112,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 7
+        },
+        {
+          "id": "mask_8",
+          "x": 128,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 8
+        },
+        {
+          "id": "mask_9",
+          "x": 144,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 9
+        },
+        {
+          "id": "mask_10",
+          "x": 160,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 10
+        },
+        {
+          "id": "mask_11",
+          "x": 176,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 11
+        },
+        {
+          "id": "mask_12",
+          "x": 192,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 12
+        },
+        {
+          "id": "mask_13",
+          "x": 208,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 13
+        },
+        {
+          "id": "mask_14",
+          "x": 224,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 14
+        },
+        {
+          "id": "mask_15",
+          "x": 240,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 15
+        }
+      ],
+      "tags": [
+        "world",
+        "tile",
+        "autotile",
+        "blockface",
+        "ice"
+      ]
+    },
+    {
+      "id": "tiles/marble_autotile",
+      "path": "sprites/world/tiles/marble_autotile.png",
+      "category": "Tile",
+      "width": 256,
+      "height": 16,
+      "frames": [
+        {
+          "id": "mask_0",
+          "x": 0,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 0
+        },
+        {
+          "id": "mask_1",
+          "x": 16,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 1
+        },
+        {
+          "id": "mask_2",
+          "x": 32,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 2
+        },
+        {
+          "id": "mask_3",
+          "x": 48,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 3
+        },
+        {
+          "id": "mask_4",
+          "x": 64,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 4
+        },
+        {
+          "id": "mask_5",
+          "x": 80,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 5
+        },
+        {
+          "id": "mask_6",
+          "x": 96,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 6
+        },
+        {
+          "id": "mask_7",
+          "x": 112,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 7
+        },
+        {
+          "id": "mask_8",
+          "x": 128,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 8
+        },
+        {
+          "id": "mask_9",
+          "x": 144,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 9
+        },
+        {
+          "id": "mask_10",
+          "x": 160,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 10
+        },
+        {
+          "id": "mask_11",
+          "x": 176,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 11
+        },
+        {
+          "id": "mask_12",
+          "x": 192,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 12
+        },
+        {
+          "id": "mask_13",
+          "x": 208,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 13
+        },
+        {
+          "id": "mask_14",
+          "x": 224,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 14
+        },
+        {
+          "id": "mask_15",
+          "x": 240,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 15
+        }
+      ],
+      "tags": [
+        "world",
+        "tile",
+        "autotile",
+        "blockface",
+        "stone"
+      ]
+    },
+    {
+      "id": "tiles/granite_autotile",
+      "path": "sprites/world/tiles/granite_autotile.png",
+      "category": "Tile",
+      "width": 256,
+      "height": 16,
+      "frames": [
+        {
+          "id": "mask_0",
+          "x": 0,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 0
+        },
+        {
+          "id": "mask_1",
+          "x": 16,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 1
+        },
+        {
+          "id": "mask_2",
+          "x": 32,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 2
+        },
+        {
+          "id": "mask_3",
+          "x": 48,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 3
+        },
+        {
+          "id": "mask_4",
+          "x": 64,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 4
+        },
+        {
+          "id": "mask_5",
+          "x": 80,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 5
+        },
+        {
+          "id": "mask_6",
+          "x": 96,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 6
+        },
+        {
+          "id": "mask_7",
+          "x": 112,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 7
+        },
+        {
+          "id": "mask_8",
+          "x": 128,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 8
+        },
+        {
+          "id": "mask_9",
+          "x": 144,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 9
+        },
+        {
+          "id": "mask_10",
+          "x": 160,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 10
+        },
+        {
+          "id": "mask_11",
+          "x": 176,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 11
+        },
+        {
+          "id": "mask_12",
+          "x": 192,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 12
+        },
+        {
+          "id": "mask_13",
+          "x": 208,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 13
+        },
+        {
+          "id": "mask_14",
+          "x": 224,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 14
+        },
+        {
+          "id": "mask_15",
+          "x": 240,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 15
+        }
+      ],
+      "tags": [
+        "world",
+        "tile",
+        "autotile",
+        "blockface",
+        "stone"
+      ]
+    },
+    {
+      "id": "tiles/ash_autotile",
+      "path": "sprites/world/tiles/ash_autotile.png",
+      "category": "Tile",
+      "width": 256,
+      "height": 16,
+      "frames": [
+        {
+          "id": "mask_0",
+          "x": 0,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 0
+        },
+        {
+          "id": "mask_1",
+          "x": 16,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 1
+        },
+        {
+          "id": "mask_2",
+          "x": 32,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 2
+        },
+        {
+          "id": "mask_3",
+          "x": 48,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 3
+        },
+        {
+          "id": "mask_4",
+          "x": 64,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 4
+        },
+        {
+          "id": "mask_5",
+          "x": 80,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 5
+        },
+        {
+          "id": "mask_6",
+          "x": 96,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 6
+        },
+        {
+          "id": "mask_7",
+          "x": 112,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 7
+        },
+        {
+          "id": "mask_8",
+          "x": 128,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 8
+        },
+        {
+          "id": "mask_9",
+          "x": 144,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 9
+        },
+        {
+          "id": "mask_10",
+          "x": 160,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 10
+        },
+        {
+          "id": "mask_11",
+          "x": 176,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 11
+        },
+        {
+          "id": "mask_12",
+          "x": 192,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 12
+        },
+        {
+          "id": "mask_13",
+          "x": 208,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 13
+        },
+        {
+          "id": "mask_14",
+          "x": 224,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 14
+        },
+        {
+          "id": "mask_15",
+          "x": 240,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 15
+        }
+      ],
+      "tags": [
+        "world",
+        "tile",
+        "autotile",
+        "blockface",
+        "stone"
+      ]
+    },
+    {
+      "id": "tiles/living_wood_autotile",
+      "path": "sprites/world/tiles/living_wood_autotile.png",
+      "category": "Tile",
+      "width": 256,
+      "height": 16,
+      "frames": [
+        {
+          "id": "mask_0",
+          "x": 0,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 0
+        },
+        {
+          "id": "mask_1",
+          "x": 16,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 1
+        },
+        {
+          "id": "mask_2",
+          "x": 32,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 2
+        },
+        {
+          "id": "mask_3",
+          "x": 48,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 3
+        },
+        {
+          "id": "mask_4",
+          "x": 64,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 4
+        },
+        {
+          "id": "mask_5",
+          "x": 80,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 5
+        },
+        {
+          "id": "mask_6",
+          "x": 96,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 6
+        },
+        {
+          "id": "mask_7",
+          "x": 112,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 7
+        },
+        {
+          "id": "mask_8",
+          "x": 128,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 8
+        },
+        {
+          "id": "mask_9",
+          "x": 144,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 9
+        },
+        {
+          "id": "mask_10",
+          "x": 160,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 10
+        },
+        {
+          "id": "mask_11",
+          "x": 176,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 11
+        },
+        {
+          "id": "mask_12",
+          "x": 192,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 12
+        },
+        {
+          "id": "mask_13",
+          "x": 208,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 13
+        },
+        {
+          "id": "mask_14",
+          "x": 224,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 14
+        },
+        {
+          "id": "mask_15",
+          "x": 240,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 15
+        }
+      ],
+      "tags": [
+        "world",
+        "tile",
+        "autotile",
+        "blockface",
+        "wood"
+      ]
+    },
+    {
+      "id": "tiles/rich_leaves_autotile",
+      "path": "sprites/world/tiles/rich_leaves_autotile.png",
+      "category": "Tile",
+      "width": 256,
+      "height": 16,
+      "frames": [
+        {
+          "id": "mask_0",
+          "x": 0,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 0
+        },
+        {
+          "id": "mask_1",
+          "x": 16,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 1
+        },
+        {
+          "id": "mask_2",
+          "x": 32,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 2
+        },
+        {
+          "id": "mask_3",
+          "x": 48,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 3
+        },
+        {
+          "id": "mask_4",
+          "x": 64,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 4
+        },
+        {
+          "id": "mask_5",
+          "x": 80,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 5
+        },
+        {
+          "id": "mask_6",
+          "x": 96,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 6
+        },
+        {
+          "id": "mask_7",
+          "x": 112,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 7
+        },
+        {
+          "id": "mask_8",
+          "x": 128,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 8
+        },
+        {
+          "id": "mask_9",
+          "x": 144,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 9
+        },
+        {
+          "id": "mask_10",
+          "x": 160,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 10
+        },
+        {
+          "id": "mask_11",
+          "x": 176,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 11
+        },
+        {
+          "id": "mask_12",
+          "x": 192,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 12
+        },
+        {
+          "id": "mask_13",
+          "x": 208,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 13
+        },
+        {
+          "id": "mask_14",
+          "x": 224,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 14
+        },
+        {
+          "id": "mask_15",
+          "x": 240,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 15
+        }
+      ],
+      "tags": [
+        "world",
+        "tile",
+        "autotile",
+        "blockface",
+        "leaves"
+      ]
+    },
+    {
+      "id": "tiles/autumn_leaves_autotile",
+      "path": "sprites/world/tiles/autumn_leaves_autotile.png",
+      "category": "Tile",
+      "width": 256,
+      "height": 16,
+      "frames": [
+        {
+          "id": "mask_0",
+          "x": 0,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 0
+        },
+        {
+          "id": "mask_1",
+          "x": 16,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 1
+        },
+        {
+          "id": "mask_2",
+          "x": 32,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 2
+        },
+        {
+          "id": "mask_3",
+          "x": 48,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 3
+        },
+        {
+          "id": "mask_4",
+          "x": 64,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 4
+        },
+        {
+          "id": "mask_5",
+          "x": 80,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 5
+        },
+        {
+          "id": "mask_6",
+          "x": 96,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 6
+        },
+        {
+          "id": "mask_7",
+          "x": 112,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 7
+        },
+        {
+          "id": "mask_8",
+          "x": 128,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 8
+        },
+        {
+          "id": "mask_9",
+          "x": 144,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 9
+        },
+        {
+          "id": "mask_10",
+          "x": 160,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 10
+        },
+        {
+          "id": "mask_11",
+          "x": 176,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 11
+        },
+        {
+          "id": "mask_12",
+          "x": 192,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 12
+        },
+        {
+          "id": "mask_13",
+          "x": 208,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 13
+        },
+        {
+          "id": "mask_14",
+          "x": 224,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 14
+        },
+        {
+          "id": "mask_15",
+          "x": 240,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 15
+        }
+      ],
+      "tags": [
+        "world",
+        "tile",
+        "autotile",
+        "blockface",
+        "leaves"
+      ]
+    },
+    {
+      "id": "tiles/pine_leaves_autotile",
+      "path": "sprites/world/tiles/pine_leaves_autotile.png",
+      "category": "Tile",
+      "width": 256,
+      "height": 16,
+      "frames": [
+        {
+          "id": "mask_0",
+          "x": 0,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 0
+        },
+        {
+          "id": "mask_1",
+          "x": 16,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 1
+        },
+        {
+          "id": "mask_2",
+          "x": 32,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 2
+        },
+        {
+          "id": "mask_3",
+          "x": 48,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 3
+        },
+        {
+          "id": "mask_4",
+          "x": 64,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 4
+        },
+        {
+          "id": "mask_5",
+          "x": 80,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 5
+        },
+        {
+          "id": "mask_6",
+          "x": 96,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 6
+        },
+        {
+          "id": "mask_7",
+          "x": 112,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 7
+        },
+        {
+          "id": "mask_8",
+          "x": 128,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 8
+        },
+        {
+          "id": "mask_9",
+          "x": 144,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 9
+        },
+        {
+          "id": "mask_10",
+          "x": 160,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 10
+        },
+        {
+          "id": "mask_11",
+          "x": 176,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 11
+        },
+        {
+          "id": "mask_12",
+          "x": 192,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 12
+        },
+        {
+          "id": "mask_13",
+          "x": 208,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 13
+        },
+        {
+          "id": "mask_14",
+          "x": 224,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 14
+        },
+        {
+          "id": "mask_15",
+          "x": 240,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 15
+        }
+      ],
+      "tags": [
+        "world",
+        "tile",
+        "autotile",
+        "blockface",
+        "leaves"
+      ]
+    },
+    {
+      "id": "tiles/plank_autotile",
+      "path": "sprites/world/tiles/plank_autotile.png",
+      "category": "Tile",
+      "width": 256,
+      "height": 16,
+      "frames": [
+        {
+          "id": "mask_0",
+          "x": 0,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 0
+        },
+        {
+          "id": "mask_1",
+          "x": 16,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 1
+        },
+        {
+          "id": "mask_2",
+          "x": 32,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 2
+        },
+        {
+          "id": "mask_3",
+          "x": 48,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 3
+        },
+        {
+          "id": "mask_4",
+          "x": 64,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 4
+        },
+        {
+          "id": "mask_5",
+          "x": 80,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 5
+        },
+        {
+          "id": "mask_6",
+          "x": 96,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 6
+        },
+        {
+          "id": "mask_7",
+          "x": 112,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 7
+        },
+        {
+          "id": "mask_8",
+          "x": 128,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 8
+        },
+        {
+          "id": "mask_9",
+          "x": 144,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 9
+        },
+        {
+          "id": "mask_10",
+          "x": 160,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 10
+        },
+        {
+          "id": "mask_11",
+          "x": 176,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 11
+        },
+        {
+          "id": "mask_12",
+          "x": 192,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 12
+        },
+        {
+          "id": "mask_13",
+          "x": 208,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 13
+        },
+        {
+          "id": "mask_14",
+          "x": 224,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 14
+        },
+        {
+          "id": "mask_15",
+          "x": 240,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 15
+        }
+      ],
+      "tags": [
+        "world",
+        "tile",
+        "autotile",
+        "blockface",
+        "wood"
+      ]
+    },
+    {
+      "id": "tiles/brick_autotile",
+      "path": "sprites/world/tiles/brick_autotile.png",
+      "category": "Tile",
+      "width": 256,
+      "height": 16,
+      "frames": [
+        {
+          "id": "mask_0",
+          "x": 0,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 0
+        },
+        {
+          "id": "mask_1",
+          "x": 16,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 1
+        },
+        {
+          "id": "mask_2",
+          "x": 32,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 2
+        },
+        {
+          "id": "mask_3",
+          "x": 48,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 3
+        },
+        {
+          "id": "mask_4",
+          "x": 64,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 4
+        },
+        {
+          "id": "mask_5",
+          "x": 80,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 5
+        },
+        {
+          "id": "mask_6",
+          "x": 96,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 6
+        },
+        {
+          "id": "mask_7",
+          "x": 112,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 7
+        },
+        {
+          "id": "mask_8",
+          "x": 128,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 8
+        },
+        {
+          "id": "mask_9",
+          "x": 144,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 9
+        },
+        {
+          "id": "mask_10",
+          "x": 160,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 10
+        },
+        {
+          "id": "mask_11",
+          "x": 176,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 11
+        },
+        {
+          "id": "mask_12",
+          "x": 192,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 12
+        },
+        {
+          "id": "mask_13",
+          "x": 208,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 13
+        },
+        {
+          "id": "mask_14",
+          "x": 224,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 14
+        },
+        {
+          "id": "mask_15",
+          "x": 240,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 15
+        }
+      ],
+      "tags": [
+        "world",
+        "tile",
+        "autotile",
+        "blockface",
+        "brick"
+      ]
+    },
+    {
+      "id": "tiles/glass_autotile",
+      "path": "sprites/world/tiles/glass_autotile.png",
+      "category": "Tile",
+      "width": 256,
+      "height": 16,
+      "frames": [
+        {
+          "id": "mask_0",
+          "x": 0,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 0
+        },
+        {
+          "id": "mask_1",
+          "x": 16,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 1
+        },
+        {
+          "id": "mask_2",
+          "x": 32,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 2
+        },
+        {
+          "id": "mask_3",
+          "x": 48,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 3
+        },
+        {
+          "id": "mask_4",
+          "x": 64,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 4
+        },
+        {
+          "id": "mask_5",
+          "x": 80,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 5
+        },
+        {
+          "id": "mask_6",
+          "x": 96,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 6
+        },
+        {
+          "id": "mask_7",
+          "x": 112,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 7
+        },
+        {
+          "id": "mask_8",
+          "x": 128,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 8
+        },
+        {
+          "id": "mask_9",
+          "x": 144,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 9
+        },
+        {
+          "id": "mask_10",
+          "x": 160,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 10
+        },
+        {
+          "id": "mask_11",
+          "x": 176,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 11
+        },
+        {
+          "id": "mask_12",
+          "x": 192,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 12
+        },
+        {
+          "id": "mask_13",
+          "x": 208,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 13
+        },
+        {
+          "id": "mask_14",
+          "x": 224,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 14
+        },
+        {
+          "id": "mask_15",
+          "x": 240,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 15
+        }
+      ],
+      "tags": [
+        "world",
+        "tile",
+        "autotile",
+        "blockface",
+        "glass"
+      ]
+    },
+    {
+      "id": "tiles/oak_trunk_autotile",
+      "path": "sprites/world/tiles/oak_trunk_autotile.png",
+      "category": "Tile",
+      "width": 256,
+      "height": 16,
+      "frames": [
+        {
+          "id": "mask_0",
+          "x": 0,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 0
+        },
+        {
+          "id": "mask_1",
+          "x": 16,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 1
+        },
+        {
+          "id": "mask_2",
+          "x": 32,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 2
+        },
+        {
+          "id": "mask_3",
+          "x": 48,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 3
+        },
+        {
+          "id": "mask_4",
+          "x": 64,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 4
+        },
+        {
+          "id": "mask_5",
+          "x": 80,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 5
+        },
+        {
+          "id": "mask_6",
+          "x": 96,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 6
+        },
+        {
+          "id": "mask_7",
+          "x": 112,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 7
+        },
+        {
+          "id": "mask_8",
+          "x": 128,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 8
+        },
+        {
+          "id": "mask_9",
+          "x": 144,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 9
+        },
+        {
+          "id": "mask_10",
+          "x": 160,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 10
+        },
+        {
+          "id": "mask_11",
+          "x": 176,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 11
+        },
+        {
+          "id": "mask_12",
+          "x": 192,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 12
+        },
+        {
+          "id": "mask_13",
+          "x": 208,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 13
+        },
+        {
+          "id": "mask_14",
+          "x": 224,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 14
+        },
+        {
+          "id": "mask_15",
+          "x": 240,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 15
+        }
+      ],
+      "tags": [
+        "world",
+        "tile",
+        "autotile",
+        "blockface",
+        "tree"
+      ]
+    },
+    {
+      "id": "tiles/pine_trunk_autotile",
+      "path": "sprites/world/tiles/pine_trunk_autotile.png",
+      "category": "Tile",
+      "width": 256,
+      "height": 16,
+      "frames": [
+        {
+          "id": "mask_0",
+          "x": 0,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 0
+        },
+        {
+          "id": "mask_1",
+          "x": 16,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 1
+        },
+        {
+          "id": "mask_2",
+          "x": 32,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 2
+        },
+        {
+          "id": "mask_3",
+          "x": 48,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 3
+        },
+        {
+          "id": "mask_4",
+          "x": 64,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 4
+        },
+        {
+          "id": "mask_5",
+          "x": 80,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 5
+        },
+        {
+          "id": "mask_6",
+          "x": 96,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 6
+        },
+        {
+          "id": "mask_7",
+          "x": 112,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 7
+        },
+        {
+          "id": "mask_8",
+          "x": 128,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 8
+        },
+        {
+          "id": "mask_9",
+          "x": 144,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 9
+        },
+        {
+          "id": "mask_10",
+          "x": 160,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 10
+        },
+        {
+          "id": "mask_11",
+          "x": 176,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 11
+        },
+        {
+          "id": "mask_12",
+          "x": 192,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 12
+        },
+        {
+          "id": "mask_13",
+          "x": 208,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 13
+        },
+        {
+          "id": "mask_14",
+          "x": 224,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 14
+        },
+        {
+          "id": "mask_15",
+          "x": 240,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 15
+        }
+      ],
+      "tags": [
+        "world",
+        "tile",
+        "autotile",
+        "blockface",
+        "tree"
+      ]
+    },
+    {
+      "id": "tiles/birch_trunk_autotile",
+      "path": "sprites/world/tiles/birch_trunk_autotile.png",
+      "category": "Tile",
+      "width": 256,
+      "height": 16,
+      "frames": [
+        {
+          "id": "mask_0",
+          "x": 0,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 0
+        },
+        {
+          "id": "mask_1",
+          "x": 16,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 1
+        },
+        {
+          "id": "mask_2",
+          "x": 32,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 2
+        },
+        {
+          "id": "mask_3",
+          "x": 48,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 3
+        },
+        {
+          "id": "mask_4",
+          "x": 64,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 4
+        },
+        {
+          "id": "mask_5",
+          "x": 80,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 5
+        },
+        {
+          "id": "mask_6",
+          "x": 96,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 6
+        },
+        {
+          "id": "mask_7",
+          "x": 112,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 7
+        },
+        {
+          "id": "mask_8",
+          "x": 128,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 8
+        },
+        {
+          "id": "mask_9",
+          "x": 144,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 9
+        },
+        {
+          "id": "mask_10",
+          "x": 160,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 10
+        },
+        {
+          "id": "mask_11",
+          "x": 176,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 11
+        },
+        {
+          "id": "mask_12",
+          "x": 192,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 12
+        },
+        {
+          "id": "mask_13",
+          "x": 208,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 13
+        },
+        {
+          "id": "mask_14",
+          "x": 224,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 14
+        },
+        {
+          "id": "mask_15",
+          "x": 240,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 15
+        }
+      ],
+      "tags": [
+        "world",
+        "tile",
+        "autotile",
+        "blockface",
+        "tree"
+      ]
+    },
+    {
+      "id": "tiles/palm_trunk_autotile",
+      "path": "sprites/world/tiles/palm_trunk_autotile.png",
+      "category": "Tile",
+      "width": 256,
+      "height": 16,
+      "frames": [
+        {
+          "id": "mask_0",
+          "x": 0,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 0
+        },
+        {
+          "id": "mask_1",
+          "x": 16,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 1
+        },
+        {
+          "id": "mask_2",
+          "x": 32,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 2
+        },
+        {
+          "id": "mask_3",
+          "x": 48,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 3
+        },
+        {
+          "id": "mask_4",
+          "x": 64,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 4
+        },
+        {
+          "id": "mask_5",
+          "x": 80,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 5
+        },
+        {
+          "id": "mask_6",
+          "x": 96,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 6
+        },
+        {
+          "id": "mask_7",
+          "x": 112,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 7
+        },
+        {
+          "id": "mask_8",
+          "x": 128,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 8
+        },
+        {
+          "id": "mask_9",
+          "x": 144,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 9
+        },
+        {
+          "id": "mask_10",
+          "x": 160,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 10
+        },
+        {
+          "id": "mask_11",
+          "x": 176,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 11
+        },
+        {
+          "id": "mask_12",
+          "x": 192,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 12
+        },
+        {
+          "id": "mask_13",
+          "x": 208,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 13
+        },
+        {
+          "id": "mask_14",
+          "x": 224,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 14
+        },
+        {
+          "id": "mask_15",
+          "x": 240,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 15
+        }
+      ],
+      "tags": [
+        "world",
+        "tile",
+        "autotile",
+        "blockface",
+        "tree"
+      ]
+    },
+    {
+      "id": "tiles/oak_leaves_autotile",
+      "path": "sprites/world/tiles/oak_leaves_autotile.png",
+      "category": "Tile",
+      "width": 256,
+      "height": 16,
+      "frames": [
+        {
+          "id": "mask_0",
+          "x": 0,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 0
+        },
+        {
+          "id": "mask_1",
+          "x": 16,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 1
+        },
+        {
+          "id": "mask_2",
+          "x": 32,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 2
+        },
+        {
+          "id": "mask_3",
+          "x": 48,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 3
+        },
+        {
+          "id": "mask_4",
+          "x": 64,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 4
+        },
+        {
+          "id": "mask_5",
+          "x": 80,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 5
+        },
+        {
+          "id": "mask_6",
+          "x": 96,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 6
+        },
+        {
+          "id": "mask_7",
+          "x": 112,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 7
+        },
+        {
+          "id": "mask_8",
+          "x": 128,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 8
+        },
+        {
+          "id": "mask_9",
+          "x": 144,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 9
+        },
+        {
+          "id": "mask_10",
+          "x": 160,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 10
+        },
+        {
+          "id": "mask_11",
+          "x": 176,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 11
+        },
+        {
+          "id": "mask_12",
+          "x": 192,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 12
+        },
+        {
+          "id": "mask_13",
+          "x": 208,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 13
+        },
+        {
+          "id": "mask_14",
+          "x": 224,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 14
+        },
+        {
+          "id": "mask_15",
+          "x": 240,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 15
+        }
+      ],
+      "tags": [
+        "world",
+        "tile",
+        "autotile",
+        "blockface",
+        "tree"
+      ]
+    },
+    {
+      "id": "tiles/pine_leaves_tree_autotile",
+      "path": "sprites/world/tiles/pine_leaves_tree_autotile.png",
+      "category": "Tile",
+      "width": 256,
+      "height": 16,
+      "frames": [
+        {
+          "id": "mask_0",
+          "x": 0,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 0
+        },
+        {
+          "id": "mask_1",
+          "x": 16,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 1
+        },
+        {
+          "id": "mask_2",
+          "x": 32,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 2
+        },
+        {
+          "id": "mask_3",
+          "x": 48,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 3
+        },
+        {
+          "id": "mask_4",
+          "x": 64,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 4
+        },
+        {
+          "id": "mask_5",
+          "x": 80,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 5
+        },
+        {
+          "id": "mask_6",
+          "x": 96,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 6
+        },
+        {
+          "id": "mask_7",
+          "x": 112,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 7
+        },
+        {
+          "id": "mask_8",
+          "x": 128,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 8
+        },
+        {
+          "id": "mask_9",
+          "x": 144,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 9
+        },
+        {
+          "id": "mask_10",
+          "x": 160,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 10
+        },
+        {
+          "id": "mask_11",
+          "x": 176,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 11
+        },
+        {
+          "id": "mask_12",
+          "x": 192,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 12
+        },
+        {
+          "id": "mask_13",
+          "x": 208,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 13
+        },
+        {
+          "id": "mask_14",
+          "x": 224,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 14
+        },
+        {
+          "id": "mask_15",
+          "x": 240,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 15
+        }
+      ],
+      "tags": [
+        "world",
+        "tile",
+        "autotile",
+        "blockface",
+        "tree"
+      ]
+    },
+    {
+      "id": "tiles/birch_leaves_autotile",
+      "path": "sprites/world/tiles/birch_leaves_autotile.png",
+      "category": "Tile",
+      "width": 256,
+      "height": 16,
+      "frames": [
+        {
+          "id": "mask_0",
+          "x": 0,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 0
+        },
+        {
+          "id": "mask_1",
+          "x": 16,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 1
+        },
+        {
+          "id": "mask_2",
+          "x": 32,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 2
+        },
+        {
+          "id": "mask_3",
+          "x": 48,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 3
+        },
+        {
+          "id": "mask_4",
+          "x": 64,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 4
+        },
+        {
+          "id": "mask_5",
+          "x": 80,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 5
+        },
+        {
+          "id": "mask_6",
+          "x": 96,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 6
+        },
+        {
+          "id": "mask_7",
+          "x": 112,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 7
+        },
+        {
+          "id": "mask_8",
+          "x": 128,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 8
+        },
+        {
+          "id": "mask_9",
+          "x": 144,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 9
+        },
+        {
+          "id": "mask_10",
+          "x": 160,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 10
+        },
+        {
+          "id": "mask_11",
+          "x": 176,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 11
+        },
+        {
+          "id": "mask_12",
+          "x": 192,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 12
+        },
+        {
+          "id": "mask_13",
+          "x": 208,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 13
+        },
+        {
+          "id": "mask_14",
+          "x": 224,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 14
+        },
+        {
+          "id": "mask_15",
+          "x": 240,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 15
+        }
+      ],
+      "tags": [
+        "world",
+        "tile",
+        "autotile",
+        "blockface",
+        "tree"
+      ]
+    },
+    {
+      "id": "tiles/palm_leaves_autotile",
+      "path": "sprites/world/tiles/palm_leaves_autotile.png",
+      "category": "Tile",
+      "width": 256,
+      "height": 16,
+      "frames": [
+        {
+          "id": "mask_0",
+          "x": 0,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 0
+        },
+        {
+          "id": "mask_1",
+          "x": 16,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 1
+        },
+        {
+          "id": "mask_2",
+          "x": 32,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 2
+        },
+        {
+          "id": "mask_3",
+          "x": 48,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 3
+        },
+        {
+          "id": "mask_4",
+          "x": 64,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 4
+        },
+        {
+          "id": "mask_5",
+          "x": 80,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 5
+        },
+        {
+          "id": "mask_6",
+          "x": 96,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 6
+        },
+        {
+          "id": "mask_7",
+          "x": 112,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 7
+        },
+        {
+          "id": "mask_8",
+          "x": 128,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 8
+        },
+        {
+          "id": "mask_9",
+          "x": 144,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 9
+        },
+        {
+          "id": "mask_10",
+          "x": 160,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 10
+        },
+        {
+          "id": "mask_11",
+          "x": 176,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 11
+        },
+        {
+          "id": "mask_12",
+          "x": 192,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 12
+        },
+        {
+          "id": "mask_13",
+          "x": 208,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 13
+        },
+        {
+          "id": "mask_14",
+          "x": 224,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 14
+        },
+        {
+          "id": "mask_15",
+          "x": 240,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 15
+        }
+      ],
+      "tags": [
+        "world",
+        "tile",
+        "autotile",
+        "blockface",
+        "tree"
+      ]
+    },
+    {
+      "id": "world/backgrounds/forest_parallax_layer_v2",
+      "path": "sprites/world/backgrounds/forest_parallax_layer_v2.png",
+      "category": "Background",
+      "width": 512,
+      "height": 128,
+      "tags": [
+        "world",
+        "background",
+        "parallax",
+        "tileable"
+      ]
+    },
+    {
+      "id": "world/backgrounds/cave_parallax_layer_v2",
+      "path": "sprites/world/backgrounds/cave_parallax_layer_v2.png",
+      "category": "Background",
+      "width": 512,
+      "height": 128,
+      "tags": [
+        "world",
+        "background",
+        "parallax",
+        "tileable"
+      ]
+    },
+    {
+      "id": "world/backgrounds/deep_cave_parallax_layer",
+      "path": "sprites/world/backgrounds/deep_cave_parallax_layer.png",
+      "category": "Background",
+      "width": 512,
+      "height": 128,
+      "tags": [
+        "world",
+        "background",
+        "parallax",
+        "tileable"
+      ]
+    },
+    {
+      "id": "world/backgrounds/night_forest_parallax_layer",
+      "path": "sprites/world/backgrounds/night_forest_parallax_layer.png",
+      "category": "Background",
+      "width": 512,
+      "height": 128,
+      "tags": [
+        "world",
+        "background",
+        "parallax",
+        "tileable"
+      ]
+    },
+    {
+      "id": "world/backgrounds/magical_grove_parallax_layer",
+      "path": "sprites/world/backgrounds/magical_grove_parallax_layer.png",
+      "category": "Background",
+      "width": 512,
+      "height": 128,
+      "tags": [
+        "world",
+        "background",
+        "parallax",
+        "tileable"
+      ]
+    },
+    {
+      "id": "world/objects/chair",
+      "path": "sprites/world/objects/chair.png",
+      "category": "WorldObject",
+      "width": 16,
+      "height": 32,
+      "tags": [
+        "world",
+        "object",
+        "decor"
+      ]
+    },
+    {
+      "id": "world/objects/table",
+      "path": "sprites/world/objects/table.png",
+      "category": "WorldObject",
+      "width": 32,
+      "height": 16,
+      "tags": [
+        "world",
+        "object",
+        "decor"
+      ]
+    },
+    {
+      "id": "world/objects/door",
+      "path": "sprites/world/objects/door.png",
+      "category": "WorldObject",
+      "width": 16,
+      "height": 32,
+      "tags": [
+        "world",
+        "object",
+        "decor"
+      ]
+    },
+    {
+      "id": "world/objects/torch",
+      "path": "sprites/world/objects/torch.png",
+      "category": "WorldObject",
+      "width": 16,
+      "height": 16,
+      "tags": [
+        "world",
+        "object",
+        "decor"
+      ]
+    },
+    {
+      "id": "world/objects/lantern",
+      "path": "sprites/world/objects/lantern.png",
+      "category": "WorldObject",
+      "width": 16,
+      "height": 16,
+      "tags": [
+        "world",
+        "object",
+        "decor"
+      ]
+    },
+    {
+      "id": "world/objects/chest",
+      "path": "sprites/world/objects/chest.png",
+      "category": "WorldObject",
+      "width": 32,
+      "height": 16,
+      "tags": [
+        "world",
+        "object",
+        "decor"
+      ]
+    },
+    {
+      "id": "world/objects/anvil",
+      "path": "sprites/world/objects/anvil.png",
+      "category": "WorldObject",
+      "width": 32,
+      "height": 16,
+      "tags": [
+        "world",
+        "object",
+        "decor"
+      ]
+    },
+    {
+      "id": "world/objects/furnace",
+      "path": "sprites/world/objects/furnace.png",
+      "category": "WorldObject",
+      "width": 32,
+      "height": 32,
+      "tags": [
+        "world",
+        "object",
+        "decor"
+      ]
+    },
+    {
+      "id": "world/objects/bookcase",
+      "path": "sprites/world/objects/bookcase.png",
+      "category": "WorldObject",
+      "width": 32,
+      "height": 32,
+      "tags": [
+        "world",
+        "object",
+        "decor"
+      ]
+    },
+    {
+      "id": "world/objects/bed",
+      "path": "sprites/world/objects/bed.png",
+      "category": "WorldObject",
+      "width": 48,
+      "height": 16,
+      "tags": [
+        "world",
+        "object",
+        "decor"
+      ]
+    },
+    {
+      "id": "world/objects/banner",
+      "path": "sprites/world/objects/banner.png",
+      "category": "WorldObject",
+      "width": 16,
+      "height": 32,
+      "tags": [
+        "world",
+        "object",
+        "decor"
+      ]
+    },
+    {
+      "id": "world/objects/pot",
+      "path": "sprites/world/objects/pot.png",
+      "category": "WorldObject",
+      "width": 16,
+      "height": 16,
+      "tags": [
+        "world",
+        "object",
+        "decor"
+      ]
+    },
+    {
+      "id": "world/objects/crate",
+      "path": "sprites/world/objects/crate.png",
+      "category": "WorldObject",
+      "width": 16,
+      "height": 16,
+      "tags": [
+        "world",
+        "object",
+        "decor"
+      ]
+    },
+    {
+      "id": "world/decor/vines",
+      "path": "sprites/world/decor/vines.png",
+      "category": "WorldObject",
+      "width": 16,
+      "height": 32,
+      "tags": [
+        "world",
+        "object",
+        "decor"
+      ]
+    },
+    {
+      "id": "world/decor/mushrooms",
+      "path": "sprites/world/decor/mushrooms.png",
+      "category": "WorldObject",
+      "width": 32,
+      "height": 16,
+      "tags": [
+        "world",
+        "object",
+        "decor"
+      ]
+    },
+    {
+      "id": "world/decor/flowers",
+      "path": "sprites/world/decor/flowers.png",
+      "category": "WorldObject",
+      "width": 32,
+      "height": 16,
+      "tags": [
+        "world",
+        "object",
+        "decor"
+      ]
+    },
+    {
+      "id": "world/decor/tree_species_props",
+      "path": "sprites/world/decor/tree_species_props.png",
+      "category": "WorldObject",
+      "width": 128,
+      "height": 32,
+      "tags": [
+        "world",
+        "object",
+        "decor"
+      ]
+    },
+    {
+      "id": "items/copper_axe",
+      "path": "sprites/tools/copper_axe.png",
+      "category": "Tool",
+      "width": 16,
+      "height": 16,
+      "tags": [
+        "item",
+        "tool",
+        "axe",
+        "copper"
+      ]
+    },
+    {
+      "id": "items/iron_axe",
+      "path": "sprites/tools/iron_axe.png",
+      "category": "Tool",
+      "width": 16,
+      "height": 16,
+      "tags": [
+        "item",
+        "tool",
+        "axe",
+        "iron"
+      ]
+    },
+    {
+      "id": "items/copper_hammer",
+      "path": "sprites/tools/copper_hammer.png",
+      "category": "Tool",
+      "width": 16,
+      "height": 16,
+      "tags": [
+        "item",
+        "tool",
+        "hammer",
+        "copper"
+      ]
+    },
+    {
+      "id": "items/iron_hammer",
+      "path": "sprites/tools/iron_hammer.png",
+      "category": "Tool",
+      "width": 16,
+      "height": 16,
+      "tags": [
+        "item",
+        "tool",
+        "hammer",
+        "iron"
+      ]
+    },
+    {
+      "id": "items/iron_hoe",
+      "path": "sprites/tools/iron_hoe.png",
+      "category": "Tool",
+      "width": 16,
+      "height": 16,
+      "tags": [
+        "item",
+        "tool",
+        "hoe",
+        "farming",
+        "iron"
+      ]
+    },
+    {
+      "id": "items/magic_wand",
+      "path": "sprites/weapons/magic_wand.png",
+      "category": "Weapon",
+      "width": 16,
+      "height": 16,
+      "tags": [
+        "item",
+        "weapon",
+        "magic",
+        "wand"
+      ]
+    },
+    {
+      "id": "items/staff",
+      "path": "sprites/weapons/staff.png",
+      "category": "Weapon",
+      "width": 16,
+      "height": 16,
+      "tags": [
+        "item",
+        "weapon",
+        "magic",
+        "staff"
+      ]
+    },
+    {
+      "id": "items/spellbook",
+      "path": "sprites/items/magic/spellbook.png",
+      "category": "Item",
+      "width": 16,
+      "height": 16,
+      "tags": [
+        "item",
+        "magic",
+        "book"
+      ]
+    },
+    {
+      "id": "items/mana_potion",
+      "path": "sprites/items/consumables/mana_potion.png",
+      "category": "Item",
+      "width": 16,
+      "height": 16,
+      "tags": [
+        "item",
+        "consumable",
+        "mana",
+        "potion"
+      ]
+    },
+    {
+      "id": "projectiles/firebolt",
+      "path": "sprites/projectiles/firebolt.png",
+      "category": "Projectile",
+      "width": 16,
+      "height": 16,
+      "tags": [
+        "projectile",
+        "magic",
+        "fire"
+      ]
+    },
+    {
+      "id": "projectiles/ice_shard",
+      "path": "sprites/projectiles/ice_shard.png",
+      "category": "Projectile",
+      "width": 16,
+      "height": 16,
+      "tags": [
+        "projectile",
+        "magic",
+        "ice"
+      ]
+    },
+    {
+      "id": "projectiles/magic_spark_particles",
+      "path": "sprites/projectiles/magic_spark_particles.png",
+      "category": "Projectile",
+      "width": 16,
+      "height": 16,
+      "tags": [
+        "projectile",
+        "particle",
+        "magic"
+      ]
+    },
+    {
+      "id": "ui/heart",
+      "path": "sprites/ui/heart.png",
+      "category": "UI",
+      "width": 16,
+      "height": 16,
+      "tags": [
+        "ui",
+        "icon"
+      ]
+    },
+    {
+      "id": "ui/mana_star",
+      "path": "sprites/ui/mana_star.png",
+      "category": "UI",
+      "width": 16,
+      "height": 16,
+      "tags": [
+        "ui",
+        "icon"
+      ]
+    },
+    {
+      "id": "ui/mana_crystal",
+      "path": "sprites/ui/mana_crystal.png",
+      "category": "UI",
+      "width": 16,
+      "height": 16,
+      "tags": [
+        "ui",
+        "icon"
+      ]
+    },
+    {
+      "id": "ui/armor",
+      "path": "sprites/ui/armor.png",
+      "category": "UI",
+      "width": 16,
+      "height": 16,
+      "tags": [
+        "ui",
+        "icon"
+      ]
+    },
+    {
+      "id": "ui/damage",
+      "path": "sprites/ui/damage.png",
+      "category": "UI",
+      "width": 16,
+      "height": 16,
+      "tags": [
+        "ui",
+        "icon"
+      ]
+    },
+    {
+      "id": "ui/speed",
+      "path": "sprites/ui/speed.png",
+      "category": "UI",
+      "width": 16,
+      "height": 16,
+      "tags": [
+        "ui",
+        "icon"
+      ]
+    },
+    {
+      "id": "ui/mining",
+      "path": "sprites/ui/mining.png",
+      "category": "UI",
+      "width": 16,
+      "height": 16,
+      "tags": [
+        "ui",
+        "icon"
+      ]
+    },
+    {
+      "id": "ui/inventory_tab",
+      "path": "sprites/ui/inventory_tab.png",
+      "category": "UI",
+      "width": 16,
+      "height": 16,
+      "tags": [
+        "ui",
+        "icon"
+      ]
+    },
+    {
+      "id": "ui/crafting_hammer",
+      "path": "sprites/ui/crafting_hammer.png",
+      "category": "UI",
+      "width": 16,
+      "height": 16,
+      "tags": [
+        "ui",
+        "icon"
+      ]
+    },
+    {
+      "id": "ui/crafting_anvil",
+      "path": "sprites/ui/crafting_anvil.png",
+      "category": "UI",
+      "width": 16,
+      "height": 16,
+      "tags": [
+        "ui",
+        "icon"
+      ]
+    },
+    {
+      "id": "ui/character_editor",
+      "path": "sprites/ui/character_editor.png",
+      "category": "UI",
+      "width": 16,
+      "height": 16,
+      "tags": [
+        "ui",
+        "icon"
       ]
     }
   ]

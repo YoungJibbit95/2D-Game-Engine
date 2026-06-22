@@ -1,0 +1,10 @@
+{
+  "id": "mana_potion",
+  "displayName": "Mana Potion",
+  "type": "ManaPotion",
+  "texture": "items/mana_potion",
+  "maxStack": 30,
+  "useTime": 0.45,
+  "manaRestore": 40,
+  "tags": ["item", "consumable", "magic", "mana"]
+}

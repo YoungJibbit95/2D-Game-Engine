@@ -15,6 +15,10 @@ public sealed class EquipmentStatCalculator
         var melee = baseStats.MeleeDamageMultiplier;
         var ranged = baseStats.RangedDamageMultiplier;
         var mining = baseStats.MiningSpeedMultiplier;
+        var maxMana = baseStats.MaxMana;
+        var magic = baseStats.MagicDamageMultiplier;
+        var manaCost = baseStats.ManaCostMultiplier;
+        var manaRegen = baseStats.ManaRegenMultiplier;
 
         foreach (var stack in loadout.Slots.Values)
         {
@@ -30,6 +34,10 @@ public sealed class EquipmentStatCalculator
             melee += definition.MeleeDamageBonus;
             ranged += definition.RangedDamageBonus;
             mining += definition.MiningSpeedBonus;
+            maxMana += definition.MaxManaBonus;
+            magic += definition.MagicDamageBonus;
+            manaCost -= definition.ManaCostReduction;
+            manaRegen += definition.ManaRegenBonus;
         }
 
         return new PlayerStatBlock(
@@ -38,6 +46,10 @@ public sealed class EquipmentStatCalculator
             MovementSpeedMultiplier: Math.Max(0.1f, movement),
             MeleeDamageMultiplier: Math.Max(0.1f, melee),
             RangedDamageMultiplier: Math.Max(0.1f, ranged),
-            MiningSpeedMultiplier: Math.Max(0.1f, mining));
+            MiningSpeedMultiplier: Math.Max(0.1f, mining),
+            MaxMana: Math.Max(0, maxMana),
+            MagicDamageMultiplier: Math.Max(0.1f, magic),
+            ManaCostMultiplier: Math.Clamp(manaCost, 0.1f, 3f),
+            ManaRegenMultiplier: Math.Max(0f, manaRegen));
     }
 }

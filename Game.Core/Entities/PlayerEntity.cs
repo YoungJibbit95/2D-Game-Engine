@@ -1,4 +1,5 @@
 using Game.Core.Combat;
+using Game.Core.Equipment;
 using Game.Core.Effects;
 using Game.Core.Physics;
 using Game.Core.World;
@@ -20,10 +21,17 @@ public sealed class PlayerEntity : Entity
 
     private PlayerCommand _command;
 
-    public PlayerEntity(Vector2 spawnPosition, TileCollisionResolver collisionResolver, int maxHealth = 100, int? currentHealth = null)
+    public PlayerEntity(
+        Vector2 spawnPosition,
+        TileCollisionResolver collisionResolver,
+        int maxHealth = 100,
+        int? currentHealth = null,
+        int maxMana = 20,
+        int? currentMana = null)
     {
         _collisionResolver = collisionResolver;
         HealthComponent = new HealthComponent(maxHealth, currentHealth);
+        ManaComponent = new ManaComponent(maxMana, currentMana);
         Body = new PhysicsBody
         {
             Position = spawnPosition,
@@ -36,11 +44,19 @@ public sealed class PlayerEntity : Entity
 
     public HealthComponent HealthComponent { get; }
 
+    public ManaComponent ManaComponent { get; }
+
     public StatusEffectCollection StatusEffects { get; } = new();
+
+    public PlayerStatBlock Stats { get; private set; } = PlayerStatBlock.Base;
 
     public int Health => HealthComponent.Current;
 
     public int MaxHealth => HealthComponent.Max;
+
+    public int Mana => ManaComponent.Current;
+
+    public int MaxMana => ManaComponent.Max;
 
     public override RectI Bounds => Body.Bounds;
 
@@ -68,13 +84,22 @@ public sealed class PlayerEntity : Entity
         Body.OnGround = false;
         Position = position;
         HealthComponent.RestoreFull();
+        ManaComponent.RestoreFull();
         _command = PlayerCommand.None;
+    }
+
+    public void ApplyStats(PlayerStatBlock stats)
+    {
+        Stats = stats;
+        HealthComponent.SetMax(stats.MaxHealth);
+        ManaComponent.SetMax(stats.MaxMana);
     }
 
     public override void Update(GameWorld world, float deltaSeconds)
     {
         StatusEffects.Update(deltaSeconds, HealthComponent);
         HealthComponent.Update(deltaSeconds);
+        ManaComponent.Update(deltaSeconds, regenMultiplier: Stats.ManaRegenMultiplier);
         ApplyHorizontalMovement(deltaSeconds);
         ApplyJump();
         ApplyGravity(deltaSeconds);
@@ -85,7 +110,7 @@ public sealed class PlayerEntity : Entity
 
     private void ApplyHorizontalMovement(float deltaSeconds)
     {
-        var targetSpeed = Math.Clamp(_command.MoveAxis, -1f, 1f) * MaxWalkSpeed;
+        var targetSpeed = Math.Clamp(_command.MoveAxis, -1f, 1f) * MaxWalkSpeed * Stats.MovementSpeedMultiplier;
         var velocity = Body.Velocity;
 
         if (Math.Abs(targetSpeed) > 0.01f)

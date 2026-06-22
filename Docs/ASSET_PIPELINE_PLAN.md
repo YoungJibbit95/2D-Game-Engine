@@ -185,7 +185,11 @@ The current base brief file covers all sprite ids in `Game.Data/assets/sprites.j
 - Armor and accessories: copper helmet, copper chestplate, copper greaves, mining charm.
 - Consumables/ammo: healing potion, wooden arrow, poison arrow.
 - Farming: copper hoe, watering can, parsnip seeds, harvested parsnip, and four-stage parsnip crop strip.
-- Runtime sprites: slime, player action sheet, player editor overlays, v2 body/hair/clothes/accessory sheets, rabbit, bird, bat, cave worm, foliage props, forest/cave parallax layers, wooden arrow projectile, poison arrow projectile.
+- Runtime sprites: slime, player action sheet, player editor overlays, v2 body/hair/clothes/accessory sheets, rabbit, bird, bat, cave worm, foliage props, corrected 512x128 forest/night/grove/cave/deep-cave parallax layers, wooden arrow projectile, poison arrow projectile, first magic projectiles, and HUD stat/resource icons.
+
+- Magic/gameplay items: spark wand, apprentice tome, mana crystal, mana potion, spark bolt, and arcane mote now have data definitions, sprite manifest entries, briefs, and 16x16 transparent PNGs.
+
+- Expansion props: the current asset wave includes additional blockface sheets, tree species, furniture, decor, tools, UI icons, crops, projectiles, and world objects. These are valid pipeline assets, but gameplay definitions should be added deliberately when the corresponding systems are ready.
 
 The latest programmer-art pass also adds corrected blockface sheets for dirt, grass, stone, wood, and leaves. These are deterministic starter assets, not final art direction, but they are valid production-shaped inputs for autotile rendering and asset validation.
 

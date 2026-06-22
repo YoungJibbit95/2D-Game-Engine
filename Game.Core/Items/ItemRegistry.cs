@@ -104,9 +104,9 @@ public sealed class ItemRegistry : IItemDefinitionProvider
 
     private static void ValidateAction(ItemDefinition item, ItemActionDefinition action)
     {
-        if (action.Kind == ItemActionKind.Shoot && string.IsNullOrWhiteSpace(action.ProjectileId))
+        if (action.Kind is ItemActionKind.Shoot or ItemActionKind.Cast && string.IsNullOrWhiteSpace(action.ProjectileId))
         {
-            throw new RegistryValidationException($"Item '{item.Id}' has a shoot action without a projectile id.");
+            throw new RegistryValidationException($"Item '{item.Id}' has a projectile action without a projectile id.");
         }
 
         if (action.Kind == ItemActionKind.Place && string.IsNullOrWhiteSpace(item.PlacesTileId))

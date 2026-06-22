@@ -1067,12 +1067,1478 @@
         "autotile",
         "blockface"
       ]
+    },
+    {
+      "spriteId": "tiles/sand_autotile",
+      "outputPath": "sprites/world/tiles/sand_autotile.png",
+      "width": 256,
+      "height": 16,
+      "subject": "sand terrain blockface",
+      "prompt": "Horizontal 256x16 pixel-art sheet with 16 seamless 16x16 frames for warm beach/desert sand with grain flecks. Connected edges tile flush; exposed edges use darker rim shading while staying fully opaque.",
+      "requirements": [
+        "Create exactly 16 frames arranged left to right.",
+        "Each frame is exactly 16x16 pixels.",
+        "Frame order is mask 0 through mask 15, with bits top=1, right=2, bottom=4, left=8.",
+        "Tilefaces must be fully opaque with no alpha holes or transparent seams.",
+        "No spacing, labels, borders, or guide marks."
+      ],
+      "tags": [
+        "world",
+        "tile",
+        "autotile",
+        "blockface",
+        "soil"
+      ]
+    },
+    {
+      "spriteId": "tiles/clay_autotile",
+      "outputPath": "sprites/world/tiles/clay_autotile.png",
+      "width": 256,
+      "height": 16,
+      "subject": "clay terrain blockface",
+      "prompt": "Horizontal 256x16 pixel-art sheet with 16 seamless 16x16 frames for red-brown compact clay with horizontal strata. Connected edges tile flush; exposed edges use darker rim shading while staying fully opaque.",
+      "requirements": [
+        "Create exactly 16 frames arranged left to right.",
+        "Each frame is exactly 16x16 pixels.",
+        "Frame order is mask 0 through mask 15, with bits top=1, right=2, bottom=4, left=8.",
+        "Tilefaces must be fully opaque with no alpha holes or transparent seams.",
+        "No spacing, labels, borders, or guide marks."
+      ],
+      "tags": [
+        "world",
+        "tile",
+        "autotile",
+        "blockface",
+        "soil"
+      ]
+    },
+    {
+      "spriteId": "tiles/mud_autotile",
+      "outputPath": "sprites/world/tiles/mud_autotile.png",
+      "width": 256,
+      "height": 16,
+      "subject": "mud terrain blockface",
+      "prompt": "Horizontal 256x16 pixel-art sheet with 16 seamless 16x16 frames for dark wet mud with clumps and damp pockets. Connected edges tile flush; exposed edges use darker rim shading while staying fully opaque.",
+      "requirements": [
+        "Create exactly 16 frames arranged left to right.",
+        "Each frame is exactly 16x16 pixels.",
+        "Frame order is mask 0 through mask 15, with bits top=1, right=2, bottom=4, left=8.",
+        "Tilefaces must be fully opaque with no alpha holes or transparent seams.",
+        "No spacing, labels, borders, or guide marks."
+      ],
+      "tags": [
+        "world",
+        "tile",
+        "autotile",
+        "blockface",
+        "soil"
+      ]
+    },
+    {
+      "spriteId": "tiles/snow_autotile",
+      "outputPath": "sprites/world/tiles/snow_autotile.png",
+      "width": 256,
+      "height": 16,
+      "subject": "snow terrain blockface",
+      "prompt": "Horizontal 256x16 pixel-art sheet with 16 seamless 16x16 frames for cold snow pack with icy blue shadows. Connected edges tile flush; exposed edges use darker rim shading while staying fully opaque.",
+      "requirements": [
+        "Create exactly 16 frames arranged left to right.",
+        "Each frame is exactly 16x16 pixels.",
+        "Frame order is mask 0 through mask 15, with bits top=1, right=2, bottom=4, left=8.",
+        "Tilefaces must be fully opaque with no alpha holes or transparent seams.",
+        "No spacing, labels, borders, or guide marks."
+      ],
+      "tags": [
+        "world",
+        "tile",
+        "autotile",
+        "blockface",
+        "snow"
+      ]
+    },
+    {
+      "spriteId": "tiles/ice_autotile",
+      "outputPath": "sprites/world/tiles/ice_autotile.png",
+      "width": 256,
+      "height": 16,
+      "subject": "ice terrain blockface",
+      "prompt": "Horizontal 256x16 pixel-art sheet with 16 seamless 16x16 frames for blue transparent-looking ice facets but fully opaque. Connected edges tile flush; exposed edges use darker rim shading while staying fully opaque.",
+      "requirements": [
+        "Create exactly 16 frames arranged left to right.",
+        "Each frame is exactly 16x16 pixels.",
+        "Frame order is mask 0 through mask 15, with bits top=1, right=2, bottom=4, left=8.",
+        "Tilefaces must be fully opaque with no alpha holes or transparent seams.",
+        "No spacing, labels, borders, or guide marks."
+      ],
+      "tags": [
+        "world",
+        "tile",
+        "autotile",
+        "blockface",
+        "ice"
+      ]
+    },
+    {
+      "spriteId": "tiles/marble_autotile",
+      "outputPath": "sprites/world/tiles/marble_autotile.png",
+      "width": 256,
+      "height": 16,
+      "subject": "marble terrain blockface",
+      "prompt": "Horizontal 256x16 pixel-art sheet with 16 seamless 16x16 frames for pale marble with elegant grey veins. Connected edges tile flush; exposed edges use darker rim shading while staying fully opaque.",
+      "requirements": [
+        "Create exactly 16 frames arranged left to right.",
+        "Each frame is exactly 16x16 pixels.",
+        "Frame order is mask 0 through mask 15, with bits top=1, right=2, bottom=4, left=8.",
+        "Tilefaces must be fully opaque with no alpha holes or transparent seams.",
+        "No spacing, labels, borders, or guide marks."
+      ],
+      "tags": [
+        "world",
+        "tile",
+        "autotile",
+        "blockface",
+        "stone"
+      ]
+    },
+    {
+      "spriteId": "tiles/granite_autotile",
+      "outputPath": "sprites/world/tiles/granite_autotile.png",
+      "width": 256,
+      "height": 16,
+      "subject": "granite terrain blockface",
+      "prompt": "Horizontal 256x16 pixel-art sheet with 16 seamless 16x16 frames for purple-grey speckled granite. Connected edges tile flush; exposed edges use darker rim shading while staying fully opaque.",
+      "requirements": [
+        "Create exactly 16 frames arranged left to right.",
+        "Each frame is exactly 16x16 pixels.",
+        "Frame order is mask 0 through mask 15, with bits top=1, right=2, bottom=4, left=8.",
+        "Tilefaces must be fully opaque with no alpha holes or transparent seams.",
+        "No spacing, labels, borders, or guide marks."
+      ],
+      "tags": [
+        "world",
+        "tile",
+        "autotile",
+        "blockface",
+        "stone"
+      ]
+    },
+    {
+      "spriteId": "tiles/ash_autotile",
+      "outputPath": "sprites/world/tiles/ash_autotile.png",
+      "width": 256,
+      "height": 16,
+      "subject": "ash terrain blockface",
+      "prompt": "Horizontal 256x16 pixel-art sheet with 16 seamless 16x16 frames for charcoal ash and volcanic dust. Connected edges tile flush; exposed edges use darker rim shading while staying fully opaque.",
+      "requirements": [
+        "Create exactly 16 frames arranged left to right.",
+        "Each frame is exactly 16x16 pixels.",
+        "Frame order is mask 0 through mask 15, with bits top=1, right=2, bottom=4, left=8.",
+        "Tilefaces must be fully opaque with no alpha holes or transparent seams.",
+        "No spacing, labels, borders, or guide marks."
+      ],
+      "tags": [
+        "world",
+        "tile",
+        "autotile",
+        "blockface",
+        "stone"
+      ]
+    },
+    {
+      "spriteId": "tiles/living_wood_autotile",
+      "outputPath": "sprites/world/tiles/living_wood_autotile.png",
+      "width": 256,
+      "height": 16,
+      "subject": "living wood terrain blockface",
+      "prompt": "Horizontal 256x16 pixel-art sheet with 16 seamless 16x16 frames for organic trunk wood with knots and growth rings. Connected edges tile flush; exposed edges use darker rim shading while staying fully opaque.",
+      "requirements": [
+        "Create exactly 16 frames arranged left to right.",
+        "Each frame is exactly 16x16 pixels.",
+        "Frame order is mask 0 through mask 15, with bits top=1, right=2, bottom=4, left=8.",
+        "Tilefaces must be fully opaque with no alpha holes or transparent seams.",
+        "No spacing, labels, borders, or guide marks."
+      ],
+      "tags": [
+        "world",
+        "tile",
+        "autotile",
+        "blockface",
+        "wood"
+      ]
+    },
+    {
+      "spriteId": "tiles/rich_leaves_autotile",
+      "outputPath": "sprites/world/tiles/rich_leaves_autotile.png",
+      "width": 256,
+      "height": 16,
+      "subject": "rich green leaf canopy blockface",
+      "prompt": "Horizontal 256x16 pixel-art sheet with 16 seamless 16x16 frames for lush broadleaf canopy with deep shadows. Connected edges tile flush; exposed edges use darker rim shading while staying fully opaque.",
+      "requirements": [
+        "Create exactly 16 frames arranged left to right.",
+        "Each frame is exactly 16x16 pixels.",
+        "Frame order is mask 0 through mask 15, with bits top=1, right=2, bottom=4, left=8.",
+        "Tilefaces must be fully opaque with no alpha holes or transparent seams.",
+        "No spacing, labels, borders, or guide marks."
+      ],
+      "tags": [
+        "world",
+        "tile",
+        "autotile",
+        "blockface",
+        "leaves"
+      ]
+    },
+    {
+      "spriteId": "tiles/autumn_leaves_autotile",
+      "outputPath": "sprites/world/tiles/autumn_leaves_autotile.png",
+      "width": 256,
+      "height": 16,
+      "subject": "autumn leaf canopy blockface",
+      "prompt": "Horizontal 256x16 pixel-art sheet with 16 seamless 16x16 frames for orange and gold autumn foliage. Connected edges tile flush; exposed edges use darker rim shading while staying fully opaque.",
+      "requirements": [
+        "Create exactly 16 frames arranged left to right.",
+        "Each frame is exactly 16x16 pixels.",
+        "Frame order is mask 0 through mask 15, with bits top=1, right=2, bottom=4, left=8.",
+        "Tilefaces must be fully opaque with no alpha holes or transparent seams.",
+        "No spacing, labels, borders, or guide marks."
+      ],
+      "tags": [
+        "world",
+        "tile",
+        "autotile",
+        "blockface",
+        "leaves"
+      ]
+    },
+    {
+      "spriteId": "tiles/pine_leaves_autotile",
+      "outputPath": "sprites/world/tiles/pine_leaves_autotile.png",
+      "width": 256,
+      "height": 16,
+      "subject": "pine needle canopy blockface",
+      "prompt": "Horizontal 256x16 pixel-art sheet with 16 seamless 16x16 frames for dark conifer needles with clustered highlights. Connected edges tile flush; exposed edges use darker rim shading while staying fully opaque.",
+      "requirements": [
+        "Create exactly 16 frames arranged left to right.",
+        "Each frame is exactly 16x16 pixels.",
+        "Frame order is mask 0 through mask 15, with bits top=1, right=2, bottom=4, left=8.",
+        "Tilefaces must be fully opaque with no alpha holes or transparent seams.",
+        "No spacing, labels, borders, or guide marks."
+      ],
+      "tags": [
+        "world",
+        "tile",
+        "autotile",
+        "blockface",
+        "leaves"
+      ]
+    },
+    {
+      "spriteId": "tiles/plank_autotile",
+      "outputPath": "sprites/world/tiles/plank_autotile.png",
+      "width": 256,
+      "height": 16,
+      "subject": "wood plank construction blockface",
+      "prompt": "Horizontal 256x16 pixel-art sheet with 16 seamless 16x16 frames for horizontal construction planks with seams. Connected edges tile flush; exposed edges use darker rim shading while staying fully opaque.",
+      "requirements": [
+        "Create exactly 16 frames arranged left to right.",
+        "Each frame is exactly 16x16 pixels.",
+        "Frame order is mask 0 through mask 15, with bits top=1, right=2, bottom=4, left=8.",
+        "Tilefaces must be fully opaque with no alpha holes or transparent seams.",
+        "No spacing, labels, borders, or guide marks."
+      ],
+      "tags": [
+        "world",
+        "tile",
+        "autotile",
+        "blockface",
+        "wood"
+      ]
+    },
+    {
+      "spriteId": "tiles/brick_autotile",
+      "outputPath": "sprites/world/tiles/brick_autotile.png",
+      "width": 256,
+      "height": 16,
+      "subject": "brick construction blockface",
+      "prompt": "Horizontal 256x16 pixel-art sheet with 16 seamless 16x16 frames for red brick wall with mortar seams. Connected edges tile flush; exposed edges use darker rim shading while staying fully opaque.",
+      "requirements": [
+        "Create exactly 16 frames arranged left to right.",
+        "Each frame is exactly 16x16 pixels.",
+        "Frame order is mask 0 through mask 15, with bits top=1, right=2, bottom=4, left=8.",
+        "Tilefaces must be fully opaque with no alpha holes or transparent seams.",
+        "No spacing, labels, borders, or guide marks."
+      ],
+      "tags": [
+        "world",
+        "tile",
+        "autotile",
+        "blockface",
+        "brick"
+      ]
+    },
+    {
+      "spriteId": "tiles/glass_autotile",
+      "outputPath": "sprites/world/tiles/glass_autotile.png",
+      "width": 256,
+      "height": 16,
+      "subject": "glass construction blockface",
+      "prompt": "Horizontal 256x16 pixel-art sheet with 16 seamless 16x16 frames for pale blue glass panes with sharp highlights. Connected edges tile flush; exposed edges use darker rim shading while staying fully opaque.",
+      "requirements": [
+        "Create exactly 16 frames arranged left to right.",
+        "Each frame is exactly 16x16 pixels.",
+        "Frame order is mask 0 through mask 15, with bits top=1, right=2, bottom=4, left=8.",
+        "Tilefaces must be fully opaque with no alpha holes or transparent seams.",
+        "No spacing, labels, borders, or guide marks."
+      ],
+      "tags": [
+        "world",
+        "tile",
+        "autotile",
+        "blockface",
+        "glass"
+      ]
+    },
+    {
+      "spriteId": "tiles/oak_trunk_autotile",
+      "outputPath": "sprites/world/tiles/oak_trunk_autotile.png",
+      "width": 256,
+      "height": 16,
+      "subject": "oak trunk autotile",
+      "prompt": "Horizontal 256x16 pixel-art sheet with 16 seamless 16x16 frames for warm oak bark, knots, vertical grain. Connected edges tile flush; exposed edges use darker rim shading while staying fully opaque.",
+      "requirements": [
+        "Create exactly 16 frames arranged left to right.",
+        "Each frame is exactly 16x16 pixels.",
+        "Frame order is mask 0 through mask 15, with bits top=1, right=2, bottom=4, left=8.",
+        "Tilefaces must be fully opaque with no alpha holes or transparent seams.",
+        "No spacing, labels, borders, or guide marks."
+      ],
+      "tags": [
+        "world",
+        "tile",
+        "autotile",
+        "blockface",
+        "tree"
+      ]
+    },
+    {
+      "spriteId": "tiles/pine_trunk_autotile",
+      "outputPath": "sprites/world/tiles/pine_trunk_autotile.png",
+      "width": 256,
+      "height": 16,
+      "subject": "pine trunk autotile",
+      "prompt": "Horizontal 256x16 pixel-art sheet with 16 seamless 16x16 frames for dark pine bark and resin stripes. Connected edges tile flush; exposed edges use darker rim shading while staying fully opaque.",
+      "requirements": [
+        "Create exactly 16 frames arranged left to right.",
+        "Each frame is exactly 16x16 pixels.",
+        "Frame order is mask 0 through mask 15, with bits top=1, right=2, bottom=4, left=8.",
+        "Tilefaces must be fully opaque with no alpha holes or transparent seams.",
+        "No spacing, labels, borders, or guide marks."
+      ],
+      "tags": [
+        "world",
+        "tile",
+        "autotile",
+        "blockface",
+        "tree"
+      ]
+    },
+    {
+      "spriteId": "tiles/birch_trunk_autotile",
+      "outputPath": "sprites/world/tiles/birch_trunk_autotile.png",
+      "width": 256,
+      "height": 16,
+      "subject": "birch trunk autotile",
+      "prompt": "Horizontal 256x16 pixel-art sheet with 16 seamless 16x16 frames for pale birch bark with dark markings. Connected edges tile flush; exposed edges use darker rim shading while staying fully opaque.",
+      "requirements": [
+        "Create exactly 16 frames arranged left to right.",
+        "Each frame is exactly 16x16 pixels.",
+        "Frame order is mask 0 through mask 15, with bits top=1, right=2, bottom=4, left=8.",
+        "Tilefaces must be fully opaque with no alpha holes or transparent seams.",
+        "No spacing, labels, borders, or guide marks."
+      ],
+      "tags": [
+        "world",
+        "tile",
+        "autotile",
+        "blockface",
+        "tree"
+      ]
+    },
+    {
+      "spriteId": "tiles/palm_trunk_autotile",
+      "outputPath": "sprites/world/tiles/palm_trunk_autotile.png",
+      "width": 256,
+      "height": 16,
+      "subject": "palm trunk autotile",
+      "prompt": "Horizontal 256x16 pixel-art sheet with 16 seamless 16x16 frames for segmented palm bark rings. Connected edges tile flush; exposed edges use darker rim shading while staying fully opaque.",
+      "requirements": [
+        "Create exactly 16 frames arranged left to right.",
+        "Each frame is exactly 16x16 pixels.",
+        "Frame order is mask 0 through mask 15, with bits top=1, right=2, bottom=4, left=8.",
+        "Tilefaces must be fully opaque with no alpha holes or transparent seams.",
+        "No spacing, labels, borders, or guide marks."
+      ],
+      "tags": [
+        "world",
+        "tile",
+        "autotile",
+        "blockface",
+        "tree"
+      ]
+    },
+    {
+      "spriteId": "tiles/oak_leaves_autotile",
+      "outputPath": "sprites/world/tiles/oak_leaves_autotile.png",
+      "width": 256,
+      "height": 16,
+      "subject": "oak leaf autotile",
+      "prompt": "Horizontal 256x16 pixel-art sheet with 16 seamless 16x16 frames for round oak leaf canopy clusters. Connected edges tile flush; exposed edges use darker rim shading while staying fully opaque.",
+      "requirements": [
+        "Create exactly 16 frames arranged left to right.",
+        "Each frame is exactly 16x16 pixels.",
+        "Frame order is mask 0 through mask 15, with bits top=1, right=2, bottom=4, left=8.",
+        "Tilefaces must be fully opaque with no alpha holes or transparent seams.",
+        "No spacing, labels, borders, or guide marks."
+      ],
+      "tags": [
+        "world",
+        "tile",
+        "autotile",
+        "blockface",
+        "tree"
+      ]
+    },
+    {
+      "spriteId": "tiles/pine_leaves_tree_autotile",
+      "outputPath": "sprites/world/tiles/pine_leaves_tree_autotile.png",
+      "width": 256,
+      "height": 16,
+      "subject": "pine tree leaf autotile",
+      "prompt": "Horizontal 256x16 pixel-art sheet with 16 seamless 16x16 frames for dense conifer canopy clusters. Connected edges tile flush; exposed edges use darker rim shading while staying fully opaque.",
+      "requirements": [
+        "Create exactly 16 frames arranged left to right.",
+        "Each frame is exactly 16x16 pixels.",
+        "Frame order is mask 0 through mask 15, with bits top=1, right=2, bottom=4, left=8.",
+        "Tilefaces must be fully opaque with no alpha holes or transparent seams.",
+        "No spacing, labels, borders, or guide marks."
+      ],
+      "tags": [
+        "world",
+        "tile",
+        "autotile",
+        "blockface",
+        "tree"
+      ]
+    },
+    {
+      "spriteId": "tiles/birch_leaves_autotile",
+      "outputPath": "sprites/world/tiles/birch_leaves_autotile.png",
+      "width": 256,
+      "height": 16,
+      "subject": "birch leaf autotile",
+      "prompt": "Horizontal 256x16 pixel-art sheet with 16 seamless 16x16 frames for light yellow-green birch leaves. Connected edges tile flush; exposed edges use darker rim shading while staying fully opaque.",
+      "requirements": [
+        "Create exactly 16 frames arranged left to right.",
+        "Each frame is exactly 16x16 pixels.",
+        "Frame order is mask 0 through mask 15, with bits top=1, right=2, bottom=4, left=8.",
+        "Tilefaces must be fully opaque with no alpha holes or transparent seams.",
+        "No spacing, labels, borders, or guide marks."
+      ],
+      "tags": [
+        "world",
+        "tile",
+        "autotile",
+        "blockface",
+        "tree"
+      ]
+    },
+    {
+      "spriteId": "tiles/palm_leaves_autotile",
+      "outputPath": "sprites/world/tiles/palm_leaves_autotile.png",
+      "width": 256,
+      "height": 16,
+      "subject": "palm leaf autotile",
+      "prompt": "Horizontal 256x16 pixel-art sheet with 16 seamless 16x16 frames for tropical palm frond clusters. Connected edges tile flush; exposed edges use darker rim shading while staying fully opaque.",
+      "requirements": [
+        "Create exactly 16 frames arranged left to right.",
+        "Each frame is exactly 16x16 pixels.",
+        "Frame order is mask 0 through mask 15, with bits top=1, right=2, bottom=4, left=8.",
+        "Tilefaces must be fully opaque with no alpha holes or transparent seams.",
+        "No spacing, labels, borders, or guide marks."
+      ],
+      "tags": [
+        "world",
+        "tile",
+        "autotile",
+        "blockface",
+        "tree"
+      ]
+    },
+    {
+      "spriteId": "world/backgrounds/forest_parallax_layer_v2",
+      "outputPath": "sprites/world/backgrounds/forest_parallax_layer_v2.png",
+      "width": 512,
+      "height": 128,
+      "subject": "forest parallax background layer v2",
+      "prompt": "Crisp hand-authored pixel-art forest parallax background layer v2 for a Terraria-like side-view renderer. Export exactly 512x128, horizontally tileable, opaque, with clear far/mid/near depth layers, hard pixel edges, no text, no UI, no blur, and no oversized soft-render look.",
+      "requirements": [
+        "Export exactly 512x128 PNG.",
+        "Must tile seamlessly on the horizontal axis.",
+        "Opaque background layer; no transparent canvas, text, labels, UI, watermark, or guide marks.",
+        "Use crisp pixel-art clusters and clear depth separation, not a large soft painterly render."
+      ],
+      "tags": [
+        "world",
+        "background",
+        "parallax",
+        "tileable"
+      ]
+    },
+    {
+      "spriteId": "world/backgrounds/cave_parallax_layer_v2",
+      "outputPath": "sprites/world/backgrounds/cave_parallax_layer_v2.png",
+      "width": 512,
+      "height": 128,
+      "subject": "cave parallax background layer v2",
+      "prompt": "Crisp hand-authored pixel-art cave parallax background layer v2 for a Terraria-like side-view renderer. Export exactly 512x128, horizontally tileable, opaque, with clear far/mid/near depth layers, hard pixel edges, no text, no UI, no blur, and no oversized soft-render look.",
+      "requirements": [
+        "Export exactly 512x128 PNG.",
+        "Must tile seamlessly on the horizontal axis.",
+        "Opaque background layer; no transparent canvas, text, labels, UI, watermark, or guide marks.",
+        "Use crisp pixel-art clusters and clear depth separation, not a large soft painterly render."
+      ],
+      "tags": [
+        "world",
+        "background",
+        "parallax",
+        "tileable"
+      ]
+    },
+    {
+      "spriteId": "world/backgrounds/deep_cave_parallax_layer",
+      "outputPath": "sprites/world/backgrounds/deep_cave_parallax_layer.png",
+      "width": 512,
+      "height": 128,
+      "subject": "deep cave parallax background layer",
+      "prompt": "Crisp hand-authored pixel-art deep cave parallax background layer for a Terraria-like side-view renderer. Export exactly 512x128, horizontally tileable, opaque, with clear far/mid/near depth layers, hard pixel edges, no text, no UI, no blur, and no oversized soft-render look.",
+      "requirements": [
+        "Export exactly 512x128 PNG.",
+        "Must tile seamlessly on the horizontal axis.",
+        "Opaque background layer; no transparent canvas, text, labels, UI, watermark, or guide marks.",
+        "Use crisp pixel-art clusters and clear depth separation, not a large soft painterly render."
+      ],
+      "tags": [
+        "world",
+        "background",
+        "parallax",
+        "tileable"
+      ]
+    },
+    {
+      "spriteId": "world/backgrounds/night_forest_parallax_layer",
+      "outputPath": "sprites/world/backgrounds/night_forest_parallax_layer.png",
+      "width": 512,
+      "height": 128,
+      "subject": "night forest parallax background layer",
+      "prompt": "Crisp hand-authored pixel-art night forest parallax background layer for a Terraria-like side-view renderer. Export exactly 512x128, horizontally tileable, opaque, with clear far/mid/near depth layers, hard pixel edges, no text, no UI, no blur, and no oversized soft-render look.",
+      "requirements": [
+        "Export exactly 512x128 PNG.",
+        "Must tile seamlessly on the horizontal axis.",
+        "Opaque background layer; no transparent canvas, text, labels, UI, watermark, or guide marks.",
+        "Use crisp pixel-art clusters and clear depth separation, not a large soft painterly render."
+      ],
+      "tags": [
+        "world",
+        "background",
+        "parallax",
+        "tileable"
+      ]
+    },
+    {
+      "spriteId": "world/backgrounds/magical_grove_parallax_layer",
+      "outputPath": "sprites/world/backgrounds/magical_grove_parallax_layer.png",
+      "width": 512,
+      "height": 128,
+      "subject": "magical grove parallax background layer",
+      "prompt": "Crisp hand-authored pixel-art magical grove parallax background layer for a Terraria-like side-view renderer. Export exactly 512x128, horizontally tileable, opaque, with clear far/mid/near depth layers, hard pixel edges, no text, no UI, no blur, and no oversized soft-render look.",
+      "requirements": [
+        "Export exactly 512x128 PNG.",
+        "Must tile seamlessly on the horizontal axis.",
+        "Opaque background layer; no transparent canvas, text, labels, UI, watermark, or guide marks.",
+        "Use crisp pixel-art clusters and clear depth separation, not a large soft painterly render."
+      ],
+      "tags": [
+        "world",
+        "background",
+        "parallax",
+        "tileable"
+      ]
+    },
+    {
+      "spriteId": "world/objects/chair",
+      "outputPath": "sprites/world/objects/chair.png",
+      "width": 16,
+      "height": 32,
+      "subject": "wooden chair",
+      "prompt": "Small wooden side-view chair grounded at bottom, transparent background.",
+      "requirements": [
+        "Export exact PNG dimensions.",
+        "No text, labels, borders, watermarks, or guide marks.",
+        "Use crisp hard-edged pixel art aligned to the pixel grid."
+      ],
+      "tags": [
+        "world",
+        "object",
+        "decor"
+      ]
+    },
+    {
+      "spriteId": "world/objects/table",
+      "outputPath": "sprites/world/objects/table.png",
+      "width": 32,
+      "height": 16,
+      "subject": "wooden table",
+      "prompt": "Two-tile wooden table with plank top and legs, transparent background.",
+      "requirements": [
+        "Export exact PNG dimensions.",
+        "No text, labels, borders, watermarks, or guide marks.",
+        "Use crisp hard-edged pixel art aligned to the pixel grid."
+      ],
+      "tags": [
+        "world",
+        "object",
+        "decor"
+      ]
+    },
+    {
+      "spriteId": "world/objects/door",
+      "outputPath": "sprites/world/objects/door.png",
+      "width": 16,
+      "height": 32,
+      "subject": "wooden door",
+      "prompt": "Tall one-tile wooden door with panels and knob, transparent background.",
+      "requirements": [
+        "Export exact PNG dimensions.",
+        "No text, labels, borders, watermarks, or guide marks.",
+        "Use crisp hard-edged pixel art aligned to the pixel grid."
+      ],
+      "tags": [
+        "world",
+        "object",
+        "decor"
+      ]
+    },
+    {
+      "spriteId": "world/objects/torch",
+      "outputPath": "sprites/world/objects/torch.png",
+      "width": 16,
+      "height": 16,
+      "subject": "wall torch",
+      "prompt": "Small wooden torch with flame, transparent background.",
+      "requirements": [
+        "Export exact PNG dimensions.",
+        "No text, labels, borders, watermarks, or guide marks.",
+        "Use crisp hard-edged pixel art aligned to the pixel grid."
+      ],
+      "tags": [
+        "world",
+        "object",
+        "decor"
+      ]
+    },
+    {
+      "spriteId": "world/objects/lantern",
+      "outputPath": "sprites/world/objects/lantern.png",
+      "width": 16,
+      "height": 16,
+      "subject": "hanging lantern",
+      "prompt": "Small metal lantern with warm glass glow, transparent background.",
+      "requirements": [
+        "Export exact PNG dimensions.",
+        "No text, labels, borders, watermarks, or guide marks.",
+        "Use crisp hard-edged pixel art aligned to the pixel grid."
+      ],
+      "tags": [
+        "world",
+        "object",
+        "decor"
+      ]
+    },
+    {
+      "spriteId": "world/objects/chest",
+      "outputPath": "sprites/world/objects/chest.png",
+      "width": 32,
+      "height": 16,
+      "subject": "treasure chest",
+      "prompt": "Two-tile wooden chest with latch and reinforced trim, transparent background.",
+      "requirements": [
+        "Export exact PNG dimensions.",
+        "No text, labels, borders, watermarks, or guide marks.",
+        "Use crisp hard-edged pixel art aligned to the pixel grid."
+      ],
+      "tags": [
+        "world",
+        "object",
+        "decor"
+      ]
+    },
+    {
+      "spriteId": "world/objects/anvil",
+      "outputPath": "sprites/world/objects/anvil.png",
+      "width": 32,
+      "height": 16,
+      "subject": "anvil station",
+      "prompt": "Two-tile iron anvil station, readable silhouette, transparent background.",
+      "requirements": [
+        "Export exact PNG dimensions.",
+        "No text, labels, borders, watermarks, or guide marks.",
+        "Use crisp hard-edged pixel art aligned to the pixel grid."
+      ],
+      "tags": [
+        "world",
+        "object",
+        "decor"
+      ]
+    },
+    {
+      "spriteId": "world/objects/furnace",
+      "outputPath": "sprites/world/objects/furnace.png",
+      "width": 32,
+      "height": 32,
+      "subject": "stone furnace",
+      "prompt": "Two-by-two furnace with stone body and warm fire mouth, transparent background.",
+      "requirements": [
+        "Export exact PNG dimensions.",
+        "No text, labels, borders, watermarks, or guide marks.",
+        "Use crisp hard-edged pixel art aligned to the pixel grid."
+      ],
+      "tags": [
+        "world",
+        "object",
+        "decor"
+      ]
+    },
+    {
+      "spriteId": "world/objects/bookcase",
+      "outputPath": "sprites/world/objects/bookcase.png",
+      "width": 32,
+      "height": 32,
+      "subject": "bookcase",
+      "prompt": "Two-by-two wooden bookcase filled with colored books, transparent background.",
+      "requirements": [
+        "Export exact PNG dimensions.",
+        "No text, labels, borders, watermarks, or guide marks.",
+        "Use crisp hard-edged pixel art aligned to the pixel grid."
+      ],
+      "tags": [
+        "world",
+        "object",
+        "decor"
+      ]
+    },
+    {
+      "spriteId": "world/objects/bed",
+      "outputPath": "sprites/world/objects/bed.png",
+      "width": 48,
+      "height": 16,
+      "subject": "bed",
+      "prompt": "Three-tile bed with pillow and blanket, transparent background.",
+      "requirements": [
+        "Export exact PNG dimensions.",
+        "No text, labels, borders, watermarks, or guide marks.",
+        "Use crisp hard-edged pixel art aligned to the pixel grid."
+      ],
+      "tags": [
+        "world",
+        "object",
+        "decor"
+      ]
+    },
+    {
+      "spriteId": "world/objects/banner",
+      "outputPath": "sprites/world/objects/banner.png",
+      "width": 16,
+      "height": 32,
+      "subject": "hanging banner",
+      "prompt": "One-tile hanging cloth banner on pole, transparent background.",
+      "requirements": [
+        "Export exact PNG dimensions.",
+        "No text, labels, borders, watermarks, or guide marks.",
+        "Use crisp hard-edged pixel art aligned to the pixel grid."
+      ],
+      "tags": [
+        "world",
+        "object",
+        "decor"
+      ]
+    },
+    {
+      "spriteId": "world/objects/pot",
+      "outputPath": "sprites/world/objects/pot.png",
+      "width": 16,
+      "height": 16,
+      "subject": "clay pot",
+      "prompt": "Small breakable clay pot, transparent background.",
+      "requirements": [
+        "Export exact PNG dimensions.",
+        "No text, labels, borders, watermarks, or guide marks.",
+        "Use crisp hard-edged pixel art aligned to the pixel grid."
+      ],
+      "tags": [
+        "world",
+        "object",
+        "decor"
+      ]
+    },
+    {
+      "spriteId": "world/objects/crate",
+      "outputPath": "sprites/world/objects/crate.png",
+      "width": 16,
+      "height": 16,
+      "subject": "wooden crate",
+      "prompt": "Small wooden crate with diagonal bracing, transparent background.",
+      "requirements": [
+        "Export exact PNG dimensions.",
+        "No text, labels, borders, watermarks, or guide marks.",
+        "Use crisp hard-edged pixel art aligned to the pixel grid."
+      ],
+      "tags": [
+        "world",
+        "object",
+        "decor"
+      ]
+    },
+    {
+      "spriteId": "world/decor/vines",
+      "outputPath": "sprites/world/decor/vines.png",
+      "width": 16,
+      "height": 32,
+      "subject": "vines decor",
+      "prompt": "Vertical hanging vines, transparent background, should layer over walls.",
+      "requirements": [
+        "Export exact PNG dimensions.",
+        "No text, labels, borders, watermarks, or guide marks.",
+        "Use crisp hard-edged pixel art aligned to the pixel grid."
+      ],
+      "tags": [
+        "world",
+        "object",
+        "decor"
+      ]
+    },
+    {
+      "spriteId": "world/decor/mushrooms",
+      "outputPath": "sprites/world/decor/mushrooms.png",
+      "width": 32,
+      "height": 16,
+      "subject": "mushroom decor strip",
+      "prompt": "Two-tile strip of small cave mushrooms, transparent background.",
+      "requirements": [
+        "Export exact PNG dimensions.",
+        "No text, labels, borders, watermarks, or guide marks.",
+        "Use crisp hard-edged pixel art aligned to the pixel grid."
+      ],
+      "tags": [
+        "world",
+        "object",
+        "decor"
+      ]
+    },
+    {
+      "spriteId": "world/decor/flowers",
+      "outputPath": "sprites/world/decor/flowers.png",
+      "width": 32,
+      "height": 16,
+      "subject": "flower decor strip",
+      "prompt": "Two-tile strip of small wildflowers, transparent background.",
+      "requirements": [
+        "Export exact PNG dimensions.",
+        "No text, labels, borders, watermarks, or guide marks.",
+        "Use crisp hard-edged pixel art aligned to the pixel grid."
+      ],
+      "tags": [
+        "world",
+        "object",
+        "decor"
+      ]
+    },
+    {
+      "spriteId": "world/decor/tree_species_props",
+      "outputPath": "sprites/world/decor/tree_species_props.png",
+      "width": 128,
+      "height": 32,
+      "subject": "tree species world decor sheet",
+      "prompt": "Four 32x32 tree mini props for oak, pine, birch, and palm silhouettes, transparent background.",
+      "requirements": [
+        "Export exact PNG dimensions.",
+        "No text, labels, borders, watermarks, or guide marks.",
+        "Use crisp hard-edged pixel art aligned to the pixel grid."
+      ],
+      "tags": [
+        "world",
+        "object",
+        "decor"
+      ]
+    },
+    {
+      "spriteId": "items/copper_axe",
+      "outputPath": "sprites/tools/copper_axe.png",
+      "width": 16,
+      "height": 16,
+      "subject": "copper axe tool icon",
+      "prompt": "Diagonal copper axe with wooden handle, transparent background.",
+      "requirements": [
+        "Export exact PNG dimensions.",
+        "No text, labels, borders, watermarks, or guide marks.",
+        "Use crisp hard-edged pixel art aligned to the pixel grid."
+      ],
+      "tags": [
+        "item",
+        "tool",
+        "axe",
+        "copper"
+      ]
+    },
+    {
+      "spriteId": "items/iron_axe",
+      "outputPath": "sprites/tools/iron_axe.png",
+      "width": 16,
+      "height": 16,
+      "subject": "iron axe tool icon",
+      "prompt": "Diagonal iron axe with wooden handle, transparent background.",
+      "requirements": [
+        "Export exact PNG dimensions.",
+        "No text, labels, borders, watermarks, or guide marks.",
+        "Use crisp hard-edged pixel art aligned to the pixel grid."
+      ],
+      "tags": [
+        "item",
+        "tool",
+        "axe",
+        "iron"
+      ]
+    },
+    {
+      "spriteId": "items/copper_hammer",
+      "outputPath": "sprites/tools/copper_hammer.png",
+      "width": 16,
+      "height": 16,
+      "subject": "copper hammer tool icon",
+      "prompt": "Diagonal copper hammer with chunky head, transparent background.",
+      "requirements": [
+        "Export exact PNG dimensions.",
+        "No text, labels, borders, watermarks, or guide marks.",
+        "Use crisp hard-edged pixel art aligned to the pixel grid."
+      ],
+      "tags": [
+        "item",
+        "tool",
+        "hammer",
+        "copper"
+      ]
+    },
+    {
+      "spriteId": "items/iron_hammer",
+      "outputPath": "sprites/tools/iron_hammer.png",
+      "width": 16,
+      "height": 16,
+      "subject": "iron hammer tool icon",
+      "prompt": "Diagonal iron hammer with chunky head, transparent background.",
+      "requirements": [
+        "Export exact PNG dimensions.",
+        "No text, labels, borders, watermarks, or guide marks.",
+        "Use crisp hard-edged pixel art aligned to the pixel grid."
+      ],
+      "tags": [
+        "item",
+        "tool",
+        "hammer",
+        "iron"
+      ]
+    },
+    {
+      "spriteId": "items/iron_hoe",
+      "outputPath": "sprites/tools/iron_hoe.png",
+      "width": 16,
+      "height": 16,
+      "subject": "iron hoe farming tool icon",
+      "prompt": "Diagonal iron hoe distinct from pickaxe and axe, transparent background.",
+      "requirements": [
+        "Export exact PNG dimensions.",
+        "No text, labels, borders, watermarks, or guide marks.",
+        "Use crisp hard-edged pixel art aligned to the pixel grid."
+      ],
+      "tags": [
+        "item",
+        "tool",
+        "hoe",
+        "farming",
+        "iron"
+      ]
+    },
+    {
+      "spriteId": "items/magic_wand",
+      "outputPath": "sprites/weapons/magic_wand.png",
+      "width": 16,
+      "height": 16,
+      "subject": "magic wand icon",
+      "prompt": "Short diagonal magic wand with glowing crystal tip, transparent background.",
+      "requirements": [
+        "Export exact PNG dimensions.",
+        "No text, labels, borders, watermarks, or guide marks.",
+        "Use crisp hard-edged pixel art aligned to the pixel grid."
+      ],
+      "tags": [
+        "item",
+        "weapon",
+        "magic",
+        "wand"
+      ]
+    },
+    {
+      "spriteId": "items/staff",
+      "outputPath": "sprites/weapons/staff.png",
+      "width": 16,
+      "height": 16,
+      "subject": "magic staff icon",
+      "prompt": "Tall staff with glowing head, compact 16x16 inventory icon, transparent background.",
+      "requirements": [
+        "Export exact PNG dimensions.",
+        "No text, labels, borders, watermarks, or guide marks.",
+        "Use crisp hard-edged pixel art aligned to the pixel grid."
+      ],
+      "tags": [
+        "item",
+        "weapon",
+        "magic",
+        "staff"
+      ]
+    },
+    {
+      "spriteId": "items/spellbook",
+      "outputPath": "sprites/items/magic/spellbook.png",
+      "width": 16,
+      "height": 16,
+      "subject": "spellbook icon",
+      "prompt": "Closed spellbook with clasp and magical accent, no readable text, transparent background.",
+      "requirements": [
+        "Export exact PNG dimensions.",
+        "No text, labels, borders, watermarks, or guide marks.",
+        "Use crisp hard-edged pixel art aligned to the pixel grid."
+      ],
+      "tags": [
+        "item",
+        "magic",
+        "book"
+      ]
+    },
+    {
+      "spriteId": "items/mana_potion",
+      "outputPath": "sprites/items/consumables/mana_potion.png",
+      "width": 16,
+      "height": 16,
+      "subject": "mana potion icon",
+      "prompt": "Small bottle with blue mana liquid and cork, transparent background.",
+      "requirements": [
+        "Export exact PNG dimensions.",
+        "No text, labels, borders, watermarks, or guide marks.",
+        "Use crisp hard-edged pixel art aligned to the pixel grid."
+      ],
+      "tags": [
+        "item",
+        "consumable",
+        "mana",
+        "potion"
+      ]
+    },
+    {
+      "spriteId": "projectiles/firebolt",
+      "outputPath": "sprites/projectiles/firebolt.png",
+      "width": 16,
+      "height": 16,
+      "subject": "firebolt projectile",
+      "prompt": "Small fast firebolt projectile with hot core and orange trail, transparent background.",
+      "requirements": [
+        "Export exact PNG dimensions.",
+        "No text, labels, borders, watermarks, or guide marks.",
+        "Use crisp hard-edged pixel art aligned to the pixel grid."
+      ],
+      "tags": [
+        "projectile",
+        "magic",
+        "fire"
+      ]
+    },
+    {
+      "spriteId": "projectiles/ice_shard",
+      "outputPath": "sprites/projectiles/ice_shard.png",
+      "width": 16,
+      "height": 16,
+      "subject": "ice shard projectile",
+      "prompt": "Sharp blue ice shard projectile with cold highlight, transparent background.",
+      "requirements": [
+        "Export exact PNG dimensions.",
+        "No text, labels, borders, watermarks, or guide marks.",
+        "Use crisp hard-edged pixel art aligned to the pixel grid."
+      ],
+      "tags": [
+        "projectile",
+        "magic",
+        "ice"
+      ]
+    },
+    {
+      "spriteId": "projectiles/magic_spark_particles",
+      "outputPath": "sprites/projectiles/magic_spark_particles.png",
+      "width": 16,
+      "height": 16,
+      "subject": "magic spark particles",
+      "prompt": "Tiny 16x16 magic spark particle cluster, transparent background.",
+      "requirements": [
+        "Export exact PNG dimensions.",
+        "No text, labels, borders, watermarks, or guide marks.",
+        "Use crisp hard-edged pixel art aligned to the pixel grid."
+      ],
+      "tags": [
+        "projectile",
+        "particle",
+        "magic"
+      ]
+    },
+    {
+      "spriteId": "ui/heart",
+      "outputPath": "sprites/ui/heart.png",
+      "width": 16,
+      "height": 16,
+      "subject": "player health heart",
+      "prompt": "16x16 transparent pixel-art UI icon for player health heart; readable in a compact HUD, no text.",
+      "requirements": [
+        "Export exact PNG dimensions.",
+        "No text, labels, borders, watermarks, or guide marks.",
+        "Use crisp hard-edged pixel art aligned to the pixel grid."
+      ],
+      "tags": [
+        "ui",
+        "icon"
+      ]
+    },
+    {
+      "spriteId": "ui/mana_star",
+      "outputPath": "sprites/ui/mana_star.png",
+      "width": 16,
+      "height": 16,
+      "subject": "mana star resource icon",
+      "prompt": "16x16 transparent pixel-art UI icon for mana star resource icon; readable in a compact HUD, no text.",
+      "requirements": [
+        "Export exact PNG dimensions.",
+        "No text, labels, borders, watermarks, or guide marks.",
+        "Use crisp hard-edged pixel art aligned to the pixel grid."
+      ],
+      "tags": [
+        "ui",
+        "icon"
+      ]
+    },
+    {
+      "spriteId": "ui/mana_crystal",
+      "outputPath": "sprites/ui/mana_crystal.png",
+      "width": 16,
+      "height": 16,
+      "subject": "mana crystal resource icon",
+      "prompt": "16x16 transparent pixel-art UI icon for mana crystal resource icon; readable in a compact HUD, no text.",
+      "requirements": [
+        "Export exact PNG dimensions.",
+        "No text, labels, borders, watermarks, or guide marks.",
+        "Use crisp hard-edged pixel art aligned to the pixel grid."
+      ],
+      "tags": [
+        "ui",
+        "icon"
+      ]
+    },
+    {
+      "spriteId": "ui/armor",
+      "outputPath": "sprites/ui/armor.png",
+      "width": 16,
+      "height": 16,
+      "subject": "armor stat icon",
+      "prompt": "16x16 transparent pixel-art UI icon for armor stat icon; readable in a compact HUD, no text.",
+      "requirements": [
+        "Export exact PNG dimensions.",
+        "No text, labels, borders, watermarks, or guide marks.",
+        "Use crisp hard-edged pixel art aligned to the pixel grid."
+      ],
+      "tags": [
+        "ui",
+        "icon"
+      ]
+    },
+    {
+      "spriteId": "ui/damage",
+      "outputPath": "sprites/ui/damage.png",
+      "width": 16,
+      "height": 16,
+      "subject": "damage stat icon",
+      "prompt": "16x16 transparent pixel-art UI icon for damage stat icon; readable in a compact HUD, no text.",
+      "requirements": [
+        "Export exact PNG dimensions.",
+        "No text, labels, borders, watermarks, or guide marks.",
+        "Use crisp hard-edged pixel art aligned to the pixel grid."
+      ],
+      "tags": [
+        "ui",
+        "icon"
+      ]
+    },
+    {
+      "spriteId": "ui/speed",
+      "outputPath": "sprites/ui/speed.png",
+      "width": 16,
+      "height": 16,
+      "subject": "speed stat icon",
+      "prompt": "16x16 transparent pixel-art UI icon for speed stat icon; readable in a compact HUD, no text.",
+      "requirements": [
+        "Export exact PNG dimensions.",
+        "No text, labels, borders, watermarks, or guide marks.",
+        "Use crisp hard-edged pixel art aligned to the pixel grid."
+      ],
+      "tags": [
+        "ui",
+        "icon"
+      ]
+    },
+    {
+      "spriteId": "ui/mining",
+      "outputPath": "sprites/ui/mining.png",
+      "width": 16,
+      "height": 16,
+      "subject": "mining stat icon",
+      "prompt": "16x16 transparent pixel-art UI icon for mining stat icon; readable in a compact HUD, no text.",
+      "requirements": [
+        "Export exact PNG dimensions.",
+        "No text, labels, borders, watermarks, or guide marks.",
+        "Use crisp hard-edged pixel art aligned to the pixel grid."
+      ],
+      "tags": [
+        "ui",
+        "icon"
+      ]
+    },
+    {
+      "spriteId": "ui/inventory_tab",
+      "outputPath": "sprites/ui/inventory_tab.png",
+      "width": 16,
+      "height": 16,
+      "subject": "inventory tab icon",
+      "prompt": "16x16 transparent pixel-art UI icon for inventory tab icon; readable in a compact HUD, no text.",
+      "requirements": [
+        "Export exact PNG dimensions.",
+        "No text, labels, borders, watermarks, or guide marks.",
+        "Use crisp hard-edged pixel art aligned to the pixel grid."
+      ],
+      "tags": [
+        "ui",
+        "icon"
+      ]
+    },
+    {
+      "spriteId": "ui/crafting_hammer",
+      "outputPath": "sprites/ui/crafting_hammer.png",
+      "width": 16,
+      "height": 16,
+      "subject": "crafting hammer icon",
+      "prompt": "16x16 transparent pixel-art UI icon for crafting hammer icon; readable in a compact HUD, no text.",
+      "requirements": [
+        "Export exact PNG dimensions.",
+        "No text, labels, borders, watermarks, or guide marks.",
+        "Use crisp hard-edged pixel art aligned to the pixel grid."
+      ],
+      "tags": [
+        "ui",
+        "icon"
+      ]
+    },
+    {
+      "spriteId": "ui/crafting_anvil",
+      "outputPath": "sprites/ui/crafting_anvil.png",
+      "width": 16,
+      "height": 16,
+      "subject": "crafting anvil icon",
+      "prompt": "16x16 transparent pixel-art UI icon for crafting anvil icon; readable in a compact HUD, no text.",
+      "requirements": [
+        "Export exact PNG dimensions.",
+        "No text, labels, borders, watermarks, or guide marks.",
+        "Use crisp hard-edged pixel art aligned to the pixel grid."
+      ],
+      "tags": [
+        "ui",
+        "icon"
+      ]
+    },
+    {
+      "spriteId": "ui/character_editor",
+      "outputPath": "sprites/ui/character_editor.png",
+      "width": 16,
+      "height": 16,
+      "subject": "character editor icon",
+      "prompt": "16x16 transparent pixel-art UI icon for character editor icon; readable in a compact HUD, no text.",
+      "requirements": [
+        "Export exact PNG dimensions.",
+        "No text, labels, borders, watermarks, or guide marks.",
+        "Use crisp hard-edged pixel art aligned to the pixel grid."
+      ],
+      "tags": [
+        "ui",
+        "icon"
+      ]
+    },
+    {
+      "spriteId": "items/spark_wand",
+      "outputPath": "sprites/weapons/spark_wand.png",
+      "width": 16,
+      "height": 16,
+      "subject": "spark wand weapon icon",
+      "prompt": "16x16 transparent pixel-art icon of a small spark wand with wooden handle and bright arcane tip.",
+      "tags": [
+        "item",
+        "weapon",
+        "magic",
+        "wand"
+      ],
+      "requirements": [
+        "Export exactly 16x16 PNG.",
+        "Transparent background.",
+        "Crisp hard-edged pixel art, no anti-aliasing, no text, no labels, no watermark.",
+        "Keep the silhouette readable in inventory or projectile rendering."
+      ]
+    },
+    {
+      "spriteId": "items/apprentice_tome",
+      "outputPath": "sprites/weapons/apprentice_tome.png",
+      "width": 16,
+      "height": 16,
+      "subject": "apprentice tome weapon icon",
+      "prompt": "16x16 transparent pixel-art icon of a beginner magic tome, closed book, arcane glints, no readable text.",
+      "tags": [
+        "item",
+        "weapon",
+        "magic",
+        "book"
+      ],
+      "requirements": [
+        "Export exactly 16x16 PNG.",
+        "Transparent background.",
+        "Crisp hard-edged pixel art, no anti-aliasing, no text, no labels, no watermark.",
+        "Keep the silhouette readable in inventory or projectile rendering."
+      ]
+    },
+    {
+      "spriteId": "items/mana_crystal",
+      "outputPath": "sprites/items/accessories/mana_crystal.png",
+      "width": 16,
+      "height": 16,
+      "subject": "mana crystal accessory icon",
+      "prompt": "16x16 transparent pixel-art accessory icon of a blue mana crystal charm, readable silhouette.",
+      "tags": [
+        "item",
+        "accessory",
+        "magic",
+        "mana",
+        "crystal"
+      ],
+      "requirements": [
+        "Export exactly 16x16 PNG.",
+        "Transparent background.",
+        "Crisp hard-edged pixel art, no anti-aliasing, no text, no labels, no watermark.",
+        "Keep the silhouette readable in inventory or projectile rendering."
+      ]
+    },
+    {
+      "spriteId": "projectiles/spark_bolt",
+      "outputPath": "sprites/projectiles/spark_bolt.png",
+      "width": 16,
+      "height": 16,
+      "subject": "spark bolt projectile",
+      "prompt": "16x16 transparent pixel-art spark bolt projectile with hot magic core and short trail.",
+      "tags": [
+        "projectile",
+        "magic",
+        "spark"
+      ],
+      "requirements": [
+        "Export exactly 16x16 PNG.",
+        "Transparent background.",
+        "Crisp hard-edged pixel art, no anti-aliasing, no text, no labels, no watermark.",
+        "Keep the silhouette readable in inventory or projectile rendering."
+      ]
+    },
+    {
+      "spriteId": "projectiles/arcane_mote",
+      "outputPath": "sprites/projectiles/arcane_mote.png",
+      "width": 16,
+      "height": 16,
+      "subject": "arcane mote projectile particle",
+      "prompt": "16x16 transparent pixel-art arcane mote particle cluster, compact and readable.",
+      "tags": [
+        "projectile",
+        "magic",
+        "arcane",
+        "particle"
+      ],
+      "requirements": [
+        "Export exactly 16x16 PNG.",
+        "Transparent background.",
+        "Crisp hard-edged pixel art, no anti-aliasing, no text, no labels, no watermark.",
+        "Keep the silhouette readable in inventory or projectile rendering."
+      ]
+    },
+    {
+      "spriteId": "world/backgrounds/forest_parallax_layer",
+      "outputPath": "sprites/world/backgrounds/forest_parallax_layer.png",
+      "width": 512,
+      "height": 128,
+      "subject": "forest parallax background layer",
+      "prompt": "Crisp hand-authored pixel-art forest parallax background layer for a Terraria-like side-view renderer. Export exactly 512x128, horizontally tileable, opaque, with clear far/mid/near depth layers, hard pixel edges, no text, no UI, no blur, and no oversized soft-render look.",
+      "requirements": [
+        "Export exactly 512x128 PNG.",
+        "Must tile seamlessly on the horizontal axis.",
+        "Opaque background layer; no transparent canvas, text, labels, UI, watermark, or guide marks.",
+        "Use crisp pixel-art clusters and clear depth separation, not a large soft painterly render."
+      ],
+      "tags": [
+        "world",
+        "background",
+        "parallax",
+        "tileable"
+      ]
+    },
+    {
+      "spriteId": "world/backgrounds/cave_parallax_layer",
+      "outputPath": "sprites/world/backgrounds/cave_parallax_layer.png",
+      "width": 512,
+      "height": 128,
+      "subject": "cave parallax background layer",
+      "prompt": "Crisp hand-authored pixel-art cave parallax background layer for a Terraria-like side-view renderer. Export exactly 512x128, horizontally tileable, opaque, with clear far/mid/near depth layers, hard pixel edges, no text, no UI, no blur, and no oversized soft-render look.",
+      "requirements": [
+        "Export exactly 512x128 PNG.",
+        "Must tile seamlessly on the horizontal axis.",
+        "Opaque background layer; no transparent canvas, text, labels, UI, watermark, or guide marks.",
+        "Use crisp pixel-art clusters and clear depth separation, not a large soft painterly render."
+      ],
+      "tags": [
+        "world",
+        "background",
+        "parallax",
+        "tileable"
+      ]
     }
   ],
   "assetConventions": {
     "worldTiles": "Autotile blockface sheets use 16 frames in one horizontal 256x16 strip. Each 16x16 frame is fully opaque unless the tile is explicitly air or decorative pass-through foliage. Frame order is 4-bit mask top=1, right=2, bottom=4, left=8. Avoid spacing, borders, labels, or transparent cracks between connected blocks.",
     "itemsAndTools": "Inventory icons use 16x16 transparent PNGs, centered silhouettes, hard alpha edges, and 2-4 shade clusters. Tools and weapons should read from silhouette first, with material color second.",
     "characterParts": "Character part sheets use transparent 16x32 frames aligned to the player rig. Hair, clothes, skin/body, and hats/accessories should be layerable over the same origin without shifting the feet or head anchor.",
-    "entities": "Small creature and enemy sheets use transparent 16x16 frames in horizontal strips. Prefer readable silhouettes and two-frame reversible motion over tiny details."
+    "entities": "Small creature and enemy sheets use transparent 16x16 frames in horizontal strips. Prefer readable silhouettes and two-frame reversible motion over tiny details.",
+    "backgrounds": "Parallax layers are opaque 512x128 PNGs, horizontally tileable, with far/mid/near pixel-art silhouettes and no text, UI, blur, or oversized soft-render look.",
+    "uiIcons": "UI icons use transparent 16x16 PNGs, strong silhouette readability, and no letters or labels so they remain language-neutral."
   }
 }

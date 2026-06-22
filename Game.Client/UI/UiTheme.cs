@@ -68,6 +68,8 @@ public static class UiTheme
     {
         var fill = raised ? palette.SurfaceRaised : palette.Surface;
         context.SpriteBatch.Draw(context.Pixel, bounds, WithAlpha(fill, opacity));
+        context.SpriteBatch.Draw(context.Pixel, new Rectangle(bounds.X + 1, bounds.Y + 1, bounds.Width - 2, 1), WithAlpha(Color.White, 0.08f * opacity));
+        context.SpriteBatch.Draw(context.Pixel, new Rectangle(bounds.X + 1, bounds.Bottom - 2, bounds.Width - 2, 1), WithAlpha(Color.Black, 0.28f * opacity));
         DrawBorder(context, bounds, WithAlpha(palette.AccentSoft, 0.72f), 1);
         context.SpriteBatch.Draw(context.Pixel, new Rectangle(bounds.X, bounds.Y, bounds.Width, 2), WithAlpha(palette.Accent, 0.86f));
     }
@@ -81,7 +83,22 @@ public static class UiTheme
                 : palette.Surface;
         var border = selected ? palette.Accent : hovered ? palette.AccentSoft : palette.SurfaceHover;
         context.SpriteBatch.Draw(context.Pixel, bounds, WithAlpha(fill, enabled ? 0.92f : 0.52f));
+        context.SpriteBatch.Draw(context.Pixel, new Rectangle(bounds.X + 1, bounds.Y + 1, Math.Max(0, bounds.Width - 2), 1), WithAlpha(Color.White, enabled ? 0.10f : 0.04f));
         DrawBorder(context, bounds, WithAlpha(border, enabled ? 0.95f : 0.45f), selected ? 2 : 1);
+    }
+
+    public static void DrawSlot(RenderContext context, Rectangle bounds, UiPalette palette, bool selected, bool hovered, float opacity = 0.94f)
+    {
+        var inset = new Rectangle(bounds.X + 2, bounds.Y + 2, Math.Max(1, bounds.Width - 4), Math.Max(1, bounds.Height - 4));
+        context.SpriteBatch.Draw(context.Pixel, bounds, WithAlpha(selected ? palette.AccentSoft : palette.Backdrop, 0.72f * opacity));
+        context.SpriteBatch.Draw(context.Pixel, inset, WithAlpha(hovered ? palette.SurfaceHover : palette.Surface, 0.94f * opacity));
+        DrawBorder(context, bounds, WithAlpha(selected ? palette.Accent : hovered ? palette.Warning : palette.SurfaceHover, selected ? 1f : 0.72f), selected ? 2 : 1);
+    }
+
+    public static void DrawHeader(RenderContext context, Rectangle bounds, UiPalette palette, float opacity = 0.92f)
+    {
+        context.SpriteBatch.Draw(context.Pixel, bounds, WithAlpha(palette.Surface, opacity));
+        context.SpriteBatch.Draw(context.Pixel, new Rectangle(bounds.X, bounds.Bottom - 2, bounds.Width, 2), WithAlpha(palette.Accent, 0.82f * opacity));
     }
 
     public static void DrawProgressBar(RenderContext context, Rectangle bounds, float progress, UiPalette palette)

@@ -1,0 +1,11 @@
+{
+  "id": "mana_crystal",
+  "result": { "itemId": "mana_crystal", "count": 1 },
+  "ingredients": [
+    { "itemId": "gel", "count": 8 },
+    { "itemId": "copper_ore", "count": 4 }
+  ],
+  "station": "workbench",
+  "category": "magic",
+  "sortOrder": 42
+}

@@ -153,6 +153,33 @@ public sealed class PlayerItemUseSystemTests
     }
 
     [Fact]
+    public void UseSelectedItem_MagicWeaponSpawnsMagicProjectileAndConsumesMana()
+    {
+        var content = CreateContent();
+        var world = new World(16, 16, WorldMetadata.CreateDefault(seed: 1));
+        var player = new PlayerEntity(Vector2.Zero, new TileCollisionResolver(), maxMana: 20, currentMana: 12);
+        var inventory = new PlayerInventory(content.Items);
+        inventory.Hotbar.Slots[0].SetStack(new ItemStack("spark_wand", 1));
+        var entities = new EntityManager(spatialCellSize: 16);
+
+        var result = new PlayerItemUseSystem().UseSelectedItem(
+            world,
+            content,
+            player,
+            inventory,
+            entities,
+            TilePos.Zero,
+            player.Body.Center + new Vector2(80, 0),
+            0.1f);
+
+        Assert.Equal(PlayerItemUseKind.Cast, result.Kind);
+        Assert.Equal(6, player.Mana);
+        var projectile = Assert.IsType<ProjectileEntity>(Assert.Single(entities.Entities));
+        Assert.Equal(DamageType.Magic, projectile.DamageType);
+        Assert.Equal(7, projectile.Damage);
+    }
+
+    [Fact]
     public void UseSelectedItem_FarmingActionsTillWaterAndPlant()
     {
         var content = CreateContent();
@@ -269,6 +296,25 @@ public sealed class PlayerItemUseSystemTests
                 },
                 new ItemDefinition
                 {
+                    Id = "spark_wand",
+                    DisplayName = "Spark Wand",
+                    Type = ItemType.WeaponMagic,
+                    TexturePath = "items/spark_wand",
+                    MaxStack = 1,
+                    UseTime = 0.35f,
+                    Damage = 3,
+                    ManaCost = 6,
+                    Actions = new[]
+                    {
+                        new ItemActionDefinition
+                        {
+                            Kind = ItemActionKind.Cast,
+                            ProjectileId = "spark_bolt"
+                        }
+                    }
+                },
+                new ItemDefinition
+                {
                     Id = "copper_hoe",
                     DisplayName = "Copper Hoe",
                     Type = ItemType.ToolHoe,
@@ -317,6 +363,17 @@ public sealed class PlayerItemUseSystemTests
                     Gravity = 0.2f,
                     Pierce = 0,
                     Lifetime = 5
+                },
+                new ProjectileDefinition
+                {
+                    Id = "spark_bolt",
+                    TexturePath = "projectiles/spark_bolt",
+                    Speed = 250,
+                    Damage = 4,
+                    DamageType = DamageType.Magic,
+                    Gravity = 0,
+                    Pierce = 1,
+                    Lifetime = 3
                 }
             }),
             EntityDefinitionRegistry.Create(new[] { CreateSlimeDefinition() }),
