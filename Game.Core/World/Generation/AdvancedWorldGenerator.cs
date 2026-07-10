@@ -11,9 +11,13 @@ public sealed class AdvancedWorldGenerator
             {
                 new BiomeAssignmentStep(),
                 new TerrainGenerationStep(),
+                new SurfaceLakeGenerationStep(),
                 new CaveGenerationStep(),
+                new CavernGenerationStep(),
+                new CavePoolGenerationStep(),
                 new OreGenerationStep(),
-                new WaterPocketGenerationStep(),
+                new UndergroundWallGenerationStep(),
+                new CaveWallCleanupStep(),
                 new StructureGenerationStep(),
                 new TreeGenerationStep()
             },

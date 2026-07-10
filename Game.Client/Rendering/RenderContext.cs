@@ -1,5 +1,6 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Game.Core.Diagnostics;
 
 namespace Game.Client.Rendering;
 
@@ -9,4 +10,5 @@ public readonly record struct RenderContext(
     DebugTextRenderer DebugText,
     Texture2D Pixel,
     GameTimeService Time,
-    Rectangle ViewportBounds);
+    Rectangle ViewportBounds,
+    PerformanceProfiler Performance);

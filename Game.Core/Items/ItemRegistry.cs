@@ -73,12 +73,18 @@ public sealed class ItemRegistry : IItemDefinitionProvider
             throw new RegistryValidationException($"Item '{definition.Id}' has negative use time.");
         }
 
+        if (definition.HealthRestore < 0 || definition.ManaRestore < 0)
+        {
+            throw new RegistryValidationException($"Item '{definition.Id}' has a negative resource restore value.");
+        }
+
         foreach (var action in definition.Actions)
         {
             ValidateAction(definition, action);
         }
 
         ValidateEffects(definition.Id, definition.OnHitEffects);
+        ValidateEffects(definition.Id, definition.StatusEffectApplications);
     }
 
     private static void ValidateEffects(string itemId, IEnumerable<StatusEffectApplication> effects)

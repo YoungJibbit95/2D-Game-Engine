@@ -29,6 +29,19 @@ public sealed class CharacterEditorOverlay
 
     public CharacterAppearance Appearance => _session?.Appearance ?? new CharacterAppearance();
 
+    public void SetAppearance(GameContentDatabase content, CharacterAppearance appearance)
+    {
+        ArgumentNullException.ThrowIfNull(content);
+        ArgumentNullException.ThrowIfNull(appearance);
+
+        _defaultAppearance = content.Characters.TryGetById("player", out var character)
+            ? character.DefaultAppearance
+            : new CharacterAppearance();
+        _session = new CharacterEditorSession(appearance, CharacterEditorOptionSet.CreateDefault());
+        _previewAnimator.Stop();
+        _status = "APPEARANCE LOADED";
+    }
+
     public void Open(GameContentDatabase content)
     {
         ArgumentNullException.ThrowIfNull(content);

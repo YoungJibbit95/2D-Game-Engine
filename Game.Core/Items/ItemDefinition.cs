@@ -55,11 +55,15 @@ public sealed record ItemDefinition
 
     public int ManaRestore { get; init; }
 
+    public int HealthRestore { get; init; }
+
     public IReadOnlyList<ItemActionDefinition> Actions { get; init; } = Array.Empty<ItemActionDefinition>();
 
     public AttackShapeDefinition? AttackShape { get; init; }
 
     public IReadOnlyList<StatusEffectApplication> OnHitEffects { get; init; } = Array.Empty<StatusEffectApplication>();
+
+    public IReadOnlyList<StatusEffectApplication> StatusEffectApplications { get; init; } = Array.Empty<StatusEffectApplication>();
 
     public IReadOnlyList<string> Tags { get; init; } = Array.Empty<string>();
 

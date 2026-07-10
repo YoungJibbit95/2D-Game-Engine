@@ -17,21 +17,37 @@ public sealed class StatusEffectCollection
 
     public void Apply(StatusEffectDefinition definition, float? durationSeconds = null)
     {
+        TryApply(definition, durationSeconds, out _);
+    }
+
+    public bool TryApply(
+        StatusEffectDefinition definition,
+        float? durationSeconds,
+        out bool refreshed)
+    {
         ArgumentNullException.ThrowIfNull(definition);
+        refreshed = false;
 
         var duration = durationSeconds ?? definition.DurationSeconds;
         if (duration <= 0)
         {
-            return;
+            return false;
         }
 
         if (_active.TryGetValue(definition.Id, out var existing))
         {
+            if (duration <= existing.RemainingSeconds)
+            {
+                return false;
+            }
+
             existing.Refresh(duration);
-            return;
+            refreshed = true;
+            return true;
         }
 
         _active.Add(definition.Id, new ActiveStatusEffect(definition, duration));
+        return true;
     }
 
     public bool Remove(string id)

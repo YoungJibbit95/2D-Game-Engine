@@ -121,11 +121,15 @@ public sealed class ItemDefinitionJsonLoader
 
         public int ManaRestore { get; init; }
 
+        public int HealthRestore { get; init; }
+
         public List<ItemActionDefinitionDto> Actions { get; init; } = new();
 
         public AttackShapeDefinition? AttackShape { get; init; }
 
         public List<StatusEffectApplicationDto> OnHitEffects { get; init; } = new();
+
+        public List<StatusEffectApplicationDto> StatusEffectApplications { get; init; } = new();
 
         public string[] Tags { get; init; } = Array.Empty<string>();
 
@@ -157,11 +161,13 @@ public sealed class ItemDefinitionJsonLoader
                 ManaRegenBonus = ManaRegenBonus,
                 ManaCost = ManaCost,
                 ManaRestore = ManaRestore,
+                HealthRestore = HealthRestore,
                 Actions = Actions.Count > 0
                     ? Actions.Select(action => action.ToDefinition()).ToArray()
                     : new[] { ItemActionResolver.InferFromLegacyType(Type) }.Where(action => action.Kind != ItemActionKind.None).ToArray(),
                 AttackShape = AttackShape,
                 OnHitEffects = OnHitEffects.Select(effect => effect.ToDefinition()).ToArray(),
+                StatusEffectApplications = StatusEffectApplications.Select(effect => effect.ToDefinition()).ToArray(),
                 Tags = DefinitionTags.Normalize(Tags)
             };
         }

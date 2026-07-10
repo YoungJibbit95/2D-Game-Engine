@@ -11,8 +11,13 @@ public sealed record ChunkStreamingUpdateResult(
     IReadOnlyList<ChunkPos> GeneratedChunkPositions,
     IReadOnlyList<ChunkPos> SavedChunkPositions,
     IReadOnlyList<ChunkPos> UnloadedChunkPositions,
-    IReadOnlyList<ChunkPos> SkippedDirtyUnloadPositions)
+    IReadOnlyList<ChunkPos> SkippedDirtyUnloadPositions,
+    int OperationsProcessed,
+    int DeferredLoadChunks,
+    int DeferredUnloadChunks)
 {
+    public bool BudgetExhausted => DeferredLoadChunks > 0 || DeferredUnloadChunks > 0;
+
     public static ChunkStreamingUpdateResult Empty { get; } = new(
         new ChunkStreamingPlan(
             new HashSet<ChunkPos>(),
@@ -27,5 +32,8 @@ public sealed record ChunkStreamingUpdateResult(
         Array.Empty<ChunkPos>(),
         Array.Empty<ChunkPos>(),
         Array.Empty<ChunkPos>(),
-        Array.Empty<ChunkPos>());
+        Array.Empty<ChunkPos>(),
+        0,
+        0,
+        0);
 }

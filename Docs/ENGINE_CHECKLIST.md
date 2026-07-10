@@ -9,27 +9,25 @@ Only open engine work is kept here. Completed items are removed after implementa
 - [ ] Add a lightweight service registry for runtime systems that need shared access without a god class.
 - [ ] Add deterministic RNG streams for worldgen, loot, AI, particles, and future replays.
 - [ ] Add a deterministic replay harness for core simulation ticks.
-- [ ] Add allocation and frame-budget diagnostics for update, render, lighting, liquids, UI, and content loading.
+- [ ] Extend the shared performance profiler into lighting propagation, liquid substeps, content loading, and long-session allocation reports.
 - [ ] Add a multi-session host API for future splitscreen, multiplayer server sessions, map sessions, and tool/editor sessions.
 
 ## World, Chunks, And Streaming
 
 - [ ] Add async/background chunk streaming jobs with a main-thread apply queue.
-- [ ] Add streaming event history/debug panels and per-frame streaming budget controls.
+- [ ] Add a dedicated streaming timeline/debug panel on top of the shared event journal and backlog metrics.
 - [ ] Add region-file compaction, tombstones, and offset tables so unloaded chunks can be deleted or updated without rewriting a whole region.
 - [ ] Add migration tooling that can convert existing loose chunk folders into packed region files.
 - [ ] Route terrain generation, liquids, and editor tools through the bulk tile edit API where batching improves dirty-region behavior.
 - [ ] Add typed tile mutation events for batch edits so simulation, audio, particles, and undo tooling can consume one result object.
-- [ ] Add background wall data generation and wall mining/placement rules.
+- [ ] Add background wall mining/placement items and interaction rules.
 - [ ] Add platform, ladder, damage tile, and one-way collision material rules.
 - [ ] Add save/load migration and integrity reports for old world versions.
 
 ## World Generation
 
 - [ ] Add biome transition bands and biome-specific generation steps.
-- [ ] Add underground wall distribution, cave wall cleanup, and background cave materials.
-- [ ] Add surface lakes, cave pools, and better water-body shaping.
-- [ ] Add cavern layers with larger rooms and connector tunnels.
+- [ ] Add biome-specific background wall materials and transition rules.
 - [ ] Add structure spacing rules, chest rooms, and loot placement.
 - [ ] Add seed retry integration that regenerates when quality gates fail.
 - [ ] Add seed preview/export tooling using `WorldGenerationService`, `WorldAnalyzer`, and quality reports.
@@ -78,12 +76,12 @@ Only open engine work is kept here. Completed items are removed after implementa
 - [ ] Add projectile knockback, spread, charge, reload, and ammo preference rules.
 - [ ] Wire sideview tile/entity interactions into concrete actions for chests, doors, signs, NPCs, crafting stations, machines, and tile entities.
 - [ ] Add concrete client/gameplay screens for topdown shop, dialogue, container, shipping-bin, and scripted trigger action results.
-- [ ] Add shared tile/entity interaction result objects for sideview world interactions with failure reasons for UI feedback.
-- [ ] Add particle/audio/event hooks for mining, placement, hit, kill, pickup, craft, and blocked-use feedback.
+- [ ] Generalize the new item-use/build/mining result objects for chests, doors, signs, NPCs, crafting stations, machines, and tile entities.
+- [ ] Connect the typed mining/item-use/combat events to particle and audio emitters; add equivalent hooks for placement, kill, pickup, and craft.
 
 ## Persistence And Tools
 
-- [ ] Save player equipment, active status effects, and expanded tile entities.
+- [ ] Expand persisted tile entities beyond chests to doors, signs, crafting stations, machines, and scripted interactables.
 - [ ] Add autosave rotation and backup-before-migration behavior.
 - [ ] Add crash logs and save recovery diagnostics.
 - [ ] Add world viewer tooling for chunks, biomes, light, liquid, entities, and ore distribution.

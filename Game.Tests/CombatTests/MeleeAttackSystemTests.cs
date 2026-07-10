@@ -51,7 +51,29 @@ public sealed class MeleeAttackSystemTests
 
         Assert.True(first.Attacked);
         Assert.False(second.Attacked);
+        Assert.True(second.Blocked);
+        Assert.Equal(GameplayActionFailureReason.Cooldown, second.FailureReason);
+        Assert.Equal(sword.UseTime, second.CooldownRemaining, precision: 3);
+        Assert.Equal(0f, second.CooldownProgress, precision: 3);
         Assert.True(third.Attacked);
+    }
+
+    [Fact]
+    public void Attack_RejectsInvalidAimWithExplicitReason()
+    {
+        var entities = new EntityManager(spatialCellSize: 16);
+        var player = new PlayerEntity(Vector2.Zero, new TileCollisionResolver());
+        entities.Add(player);
+
+        var result = CreateSystem().Attack(
+            player,
+            entities,
+            CreateSword(damage: 5),
+            CreateLootTables(),
+            player.Body.Center);
+
+        Assert.True(result.Blocked);
+        Assert.Equal(GameplayActionFailureReason.InvalidTarget, result.FailureReason);
     }
 
     [Fact]
@@ -125,6 +147,9 @@ public sealed class MeleeAttackSystemTests
                 new StatusEffectApplication { EffectId = "poisoned" }
             }
         };
+        var events = new GameEventBus();
+        StatusEffectAppliedEvent? appliedEvent = null;
+        events.Subscribe<StatusEffectAppliedEvent>(gameEvent => appliedEvent = gameEvent);
 
         var result = CreateSystem().Attack(
             player,
@@ -132,11 +157,14 @@ public sealed class MeleeAttackSystemTests
             poisonedSword,
             CreateLootTables(),
             new Vector2(64, 0),
-            events: null,
+            events,
             statusEffectRegistry: CreateStatusEffects());
 
         Assert.Equal(1, result.StatusEffectsApplied);
         Assert.True(enemy.StatusEffects.HasEffect("poisoned"));
+        Assert.NotNull(appliedEvent);
+        Assert.Equal(StatusEffectSourceKind.Item, appliedEvent.SourceKind);
+        Assert.Equal(poisonedSword.Id, appliedEvent.SourceId);
     }
 
     private static MeleeAttackSystem CreateSystem()

@@ -2,6 +2,7 @@ using Game.Core.Combat;
 using Game.Core.Data;
 using Game.Core.Entities;
 using Game.Core.Events;
+using Game.Core.Effects;
 using Game.Core.Farming;
 using Game.Core.Interaction;
 using Game.Core.Inventory;
@@ -23,20 +24,25 @@ public sealed class PlayerItemUseSystem
     private readonly MeleeAttackSystem _melee;
     private readonly TileCollisionResolver _collisionResolver;
     private readonly ProjectileFactory _projectiles;
+    private readonly StatusEffectApplier _statusEffects;
     private float _useCooldownRemaining;
+    private float _useCooldownDuration;
+    private BlockedFeedbackSignature? _lastBlockedFeedback;
 
     public PlayerItemUseSystem(
         MiningSystem? mining = null,
         BuildingSystem? building = null,
         MeleeAttackSystem? melee = null,
         TileCollisionResolver? collisionResolver = null,
-        ProjectileFactory? projectiles = null)
+        ProjectileFactory? projectiles = null,
+        StatusEffectApplier? statusEffects = null)
     {
         _collisionResolver = collisionResolver ?? new TileCollisionResolver();
         _mining = mining ?? new MiningSystem();
         _building = building ?? new BuildingSystem();
         _melee = melee ?? new MeleeAttackSystem(new LootRoller(new Random()), _collisionResolver);
         _projectiles = projectiles ?? new ProjectileFactory();
+        _statusEffects = statusEffects ?? new StatusEffectApplier();
     }
 
     public void Update(float deltaSeconds)
@@ -67,32 +73,61 @@ public sealed class PlayerItemUseSystem
         ArgumentNullException.ThrowIfNull(entities);
 
         var selected = inventory.SelectedStack;
-        if (selected.IsEmpty || !content.Items.TryGetById(selected.ItemId, out var item))
+        if (selected.IsEmpty)
         {
             _mining.Reset();
-            return PlayerItemUseResult.None;
+            var blocked = PlayerItemUseResult.BlockedResult(
+                PlayerItemUseKind.None,
+                GameplayActionFailureReason.NoSelectedItem);
+            PublishFeedback(events, player, null, targetTile, targetWorldPosition, blocked);
+            return blocked;
+        }
+
+        if (!content.Items.TryGetById(selected.ItemId, out var item))
+        {
+            _mining.Reset();
+            var blocked = PlayerItemUseResult.BlockedResult(
+                PlayerItemUseKind.None,
+                GameplayActionFailureReason.ItemNotFound);
+            PublishFeedback(events, player, selected.ItemId, targetTile, targetWorldPosition, blocked);
+            return blocked;
         }
 
         var action = ItemActionResolver.GetPrimaryAction(item);
-        if (UsesDiscreteCooldown(action) && _useCooldownRemaining > 0)
+        var attemptedKind = ResolveUseKind(action.Kind);
+        if (action.Kind != ItemActionKind.Mine)
         {
-            return PlayerItemUseResult.None;
+            _mining.Reset();
         }
 
-        return action.Kind switch
+        if (UsesDiscreteCooldown(action) && _useCooldownRemaining > 0)
+        {
+            var blocked = PlayerItemUseResult.BlockedResult(
+                attemptedKind,
+                GameplayActionFailureReason.Cooldown,
+                _useCooldownRemaining,
+                _useCooldownDuration);
+            PublishFeedback(events, player, selected.ItemId, targetTile, targetWorldPosition, blocked);
+            return blocked;
+        }
+
+        var result = action.Kind switch
         {
             ItemActionKind.Place => TryBuild(world, content, player, inventory, targetTile, selected.ItemId, action, events),
             ItemActionKind.Mine => TryMine(world, content, player, entities, targetTile, item, action, deltaSeconds, events),
             ItemActionKind.Melee => TryMelee(player, entities, content, item, targetWorldPosition, events),
             ItemActionKind.Shoot => TryShoot(content, player, inventory, entities, item, action, targetWorldPosition),
             ItemActionKind.Cast => TryCast(content, player, entities, item, action, targetWorldPosition),
-            ItemActionKind.Consume => TryConsume(player, inventory, selected.ItemId, item),
+            ItemActionKind.Consume => TryConsume(content, player, inventory, selected.ItemId, item, events),
             ItemActionKind.Till => TryTill(world, content, farmPlots, targetTile, item),
             ItemActionKind.Water => TryWater(world, farmPlots, targetTile, item),
             ItemActionKind.Plant => TryPlant(world, content, inventory, farmPlots, targetTile, selected.ItemId, item, farmSeason, currentDay),
             ItemActionKind.Harvest => TryHarvest(content, inventory, farmPlots, targetTile, item, farmingRandom),
-            _ => PlayerItemUseResult.None
+            _ => PlayerItemUseResult.BlockedResult(PlayerItemUseKind.None, GameplayActionFailureReason.NoAction)
         };
+
+        PublishFeedback(events, player, selected.ItemId, targetTile, targetWorldPosition, result);
+        return result;
     }
 
     private PlayerItemUseResult TryBuild(
@@ -105,7 +140,7 @@ public sealed class PlayerItemUseSystem
         ItemActionDefinition action,
         GameEventBus? events)
     {
-        var placed = _building.PlaceTile(
+        var building = _building.PlaceTileWithResult(
             world,
             inventory,
             content.Items,
@@ -117,9 +152,11 @@ public sealed class PlayerItemUseSystem
             player.Bounds,
             events);
 
-        return placed
-            ? StartCooldown(new PlayerItemUseResult(PlayerItemUseKind.Build, MiningResult.None, true, MeleeAttackResult.None), content.Items.GetById(itemId))
-            : PlayerItemUseResult.None;
+        return building.Success
+            ? StartCooldown(
+                new PlayerItemUseResult(PlayerItemUseKind.Build, MiningResult.None, true, MeleeAttackResult.None),
+                content.Items.GetById(itemId))
+            : PlayerItemUseResult.BlockedResult(PlayerItemUseKind.Build, building.FailureReason);
     }
 
     private PlayerItemUseResult TryMine(
@@ -151,9 +188,24 @@ public sealed class PlayerItemUseSystem
                 _collisionResolver));
         }
 
-        return mining.Completed
-            ? new PlayerItemUseResult(PlayerItemUseKind.Mine, mining, false, MeleeAttackResult.None)
-            : PlayerItemUseResult.None;
+        if (mining.Completed)
+        {
+            return MarkSucceeded(new PlayerItemUseResult(
+                PlayerItemUseKind.Mine,
+                mining,
+                false,
+                MeleeAttackResult.None)) with
+            {
+                ActionProgress = 1f
+            };
+        }
+
+        return mining.Blocked
+            ? PlayerItemUseResult.BlockedResult(
+                PlayerItemUseKind.Mine,
+                mining.FailureReason,
+                mining: mining)
+            : PlayerItemUseResult.Progressing(PlayerItemUseKind.Mine, mining);
     }
 
     private PlayerItemUseResult TryMelee(
@@ -167,7 +219,12 @@ public sealed class PlayerItemUseSystem
         var melee = _melee.Attack(player, entities, item, content.LootTables, targetWorldPosition, events, content.StatusEffects);
         return melee.Attacked
             ? StartCooldown(new PlayerItemUseResult(PlayerItemUseKind.Melee, MiningResult.None, false, melee), item)
-            : PlayerItemUseResult.None;
+            : PlayerItemUseResult.BlockedResult(
+                PlayerItemUseKind.Melee,
+                melee.FailureReason,
+                melee.CooldownRemaining,
+                melee.CooldownDuration,
+                melee: melee);
     }
 
     private PlayerItemUseResult TryShoot(
@@ -181,14 +238,19 @@ public sealed class PlayerItemUseSystem
     {
         if (string.IsNullOrWhiteSpace(action.ProjectileId) || !content.Projectiles.TryGetById(action.ProjectileId, out var definition))
         {
-            return PlayerItemUseResult.None;
+            return PlayerItemUseResult.BlockedResult(PlayerItemUseKind.Shoot, GameplayActionFailureReason.InvalidItem);
+        }
+
+        if (!IsValidTarget(targetWorldPosition, player.Body.Center))
+        {
+            return PlayerItemUseResult.BlockedResult(PlayerItemUseKind.Shoot, GameplayActionFailureReason.InvalidTarget);
         }
 
         if (!string.IsNullOrWhiteSpace(action.AmmoItemId))
         {
             if (inventory.CountItem(action.AmmoItemId) < action.AmmoCost)
             {
-                return PlayerItemUseResult.None;
+                return PlayerItemUseResult.BlockedResult(PlayerItemUseKind.Shoot, GameplayActionFailureReason.InsufficientAmmo);
             }
 
             inventory.RemoveItem(action.AmmoItemId, action.AmmoCost);
@@ -219,13 +281,18 @@ public sealed class PlayerItemUseSystem
     {
         if (string.IsNullOrWhiteSpace(action.ProjectileId) || !content.Projectiles.TryGetById(action.ProjectileId, out var definition))
         {
-            return PlayerItemUseResult.None;
+            return PlayerItemUseResult.BlockedResult(PlayerItemUseKind.Cast, GameplayActionFailureReason.InvalidItem);
+        }
+
+        if (!IsValidTarget(targetWorldPosition, player.Body.Center))
+        {
+            return PlayerItemUseResult.BlockedResult(PlayerItemUseKind.Cast, GameplayActionFailureReason.InvalidTarget);
         }
 
         var manaCost = Math.Max(0, (int)MathF.Ceiling(item.ManaCost * player.Stats.ManaCostMultiplier));
         if (!player.ManaComponent.TrySpend(manaCost))
         {
-            return PlayerItemUseResult.None;
+            return PlayerItemUseResult.BlockedResult(PlayerItemUseKind.Cast, GameplayActionFailureReason.InsufficientMana);
         }
 
         var damage = Math.Max(1, (int)MathF.Round((definition.Damage + item.Damage) * player.Stats.MagicDamageMultiplier));
@@ -245,25 +312,57 @@ public sealed class PlayerItemUseSystem
     }
 
     private PlayerItemUseResult TryConsume(
+        GameContentDatabase content,
         PlayerEntity player,
         PlayerInventory inventory,
         string itemId,
-        ItemDefinition item)
+        ItemDefinition item,
+        GameEventBus? events)
     {
-        var changed = false;
+        var healthBefore = player.Health;
+        if (item.HealthRestore > 0 && player.Health > 0 && player.Health < player.MaxHealth)
+        {
+            player.HealthComponent.Heal(item.HealthRestore);
+        }
+
+        var healthRestored = Math.Max(0, player.Health - healthBefore);
+        var manaBefore = player.Mana;
         if (item.ManaRestore > 0 && player.Mana < player.MaxMana)
         {
             player.ManaComponent.Restore(item.ManaRestore);
-            changed = true;
         }
 
-        if (!changed)
+        var manaRestored = Math.Max(0, player.Mana - manaBefore);
+        var effectResult = _statusEffects.ApplyDetailed(
+            player.StatusEffects,
+            content.StatusEffects,
+            item.StatusEffectApplications);
+
+        if (healthRestored == 0 && manaRestored == 0 && !effectResult.Changed)
         {
-            return PlayerItemUseResult.None;
+            return PlayerItemUseResult.BlockedResult(PlayerItemUseKind.Consume, GameplayActionFailureReason.NoBenefit);
         }
 
-        inventory.RemoveItem(itemId, 1);
-        return StartCooldown(new PlayerItemUseResult(PlayerItemUseKind.Consume, MiningResult.None, false, MeleeAttackResult.None), item);
+        if (!inventory.RemoveItem(itemId, 1))
+        {
+            return PlayerItemUseResult.BlockedResult(PlayerItemUseKind.Consume, GameplayActionFailureReason.InsufficientItem);
+        }
+
+        if (healthRestored > 0 || manaRestored > 0)
+        {
+            events?.Publish(new ResourceRestoredEvent(player.Id, itemId, healthRestored, manaRestored));
+        }
+
+        PublishStatusEffects(events, player.Id, itemId, effectResult);
+        return StartCooldown(
+            new PlayerItemUseResult(PlayerItemUseKind.Consume, MiningResult.None, false, MeleeAttackResult.None)
+            {
+                HealthRestored = healthRestored,
+                ManaRestored = manaRestored,
+                StatusEffectsApplied = effectResult.AppliedCount,
+                ConsumedItem = true
+            },
+            item);
     }
 
     private PlayerItemUseResult TryTill(
@@ -275,13 +374,13 @@ public sealed class PlayerItemUseSystem
     {
         if (farmPlots is null)
         {
-            return PlayerItemUseResult.None;
+            return PlayerItemUseResult.BlockedResult(PlayerItemUseKind.Till, GameplayActionFailureReason.InvalidTarget);
         }
 
         var result = new FarmingSystem().Till(world, content.Tiles, farmPlots, targetTile);
         return result.Status == FarmActionStatus.Completed
             ? StartCooldown(new PlayerItemUseResult(PlayerItemUseKind.Till, MiningResult.None, false, MeleeAttackResult.None, Farming: result), item)
-            : PlayerItemUseResult.None with { Farming = result };
+            : PlayerItemUseResult.BlockedResult(PlayerItemUseKind.Till, MapFarmingFailure(result.Status)) with { Farming = result };
     }
 
     private PlayerItemUseResult TryWater(
@@ -292,13 +391,13 @@ public sealed class PlayerItemUseSystem
     {
         if (farmPlots is null)
         {
-            return PlayerItemUseResult.None;
+            return PlayerItemUseResult.BlockedResult(PlayerItemUseKind.Water, GameplayActionFailureReason.InvalidTarget);
         }
 
         var result = new FarmingSystem().Water(world, farmPlots, targetTile);
         return result.Status == FarmActionStatus.Completed
             ? StartCooldown(new PlayerItemUseResult(PlayerItemUseKind.Water, MiningResult.None, false, MeleeAttackResult.None, Farming: result), item)
-            : PlayerItemUseResult.None with { Farming = result };
+            : PlayerItemUseResult.BlockedResult(PlayerItemUseKind.Water, MapFarmingFailure(result.Status)) with { Farming = result };
     }
 
     private PlayerItemUseResult TryPlant(
@@ -314,7 +413,7 @@ public sealed class PlayerItemUseSystem
     {
         if (farmPlots is null)
         {
-            return PlayerItemUseResult.None;
+            return PlayerItemUseResult.BlockedResult(PlayerItemUseKind.Plant, GameplayActionFailureReason.InvalidTarget);
         }
 
         var result = new FarmingSystem().PlantSeed(
@@ -329,7 +428,7 @@ public sealed class PlayerItemUseSystem
 
         return result.Status == FarmActionStatus.Completed
             ? StartCooldown(new PlayerItemUseResult(PlayerItemUseKind.Plant, MiningResult.None, false, MeleeAttackResult.None, Farming: result), item)
-            : PlayerItemUseResult.None with { Farming = result };
+            : PlayerItemUseResult.BlockedResult(PlayerItemUseKind.Plant, MapFarmingFailure(result.Status)) with { Farming = result };
     }
 
     private PlayerItemUseResult TryHarvest(
@@ -342,13 +441,13 @@ public sealed class PlayerItemUseSystem
     {
         if (farmPlots is null)
         {
-            return PlayerItemUseResult.None;
+            return PlayerItemUseResult.BlockedResult(PlayerItemUseKind.Harvest, GameplayActionFailureReason.InvalidTarget);
         }
 
         var result = new FarmingSystem().Harvest(content.Crops, farmPlots, inventory, targetTile, farmingRandom);
         return result.Status == FarmActionStatus.Completed
             ? StartCooldown(new PlayerItemUseResult(PlayerItemUseKind.Harvest, MiningResult.None, false, MeleeAttackResult.None, Farming: result), item)
-            : PlayerItemUseResult.None with { Farming = result };
+            : PlayerItemUseResult.BlockedResult(PlayerItemUseKind.Harvest, MapFarmingFailure(result.Status)) with { Farming = result };
     }
 
     private static float ResolveReach(ItemActionDefinition action)
@@ -360,10 +459,20 @@ public sealed class PlayerItemUseSystem
     {
         if (result.Kind != PlayerItemUseKind.None && item.UseTime > 0)
         {
+            _useCooldownDuration = Math.Max(0, item.UseTime);
             _useCooldownRemaining = Math.Max(_useCooldownRemaining, item.UseTime);
         }
+        else if (item.UseTime <= 0)
+        {
+            _useCooldownDuration = 0;
+            _useCooldownRemaining = 0;
+        }
 
-        return result;
+        return MarkSucceeded(result) with
+        {
+            CooldownRemaining = _useCooldownRemaining,
+            CooldownDuration = _useCooldownDuration
+        };
     }
 
     private static bool UsesDiscreteCooldown(ItemActionDefinition action)
@@ -371,4 +480,156 @@ public sealed class PlayerItemUseSystem
         return action.Kind is ItemActionKind.Place or ItemActionKind.Melee or ItemActionKind.Shoot or ItemActionKind.Consume or ItemActionKind.Cast or
             ItemActionKind.Till or ItemActionKind.Water or ItemActionKind.Plant or ItemActionKind.Harvest;
     }
+
+    private static PlayerItemUseResult MarkSucceeded(PlayerItemUseResult result)
+    {
+        return result with
+        {
+            Status = PlayerItemUseStatus.Succeeded,
+            AttemptedKind = result.Kind,
+            SuccessReason = ResolveSuccessReason(result.Kind),
+            FailureReason = GameplayActionFailureReason.None
+        };
+    }
+
+    private static GameplayActionSuccessReason ResolveSuccessReason(PlayerItemUseKind kind)
+    {
+        return kind switch
+        {
+            PlayerItemUseKind.Mine => GameplayActionSuccessReason.TileMined,
+            PlayerItemUseKind.Build => GameplayActionSuccessReason.TilePlaced,
+            PlayerItemUseKind.Melee => GameplayActionSuccessReason.AttackPerformed,
+            PlayerItemUseKind.Shoot or PlayerItemUseKind.Cast => GameplayActionSuccessReason.ProjectileSpawned,
+            PlayerItemUseKind.Consume => GameplayActionSuccessReason.ConsumableApplied,
+            PlayerItemUseKind.Till or PlayerItemUseKind.Water or PlayerItemUseKind.Plant or PlayerItemUseKind.Harvest =>
+                GameplayActionSuccessReason.FarmingCompleted,
+            _ => GameplayActionSuccessReason.None
+        };
+    }
+
+    private static PlayerItemUseKind ResolveUseKind(ItemActionKind actionKind)
+    {
+        return actionKind switch
+        {
+            ItemActionKind.Place => PlayerItemUseKind.Build,
+            ItemActionKind.Mine => PlayerItemUseKind.Mine,
+            ItemActionKind.Melee => PlayerItemUseKind.Melee,
+            ItemActionKind.Shoot => PlayerItemUseKind.Shoot,
+            ItemActionKind.Cast => PlayerItemUseKind.Cast,
+            ItemActionKind.Consume => PlayerItemUseKind.Consume,
+            ItemActionKind.Till => PlayerItemUseKind.Till,
+            ItemActionKind.Water => PlayerItemUseKind.Water,
+            ItemActionKind.Plant => PlayerItemUseKind.Plant,
+            ItemActionKind.Harvest => PlayerItemUseKind.Harvest,
+            _ => PlayerItemUseKind.None
+        };
+    }
+
+    private static GameplayActionFailureReason MapFarmingFailure(FarmActionStatus status)
+    {
+        return status switch
+        {
+            FarmActionStatus.AlreadyOccupied => GameplayActionFailureReason.Occupied,
+            FarmActionStatus.MissingSeed => GameplayActionFailureReason.InsufficientItem,
+            FarmActionStatus.OutOfBounds => GameplayActionFailureReason.InvalidTarget,
+            _ => GameplayActionFailureReason.InvalidTarget
+        };
+    }
+
+    private static bool IsValidTarget(Vector2 target, Vector2 origin)
+    {
+        return float.IsFinite(target.X) &&
+               float.IsFinite(target.Y) &&
+               Vector2.DistanceSquared(target, origin) > float.Epsilon;
+    }
+
+    private void PublishFeedback(
+        GameEventBus? events,
+        PlayerEntity player,
+        string? itemId,
+        TilePos targetTile,
+        Vector2 targetWorldPosition,
+        PlayerItemUseResult result)
+    {
+        if (result.Success)
+        {
+            _lastBlockedFeedback = null;
+            events?.Publish(new PlayerItemUseCompletedEvent(
+                player.Id,
+                itemId ?? string.Empty,
+                result.Kind,
+                result.SuccessReason,
+                targetTile,
+                targetWorldPosition,
+                result.CooldownDuration,
+                result.HealthRestored,
+                result.ManaRestored,
+                result.StatusEffectsApplied));
+            return;
+        }
+
+        if (result.InProgress)
+        {
+            _lastBlockedFeedback = null;
+            return;
+        }
+
+        if (!result.Blocked || events is null)
+        {
+            return;
+        }
+
+        var signature = new BlockedFeedbackSignature(
+            events,
+            itemId,
+            result.AttemptedKind,
+            result.FailureReason,
+            targetTile);
+        if (_lastBlockedFeedback == signature)
+        {
+            return;
+        }
+
+        _lastBlockedFeedback = signature;
+        events.Publish(new PlayerItemUseBlockedEvent(
+            player.Id,
+            itemId,
+            result.AttemptedKind,
+            result.FailureReason,
+            targetTile,
+            targetWorldPosition,
+            result.CooldownRemaining,
+            result.CooldownDuration,
+            result.ActionProgress));
+    }
+
+    private static void PublishStatusEffects(
+        GameEventBus? events,
+        int targetEntityId,
+        string sourceItemId,
+        StatusEffectApplyResult result)
+    {
+        if (events is null)
+        {
+            return;
+        }
+
+        foreach (var effect in result.AppliedEffects)
+        {
+            events.Publish(new StatusEffectAppliedEvent(
+                targetEntityId,
+                effect.EffectId,
+                StatusEffectSourceKind.Item,
+                sourceItemId,
+                effect.Refreshed,
+                effect.DurationSeconds));
+        }
+    }
+
+    private readonly record struct BlockedFeedbackSignature(
+        GameEventBus EventBus,
+        string? ItemId,
+        PlayerItemUseKind Kind,
+        GameplayActionFailureReason Reason,
+        TilePos TargetTile);
 }

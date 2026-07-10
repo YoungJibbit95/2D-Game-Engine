@@ -55,6 +55,58 @@ public sealed class StatusEffectCollectionTests
     }
 
     [Fact]
+    public void TryApply_ReportsOnlyNewOrExtendedEffectsAsChanges()
+    {
+        var definition = new StatusEffectDefinition
+        {
+            Id = "fortified",
+            DisplayName = "Fortified",
+            Kind = StatusEffectKind.Buff,
+            DurationSeconds = 4f,
+            DefenseDelta = 2
+        };
+        var effects = new StatusEffectCollection();
+
+        var added = effects.TryApply(definition, durationSeconds: null, out var initiallyRefreshed);
+        var unchanged = effects.TryApply(definition, durationSeconds: 3f, out _);
+        effects.Update(2f);
+        var refreshed = effects.TryApply(definition, durationSeconds: 4f, out var wasRefreshed);
+
+        Assert.True(added);
+        Assert.False(initiallyRefreshed);
+        Assert.False(unchanged);
+        Assert.True(refreshed);
+        Assert.True(wasRefreshed);
+        Assert.Equal(4f, Assert.Single(effects.ActiveEffects).RemainingSeconds, precision: 3);
+    }
+
+    [Fact]
+    public void ApplyDetailed_ReturnsEffectIdentityAndSkipsNoOpRefresh()
+    {
+        var definition = new StatusEffectDefinition
+        {
+            Id = "swift",
+            DisplayName = "Swift",
+            Kind = StatusEffectKind.Buff,
+            DurationSeconds = 5f,
+            MovementSpeedBonus = 0.1f
+        };
+        var registry = StatusEffectRegistry.Create(new[] { definition });
+        var effects = new StatusEffectCollection();
+        var applier = new StatusEffectApplier(new Random(1));
+        var applications = new[] { new StatusEffectApplication { EffectId = "swift" } };
+
+        var first = applier.ApplyDetailed(effects, registry, applications);
+        var repeated = applier.ApplyDetailed(effects, registry, applications);
+
+        var applied = Assert.Single(first.AppliedEffects);
+        Assert.Equal("swift", applied.EffectId);
+        Assert.False(applied.Refreshed);
+        Assert.True(repeated == StatusEffectApplyResult.None);
+        Assert.False(repeated.Changed);
+    }
+
+    [Fact]
     public void ApplyStatModifiers_CombinesActiveEffectBonuses()
     {
         var effects = new StatusEffectCollection();

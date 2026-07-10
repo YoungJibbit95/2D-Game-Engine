@@ -1,6 +1,6 @@
 # Engine Inventory
 
-Last updated: 2026-06-21
+Last updated: 2026-07-10
 
 This file is a contributor-facing snapshot of the current project shape. Open work still lives in the checklist files.
 
@@ -28,21 +28,20 @@ The count excludes `bin`, `obj`, `.git`, and `.vs`.
 
 | Area | Files | Lines |
 | --- | ---: | ---: |
-| `Game.Core` | 388 | 18,056 |
-| `Game.Client` | 47 | 4,877 |
-| `Game.Tests` | 88 | 8,986 |
-| `Game.Data` | 112 | 2,131 |
-| `Docs` | 10 | 848 |
+| `Game.Core` | 416 | 20,571 |
+| `Game.Client` | 53 | 6,373 |
+| `Game.Tests` | 93 | 10,666 |
+| `Game.Data` | 217 | 11,074 |
+| `Docs` | 10 | 823 |
 
 | Extension | Files | Lines |
 | --- | ---: | ---: |
-| `.cs` | 519 | 31,856 |
-| `.json` | 80 | 2,164 |
-| `.md` | 12 | 1,036 |
-| `.png` | 35 | 0 |
-| Project/solution/config files | 7 | 108 |
+| `.cs` | 558 | 37,547 |
+| `.json` | 90 | 11,107 |
+| `.md` | 12 | 1,011 |
+| `.png` | 130 | 0 |
 
-Total workspace snapshot: 677 files, 34,113 text lines plus 35 PNG assets.
+Total workspace snapshot: 822 files, more than 49,000 C#/JSON/Markdown lines plus 130 PNG assets.
 
 ## Core Engine Features
 
@@ -54,12 +53,12 @@ Total workspace snapshot: 677 files, 34,113 text lines plus 35 PNG assets.
 - Batch tile mutation through `World.ApplyTileEdits`.
 - World region clamping that preserves infinite horizontal coordinates.
 - Packed region-file chunk storage plus legacy loose chunk fallback.
-- Coordinated save/load services for world, player, inventory, runtime entities, tile entities, and farm plots.
+- Coordinated save/load services for world, player, inventory, equipment, exact active-effect durations, character appearance, runtime entities, tile entities, and farm plots.
 - Session-level autosave and session-level load orchestration.
 - Deterministic finite and streamed world generation.
-- Profile-driven generation for dimensions, terrain, caves, ores, water pockets, trees, and vertical dimension bands.
+- Profile-driven generation for dimensions, terrain, cave walkers, large caverns/connectors, ores, shaped surface lakes, cave pools, underground walls/cleanup, trees, and vertical dimension bands.
 - Pass-through mineable tree tiles for Terraria-style movement and mining.
-- Chunk streaming planner and lifecycle service with load/generate/save/unload events.
+- Chunk streaming planner and lifecycle service with load/generate/save/unload events, per-update operation budgets, nearest-load/farthest-unload priority, and backlog metrics.
 - World simulation scheduler for dirty liquid, render, and light regions.
 - Baseline liquid simulation with active-region stepping.
 - Greyscale lighting with sunlight, point lights, and underground falloff.
@@ -79,13 +78,14 @@ Total workspace snapshot: 677 files, 34,113 text lines plus 35 PNG assets.
 - Startup profile foundation with JSON definitions, starter inventory targeting, selected hotbar slot, default world profile/startup map references, validation, and inventory creation service.
 - Sprite asset audit foundation that checks manifest file existence, PNG header dimensions, generation brief path/size matches, missing briefs, and complete autotile mask coverage.
 - Generated/base PNG assets now cover core terrain, tree tiles, workbench, starter blocks, ores, coin/materials, pickaxes, swords, bow, arrow, projectile, slime, player action animation sheet, player hair/clothes variants, rabbit, bird, bat, cave worm, foliage props, and forest/cave background layers.
-- Combat health, damage info, invulnerability, contact damage, projectile damage, melee attacks, loot drops, and status effects.
+- Combat health, damage info, invulnerability, contact damage, projectile damage, melee attacks, loot drops, status effects, data-driven restorative/effect consumables, and structured action feedback.
 - Entity manager with runtime id assignment and spatial query index.
 - Shared world queries for raycasts, line of sight, shape queries, and tile flood fill.
 - Core settings model with video, rendering, UI, audio, gameplay, world, input, and debug sections.
 - Engine-neutral UI animation pipeline with clips, tracks, keyframes, curves, and a runtime player.
 - Runtime sprite animation clips, loop modes, JSON loader, sprite animator, character definitions, character animation state resolver, and first character editor session foundation.
 - Renderer-neutral UI toolkit with retained elements, free/stack/grid/scroll/tabs/splitter/dock layout, topmost hit-testing, modal layers, focus traversal, tooltip state, and cursor item interaction snapshots.
+- Engine-neutral performance profiler with timestamp/allocation scopes, rolling averages, peaks, budgets, and slowest-pass snapshots.
 
 ## Client Features
 
@@ -104,6 +104,8 @@ Total workspace snapshot: 677 files, 34,113 text lines plus 35 PNG assets.
 - Runtime settings for theme, panel opacity, HUD opacity, animation speed, reduced motion, render cache budget, liquid opacity, streaming behavior, and debug metric visibility.
 - Chunk render command cache with LRU-style budget trimming.
 - Tile/entity/item/projectile rendering can use real sprite assets when PNGs exist, or deterministic placeholders/debug rectangles while assets are missing.
+- Mining progress/crack feedback, action failure messages, item cooldown bars, buff/debuff timers, performance metrics, event journal, and streaming backlog overlays.
+- Saved equipment, effects, and character appearance are restored through `LoadedGameSession` into active gameplay and written back by autosave.
 
 ## Test Coverage Highlights
 
@@ -120,7 +122,7 @@ Total workspace snapshot: 677 files, 34,113 text lines plus 35 PNG assets.
 - UI animation track/player behavior.
 - UI layout, hit-testing, modal layers, focus traversal, tooltips, and cursor interaction snapshots.
 
-Current test count: 361 passing tests after the animation/character foundation and character asset-wave integration.
+Current test count: 406 passing tests after worldgeneration, action feedback, persistence, streaming budget, and profiler integration.
 
 ## Current Engine Direction
 
@@ -131,7 +133,7 @@ The engine is now past the first playable prototype shell and is becoming a reus
 - Upgrade rendering to atlas-backed batching, render targets, shader passes, particles, and reusable animation controllers for all entities.
 - Wire sprite asset audits into CI, debug commands, packaging, and editor tooling.
 - Add RGB region-based lighting and dynamic lights attached to items, projectiles, entities, and furniture.
-- Deepen worldgen with biome transitions, underground walls, larger cavern layers, lakes, structure spacing, chest rooms, and sampled infinite-world quality gates.
+- Deepen worldgen with biome transitions, biome-specific materials, structure spacing, chest rooms, seed retry/preview tooling, and sampled infinite-world quality gates.
 - Continue moving toward stable engine package names, a multi-session host API, and a physical standalone game repository that references the engine.
 - Add richer crop rendering, client topdown map rendering/input integration, weather/rain watering, shop/dialogue UI, shipping bins, NPC schedules, and relationship data.
 - Add save migrations, integrity reports, autosave rotation, and recovery diagnostics.

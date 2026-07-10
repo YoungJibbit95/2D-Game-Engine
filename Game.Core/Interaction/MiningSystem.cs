@@ -8,8 +8,14 @@ namespace Game.Core.Interaction;
 
 public sealed class MiningSystem
 {
+    private const float ProgressEventStep = 0.05f;
+
     private TilePos? _currentTarget;
     private float _progress;
+    private float _lastPublishedProgress;
+    private TilePos? _lastBlockedTarget;
+    private GameplayActionFailureReason _lastBlockedReason;
+    private GameEventBus? _lastBlockedEventBus;
 
     public float Progress => _progress;
 
@@ -28,39 +34,58 @@ public sealed class MiningSystem
         ArgumentNullException.ThrowIfNull(world);
         ArgumentNullException.ThrowIfNull(tiles);
 
-        if (deltaSeconds <= 0 || !world.IsInBounds(target.X, target.Y))
+        if (!world.IsInBounds(target.X, target.Y))
         {
-            Reset();
-            return MiningResult.None;
+            return Block(target, 0, GameplayActionFailureReason.InvalidTarget, events);
         }
 
         var tile = world.GetTile(target.X, target.Y);
         if (tile.IsAir)
         {
-            Reset();
-            return MiningResult.None;
+            return Block(target, 0, GameplayActionFailureReason.InvalidTarget, events);
         }
 
         var definition = tiles.GetByNumericId(tile.TileId);
-        if (!IsWithinReach(actorCenterWorld, target, reachPixels) || toolPower < definition.MiningPowerRequired)
+        if (!IsWithinReach(actorCenterWorld, target, reachPixels))
         {
-            Reset();
-            return MiningResult.None;
+            return Block(target, tile.TileId, GameplayActionFailureReason.OutOfReach, events);
         }
 
+        if (toolPower < definition.MiningPowerRequired)
+        {
+            return Block(target, tile.TileId, GameplayActionFailureReason.InsufficientToolPower, events);
+        }
+
+        if (deltaSeconds <= 0)
+        {
+            return Block(target, tile.TileId, GameplayActionFailureReason.InvalidTarget, events);
+        }
+
+        ClearBlockedFeedback();
+        var started = _currentTarget != target;
         if (_currentTarget != target)
         {
             _currentTarget = target;
             _progress = 0;
+            _lastPublishedProgress = 0;
+            events?.Publish(new MiningStartedEvent(target, tile.TileId));
         }
 
         var hardness = Math.Max(0.05f, definition.Hardness);
         var speed = 1f + Math.Max(0, toolPower - definition.MiningPowerRequired) / 100f;
+        var previousProgress = Math.Clamp(_progress, 0f, 1f);
         _progress += deltaSeconds * speed / hardness;
+        var currentProgress = Math.Clamp(_progress, 0f, 1f);
 
         if (_progress < 1f)
         {
-            return MiningResult.None;
+            if (currentProgress - _lastPublishedProgress >= ProgressEventStep)
+            {
+                events?.Publish(new MiningProgressEvent(target, tile.TileId, _lastPublishedProgress, currentProgress));
+                _lastPublishedProgress = currentProgress;
+            }
+
+            return MiningResult.Progressed(target, tile.TileId, previousProgress, currentProgress, started);
         }
 
         var minedTileId = tile.TileId;
@@ -68,16 +93,51 @@ public sealed class MiningSystem
         var drop = string.IsNullOrWhiteSpace(definition.DropItemId)
             ? ItemStack.Empty
             : new ItemStack(definition.DropItemId, 1);
-        var result = new MiningResult(true, target, drop);
+        var result = MiningResult.CompletedResult(target, minedTileId, drop, previousProgress);
+        events?.Publish(new MiningCompletedEvent(target, minedTileId, drop));
         events?.Publish(new TileMinedEvent(target, minedTileId, drop));
-        Reset();
+        ResetProgress();
         return result;
     }
 
     public void Reset()
     {
+        ResetProgress();
+        ClearBlockedFeedback();
+    }
+
+    private MiningResult Block(
+        TilePos target,
+        ushort tileId,
+        GameplayActionFailureReason reason,
+        GameEventBus? events)
+    {
+        ResetProgress();
+        if (_lastBlockedTarget != target ||
+            _lastBlockedReason != reason ||
+            !ReferenceEquals(_lastBlockedEventBus, events))
+        {
+            events?.Publish(new MiningBlockedEvent(target, tileId, reason));
+            _lastBlockedTarget = target;
+            _lastBlockedReason = reason;
+            _lastBlockedEventBus = events;
+        }
+
+        return MiningResult.BlockedResult(target, tileId, reason);
+    }
+
+    private void ResetProgress()
+    {
         _currentTarget = null;
         _progress = 0;
+        _lastPublishedProgress = 0;
+    }
+
+    private void ClearBlockedFeedback()
+    {
+        _lastBlockedTarget = null;
+        _lastBlockedReason = GameplayActionFailureReason.None;
+        _lastBlockedEventBus = null;
     }
 
     private static bool IsWithinReach(Vector2 actorCenterWorld, TilePos target, float reachPixels)

@@ -23,6 +23,7 @@ public sealed class MeleeAttackSystem
     private readonly AttackShapeResolver _attackShapes = new();
     private readonly StatusEffectApplier _statusEffects;
     private float _cooldownRemaining;
+    private float _cooldownDuration;
 
     public MeleeAttackSystem(LootRoller lootRoller, TileCollisionResolver collisionResolver, StatusEffectApplier? statusEffects = null)
     {
@@ -84,12 +85,31 @@ public sealed class MeleeAttackSystem
         ArgumentNullException.ThrowIfNull(item);
         ArgumentNullException.ThrowIfNull(lootTables);
 
-        if (!CanAttack || !CanUseAsMelee(item) || item.Damage <= 0 || player.HealthComponent.IsDead)
+        if (!CanAttack)
         {
-            return MeleeAttackResult.None;
+            return MeleeAttackResult.BlockedResult(
+                GameplayActionFailureReason.Cooldown,
+                _cooldownRemaining,
+                _cooldownDuration);
         }
 
-        _cooldownRemaining = Math.Max(0.08f, item.UseTime);
+        if (player.HealthComponent.IsDead)
+        {
+            return MeleeAttackResult.BlockedResult(GameplayActionFailureReason.ActorUnavailable);
+        }
+
+        if (!CanUseAsMelee(item) || item.Damage <= 0)
+        {
+            return MeleeAttackResult.BlockedResult(GameplayActionFailureReason.InvalidItem);
+        }
+
+        if (!IsValidTarget(targetWorldPosition, player.Body.Center))
+        {
+            return MeleeAttackResult.BlockedResult(GameplayActionFailureReason.InvalidTarget);
+        }
+
+        _cooldownDuration = Math.Max(0.08f, item.UseTime);
+        _cooldownRemaining = _cooldownDuration;
         var shape = _attackShapes.Resolve(player, targetWorldPosition, item.AttackShape ?? new AttackShapeDefinition
         {
             Kind = AttackShapeKind.Rectangle,
@@ -122,7 +142,14 @@ public sealed class MeleeAttackSystem
             events?.Publish(new MeleeHitEvent(player.Id, enemy.Id, scaledDamage));
             if (applied && statusEffectRegistry is not null && item.OnHitEffects.Count > 0)
             {
-                effectsApplied += _statusEffects.Apply(enemy.StatusEffects, statusEffectRegistry, item.OnHitEffects);
+                var effectResult = _statusEffects.ApplyDetailed(enemy.StatusEffects, statusEffectRegistry, item.OnHitEffects);
+                effectsApplied += effectResult.AppliedCount;
+                PublishStatusEffects(
+                    events,
+                    enemy.Id,
+                    StatusEffectSourceKind.Item,
+                    item.Id,
+                    effectResult);
             }
 
             if (!applied || !enemy.Health.IsDead)
@@ -141,7 +168,15 @@ public sealed class MeleeAttackSystem
             entities.Add(drop);
         }
 
-        return new MeleeAttackResult(true, hits, enemyDeaths, droppedItems, effectsApplied);
+        return new MeleeAttackResult(
+            true,
+            hits,
+            enemyDeaths,
+            droppedItems,
+            effectsApplied,
+            GameplayActionFailureReason.None,
+            _cooldownRemaining,
+            _cooldownDuration);
     }
 
     private int AddLootDrops(EnemyEntity enemy, LootTableRegistry lootTables, List<DroppedItemEntity> pendingDrops)
@@ -170,5 +205,36 @@ public sealed class MeleeAttackSystem
     {
         var action = ItemActionResolver.GetPrimaryAction(item);
         return action.Kind == ItemActionKind.Melee || item.Type is ItemType.WeaponMelee or ItemType.ToolAxe;
+    }
+
+    private static bool IsValidTarget(Vector2 target, Vector2 origin)
+    {
+        return float.IsFinite(target.X) &&
+               float.IsFinite(target.Y) &&
+               Vector2.DistanceSquared(target, origin) > float.Epsilon;
+    }
+
+    private static void PublishStatusEffects(
+        GameEventBus? events,
+        int targetEntityId,
+        StatusEffectSourceKind sourceKind,
+        string sourceId,
+        StatusEffectApplyResult result)
+    {
+        if (events is null)
+        {
+            return;
+        }
+
+        foreach (var effect in result.AppliedEffects)
+        {
+            events.Publish(new StatusEffectAppliedEvent(
+                targetEntityId,
+                effect.EffectId,
+                sourceKind,
+                sourceId,
+                effect.Refreshed,
+                effect.DurationSeconds));
+        }
     }
 }

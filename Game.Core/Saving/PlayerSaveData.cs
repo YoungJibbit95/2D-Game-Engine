@@ -1,10 +1,13 @@
+using Game.Core.Characters;
 using Game.Core.Inventory;
 
 namespace Game.Core.Saving;
 
 public sealed record PlayerSaveData
 {
-    public int FormatVersion { get; init; } = 1;
+    public const int CurrentFormatVersion = 2;
+
+    public int FormatVersion { get; init; } = CurrentFormatVersion;
 
     public required string PlayerId { get; init; }
 
@@ -23,4 +26,11 @@ public sealed record PlayerSaveData
     public required int SelectedHotbarSlot { get; init; }
 
     public required IReadOnlyList<ItemStack> InventorySlots { get; init; }
+
+    public EquipmentLoadoutSaveData? EquipmentLoadout { get; init; }
+
+    public IReadOnlyList<ActiveStatusEffectSaveData> ActiveStatusEffects { get; init; } =
+        Array.Empty<ActiveStatusEffectSaveData>();
+
+    public CharacterAppearance? CharacterAppearance { get; init; }
 }

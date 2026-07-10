@@ -47,6 +47,27 @@ public sealed class AdvancedWorldGeneratorTests
     }
 
     [Fact]
+    public void Generate_IntegratesCavernsSurfaceLakesCavePoolsAndWalls()
+    {
+        var profile = WorldGenerationProfile.Small with
+        {
+            WidthTiles = 256,
+            HeightTiles = 144,
+            SurfaceBaseY = 44,
+            SurfaceAmplitude = 7
+        };
+
+        var world = new AdvancedWorldGenerator().Generate(profile, seed: 1701);
+        var analysis = new WorldAnalyzer().Analyze(world);
+
+        Assert.True(analysis.CavernRegionCount > 0);
+        Assert.True(analysis.SurfaceLiquidTileCount > 0);
+        Assert.True(analysis.CaveLiquidTileCount > 0);
+        Assert.True(analysis.WallTileCount > 0);
+        Assert.True(analysis.ExposedWallTileCount > 0);
+    }
+
+    [Fact]
     public void Generate_CreatesTreesWithWoodAndLeaves()
     {
         var world = new AdvancedWorldGenerator().Generate(192, 96, seed: 303);
@@ -131,7 +152,12 @@ public sealed class AdvancedWorldGeneratorTests
         {
             for (var x = 0; x < first.WidthTiles; x++)
             {
-                Assert.Equal(first.GetTile(x, y).TileId, second.GetTile(x, y).TileId);
+                var firstTile = first.GetTile(x, y);
+                var secondTile = second.GetTile(x, y);
+                Assert.Equal(firstTile.TileId, secondTile.TileId);
+                Assert.Equal(firstTile.WallId, secondTile.WallId);
+                Assert.Equal(firstTile.LiquidAmount, secondTile.LiquidAmount);
+                Assert.Equal(firstTile.Flags, secondTile.Flags);
             }
         }
     }

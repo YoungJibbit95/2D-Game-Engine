@@ -66,7 +66,17 @@ public sealed class CombatSystem
                     statusEffects is not null &&
                     projectiles.TryGetById(projectile.ProjectileId, out var projectileDefinition))
                 {
-                    effectsApplied += _statusEffects.Apply(enemy.StatusEffects, statusEffects, projectileDefinition.OnHitEffects);
+                    var effectResult = _statusEffects.ApplyDetailed(
+                        enemy.StatusEffects,
+                        statusEffects,
+                        projectileDefinition.OnHitEffects);
+                    effectsApplied += effectResult.AppliedCount;
+                    PublishStatusEffects(
+                        events,
+                        enemy.Id,
+                        StatusEffectSourceKind.Projectile,
+                        projectile.ProjectileId,
+                        effectResult);
                 }
 
                 projectile.RegisterHit();
@@ -182,7 +192,13 @@ public sealed class CombatSystem
                 return ContactDamageResult.None;
             }
 
-            _statusEffects.Apply(player.StatusEffects, statusEffects, enemy.OnContactEffects);
+            var effectResult = _statusEffects.ApplyDetailed(player.StatusEffects, statusEffects, enemy.OnContactEffects);
+            PublishStatusEffects(
+                events,
+                player.Id,
+                StatusEffectSourceKind.Entity,
+                enemy.DefinitionId,
+                effectResult);
             events?.Publish(new PlayerDamagedEvent(enemy.ContactDamage, player.Health, player.MaxHealth, enemy.Id));
             return new ContactDamageResult(1, enemy.ContactDamage, player.HealthComponent.IsDead);
         }
@@ -210,5 +226,29 @@ public sealed class CombatSystem
         }
 
         return count;
+    }
+
+    private static void PublishStatusEffects(
+        GameEventBus? events,
+        int targetEntityId,
+        StatusEffectSourceKind sourceKind,
+        string sourceId,
+        StatusEffectApplyResult result)
+    {
+        if (events is null)
+        {
+            return;
+        }
+
+        foreach (var effect in result.AppliedEffects)
+        {
+            events.Publish(new StatusEffectAppliedEvent(
+                targetEntityId,
+                effect.EffectId,
+                sourceKind,
+                sourceId,
+                effect.Refreshed,
+                effect.DurationSeconds));
+        }
     }
 }

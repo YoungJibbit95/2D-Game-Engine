@@ -14,6 +14,7 @@ public sealed class GameSettingsValidator
         ValidateGameplay(settings.Gameplay, result);
         ValidateWorld(settings.World, result);
         ValidateInput(settings.Input, result);
+        ValidateDebug(settings.Debug, result);
         return result;
     }
 
@@ -169,6 +170,14 @@ public sealed class GameSettingsValidator
         if (world.StreamingBudgetChunksPerFrame < 1 || world.StreamingBudgetChunksPerFrame > 512)
         {
             result.Add("world.streamingBudgetChunksPerFrame", "Streaming budget must be between 1 and 512 chunks per frame.");
+        }
+    }
+
+    private static void ValidateDebug(DebugSettings debug, SettingsValidationResult result)
+    {
+        if (debug.ProfilerMetricLimit < 3 || debug.ProfilerMetricLimit > 32)
+        {
+            result.Add("debug.profilerMetricLimit", "Profiler metric limit must be between 3 and 32.");
         }
     }
 

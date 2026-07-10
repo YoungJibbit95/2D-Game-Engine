@@ -1,10 +1,13 @@
 using Game.Core.Data;
 using Game.Core.Entities;
+using Game.Core.Characters;
+using Game.Core.Equipment;
 using Game.Core.Events;
 using Game.Core.Farming;
 using Game.Core.Inventory;
 using Game.Core.Projects;
 using Game.Core.Startup;
+using Game.Core.Saving;
 using Game.Core.Time;
 using Game.Core.World.Generation;
 using Game.Core.World.TileEntities;
@@ -28,4 +31,7 @@ public sealed record LoadedGameSession(
     GameProjectPaths? ProjectPaths = null,
     GameStartupDefinition? Startup = null,
     StarterInventoryResult? StartupInventory = null,
-    bool LoadedFromSave = false);
+    bool LoadedFromSave = false,
+    EquipmentLoadout? EquipmentLoadout = null,
+    CharacterAppearance? CharacterAppearance = null,
+    IReadOnlyList<PlayerLoadWarning>? PlayerLoadWarnings = null);

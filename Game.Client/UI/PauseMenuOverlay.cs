@@ -316,6 +316,9 @@ public sealed class PauseMenuOverlay
             Toggle("SAVE METRICS", () => Settings.Debug.ShowSaveMetrics, value => SetDebug(d => d with { ShowSaveMetrics = value })),
             Toggle("STREAMING METRICS", () => Settings.Debug.ShowStreamingMetrics, value => SetDebug(d => d with { ShowStreamingMetrics = value })),
             Toggle("RENDER METRICS", () => Settings.Debug.ShowRenderMetrics, value => SetDebug(d => d with { ShowRenderMetrics = value })),
+            Toggle("PERFORMANCE PROFILER", () => Settings.Debug.ShowPerformanceProfiler, value => SetDebug(d => d with { ShowPerformanceProfiler = value })),
+            Toggle("ALLOCATION METRICS", () => Settings.Debug.ShowAllocationMetrics, value => SetDebug(d => d with { ShowAllocationMetrics = value })),
+            Number("PROFILER ROWS", () => Settings.Debug.ProfilerMetricLimit, 3, 32, 1, value => SetDebug(d => d with { ProfilerMetricLimit = value })),
             Toggle("MOUSE TILE", () => Settings.Debug.ShowMouseTile, value => SetDebug(d => d with { ShowMouseTile = value })),
             Toggle("EVENT JOURNAL", () => Settings.Debug.ShowEventJournal, value => SetDebug(d => d with { ShowEventJournal = value }))
         ];

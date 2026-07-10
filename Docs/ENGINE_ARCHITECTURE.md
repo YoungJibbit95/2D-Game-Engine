@@ -90,6 +90,8 @@ The current region format rewrites a full region file when chunks inside it chan
 
 `GameLoadCoordinator` is the matching high-level load entrypoint. It validates the session layout, loads world chunks, restores the player body and health, reconstructs `PlayerInventory`, repopulates `EntityManager`, restores `TileEntityManager`, returns `GameLoadResult`, and publishes `GameLoadedEvent`. `GameSessionBootstrapper` now resumes an existing save folder through this coordinator before falling back to fresh generation.
 
+Player saves use format version 2. In addition to inventory and player resources, they persist equipment slot assignments, active status-effect ids with exact remaining duration, and `CharacterAppearance`. Loading validates all referenced item/effect ids, skips removed or incompatible content safely, and returns typed `PlayerLoadWarning` records. `LoadedGameSession` carries the restored loadout and appearance into the client, and autosave writes the same live state back.
+
 Tile changes should always go through `World.SetTile`, `World.RemoveTile`, `World.TrySetTile`, `World.TryRemoveTile`, or `World.ApplyTileEdits` so chunk dirtiness, render rebuilds, lighting updates, and neighbor invalidation stay consistent.
 
 `World.ApplyTileEdits` is the batch mutation path for generation tools, structure placement, liquid solvers, future editors, and scripted events. It validates the whole batch before mutating, coalesces duplicate tile positions with last-write-wins behavior, applies only real changes, computes changed bounds, and returns changed positions plus every loaded dirty chunk touched by the padded invalidation region.
@@ -146,6 +148,8 @@ The current action kinds are:
 - `Interact`
 
 The runtime selected-item path resolves the primary action and routes it through `PlayerItemUseSystem`. The implemented gameplay actions are mining, building, melee, shooting, casting, consume, till, water, plant, and harvest. Shooting can spawn a projectile and consume an ammo item from the full player inventory. Casting spawns magic projectiles, consumes player mana, and uses the player's current stat block for magic damage and mana cost.
+
+Every selected-item attempt now returns a structured `PlayerItemUseResult`: attempted/successful action kind, succeeded/in-progress/blocked status, typed failure/success reason, mining/action progress, cooldown duration/remaining, restore amounts, applied effects, and spawned runtime objects. Mining and item use also publish typed lifecycle/feedback events. This contract is the bridge for UI, audio, particles, replay capture, multiplayer validation, and debugging without duplicating gameplay rules in the client.
 
 `useTime` is treated as a discrete action cooldown for placement, melee, shooting, consume, and cast actions. Mining remains continuous so progress can build while the input is held.
 
@@ -255,6 +259,8 @@ The client has a `ClientTextureRegistry` that resolves `SpriteAssetRegistry` ids
 The current client renderer draws tiles, liquids, entities, player, lighting overlay, HUD, and debug text. Tile and lighting passes are aware of horizontally infinite worlds and do not clamp visible chunks to `0..WidthTiles` when the world is infinite. Tile rendering now asks `TileDefinition.TexturePath` for a sprite id and can draw a real loaded texture when the PNG exists; otherwise it keeps the existing readable colored fallback. `ParallaxBackgroundRenderer` now blends day/night sky colors and switches layered background scenes by depth: forest, night forest, magical grove, cave, and deep cave. Runtime entity drawing flips sprites by movement direction, bobs dropped items and flying enemies, and tints hurt enemies and magic projectiles.
 
 `ChunkRenderCache` stores per-chunk tile draw commands. It rebuilds when a chunk has `NeedsMeshRebuild`, computes a 4-bit autotile neighbor mask for each non-air tile, then clears only that mesh flag so save dirtiness remains intact. `TilemapRenderer` passes those masks into `ClientTextureRegistry`, which selects the best source frame for real terrain sheets and keeps placeholder rendering working until final art exists. The renderer exposes `TilemapRenderMetrics` for visible chunks, cached chunks, rebuilt chunks, evicted chunks, tile commands, and liquid commands.
+
+`PerformanceProfiler` is renderer-neutral and uses disposable timestamp/allocation scopes with rolling averages, peaks, per-pass budgets, and ordered snapshots. `MainGame` measures update, fixed simulation, and draw. `PlayingState` measures streaming, background, tilemap, entities, lighting, UI, and debug passes. Optional client overlays show the slowest passes, current allocations, the bounded event journal, and streaming backlogs.
 
 The next renderer evolution should use:
 

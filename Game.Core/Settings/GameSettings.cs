@@ -217,4 +217,10 @@ public sealed record DebugSettings
     public bool ShowMouseTile { get; init; } = true;
 
     public bool ShowEventJournal { get; init; }
+
+    public bool ShowPerformanceProfiler { get; init; }
+
+    public bool ShowAllocationMetrics { get; init; } = true;
+
+    public int ProfilerMetricLimit { get; init; } = 10;
 }

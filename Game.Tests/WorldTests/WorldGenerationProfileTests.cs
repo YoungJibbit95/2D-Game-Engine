@@ -33,11 +33,14 @@ public sealed class WorldGenerationProfileTests
             HeightTiles = 64,
             CaveWalkerCount = 0,
             CaveWalkLength = 0,
+            CavernRoomCount = 0,
             CopperVeinCount = 0,
             IronVeinCount = 0,
             Ores = Array.Empty<OreGenerationDefinition>(),
             TreeAttempts = 0,
-            WaterPocketAttempts = 0
+            WaterPocketAttempts = 0,
+            SurfaceLakeAttempts = 0,
+            CavePoolAttempts = 0
         };
 
         var result = new AdvancedWorldGenerator().GenerateDetailed(profile, seed: 123);
@@ -58,10 +61,13 @@ public sealed class WorldGenerationProfileTests
             HeightTiles = 80,
             CaveWalkerCount = 0,
             CaveWalkLength = 0,
+            CavernRoomCount = 0,
             CopperVeinCount = 0,
             IronVeinCount = 0,
             TreeAttempts = 0,
             WaterPocketAttempts = 0,
+            SurfaceLakeAttempts = 0,
+            CavePoolAttempts = 0,
             Ores = new[]
             {
                 new OreGenerationDefinition

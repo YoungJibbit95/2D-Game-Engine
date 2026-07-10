@@ -179,6 +179,61 @@ public sealed class ChunkStreamingServiceTests : IDisposable
         Assert.Equal("dirty_without_save_directory", skipped.Reason);
     }
 
+    [Fact]
+    public void Update_RespectsOperationBudgetAndLoadsNearestChunksFirst()
+    {
+        var world = _generator.CreateWorld(_profile, seed: 42);
+        var visibleArea = new RectI(
+            -GameConstants.ChunkSize * 2,
+            GameConstants.ChunkSize,
+            GameConstants.ChunkSize * 5,
+            GameConstants.ChunkSize);
+
+        var result = new ChunkStreamingService().Update(
+            world,
+            _profile,
+            visibleArea,
+            _tempDirectory,
+            NoMarginOptions() with { MaxChunkOperationsPerUpdate = 2 });
+
+        Assert.Equal(2, result.OperationsProcessed);
+        Assert.Equal(2, result.GeneratedChunks);
+        Assert.Equal(3, result.DeferredLoadChunks);
+        Assert.Equal(0, result.DeferredUnloadChunks);
+        Assert.True(result.BudgetExhausted);
+        Assert.Contains(new ChunkPos(0, 1), result.GeneratedChunkPositions);
+        Assert.Contains(new ChunkPos(-1, 1), result.GeneratedChunkPositions);
+    }
+
+    [Fact]
+    public void Update_UsesRemainingBudgetForFarthestUnloads()
+    {
+        var world = _generator.CreateWorld(_profile, seed: 42);
+        var near = new ChunkPos(2, 0);
+        var far = new ChunkPos(8, 0);
+        _generator.EnsureChunk(world, _profile, near);
+        _generator.EnsureChunk(world, _profile, far);
+        world.ClearAllDirtyFlags();
+
+        var result = new ChunkStreamingService().Update(
+            world,
+            _profile,
+            CoordinateUtils.ChunkTileBounds(new ChunkPos(0, 0)),
+            _tempDirectory,
+            NoMarginOptions() with
+            {
+                KeepDirtyChunksLoaded = false,
+                MaxChunkOperationsPerUpdate = 2
+            });
+
+        Assert.Equal(2, result.OperationsProcessed);
+        Assert.Equal(1, result.GeneratedChunks);
+        Assert.Equal(1, result.UnloadedChunks);
+        Assert.Contains(far, result.UnloadedChunkPositions);
+        Assert.Equal(1, result.DeferredUnloadChunks);
+        Assert.True(world.TryGetChunk(near, out _));
+    }
+
     public void Dispose()
     {
         if (Directory.Exists(_tempDirectory))

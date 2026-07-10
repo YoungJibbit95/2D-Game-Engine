@@ -55,12 +55,15 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
     private readonly CraftingOverlay _craftingOverlay = new();
     private readonly CharacterEditorOverlay _characterEditorOverlay = new();
     private readonly DebugConsoleOverlay _debugConsole = new();
+    private readonly PerformanceOverlay _performanceOverlay = new();
+    private readonly EventJournalOverlay _eventJournalOverlay = new();
+    private readonly GameplayFeedbackOverlay _gameplayFeedback = new();
     private readonly PauseMenuOverlay _pauseMenu;
     private readonly GameStateManager _states;
     private readonly EntityFactory _entityFactory;
     private readonly SpriteAnimator _playerAnimator = new();
     private readonly CharacterAnimationStateResolver _playerAnimationResolver = new();
-    private readonly EquipmentLoadout _equipmentLoadout = new();
+    private EquipmentLoadout _equipmentLoadout = new();
     private readonly EquipmentStatCalculator _equipmentStats = new();
     private readonly LoadedGameSession? _loadedSession;
 
@@ -68,6 +71,7 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
     private PlayerEntity? _player;
     private EntityManager _entities = new();
     private GameEventBus _events = new();
+    private GameEventJournal? _eventJournal;
     private WorldTime _worldTime = new();
     private GameContentDatabase? _content;
     private PlayerInventory? _inventory;
@@ -117,10 +121,14 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
         _player = session.Player;
         _entities = session.Entities;
         _events = session.Events;
+        _eventJournal?.Dispose();
+        _eventJournal = new GameEventJournal(_events, capacity: 256);
         _worldTime = session.WorldTime;
         _worldSaveDirectory = session.WorldSaveDirectory;
         _tileEntities = session.TileEntities ?? new TileEntityManager();
         _farmPlots = session.FarmPlots ?? new FarmPlotManager();
+        _equipmentLoadout = session.EquipmentLoadout ?? new EquipmentLoadout();
+        _characterEditorOverlay.SetAppearance(_content, session.CharacterAppearance ?? new CharacterAppearance());
         _selectedHotbarSlot = _inventory.SelectedHotbarSlot;
         _lastFarmDay = _worldTime.Day;
 
@@ -161,6 +169,7 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
     public void Update(double deltaSeconds)
     {
         _input.Update();
+        _gameplayFeedback.Update((float)deltaSeconds);
         var settings = _pauseMenu.Settings;
 
         if (_pauseMenu.IsOpen)
@@ -230,9 +239,15 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
         _camera.Zoom = settings.Gameplay.CameraZoom;
         var cameraTarget = GetCameraTarget(settings);
         _camera.Follow(cameraTarget, context.ViewportBounds, smoothing: 0.18f);
-        EnsureVisibleChunks();
+        using (context.Performance.Measure("Render.Streaming", 1.0))
+        {
+            EnsureVisibleChunks();
+        }
 
-        _backgroundRenderer.Draw(context, _textures, _camera, _world, _worldTime);
+        using (context.Performance.Measure("Render.Background", 1.25))
+        {
+            _backgroundRenderer.Draw(context, _textures, _camera, _world, _worldTime);
+        }
 
         _tilemapRenderer.ShowGrid = _showGrid;
         _tilemapRenderer.DrawLiquids = settings.Rendering.DrawLiquids;
@@ -241,93 +256,116 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
         _tilemapRenderer.Textures = _textures;
         _tilemapRenderer.TileSpriteResolver = ResolveTileSpriteId;
         _tilemapRenderer.Tiles = _content?.Tiles;
-        _tilemapRenderer.Draw(context, _world, _camera);
-        DrawFarmPlots(context);
-        DrawPlayer(context);
-        DrawEntities(context);
+        using (context.Performance.Measure("Render.Tilemap", 5.5))
+        {
+            _tilemapRenderer.Draw(context, _world, _camera);
+            DrawFarmPlots(context);
+        }
+
+        using (context.Performance.Measure("Render.Entities", 2.0))
+        {
+            DrawPlayer(context);
+            DrawEntities(context);
+        }
+
         if (settings.Rendering.DrawLightingOverlay)
         {
-            _lightingRenderer.Draw(context, _world, _camera);
+            using (context.Performance.Measure("Render.Lighting", 2.5))
+            {
+                _lightingRenderer.Draw(context, _world, _camera);
+            }
         }
 
-        var playerStats = ResolvePlayerStats();
-        _hud.Draw(
-            context,
-            _inventory,
-            _content?.Items,
-            _textures,
-            _player?.Health ?? 0,
-            _player?.MaxHealth ?? 100,
-            _player?.Mana ?? 0,
-            _player?.MaxMana ?? playerStats.MaxMana,
-            settings);
-        if (_inventory is not null && _content is not null)
+        using (context.Performance.Measure("Render.UI", 2.5))
         {
-            _inventoryOverlay.Draw(
+            var playerStats = ResolvePlayerStats();
+            _hud.Draw(
                 context,
                 _inventory,
-                _content.Items,
+                _content?.Items,
                 _textures,
-                settings,
-                _equipmentLoadout,
-                playerStats,
+                _player?.Health ?? 0,
+                _player?.MaxHealth ?? 100,
                 _player?.Mana ?? 0,
-                _player?.MaxMana ?? playerStats.MaxMana);
+                _player?.MaxMana ?? playerStats.MaxMana,
+                settings);
+            if (_inventory is not null && _content is not null)
+            {
+                _inventoryOverlay.Draw(
+                    context,
+                    _inventory,
+                    _content.Items,
+                    _textures,
+                    settings,
+                    _equipmentLoadout,
+                    playerStats,
+                    _player?.Mana ?? 0,
+                    _player?.MaxMana ?? playerStats.MaxMana);
+            }
+
+            if (_content is not null)
+            {
+                _craftingOverlay.Draw(context, _content, _textures, settings);
+                _characterEditorOverlay.Draw(context, _content, _textures, settings);
+            }
+
+            _gameplayFeedback.Draw(context, _camera, _player, settings);
         }
-        if (_content is not null)
+
+        using (context.Performance.Measure("Render.Debug", 1.5))
         {
-            _craftingOverlay.Draw(context, _content, _textures, settings);
-            _characterEditorOverlay.Draw(context, _content, _textures, settings);
+            if (settings.Rendering.DrawDebugOverlays && settings.Debug.ShowDebugOverlay)
+            {
+                var worldTimeText = _worldTime.NormalizedTimeOfDay.ToString("0.000", CultureInfo.InvariantCulture);
+                context.DebugText.Draw(new Vector2(12, 58), $"WORLD TIME: {worldTimeText}", Color.LightGray, 2);
+                context.DebugText.Draw(new Vector2(12, 82), $"CHUNKS: {_world.Chunks.Count}", Color.LightGray, 2);
+                context.DebugText.Draw(new Vector2(12, 106), $"ENTITIES: {_entities.Entities.Count}", Color.LightGray, 2);
+                if (_player is not null)
+                {
+                    var playerTile = CoordinateUtils.WorldToTile(_player.Body.Center.X, _player.Body.Center.Y);
+                    context.DebugText.Draw(new Vector2(12, 130), $"PLAYER TILE: {playerTile.X}:{playerTile.Y}", Color.LightGray, 2);
+                }
+
+                if (settings.Debug.ShowMouseTile && _hoverTile is { } hoverTile)
+                {
+                    context.DebugText.Draw(new Vector2(12, 154), $"MOUSE TILE: {hoverTile.X}:{hoverTile.Y}", Color.LightGray, 2);
+                }
+
+                DrawEngineDebugSnapshot(context);
+                if (settings.Debug.ShowRenderMetrics)
+                {
+                    DrawRenderDebugMetrics(context);
+                }
+
+                if (settings.Debug.ShowStreamingMetrics)
+                {
+                    DrawStreamingDebugMetrics(context);
+                }
+
+                if (settings.Debug.ShowSaveMetrics)
+                {
+                    DrawSaveDebugMetrics(context);
+                }
+
+                context.DebugText.Draw(new Vector2(12, 322), $"FARM PLOTS: {_farmPlots.Plots.Count}", Color.LightGray, 2);
+                context.DebugText.Draw(new Vector2(12, 346), $"PICKUP LAST: {_lastPickedUpItems}", Color.LightGray, 2);
+            }
+
+            if (settings.Gameplay.ShowInteractionTarget)
+            {
+                DrawInteractionTarget(context);
+            }
+
+            _performanceOverlay.Draw(context, settings);
+            _eventJournalOverlay.Draw(context, _eventJournal, settings);
+            _debugConsole.Draw(context);
+            _pauseMenu.Draw(context);
         }
-
-        if (settings.Rendering.DrawDebugOverlays && settings.Debug.ShowDebugOverlay)
-        {
-            var worldTimeText = _worldTime.NormalizedTimeOfDay.ToString("0.000", CultureInfo.InvariantCulture);
-            context.DebugText.Draw(new Vector2(12, 58), $"WORLD TIME: {worldTimeText}", Color.LightGray, 2);
-            context.DebugText.Draw(new Vector2(12, 82), $"CHUNKS: {_world.Chunks.Count}", Color.LightGray, 2);
-            context.DebugText.Draw(new Vector2(12, 106), $"ENTITIES: {_entities.Entities.Count}", Color.LightGray, 2);
-            if (_player is not null)
-            {
-                var playerTile = CoordinateUtils.WorldToTile(_player.Body.Center.X, _player.Body.Center.Y);
-                context.DebugText.Draw(new Vector2(12, 130), $"PLAYER TILE: {playerTile.X}:{playerTile.Y}", Color.LightGray, 2);
-            }
-
-            if (settings.Debug.ShowMouseTile && _hoverTile is { } hoverTile)
-            {
-                context.DebugText.Draw(new Vector2(12, 154), $"MOUSE TILE: {hoverTile.X}:{hoverTile.Y}", Color.LightGray, 2);
-            }
-
-            DrawEngineDebugSnapshot(context);
-            if (settings.Debug.ShowRenderMetrics)
-            {
-                DrawRenderDebugMetrics(context);
-            }
-
-            if (settings.Debug.ShowStreamingMetrics)
-            {
-                DrawStreamingDebugMetrics(context);
-            }
-
-            if (settings.Debug.ShowSaveMetrics)
-            {
-                DrawSaveDebugMetrics(context);
-            }
-
-            context.DebugText.Draw(new Vector2(12, 322), $"FARM PLOTS: {_farmPlots.Plots.Count}", Color.LightGray, 2);
-            context.DebugText.Draw(new Vector2(12, 346), $"PICKUP LAST: {_lastPickedUpItems}", Color.LightGray, 2);
-        }
-
-        if (settings.Gameplay.ShowInteractionTarget)
-        {
-            DrawInteractionTarget(context);
-        }
-
-        _debugConsole.Draw(context);
-        _pauseMenu.Draw(context);
     }
 
     public void Dispose()
     {
+        _eventJournal?.Dispose();
         _textures?.Dispose();
     }
 
@@ -726,12 +764,13 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
 
         if (!useInputActive || _interactionTile is not { } targetTile)
         {
+            _gameplayFeedback.CancelMining();
             return;
         }
 
         TriggerPlayerActionAnimation(ResolvePlayerActionState(_inventory.SelectedStack));
 
-        _itemUse.UseSelectedItem(
+        var result = _itemUse.UseSelectedItem(
             _world,
             _content,
             _player,
@@ -744,6 +783,7 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
             _farmPlots,
             ResolveCurrentFarmSeason(),
             _worldTime.Day);
+        _gameplayFeedback.Observe(result);
     }
 
     private TilePos? ResolveInteractionTarget(Vector2 mouseWorld, float reachPixels)
@@ -863,7 +903,7 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
     {
         context.DebugText.Draw(
             new Vector2(12, 274),
-            $"STREAM LOAD:{_lastStreaming.LoadedChunks} GEN:{_lastStreaming.GeneratedChunks} SAVE:{_lastStreaming.SavedChunksBeforeUnload} UNLOAD:{_lastStreaming.UnloadedChunks}",
+            $"STREAM LOAD:{_lastStreaming.LoadedChunks} GEN:{_lastStreaming.GeneratedChunks} SAVE:{_lastStreaming.SavedChunksBeforeUnload} UNLOAD:{_lastStreaming.UnloadedChunks} Q:{_lastStreaming.DeferredLoadChunks}/{_lastStreaming.DeferredUnloadChunks}",
             Color.LightGray,
             2);
     }
@@ -944,7 +984,9 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
             new GameSaveRequest(_world, _player, _inventory, _entities)
             {
                 TileEntities = _tileEntities,
-                FarmPlots = _farmPlots
+                FarmPlots = _farmPlots,
+                EquipmentLoadout = _equipmentLoadout,
+                CharacterAppearance = _characterEditorOverlay.Appearance
             },
             _worldSaveDirectory,
             new GameSaveCoordinatorOptions
@@ -1025,7 +1067,8 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
         {
             LoadMarginChunks = worldSettings.ChunkLoadMargin,
             UnloadMarginChunks = worldSettings.ChunkUnloadMargin,
-            KeepDirtyChunksLoaded = worldSettings.KeepDirtyChunksLoaded
+            KeepDirtyChunksLoaded = worldSettings.KeepDirtyChunksLoaded,
+            MaxChunkOperationsPerUpdate = worldSettings.StreamingBudgetChunksPerFrame
         }, _events);
     }
 

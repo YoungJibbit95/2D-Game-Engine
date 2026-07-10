@@ -4,14 +4,12 @@ Only open work is kept here. Completed items are removed after implementation.
 
 ## Player And Controls
 
-- [ ] Add consumable use flow that applies status effects.
 - [ ] Add configurable reach from final player stats.
 - [ ] Add client mode switch or controller profile for sideview sandbox movement vs topdown RPG/life-sim movement.
 
 ## Mining, Building, And Interaction
 
 - [ ] Expand placement anchor/support rules for platforms, walls, furniture, and tile entities.
-- [ ] Add mining progress UI at the cursor.
 - [ ] Add tile hit particles and audio hooks on mining progress and completion.
 - [ ] Add interact actions for chests, doors, signs, NPCs, crafting stations, and tile entities.
 - [ ] Add liquid interaction rules for placing blocks in water and mining flooded tiles.
@@ -20,9 +18,6 @@ Only open work is kept here. Completed items are removed after implementation.
 
 - [ ] Expand startup profiles and starter progression beyond current wood/copper/iron weapons/tools and first copper armor pieces.
 - [ ] Add first consumables: healing potion, regeneration food, antidote.
-- [ ] Add equipment persistence.
-- [ ] Add status effect persistence.
-- [ ] Add item use cooldown display and blocked-use feedback.
 
 ## Crafting
 
@@ -45,7 +40,7 @@ Only open work is kept here. Completed items are removed after implementation.
 
 - [ ] Use world-aware line-of-sight melee in selected item use.
 - [ ] Add attack arcs, animation phases, and multi-hit windows for melee weapons.
-- [ ] Add status-effect UI, audio, particle, and balancing feedback for weapon/projectile/enemy applications.
+- [ ] Add audio, particles, and a balancing pass for weapon/projectile/enemy status-effect applications.
 - [ ] Add projectile knockback, pierce tuning, and hit effects.
 - [ ] Add ranged weapon spread, charge, reload, and ammo preference rules.
 - [ ] Add enemy hurt flash, death particles, and audio hooks.
@@ -61,9 +56,8 @@ Only open work is kept here. Completed items are removed after implementation.
 ## World Generation Gameplay
 
 - [ ] Add chest loot rooms generated near caves.
-- [ ] Add surface lakes and cave pools that interact with liquid simulation.
 - [ ] Add biome-specific small structures.
-- [ ] Add background wall distribution for underground areas.
+- [ ] Add mineable/placeable background wall items and biome-specific wall materials.
 - [ ] Add ore progression balance pass using profile-driven ore definitions and generation analysis metrics.
 
 ## Time And World Rules

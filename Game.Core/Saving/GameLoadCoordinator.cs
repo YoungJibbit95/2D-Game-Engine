@@ -88,6 +88,10 @@ public sealed class GameLoadCoordinator
         var playerData = _players.Load(playerPath);
         var inventory = _players.ToPlayerInventory(playerData, content.Items);
         var player = RestorePlayer(playerData);
+        var playerWarnings = new List<PlayerLoadWarning>();
+        var equipmentLoadout = _players.ToEquipmentLoadout(playerData, content.Items, playerWarnings);
+        _players.RestoreStatusEffects(playerData, player.StatusEffects, content.StatusEffects, playerWarnings);
+        var characterAppearance = _players.ToCharacterAppearance(playerData);
 
         var entityManager = new EntityManager();
         var runtimeEntitiesLoaded = false;
@@ -134,7 +138,12 @@ public sealed class GameLoadCoordinator
             RuntimeEntityCount: entityManager.Entities.Count,
             TileEntityCount: tileEntityManager.Entities.Count,
             FarmPlots: farmPlotManager,
-            FarmPlotCount: farmPlotManager.Plots.Count);
+            FarmPlotCount: farmPlotManager.Plots.Count)
+        {
+            EquipmentLoadout = equipmentLoadout,
+            CharacterAppearance = characterAppearance,
+            PlayerWarnings = playerWarnings.ToArray()
+        };
 
         events?.Publish(new GameLoadedEvent(result));
         return result;

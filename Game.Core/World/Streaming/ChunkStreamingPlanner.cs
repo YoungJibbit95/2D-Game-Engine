@@ -92,5 +92,10 @@ public sealed class ChunkStreamingPlanner
         {
             throw new ArgumentOutOfRangeException(nameof(options), "Unload margin must be greater than or equal to load margin.");
         }
+
+        if (options.MaxChunkOperationsPerUpdate < 1)
+        {
+            throw new ArgumentOutOfRangeException(nameof(options), "Chunk operation budget must be at least one.");
+        }
     }
 }

@@ -1,4 +1,6 @@
 using Game.Core.Inventory;
+using Game.Core.Characters;
+using Game.Core.Equipment;
 using Game.Core.Saving;
 using Game.Core.Sessions;
 using Game.Core.Settings;
@@ -48,11 +50,22 @@ public sealed class GameSessionBootstrapperTests : IDisposable
             CreateFiniteSettings()));
 
         created.Session.Inventory.Hotbar.Slots[0].SetStack(new ItemStack("dirt_block", 3));
+        var equipment = Assert.IsType<EquipmentLoadout>(created.Session.EquipmentLoadout);
+        Assert.True(equipment.TryEquip(new ItemStack("copper_helmet", 1), created.Session.Content.Items, EquipmentSlotType.Head).Success);
+        created.Session.Player.StatusEffects.Apply(created.Session.Content.StatusEffects.GetById("poisoned"), 3.5f);
+        var appearance = new CharacterAppearance
+        {
+            HairStyleId = "ponytail",
+            HairColor = "#112233",
+            ShirtColor = "#445566"
+        };
         new GameSaveCoordinator().Save(
             new GameSaveRequest(created.Session.World, created.Session.Player, created.Session.Inventory, created.Session.Entities)
             {
                 TileEntities = created.Session.TileEntities,
-                FarmPlots = created.Session.FarmPlots
+                FarmPlots = created.Session.FarmPlots,
+                EquipmentLoadout = equipment,
+                CharacterAppearance = appearance
             },
             saveDirectory,
             new GameSaveCoordinatorOptions { WorldSaveMode = WorldSaveMode.AllChunks });
@@ -70,6 +83,13 @@ public sealed class GameSessionBootstrapperTests : IDisposable
         Assert.Equal("Saved World", loaded.Session.World.Metadata.Name);
         Assert.Equal(444, loaded.Session.World.Metadata.Seed);
         Assert.Equal(new ItemStack("dirt_block", 3), loaded.Session.Inventory.Hotbar.Slots[0].Stack);
+        Assert.Equal("copper_helmet", loaded.Session.EquipmentLoadout?.GetStack(EquipmentSlotType.Head).ItemId);
+        Assert.Equal("ponytail", loaded.Session.CharacterAppearance?.HairStyleId);
+        Assert.Equal("#112233", loaded.Session.CharacterAppearance?.HairColor);
+        var restoredEffect = Assert.Single(loaded.Session.Player.StatusEffects.ActiveEffects);
+        Assert.Equal("poisoned", restoredEffect.Definition.Id);
+        Assert.Equal(3.5f, restoredEffect.RemainingSeconds, precision: 3);
+        Assert.Empty(loaded.Session.PlayerLoadWarnings ?? Array.Empty<PlayerLoadWarning>());
     }
 
     public void Dispose()
@@ -110,6 +130,8 @@ public sealed class GameSessionBootstrapperTests : IDisposable
         WriteItems();
         WriteWorldgen();
         WriteStartup();
+        WriteEffects();
+        WriteCharacter();
     }
 
     private void WriteTiles()
@@ -177,6 +199,17 @@ public sealed class GameSessionBootstrapperTests : IDisposable
           "placesTile": "dirt"
         }
         """);
+        File.WriteAllText(Path.Combine(root, "copper_helmet.json"), """
+        {
+          "id": "copper_helmet",
+          "displayName": "Copper Helmet",
+          "type": "Armor",
+          "texture": "items/copper_helmet",
+          "maxStack": 1,
+          "equipmentSlot": "Head",
+          "defense": 2
+        }
+        """);
     }
 
     private void WriteWorldgen()
@@ -214,6 +247,44 @@ public sealed class GameSessionBootstrapperTests : IDisposable
             { "itemId": "starter_pickaxe", "count": 1, "target": "Hotbar", "slot": 0 },
             { "itemId": "dirt_block", "count": 10, "target": "Hotbar", "slot": 1 }
           ]
+        }
+        """);
+    }
+
+    private void WriteEffects()
+    {
+        var root = Path.Combine(_root, "Content", "effects");
+        Directory.CreateDirectory(root);
+        File.WriteAllText(Path.Combine(root, "poisoned.json"), """
+        {
+          "id": "poisoned",
+          "displayName": "Poisoned",
+          "kind": "Debuff",
+          "durationSeconds": 6.0,
+          "tickIntervalSeconds": 1.0,
+          "damagePerTick": 1
+        }
+        """);
+    }
+
+    private void WriteCharacter()
+    {
+        var root = Path.Combine(_root, "Content", "characters");
+        Directory.CreateDirectory(root);
+        File.WriteAllText(Path.Combine(root, "player.json"), """
+        {
+          "id": "player",
+          "displayName": "Player",
+          "width": 12,
+          "height": 28,
+          "defaultAppearance": {
+            "hairStyleId": "short"
+          },
+          "animationSet": {
+            "id": "player.default",
+            "displayName": "Default",
+            "defaultClipId": "player.idle"
+          }
         }
         """);
     }

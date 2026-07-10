@@ -72,4 +72,15 @@ public sealed class ChunkStreamingPlannerTests
         Assert.Contains(new ChunkPos(-1, 0), plan.RequiredChunks);
         Assert.Contains(new ChunkPos(-3, 0), plan.ChunksToLoad);
     }
+
+    [Fact]
+    public void Plan_RejectsNonPositiveOperationBudget()
+    {
+        var world = new World(128, 64, WorldMetadata.CreateDefault(seed: 1));
+
+        Assert.Throws<ArgumentOutOfRangeException>(() => new ChunkStreamingPlanner().Plan(
+            world,
+            new RectI(0, 0, 32, 32),
+            new ChunkStreamingOptions { MaxChunkOperationsPerUpdate = 0 }));
+    }
 }

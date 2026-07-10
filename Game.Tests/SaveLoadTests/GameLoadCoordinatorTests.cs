@@ -1,8 +1,11 @@
 using Game.Core;
 using Game.Core.Biomes;
+using Game.Core.Characters;
 using Game.Core.Crafting;
 using Game.Core.Data;
+using Game.Core.Effects;
 using Game.Core.Entities;
+using Game.Core.Equipment;
 using Game.Core.Events;
 using Game.Core.Farming;
 using Game.Core.Inventory;
@@ -155,6 +158,132 @@ public sealed class GameLoadCoordinatorTests : IDisposable
         Assert.Empty(loaded.FarmPlots.Plots);
     }
 
+    [Fact]
+    public void SaveThenLoad_RestoresEquipmentEffectsAndCharacterAppearance()
+    {
+        var request = CreateSaveRequest();
+        var equipment = new EquipmentLoadout();
+        Assert.True(equipment.TryEquip(
+            new ItemStack("copper_helmet", 1),
+            _content.Items,
+            EquipmentSlotType.Head).Success);
+        Assert.True(equipment.TryEquip(
+            new ItemStack("swift_charm", 1),
+            _content.Items,
+            EquipmentSlotType.Accessory3).Success);
+        var appearance = new CharacterAppearance
+        {
+            BodySpriteId = "entities/player/ranger",
+            SkinTone = "#9d6c4b",
+            HairStyleId = "ponytail",
+            ClothesStyleId = "forest_coat",
+            AccessoryId = "leaf_pin",
+            HairColor = "#3a2418",
+            ShirtColor = "#3d7653",
+            PantsColor = "#29384b",
+            EyeColor = "#6ec0a5"
+        };
+        request.Player.StatusEffects.Apply(_content.StatusEffects.GetById("well_fed"), 13.625f);
+        request.Player.StatusEffects.Update(2.125f);
+
+        new GameSaveCoordinator().Save(
+            request with
+            {
+                EquipmentLoadout = equipment,
+                CharacterAppearance = appearance
+            },
+            _root,
+            new GameSaveCoordinatorOptions { WorldSaveMode = WorldSaveMode.AllChunks });
+
+        var result = new GameLoadCoordinator().Load(_root, _content);
+
+        Assert.Equal(new ItemStack("copper_helmet", 1), result.EquipmentLoadout.GetStack(EquipmentSlotType.Head));
+        Assert.Equal(new ItemStack("swift_charm", 1), result.EquipmentLoadout.GetStack(EquipmentSlotType.Accessory3));
+        Assert.Equal(appearance, result.CharacterAppearance);
+        var restoredEffect = Assert.Single(result.Player.StatusEffects.ActiveEffects);
+        Assert.Equal("well_fed", restoredEffect.Definition.Id);
+        Assert.Equal(11.5f, restoredEffect.RemainingSeconds);
+        Assert.Empty(result.PlayerWarnings);
+    }
+
+    [Fact]
+    public void Load_SkipsUnknownOrInvalidPlayerIdentityEntriesAndReturnsWarnings()
+    {
+        var request = CreateSaveRequest();
+        new GameSaveCoordinator().Save(
+            request,
+            _root,
+            new GameSaveCoordinatorOptions { WorldSaveMode = WorldSaveMode.AllChunks });
+        var playerPath = Path.Combine(_root, "player.json");
+        var playerService = new PlayerSaveService();
+        var data = playerService.Load(playerPath) with
+        {
+            EquipmentLoadout = new EquipmentLoadoutSaveData
+            {
+                Slots = new[]
+                {
+                    new EquipmentSlotSaveData { SlotId = "Head", ItemId = "copper_helmet" },
+                    new EquipmentSlotSaveData { SlotId = "Accessory1", ItemId = "removed_charm" },
+                    new EquipmentSlotSaveData { SlotId = "Body", ItemId = "gel" },
+                    new EquipmentSlotSaveData { SlotId = "Cape", ItemId = "copper_helmet" }
+                }
+            },
+            ActiveStatusEffects = new[]
+            {
+                new ActiveStatusEffectSaveData { EffectId = "well_fed", RemainingDurationSeconds = 7.25f },
+                new ActiveStatusEffectSaveData { EffectId = "removed_effect", RemainingDurationSeconds = 4f },
+                new ActiveStatusEffectSaveData { EffectId = "poisoned", RemainingDurationSeconds = -1f }
+            }
+        };
+        playerService.Save(data, playerPath);
+
+        var result = new GameLoadCoordinator().Load(_root, _content);
+
+        Assert.Equal(new ItemStack("copper_helmet", 1), result.EquipmentLoadout.GetStack(EquipmentSlotType.Head));
+        Assert.True(result.EquipmentLoadout.GetStack(EquipmentSlotType.Accessory1).IsEmpty);
+        var effect = Assert.Single(result.Player.StatusEffects.ActiveEffects);
+        Assert.Equal("well_fed", effect.Definition.Id);
+        Assert.Equal(7.25f, effect.RemainingSeconds);
+        Assert.Contains(result.PlayerWarnings, warning => warning.Kind == PlayerLoadWarningKind.UnknownEquipmentItem);
+        Assert.Contains(result.PlayerWarnings, warning => warning.Kind == PlayerLoadWarningKind.IncompatibleEquipmentItem);
+        Assert.Contains(result.PlayerWarnings, warning => warning.Kind == PlayerLoadWarningKind.InvalidEquipmentSlot);
+        Assert.Contains(result.PlayerWarnings, warning => warning.Kind == PlayerLoadWarningKind.UnknownStatusEffect);
+        Assert.Contains(result.PlayerWarnings, warning => warning.Kind == PlayerLoadWarningKind.InvalidStatusEffectDuration);
+    }
+
+    [Fact]
+    public void Load_VersionOnePlayerWithoutIdentityFields_RestoresDefaults()
+    {
+        new GameSaveCoordinator().Save(
+            CreateSaveRequest(),
+            _root,
+            new GameSaveCoordinatorOptions { WorldSaveMode = WorldSaveMode.AllChunks });
+        File.WriteAllText(
+            Path.Combine(_root, "player.json"),
+            """
+            {
+              "FormatVersion": 1,
+              "PlayerId": "legacy_player",
+              "DisplayName": "Legacy",
+              "PositionX": 24,
+              "PositionY": 48,
+              "Health": 90,
+              "MaxHealth": 100,
+              "Mana": 12,
+              "SelectedHotbarSlot": 0,
+              "InventorySlots": []
+            }
+            """);
+
+        var result = new GameLoadCoordinator().Load(_root, _content);
+
+        Assert.Equal(new Vector2(24, 48), result.Player.Body.Position);
+        Assert.All(result.EquipmentLoadout.Slots.Values, stack => Assert.True(stack.IsEmpty));
+        Assert.Empty(result.Player.StatusEffects.ActiveEffects);
+        Assert.Equal(new CharacterAppearance(), result.CharacterAppearance);
+        Assert.Empty(result.PlayerWarnings);
+    }
+
     public void Dispose()
     {
         if (Directory.Exists(_root))
@@ -187,6 +316,21 @@ public sealed class GameLoadCoordinatorTests : IDisposable
                     Type = ItemType.Material,
                     TexturePath = "items/gel",
                     MaxStack = 999
+                },
+                new ItemDefinition
+                {
+                    Id = "copper_helmet",
+                    DisplayName = "Copper Helmet",
+                    Type = ItemType.Armor,
+                    TexturePath = "items/copper_helmet",
+                    EquipmentSlot = EquipmentSlotType.Head
+                },
+                new ItemDefinition
+                {
+                    Id = "swift_charm",
+                    DisplayName = "Swift Charm",
+                    Type = ItemType.Accessory,
+                    TexturePath = "items/swift_charm"
                 }
             }),
             RecipeRegistry.Create(Array.Empty<RecipeDefinition>()),
@@ -206,6 +350,23 @@ public sealed class GameLoadCoordinatorTests : IDisposable
                     SeedItemId = "parsnip_seeds",
                     HarvestItemId = "parsnip",
                     GrowthStageDays = new[] { 1, 1, 1 }
+                }
+            }),
+            StatusEffects = StatusEffectRegistry.Create(new[]
+            {
+                new StatusEffectDefinition
+                {
+                    Id = "well_fed",
+                    DisplayName = "Well Fed",
+                    DurationSeconds = 30f,
+                    MovementSpeedBonus = 0.1f
+                },
+                new StatusEffectDefinition
+                {
+                    Id = "poisoned",
+                    DisplayName = "Poisoned",
+                    DurationSeconds = 10f,
+                    DamagePerTick = 1
                 }
             })
         };

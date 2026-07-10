@@ -44,7 +44,10 @@ public sealed class ChunkStreamingService
             throw new InvalidOperationException("Chunk streaming service requires a horizontally infinite world.");
         }
 
-        var plan = _planner.Plan(world, visibleTileArea, options);
+        var resolvedOptions = options ?? new ChunkStreamingOptions();
+        var plan = _planner.Plan(world, visibleTileArea, resolvedOptions);
+        var operationBudget = resolvedOptions.MaxChunkOperationsPerUpdate;
+        var operationsProcessed = 0;
         var loaded = 0;
         var generated = 0;
         var savedBeforeUnload = 0;
@@ -56,8 +59,18 @@ public sealed class ChunkStreamingService
         var unloadedPositions = new List<ChunkPos>();
         var skippedDirtyUnloadPositions = new List<ChunkPos>();
 
-        foreach (var position in plan.ChunksToLoad.OrderBy(chunk => chunk.Y).ThenBy(chunk => chunk.X))
+        var centerChunk = CoordinateUtils.TileToChunk(
+            visibleTileArea.Left + Math.Max(0, visibleTileArea.Width - 1) / 2,
+            visibleTileArea.Top + Math.Max(0, visibleTileArea.Height - 1) / 2);
+        var orderedLoads = plan.ChunksToLoad
+            .OrderBy(position => DistanceSquared(position, centerChunk))
+            .ThenBy(position => position.Y)
+            .ThenBy(position => position.X)
+            .ToArray();
+        var loadOperationCount = Math.Min(orderedLoads.Length, operationBudget);
+        foreach (var position in orderedLoads.Take(loadOperationCount))
         {
+            operationsProcessed++;
             if (!string.IsNullOrWhiteSpace(worldDirectory) && _saves.TryLoadChunk(world, worldDirectory, position))
             {
                 loaded++;
@@ -74,8 +87,16 @@ public sealed class ChunkStreamingService
             }
         }
 
-        foreach (var position in plan.ChunksToUnload.OrderBy(chunk => chunk.Y).ThenBy(chunk => chunk.X))
+        var remainingBudget = Math.Max(0, operationBudget - operationsProcessed);
+        var orderedUnloads = plan.ChunksToUnload
+            .OrderByDescending(position => DistanceSquared(position, centerChunk))
+            .ThenBy(position => position.Y)
+            .ThenBy(position => position.X)
+            .ToArray();
+        var unloadOperationCount = Math.Min(orderedUnloads.Length, remainingBudget);
+        foreach (var position in orderedUnloads.Take(unloadOperationCount))
         {
+            operationsProcessed++;
             if (!world.TryGetChunk(position, out var chunk) || chunk is null)
             {
                 continue;
@@ -118,6 +139,16 @@ public sealed class ChunkStreamingService
             generatedPositions,
             savedPositions,
             unloadedPositions,
-            skippedDirtyUnloadPositions);
+            skippedDirtyUnloadPositions,
+            operationsProcessed,
+            Math.Max(0, orderedLoads.Length - loadOperationCount),
+            Math.Max(0, orderedUnloads.Length - unloadOperationCount));
+    }
+
+    private static long DistanceSquared(ChunkPos first, ChunkPos second)
+    {
+        var x = (long)first.X - second.X;
+        var y = (long)first.Y - second.Y;
+        return x * x + y * y;
     }
 }

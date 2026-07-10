@@ -10,12 +10,10 @@ Only open work is kept here. Completed items are removed after implementation.
 
 ## HUD
 
-- [ ] Add mining progress at cursor.
 - [ ] Add selected item tooltip.
-- [ ] Add buff/debuff icon row with remaining-time radial or bar.
 - [ ] Add interaction prompt for chests, doors, signs, NPCs, and crafting stations.
 - [ ] Add liquid/debug overlay showing tile liquid amount and flow direction.
-- [ ] Add combat feedback overlays for damage numbers, hit flashes, and cooldowns.
+- [ ] Add combat damage numbers and entity hit flashes.
 
 ## Inventory And Equipment UI
 
@@ -31,7 +29,7 @@ Only open work is kept here. Completed items are removed after implementation.
 
 - [ ] Add local splitscreen setup flow.
 - [ ] Add multiplayer host/join flow.
-- [ ] Persist character editor appearance into player saves and expose it before world launch.
+- [ ] Expose persisted character appearance before world launch in the character/world creation flow.
 - [ ] Add typed value entry for settings rows such as resolution, reach, and volume.
 - [ ] Add keybind conflict resolution UI that can jump to the conflicting action.
 - [ ] Add graphics apply safety timeout for fullscreen/resolution changes.
@@ -44,5 +42,5 @@ Only open work is kept here. Completed items are removed after implementation.
 - [ ] Add debug windows for world/player.
 - [ ] Add debug windows for liquids, status effects, equipment, spawns, and dirty regions.
 - [ ] Add content browser for registries: tiles, items, effects, entities, recipes.
-- [ ] Add in-game profiler overlay for active chunks, dirty systems, and allocations.
+- [ ] Add profiler history graphs, percentile summaries, export, and subsystem drill-down views.
 - [ ] Add worldgen seed preview and analysis panel.

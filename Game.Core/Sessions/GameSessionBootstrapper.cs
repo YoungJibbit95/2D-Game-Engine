@@ -97,7 +97,11 @@ public sealed class GameSessionBootstrapper
             projectContent.Paths,
             startup,
             starterInventory,
-            LoadedFromSave: false);
+            LoadedFromSave: false,
+            EquipmentLoadout: new Game.Core.Equipment.EquipmentLoadout(),
+            CharacterAppearance: content.Characters.TryGetById("player", out var playerCharacter)
+                ? playerCharacter.DefaultAppearance
+                : new Game.Core.Characters.CharacterAppearance());
 
         return new GameSessionBootstrapResult(
             session,
@@ -142,7 +146,10 @@ public sealed class GameSessionBootstrapper
             projectContent.Paths,
             startup,
             StartupInventory: null,
-            LoadedFromSave: true);
+            LoadedFromSave: true,
+            EquipmentLoadout: loaded.EquipmentLoadout,
+            CharacterAppearance: loaded.CharacterAppearance,
+            PlayerLoadWarnings: loaded.PlayerWarnings);
         return true;
     }
 

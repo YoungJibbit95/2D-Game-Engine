@@ -3,6 +3,7 @@ using Game.Client.Configuration;
 using Game.Client.Rendering;
 using Game.Core;
 using Game.Core.Settings;
+using Game.Core.Diagnostics;
 using System.Globalization;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -16,6 +17,7 @@ public sealed class MainGame : Microsoft.Xna.Framework.Game
     private readonly GameStateManager _states;
     private readonly GameTimeService _time;
     private readonly FixedUpdateRunner _fixedUpdateRunner;
+    private readonly PerformanceProfiler _performance = new();
     private GameSettings _settings;
     private readonly GameSettingsService _settingsService;
 
@@ -66,9 +68,13 @@ public sealed class MainGame : Microsoft.Xna.Framework.Game
     protected override void Update(GameTime gameTime)
     {
         _time.BeginFrame(gameTime);
+        _performance.BeginFrame();
 
-        _states.Update(_time.FrameDeltaSeconds);
-        _fixedUpdateRunner.Run(_time.FrameDeltaSeconds, FixedUpdate);
+        using (_performance.Measure("Frame.Update", 8.0))
+        {
+            _states.Update(_time.FrameDeltaSeconds);
+            _fixedUpdateRunner.Run(_time.FrameDeltaSeconds, FixedUpdate);
+        }
 
         base.Update(gameTime);
     }
@@ -90,10 +96,14 @@ public sealed class MainGame : Microsoft.Xna.Framework.Game
             _debugText,
             _pixel,
             _time,
-            GraphicsDevice.Viewport.Bounds);
+            GraphicsDevice.Viewport.Bounds,
+            _performance);
 
-        _states.Draw(context);
-        DrawDebugOverlay(context);
+        using (_performance.Measure("Frame.Draw", 16.67))
+        {
+            _states.Draw(context);
+            DrawDebugOverlay(context);
+        }
 
         _spriteBatch.End();
         _time.RecordDrawFrame();
@@ -103,7 +113,10 @@ public sealed class MainGame : Microsoft.Xna.Framework.Game
 
     private void FixedUpdate(float fixedDeltaSeconds)
     {
-        _states.FixedUpdate(fixedDeltaSeconds);
+        using (_performance.Measure("Simulation.FixedUpdate", 6.0))
+        {
+            _states.FixedUpdate(fixedDeltaSeconds);
+        }
     }
 
     private void DrawDebugOverlay(RenderContext context)

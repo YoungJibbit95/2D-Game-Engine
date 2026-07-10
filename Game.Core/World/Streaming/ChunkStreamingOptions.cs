@@ -7,4 +7,6 @@ public sealed record ChunkStreamingOptions
     public int UnloadMarginChunks { get; init; } = 3;
 
     public bool KeepDirtyChunksLoaded { get; init; } = true;
+
+    public int MaxChunkOperationsPerUpdate { get; init; } = 32;
 }

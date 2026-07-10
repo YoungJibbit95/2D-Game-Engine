@@ -1,4 +1,6 @@
+using Game.Core.Characters;
 using Game.Core.Entities;
+using Game.Core.Equipment;
 using Game.Core.Farming;
 using Game.Core.Inventory;
 using Game.Core.World.TileEntities;
@@ -20,4 +22,11 @@ public sealed record GameLoadResult(
     int RuntimeEntityCount,
     int TileEntityCount,
     FarmPlotManager FarmPlots,
-    int FarmPlotCount);
+    int FarmPlotCount)
+{
+    public EquipmentLoadout EquipmentLoadout { get; init; } = new();
+
+    public CharacterAppearance CharacterAppearance { get; init; } = new();
+
+    public IReadOnlyList<PlayerLoadWarning> PlayerWarnings { get; init; } = Array.Empty<PlayerLoadWarning>();
+}
