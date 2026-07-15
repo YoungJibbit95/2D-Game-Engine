@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "waveId": "wave_04_character_atmosphere_ui_production",
+  "tool": {
+    "skill": "imagegen",
+    "mode": "built-in image_gen",
+    "generatedSource": "art_direction/generated_sources/wave_04_character_source.png",
+    "generatedSourceSha256": "DA0534FD0E76F9172BB57D880080FD4B7095D3D3DD8D93F5CD870B7FAFA2E661"
+  },
+  "prompts": [
+    {
+      "id": "wave04_character_source_v1",
+      "status": "generated",
+      "useCase": "stylized-concept",
+      "referenceImages": [
+        "art_direction/wave_03_production_preview.png",
+        "sprites/entities/player/player_base_actions.png",
+        "sprites/entities/player/player_clothes_variants_v2.png"
+      ],
+      "prompt": "Use case: stylized-concept\nAsset type: production source board for deterministic conversion into a 16x32 side-view pixel-art character layer atlas\nPrimary request: Design one coherent human adventurer with a highly readable Terraria-like side-view pixel silhouette. Show a strict 16-column action sequence: idle A, idle B, six distinct run phases, jump, fall, three tool-use phases, defensive block, hurt recoil A, hurt recoil B. Also show separable visual layers for body, short windswept hair, teal work clothes, copper-and-steel light armor, and held tool/shield silhouettes.\nInput images: Image 1 is the repository's current production preview and defines outline weight, scale, and palette discipline; Image 2 defines exact 16x32 body proportions; Image 3 defines flat readable clothing treatment.\nScene/backdrop: perfectly flat solid #FF00FF chroma-key field, no floor, no shadows, no gradient, no texture.\nStyle/medium: crisp authored pixel art reference board, chunky clusters, one-pixel near-black contour at target scale, no anti-aliased painting, no soft rendering.\nComposition/framing: orthographic side view facing right, aligned baseline, generous spacing; five labeled-by-layout but text-free rows conceptually corresponding to body, hair, clothes, armor, held equipment; consistent body registration in every column.\nColor palette: restrained project palette, warm skin, dark navy outline, teal cloth, copper orange, muted steel blue, bright amber hit accents.\nConstraints: preserve exact body proportions and anchor registration across all action phases; every pose must read at 16x32; opaque hard-edged shapes only; no text, letters, numbers, grid labels, watermark, drop shadow, perspective, blur, glow, semi-transparent pixels, extra characters, scenery, UI chrome, or duplicated pose filler. Do not use #FF00FF in the subject."
+    },
+    {
+      "id": "wave04_biome_source_attempt_v1",
+      "status": "terminated-after-tool-timeout",
+      "outputUsed": false,
+      "useCase": "stylized-concept",
+      "referenceImages": [
+        "art_direction/wave_03_production_preview.png",
+        "sprites/world/backgrounds/meadow_parallax_layer.png",
+        "sprites/world/tiles/grass_autotile.png"
+      ],
+      "prompt": "Create five separate wide production pixel-art biome bands for Meadow, Forest, Cave, Mushroom Cave, and Crystal Depths. Each band needs clear far, middle, and silhouette depth, tile-palette cohesion, a readable side-view horizon, and horizontally matching left/right contours. Hard clusters only; no blur, gradients, text, characters, UI, watermark, perspective floor, or painterly detail."
+    },
+    {
+      "id": "wave04_deterministic_extension_v1",
+      "status": "implemented",
+      "outputUsed": true,
+      "tool": "checked-in Pillow generator",
+      "prompt": "Extend the generated adventurer's hard-cluster outline, teal/copper material language, and native-scale readability into five tile-palette-matched seamless parallax layers, thirteen ambient/weather/combat effect sheets, two 3x3 nine-slice sets, and six 32x32 action icons. Use only yjse-pixel-v1 palette colors, binary alpha, exact declared frame cells, integer origins, no text, no blur, no gradients, and no copied third-party art."
+    }
+  ],
+  "deterministicConversion": {
+    "generator": "art_direction/tools/generate_wave_04_assets.py",
+    "steps": [
+      "Resize the generated source with nearest-neighbor sampling for palette analysis.",
+      "Exclude the #FF00FF chroma field from source statistics.",
+      "Quantize visible source colors to the checked-in yjse-pixel-v1 palette.",
+      "Select hair, cloth, and armor accents from deterministic family counts.",
+      "Reconstruct every runtime sprite directly at its final frame grid with Pillow pixel primitives.",
+      "Force alpha to 0 or 255 and save with stable PNG settings."
+    ]
+  }
+}

@@ -4,7 +4,7 @@
   "width": 12,
   "height": 28,
   "defaultAppearance": {
-    "bodySpriteId": "entities/player/base_actions",
+    "bodySpriteId": "entities/player/character_v1_wave04/body",
     "skinTone": "#c98f62",
     "hairStyleId": "short",
     "clothesStyleId": "blue_jeans",
@@ -25,8 +25,115 @@
       "Fall": "player.fall",
       "Mine": "player.mine",
       "Attack": "player.attack",
-      "UseItem": "player.attack"
+      "UseItem": "player.attack",
+      "Block": "player.block",
+      "Hurt": "player.hurt"
     }
+  },
+  "runtimeAnimationContent": {
+    "rigs": [
+      {
+        "id": "player.character-v1.wave04",
+        "layers": [
+          {
+            "id": "body",
+            "appearanceSlot": "Body",
+            "animationTrackId": "body",
+            "drawOrder": 0,
+            "pivot": { "x": 8, "y": 32 }
+          },
+          {
+            "id": "clothes",
+            "appearanceSlot": "Clothing",
+            "animationTrackId": "body",
+            "drawOrder": 10,
+            "pivot": { "x": 8, "y": 32 }
+          },
+          {
+            "id": "hair",
+            "appearanceSlot": "Hair",
+            "animationTrackId": "body",
+            "drawOrder": 20,
+            "pivot": { "x": 8, "y": 32 }
+          },
+          {
+            "id": "armor",
+            "appearanceSlot": "Armor",
+            "animationTrackId": "body",
+            "drawOrder": 30,
+            "pivot": { "x": 8, "y": 32 }
+          },
+          {
+            "id": "equipment",
+            "appearanceSlot": "Tool",
+            "animationTrackId": "body",
+            "drawOrder": 40,
+            "pivot": { "x": 8, "y": 32 }
+          }
+        ]
+      }
+    ],
+    "characterProfiles": [
+      {
+        "id": "player.wave04",
+        "rigId": "player.character-v1.wave04",
+        "stateMachineId": "player.wave04.states",
+        "spriteBindings": [
+          {
+            "slot": "Body",
+            "spriteId": "entities/player/character_v1_wave04/body"
+          },
+          {
+            "slot": "Clothing",
+            "spriteId": "entities/player/character_v1_wave04/clothes"
+          },
+          {
+            "slot": "Hair",
+            "spriteId": "entities/player/character_v1_wave04/hair"
+          },
+          {
+            "slot": "Armor",
+            "spriteId": "entities/player/character_v1_wave04/armor",
+            "visibleByDefault": false
+          },
+          {
+            "slot": "Tool",
+            "spriteId": "entities/player/character_v1_wave04/equipment"
+          }
+        ],
+        "actions": [
+          {
+            "action": "Attack",
+            "layerId": "base",
+            "stateId": "tool",
+            "restartIfActive": true,
+            "blendTicksOverride": 1
+          },
+          {
+            "action": "Mine",
+            "layerId": "base",
+            "stateId": "tool",
+            "restartIfActive": true,
+            "blendTicksOverride": 1
+          },
+          {
+            "action": "UseItem",
+            "layerId": "base",
+            "stateId": "tool",
+            "restartIfActive": true,
+            "blendTicksOverride": 1
+          },
+          {
+            "action": "Hurt",
+            "layerId": "base",
+            "stateId": "hurt",
+            "bypassActionLock": true,
+            "restartIfActive": true,
+            "blendTicksOverride": 1
+          }
+        ]
+      }
+    ]
   },
   "tags": ["player", "editable", "side-view"]
 }

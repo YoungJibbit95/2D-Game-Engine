@@ -1,0 +1,16 @@
+{
+  "id": "mangrove_root_block",
+  "displayName": "Mangrove Root",
+  "description": "A living root segment that can be walked through and harvested.",
+  "rarity": "Common",
+  "value": 2,
+  "category": "Block",
+  "sortPriority": 32,
+  "type": "PlaceableTile",
+  "texture": "world/wave05/mangrove_root_autotile",
+  "maxStack": 999,
+  "useTime": 0.08,
+  "placesTile": "mangrove_root",
+  "placementSupport": "AdjacentSolidOrWall",
+  "tags": ["block", "tree", "pass-through", "placeable"]
+}

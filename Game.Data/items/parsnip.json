@@ -1,6 +1,11 @@
 {
   "id": "parsnip",
   "displayName": "Parsnip",
+  "description": "A crisp spring root vegetable with modest restorative value.",
+  "rarity": "Common",
+  "value": 12,
+  "category": "Farming",
+  "sortPriority": 20,
   "type": "Consumable",
   "texture": "items/parsnip",
   "maxStack": 999,

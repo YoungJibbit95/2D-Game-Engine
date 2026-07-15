@@ -1,6 +1,11 @@
 {
   "id": "copper_sword",
   "displayName": "Copper Sword",
+  "description": "A reliable forged blade with useful early knockback.",
+  "rarity": "Common",
+  "value": 45,
+  "category": "Weapon",
+  "sortPriority": 20,
   "type": "WeaponMelee",
   "texture": "items/copper_sword",
   "maxStack": 1,

@@ -50,7 +50,7 @@ public sealed class TilemapRenderer
             DrawChunk(context, world, chunk, result.Commands, camera, ref tileCommands, ref liquidCommands);
         }
 
-        var evicted = _cache.TrimToLoadedChunks(world.Chunks.Keys);
+        var evicted = _cache.TrimToLoadedChunks(world.Chunks);
         evicted += _cache.TrimToBudget(MaxCachedChunks);
         LastMetrics = new TilemapRenderMetrics(
             visibleChunks,
@@ -94,7 +94,8 @@ public sealed class TilemapRenderer
 
             if (DrawLiquids && command.Tile.HasLiquid)
             {
-                DrawLiquid(context, camera, tileX, tileY, command.Tile, LiquidOpacity);
+                var hasLiquidAbove = tileY > 0 && world.GetTile(tileX, tileY - 1).HasLiquid;
+                DrawLiquid(context, camera, tileX, tileY, command.Tile, LiquidOpacity, !hasLiquidAbove);
                 liquidCommands++;
             }
         }
@@ -154,7 +155,14 @@ public sealed class TilemapRenderer
         return true;
     }
 
-    private static void DrawLiquid(RenderContext context, Camera2D camera, int tileX, int tileY, TileInstance tile, float opacity)
+    private static void DrawLiquid(
+        RenderContext context,
+        Camera2D camera,
+        int tileX,
+        int tileY,
+        TileInstance tile,
+        float opacity,
+        bool exposedSurface)
     {
         var worldPosition = new Vector2(tileX * GameConstants.TileSize, tileY * GameConstants.TileSize);
         var screenPosition = camera.WorldToScreen(worldPosition, context.ViewportBounds);
@@ -169,7 +177,20 @@ public sealed class TilemapRenderer
             liquidHeight);
 
         var alpha = Math.Clamp((int)MathF.Round(255f * Math.Clamp(opacity, 0f, 1f)), 0, 255);
-        context.SpriteBatch.Draw(context.Pixel, destination, new Color(52, 121, 207, alpha));
+        var pulse = MathF.Sin((float)context.Time.TotalSeconds * 1.7f + tileX * 0.31f) * 0.5f + 0.5f;
+        var baseColor = Color.Lerp(new Color(34, 88, 168), new Color(57, 132, 211), pulse * 0.22f);
+        context.SpriteBatch.Draw(context.Pixel, destination, new Color(baseColor, alpha / 255f));
+
+        if (!exposedSurface)
+        {
+            return;
+        }
+
+        var highlightHeight = Math.Max(1, (int)MathF.Ceiling(camera.Zoom));
+        var highlightWidth = Math.Max(1, destination.Width - (tileX & 1) * Math.Max(1, destination.Width / 4));
+        var highlight = new Rectangle(destination.X, destination.Y, highlightWidth, highlightHeight);
+        var highlightAlpha = (byte)Math.Clamp((int)MathF.Round(alpha * (0.35f + pulse * 0.22f)), 0, 190);
+        context.SpriteBatch.Draw(context.Pixel, highlight, new Color((byte)154, (byte)215, (byte)244, highlightAlpha));
     }
 
     private static void DrawGrid(RenderContext context, Rectangle destination)

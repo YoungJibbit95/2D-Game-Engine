@@ -33,21 +33,24 @@ public sealed class InventoryInteractionService
                 return InventoryInteractionResult.NoChange;
             }
 
-            cursor.Set(slot.Clear());
+            var favorite = slot.IsFavorite;
+            cursor.Set(slot.Clear(), favorite);
             return InventoryInteractionResult.Success;
         }
 
         if (slot.IsEmpty)
         {
-            slot.SetStack(cursor.Clear());
+            var favorite = cursor.IsFavorite;
+            slot.SetState(new InventorySlotState(cursor.Clear(), favorite));
             return InventoryInteractionResult.Success;
         }
 
         if (!string.Equals(slot.Stack.ItemId, cursor.HeldStack.ItemId, StringComparison.OrdinalIgnoreCase))
         {
-            var slotStack = slot.Clear();
-            slot.SetStack(cursor.Clear());
-            cursor.Set(slotStack);
+            var slotState = slot.GetState();
+            var swappedFavorite = cursor.IsFavorite;
+            slot.SetState(new InventorySlotState(cursor.Clear(), swappedFavorite));
+            cursor.Set(slotState.Stack, slotState.IsFavorite);
             return InventoryInteractionResult.Success;
         }
 
@@ -60,7 +63,8 @@ public sealed class InventoryInteractionService
 
         var moved = Math.Min(space, cursor.HeldStack.Count);
         slot.SetStack(slot.Stack.WithCount(slot.Stack.Count + moved));
-        cursor.Set(cursor.HeldStack.WithCount(cursor.HeldStack.Count - moved));
+        var cursorFavorite = cursor.IsFavorite;
+        cursor.Set(cursor.HeldStack.WithCount(cursor.HeldStack.Count - moved), cursorFavorite);
         return InventoryInteractionResult.Success;
     }
 
@@ -74,7 +78,7 @@ public sealed class InventoryInteractionService
             }
 
             var take = (slot.Stack.Count + 1) / 2;
-            cursor.Set(new ItemStack(slot.Stack.ItemId, take));
+            cursor.Set(new ItemStack(slot.Stack.ItemId, take), slot.IsFavorite);
             slot.SetStack(slot.Stack.WithCount(slot.Stack.Count - take));
             return InventoryInteractionResult.Success;
         }
@@ -82,7 +86,8 @@ public sealed class InventoryInteractionService
         if (slot.IsEmpty)
         {
             slot.SetStack(new ItemStack(cursor.HeldStack.ItemId, 1));
-            cursor.Set(cursor.HeldStack.WithCount(cursor.HeldStack.Count - 1));
+            var cursorFavorite = cursor.IsFavorite;
+            cursor.Set(cursor.HeldStack.WithCount(cursor.HeldStack.Count - 1), cursorFavorite);
             return InventoryInteractionResult.Success;
         }
 
@@ -98,7 +103,8 @@ public sealed class InventoryInteractionService
         }
 
         slot.SetStack(slot.Stack.WithCount(slot.Stack.Count + 1));
-        cursor.Set(cursor.HeldStack.WithCount(cursor.HeldStack.Count - 1));
+        var favorite = cursor.IsFavorite;
+        cursor.Set(cursor.HeldStack.WithCount(cursor.HeldStack.Count - 1), favorite);
         return InventoryInteractionResult.Success;
     }
 }

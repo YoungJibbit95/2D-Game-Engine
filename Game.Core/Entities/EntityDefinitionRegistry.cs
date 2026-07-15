@@ -1,5 +1,6 @@
 using Game.Core.Data;
 using Game.Core.Effects;
+using Game.Core.Entities.AI;
 
 namespace Game.Core.Entities;
 
@@ -79,6 +80,39 @@ public sealed class EntityDefinitionRegistry
         if (definition.ContactKnockback < 0)
         {
             throw new RegistryValidationException($"Entity '{definition.Id}' has negative contact knockback.");
+        }
+
+        if (definition.AttackDamage is < 0)
+        {
+            throw new RegistryValidationException($"Entity '{definition.Id}' has negative attack damage.");
+        }
+
+        if (definition.AttackKnockback is < 0 || definition.AttackKnockback is { } attackKnockback && !float.IsFinite(attackKnockback))
+        {
+            throw new RegistryValidationException($"Entity '{definition.Id}' has invalid attack knockback.");
+        }
+
+        if (!float.IsFinite(definition.Despawn.SpawnProtectionSeconds) ||
+            !float.IsFinite(definition.Despawn.DamageProtectionSeconds) ||
+            definition.Despawn.SpawnProtectionSeconds < 0 ||
+            definition.Despawn.DamageProtectionSeconds < 0)
+        {
+            throw new RegistryValidationException($"Entity '{definition.Id}' has invalid despawn protection timing.");
+        }
+
+        if (definition.Tags.Any(string.IsNullOrWhiteSpace))
+        {
+            throw new RegistryValidationException($"Entity '{definition.Id}' has an empty tag.");
+        }
+
+        if (definition.Tags.Distinct(StringComparer.OrdinalIgnoreCase).Count() != definition.Tags.Count)
+        {
+            throw new RegistryValidationException($"Entity '{definition.Id}' has duplicate tags.");
+        }
+
+        if (definition.Ai is not null)
+        {
+            AiProfileDefinition.Validate(definition.Id, definition.Ai);
         }
 
         ValidateEffects(definition.Id, definition.OnContactEffects);

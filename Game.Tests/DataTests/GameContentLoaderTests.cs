@@ -558,9 +558,24 @@ public sealed class GameContentLoaderTests : IDisposable
         Assert.True(result.Database.WorldGenerationProfiles.TryGetById("small", out var smallProfile));
         Assert.True(result.Database.WorldGenerationProfiles.TryGetById("medium", out _));
         Assert.True(result.Database.WorldGenerationProfiles.TryGetById("large", out _));
+        Assert.False(result.Database.WorldGenerationProfiles.TryGetById("living_world", out _));
+        Assert.True(result.Database.RegionalGenerationProfiles.TryGetById("living_world", out var livingWorld));
+        Assert.NotEmpty(livingWorld.BiomeLayers);
+        Assert.Equal(7, result.Database.StructurePlans.Definitions.Count);
         Assert.NotEmpty(smallProfile.Ores);
         Assert.True(result.Database.Items.TryGetById("copper_chestplate", out var copperChestplate));
         Assert.Equal(Game.Core.Equipment.EquipmentSlotType.Body, copperChestplate.EquipmentSlot);
+        Assert.True(result.Database.Items.TryGetById("healing_potion", out var healingPotion));
+        Assert.Equal(50, healingPotion.HealthRestore);
+        Assert.False(string.IsNullOrWhiteSpace(healingPotion.Description));
+        Assert.True(healingPotion.Value > 0);
+        Assert.True(result.Database.Tiles.TryGetById("furnace", out var furnace));
+        Assert.Equal("furnace", furnace.CraftingStationId);
+        Assert.True(result.Database.Tiles.TryGetById("anvil", out var anvil));
+        Assert.Equal("anvil", anvil.CraftingStationId);
+        Assert.Equal("workbench", result.Database.Recipes.GetById("furnace").Station);
+        Assert.Equal("furnace", result.Database.Recipes.GetById("anvil").Station);
+        Assert.Equal(4, result.Database.Recipes.GetById("torch").Result.Count);
         Assert.True(result.Database.Crops.TryGetBySeedItemId("parsnip_seeds", out var parsnip));
         Assert.True(parsnip.CanGrowIn(Game.Core.Farming.FarmSeason.Spring));
         Assert.True(result.Database.Maps.TryGetById("farmstead", out var farmstead));
@@ -571,8 +586,21 @@ public sealed class GameContentLoaderTests : IDisposable
         Assert.True(result.Database.GameStartups.TryGetDefault("default", out var startup));
         Assert.Contains(startup.StarterItems, item => item.ItemId == "copper_pickaxe");
         Assert.True(result.Database.Animations.TryGetById("player.walk", out _));
+        Assert.NotNull(result.Database.RuntimeAnimations);
+        Assert.True(result.Database.RuntimeAnimations.TryGetCharacter("player.wave04", out var runtimePlayer));
+        Assert.Equal(5, runtimePlayer.Rig.Layers.Count);
+        Assert.Equal(14, result.Database.RuntimeAnimations.Entities.Count);
         Assert.True(result.Database.Characters.TryGetById("player", out var player));
         Assert.Equal("player.idle", player.AnimationSet.ResolveClipId(Game.Core.Characters.CharacterAnimationState.Idle));
+        Assert.True(result.Database.WorldEvents.TryGetById("firefly_bloom", out var fireflyBloom));
+        Assert.Equal(3, fireflyBloom.Phases.Count);
+        Assert.True(result.Database.WorldEvents.TryGetById("crystal_surge", out _));
+        Assert.True(result.Database.Biomes.TryGetById("amber_grove", out var amberGrove));
+        Assert.Equal("world/backgrounds/wave05/amber_grove", amberGrove.Presentation.BackgroundSpriteId);
+        Assert.True(result.Database.Biomes.TryGetById("twilight_marsh", out _));
+        Assert.False(result.Database.Tiles.GetById("mangrove_root").Solid);
+        Assert.Equal(70, result.Database.Items.GetById("sunsteel_pickaxe").ToolPower);
+        Assert.Equal("anvil", result.Database.Recipes.GetById("mirror_shield").Station);
     }
 
     public void Dispose()
@@ -619,7 +647,9 @@ public sealed class GameContentLoaderTests : IDisposable
         while (directory is not null)
         {
             var candidate = Path.Combine(directory.FullName, "Game.Data");
-            if (Directory.Exists(candidate))
+            if (File.Exists(Path.Combine(directory.FullName, "YjsE.sln")) &&
+                Directory.Exists(Path.Combine(candidate, "tiles")) &&
+                Directory.Exists(Path.Combine(candidate, "assets")))
             {
                 return candidate;
             }

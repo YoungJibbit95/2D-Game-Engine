@@ -140,6 +140,45 @@ public sealed class ItemRegistryTests
         Assert.Equal("spark_bolt", action.ProjectileId);
     }
 
+    [Fact]
+    public void Loader_ReadsInventoryMetadata()
+    {
+        const string json = """
+        {
+          "id": "royal_gem",
+          "displayName": "Royal Gem",
+          "description": "A gem treasured by collectors.",
+          "type": "Material",
+          "rarity": "Epic",
+          "value": 750,
+          "category": "Quest",
+          "sortPriority": -10,
+          "canFavorite": false,
+          "canTrash": false,
+          "texture": "items/royal_gem",
+          "maxStack": 20
+        }
+        """;
+
+        var definition = new ItemDefinitionJsonLoader().LoadDefinitionFromJson(json);
+
+        Assert.Equal("A gem treasured by collectors.", definition.Description);
+        Assert.Equal(ItemRarity.Epic, definition.Rarity);
+        Assert.Equal(750, definition.Value);
+        Assert.Equal(ItemCategory.Quest, definition.ResolvedCategory);
+        Assert.Equal(-10, definition.SortPriority);
+        Assert.False(definition.CanFavorite);
+        Assert.False(definition.CanTrash);
+    }
+
+    [Fact]
+    public void Create_RejectsNegativeItemValue()
+    {
+        var definition = CreateDirtBlockDefinition() with { Value = -1 };
+
+        Assert.Throws<RegistryValidationException>(() => ItemRegistry.Create(new[] { definition }));
+    }
+
     private static ItemDefinition CreateDirtBlockDefinition()
     {
         return new ItemDefinition

@@ -1,0 +1,10 @@
+{
+  "id": "prism_axe",
+  "result": { "itemId": "prism_axe", "count": 1 },
+  "ingredients": [
+    { "itemId": "amberstone_block", "count": 10 },
+    { "itemId": "iron_ore", "count": 5 },
+    { "itemId": "wood", "count": 3 }
+  ],
+  "station": "anvil"
+}

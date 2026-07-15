@@ -1,4 +1,5 @@
 using Game.Core.Effects;
+using Game.Core.Entities.AI;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -81,6 +82,14 @@ public sealed class EntityDefinitionJsonLoader
 
         public string? AiBehavior { get; init; }
 
+        public AiProfileDefinition? Ai { get; init; }
+
+        public EntityFaction Faction { get; init; } = EntityFaction.Hostile;
+
+        public EntityMovementMode MovementMode { get; init; } = EntityMovementMode.Ground;
+
+        public List<string> Tags { get; init; } = new();
+
         public string? LootTableId { get; init; }
 
         [JsonPropertyName("lootTable")]
@@ -89,6 +98,12 @@ public sealed class EntityDefinitionJsonLoader
         public int ContactDamage { get; init; } = 10;
 
         public float ContactKnockback { get; init; } = 180f;
+
+        public int? AttackDamage { get; init; }
+
+        public float? AttackKnockback { get; init; }
+
+        public EntityDespawnPolicyDefinition Despawn { get; init; } = new();
 
         public List<StatusEffectApplicationDto> OnContactEffects { get; init; } = new();
 
@@ -103,9 +118,16 @@ public sealed class EntityDefinitionJsonLoader
                 Width = Width,
                 Height = Height,
                 AiBehavior = AiBehavior,
+                Ai = Ai,
+                Faction = Faction,
+                MovementMode = MovementMode,
+                Tags = Tags.ToArray(),
                 LootTableId = LootTableId ?? LootTable,
                 ContactDamage = ContactDamage,
                 ContactKnockback = ContactKnockback,
+                AttackDamage = AttackDamage,
+                AttackKnockback = AttackKnockback,
+                Despawn = Despawn,
                 OnContactEffects = OnContactEffects.Select(effect => effect.ToDefinition()).ToArray()
             };
         }

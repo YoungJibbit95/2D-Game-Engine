@@ -11,7 +11,21 @@ public sealed record ItemDefinition
 
     public required string DisplayName { get; init; }
 
+    public string Description { get; init; } = string.Empty;
+
     public ItemType Type { get; init; }
+
+    public ItemRarity Rarity { get; init; }
+
+    public int Value { get; init; }
+
+    public ItemCategory Category { get; init; } = ItemCategory.Automatic;
+
+    public int SortPriority { get; init; }
+
+    public bool CanFavorite { get; init; } = true;
+
+    public bool CanTrash { get; init; } = true;
 
     public required string TexturePath { get; init; }
 
@@ -71,4 +85,6 @@ public sealed record ItemDefinition
     {
         return DefinitionTags.HasTag(Tags, tag);
     }
+
+    public ItemCategory ResolvedCategory => ItemCategoryResolver.Resolve(this);
 }

@@ -18,6 +18,8 @@ public sealed record GameSettings
 
     public DebugSettings Debug { get; init; } = new();
 
+    public AccessibilitySettings Accessibility { get; init; } = new();
+
     public static GameSettings CreateDefault()
     {
         return new GameSettings();
@@ -33,6 +35,8 @@ public sealed record VideoSettings
     public bool Fullscreen { get; init; }
 
     public bool VSync { get; init; } = true;
+
+    public int FrameRateLimit { get; init; }
 
     public float UiScale { get; init; } = 1f;
 
@@ -66,6 +70,34 @@ public sealed record RenderingSettings
     public int MaxChunkRenderCacheEntries { get; init; } = 512;
 
     public bool EntityInterpolation { get; init; } = true;
+
+    public int LightingQuality { get; init; } = 2;
+
+    public int ShadowQuality { get; init; } = 2;
+
+    public int ReflectionQuality { get; init; } = 1;
+
+    public int UiEffectQuality { get; init; } = 2;
+
+    public bool SoftShadows { get; init; } = true;
+
+    public bool SunLightShafts { get; init; } = true;
+
+    public bool ScreenSpaceReflections { get; init; } = true;
+
+    public bool AmbientOcclusion { get; init; } = true;
+
+    public float CaveAmbientLight { get; init; } = 0.16f;
+
+    public float TorchBloomStrength { get; init; } = 0.65f;
+
+    public float ShadowSoftness { get; init; } = 0.55f;
+
+    public float ReflectionStrength { get; init; } = 0.32f;
+
+    public int RaymarchStepBudget { get; init; } = 24;
+
+    public int BlurRadiusPixels { get; init; } = 6;
 }
 
 public sealed record UiSettings
@@ -85,6 +117,18 @@ public sealed record UiSettings
     public bool CompactLists { get; init; }
 
     public bool ShowControlHints { get; init; } = true;
+
+    public int CornerRadiusPixels { get; init; } = 6;
+
+    public float BackdropBlurStrength { get; init; } = 0.45f;
+
+    public float GlowStrength { get; init; } = 0.3f;
+
+    public float TextScale { get; init; } = 1f;
+
+    public bool HighContrastPanels { get; init; }
+
+    public bool LargeCursor { get; init; }
 }
 
 public sealed record AudioSettings
@@ -125,6 +169,16 @@ public sealed record GameplaySettings
     public float CameraLookAheadPixels { get; init; } = 32f;
 
     public float ScreenShakeMultiplier { get; init; } = 1f;
+
+    public float EntitySimulationRadiusPixels { get; init; } = 1800f;
+
+    public float SpawnMinimumDistancePixels { get; init; } = 520f;
+
+    public float SpawnMaximumDistancePixels { get; init; } = 1500f;
+
+    public bool SpawnOutsideViewportOnly { get; init; } = true;
+
+    public bool HoldToBlock { get; init; } = true;
 }
 
 public sealed record WorldSettings
@@ -144,6 +198,22 @@ public sealed record WorldSettings
     public bool SaveChunksBeforeUnload { get; init; } = true;
 
     public int StreamingBudgetChunksPerFrame { get; init; } = 32;
+
+    public int StreamingConcurrentLoads { get; init; } = 4;
+
+    public int StreamingConcurrentSaves { get; init; } = 1;
+
+    public int StreamingApplyQueueLimit { get; init; } = 64;
+
+    public float StreamingApplyBudgetMilliseconds { get; init; } = 4f;
+
+    public int StreamingApplyBudgetKilobytes { get; init; } = 512;
+
+    public int StreamingRetryAttempts { get; init; } = 3;
+
+    public int StreamingRetryInitialBackoffUpdates { get; init; } = 1;
+
+    public int StreamingRetryMaximumBackoffUpdates { get; init; } = 16;
 }
 
 public sealed record InputSettings
@@ -204,7 +274,7 @@ public sealed record KeyBindingSettings
 
 public sealed record DebugSettings
 {
-    public bool ShowDebugOverlay { get; init; } = true;
+    public bool ShowDebugOverlay { get; init; }
 
     public bool ShowGrid { get; init; }
 
@@ -223,4 +293,21 @@ public sealed record DebugSettings
     public bool ShowAllocationMetrics { get; init; } = true;
 
     public int ProfilerMetricLimit { get; init; } = 10;
+}
+
+public sealed record AccessibilitySettings
+{
+    public bool ScreenFlashReduction { get; init; }
+
+    public bool DisableCameraShake { get; init; }
+
+    public bool HoldActionsBecomeToggle { get; init; }
+
+    public bool HighContrastInteractionOutline { get; init; }
+
+    public bool ColorBlindFriendlyIndicators { get; init; }
+
+    public float InterfaceContrast { get; init; } = 1f;
+
+    public float TooltipDelaySeconds { get; init; } = 0.25f;
 }

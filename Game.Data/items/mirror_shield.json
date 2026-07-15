@@ -1,0 +1,17 @@
+{
+  "id": "mirror_shield",
+  "displayName": "Mirror Shield",
+  "description": "An accessory that reinforces guarding and reflects the cave glow.",
+  "rarity": "Epic",
+  "value": 680,
+  "category": "Equipment",
+  "sortPriority": 76,
+  "type": "Accessory",
+  "texture": "items/wave05/mirror_shield",
+  "maxStack": 1,
+  "equipmentSlot": "Accessory1",
+  "defense": 4,
+  "maxHealthBonus": 10,
+  "movementSpeedBonus": -0.02,
+  "tags": ["equipment", "accessory", "shield", "guard", "wave05"]
+}

@@ -1,0 +1,9 @@
+{
+  "id": "flare_bow",
+  "result": { "itemId": "flare_bow", "count": 1 },
+  "ingredients": [
+    { "itemId": "amberwood_plank_block", "count": 8 },
+    { "itemId": "iron_ore", "count": 2 }
+  ],
+  "station": "workbench"
+}

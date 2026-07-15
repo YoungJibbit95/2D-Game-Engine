@@ -10,7 +10,11 @@ public sealed class SlimeAiBehavior : IAiBehavior
     private float _decisionTimer;
     private int _direction = 1;
 
-    public void Update(EnemyEntity entity, World.World world, float deltaSeconds)
+    public AiState CurrentState => AiState.Wander;
+
+    public int? TargetEntityId => null;
+
+    public void Update(EnemyEntity entity, AiUpdateContext context, float deltaSeconds)
     {
         _decisionTimer -= deltaSeconds;
 
@@ -27,5 +31,11 @@ public sealed class SlimeAiBehavior : IAiBehavior
 
         entity.Body.Velocity = new Vector2(HorizontalSpeed * _direction, JumpVelocity);
         entity.Body.OnGround = false;
+    }
+
+    public bool TryConsumeAttackIntent(out AiAttackIntent intent)
+    {
+        intent = default;
+        return false;
     }
 }

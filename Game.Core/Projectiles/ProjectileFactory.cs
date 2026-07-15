@@ -1,5 +1,6 @@
 using System.Numerics;
 using Game.Core.Combat;
+using Game.Core.Entities;
 
 namespace Game.Core.Projectiles;
 
@@ -11,7 +12,8 @@ public sealed class ProjectileFactory
         Vector2 direction,
         int? ownerEntityId = null,
         int? damageOverride = null,
-        DamageType? damageTypeOverride = null)
+        DamageType? damageTypeOverride = null,
+        EntityFaction ownerFaction = EntityFaction.Friendly)
     {
         ArgumentNullException.ThrowIfNull(definition);
 
@@ -20,17 +22,25 @@ public sealed class ProjectileFactory
             direction = Vector2.UnitX;
         }
 
+        if (!float.IsFinite(direction.X) || !float.IsFinite(direction.Y))
+        {
+            throw new ArgumentOutOfRangeException(nameof(direction));
+        }
+
         direction = Vector2.Normalize(direction);
 
+        var runtimeDefinition = damageOverride is null && damageTypeOverride is null
+            ? definition
+            : definition with
+            {
+                Damage = damageOverride ?? definition.Damage,
+                DamageType = damageTypeOverride ?? definition.DamageType
+            };
         return new ProjectileEntity(
-            definition.Id,
+            runtimeDefinition,
             position,
             direction * definition.Speed,
-            damageOverride ?? definition.Damage,
-            damageTypeOverride ?? definition.DamageType,
-            definition.Gravity,
-            definition.Pierce,
-            definition.Lifetime,
-            ownerEntityId);
+            ownerEntityId,
+            ownerFaction);
     }
 }

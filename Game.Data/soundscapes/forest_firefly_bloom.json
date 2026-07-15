@@ -1,0 +1,16 @@
+{
+  "id": "forest_firefly_bloom",
+  "nightMusicLoopId": "music/forest_night",
+  "surfaceAmbientLoopId": "ambient/forest_canopy",
+  "undergroundAmbientLoopId": "ambient/forest_cave",
+  "musicVolume": 0.7,
+  "ambientVolume": 0.72,
+  "crossfadeSeconds": 1.4,
+  "worldEvents": {
+    "firefly_bloom": {
+      "loopId": "ambient/firefly_bloom",
+      "startStingerId": "stingers/firefly_awaken",
+      "volume": 0.8
+    }
+  }
+}

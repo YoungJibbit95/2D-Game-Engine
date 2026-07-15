@@ -23,9 +23,9 @@ public struct TileInstance
 
     public bool IsAir => TileId == KnownTileIds.Air;
 
-    public bool IsSolid => Flags.HasFlag(TileFlags.Solid);
+    public bool IsSolid => (Flags & TileFlags.Solid) != 0;
 
-    public bool HasLiquid => Flags.HasFlag(TileFlags.HasLiquid) && LiquidAmount > 0;
+    public bool HasLiquid => (Flags & TileFlags.HasLiquid) != 0 && LiquidAmount > 0;
 
     public static TileInstance FromTileId(ushort tileId, TileFlags flags = TileFlags.None, bool isSolid = true)
     {

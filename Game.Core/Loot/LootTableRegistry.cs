@@ -62,6 +62,11 @@ public sealed class LootTableRegistry
             throw new RegistryValidationException("Loot table id is required.");
         }
 
+        if (definition.WeightedRolls < 0)
+        {
+            throw new RegistryValidationException($"Loot table '{definition.Id}' has a negative weighted roll count.");
+        }
+
         foreach (var entry in definition.Entries)
         {
             if (string.IsNullOrWhiteSpace(entry.ItemId) || entry.Min <= 0 || entry.Max < entry.Min)
@@ -72,6 +77,27 @@ public sealed class LootTableRegistry
             if (entry.Chance < 0 || entry.Chance > 1)
             {
                 throw new RegistryValidationException($"Loot table '{definition.Id}' has a chance outside 0..1.");
+            }
+
+            if (entry.Weight < 0 || !float.IsFinite(entry.Weight))
+            {
+                throw new RegistryValidationException($"Loot table '{definition.Id}' has an invalid entry weight.");
+            }
+
+            if (entry.Guaranteed && entry.Weight > 0)
+            {
+                throw new RegistryValidationException($"Loot table '{definition.Id}' has an entry that is both guaranteed and weighted.");
+            }
+
+            if (entry.MinVictimDepth is < 0 || entry.MaxVictimDepth is < 0 ||
+                (entry.MinVictimDepth is not null && entry.MaxVictimDepth is not null && entry.MinVictimDepth > entry.MaxVictimDepth))
+            {
+                throw new RegistryValidationException($"Loot table '{definition.Id}' has an invalid victim depth condition.");
+            }
+
+            if (entry.RequiredVictimTags.Any(string.IsNullOrWhiteSpace))
+            {
+                throw new RegistryValidationException($"Loot table '{definition.Id}' has an empty victim tag condition.");
             }
         }
     }

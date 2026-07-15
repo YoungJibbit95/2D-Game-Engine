@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "scenarioVersion": "yjse-epic1-harness-v2",
+  "measurementKind": "calibration-sample",
+  "capturedAtUtc": "2026-07-12T20:43:18.4020198+00:00",
+  "repositoryRevision": "f9a06072a1172d2bd8d064cabad92235443dd8c8",
+  "configuration": "Release",
+  "runtime": ".NET 8.0.28",
+  "processor": "AMD64 Family 25 Model 80 Stepping 0, AuthenticAMD",
+  "sourceArtifact": "artifacts/performance-calibration-current.json",
+  "measurements": {
+    "Events.Publish.Typed": {
+      "averageMilliseconds": 0.00007443,
+      "p99Milliseconds": 0.0001,
+      "averageAllocatedBytes": 0.0
+    },
+    "Content.Load": {
+      "averageMilliseconds": 38.92375,
+      "p99Milliseconds": 42.5867,
+      "averageAllocatedBytes": 1524966.0
+    },
+    "World.Generate.Simple.256x128": {
+      "averageMilliseconds": 25.0813875,
+      "p99Milliseconds": 25.9586,
+      "averageAllocatedBytes": 17054752.0
+    },
+    "World.Streaming.InitialWindow": {
+      "averageMilliseconds": 6.980475,
+      "p99Milliseconds": 7.6637,
+      "averageAllocatedBytes": 2779337.0
+    },
+    "Simulation.FixedTick": {
+      "averageMilliseconds": 0.04837747,
+      "p99Milliseconds": 0.0933,
+      "averageAllocatedBytes": 7942.3288
+    },
+    "Simulation.StateHash": {
+      "averageMilliseconds": 1.231224,
+      "p99Milliseconds": 1.6891,
+      "averageAllocatedBytes": 3370.48
+    }
+  }
+}

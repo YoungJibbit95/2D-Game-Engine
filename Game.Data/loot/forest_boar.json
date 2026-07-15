@@ -1,0 +1,9 @@
+{
+  "id": "forest_boar",
+  "weightedRolls": 1,
+  "entries": [
+    { "itemId": "copper_coin", "min": 3, "max": 8, "guaranteed": true },
+    { "itemId": "wood", "min": 1, "max": 3, "chance": 1.0, "weight": 3.0 },
+    { "itemId": "healing_potion", "min": 1, "max": 1, "chance": 0.3, "weight": 1.0 }
+  ]
+}

@@ -1,0 +1,70 @@
+{
+  "id": "crystal_surge",
+  "displayName": "Crystal Surge",
+  "chancePerWindow": 0.16,
+  "minDurationTicks": 720,
+  "maxDurationTicks": 1200,
+  "cooldownTicks": 5400,
+  "intensity": 0.9,
+  "allowedBiomeIds": ["crystal_depths", "deep_cave"],
+  "requiresUnderground": true,
+  "playerActionTriggers": ["mine", "cast"],
+  "playerActionTriggerChance": 0.12,
+  "modifiers": {
+    "spawnWeightMultiplier": 1.25,
+    "skyLightMultiplier": 0.7,
+    "ambientLightAdd": 0.12,
+    "weatherIntensityMultiplier": 0.25,
+    "lootQuantityMultiplier": 1.3,
+    "rareLootChanceMultiplier": 1.5,
+    "presentationIntensity": 1.25,
+    "particleSpriteId": "effects/ambient/crystal_glints",
+    "colorGradeId": "crystal_surge",
+    "soundscapeId": "crystal_resonance"
+  },
+  "phases": [
+    {
+      "id": "charging",
+      "startProgress": 0.0,
+      "endProgress": 0.3,
+      "modifiers": {
+        "spawnWeightMultiplier": 0.85,
+        "skyLightMultiplier": 0.9,
+        "ambientLightAdd": 0.02,
+        "weatherIntensityMultiplier": 1.0,
+        "lootQuantityMultiplier": 1.0,
+        "rareLootChanceMultiplier": 1.0,
+        "presentationIntensity": 0.55
+      }
+    },
+    {
+      "id": "resonance",
+      "startProgress": 0.3,
+      "endProgress": 0.85,
+      "modifiers": {
+        "spawnWeightMultiplier": 1.35,
+        "skyLightMultiplier": 0.8,
+        "ambientLightAdd": 0.08,
+        "weatherIntensityMultiplier": 1.0,
+        "lootQuantityMultiplier": 1.2,
+        "rareLootChanceMultiplier": 1.35,
+        "presentationIntensity": 1.2,
+        "particleSpriteId": "effects/ambient/crystal_glints"
+      }
+    },
+    {
+      "id": "afterglow",
+      "startProgress": 0.85,
+      "endProgress": 1.0,
+      "modifiers": {
+        "spawnWeightMultiplier": 0.8,
+        "skyLightMultiplier": 1.0,
+        "ambientLightAdd": 0.04,
+        "weatherIntensityMultiplier": 1.0,
+        "lootQuantityMultiplier": 1.0,
+        "rareLootChanceMultiplier": 1.0,
+        "presentationIntensity": 0.4
+      }
+    }
+  ]
+}

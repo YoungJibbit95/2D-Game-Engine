@@ -1,0 +1,15 @@
+{
+  "id": "deep_cave",
+  "undergroundMusicLoopId": "music/deep_cave",
+  "undergroundAmbientLoopId": "ambient/deep_cave_air",
+  "musicVolume": 0.62,
+  "ambientVolume": 0.72,
+  "crossfadeSeconds": 2.5,
+  "worldEvents": {
+    "crystal_surge": {
+      "loopId": "ambient/crystal_surge",
+      "startStingerId": "stingers/crystal_awaken",
+      "volume": 0.78
+    }
+  }
+}

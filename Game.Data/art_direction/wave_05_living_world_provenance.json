@@ -1,0 +1,448 @@
+{
+  "schemaVersion": 1,
+  "waveId": "wave_05_living_world_production",
+  "generatedOn": "2026-07-14",
+  "sourceType": "checked-in deterministic pixel generator",
+  "externalDownloads": false,
+  "modelGeneratedSource": false,
+  "generator": {
+    "path": "Assets/Wave05/tools/generate_wave05_assets.py",
+    "sha256": "2657ddf5b07ff4d169e360ed9340a9fd96b9a618bad1477ffc540d5c1256e8b8",
+    "runtime": "Python 3 plus Pillow from art_direction/requirements.txt",
+    "method": "Direct final-size Pillow primitives constrained to yjse-pixel-v1; no hidden source art and no manual raster edits claimed."
+  },
+  "manifest": "assets/wave05_living_world.sprites.json",
+  "brief": "asset_briefs/production_wave_05_living_world_briefs.json",
+  "assets": [
+    {
+      "spriteId": "world/backgrounds/wave05/twilight_marsh",
+      "path": "Assets/Wave05/backgrounds/twilight_marsh_parallax.png",
+      "sha256": "963af87454e374a593da7b2d51ced9d83393db3fdf0e892b34bc5ef2676220db",
+      "dimensions": [
+        512,
+        128
+      ],
+      "frameCount": 0,
+      "alphaValues": [
+        255
+      ],
+      "generator": "Assets/Wave05/tools/generate_wave05_assets.py",
+      "method": "deterministic Pillow pixel primitives at final runtime dimensions",
+      "license": "YjsE-Project-Owned",
+      "runtimeConsumer": "SpriteAssetJsonLoader and ClientTextureRegistry preload; gameplay activation remains content-owner controlled"
+    },
+    {
+      "spriteId": "world/backgrounds/wave05/amber_grove",
+      "path": "Assets/Wave05/backgrounds/amber_grove_parallax.png",
+      "sha256": "f3e31829ef423c0d250ea1996fd2567a28408d0f25063c051f29a85814ea3b85",
+      "dimensions": [
+        512,
+        128
+      ],
+      "frameCount": 0,
+      "alphaValues": [
+        255
+      ],
+      "generator": "Assets/Wave05/tools/generate_wave05_assets.py",
+      "method": "deterministic Pillow pixel primitives at final runtime dimensions",
+      "license": "YjsE-Project-Owned",
+      "runtimeConsumer": "SpriteAssetJsonLoader and ClientTextureRegistry preload; gameplay activation remains content-owner controlled"
+    },
+    {
+      "spriteId": "world/wave05/mangrove_root_autotile",
+      "path": "Assets/Wave05/world/mangrove_root_autotile.png",
+      "sha256": "2129a837ceb60986aea71c92d8b66201ba73c1d427585a33be87c8945b9b087d",
+      "dimensions": [
+        256,
+        16
+      ],
+      "frameCount": 16,
+      "alphaValues": [
+        0,
+        255
+      ],
+      "generator": "Assets/Wave05/tools/generate_wave05_assets.py",
+      "method": "deterministic Pillow pixel primitives at final runtime dimensions",
+      "license": "YjsE-Project-Owned",
+      "runtimeConsumer": "SpriteAssetJsonLoader and ClientTextureRegistry preload; gameplay activation remains content-owner controlled"
+    },
+    {
+      "spriteId": "world/wave05/marsh_moss_autotile",
+      "path": "Assets/Wave05/world/marsh_moss_autotile.png",
+      "sha256": "2e35710c582fb2e79726557f224ae26e237278827bc9670832fd59001933274c",
+      "dimensions": [
+        256,
+        16
+      ],
+      "frameCount": 16,
+      "alphaValues": [
+        0,
+        255
+      ],
+      "generator": "Assets/Wave05/tools/generate_wave05_assets.py",
+      "method": "deterministic Pillow pixel primitives at final runtime dimensions",
+      "license": "YjsE-Project-Owned",
+      "runtimeConsumer": "SpriteAssetJsonLoader and ClientTextureRegistry preload; gameplay activation remains content-owner controlled"
+    },
+    {
+      "spriteId": "world/wave05/amberwood_plank_autotile",
+      "path": "Assets/Wave05/world/amberwood_plank_autotile.png",
+      "sha256": "fdc717d938c89e44c440bc45c87c2de63a9466a55b7420bb2ef59f1027020d89",
+      "dimensions": [
+        256,
+        16
+      ],
+      "frameCount": 16,
+      "alphaValues": [
+        0,
+        255
+      ],
+      "generator": "Assets/Wave05/tools/generate_wave05_assets.py",
+      "method": "deterministic Pillow pixel primitives at final runtime dimensions",
+      "license": "YjsE-Project-Owned",
+      "runtimeConsumer": "SpriteAssetJsonLoader and ClientTextureRegistry preload; gameplay activation remains content-owner controlled"
+    },
+    {
+      "spriteId": "world/wave05/amberstone_autotile",
+      "path": "Assets/Wave05/world/amberstone_autotile.png",
+      "sha256": "003ceacc30779fc7eae7b1a964daa889ec1a0529118afe40c9fa05fdd861d9c9",
+      "dimensions": [
+        256,
+        16
+      ],
+      "frameCount": 16,
+      "alphaValues": [
+        0,
+        255
+      ],
+      "generator": "Assets/Wave05/tools/generate_wave05_assets.py",
+      "method": "deterministic Pillow pixel primitives at final runtime dimensions",
+      "license": "YjsE-Project-Owned",
+      "runtimeConsumer": "SpriteAssetJsonLoader and ClientTextureRegistry preload; gameplay activation remains content-owner controlled"
+    },
+    {
+      "spriteId": "world/wave05/hanging_lantern_chain",
+      "path": "Assets/Wave05/world/hanging_lantern_chain.png",
+      "sha256": "21d3a2f36c36e32015b099edff9fedafb40c120cfbf4f1b781c716db9195c832",
+      "dimensions": [
+        64,
+        32
+      ],
+      "frameCount": 4,
+      "alphaValues": [
+        0,
+        255
+      ],
+      "generator": "Assets/Wave05/tools/generate_wave05_assets.py",
+      "method": "deterministic Pillow pixel primitives at final runtime dimensions",
+      "license": "YjsE-Project-Owned",
+      "runtimeConsumer": "SpriteAssetJsonLoader and ClientTextureRegistry preload; gameplay activation remains content-owner controlled"
+    },
+    {
+      "spriteId": "world/wave05/amber_workshop_set",
+      "path": "Assets/Wave05/world/amber_workshop_set.png",
+      "sha256": "9e7b00130301cd1d7cda6a8ba5202c33ab5fc490116ae1c42d08878f7a862ef9",
+      "dimensions": [
+        128,
+        32
+      ],
+      "frameCount": 4,
+      "alphaValues": [
+        0,
+        255
+      ],
+      "generator": "Assets/Wave05/tools/generate_wave05_assets.py",
+      "method": "deterministic Pillow pixel primitives at final runtime dimensions",
+      "license": "YjsE-Project-Owned",
+      "runtimeConsumer": "SpriteAssetJsonLoader and ClientTextureRegistry preload; gameplay activation remains content-owner controlled"
+    },
+    {
+      "spriteId": "items/wave05/sunsteel_pickaxe",
+      "path": "Assets/Wave05/items/sunsteel_pickaxe.png",
+      "sha256": "6291078c9750751a1c01cbe6996b6678e81f7ab07d828f62efbc237aba7732f1",
+      "dimensions": [
+        32,
+        32
+      ],
+      "frameCount": 0,
+      "alphaValues": [
+        0,
+        255
+      ],
+      "generator": "Assets/Wave05/tools/generate_wave05_assets.py",
+      "method": "deterministic Pillow pixel primitives at final runtime dimensions",
+      "license": "YjsE-Project-Owned",
+      "runtimeConsumer": "SpriteAssetJsonLoader and ClientTextureRegistry preload; gameplay activation remains content-owner controlled"
+    },
+    {
+      "spriteId": "items/wave05/prism_axe",
+      "path": "Assets/Wave05/items/prism_axe.png",
+      "sha256": "2af52cae23cde20489ba835bf9ec633b3ea73af01f9a4c91bee20d729a20ed62",
+      "dimensions": [
+        32,
+        32
+      ],
+      "frameCount": 0,
+      "alphaValues": [
+        0,
+        255
+      ],
+      "generator": "Assets/Wave05/tools/generate_wave05_assets.py",
+      "method": "deterministic Pillow pixel primitives at final runtime dimensions",
+      "license": "YjsE-Project-Owned",
+      "runtimeConsumer": "SpriteAssetJsonLoader and ClientTextureRegistry preload; gameplay activation remains content-owner controlled"
+    },
+    {
+      "spriteId": "items/wave05/glimmer_rod",
+      "path": "Assets/Wave05/items/glimmer_rod.png",
+      "sha256": "443854ae7b3f7e4c16ec8715ad987dd7f01124db65b5aa624371c54b7cbcf0f5",
+      "dimensions": [
+        32,
+        32
+      ],
+      "frameCount": 0,
+      "alphaValues": [
+        0,
+        255
+      ],
+      "generator": "Assets/Wave05/tools/generate_wave05_assets.py",
+      "method": "deterministic Pillow pixel primitives at final runtime dimensions",
+      "license": "YjsE-Project-Owned",
+      "runtimeConsumer": "SpriteAssetJsonLoader and ClientTextureRegistry preload; gameplay activation remains content-owner controlled"
+    },
+    {
+      "spriteId": "items/wave05/thornblade",
+      "path": "Assets/Wave05/items/thornblade.png",
+      "sha256": "61eee573fcedfdaf8a899e06404b7530e6931fa22809cdab7a6c93ddd9c33a27",
+      "dimensions": [
+        32,
+        32
+      ],
+      "frameCount": 0,
+      "alphaValues": [
+        0,
+        255
+      ],
+      "generator": "Assets/Wave05/tools/generate_wave05_assets.py",
+      "method": "deterministic Pillow pixel primitives at final runtime dimensions",
+      "license": "YjsE-Project-Owned",
+      "runtimeConsumer": "SpriteAssetJsonLoader and ClientTextureRegistry preload; gameplay activation remains content-owner controlled"
+    },
+    {
+      "spriteId": "items/wave05/mirror_shield",
+      "path": "Assets/Wave05/items/mirror_shield.png",
+      "sha256": "2b93ef4ddde24be0d52dfb1c84e161a43aa642682bf49cde712f9b51c6ad77c7",
+      "dimensions": [
+        32,
+        32
+      ],
+      "frameCount": 0,
+      "alphaValues": [
+        0,
+        255
+      ],
+      "generator": "Assets/Wave05/tools/generate_wave05_assets.py",
+      "method": "deterministic Pillow pixel primitives at final runtime dimensions",
+      "license": "YjsE-Project-Owned",
+      "runtimeConsumer": "SpriteAssetJsonLoader and ClientTextureRegistry preload; gameplay activation remains content-owner controlled"
+    },
+    {
+      "spriteId": "items/wave05/flare_bow",
+      "path": "Assets/Wave05/items/flare_bow.png",
+      "sha256": "e59b71f1c81488f2b6043490006ffbe9daf4cfbd46afbcdb3d1d73b7f7d43564",
+      "dimensions": [
+        32,
+        32
+      ],
+      "frameCount": 0,
+      "alphaValues": [
+        0,
+        255
+      ],
+      "generator": "Assets/Wave05/tools/generate_wave05_assets.py",
+      "method": "deterministic Pillow pixel primitives at final runtime dimensions",
+      "license": "YjsE-Project-Owned",
+      "runtimeConsumer": "SpriteAssetJsonLoader and ClientTextureRegistry preload; gameplay activation remains content-owner controlled"
+    },
+    {
+      "spriteId": "entities/wave05/marsh_frog",
+      "path": "Assets/Wave05/entities/marsh_frog.png",
+      "sha256": "1ac2b243e23736352ce97d6c28eebce180a0faf3819af98e02e58951016ebf3d",
+      "dimensions": [
+        256,
+        32
+      ],
+      "frameCount": 8,
+      "alphaValues": [
+        0,
+        255
+      ],
+      "generator": "Assets/Wave05/tools/generate_wave05_assets.py",
+      "method": "deterministic Pillow pixel primitives at final runtime dimensions",
+      "license": "YjsE-Project-Owned",
+      "runtimeConsumer": "SpriteAssetJsonLoader and ClientTextureRegistry preload; gameplay activation remains content-owner controlled"
+    },
+    {
+      "spriteId": "entities/wave05/canopy_owl",
+      "path": "Assets/Wave05/entities/canopy_owl.png",
+      "sha256": "bac64635e102ff4be1df8136a47d2d5eba27ece13269445f5f04550644e408e5",
+      "dimensions": [
+        256,
+        32
+      ],
+      "frameCount": 8,
+      "alphaValues": [
+        0,
+        255
+      ],
+      "generator": "Assets/Wave05/tools/generate_wave05_assets.py",
+      "method": "deterministic Pillow pixel primitives at final runtime dimensions",
+      "license": "YjsE-Project-Owned",
+      "runtimeConsumer": "SpriteAssetJsonLoader and ClientTextureRegistry preload; gameplay activation remains content-owner controlled"
+    },
+    {
+      "spriteId": "entities/wave05/amber_beetle",
+      "path": "Assets/Wave05/entities/amber_beetle.png",
+      "sha256": "4e9999be26daf64157dec386e8c8b887e8553059df52fc80b7fca1eef3798ff7",
+      "dimensions": [
+        256,
+        32
+      ],
+      "frameCount": 8,
+      "alphaValues": [
+        0,
+        255
+      ],
+      "generator": "Assets/Wave05/tools/generate_wave05_assets.py",
+      "method": "deterministic Pillow pixel primitives at final runtime dimensions",
+      "license": "YjsE-Project-Owned",
+      "runtimeConsumer": "SpriteAssetJsonLoader and ClientTextureRegistry preload; gameplay activation remains content-owner controlled"
+    },
+    {
+      "spriteId": "entities/wave05/prism_wisp",
+      "path": "Assets/Wave05/entities/prism_wisp.png",
+      "sha256": "61d080f15a45a1226421375bce6e03ffde3e9e25e4691e18ef1576a770f1ebbf",
+      "dimensions": [
+        256,
+        32
+      ],
+      "frameCount": 8,
+      "alphaValues": [
+        0,
+        255
+      ],
+      "generator": "Assets/Wave05/tools/generate_wave05_assets.py",
+      "method": "deterministic Pillow pixel primitives at final runtime dimensions",
+      "license": "YjsE-Project-Owned",
+      "runtimeConsumer": "SpriteAssetJsonLoader and ClientTextureRegistry preload; gameplay activation remains content-owner controlled"
+    },
+    {
+      "spriteId": "ui/wave05/glass_panel_9slice",
+      "path": "Assets/Wave05/ui/glass_panel_9slice.png",
+      "sha256": "67b3d5e3574e0c1e97242497135c13f33d4850725dcc0e9f7f0714a420c94853",
+      "dimensions": [
+        48,
+        48
+      ],
+      "frameCount": 9,
+      "alphaValues": [
+        0,
+        255
+      ],
+      "generator": "Assets/Wave05/tools/generate_wave05_assets.py",
+      "method": "deterministic Pillow pixel primitives at final runtime dimensions",
+      "license": "YjsE-Project-Owned",
+      "runtimeConsumer": "SpriteAssetJsonLoader and ClientTextureRegistry preload; gameplay activation remains content-owner controlled"
+    },
+    {
+      "spriteId": "ui/wave05/brass_modal_9slice",
+      "path": "Assets/Wave05/ui/brass_modal_9slice.png",
+      "sha256": "f0caee55ce9daa9ec4c109ab254171db913ef4df3d22a1e42bdccaeccdae93cf",
+      "dimensions": [
+        48,
+        48
+      ],
+      "frameCount": 9,
+      "alphaValues": [
+        0,
+        255
+      ],
+      "generator": "Assets/Wave05/tools/generate_wave05_assets.py",
+      "method": "deterministic Pillow pixel primitives at final runtime dimensions",
+      "license": "YjsE-Project-Owned",
+      "runtimeConsumer": "SpriteAssetJsonLoader and ClientTextureRegistry preload; gameplay activation remains content-owner controlled"
+    },
+    {
+      "spriteId": "ui/wave05/quest",
+      "path": "Assets/Wave05/ui/quest.png",
+      "sha256": "4fbf26b308c76f06faf53bd8763a3d8d6acd48ba2ddb14922b28ce907ddbfa04",
+      "dimensions": [
+        32,
+        32
+      ],
+      "frameCount": 0,
+      "alphaValues": [
+        0,
+        255
+      ],
+      "generator": "Assets/Wave05/tools/generate_wave05_assets.py",
+      "method": "deterministic Pillow pixel primitives at final runtime dimensions",
+      "license": "YjsE-Project-Owned",
+      "runtimeConsumer": "SpriteAssetJsonLoader and ClientTextureRegistry preload; gameplay activation remains content-owner controlled"
+    },
+    {
+      "spriteId": "ui/wave05/combat",
+      "path": "Assets/Wave05/ui/combat.png",
+      "sha256": "837bc0dbe7728a675c6ade40f495ee335261a29a2657ee35f54a2c8f7adebd31",
+      "dimensions": [
+        32,
+        32
+      ],
+      "frameCount": 0,
+      "alphaValues": [
+        0,
+        255
+      ],
+      "generator": "Assets/Wave05/tools/generate_wave05_assets.py",
+      "method": "deterministic Pillow pixel primitives at final runtime dimensions",
+      "license": "YjsE-Project-Owned",
+      "runtimeConsumer": "SpriteAssetJsonLoader and ClientTextureRegistry preload; gameplay activation remains content-owner controlled"
+    },
+    {
+      "spriteId": "ui/wave05/social",
+      "path": "Assets/Wave05/ui/social.png",
+      "sha256": "88c856a1c8490697355d8f00cbe5f8d31f63f680625af8960befe661486f994b",
+      "dimensions": [
+        32,
+        32
+      ],
+      "frameCount": 0,
+      "alphaValues": [
+        0,
+        255
+      ],
+      "generator": "Assets/Wave05/tools/generate_wave05_assets.py",
+      "method": "deterministic Pillow pixel primitives at final runtime dimensions",
+      "license": "YjsE-Project-Owned",
+      "runtimeConsumer": "SpriteAssetJsonLoader and ClientTextureRegistry preload; gameplay activation remains content-owner controlled"
+    },
+    {
+      "spriteId": "ui/wave05/building",
+      "path": "Assets/Wave05/ui/building.png",
+      "sha256": "a4d6df4c7c5a97b4e815821d8c72dee2c52eda50f7f25e7251dd7e4fe193ca67",
+      "dimensions": [
+        32,
+        32
+      ],
+      "frameCount": 0,
+      "alphaValues": [
+        0,
+        255
+      ],
+      "generator": "Assets/Wave05/tools/generate_wave05_assets.py",
+      "method": "deterministic Pillow pixel primitives at final runtime dimensions",
+      "license": "YjsE-Project-Owned",
+      "runtimeConsumer": "SpriteAssetJsonLoader and ClientTextureRegistry preload; gameplay activation remains content-owner controlled"
+    }
+  ]
+}

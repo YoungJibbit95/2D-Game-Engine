@@ -1,0 +1,281 @@
+{
+  "assets": [
+    {
+      "id": "wave05-amber-grove",
+      "role": "scene",
+      "featuredOrder": 1,
+      "title": "Amber Grove",
+      "meta": "Wave 05 / regional biome",
+      "alt": "Goldener Pixelart-Wald mit Amberbaeumen und warmen Lichtschichten",
+      "localPath": "assets/wave05/world/amber-grove.png",
+      "sourcePath": "Game.Data/Assets/Wave05/backgrounds/amber_grove_parallax.png"
+    },
+    {
+      "id": "wave05-twilight-marsh",
+      "role": "scene",
+      "featuredOrder": 2,
+      "title": "Twilight Marsh",
+      "meta": "Wave 05 / regional biome",
+      "alt": "Dunkler Pixelart-Sumpf mit Mangroven, Nebel und tuerkisen Lichtakzenten",
+      "localPath": "assets/wave05/world/twilight-marsh.png",
+      "sourcePath": "Game.Data/Assets/Wave05/backgrounds/twilight_marsh_parallax.png"
+    },
+    {
+      "id": "wave05-mangrove-root",
+      "role": "world",
+      "title": "Mangrove root autotile",
+      "meta": "16 connected masks",
+      "alt": "Pixelart-Autotile-Streifen fuer passierbare Mangrovenwurzeln",
+      "localPath": "assets/wave05/world/mangrove-root-autotile.png",
+      "sourcePath": "Game.Data/Assets/Wave05/world/mangrove_root_autotile.png"
+    },
+    {
+      "id": "wave05-amberstone",
+      "role": "world",
+      "title": "Amberstone autotile",
+      "meta": "16 connected masks",
+      "alt": "Pixelart-Autotile-Streifen fuer Amberstein",
+      "localPath": "assets/wave05/world/amberstone-autotile.png",
+      "sourcePath": "Game.Data/Assets/Wave05/world/amberstone_autotile.png"
+    },
+    {
+      "id": "wave05-marsh-frog",
+      "role": "entity",
+      "title": "Marsh Frog",
+      "meta": "Friendly water-edge actor",
+      "alt": "Animierter Pixelart-Sumpffrosch",
+      "localPath": "assets/wave05/entities/marsh-frog.png",
+      "sourcePath": "Game.Data/Assets/Wave05/entities/marsh_frog.png"
+    },
+    {
+      "id": "wave05-canopy-owl",
+      "role": "entity",
+      "title": "Canopy Owl",
+      "meta": "Flying grove actor",
+      "alt": "Animierte Pixelart-Baumkroneneule",
+      "localPath": "assets/wave05/entities/canopy-owl.png",
+      "sourcePath": "Game.Data/Assets/Wave05/entities/canopy_owl.png"
+    },
+    {
+      "id": "wave05-amber-beetle",
+      "role": "entity",
+      "title": "Amber Beetle",
+      "meta": "Hostile ground actor",
+      "alt": "Animierter Pixelart-Amberkaefer",
+      "localPath": "assets/wave05/entities/amber-beetle.png",
+      "sourcePath": "Game.Data/Assets/Wave05/entities/amber_beetle.png"
+    },
+    {
+      "id": "wave05-prism-wisp",
+      "role": "entity",
+      "title": "Prism Wisp",
+      "meta": "Flying hostile actor",
+      "alt": "Animiertes Pixelart-Prismenlicht",
+      "localPath": "assets/wave05/entities/prism-wisp.png",
+      "sourcePath": "Game.Data/Assets/Wave05/entities/prism_wisp.png"
+    },
+    {
+      "id": "wave05-sunsteel-pickaxe",
+      "role": "item",
+      "title": "Sunsteel Pickaxe",
+      "meta": "Tool item",
+      "alt": "Pixelart-Sonnenstahlspitzhacke",
+      "localPath": "assets/wave05/items/sunsteel-pickaxe.png",
+      "sourcePath": "Game.Data/Assets/Wave05/items/sunsteel_pickaxe.png"
+    },
+    {
+      "id": "wave05-mirror-shield",
+      "role": "item",
+      "title": "Mirror Shield",
+      "meta": "Guard item",
+      "alt": "Pixelart-Spiegelschild",
+      "localPath": "assets/wave05/items/mirror-shield.png",
+      "sourcePath": "Game.Data/Assets/Wave05/items/mirror_shield.png"
+    },
+    {
+      "id": "wave05-ui-building",
+      "role": "ui",
+      "title": "Building icon",
+      "meta": "Wave 05 UI",
+      "alt": "Pixelart-Symbol fuer das Bausystem",
+      "localPath": "assets/wave05/ui/building.png",
+      "sourcePath": "Game.Data/Assets/Wave05/ui/building.png"
+    },
+    {
+      "id": "wave05-ui-quest",
+      "role": "ui",
+      "title": "Quest icon",
+      "meta": "Wave 05 UI",
+      "alt": "Pixelart-Symbol fuer Weltaktivitaeten",
+      "localPath": "assets/wave05/ui/quest.png",
+      "sourcePath": "Game.Data/Assets/Wave05/ui/quest.png"
+    },
+    {
+      "id": "wave04-meadow",
+      "role": "scene",
+      "featuredOrder": 10,
+      "title": "Meadow",
+      "meta": "Surface / daylight",
+      "alt": "Heller Pixelart-Wiesenhintergrund mit Huegeln und Baeumen",
+      "localPath": "assets/wave04/world/meadow.png",
+      "sourcePath": "Game.Data/sprites/world/backgrounds/wave04/meadow_parallax_layer.png"
+    },
+    {
+      "id": "wave04-forest",
+      "role": "scene",
+      "featuredOrder": 11,
+      "title": "Forest",
+      "meta": "Surface / canopy",
+      "alt": "Pixelart-Waldhintergrund mit mehreren gruenen Tiefenebenen",
+      "localPath": "assets/wave04/world/forest.png",
+      "sourcePath": "Game.Data/sprites/world/backgrounds/wave04/forest_parallax_layer.png"
+    },
+    {
+      "id": "wave04-cave",
+      "role": "scene",
+      "featuredOrder": 12,
+      "title": "Caverns",
+      "meta": "Underground / rest light",
+      "alt": "Dunkler Pixelart-Hoehlenhintergrund mit Felsformationen",
+      "localPath": "assets/wave04/world/cave.png",
+      "sourcePath": "Game.Data/sprites/world/backgrounds/wave04/cave_parallax_layer.png"
+    },
+    {
+      "id": "wave04-mushroom",
+      "role": "scene",
+      "featuredOrder": 13,
+      "title": "Mushroom Caves",
+      "meta": "Underground / spores",
+      "alt": "Violetter Pixelart-Pilzhoehlengrund mit leuchtenden Pilzen",
+      "localPath": "assets/wave04/world/mushroom.png",
+      "sourcePath": "Game.Data/sprites/world/backgrounds/wave04/mushroom_cave_parallax_layer.png"
+    },
+    {
+      "id": "wave04-crystal",
+      "role": "scene",
+      "featuredOrder": 14,
+      "title": "Crystal Depths",
+      "meta": "Deep layer / emissive",
+      "alt": "Tiefblauer Pixelart-Hoehlengrund mit hellen Kristallen",
+      "localPath": "assets/wave04/world/crystal.png",
+      "sourcePath": "Game.Data/sprites/world/backgrounds/wave04/crystal_depths_parallax_layer.png"
+    },
+    {
+      "id": "wave04-player-body",
+      "role": "player-layer",
+      "title": "Player body actions",
+      "meta": "Source-rectangle strip",
+      "alt": "Pixelart-Animationsstreifen des Spielerkoerpers",
+      "localPath": "assets/wave04/player/body-actions.png",
+      "sourcePath": "Game.Data/sprites/entities/player/wave04/player_body_actions.png"
+    },
+    {
+      "id": "wave04-player-hair",
+      "role": "player-layer",
+      "title": "Player hair actions",
+      "meta": "Rig layer",
+      "alt": "Pixelart-Animationsstreifen der Spielerhaare",
+      "localPath": "assets/wave04/player/hair-actions.png",
+      "sourcePath": "Game.Data/sprites/entities/player/wave04/player_hair_actions.png"
+    },
+    {
+      "id": "wave04-player-clothes",
+      "role": "player-layer",
+      "title": "Player clothes actions",
+      "meta": "Rig layer",
+      "alt": "Pixelart-Animationsstreifen der Spielerkleidung",
+      "localPath": "assets/wave04/player/clothes-actions.png",
+      "sourcePath": "Game.Data/sprites/entities/player/wave04/player_clothes_actions.png"
+    },
+    {
+      "id": "wave04-player-armor",
+      "role": "player-layer",
+      "title": "Player armor actions",
+      "meta": "Rig layer",
+      "alt": "Pixelart-Animationsstreifen der Spielerruestung",
+      "localPath": "assets/wave04/player/armor-actions.png",
+      "sourcePath": "Game.Data/sprites/entities/player/wave04/player_armor_actions.png"
+    },
+    {
+      "id": "wave04-player-equipment",
+      "role": "player-layer",
+      "title": "Player equipment actions",
+      "meta": "Rig layer",
+      "alt": "Pixelart-Animationsstreifen der Spielerausruestung",
+      "localPath": "assets/wave04/player/equipment-actions.png",
+      "sourcePath": "Game.Data/sprites/entities/player/wave04/player_equipment_actions.png"
+    },
+    {
+      "id": "wave04-ui-block",
+      "role": "ui",
+      "title": "Block icon",
+      "meta": "Wave 04 UI",
+      "alt": "Pixelart-Schildsymbol fuer Blocken",
+      "localPath": "assets/wave04/ui/block.png",
+      "sourcePath": "Game.Data/sprites/ui/wave04/block.png"
+    },
+    {
+      "id": "wave04-ui-weather",
+      "role": "ui",
+      "title": "Weather icon",
+      "meta": "Wave 04 UI",
+      "alt": "Pixelart-Symbol fuer Wetter",
+      "localPath": "assets/wave04/ui/weather.png",
+      "sourcePath": "Game.Data/sprites/ui/wave04/weather.png"
+    },
+    {
+      "id": "wave04-ui-armor",
+      "role": "ui",
+      "title": "Armor icon",
+      "meta": "Wave 04 UI",
+      "alt": "Pixelart-Symbol fuer Ruestung",
+      "localPath": "assets/wave04/ui/armor.png",
+      "sourcePath": "Game.Data/sprites/ui/wave04/armor.png"
+    },
+    {
+      "id": "wave04-ui-panel",
+      "role": "ui",
+      "title": "Panel nine-slice",
+      "meta": "Wave 04 UI",
+      "alt": "Pixelart-Neunsegment-Panel",
+      "localPath": "assets/wave04/ui/panel-9slice.png",
+      "sourcePath": "Game.Data/sprites/ui/wave04/panel_9slice.png"
+    },
+    {
+      "id": "wave04-sword-arc",
+      "role": "effect",
+      "title": "Sword arc",
+      "meta": "Combat effect",
+      "alt": "Pixelart-Schwertbogen-Effekt",
+      "localPath": "assets/wave04/effects/sword-arc.png",
+      "sourcePath": "Game.Data/sprites/effects/combat/sword_arc.png"
+    },
+    {
+      "id": "wave04-block-impact",
+      "role": "effect",
+      "title": "Block impact",
+      "meta": "Combat effect",
+      "alt": "Pixelart-Blocktreffer-Effekt",
+      "localPath": "assets/wave04/effects/block-impact.png",
+      "sourcePath": "Game.Data/sprites/effects/combat/block_impact.png"
+    },
+    {
+      "id": "wave04-forest-leaves",
+      "role": "effect",
+      "title": "Forest leaves",
+      "meta": "Ambient effect",
+      "alt": "Pixelart-Waldblattpartikel",
+      "localPath": "assets/wave04/effects/forest-leaves.png",
+      "sourcePath": "Game.Data/sprites/effects/ambient/forest_leaf_swirl.png"
+    },
+    {
+      "id": "wave04-mushroom-spores",
+      "role": "effect",
+      "title": "Mushroom spores",
+      "meta": "Ambient effect",
+      "alt": "Pixelart-Pilzsporenpartikel",
+      "localPath": "assets/wave04/effects/mushroom-spores.png",
+      "sourcePath": "Game.Data/sprites/effects/ambient/mushroom_spores.png"
+    }
+  ]
+}

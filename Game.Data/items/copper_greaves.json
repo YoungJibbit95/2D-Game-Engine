@@ -1,6 +1,11 @@
 {
   "id": "copper_greaves",
   "displayName": "Copper Greaves",
+  "description": "Reinforced leg armor for rough caves and close combat.",
+  "rarity": "Common",
+  "value": 50,
+  "category": "Equipment",
+  "sortPriority": 30,
   "type": "Armor",
   "texture": "items/copper_greaves",
   "maxStack": 1,

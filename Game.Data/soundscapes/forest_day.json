@@ -1,0 +1,17 @@
+{
+  "id": "forest_day",
+  "dayMusicLoopId": "music/forest_day",
+  "nightMusicLoopId": "music/forest_night",
+  "undergroundMusicLoopId": "music/caves_low",
+  "surfaceAmbientLoopId": "ambient/forest_canopy",
+  "undergroundAmbientLoopId": "ambient/forest_cave",
+  "rainLoopId": "ambient/rain_leaves",
+  "stormLoopId": "ambient/storm_forest",
+  "fogLoopId": "ambient/forest_fog",
+  "rainStartStingerId": "stingers/rain_begin",
+  "stormStartStingerId": "stingers/thunder_distant",
+  "musicVolume": 0.74,
+  "ambientVolume": 0.68,
+  "weatherVolume": 0.76,
+  "crossfadeSeconds": 2.2
+}

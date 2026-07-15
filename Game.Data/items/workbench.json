@@ -1,6 +1,11 @@
 {
   "id": "workbench",
   "displayName": "Workbench",
+  "description": "A basic crafting station for tools, weapons and utility furniture.",
+  "rarity": "Common",
+  "value": 20,
+  "category": "Block",
+  "sortPriority": 100,
   "type": "PlaceableTile",
   "texture": "items/workbench",
   "maxStack": 99,

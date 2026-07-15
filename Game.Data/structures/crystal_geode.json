@@ -1,0 +1,13 @@
+{
+  "id": "crystal_geode",
+  "templateId": "crystal_geode_room",
+  "placement": "cave",
+  "chancePerRegion": 0.44,
+  "minSpacingRegions": 2,
+  "widthTiles": 16,
+  "heightTiles": 10,
+  "minTileY": 108,
+  "maxTileY": 140,
+  "allowedBiomeIds": ["crystal_depths"],
+  "allowedLayerIds": ["crystal_depths"]
+}

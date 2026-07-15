@@ -1,0 +1,17 @@
+{
+  "id": "deep_cave_crystal_spider",
+  "entityId": "crystal_cave_spider",
+  "biomeId": "forest",
+  "time": "any",
+  "habitats": ["cavern"],
+  "minTileY": 128,
+  "maxTileY": 360,
+  "chance": 0.025,
+  "maxActive": 1,
+  "populationGroup": "cave_elites",
+  "maxActiveInGroup": 1,
+  "populationRegionSizeTiles": 128,
+  "maxActiveInRegion": 1,
+  "maxActiveInHabitat": 1,
+  "cooldownSeconds": 90
+}

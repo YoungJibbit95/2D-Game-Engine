@@ -10,6 +10,7 @@ using Game.Core.Items;
 using Game.Core.Loot;
 using Game.Core.Physics;
 using Game.Core.Projectiles;
+using Game.Core.Randomness;
 using Game.Core.Spawning;
 using Game.Core.Tiles;
 using System.Numerics;
@@ -64,6 +65,26 @@ public sealed class CombatSystemTests
 
         Assert.Equal(1, result.StatusEffectsApplied);
         Assert.True(enemy.StatusEffects.HasEffect("poisoned"));
+    }
+
+    [Fact]
+    public void ResolveProjectileHits_PiercingProjectileHitsSameEnemyExactlyOnce()
+    {
+        var entities = new EntityManager(spatialCellSize: 16);
+        var enemy = CreateEnemy(health: 20);
+        var projectile = new ProjectileEntity("arrow", Vector2.Zero, Vector2.Zero, 3, 0, 2, 5);
+        entities.Add(enemy);
+        entities.Add(projectile);
+        var combat = CreateCombatSystem();
+
+        var first = combat.ResolveProjectileHits(entities, CreateLootTables());
+        var second = combat.ResolveProjectileHits(entities, CreateLootTables());
+
+        Assert.Equal(1, first.ProjectileHits);
+        Assert.Equal(0, second.ProjectileHits);
+        Assert.Equal(17, enemy.Health.Current);
+        Assert.True(projectile.IsActive);
+        Assert.Equal(1, projectile.Pierce);
     }
 
     [Fact]
@@ -128,9 +149,162 @@ public sealed class CombatSystemTests
         Assert.True(player.StatusEffects.HasEffect("poisoned"));
     }
 
+    [Fact]
+    public void ResolveEnemyContactDamage_WithGuardReturnsParryWithoutApplyingDamage()
+    {
+        var entities = new EntityManager(spatialCellSize: 16);
+        var player = new PlayerEntity(Vector2.Zero, new TileCollisionResolver());
+        var enemy = CreateEnemy(health: 20);
+        entities.Add(enemy);
+        var guard = new GuardRuntimeState(new GuardDefinition());
+        Assert.True(guard.TryBeginGuard(enemy.Body.Center - player.Body.Center));
+
+        var result = CreateCombatSystem().ResolveEnemyContactDamage(
+            player,
+            entities,
+            guard,
+            CreateDamageResolver(),
+            damage: 12);
+
+        Assert.Equal(1, result.ContactHits);
+        Assert.True(result.Parried);
+        Assert.Equal(CombatHitOutcome.Parried, result.Outcome);
+        Assert.Equal(0, result.DamageApplied);
+        Assert.Equal(100, player.Health);
+        Assert.NotNull(result.Resolution);
+        Assert.Contains(result.Resolution.Value.Events, gameEvent => gameEvent is CombatParriedEvent);
+    }
+
+    [Fact]
+    public void ResolveEnemyContactDamage_WithGuardReturnsBlockedActualDamage()
+    {
+        var entities = new EntityManager(spatialCellSize: 16);
+        var player = new PlayerEntity(Vector2.Zero, new TileCollisionResolver());
+        var enemy = CreateEnemy(health: 20);
+        entities.Add(enemy);
+        var guard = new GuardRuntimeState(new GuardDefinition());
+        Assert.True(guard.TryBeginGuard(enemy.Body.Center - player.Body.Center));
+        guard.Update(0.2f);
+
+        var result = CreateCombatSystem().ResolveEnemyContactDamage(
+            player,
+            entities,
+            guard,
+            CreateDamageResolver(),
+            damage: 12);
+
+        Assert.True(result.Blocked);
+        Assert.Equal(3, result.DamageApplied);
+        Assert.Equal(9, result.DamagePrevented);
+        Assert.Equal(12, result.GuardStaminaSpent);
+        Assert.Equal(97, player.Health);
+    }
+
+    [Fact]
+    public void ResolveEnemyContactDamage_WithGuardReturnsGuardBreakAndActualDamage()
+    {
+        var entities = new EntityManager(spatialCellSize: 16);
+        var player = new PlayerEntity(Vector2.Zero, new TileCollisionResolver());
+        var enemy = CreateEnemy(health: 20);
+        entities.Add(enemy);
+        var guard = new GuardRuntimeState(new GuardDefinition(), stamina: 5);
+        Assert.True(guard.TryBeginGuard(enemy.Body.Center - player.Body.Center));
+        guard.Update(0.2f);
+
+        var result = CreateCombatSystem().ResolveEnemyContactDamage(
+            player,
+            entities,
+            guard,
+            CreateDamageResolver(),
+            damage: 12);
+
+        Assert.True(result.GuardBroken);
+        Assert.Equal(12, result.DamageApplied);
+        Assert.Equal(5, result.GuardStaminaSpent);
+        Assert.Equal(88, player.Health);
+        Assert.True(guard.IsGuardBroken);
+    }
+
+    [Fact]
+    public void ResolveProjectileDamageAgainstPlayer_QueriesAndAppliesHostileProjectile()
+    {
+        var entities = new EntityManager(spatialCellSize: 16);
+        var player = new PlayerEntity(Vector2.Zero, new TileCollisionResolver());
+        var projectile = new ProjectileEntity(
+            new ProjectileDefinition
+            {
+                Id = "hostile-bolt",
+                TexturePath = "projectiles/hostile-bolt",
+                Speed = 100,
+                Damage = 8,
+                DamageType = DamageType.Magic,
+                Lifetime = 5
+            },
+            Vector2.Zero,
+            Vector2.UnitX,
+            ownerEntityId: 99,
+            ownerFaction: EntityFaction.Hostile);
+        entities.Add(projectile);
+
+        var result = CreateCombatSystem().ResolveProjectileDamageAgainstPlayer(
+            player,
+            entities,
+            CreateContent(),
+            new GuardRuntimeState(new GuardDefinition()),
+            CreateDamageResolver());
+
+        Assert.Equal(1, result.ContactHits);
+        Assert.Equal(CombatHitOutcome.Applied, result.Outcome);
+        Assert.Equal(8, result.DamageApplied);
+        Assert.Equal(92, player.Health);
+        Assert.False(projectile.IsActive);
+    }
+
+    [Fact]
+    public void ResolvePlayerDamage_HandlesProjectileAndContactThroughCombinedEntryPoint()
+    {
+        var entities = new EntityManager(spatialCellSize: 16);
+        var player = new PlayerEntity(Vector2.Zero, new TileCollisionResolver());
+        entities.Add(CreateEnemy(health: 20));
+        var projectile = new ProjectileEntity(
+            new ProjectileDefinition
+            {
+                Id = "hostile-bolt",
+                TexturePath = "projectiles/hostile-bolt",
+                Speed = 100,
+                Damage = 8,
+                Lifetime = 5
+            },
+            Vector2.Zero,
+            Vector2.UnitX,
+            ownerEntityId: 99,
+            ownerFaction: EntityFaction.Hostile);
+        entities.Add(projectile);
+
+        var result = CreateCombatSystem().ResolvePlayerDamage(
+            player,
+            entities,
+            CreateContent(),
+            new GuardRuntimeState(new GuardDefinition()),
+            CreateDamageResolver());
+
+        Assert.Equal(1, result.ContactHits);
+        Assert.Equal(8, result.DamageApplied);
+        Assert.Equal(92, player.Health);
+        Assert.False(projectile.IsActive);
+    }
+
     private static CombatSystem CreateCombatSystem()
     {
         return new CombatSystem(new LootRoller(new Random(1)), new TileCollisionResolver());
+    }
+
+    private static CombatDamageResolver CreateDamageResolver()
+    {
+        var randoms = new SessionRandomRegistry(9173);
+        return new CombatDamageResolver(
+            randoms.GetStream("combat.critical"),
+            randoms.GetStream("combat.status-resolution"));
     }
 
     private static EnemyEntity CreateEnemy(int health)

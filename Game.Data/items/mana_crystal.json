@@ -1,6 +1,11 @@
 {
   "id": "mana_crystal",
   "displayName": "Mana Crystal",
+  "description": "A resonant crystal that permanently expands carried magical capacity while equipped.",
+  "rarity": "Rare",
+  "value": 160,
+  "category": "Equipment",
+  "sortPriority": 60,
   "type": "Accessory",
   "texture": "items/mana_crystal",
   "maxStack": 1,

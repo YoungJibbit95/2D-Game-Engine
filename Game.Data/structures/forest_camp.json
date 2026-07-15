@@ -1,0 +1,29 @@
+{
+  "id": "forest_camp",
+  "templateId": "forest_camp_small",
+  "placement": "surface",
+  "chancePerRegion": 0.42,
+  "minSpacingRegions": 2,
+  "widthTiles": 14,
+  "heightTiles": 8,
+  "minTileY": 50,
+  "maxTileY": 68,
+  "allowedBiomeIds": ["forest"],
+  "allowedLayerIds": ["surface"],
+  "transparentSymbol": ".",
+  "legend": {
+    "W": "wood",
+    "S": "stone",
+    "_": "air"
+  },
+  "rows": [
+    ".....WW.......",
+    "....W__W......",
+    "...W____W.....",
+    "..W______W....",
+    "..W______W....",
+    "..W______W....",
+    "WWWWWWWWWWWWWW",
+    "SSSSSSSSSSSSSS"
+  ]
+}

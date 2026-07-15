@@ -15,6 +15,7 @@ public sealed class GameSettingsValidator
         ValidateWorld(settings.World, result);
         ValidateInput(settings.Input, result);
         ValidateDebug(settings.Debug, result);
+        ValidateAccessibility(settings.Accessibility, result);
         return result;
     }
 
@@ -28,6 +29,11 @@ public sealed class GameSettingsValidator
         if (video.Height < 360 || video.Height > 4320)
         {
             result.Add("video.height", "Height must be between 360 and 4320.");
+        }
+
+        if (video.FrameRateLimit != 0 && video.FrameRateLimit is < 30 or > 360)
+        {
+            result.Add("video.frameRateLimit", "Frame-rate limit must be unlimited (0) or between 30 and 360 FPS.");
         }
 
         if (video.UiScale < 0.5f || video.UiScale > 4f)
@@ -54,6 +60,24 @@ public sealed class GameSettingsValidator
 
         ValidateUnitRange(rendering.LiquidOpacity, "rendering.liquidOpacity", result);
         ValidateUnitRange(rendering.LightingBlendStrength, "rendering.lightingBlendStrength", result);
+        ValidateQuality(rendering.LightingQuality, "rendering.lightingQuality", result);
+        ValidateQuality(rendering.ShadowQuality, "rendering.shadowQuality", result);
+        ValidateQuality(rendering.ReflectionQuality, "rendering.reflectionQuality", result);
+        ValidateQuality(rendering.UiEffectQuality, "rendering.uiEffectQuality", result);
+        ValidateUnitRange(rendering.CaveAmbientLight, "rendering.caveAmbientLight", result);
+        ValidateUnitRange(rendering.TorchBloomStrength, "rendering.torchBloomStrength", result);
+        ValidateUnitRange(rendering.ShadowSoftness, "rendering.shadowSoftness", result);
+        ValidateUnitRange(rendering.ReflectionStrength, "rendering.reflectionStrength", result);
+
+        if (rendering.RaymarchStepBudget < 4 || rendering.RaymarchStepBudget > 128)
+        {
+            result.Add("rendering.raymarchStepBudget", "Raymarch step budget must be between 4 and 128.");
+        }
+
+        if (rendering.BlurRadiusPixels < 0 || rendering.BlurRadiusPixels > 24)
+        {
+            result.Add("rendering.blurRadiusPixels", "Blur radius must be between 0 and 24 pixels.");
+        }
 
         if (rendering.MaxChunkRenderCacheEntries < 32 || rendering.MaxChunkRenderCacheEntries > 4096)
         {
@@ -75,6 +99,19 @@ public sealed class GameSettingsValidator
         if (ui.AnimationSpeed < 0.1f || ui.AnimationSpeed > 4f)
         {
             result.Add("ui.animationSpeed", "UI animation speed must be between 0.1 and 4.");
+        }
+
+
+        if (ui.CornerRadiusPixels < 0 || ui.CornerRadiusPixels > 16)
+        {
+            result.Add("ui.cornerRadiusPixels", "UI corner radius must be between 0 and 16 pixels.");
+        }
+
+        ValidateUnitRange(ui.BackdropBlurStrength, "ui.backdropBlurStrength", result);
+        ValidateUnitRange(ui.GlowStrength, "ui.glowStrength", result);
+        if (ui.TextScale < 0.75f || ui.TextScale > 2f)
+        {
+            result.Add("ui.textScale", "UI text scale must be between 0.75 and 2.");
         }
     }
 
@@ -127,6 +164,24 @@ public sealed class GameSettingsValidator
         {
             result.Add("gameplay.screenShakeMultiplier", "Screen shake multiplier must be between 0 and 4.");
         }
+
+
+        if (gameplay.EntitySimulationRadiusPixels < 256f || gameplay.EntitySimulationRadiusPixels > 8192f)
+        {
+            result.Add("gameplay.entitySimulationRadiusPixels", "Entity simulation radius must be between 256 and 8192 pixels.");
+        }
+
+        if (gameplay.SpawnMinimumDistancePixels < 64f ||
+            gameplay.SpawnMinimumDistancePixels > gameplay.SpawnMaximumDistancePixels)
+        {
+            result.Add("gameplay.spawnMinimumDistancePixels", "Spawn minimum distance must be at least 64 pixels and not exceed the maximum.");
+        }
+
+        if (gameplay.SpawnMaximumDistancePixels > gameplay.EntitySimulationRadiusPixels ||
+            gameplay.SpawnMaximumDistancePixels > 8192f)
+        {
+            result.Add("gameplay.spawnMaximumDistancePixels", "Spawn maximum distance must fit inside the entity simulation radius.");
+        }
     }
 
     private static void ValidateInput(InputSettings input, SettingsValidationResult result)
@@ -171,6 +226,48 @@ public sealed class GameSettingsValidator
         {
             result.Add("world.streamingBudgetChunksPerFrame", "Streaming budget must be between 1 and 512 chunks per frame.");
         }
+
+        if (world.StreamingConcurrentLoads is < 1 or > 32)
+        {
+            result.Add("world.streamingConcurrentLoads", "Concurrent streaming loads must be between 1 and 32.");
+        }
+
+        if (world.StreamingConcurrentSaves is < 1 or > 8)
+        {
+            result.Add("world.streamingConcurrentSaves", "Concurrent streaming saves must be between 1 and 8.");
+        }
+
+        if (world.StreamingApplyQueueLimit is < 8 or > 2048)
+        {
+            result.Add("world.streamingApplyQueueLimit", "Streaming apply queue limit must be between 8 and 2048.");
+        }
+
+        if (!float.IsFinite(world.StreamingApplyBudgetMilliseconds) ||
+            world.StreamingApplyBudgetMilliseconds is < 0.25f or > 33f)
+        {
+            result.Add("world.streamingApplyBudgetMilliseconds", "Streaming apply time budget must be between 0.25 and 33 milliseconds.");
+        }
+
+        if (world.StreamingApplyBudgetKilobytes is < 64 or > 16384)
+        {
+            result.Add("world.streamingApplyBudgetKilobytes", "Streaming apply byte budget must be between 64 and 16384 KiB.");
+        }
+
+        if (world.StreamingRetryAttempts is < 1 or > 16)
+        {
+            result.Add("world.streamingRetryAttempts", "Streaming retry attempts must be between 1 and 16.");
+        }
+
+        if (world.StreamingRetryInitialBackoffUpdates is < 1 or > 256)
+        {
+            result.Add("world.streamingRetryInitialBackoffUpdates", "Initial retry backoff must be between 1 and 256 updates.");
+        }
+
+        if (world.StreamingRetryMaximumBackoffUpdates < world.StreamingRetryInitialBackoffUpdates ||
+            world.StreamingRetryMaximumBackoffUpdates > 4096)
+        {
+            result.Add("world.streamingRetryMaximumBackoffUpdates", "Maximum retry backoff must be between the initial backoff and 4096 updates.");
+        }
     }
 
     private static void ValidateDebug(DebugSettings debug, SettingsValidationResult result)
@@ -178,6 +275,27 @@ public sealed class GameSettingsValidator
         if (debug.ProfilerMetricLimit < 3 || debug.ProfilerMetricLimit > 32)
         {
             result.Add("debug.profilerMetricLimit", "Profiler metric limit must be between 3 and 32.");
+        }
+    }
+
+    private static void ValidateAccessibility(AccessibilitySettings accessibility, SettingsValidationResult result)
+    {
+        if (accessibility.InterfaceContrast < 0.5f || accessibility.InterfaceContrast > 2f)
+        {
+            result.Add("accessibility.interfaceContrast", "Interface contrast must be between 0.5 and 2.");
+        }
+
+        if (accessibility.TooltipDelaySeconds < 0f || accessibility.TooltipDelaySeconds > 2f)
+        {
+            result.Add("accessibility.tooltipDelaySeconds", "Tooltip delay must be between 0 and 2 seconds.");
+        }
+    }
+
+    private static void ValidateQuality(int value, string path, SettingsValidationResult result)
+    {
+        if (value < 0 || value > 3)
+        {
+            result.Add(path, "Quality must be between 0 and 3.");
         }
     }
 

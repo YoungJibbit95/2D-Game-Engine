@@ -1,6 +1,11 @@
 {
   "id": "copper_pickaxe",
   "displayName": "Copper Pickaxe",
+  "description": "A balanced starter pickaxe for dirt, stone and common ore.",
+  "rarity": "Common",
+  "value": 35,
+  "category": "Tool",
+  "sortPriority": 10,
   "type": "ToolPickaxe",
   "texture": "items/copper_pickaxe",
   "maxStack": 1,

@@ -1,0 +1,14 @@
+{
+  "id": "anvil",
+  "numericId": 10,
+  "displayName": "Iron Anvil",
+  "texture": "world/objects/anvil",
+  "solid": false,
+  "blocksLight": false,
+  "hardness": 3.0,
+  "miningPowerRequired": 20,
+  "dropItem": "anvil",
+  "mergeGroup": "furniture",
+  "craftingStation": "anvil",
+  "tags": ["station", "crafting", "smithing", "furniture", "mineable"]
+}

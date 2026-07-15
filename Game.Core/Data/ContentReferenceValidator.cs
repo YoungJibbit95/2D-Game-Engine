@@ -28,6 +28,7 @@ public sealed class ContentReferenceValidator
         ValidateAnimations(database, report);
         ValidateCharacters(database, report);
         ValidateWorldGenerationProfiles(database, report);
+        ValidateWorldEvents(database, report);
         ValidateSpriteReferences(database, report);
     }
 
@@ -139,6 +140,20 @@ public sealed class ContentReferenceValidator
             {
                 AddMissingReference(report, "biome", biome.Id, "underground tile", biome.UndergroundTile);
             }
+
+            ValidateOptionalSpawnRule(database, report, biome.Id, "enemy spawn table", biome.EnemySpawnTable);
+            ValidateOptionalSpawnRule(database, report, biome.Id, "surface day spawn table", biome.Spawning.SurfaceDayTableId);
+            ValidateOptionalSpawnRule(database, report, biome.Id, "surface night spawn table", biome.Spawning.SurfaceNightTableId);
+            ValidateOptionalSpawnRule(database, report, biome.Id, "cave spawn table", biome.Spawning.CaveTableId);
+
+            if (database.SpriteAssets.HasExplicitAssets)
+            {
+                RequireOptionalSprite(database, report, "biome", biome.Id, biome.Presentation.BackgroundSpriteId);
+                RequireOptionalSprite(database, report, "biome", biome.Id, biome.Presentation.AmbientParticleSpriteId);
+                RequireOptionalSprite(database, report, "biome", biome.Id, biome.Presentation.AmbientCritterSpriteId);
+                RequireOptionalSprite(database, report, "biome", biome.Id, biome.Presentation.BiomeIconSpriteId);
+                RequireOptionalSprite(database, report, "biome", biome.Id, biome.Presentation.EliteSpriteId);
+            }
         }
     }
 
@@ -165,6 +180,20 @@ public sealed class ContentReferenceValidator
 
     private static void ValidateSpawnRules(GameContentDatabase database, ContentLoadReport report)
     {
+        var knownWorldEvents = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var definition in database.WorldEvents.Definitions)
+        {
+            knownWorldEvents.Add(definition.Id);
+        }
+
+        foreach (var profile in database.RegionalGenerationProfiles.Profiles)
+        {
+            foreach (var definition in profile.WorldEvents)
+            {
+                knownWorldEvents.Add(definition.Id);
+            }
+        }
+
         foreach (var rule in database.SpawnRules.Definitions)
         {
             if (!database.Entities.TryGetById(rule.EntityId, out _))
@@ -175,6 +204,16 @@ public sealed class ContentReferenceValidator
             if (!string.IsNullOrWhiteSpace(rule.BiomeId) && !database.Biomes.TryGetById(rule.BiomeId, out _))
             {
                 AddMissingReference(report, "spawn", rule.Id, "biome", rule.BiomeId);
+            }
+
+            foreach (var eventId in rule.WorldEventWeights.Keys)
+            {
+                if (!string.Equals(eventId, "none", StringComparison.OrdinalIgnoreCase) &&
+                    !string.Equals(eventId, "*", StringComparison.OrdinalIgnoreCase) &&
+                    !knownWorldEvents.Contains(eventId))
+                {
+                    AddMissingReference(report, "spawn", rule.Id, "world event", eventId);
+                }
             }
         }
     }
@@ -395,6 +434,85 @@ public sealed class ContentReferenceValidator
                 }
             }
         }
+
+
+        foreach (var structure in database.StructurePlans.Definitions)
+        {
+            foreach (var tileId in structure.Legend.Values.Distinct(StringComparer.OrdinalIgnoreCase))
+            {
+                if (!string.Equals(tileId, "air", StringComparison.OrdinalIgnoreCase) &&
+                    !database.Tiles.TryGetById(tileId, out _))
+                {
+                    AddMissingReference(report, "structure-plan", structure.Id, "template tile", tileId);
+                }
+            }
+
+            foreach (var biomeId in structure.AllowedBiomeIds)
+            {
+                if (!database.Biomes.TryGetById(biomeId, out _))
+                {
+                    AddMissingReference(report, "structure-plan", structure.Id, "biome", biomeId);
+                }
+            }
+        }
+
+        foreach (var profile in database.RegionalGenerationProfiles.Profiles)
+        {
+            foreach (var layer in profile.BiomeLayers)
+            {
+                foreach (var biomeId in layer.BiomeIds)
+                {
+                    if (!database.Biomes.TryGetById(biomeId, out _))
+                    {
+                        AddMissingReference(report, "regional-worldgen", profile.Id, $"layer '{layer.Id}' biome", biomeId);
+                    }
+                }
+            }
+
+            foreach (var feature in profile.Features)
+            {
+                foreach (var biomeId in feature.AllowedBiomeIds)
+                {
+                    if (!database.Biomes.TryGetById(biomeId, out _))
+                    {
+                        AddMissingReference(report, "regional-worldgen", profile.Id, $"feature '{feature.Id}' biome", biomeId);
+                    }
+                }
+            }
+        }
+    }
+
+    private static void ValidateWorldEvents(GameContentDatabase database, ContentLoadReport report)
+    {
+        foreach (var definition in database.WorldEvents.Definitions)
+        {
+            foreach (var biomeId in definition.AllowedBiomeIds)
+            {
+                if (!database.Biomes.TryGetById(biomeId, out _))
+                {
+                    AddMissingReference(report, "world-event", definition.Id, "biome", biomeId);
+                }
+            }
+
+            if (database.SpriteAssets.HasExplicitAssets)
+            {
+                RequireOptionalSprite(
+                    database,
+                    report,
+                    "world-event",
+                    definition.Id,
+                    definition.Modifiers.ParticleSpriteId);
+                foreach (var phase in definition.Phases)
+                {
+                    RequireOptionalSprite(
+                        database,
+                        report,
+                        "world-event",
+                        $"{definition.Id}:{phase.Id}",
+                        phase.Modifiers.ParticleSpriteId);
+                }
+            }
+        }
     }
 
     private static void ValidateDimensionTile(
@@ -456,6 +574,32 @@ public sealed class ContentReferenceValidator
         }
 
         AddMissingReference(report, contentKind, contentId, "sprite asset", spriteId);
+    }
+
+    private static void RequireOptionalSprite(
+        GameContentDatabase database,
+        ContentLoadReport report,
+        string contentKind,
+        string contentId,
+        string? spriteId)
+    {
+        if (!string.IsNullOrWhiteSpace(spriteId))
+        {
+            RequireSprite(database, report, contentKind, contentId, spriteId);
+        }
+    }
+
+    private static void ValidateOptionalSpawnRule(
+        GameContentDatabase database,
+        ContentLoadReport report,
+        string biomeId,
+        string referenceKind,
+        string? ruleId)
+    {
+        if (!string.IsNullOrWhiteSpace(ruleId) && !database.SpawnRules.TryGetById(ruleId, out _))
+        {
+            AddMissingReference(report, "biome", biomeId, referenceKind, ruleId);
+        }
     }
 
     private static void ValidateStatusEffects(

@@ -1,0 +1,13 @@
+{
+  "id": "marsh_moss",
+  "numericId": 15,
+  "displayName": "Marsh Moss",
+  "texture": "world/wave05/marsh_moss_autotile",
+  "solid": true,
+  "blocksLight": true,
+  "hardness": 1.1,
+  "miningPowerRequired": 0,
+  "dropItem": "marsh_moss_block",
+  "mergeGroup": "soil",
+  "tags": ["soil", "moss", "twilight-marsh", "natural", "mineable"]
+}

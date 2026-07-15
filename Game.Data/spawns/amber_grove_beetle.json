@@ -1,0 +1,20 @@
+{
+  "id": "amber_grove_beetle",
+  "entityId": "amber_beetle",
+  "biomeId": "amber_grove",
+  "time": "day",
+  "habitats": ["surface"],
+  "minTileY": 0,
+  "maxTileY": 112,
+  "chance": 0.2,
+  "dayWeight": 1.35,
+  "worldEventWeights": { "amberfall": 1.8 },
+  "maxActive": 5,
+  "populationGroup": "grove-hostiles",
+  "maxActiveInGroup": 7,
+  "populationRegionSizeTiles": 96,
+  "maxActiveInRegion": 3,
+  "maxActiveInHabitat": 5,
+  "maxActiveInLocalArea": 2,
+  "cooldownSeconds": 6.0
+}

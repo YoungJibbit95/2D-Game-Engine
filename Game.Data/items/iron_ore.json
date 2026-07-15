@@ -1,6 +1,11 @@
 {
   "id": "iron_ore",
   "displayName": "Iron Ore",
+  "description": "Dense ore suitable for stronger tools, weapons and stations.",
+  "rarity": "Uncommon",
+  "value": 8,
+  "category": "Material",
+  "sortPriority": 50,
   "type": "Material",
   "texture": "items/iron_ore",
   "maxStack": 999

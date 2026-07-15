@@ -3,7 +3,7 @@
     {
       "id": "player.idle",
       "displayName": "Player Idle",
-      "sprite": "entities/player/base_actions",
+      "sprite": "entities/player/character_v1_wave04/body",
       "frameStart": 0,
       "frameCount": 2,
       "frameDuration": 0.35,
@@ -13,9 +13,9 @@
     {
       "id": "player.walk",
       "displayName": "Player Walk",
-      "sprite": "entities/player/base_actions",
+      "sprite": "entities/player/character_v1_wave04/body",
       "frameStart": 2,
-      "frameCount": 4,
+      "frameCount": 6,
       "frameDuration": 0.1,
       "loopMode": "Loop",
       "tags": ["player", "movement", "walk"]
@@ -23,8 +23,8 @@
     {
       "id": "player.jump",
       "displayName": "Player Jump",
-      "sprite": "entities/player/base_actions",
-      "frameStart": 6,
+      "sprite": "entities/player/character_v1_wave04/body",
+      "frameStart": 8,
       "frameCount": 1,
       "frameDuration": 0.12,
       "loopMode": "Once",
@@ -33,8 +33,8 @@
     {
       "id": "player.fall",
       "displayName": "Player Fall",
-      "sprite": "entities/player/base_actions",
-      "frameStart": 7,
+      "sprite": "entities/player/character_v1_wave04/body",
+      "frameStart": 9,
       "frameCount": 1,
       "frameDuration": 0.12,
       "loopMode": "Once",
@@ -43,11 +43,11 @@
     {
       "id": "player.mine",
       "displayName": "Player Mine",
-      "sprite": "entities/player/base_actions",
+      "sprite": "entities/player/character_v1_wave04/body",
       "frames": [
-        { "frame": 8, "durationMs": 80, "eventId": "tool_raise" },
-        { "frame": 9, "durationMs": 90, "eventId": "tool_swing" },
-        { "frame": 8, "durationMs": 80 }
+        { "frame": 10, "durationMs": 80, "eventId": "tool_raise" },
+        { "frame": 11, "durationMs": 90, "eventId": "tool_swing" },
+        { "frame": 12, "durationMs": 80 }
       ],
       "loopMode": "Loop",
       "tags": ["player", "action", "mine"]
@@ -55,14 +55,34 @@
     {
       "id": "player.attack",
       "displayName": "Player Attack",
-      "sprite": "entities/player/base_actions",
+      "sprite": "entities/player/character_v1_wave04/body",
       "frames": [
         { "frame": 10, "durationMs": 65, "eventId": "attack_start" },
         { "frame": 11, "durationMs": 90, "eventId": "attack_hit" },
-        { "frame": 10, "durationMs": 65 }
+        { "frame": 12, "durationMs": 65 }
       ],
       "loopMode": "Once",
       "tags": ["player", "action", "attack"]
+    },
+    {
+      "id": "player.block",
+      "displayName": "Player Block",
+      "sprite": "entities/player/character_v1_wave04/body",
+      "frameStart": 13,
+      "frameCount": 1,
+      "frameDuration": 0.12,
+      "loopMode": "Loop",
+      "tags": ["player", "action", "block"]
+    },
+    {
+      "id": "player.hurt",
+      "displayName": "Player Hurt",
+      "sprite": "entities/player/character_v1_wave04/body",
+      "frameStart": 14,
+      "frameCount": 2,
+      "frameDuration": 0.08,
+      "loopMode": "Once",
+      "tags": ["player", "action", "hurt"]
     }
   ]
 }

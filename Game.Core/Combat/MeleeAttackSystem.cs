@@ -51,9 +51,19 @@ public sealed class MeleeAttackSystem
         LootTableRegistry lootTables,
         Vector2 targetWorldPosition,
         GameEventBus? events = null,
-        StatusEffectRegistry? statusEffectRegistry = null)
+        StatusEffectRegistry? statusEffectRegistry = null,
+        LootKillContext? lootContext = null)
     {
-        return AttackInternal(player, entities, item, lootTables, targetWorldPosition, world: null, events, statusEffectRegistry);
+        return AttackInternal(
+            player,
+            entities,
+            item,
+            lootTables,
+            targetWorldPosition,
+            world: null,
+            events,
+            statusEffectRegistry,
+            lootContext);
     }
 
     public MeleeAttackResult Attack(
@@ -64,10 +74,20 @@ public sealed class MeleeAttackSystem
         Vector2 targetWorldPosition,
         GameWorld world,
         GameEventBus? events = null,
-        StatusEffectRegistry? statusEffectRegistry = null)
+        StatusEffectRegistry? statusEffectRegistry = null,
+        LootKillContext? lootContext = null)
     {
         ArgumentNullException.ThrowIfNull(world);
-        return AttackInternal(player, entities, item, lootTables, targetWorldPosition, world, events, statusEffectRegistry);
+        return AttackInternal(
+            player,
+            entities,
+            item,
+            lootTables,
+            targetWorldPosition,
+            world,
+            events,
+            statusEffectRegistry,
+            lootContext);
     }
 
     private MeleeAttackResult AttackInternal(
@@ -78,7 +98,8 @@ public sealed class MeleeAttackSystem
         Vector2 targetWorldPosition,
         GameWorld? world,
         GameEventBus? events,
-        StatusEffectRegistry? statusEffectRegistry)
+        StatusEffectRegistry? statusEffectRegistry,
+        LootKillContext? lootContext)
     {
         ArgumentNullException.ThrowIfNull(player);
         ArgumentNullException.ThrowIfNull(entities);
@@ -160,7 +181,7 @@ public sealed class MeleeAttackSystem
             enemy.IsActive = false;
             enemyDeaths++;
             events?.Publish(new EntityDiedEvent(enemy.Id, enemy.DefinitionId));
-            droppedItems += AddLootDrops(enemy, lootTables, pendingDrops);
+            droppedItems += AddLootDrops(enemy, lootTables, pendingDrops, lootContext, events);
         }
 
         foreach (var drop in pendingDrops)
@@ -179,7 +200,12 @@ public sealed class MeleeAttackSystem
             _cooldownDuration);
     }
 
-    private int AddLootDrops(EnemyEntity enemy, LootTableRegistry lootTables, List<DroppedItemEntity> pendingDrops)
+    private int AddLootDrops(
+        EnemyEntity enemy,
+        LootTableRegistry lootTables,
+        List<DroppedItemEntity> pendingDrops,
+        LootKillContext? lootContext,
+        GameEventBus? events)
     {
         if (string.IsNullOrWhiteSpace(enemy.LootTableId) || !lootTables.TryGetById(enemy.LootTableId, out var table))
         {
@@ -187,7 +213,7 @@ public sealed class MeleeAttackSystem
         }
 
         var count = 0;
-        foreach (var drop in _lootRoller.Roll(table))
+        foreach (var drop in _lootRoller.Roll(table, lootContext ?? LootKillContext.Empty))
         {
             if (drop.IsEmpty)
             {
@@ -195,6 +221,7 @@ public sealed class MeleeAttackSystem
             }
 
             pendingDrops.Add(new DroppedItemEntity(drop, enemy.Body.Position, _collisionResolver));
+            events?.Publish(new LootDroppedEvent(enemy.Id, drop, enemy.Body.Position));
             count++;
         }
 

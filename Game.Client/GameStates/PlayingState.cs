@@ -1,10 +1,16 @@
+using Game.Client.DeveloperTools;
+using Game.Client.Audio;
 using Game.Client.Input;
 using Game.Client.Rendering;
-using Game.Core.Animations;
+using Game.Client.Rendering.Effects;
+using Game.Client.Rendering.Character;
+using Game.Client.Rendering.Entities;
+using Game.Client.Rendering.Lighting;
 using Game.Core.Characters;
 using Game.Client.UI;
 using Game.Core;
 using Game.Core.Actions;
+using Game.Core.Audio;
 using Game.Client.Configuration;
 using Game.Core.Commands;
 using Game.Core.Data;
@@ -13,12 +19,14 @@ using Game.Core.Entities;
 using Game.Core.Equipment;
 using Game.Core.Events;
 using Game.Core.Farming;
+using Game.Core.Feedback;
 using Game.Core.Interaction;
 using Game.Core.Inventory;
 using Game.Core.Items;
 using Game.Core.Lighting;
 using Game.Core.Physics;
 using Game.Core.Projectiles;
+using Game.Core.Runtime;
 using Game.Core.Saving;
 using Game.Core.Sessions;
 using Game.Core.Settings;
@@ -42,14 +50,15 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
     private readonly TilemapRenderer _tilemapRenderer = new();
     private readonly ParallaxBackgroundRenderer _backgroundRenderer = new();
     private readonly LightingRenderer _lightingRenderer = new();
+    private readonly ScreenSpaceEffectsRenderer _screenSpaceEffects = new();
+    private readonly PixelAtmosphereRenderer _atmosphereRenderer = new();
+    private readonly ScreenSpaceLight[] _visibleLights = new ScreenSpaceLight[32];
     private readonly TileCollisionResolver _collisionResolver = new();
-    private readonly PlayerItemUseSystem _itemUse = new();
     private readonly InteractionTargetingSystem _targeting = new();
-    private readonly ItemPickupSystem _pickup = new();
-    private readonly ChunkStreamingService _streaming = new();
+    private ChunkStreamingService _streaming = new();
     private readonly GameSaveCoordinator _saves = new();
     private readonly EngineDebugSnapshotBuilder _debugSnapshots = new();
-    private readonly CommandDispatcher _commands = new(CommandRegistry.CreateDefault());
+    private readonly DeveloperConsoleAdapter _developerConsole = new();
     private readonly HudOverlay _hud = new();
     private readonly InventoryOverlay _inventoryOverlay = new();
     private readonly CraftingOverlay _craftingOverlay = new();
@@ -58,20 +67,33 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
     private readonly PerformanceOverlay _performanceOverlay = new();
     private readonly EventJournalOverlay _eventJournalOverlay = new();
     private readonly GameplayFeedbackOverlay _gameplayFeedback = new();
+    private readonly GameplayParticleSystem _particles = new();
+    private readonly GameplayFeedbackCue[] _feedbackCueDrainBuffer = new GameplayFeedbackCue[64];
+    private readonly GameplayAudioCue[] _audioCueDrainBuffer = new GameplayAudioCue[32];
+    private readonly Game.Client.Diagnostics.SimulationPhaseOverlay _simulationPhaseOverlay = new();
+    private readonly Wave04PlayerCharacterRenderer _playerCharacterRenderer = new();
+    private readonly EntityVisualPipeline _entityVisuals = new();
+    private readonly EntityVisualDrawCommandExecutor _entityVisualDrawExecutor = new();
+    private readonly SoundEffectRegistry _soundEffects = new();
+    private readonly AudioManager _audio;
     private readonly PauseMenuOverlay _pauseMenu;
     private readonly GameStateManager _states;
     private readonly EntityFactory _entityFactory;
-    private readonly SpriteAnimator _playerAnimator = new();
-    private readonly CharacterAnimationStateResolver _playerAnimationResolver = new();
     private EquipmentLoadout _equipmentLoadout = new();
-    private readonly EquipmentStatCalculator _equipmentStats = new();
-    private readonly LoadedGameSession? _loadedSession;
+    private readonly LoadedGameSession? _initialSession;
+    private readonly bool _openConsoleOnInitialize;
+    private readonly string? _forcedBiomeId;
+    private readonly bool _suppressDebugOverlays;
 
+    private LoadedGameSession? _session;
+    private GameSimulation? _simulation;
+    private GameFrameSnapshot? _frameSnapshot;
     private World? _world;
     private PlayerEntity? _player;
     private EntityManager _entities = new();
     private GameEventBus _events = new();
     private GameEventJournal? _eventJournal;
+    private GameplayFeedbackRouter? _feedbackRouter;
     private WorldTime _worldTime = new();
     private GameContentDatabase? _content;
     private PlayerInventory? _inventory;
@@ -81,31 +103,44 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
     private TilePos? _interactionTile;
     private Rectangle _lastViewportBounds = new(0, 0, 1280, 720);
     private EngineDebugSnapshot? _debugSnapshot;
-    private double _nextDebugSnapshotAt;
+    private double _debugSnapshotElapsed;
     private bool _showGrid;
     private int _selectedHotbarSlot;
     private string? _worldSaveDirectory;
     private ClientTextureRegistry? _textures;
+    private GraphicsDevice? _graphicsDevice;
     private ChunkStreamingUpdateResult _lastStreaming = ChunkStreamingUpdateResult.Empty;
     private GameSaveResult? _lastSave;
-    private int _lastFarmDay = 1;
-    private int _lastPickedUpItems;
-    private CharacterAnimationState _playerAnimationState = CharacterAnimationState.Idle;
-    private CharacterAnimationState? _playerActionAnimation;
-    private float _playerActionAnimationTimer;
+    private PlayerCommand _pendingPlayerCommand = PlayerCommand.None;
+    private PlayerItemUseRequest _pendingItemUse = PlayerItemUseRequest.Inactive;
+    private bool _hasPendingItemUse;
+    private bool _pendingItemUseContinuous;
     private bool _playerFacingLeft;
+    private bool _guardToggleActive;
+    private bool _playerWasDamageFlashing;
+    private SoundscapeController? _soundscape;
 
-    public PlayingState(GameStateManager states, LoadedGameSession? loadedSession = null)
+    public PlayingState(
+        GameStateManager states,
+        LoadedGameSession? loadedSession = null,
+        bool openConsoleOnInitialize = false,
+        string? forcedBiomeId = null,
+        bool suppressDebugOverlays = false)
     {
         _states = states;
-        _loadedSession = loadedSession;
+        _initialSession = loadedSession;
+        _openConsoleOnInitialize = openConsoleOnInitialize;
+        _forcedBiomeId = forcedBiomeId;
+        _suppressDebugOverlays = suppressDebugOverlays;
         _entityFactory = new EntityFactory(_collisionResolver);
+        _audio = new AudioManager(_soundEffects);
         _pauseMenu = new PauseMenuOverlay(
             ClientPaths.SettingsPath(),
             resume: static () => { },
             mainMenu: ReturnToMainMenu,
             exitGame: _states.RequestExit,
             settingsChanged: _states.ApplySettings);
+        _craftingOverlay.CraftingResolved += OnCraftingResolved;
     }
 
     public string Name => "Playing";
@@ -114,8 +149,16 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
 
     public void Initialize()
     {
-        var session = _loadedSession ?? WorldSessionFactory.CreateSingleplayer(seed: 1337, worldName: "Debug World");
+        var session = _initialSession ?? WorldSessionFactory.CreateSingleplayer(seed: 1337, worldName: "Debug World");
+        _session = session;
+        _simulation = session.Simulation;
+        _frameSnapshot = _simulation.LatestSnapshot;
         _content = session.Content;
+        if (_content.RuntimeAnimations?.TryGetCharacter("player.wave04", out var playerAnimation) == true)
+        {
+            _playerCharacterRenderer.Configure(playerAnimation);
+        }
+        _entityVisuals.Configure(_content.RuntimeAnimations, TryResolveEntitySpriteId);
         _inventory = session.Inventory;
         _world = session.World;
         _player = session.Player;
@@ -123,47 +166,218 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
         _events = session.Events;
         _eventJournal?.Dispose();
         _eventJournal = new GameEventJournal(_events, capacity: 256);
+        _feedbackRouter?.Dispose();
+        _feedbackRouter = new GameplayFeedbackRouter(
+            _events,
+            ResolveFeedbackEntityPosition,
+            capacity: 384,
+            rareItemResolver: IsRareFeedbackItem,
+            focusPositionResolver: ResolveFeedbackFocusPosition);
         _worldTime = session.WorldTime;
         _worldSaveDirectory = session.WorldSaveDirectory;
         _tileEntities = session.TileEntities ?? new TileEntityManager();
         _farmPlots = session.FarmPlots ?? new FarmPlotManager();
         _equipmentLoadout = session.EquipmentLoadout ?? new EquipmentLoadout();
+        ApplyForcedBiomeSpawn();
         _characterEditorOverlay.SetAppearance(_content, session.CharacterAppearance ?? new CharacterAppearance());
         _selectedHotbarSlot = _inventory.SelectedHotbarSlot;
-        _lastFarmDay = _worldTime.Day;
+        if (_openConsoleOnInitialize)
+        {
+            _debugConsole.State.Open();
+        }
+        _streaming.CancelPendingJobs();
+        _streaming = new ChunkStreamingService(generator: session.InfiniteChunkGenerator);
 
         _camera.Position = new Vector2(_player.Body.Center.X, _player.Body.Center.Y);
         _camera.Zoom = _pauseMenu.Settings.Gameplay.CameraZoom;
+        _camera.Recalculate(_lastViewportBounds);
+    }
+
+    private void ApplyForcedBiomeSpawn()
+    {
+        if (string.IsNullOrWhiteSpace(_forcedBiomeId) || _simulation is null || _player is null)
+        {
+            return;
+        }
+
+        var livingWorld = _simulation.LivingWorld;
+        var profile = livingWorld.Profile;
+        _worldTime.SetDay();
+        for (var regionIndex = -256; regionIndex <= 256; regionIndex++)
+        {
+            var regionStart = (long)regionIndex * profile.RegionWidthTiles;
+            var centerTileX = (int)Math.Clamp(
+                regionStart + profile.RegionWidthTiles / 2L,
+                int.MinValue,
+                int.MaxValue);
+            var region = livingWorld.ResolveRegion(centerTileX);
+            if (string.Equals(region.Biome.Id, _forcedBiomeId, StringComparison.OrdinalIgnoreCase))
+            {
+                var surfaceY = _session?.InfiniteChunkGenerator is { } generator &&
+                    _session.WorldGenerationProfile is { } worldProfile
+                        ? generator.GetSurfaceHeightAt(
+                            worldProfile,
+                            _world?.Metadata.Seed ?? 0,
+                            centerTileX)
+                        : profile.SurfaceBaseY;
+                EnsureForcedSpawnChunks(centerTileX, surfaceY);
+                SetForcedPlayerTile(centerTileX, Math.Max(2, surfaceY - 3));
+                return;
+            }
+
+            for (var caveIndex = 0; caveIndex < region.Caves.Count; caveIndex++)
+            {
+                var cave = region.Caves[caveIndex];
+                if (!string.Equals(cave.ProfileId, _forcedBiomeId, StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
+                var caveTileX = (int)Math.Clamp(cave.CenterTileX, int.MinValue, int.MaxValue);
+                EnsureForcedSpawnChunks(caveTileX, cave.CenterTileY);
+                SetForcedPlayerTile(caveTileX, cave.CenterTileY);
+                return;
+            }
+        }
+
+        throw new InvalidDataException($"Could not find forced smoke biome '{_forcedBiomeId}' in the search window.");
+    }
+
+    private void EnsureForcedSpawnChunks(int tileX, int tileY)
+    {
+        if (_world is null ||
+            _session?.InfiniteChunkGenerator is not { } generator ||
+            _session.WorldGenerationProfile is not { } profile)
+        {
+            return;
+        }
+
+        var center = CoordinateUtils.TileToChunk(new TilePos(tileX, tileY));
+        var maximumChunkY = Math.Max(0, (_world.HeightTiles - 1) / GameConstants.ChunkSize);
+        for (var chunkY = Math.Max(0, center.Y - 2); chunkY <= Math.Min(maximumChunkY, center.Y + 2); chunkY++)
+        {
+            for (var chunkX = center.X - 2; chunkX <= center.X + 2; chunkX++)
+            {
+                generator.EnsureChunk(_world, profile, new ChunkPos(chunkX, chunkY));
+            }
+        }
+    }
+
+    private void SetForcedPlayerTile(int tileX, int tileY)
+    {
+        if (_player is null)
+        {
+            return;
+        }
+
+        _player.Body.Position = new System.Numerics.Vector2(
+            tileX * (float)GameConstants.TileSize,
+            tileY * (float)GameConstants.TileSize);
+        _player.Body.Velocity = System.Numerics.Vector2.Zero;
     }
 
     public void LoadContent(ContentManager content)
     {
+        if (_content is null)
+        {
+            return;
+        }
+
+        var graphicsService = content.ServiceProvider.GetService(typeof(IGraphicsDeviceService)) as IGraphicsDeviceService
+            ?? throw new InvalidOperationException("MonoGame graphics device service is unavailable.");
+        _graphicsDevice = graphicsService.GraphicsDevice;
+        _textures?.Dispose();
+        var textureContentRoot = _session?.ProjectPaths?.ContentRoot ?? ClientPaths.FindGameDataRoot();
+        _textures = new ClientTextureRegistry(
+            graphicsService.GraphicsDevice,
+            textureContentRoot,
+            _content.SpriteAssets);
+        _textures.PreloadAll();
+        _entityVisualDrawExecutor.PrepareResources(graphicsService.GraphicsDevice);
+        var soundscapeDirectory = Path.Combine(textureContentRoot, "soundscapes");
+        var soundscapes = new SoundscapeDefinitionJsonLoader().LoadCatalogFromDirectory(soundscapeDirectory);
+        _soundscape = new SoundscapeController(
+            new SoundscapeCommandPlanner(new SoundscapeResolver(soundscapes)),
+            _audio);
+        AudioSettingsAdapter.Apply(_audio, _pauseMenu.Settings.Audio);
+        EnsurePresentationResources(_pauseMenu.Settings);
     }
 
     public void FixedUpdate(float fixedDeltaSeconds)
     {
-        if (_pauseMenu.IsOpen)
+        if (_pauseMenu.IsOpen || _simulation is null)
         {
-            _player?.SetCommand(PlayerCommand.None);
+            SuppressGameplayInput();
             return;
         }
 
-        var previousDay = _worldTime.Day;
-        _worldTime.Update(fixedDeltaSeconds);
-        if (_content is not null && _worldTime.Day != previousDay && _worldTime.Day != _lastFarmDay)
+        var settings = _pauseMenu.Settings;
+        var visibleHalfWidth = Math.Max(
+            1,
+            (int)MathF.Ceiling(_camera.VisibleWorldRect.Width / (GameConstants.TileSize * 2f)));
+        var visibleHalfHeight = Math.Max(
+            1,
+            (int)MathF.Ceiling(_camera.VisibleWorldRect.Height / (GameConstants.TileSize * 2f)));
+        var spawnMinimumTiles = Math.Max(
+            1,
+            (int)MathF.Ceiling(settings.Gameplay.SpawnMinimumDistancePixels / GameConstants.TileSize));
+        var spawnMaximumTiles = Math.Max(
+            spawnMinimumTiles,
+            (int)MathF.Ceiling(settings.Gameplay.SpawnMaximumDistancePixels / GameConstants.TileSize));
+        if (_simulation.Options.AutoPickupItems != settings.Gameplay.AutoPickupItems ||
+            _simulation.Options.EnablePhaseTelemetry != settings.Debug.ShowPerformanceProfiler ||
+            _simulation.Options.MaxActiveEnemies != settings.Gameplay.MaxActiveEnemies ||
+            _simulation.Options.EnemySpawnRateMultiplier != settings.Gameplay.EnemySpawnRateMultiplier ||
+            _simulation.Options.SpawnMinimumDistanceTiles != spawnMinimumTiles ||
+            _simulation.Options.SpawnMaximumDistanceTiles != spawnMaximumTiles ||
+            _simulation.Options.SpawnVisibleHalfWidthTiles != visibleHalfWidth ||
+            _simulation.Options.SpawnVisibleHalfHeightTiles != visibleHalfHeight ||
+            _simulation.Options.SpawnOutsideViewportOnly != settings.Gameplay.SpawnOutsideViewportOnly)
         {
-            new FarmingSystem().AdvanceDay(_content.Crops, _farmPlots, ResolveCurrentFarmSeason());
-            _lastFarmDay = _worldTime.Day;
+            _simulation.ConfigureOptions(_simulation.Options with
+            {
+                AutoPickupItems = settings.Gameplay.AutoPickupItems,
+                EnablePhaseTelemetry = settings.Debug.ShowPerformanceProfiler,
+                MaxActiveEnemies = settings.Gameplay.MaxActiveEnemies,
+                EnemySpawnRateMultiplier = settings.Gameplay.EnemySpawnRateMultiplier,
+                SpawnMinimumDistanceTiles = spawnMinimumTiles,
+                SpawnMaximumDistanceTiles = spawnMaximumTiles,
+                SpawnVisibleHalfWidthTiles = visibleHalfWidth,
+                SpawnVisibleHalfHeightTiles = visibleHalfHeight,
+                SpawnOutsideViewportOnly = settings.Gameplay.SpawnOutsideViewportOnly
+            });
         }
 
-        if (_world is not null && _player is not null)
+        var itemUse = _hasPendingItemUse ? _pendingItemUse : PlayerItemUseRequest.Inactive;
+        var result = _simulation.Tick(_pendingPlayerCommand, fixedDeltaSeconds, itemUse);
+        _frameSnapshot = result.Snapshot;
+        _entityVisuals.Prepare(result.Snapshot, _camera.VisibleWorldRect);
+        PreparePresentationFrames(result.Snapshot, settings);
+        AudioSettingsAdapter.Apply(_audio, settings.Audio);
+        _soundscape?.Update(
+            result.Snapshot.LivingWorld,
+            result.Snapshot.WorldTime,
+            fixedDeltaSeconds,
+            result.Snapshot.Player.Position);
+        _particles.EmitAmbient(new AmbientParticleFrame(
+            result.Snapshot.LivingWorld,
+            _camera.VisibleWorldRect,
+            result.TickNumber,
+            settings.Rendering.ParticleQuality));
+        if (itemUse.IsActive)
         {
-            ApplyPlayerStats();
-            _player.Update(_world, fixedDeltaSeconds);
-            _entities.UpdateAll(_world, fixedDeltaSeconds);
-            UpdateItemPickup();
-            UpdatePlayerAnimation(fixedDeltaSeconds);
+            _gameplayFeedback.Observe(result.ItemUse);
         }
+
+        if (!_pendingItemUseContinuous)
+        {
+            _pendingItemUse = PlayerItemUseRequest.Inactive;
+            _hasPendingItemUse = false;
+        }
+
+        UpdatePlayerAnimation();
+        DrainFeedbackCues();
+        _particles.Update(fixedDeltaSeconds);
     }
 
     public void Update(double deltaSeconds)
@@ -171,32 +385,57 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
         _input.Update();
         _gameplayFeedback.Update((float)deltaSeconds);
         var settings = _pauseMenu.Settings;
+        EnsurePresentationResources(settings);
+        _screenSpaceEffects.SetSceneCaptureRequired(RequiresBackdropBlur(settings));
+        UpdateEngineDebugSnapshot(deltaSeconds, settings);
+        _camera.Zoom = settings.Gameplay.CameraZoom;
+        _camera.Follow(GetCameraTarget(settings), _lastViewportBounds, smoothing: 0.18f);
+        EnsureVisibleChunks();
 
         if (_pauseMenu.IsOpen)
         {
             _pauseMenu.Update(_input, deltaSeconds);
-            _player?.SetCommand(PlayerCommand.None);
+            SuppressGameplayInput();
             return;
         }
 
-        if (_debugConsole.Update(_input, ExecuteDebugCommand, settings.Input.KeyBindings.DebugConsole))
+        var consoleHandled = _debugConsole.IsOpen
+            ? _debugConsole.Update(_input, _developerConsole, CreateCommandContext(), settings.Input.KeyBindings.DebugConsole)
+            : _debugConsole.Update(_input, ExecuteDebugCommand, settings.Input.KeyBindings.DebugConsole);
+        if (consoleHandled)
         {
-            _player?.SetCommand(PlayerCommand.None);
+            SuppressGameplayInput();
             return;
         }
 
         if (_input.IsBindingPressed(settings.Input.KeyBindings.Pause))
         {
             _pauseMenu.Open();
-            _player?.SetCommand(PlayerCommand.None);
+            SuppressGameplayInput();
             return;
         }
 
         if (_content is not null && _characterEditorOverlay.Update(_input, _content, settings, deltaSeconds))
         {
-            _player?.SetCommand(PlayerCommand.None);
+            SuppressGameplayInput();
             UpdateAutosave((float)deltaSeconds, settings);
             return;
+        }
+
+        if (_input.IsBindingPressed(settings.Input.KeyBindings.OpenInventory) && _craftingOverlay.IsOpen)
+        {
+            _craftingOverlay.Close();
+        }
+
+        if (_input.IsBindingPressed(settings.Input.KeyBindings.OpenCrafting) && _inventoryOverlay.IsOpen)
+        {
+            _inventoryOverlay.Close();
+            if (_inventoryOverlay.IsOpen)
+            {
+                SuppressGameplayInput();
+                UpdateAutosave((float)deltaSeconds, settings);
+                return;
+            }
         }
 
         if (_inventory is not null &&
@@ -205,7 +444,7 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
             _player is not null &&
             _craftingOverlay.Update(_input, _inventory, _content, _world, _player, settings))
         {
-            _player.SetCommand(PlayerCommand.None);
+            SuppressGameplayInput();
             UpdateAutosave((float)deltaSeconds, settings);
             return;
         }
@@ -214,39 +453,39 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
             _content is not null &&
             _inventoryOverlay.Update(_input, _inventory, _content.Items, _equipmentLoadout, settings))
         {
-            _player?.SetCommand(PlayerCommand.None);
+            SuppressGameplayInput();
             UpdateAutosave((float)deltaSeconds, settings);
             return;
         }
 
         _showGrid = settings.Debug.ShowGrid || _input.IsBindingDown(settings.Input.KeyBindings.DebugToggle);
         UpdateHotbarSelection(settings.Input);
-        _player?.SetCommand(PlayerCommandBuilder.Build(_input, settings.Input.KeyBindings));
-        UpdateItemUse((float)deltaSeconds, settings);
+        _pendingPlayerCommand = BuildPlayerCommand(settings);
+        PrepareItemUseRequest(settings);
         UpdateAutosave((float)deltaSeconds, settings);
+        if (_simulation is not null)
+        {
+            _simulationPhaseOverlay.Update(deltaSeconds, _simulation, settings);
+        }
     }
 
     public void Draw(RenderContext context)
     {
-        if (_world is null)
+        if (_world is null || _frameSnapshot is null)
         {
             return;
         }
 
+        var frame = _frameSnapshot;
         _lastViewportBounds = context.ViewportBounds;
         var settings = _pauseMenu.Settings;
-        EnsureTextureRegistry(context);
         _camera.Zoom = settings.Gameplay.CameraZoom;
-        var cameraTarget = GetCameraTarget(settings);
-        _camera.Follow(cameraTarget, context.ViewportBounds, smoothing: 0.18f);
-        using (context.Performance.Measure("Render.Streaming", 1.0))
-        {
-            EnsureVisibleChunks();
-        }
+        _camera.Recalculate(context.ViewportBounds);
+        var capturedScene = _screenSpaceEffects.BeginSceneCapture(context, Color.Transparent);
 
         using (context.Performance.Measure("Render.Background", 1.25))
         {
-            _backgroundRenderer.Draw(context, _textures, _camera, _world, _worldTime);
+            _backgroundRenderer.Draw(context, _textures, _camera, _world, frame.WorldTime.IsNight, frame.LivingWorld);
         }
 
         _tilemapRenderer.ShowGrid = _showGrid;
@@ -268,11 +507,30 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
             DrawEntities(context);
         }
 
+        using (context.Performance.Measure("Render.Particles", 1.0))
+        {
+            _particles.Draw(context, _camera, settings);
+        }
+
         if (settings.Rendering.DrawLightingOverlay)
         {
             using (context.Performance.Measure("Render.Lighting", 2.5))
             {
-                _lightingRenderer.Draw(context, _world, _camera);
+                _lightingRenderer.Draw(context, _world, _camera, settings.Rendering.LightingBlendStrength);
+            }
+        }
+
+        _atmosphereRenderer.DrawPrepared(context, _camera);
+
+        if (capturedScene)
+        {
+            _screenSpaceEffects.EndSceneCaptureAndComposite(context, settings.Rendering.ReflectionStrength);
+            if (RequiresBackdropBlur(settings))
+            {
+                _screenSpaceEffects.DrawPreparedBackdropBlur(
+                    context,
+                    settings.Ui.BackdropBlurStrength,
+                    settings.Rendering.BlurRadiusPixels);
             }
         }
 
@@ -281,13 +539,9 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
             var playerStats = ResolvePlayerStats();
             _hud.Draw(
                 context,
-                _inventory,
+                frame,
                 _content?.Items,
                 _textures,
-                _player?.Health ?? 0,
-                _player?.MaxHealth ?? 100,
-                _player?.Mana ?? 0,
-                _player?.MaxMana ?? playerStats.MaxMana,
                 settings);
             if (_inventory is not null && _content is not null)
             {
@@ -314,17 +568,25 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
 
         using (context.Performance.Measure("Render.Debug", 1.5))
         {
-            if (settings.Rendering.DrawDebugOverlays && settings.Debug.ShowDebugOverlay)
+            if (!_suppressDebugOverlays && settings.Rendering.DrawDebugOverlays && settings.Debug.ShowDebugOverlay)
             {
-                var worldTimeText = _worldTime.NormalizedTimeOfDay.ToString("0.000", CultureInfo.InvariantCulture);
+                var worldTimeText = frame.WorldTime.NormalizedTimeOfDay.ToString("0.000", CultureInfo.InvariantCulture);
                 context.DebugText.Draw(new Vector2(12, 58), $"WORLD TIME: {worldTimeText}", Color.LightGray, 2);
                 context.DebugText.Draw(new Vector2(12, 82), $"CHUNKS: {_world.Chunks.Count}", Color.LightGray, 2);
-                context.DebugText.Draw(new Vector2(12, 106), $"ENTITIES: {_entities.Entities.Count}", Color.LightGray, 2);
-                if (_player is not null)
-                {
-                    var playerTile = CoordinateUtils.WorldToTile(_player.Body.Center.X, _player.Body.Center.Y);
-                    context.DebugText.Draw(new Vector2(12, 130), $"PLAYER TILE: {playerTile.X}:{playerTile.Y}", Color.LightGray, 2);
-                }
+                context.DebugText.Draw(new Vector2(12, 106), $"ENTITIES: {frame.Hud.ActiveEntities}", Color.LightGray, 2);
+                var playerTile = CoordinateUtils.WorldToTile(
+                    frame.Player.Bounds.X + frame.Player.Bounds.Width * 0.5f,
+                    frame.Player.Bounds.Y + frame.Player.Bounds.Height * 0.5f);
+                context.DebugText.Draw(new Vector2(12, 130), $"PLAYER TILE: {playerTile.X}:{playerTile.Y}", Color.LightGray, 2);
+                var living = frame.LivingWorld;
+                var eventText = living.IsWorldEventActive
+                    ? $" EVENT:{living.WorldEventId}/{living.WorldEventPhaseId ?? "active"}"
+                    : string.Empty;
+                context.DebugText.Draw(
+                    new Vector2(12, 394),
+                    $"BIOME: {living.BiomeId}/{living.SubBiomeId ?? "-"} WEATHER:{living.Weather} {living.WeatherIntensity:0.00}{eventText}",
+                    Color.LightGray,
+                    2);
 
                 if (settings.Debug.ShowMouseTile && _hoverTile is { } hoverTile)
                 {
@@ -347,8 +609,8 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
                     DrawSaveDebugMetrics(context);
                 }
 
-                context.DebugText.Draw(new Vector2(12, 322), $"FARM PLOTS: {_farmPlots.Plots.Count}", Color.LightGray, 2);
-                context.DebugText.Draw(new Vector2(12, 346), $"PICKUP LAST: {_lastPickedUpItems}", Color.LightGray, 2);
+                context.DebugText.Draw(new Vector2(12, 346), $"FARM PLOTS: {frame.Hud.FarmPlots}", Color.LightGray, 2);
+                context.DebugText.Draw(new Vector2(12, 370), $"PICKUP LAST: {frame.Hud.PickedUpItemsThisTick}", Color.LightGray, 2);
             }
 
             if (settings.Gameplay.ShowInteractionTarget)
@@ -356,8 +618,13 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
                 DrawInteractionTarget(context);
             }
 
-            _performanceOverlay.Draw(context, settings);
-            _eventJournalOverlay.Draw(context, _eventJournal, settings);
+            if (!_suppressDebugOverlays)
+            {
+                _performanceOverlay.Draw(context, settings);
+                _simulationPhaseOverlay.Draw(context);
+                _eventJournalOverlay.Draw(context, _eventJournal, settings);
+            }
+
             _debugConsole.Draw(context);
             _pauseMenu.Draw(context);
         }
@@ -365,119 +632,95 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
 
     public void Dispose()
     {
+        _craftingOverlay.CraftingResolved -= OnCraftingResolved;
+        _streaming.CancelPendingJobs();
         _eventJournal?.Dispose();
+        _feedbackRouter?.Dispose();
+        _session?.Dispose();
+        _session = null;
+        _simulation = null;
+        _particles.Clear();
         _textures?.Dispose();
+        _lightingRenderer.Dispose();
+        _screenSpaceEffects.Dispose();
+        _entityVisualDrawExecutor.Dispose();
+        _soundscape?.Reset(0);
+        _audio.Dispose();
     }
 
     public void OnTextInput(char character)
     {
+        if (_craftingOverlay.IsOpen)
+        {
+            _craftingOverlay.OnTextInput(character);
+            return;
+        }
+
         _debugConsole.OnTextInput(character);
+    }
+
+    private void OnCraftingResolved(Game.Core.Crafting.CraftingBatchResult result)
+    {
+        if (result.CompletedEvent is { } completed)
+        {
+            _events.Publish(completed);
+            return;
+        }
+
+        if (result.FailedEvent is { } failed)
+        {
+            _events.Publish(failed);
+        }
     }
 
     private Vector2 GetCameraTarget(GameSettings settings)
     {
-        if (_player is null)
+        if (_frameSnapshot is not { } frame)
         {
             return Vector2.Zero;
         }
 
         var lookAhead = settings.Gameplay.CameraLookAheadPixels;
-        var velocity = _player.Body.Velocity;
+        var velocity = frame.Player.Velocity;
         var offsetX = Math.Abs(velocity.X) < 1f ? 0f : MathF.Sign(velocity.X) * lookAhead;
-        return new Vector2(_player.Body.Center.X + offsetX, _player.Body.Center.Y);
+        return new Vector2(
+            frame.Player.Bounds.X + frame.Player.Bounds.Width * 0.5f + offsetX,
+            frame.Player.Bounds.Y + frame.Player.Bounds.Height * 0.5f);
     }
 
     private void DrawPlayer(RenderContext context)
     {
-        if (_player is null)
+        if (_frameSnapshot is not { } frame)
         {
             return;
         }
 
-        if (TryDrawPlayerSprite(context))
+        if (TryDrawPlayerSprite(context, frame.Player))
         {
             return;
         }
 
         var screenPosition = _camera.WorldToScreen(
-            new Vector2(_player.Body.Position.X, _player.Body.Position.Y),
+            new Vector2(frame.Player.Position.X, frame.Player.Position.Y),
             context.ViewportBounds);
 
         var destination = new Rectangle(
             (int)MathF.Floor(screenPosition.X),
             (int)MathF.Floor(screenPosition.Y),
-            (int)MathF.Ceiling(_player.Body.Size.X * _camera.Zoom),
-            (int)MathF.Ceiling(_player.Body.Size.Y * _camera.Zoom));
+            (int)MathF.Ceiling(frame.Player.Bounds.Width * _camera.Zoom),
+            (int)MathF.Ceiling(frame.Player.Bounds.Height * _camera.Zoom));
 
         context.SpriteBatch.Draw(context.Pixel, destination, new Color(230, 204, 138));
         context.SpriteBatch.Draw(context.Pixel, new Rectangle(destination.X, destination.Y, destination.Width, 2), new Color(80, 52, 48));
     }
 
-    private bool TryDrawPlayerSprite(RenderContext context)
+    private bool TryDrawPlayerSprite(RenderContext context, PlayerFrameSnapshot player)
     {
-        if (_player is null || _textures is null || _playerAnimator.CurrentFrame is not { } frame)
-        {
-            return false;
-        }
-
-        var sprite = _textures.Get(frame.SpriteId, frame.FrameIndex);
-        if (sprite.SourceRectangle.Width <= 0 || sprite.SourceRectangle.Height <= 0)
-        {
-            return false;
-        }
-
-        var source = sprite.SourceRectangle;
-        var worldPosition = new Vector2(
-            _player.Body.Center.X - source.Width * 0.5f + frame.OffsetX,
-            _player.Body.Position.Y + _player.Body.Size.Y - source.Height + frame.OffsetY);
-        worldPosition += ResolveEntityVisualOffset(_player, context.Time.TotalSeconds);
-        var screenPosition = _camera.WorldToScreen(worldPosition, context.ViewportBounds);
-        var destination = new Rectangle(
-            (int)MathF.Floor(screenPosition.X),
-            (int)MathF.Floor(screenPosition.Y),
-            Math.Max(1, (int)MathF.Ceiling(source.Width * _camera.Zoom)),
-            Math.Max(1, (int)MathF.Ceiling(source.Height * _camera.Zoom)));
-        var effects = _playerFacingLeft ? SpriteEffects.FlipHorizontally : SpriteEffects.None;
-
-        context.SpriteBatch.Draw(sprite.Texture, destination, source, Color.White, 0f, Vector2.Zero, effects, 0f);
-        DrawPlayerAppearanceParts(context, destination, effects);
-        return true;
+        _ = player;
+        return _playerCharacterRenderer.Draw(context, _textures, _camera);
     }
 
-    private void DrawPlayerAppearanceParts(RenderContext context, Rectangle destination, SpriteEffects effects)
-    {
-        if (_textures is null)
-        {
-            return;
-        }
-
-        var appearance = _characterEditorOverlay.Appearance;
-        DrawPlayerPart(context, destination, effects, "entities/player/body_variants", ResolveSkinFrame(appearance.SkinTone), ParseHexColor(appearance.SkinTone));
-        DrawPlayerPart(context, destination, effects, "entities/player/clothes_variants_v2", ResolveClothesFrame(appearance.ClothesStyleId), ParseHexColor(appearance.ShirtColor));
-        DrawPlayerPart(context, destination, effects, "entities/player/hair_variants_v2", ResolveHairFrame(appearance.HairStyleId), ParseHexColor(appearance.HairColor));
-        if (!string.Equals(appearance.AccessoryId, "none", StringComparison.OrdinalIgnoreCase))
-        {
-            DrawPlayerPart(context, destination, effects, "entities/player/accessories_hats", Math.Max(0, ResolveAccessoryFrame(appearance.AccessoryId) - 1), Color.White);
-        }
-    }
-
-    private void DrawPlayerPart(RenderContext context, Rectangle destination, SpriteEffects effects, string spriteId, int frameIndex, Color color)
-    {
-        if (_textures is null)
-        {
-            return;
-        }
-
-        var sprite = _textures.Get(spriteId, frameIndex);
-        if (sprite.IsPlaceholder || sprite.SourceRectangle.Width <= 0 || sprite.SourceRectangle.Height <= 0)
-        {
-            return;
-        }
-
-        context.SpriteBatch.Draw(sprite.Texture, destination, sprite.SourceRectangle, color, 0f, Vector2.Zero, effects, 0f);
-    }
-
-    private bool TryDrawEntitySprite(RenderContext context, Entity entity)
+    private bool TryDrawEntitySprite(RenderContext context, EntityFrameSnapshot entity)
     {
         if (_textures is null || _content is null || !TryResolveEntitySpriteId(entity, out var spriteId))
         {
@@ -496,6 +739,7 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
         var worldPosition = new Vector2(
             bounds.X + bounds.Width * 0.5f - source.Width * 0.5f,
             bounds.Y + bounds.Height - source.Height);
+        worldPosition += ResolveEntityVisualOffset(entity, context.Time.TotalSeconds);
         var screenPosition = _camera.WorldToScreen(worldPosition, context.ViewportBounds);
         var destination = new Rectangle(
             (int)MathF.Floor(screenPosition.X),
@@ -509,28 +753,26 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
         return true;
     }
 
-    private static SpriteEffects ResolveEntitySpriteEffects(Entity entity)
+    private static SpriteEffects ResolveEntitySpriteEffects(EntityFrameSnapshot entity)
     {
-        return entity switch
+        return entity.Kind switch
         {
-            EnemyEntity enemy when enemy.Body.Velocity.X < -1f => SpriteEffects.FlipHorizontally,
-            EnemyEntity => SpriteEffects.None,
-            DroppedItemEntity => SpriteEffects.None,
-            ProjectileEntity projectile when projectile.Velocity.X < 0 => SpriteEffects.FlipHorizontally,
+            EntityFrameKind.Enemy when entity.Velocity.X < -1f => SpriteEffects.FlipHorizontally,
+            EntityFrameKind.Projectile when entity.Velocity.X < 0 => SpriteEffects.FlipHorizontally,
             _ => SpriteEffects.None
         };
     }
 
-    private static Color ResolveEntityTint(Entity entity, double totalSeconds)
+    private static Color ResolveEntityTint(EntityFrameSnapshot entity, double totalSeconds)
     {
-        if (entity is EnemyEntity { Health.InvulnerabilityTimeRemaining: > 0 })
+        if (entity.IsDamageFlashing)
         {
             return Math.Floor(totalSeconds * 18) % 2 == 0
                 ? new Color(255, 210, 210)
                 : Color.White;
         }
 
-        if (entity is ProjectileEntity projectile && projectile.DamageType == Game.Core.Combat.DamageType.Magic)
+        if (entity.Kind == EntityFrameKind.Projectile && entity.DamageType == Game.Core.Combat.DamageType.Magic)
         {
             return new Color(170, 210, 255);
         }
@@ -538,34 +780,34 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
         return Color.White;
     }
 
-    private static Vector2 ResolveEntityVisualOffset(Entity entity, double totalSeconds)
+    private static Vector2 ResolveEntityVisualOffset(EntityFrameSnapshot entity, double totalSeconds)
     {
-        return entity switch
+        return entity.Kind switch
         {
-            DroppedItemEntity => new Vector2(0, MathF.Sin((float)(totalSeconds * 5.5 + entity.Id)) * 2f),
-            EnemyEntity enemy when enemy.DefinitionId.Contains("bat", StringComparison.OrdinalIgnoreCase) => new Vector2(0, MathF.Sin((float)(totalSeconds * 6 + entity.Id)) * 3f),
+            EntityFrameKind.DroppedItem => new Vector2(0, MathF.Sin((float)(totalSeconds * 5.5 + entity.Id)) * 2f),
+            EntityFrameKind.Enemy when entity.ContentId.Contains("bat", StringComparison.OrdinalIgnoreCase) => new Vector2(0, MathF.Sin((float)(totalSeconds * 6 + entity.Id)) * 3f),
             _ => Vector2.Zero
         };
     }
 
-    private int ResolveEntityFrameIndex(Entity entity, string spriteId, double totalSeconds)
+    private int ResolveEntityFrameIndex(EntityFrameSnapshot entity, string spriteId, double totalSeconds)
     {
         if (_content is null ||
             !_content.SpriteAssets.TryGetById(spriteId, out var asset) ||
             asset.Frames.Count <= 1 ||
             !asset.HasTag("animated") ||
-            entity is DroppedItemEntity or ProjectileEntity)
+            entity.Kind is EntityFrameKind.DroppedItem or EntityFrameKind.Projectile)
         {
             return 0;
         }
 
-        var frameRate = entity is EnemyEntity enemy && enemy.DefinitionId.Contains("bat", StringComparison.OrdinalIgnoreCase)
+        var frameRate = entity.Kind == EntityFrameKind.Enemy && entity.ContentId.Contains("bat", StringComparison.OrdinalIgnoreCase)
             ? 10.0
             : 6.0;
         return (int)Math.Floor(totalSeconds * frameRate + entity.Id * 0.37) % asset.Frames.Count;
     }
 
-    private bool TryResolveEntitySpriteId(Entity entity, out string spriteId)
+    private bool TryResolveEntitySpriteId(in EntityFrameSnapshot entity, out string spriteId)
     {
         spriteId = string.Empty;
         if (_content is null)
@@ -573,15 +815,15 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
             return false;
         }
 
-        switch (entity)
+        switch (entity.Kind)
         {
-            case EnemyEntity enemy when _content.Entities.TryGetById(enemy.DefinitionId, out var enemyDefinition):
+            case EntityFrameKind.Enemy when _content.Entities.TryGetById(entity.ContentId, out var enemyDefinition):
                 spriteId = enemyDefinition.TexturePath;
                 return true;
-            case DroppedItemEntity dropped when _content.Items.TryGetById(dropped.Stack.ItemId, out var itemDefinition):
+            case EntityFrameKind.DroppedItem when _content.Items.TryGetById(entity.ContentId, out var itemDefinition):
                 spriteId = itemDefinition.TexturePath;
                 return true;
-            case ProjectileEntity projectile when _content.Projectiles.TryGetById(projectile.ProjectileId, out var projectileDefinition):
+            case EntityFrameKind.Projectile when _content.Projectiles.TryGetById(entity.ContentId, out var projectileDefinition):
                 spriteId = projectileDefinition.TexturePath;
                 return true;
             default:
@@ -591,7 +833,18 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
 
     private void DrawEntities(RenderContext context)
     {
-        foreach (var entity in _entities.Entities)
+        if (_frameSnapshot is not { } frame)
+        {
+            return;
+        }
+
+        if (_textures is not null && _entityVisuals.CommandBuffer.Count > 0)
+        {
+            _entityVisualDrawExecutor.Draw(context, _textures, _entityVisuals.CommandBuffer, _camera);
+            return;
+        }
+
+        foreach (var entity in frame.Entities)
         {
             if (!entity.IsActive)
             {
@@ -603,11 +856,11 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
                 continue;
             }
 
-            var color = entity switch
+            var color = entity.Kind switch
             {
-                EnemyEntity => new Color(98, 181, 94),
-                DroppedItemEntity => new Color(239, 203, 105),
-                ProjectileEntity => new Color(224, 86, 72),
+                EntityFrameKind.Enemy => new Color(98, 181, 94),
+                EntityFrameKind.DroppedItem => new Color(239, 203, 105),
+                EntityFrameKind.Projectile => new Color(224, 86, 72),
                 _ => new Color(180, 180, 180)
             };
 
@@ -627,7 +880,7 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
         context.SpriteBatch.Draw(context.Pixel, destination, color);
     }
 
-    private void UpdatePlayerAnimation(float deltaSeconds)
+    private void UpdatePlayerAnimation()
     {
         if (_player is null || _content is null)
         {
@@ -643,56 +896,57 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
             _playerFacingLeft = false;
         }
 
-        if (_playerActionAnimationTimer > 0)
+        if (_frameSnapshot is { } frame)
         {
-            _playerActionAnimationTimer = Math.Max(0, _playerActionAnimationTimer - deltaSeconds);
-        }
-        else
-        {
-            _playerActionAnimation = null;
-        }
+            var damageFlashing = _player.HealthComponent.InvulnerabilityTimeRemaining > 0;
+            if (damageFlashing && !_playerWasDamageFlashing)
+            {
+                _playerCharacterRenderer.RequestAction(CharacterAnimationState.Hurt);
+            }
 
-        var resolvedState = _playerActionAnimation ?? _playerAnimationResolver.Resolve(
-            _player.Body,
-            isDead: _player.HealthComponent.IsDead);
-        _playerAnimationState = resolvedState;
+            _playerWasDamageFlashing = damageFlashing;
 
-        if (TryResolvePlayerAnimationClip(resolvedState, out var clip) &&
-            !string.Equals(_playerAnimator.Clip?.Id, clip.Id, StringComparison.OrdinalIgnoreCase))
-        {
-            _playerAnimator.Play(clip, restartIfSame: true);
+            _playerCharacterRenderer.Advance(
+                frame.Player,
+                _simulation?.PlayerGuard,
+                _characterEditorOverlay.Appearance,
+                _equipmentLoadout);
         }
-
-        _playerAnimator.Update(deltaSeconds);
     }
 
-    private bool TryResolvePlayerAnimationClip(CharacterAnimationState state, out SpriteAnimationClip clip)
+    private PlayerCommand BuildPlayerCommand(GameSettings settings)
     {
-        clip = null!;
-        if (_content is null)
+        var command = PlayerCommandBuilder.Build(_input, settings.Input.KeyBindings);
+        if (_player is null)
         {
-            return false;
+            return command;
         }
 
-        var clipId = _content.Characters.TryGetById("player", out var character)
-            ? character.AnimationSet.ResolveClipId(state)
-            : ResolveFallbackPlayerClipId(state);
+        var wantsGuard = settings.Gameplay.HoldToBlock
+            ? _input.IsBindingDown(settings.Input.KeyBindings.AttackSecondary)
+            : ResolveToggleGuard(settings.Input.KeyBindings.AttackSecondary);
+        var mouseWorld = _camera.ScreenToWorld(_input.MousePosition.ToVector2(), _lastViewportBounds);
+        var facing = new System.Numerics.Vector2(
+            mouseWorld.X - _player.Body.Center.X,
+            mouseWorld.Y - _player.Body.Center.Y);
+        if (facing.LengthSquared() <= float.Epsilon)
+        {
+            facing = _playerFacingLeft
+                ? -System.Numerics.Vector2.UnitX
+                : System.Numerics.Vector2.UnitX;
+        }
 
-        return !string.IsNullOrWhiteSpace(clipId) && _content.Animations.TryGetById(clipId, out clip!);
+        return command with { WantsGuard = wantsGuard, GuardFacing = facing };
     }
 
-    private static string ResolveFallbackPlayerClipId(CharacterAnimationState state)
+    private bool ResolveToggleGuard(string binding)
     {
-        return state switch
+        if (_input.IsBindingPressed(binding))
         {
-            CharacterAnimationState.Walk => "player.walk",
-            CharacterAnimationState.Jump => "player.jump",
-            CharacterAnimationState.Fall => "player.fall",
-            CharacterAnimationState.Attack => "player.attack",
-            CharacterAnimationState.Mine => "player.mine",
-            CharacterAnimationState.UseItem => "player.attack",
-            _ => "player.idle"
-        };
+            _guardToggleActive = !_guardToggleActive;
+        }
+
+        return _guardToggleActive;
     }
 
     private CharacterAnimationState? ResolvePlayerActionState(ItemStack stack)
@@ -718,8 +972,7 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
             return;
         }
 
-        _playerActionAnimation = state.Value;
-        _playerActionAnimationTimer = state.Value == CharacterAnimationState.Attack ? 0.22f : 0.18f;
+        _playerCharacterRenderer.RequestAction(state.Value);
     }
 
     private void UpdateHotbarSelection(InputSettings inputSettings)
@@ -746,44 +999,50 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
         }
     }
 
-    private void UpdateItemUse(float deltaSeconds, GameSettings settings)
+    private void PrepareItemUseRequest(GameSettings settings)
     {
         if (_world is null || _content is null || _player is null || _inventory is null)
         {
+            _pendingItemUse = PlayerItemUseRequest.Inactive;
+            _hasPendingItemUse = false;
             return;
         }
 
-        _itemUse.Update(deltaSeconds);
         var mouseWorld = _camera.ScreenToWorld(_input.MousePosition.ToVector2(), _lastViewportBounds);
         _hoverTile = CoordinateUtils.WorldToTile(mouseWorld.X, mouseWorld.Y);
         _interactionTile = ResolveInteractionTarget(mouseWorld, settings.Gameplay.InteractionReachPixels);
 
-        var useInputActive = settings.Gameplay.HoldToMine
+        _pendingItemUseContinuous = settings.Gameplay.HoldToMine;
+        var useInputActive = _pendingItemUseContinuous
             ? _input.IsBindingDown(settings.Input.KeyBindings.AttackPrimary)
             : _input.IsBindingPressed(settings.Input.KeyBindings.AttackPrimary);
 
         if (!useInputActive || _interactionTile is not { } targetTile)
         {
+            if (_pendingItemUseContinuous)
+            {
+                _pendingItemUse = PlayerItemUseRequest.Inactive;
+                _hasPendingItemUse = false;
+            }
+
             _gameplayFeedback.CancelMining();
             return;
         }
 
         TriggerPlayerActionAnimation(ResolvePlayerActionState(_inventory.SelectedStack));
-
-        var result = _itemUse.UseSelectedItem(
-            _world,
-            _content,
-            _player,
-            _inventory,
-            _entities,
+        _pendingItemUse = new PlayerItemUseRequest(
+            true,
             targetTile,
-            new System.Numerics.Vector2(mouseWorld.X, mouseWorld.Y),
-            deltaSeconds,
-            _events,
-            _farmPlots,
-            ResolveCurrentFarmSeason(),
-            _worldTime.Day);
-        _gameplayFeedback.Observe(result);
+            new System.Numerics.Vector2(mouseWorld.X, mouseWorld.Y));
+        _hasPendingItemUse = true;
+    }
+
+    private void SuppressGameplayInput()
+    {
+        _pendingPlayerCommand = PlayerCommand.None;
+        _pendingItemUse = PlayerItemUseRequest.Inactive;
+        _hasPendingItemUse = false;
+        _gameplayFeedback.CancelMining();
     }
 
     private TilePos? ResolveInteractionTarget(Vector2 mouseWorld, float reachPixels)
@@ -794,7 +1053,7 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
         }
 
         var selected = _inventory.SelectedStack;
-        if (selected.IsEmpty || ! _content.Items.TryGetById(selected.ItemId, out var item))
+        if (selected.IsEmpty || !_content.Items.TryGetById(selected.ItemId, out var item))
         {
             return _hoverTile;
         }
@@ -831,32 +1090,44 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
         context.SpriteBatch.Draw(context.Pixel, new Rectangle(bounds.Right - 2, bounds.Y, 2, bounds.Height), color);
     }
 
-    private void DrawEngineDebugSnapshot(RenderContext context)
+    private void UpdateEngineDebugSnapshot(double deltaSeconds, GameSettings settings)
     {
-        if (_world is null)
+        if (_world is null ||
+            !settings.Rendering.DrawDebugOverlays ||
+            !settings.Debug.ShowDebugOverlay)
         {
             return;
         }
 
-        if (_debugSnapshot is null || context.Time.TotalSeconds >= _nextDebugSnapshotAt)
+        _debugSnapshotElapsed += Math.Max(0, deltaSeconds);
+        if (_debugSnapshot is not null && _debugSnapshotElapsed < 0.5)
         {
-            _debugSnapshot = _debugSnapshots.Build(_world, _entities, _worldTime);
-            _nextDebugSnapshotAt = context.Time.TotalSeconds + 0.5;
+            return;
         }
 
-        var snapshot = _debugSnapshot;
+        _debugSnapshot = _debugSnapshots.Build(_world, _entities, _worldTime);
+        _debugSnapshotElapsed = 0;
+    }
+
+    private void DrawEngineDebugSnapshot(RenderContext context)
+    {
+        if (_debugSnapshot is not { } snapshot)
+        {
+            return;
+        }
+
         context.DebugText.Draw(new Vector2(12, 178), $"DIRTY: {snapshot.DirtyChunkCount} LIQ: {snapshot.LiquidTileCount}", Color.LightGray, 2);
         context.DebugText.Draw(new Vector2(12, 202), $"SURF: {snapshot.MinSurfaceY}-{snapshot.MaxSurfaceY}", Color.LightGray, 2);
     }
 
     private void DrawFarmPlots(RenderContext context)
     {
-        if (_content is null)
+        if (_content is null || _frameSnapshot is not { } frame)
         {
             return;
         }
 
-        foreach (var plot in _farmPlots.Plots)
+        foreach (var plot in frame.FarmPlots)
         {
             var worldRect = new RectI(
                 plot.Position.X * GameConstants.TileSize,
@@ -866,13 +1137,27 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
 
             DrawWorldRect(context, worldRect, plot.IsWatered ? new Color(81, 116, 130, 150) : new Color(116, 79, 48, 150));
 
-            if (plot.Crop is null || !_content.Crops.TryGetById(plot.Crop.CropId, out var crop))
+            if (plot.CropId is null || !_content.Crops.TryGetById(plot.CropId, out var crop))
             {
                 continue;
             }
 
-            var stage = plot.Crop.GetGrowthStageIndex(crop);
-            var cropColor = stage >= crop.GrowthStageDays.Count - 1
+            var totalGrowthDays = 0;
+            for (var index = 0; index < crop.GrowthStageDays.Count; index++)
+            {
+                totalGrowthDays += crop.GrowthStageDays[index];
+            }
+
+            totalGrowthDays = Math.Max(1, totalGrowthDays);
+            var elapsedDays = Math.Max(0, totalGrowthDays - plot.DaysUntilHarvest);
+            var stage = 0;
+            var stageBoundary = 0;
+            while (stage < crop.GrowthStageDays.Count - 1 && elapsedDays >= stageBoundary + crop.GrowthStageDays[stage])
+            {
+                stageBoundary += crop.GrowthStageDays[stage++];
+            }
+
+            var cropColor = plot.IsMature
                 ? new Color(142, 190, 83)
                 : new Color(83, 153, 72);
             var cropRect = new RectI(
@@ -894,16 +1179,116 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
             2);
         context.DebugText.Draw(
             new Vector2(12, 250),
-            $"TILE CMDS: {metrics.RenderedTileCommands} LIQ CMDS: {metrics.RenderedLiquidCommands} EVICT: {metrics.EvictedChunks}",
+            $"TILE CMDS: {metrics.RenderedTileCommands} LIQ CMDS: {metrics.RenderedLiquidCommands} EVICT: {metrics.EvictedChunks} TEX:{_textures?.Telemetry.ResourceCount ?? 0}/{_textures?.Telemetry.FrameCount ?? 0}",
             Color.LightGray,
             2);
+        var lighting = _lightingRenderer.LastTelemetry;
+        var reflections = _screenSpaceEffects.LastTelemetry;
+        context.DebugText.Draw(
+            new Vector2(12, 418),
+            $"LIGHT {lighting.Quality} {lighting.MaskSize.X}x{lighting.MaskSize.Y} RAYS:{lighting.RaysCast} OCC:{lighting.OccluderSamples} PTS:{lighting.PointLightsUsed} REFL:{reflections.SurfaceCount}",
+            Color.LightGray,
+            2);
+        if (_soundscape is not null)
+        {
+            var audio = _soundscape.CaptureTelemetry();
+            context.DebugText.Draw(
+                new Vector2(12, 442),
+                $"AUDIO V:{audio.Audio.ActiveVoices} MISS:{audio.Audio.MissingAssets} TRANS:{audio.Audio.LoopTransitions} SCAPE:{audio.DesiredAmbientLoopId ?? "-"}",
+                Color.LightGray,
+                2);
+        }
+
+        var entityVisuals = _entityVisuals.CommandBuffer.Telemetry;
+        context.DebugText.Draw(
+            new Vector2(12, 466),
+            $"ENTITY VIS {entityVisuals.VisibleEntities}/{entityVisuals.InputEntities} CMD:{entityVisuals.PreparedCommands} CULL:{entityVisuals.CulledEntities} OVR:{entityVisuals.CommandOverflowEntities + entityVisuals.TrackOverflowEntities}",
+            entityVisuals.WasBudgetClamped ? Color.OrangeRed : Color.LightGray,
+            2);
+        var feedback = _feedbackRouter?.Telemetry ?? default;
+        context.DebugText.Draw(
+            new Vector2(12, 490),
+            $"FX Q:{feedback.PendingVisualCommands}/{feedback.PendingAudioCommands} DROP:{feedback.VisualCommandsDropped}/{feedback.AudioCommandsDropped} DRAIN:{feedback.VisualCommandsDrained}/{feedback.AudioCommandsDrained}",
+            feedback.VisualCommandsDropped + feedback.AudioCommandsDropped > 0 ? Color.OrangeRed : Color.LightGray,
+            2);
+    }
+
+    private void EnsurePresentationResources(GameSettings settings)
+    {
+        if (_graphicsDevice is null || _lastViewportBounds.IsEmpty)
+        {
+            return;
+        }
+
+        _lightingRenderer.PrepareResources(_graphicsDevice, _lastViewportBounds, settings.Rendering);
+        _screenSpaceEffects.PrepareResources(
+            _graphicsDevice,
+            _lastViewportBounds,
+            settings.Rendering,
+            settings.Ui);
+    }
+
+    private bool RequiresBackdropBlur(GameSettings settings)
+    {
+        return settings.Rendering.UiEffectQuality > 0 &&
+            settings.Ui.BackdropBlurStrength > 0.001f &&
+            (_pauseMenu.IsOpen ||
+             _inventoryOverlay.IsOpen ||
+             _craftingOverlay.IsOpen ||
+             _characterEditorOverlay.IsOpen);
+    }
+
+    private void PreparePresentationFrames(GameFrameSnapshot frame, GameSettings settings)
+    {
+        if (_world is null || _content is null || _lastViewportBounds.IsEmpty)
+        {
+            return;
+        }
+
+        var lightingQuality = _lightingRenderer.Quality;
+        var lightTelemetry = VisibleLightCollector.CollectTileLights(
+            _world,
+            _content.Tiles,
+            _camera.VisibleWorldRect,
+            lightingQuality,
+            _visibleLights);
+        _lightingRenderer.PrepareFrame(
+            _world,
+            _camera,
+            _lastViewportBounds,
+            frame.WorldTime,
+            frame.LivingWorld,
+            settings.Rendering,
+            frame.TickNumber,
+            _visibleLights.AsSpan(0, lightTelemetry.LightsCollected));
+        _screenSpaceEffects.PrepareFrame(
+            _world,
+            _camera,
+            _lastViewportBounds,
+            frame.TickNumber,
+            settings.Rendering);
+        _atmosphereRenderer.PrepareFrame(
+            _world,
+            _camera,
+            frame.WorldTime,
+            frame.LivingWorld,
+            settings.Rendering,
+            _lastViewportBounds,
+            lightingQuality.Tier,
+            frame.TickNumber);
     }
 
     private void DrawStreamingDebugMetrics(RenderContext context)
     {
+        var telemetry = _lastStreaming.Telemetry;
         context.DebugText.Draw(
             new Vector2(12, 274),
-            $"STREAM LOAD:{_lastStreaming.LoadedChunks} GEN:{_lastStreaming.GeneratedChunks} SAVE:{_lastStreaming.SavedChunksBeforeUnload} UNLOAD:{_lastStreaming.UnloadedChunks} Q:{_lastStreaming.DeferredLoadChunks}/{_lastStreaming.DeferredUnloadChunks}",
+            $"STREAM L/G/S/U:{_lastStreaming.LoadedChunks}/{_lastStreaming.GeneratedChunks}/{_lastStreaming.SavedChunksBeforeUnload}/{_lastStreaming.UnloadedChunks} JOBS:{telemetry.PendingLoadJobs}/{telemetry.PendingSaveJobs} APPLY:{telemetry.ApplyQueueLength} ({telemetry.QueuedDecodedBytes / 1024}KB)",
+            Color.LightGray,
+            2);
+        context.DebugText.Draw(
+            new Vector2(12, 298),
+            $"STREAM DEF:{telemetry.DeferredLoadRequests}/{telemetry.DeferredUnloadRequests} CANCEL:{telemetry.CancelledJobs}/{telemetry.CancellationRequests} STALE:{telemetry.StaleResultsRejected} FAIL:{telemetry.FailedJobs} MS:{telemetry.LoadTime.TotalMilliseconds:0}/{telemetry.GenerateTime.TotalMilliseconds:0}/{telemetry.ApplyTime.TotalMilliseconds:0}/{telemetry.SaveTime.TotalMilliseconds:0}",
             Color.LightGray,
             2);
     }
@@ -916,20 +1301,10 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
         }
 
         context.DebugText.Draw(
-            new Vector2(12, 298),
+            new Vector2(12, 322),
             $"LAST SAVE: {_lastSave.Reason} chunks:{_lastSave.WorldChunksConsidered} entities:{_lastSave.RuntimeEntitiesSaved} farm:{_lastSave.FarmPlotCount}",
             Color.LightGray,
             2);
-    }
-
-    private void EnsureTextureRegistry(RenderContext context)
-    {
-        if (_textures is not null || _content is null)
-        {
-            return;
-        }
-
-        _textures = new ClientTextureRegistry(context.GraphicsDevice, ClientPaths.FindGameDataRoot(), _content.SpriteAssets);
     }
 
     private string? ResolveTileSpriteId(ushort tileId)
@@ -949,7 +1324,12 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
             return CommandResult.Failure("Playing state is not initialized.");
         }
 
-        return _commands.Execute(command, new CommandContext
+        return _developerConsole.Execute(command, CreateCommandContext());
+    }
+
+    private CommandContext CreateCommandContext()
+    {
+        return new CommandContext
         {
             Content = _content,
             World = _world,
@@ -959,9 +1339,8 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
             EntityFactory = _entityFactory,
             PlayerPosition = _player?.Body.Position,
             Events = _events
-        });
+        };
     }
-
     private void ReturnToMainMenu()
     {
         _states.ChangeState(new MainMenuState(_states, _states.RequestExit));
@@ -986,7 +1365,10 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
                 TileEntities = _tileEntities,
                 FarmPlots = _farmPlots,
                 EquipmentLoadout = _equipmentLoadout,
-                CharacterAppearance = _characterEditorOverlay.Appearance
+                CharacterAppearance = _characterEditorOverlay.Appearance,
+                WorldTime = _worldTime,
+                RandomStreams = _simulation?.RandomStreams,
+                WorldEventState = _simulation?.LivingWorld.CaptureWorldEventState()
             },
             _worldSaveDirectory,
             new GameSaveCoordinatorOptions
@@ -1003,55 +1385,11 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
         }
     }
 
-    private void UpdateItemPickup()
-    {
-        if (_player is null ||
-            _inventory is null ||
-            !_pauseMenu.Settings.Gameplay.AutoPickupItems ||
-            _player.HealthComponent.IsDead)
-        {
-            _lastPickedUpItems = 0;
-            return;
-        }
-
-        AttractNearbyDroppedItems();
-        _lastPickedUpItems = _pickup.PickupItems(
-            _entities,
-            _inventory,
-            _player.Bounds.Inflate(28),
-            _events);
-    }
-
-    private void AttractNearbyDroppedItems()
-    {
-        if (_player is null)
-        {
-            return;
-        }
-
-        const float magnetRadius = 92f;
-        const float magnetStrength = 360f;
-        var playerCenter = _player.Body.Center;
-        foreach (var dropped in _entities.Query(_player.Bounds.Inflate((int)magnetRadius)).OfType<DroppedItemEntity>())
-        {
-            var itemCenter = dropped.Body.Center;
-            var offset = playerCenter - itemCenter;
-            var distance = offset.Length();
-            if (distance <= 0.001f || distance > magnetRadius)
-            {
-                continue;
-            }
-
-            var direction = offset / distance;
-            var strength = (1f - distance / magnetRadius) * magnetStrength;
-            dropped.Body.Velocity += direction * strength * (1f / 60f);
-        }
-    }
     private void EnsureVisibleChunks()
     {
         if (_world is null ||
             !_world.IsHorizontallyInfinite ||
-            _loadedSession?.WorldGenerationProfile is not { } profile)
+            _session?.WorldGenerationProfile is not { } profile)
         {
             return;
         }
@@ -1063,45 +1401,99 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
         var streamingSaveDirectory = worldSettings.SaveChunksBeforeUnload
             ? _worldSaveDirectory
             : null;
-            _lastStreaming = _streaming.Update(_world, profile, visibleTiles, streamingSaveDirectory, new ChunkStreamingOptions
+        _lastStreaming = _streaming.Update(_world, profile, visibleTiles, streamingSaveDirectory, new ChunkStreamingOptions
         {
             LoadMarginChunks = worldSettings.ChunkLoadMargin,
             UnloadMarginChunks = worldSettings.ChunkUnloadMargin,
             KeepDirtyChunksLoaded = worldSettings.KeepDirtyChunksLoaded,
-            MaxChunkOperationsPerUpdate = worldSettings.StreamingBudgetChunksPerFrame
+            MaxChunkOperationsPerUpdate = worldSettings.StreamingBudgetChunksPerFrame,
+            MaxConcurrentLoadJobs = worldSettings.StreamingConcurrentLoads,
+            MaxConcurrentSaveJobs = worldSettings.StreamingConcurrentSaves,
+            MaxApplyQueueLength = worldSettings.StreamingApplyQueueLimit,
+            MaxApplyTimePerUpdate = TimeSpan.FromMilliseconds(worldSettings.StreamingApplyBudgetMilliseconds),
+            MaxApplyDecodedBytesPerUpdate = worldSettings.StreamingApplyBudgetKilobytes * 1024L,
+            RetryPolicy = new ChunkStreamingRetryPolicy
+            {
+                MaxAttempts = worldSettings.StreamingRetryAttempts,
+                InitialBackoffUpdates = worldSettings.StreamingRetryInitialBackoffUpdates,
+                MaxBackoffUpdates = worldSettings.StreamingRetryMaximumBackoffUpdates
+            }
         }, _events);
-    }
-
-    private FarmSeason ResolveCurrentFarmSeason()
-    {
-        return (((_worldTime.Day - 1) / 28) % 4) switch
-        {
-            0 => FarmSeason.Spring,
-            1 => FarmSeason.Summer,
-            2 => FarmSeason.Fall,
-            _ => FarmSeason.Winter
-        };
     }
 
     private PlayerStatBlock ResolvePlayerStats()
     {
-        if (_content is null)
-        {
-            return PlayerStatBlock.Base;
-        }
-
-        var equipmentStats = _equipmentStats.Calculate(PlayerStatBlock.Base, _equipmentLoadout, _content.Items);
-        return _player?.StatusEffects.ApplyStatModifiers(equipmentStats) ?? equipmentStats;
+        return _frameSnapshot?.Player.Stats ?? PlayerStatBlock.Base;
     }
 
-    private void ApplyPlayerStats()
+    private void DrainFeedbackCues()
     {
-        if (_player is null)
+        if (_feedbackRouter is null)
         {
             return;
         }
 
-        _player.ApplyStats(ResolvePlayerStats());
+        var quality = _pauseMenu.Settings.Rendering.ParticleQuality;
+        while (true)
+        {
+            var count = _feedbackRouter.DrainTo(_feedbackCueDrainBuffer);
+            for (var index = 0; index < count; index++)
+            {
+                _particles.Emit(_feedbackCueDrainBuffer[index], quality);
+            }
+
+            if (count < _feedbackCueDrainBuffer.Length)
+            {
+                break;
+            }
+        }
+
+        while (true)
+        {
+            var count = _feedbackRouter.DrainAudioTo(_audioCueDrainBuffer);
+            for (var index = 0; index < count; index++)
+            {
+                var cue = _audioCueDrainBuffer[index];
+                _audio.PlayOneShot(new AudioPlayRequest(
+                    cue.AudioId,
+                    cue.Bus,
+                    cue.Volume,
+                    cue.Pitch,
+                    cue.Priority,
+                    cue.CooldownSeconds,
+                    cue.IsSpatial,
+                    cue.WorldPosition,
+                    cue.MaximumDistance));
+            }
+
+            if (count < _audioCueDrainBuffer.Length)
+            {
+                break;
+            }
+        }
+    }
+
+    private System.Numerics.Vector2? ResolveFeedbackEntityPosition(int entityId)
+    {
+        if (_player is not null && _player.Id == entityId)
+        {
+            return _player.Body.Center;
+        }
+
+        var entity = _entities.Entities.FirstOrDefault(candidate => candidate.Id == entityId);
+        return entity?.Position;
+    }
+
+    private System.Numerics.Vector2 ResolveFeedbackFocusPosition()
+    {
+        return _player?.Body.Center ?? default;
+    }
+
+    private bool IsRareFeedbackItem(string itemId)
+    {
+        return _content?.Items.TryGetById(itemId, out var item) == true &&
+            item.Rarity >= ItemRarity.Rare &&
+            item.Rarity != ItemRarity.Quest;
     }
 
     private static string GetHotbarBinding(KeyBindingSettings bindings, int slot)
@@ -1119,76 +1511,6 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
             8 => bindings.Hotbar9,
             _ => bindings.Hotbar10
         };
-    }
-
-    private static int ResolveHairFrame(string hairStyle)
-    {
-        return hairStyle.ToUpperInvariant() switch
-        {
-            "MESSY" => 1,
-            "BOB" => 2,
-            "PONYTAIL" => 3,
-            "BRAIDS" => 4,
-            "MOHAWK" => 5,
-            "LONG" => 6,
-            "CAP" => 7,
-            _ => 0
-        };
-    }
-
-    private static int ResolveClothesFrame(string clothesStyle)
-    {
-        return clothesStyle.ToUpperInvariant() switch
-        {
-            "GREEN_WORK" => 1,
-            "RED_TRAIL" => 2,
-            "VIOLET_MAGE" => 3,
-            "TAN_WORKER" => 4,
-            "GREY_MINER" => 5,
-            "TEAL_SCOUT" => 6,
-            "OCHRE_FARMER" => 7,
-            _ => 0
-        };
-    }
-
-    private static int ResolveAccessoryFrame(string accessoryId)
-    {
-        return accessoryId.ToUpperInvariant() switch
-        {
-            "STRAW_HAT" => 1,
-            "MINER_HELMET" => 2,
-            "RED_BANDANA" => 3,
-            "GLASSES" => 4,
-            "LEAF_CROWN" => 5,
-            "HOOD" => 6,
-            _ => 0
-        };
-    }
-
-    private static int ResolveSkinFrame(string skinTone)
-    {
-        return skinTone.ToUpperInvariant() switch
-        {
-            "#F0CFA3" => 0,
-            "#E0B687" => 1,
-            "#C98F62" => 2,
-            "#8F563B" => 3,
-            _ => 1
-        };
-    }
-
-    private static Color ParseHexColor(string value)
-    {
-        if (string.IsNullOrWhiteSpace(value) || value.Length != 7 || value[0] != '#')
-        {
-            return Color.White;
-        }
-
-        return byte.TryParse(value.AsSpan(1, 2), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var r) &&
-               byte.TryParse(value.AsSpan(3, 2), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var g) &&
-               byte.TryParse(value.AsSpan(5, 2), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var b)
-            ? new Color(r, g, b)
-            : Color.White;
     }
 
 }

@@ -6,6 +6,7 @@ using Game.Core.Inventory;
 using Game.Core.Physics;
 using Game.Core.World.TileEntities;
 using System.Numerics;
+using Game.Core.Randomness;
 
 namespace Game.Core.Saving;
 
@@ -18,6 +19,9 @@ public sealed class GameLoadCoordinator
     private readonly EntitySaveService _runtimeEntities;
     private readonly TileEntitySaveService _tileEntities;
     private readonly FarmPlotSaveService _farmPlots;
+    private readonly SimulationSaveService _simulation = new();
+    private readonly RandomStateSaveService _randomState = new();
+    private readonly WorldEventStateSaveService _worldEvents = new();
     private readonly TileCollisionResolver _collisionResolver;
     private readonly Func<DateTimeOffset> _clock;
 
@@ -123,6 +127,34 @@ public sealed class GameLoadCoordinator
             farmPlotManager = _farmPlots.Load(farmPlotsPath, content.Crops);
         }
 
+        var worldTime = new Game.Core.Time.WorldTime();
+        var simulationStateLoaded = false;
+        if (options.LoadSimulationState)
+        {
+            var simulationPath = Path.Combine(saveDirectory, options.SimulationStateFileName);
+            simulationStateLoaded = File.Exists(simulationPath);
+            if (simulationStateLoaded)
+            {
+                worldTime = _simulation.Load(simulationPath);
+            }
+        }
+
+        var randomStatePath = Path.Combine(saveDirectory, options.RandomStateFileName);
+        var randomStateLoad = options.LoadRandomState
+            ? _randomState.LoadOrCreate(randomStatePath, unchecked((ulong)(uint)world.Metadata.Seed))
+            : new RandomStateLoadResult
+            {
+                Registry = new SessionRandomRegistry(unchecked((ulong)(uint)world.Metadata.Seed)),
+                Source = RandomStateLoadSource.LegacyFallback
+            };
+
+        var worldEventStateLoad = options.LoadWorldEventState
+            ? _worldEvents.LoadOrDefault(Path.Combine(saveDirectory, options.WorldEventStateFileName))
+            : new WorldEventStateLoadResult
+            {
+                Source = WorldEventStateLoadSource.LegacyFallback
+            };
+
         var result = new GameLoadResult(
             saveDirectory,
             _clock(),
@@ -142,7 +174,17 @@ public sealed class GameLoadCoordinator
         {
             EquipmentLoadout = equipmentLoadout,
             CharacterAppearance = characterAppearance,
-            PlayerWarnings = playerWarnings.ToArray()
+            PlayerWarnings = playerWarnings.ToArray(),
+            WorldTime = worldTime,
+            SimulationStateLoaded = simulationStateLoaded,
+            RandomStreams = randomStateLoad.Registry,
+            RandomStateLoaded = randomStateLoad.Source is not RandomStateLoadSource.LegacyFallback,
+            RandomStateSource = randomStateLoad.Source,
+            RandomStateWarning = randomStateLoad.Warning,
+            WorldEventState = worldEventStateLoad.State,
+            WorldEventStateLoaded = worldEventStateLoad.Source is not WorldEventStateLoadSource.LegacyFallback,
+            WorldEventStateSource = worldEventStateLoad.Source,
+            WorldEventStateWarning = worldEventStateLoad.Warning
         };
 
         events?.Publish(new GameLoadedEvent(result));

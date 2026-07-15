@@ -1,0 +1,11 @@
+{
+  "id": "furnace",
+  "result": { "itemId": "furnace", "count": 1 },
+  "ingredients": [
+    { "itemId": "stone_block", "count": 20 },
+    { "itemId": "wood", "count": 4 }
+  ],
+  "station": "workbench",
+  "category": "stations",
+  "sortOrder": 20
+}

@@ -1,6 +1,11 @@
 {
   "id": "gel",
   "displayName": "Gel",
+  "description": "A faintly luminous substance dropped by slimes.",
+  "rarity": "Common",
+  "value": 3,
+  "category": "Material",
+  "sortPriority": 30,
   "type": "Material",
   "texture": "items/gel",
   "maxStack": 999

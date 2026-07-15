@@ -1,0 +1,68 @@
+{
+  "id": "firefly_bloom",
+  "displayName": "Firefly Bloom",
+  "chancePerWindow": 0.28,
+  "minDurationTicks": 900,
+  "maxDurationTicks": 1500,
+  "cooldownTicks": 3600,
+  "intensity": 0.75,
+  "allowedBiomeIds": ["forest", "meadow"],
+  "requiresNight": true,
+  "modifiers": {
+    "spawnWeightMultiplier": 1.4,
+    "skyLightMultiplier": 0.92,
+    "ambientLightAdd": 0.05,
+    "weatherIntensityMultiplier": 0.7,
+    "lootQuantityMultiplier": 1.15,
+    "rareLootChanceMultiplier": 1.25,
+    "presentationIntensity": 1.0,
+    "particleSpriteId": "entities/critters/firefly",
+    "colorGradeId": "forest_firefly_bloom",
+    "soundscapeId": "forest_firefly_bloom"
+  },
+  "phases": [
+    {
+      "id": "awakening",
+      "startProgress": 0.0,
+      "endProgress": 0.2,
+      "modifiers": {
+        "spawnWeightMultiplier": 0.8,
+        "skyLightMultiplier": 1.0,
+        "ambientLightAdd": 0.0,
+        "weatherIntensityMultiplier": 1.0,
+        "lootQuantityMultiplier": 1.0,
+        "rareLootChanceMultiplier": 1.0,
+        "presentationIntensity": 0.45
+      }
+    },
+    {
+      "id": "bloom",
+      "startProgress": 0.2,
+      "endProgress": 0.8,
+      "modifiers": {
+        "spawnWeightMultiplier": 1.35,
+        "skyLightMultiplier": 0.96,
+        "ambientLightAdd": 0.04,
+        "weatherIntensityMultiplier": 0.85,
+        "lootQuantityMultiplier": 1.15,
+        "rareLootChanceMultiplier": 1.2,
+        "presentationIntensity": 1.0,
+        "particleSpriteId": "entities/critters/firefly"
+      }
+    },
+    {
+      "id": "settling",
+      "startProgress": 0.8,
+      "endProgress": 1.0,
+      "modifiers": {
+        "spawnWeightMultiplier": 0.75,
+        "skyLightMultiplier": 1.0,
+        "ambientLightAdd": 0.0,
+        "weatherIntensityMultiplier": 1.0,
+        "lootQuantityMultiplier": 1.0,
+        "rareLootChanceMultiplier": 1.0,
+        "presentationIntensity": 0.35
+      }
+    }
+  ]
+}

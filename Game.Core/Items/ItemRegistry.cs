@@ -73,6 +73,11 @@ public sealed class ItemRegistry : IItemDefinitionProvider
             throw new RegistryValidationException($"Item '{definition.Id}' has negative use time.");
         }
 
+        if (definition.Value < 0)
+        {
+            throw new RegistryValidationException($"Item '{definition.Id}' has a negative value.");
+        }
+
         if (definition.HealthRestore < 0 || definition.ManaRestore < 0)
         {
             throw new RegistryValidationException($"Item '{definition.Id}' has a negative resource restore value.");
@@ -151,6 +156,12 @@ public sealed class ItemRegistry : IItemDefinitionProvider
             Id = "missing_item",
             DisplayName = "Missing Item",
             Type = ItemType.QuestItem,
+            Description = "The original item definition could not be found.",
+            Rarity = ItemRarity.Quest,
+            Value = 0,
+            Category = ItemCategory.Quest,
+            CanFavorite = false,
+            CanTrash = false,
             TexturePath = "items/missing",
             MaxStack = 1
         };

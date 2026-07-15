@@ -1,6 +1,11 @@
 {
   "id": "wooden_bow",
   "displayName": "Wooden Bow",
+  "description": "A flexible ranged weapon that fires standard arrow ammunition.",
+  "rarity": "Common",
+  "value": 32,
+  "category": "Weapon",
+  "sortPriority": 40,
   "type": "WeaponRanged",
   "texture": "items/wooden_bow",
   "maxStack": 1,

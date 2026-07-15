@@ -1,0 +1,13 @@
+{
+  "id": "deep_ruin",
+  "templateId": "deep_ruin_chamber",
+  "placement": "deep_cave",
+  "chancePerRegion": 0.34,
+  "minSpacingRegions": 3,
+  "widthTiles": 18,
+  "heightTiles": 12,
+  "minTileY": 132,
+  "maxTileY": 152,
+  "allowedBiomeIds": ["deep_cave"],
+  "allowedLayerIds": ["deep_caverns"]
+}

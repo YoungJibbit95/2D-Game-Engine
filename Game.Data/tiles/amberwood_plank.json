@@ -1,0 +1,13 @@
+{
+  "id": "amberwood_plank",
+  "numericId": 13,
+  "displayName": "Amberwood Plank",
+  "texture": "world/wave05/amberwood_plank_autotile",
+  "solid": true,
+  "blocksLight": true,
+  "hardness": 1.6,
+  "miningPowerRequired": 0,
+  "dropItem": "amberwood_plank_block",
+  "mergeGroup": "wood",
+  "tags": ["wood", "building", "crafted", "mineable"]
+}

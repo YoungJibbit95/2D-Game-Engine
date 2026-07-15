@@ -1,0 +1,481 @@
+{
+  "animations": [
+    {
+      "id": "player.wave04.idle",
+      "displayName": "Wave 04 Player Idle",
+      "sprite": "entities/player/character_v1_wave04/body",
+      "loopMode": "PingPong",
+      "frames": [
+        {
+          "frame": 0,
+          "frameId": "idle_0",
+          "sourceRectangle": { "x": 0, "y": 0, "width": 16, "height": 32 },
+          "durationSeconds": 0.3,
+          "durationTicks": 18
+        },
+        {
+          "frame": 1,
+          "frameId": "idle_1",
+          "sourceRectangle": { "x": 16, "y": 0, "width": 16, "height": 32 },
+          "durationSeconds": 0.3,
+          "durationTicks": 18
+        }
+      ],
+      "tags": ["player", "wave-04", "fixed-tick", "locomotion"]
+    },
+    {
+      "id": "player.wave04.run",
+      "displayName": "Wave 04 Player Run",
+      "sprite": "entities/player/character_v1_wave04/body",
+      "loopMode": "Loop",
+      "frames": [
+        {
+          "frame": 2,
+          "frameId": "run_0",
+          "sourceRectangle": { "x": 32, "y": 0, "width": 16, "height": 32 },
+          "durationSeconds": 0.083333336,
+          "durationTicks": 5
+        },
+        {
+          "frame": 3,
+          "frameId": "run_1",
+          "sourceRectangle": { "x": 48, "y": 0, "width": 16, "height": 32 },
+          "durationSeconds": 0.083333336,
+          "durationTicks": 5
+        },
+        {
+          "frame": 4,
+          "frameId": "run_2",
+          "sourceRectangle": { "x": 64, "y": 0, "width": 16, "height": 32 },
+          "durationSeconds": 0.083333336,
+          "durationTicks": 5
+        },
+        {
+          "frame": 5,
+          "frameId": "run_3",
+          "sourceRectangle": { "x": 80, "y": 0, "width": 16, "height": 32 },
+          "durationSeconds": 0.083333336,
+          "durationTicks": 5
+        },
+        {
+          "frame": 6,
+          "frameId": "run_4",
+          "sourceRectangle": { "x": 96, "y": 0, "width": 16, "height": 32 },
+          "durationSeconds": 0.083333336,
+          "durationTicks": 5
+        },
+        {
+          "frame": 7,
+          "frameId": "run_5",
+          "sourceRectangle": { "x": 112, "y": 0, "width": 16, "height": 32 },
+          "durationSeconds": 0.083333336,
+          "durationTicks": 5
+        }
+      ],
+      "tags": ["player", "wave-04", "fixed-tick", "locomotion"]
+    },
+    {
+      "id": "player.wave04.jump",
+      "displayName": "Wave 04 Player Jump",
+      "sprite": "entities/player/character_v1_wave04/body",
+      "loopMode": "Once",
+      "frames": [
+        {
+          "frame": 8,
+          "frameId": "jump",
+          "sourceRectangle": { "x": 128, "y": 0, "width": 16, "height": 32 },
+          "durationSeconds": 0.13333334,
+          "durationTicks": 8
+        }
+      ],
+      "tags": ["player", "wave-04", "fixed-tick", "airborne"]
+    },
+    {
+      "id": "player.wave04.fall",
+      "displayName": "Wave 04 Player Fall",
+      "sprite": "entities/player/character_v1_wave04/body",
+      "loopMode": "Once",
+      "frames": [
+        {
+          "frame": 9,
+          "frameId": "fall",
+          "sourceRectangle": { "x": 144, "y": 0, "width": 16, "height": 32 },
+          "durationSeconds": 0.13333334,
+          "durationTicks": 8
+        }
+      ],
+      "tags": ["player", "wave-04", "fixed-tick", "airborne"]
+    },
+    {
+      "id": "player.wave04.tool",
+      "displayName": "Wave 04 Player Tool Action",
+      "sprite": "entities/player/character_v1_wave04/body",
+      "loopMode": "Once",
+      "frames": [
+        {
+          "frame": 10,
+          "frameId": "tool_0",
+          "sourceRectangle": { "x": 160, "y": 0, "width": 16, "height": 32 },
+          "durationSeconds": 0.083333336,
+          "durationTicks": 5
+        },
+        {
+          "frame": 11,
+          "frameId": "tool_1",
+          "sourceRectangle": { "x": 176, "y": 0, "width": 16, "height": 32 },
+          "durationSeconds": 0.083333336,
+          "durationTicks": 5
+        },
+        {
+          "frame": 12,
+          "frameId": "tool_2",
+          "sourceRectangle": { "x": 192, "y": 0, "width": 16, "height": 32 },
+          "durationSeconds": 0.083333336,
+          "durationTicks": 5
+        }
+      ],
+      "events": [
+        { "id": "tool.windup", "tick": 0 },
+        { "id": "tool.impact", "tick": 5 }
+      ],
+      "tags": ["player", "wave-04", "fixed-tick", "action"]
+    },
+    {
+      "id": "player.wave04.block",
+      "displayName": "Wave 04 Player Block",
+      "sprite": "entities/player/character_v1_wave04/body",
+      "loopMode": "Loop",
+      "frames": [
+        {
+          "frame": 13,
+          "frameId": "block",
+          "sourceRectangle": { "x": 208, "y": 0, "width": 16, "height": 32 },
+          "durationSeconds": 0.13333334,
+          "durationTicks": 8
+        }
+      ],
+      "tags": ["player", "wave-04", "fixed-tick", "guard"]
+    },
+    {
+      "id": "player.wave04.hurt",
+      "displayName": "Wave 04 Player Hurt",
+      "sprite": "entities/player/character_v1_wave04/body",
+      "loopMode": "Once",
+      "frames": [
+        {
+          "frame": 14,
+          "frameId": "hurt_0",
+          "sourceRectangle": { "x": 224, "y": 0, "width": 16, "height": 32 },
+          "durationSeconds": 0.083333336,
+          "durationTicks": 5
+        },
+        {
+          "frame": 15,
+          "frameId": "hurt_1",
+          "sourceRectangle": { "x": 240, "y": 0, "width": 16, "height": 32 },
+          "durationSeconds": 0.083333336,
+          "durationTicks": 5
+        }
+      ],
+      "events": [
+        { "id": "hurt.flash", "tick": 0 }
+      ],
+      "tags": ["player", "wave-04", "fixed-tick", "action"]
+    },
+    {
+      "id": "player.wave04.death",
+      "displayName": "Wave 04 Player Death Hold",
+      "sprite": "entities/player/character_v1_wave04/body",
+      "loopMode": "Once",
+      "frames": [
+        {
+          "frame": 15,
+          "frameId": "hurt_1",
+          "sourceRectangle": { "x": 240, "y": 0, "width": 16, "height": 32 },
+          "durationSeconds": 1.0,
+          "durationTicks": 60
+        }
+      ],
+      "tags": ["player", "wave-04", "fixed-tick", "terminal"]
+    }
+  ],
+  "runtimeAnimationContent": {
+    "clipIds": [
+      "player.wave04.idle",
+      "player.wave04.run",
+      "player.wave04.jump",
+      "player.wave04.fall",
+      "player.wave04.tool",
+      "player.wave04.block",
+      "player.wave04.hurt",
+      "player.wave04.death"
+    ],
+    "stateMachines": [
+      {
+        "id": "player.wave04.states",
+        "layers": [
+          {
+            "id": "base",
+            "priority": 0,
+            "initialStateId": "idle",
+            "states": [
+              { "id": "idle", "clipId": "player.wave04.idle" },
+              {
+                "id": "run",
+                "clipId": "player.wave04.run",
+                "scaleWithLocomotion": true,
+                "locomotionReferenceSpeedMilliUnitsPerSecond": 120000,
+                "minimumLocomotionRatePercentage": 50,
+                "maximumLocomotionRatePercentage": 200
+              },
+              { "id": "jump", "clipId": "player.wave04.jump" },
+              { "id": "fall", "clipId": "player.wave04.fall" },
+              {
+                "id": "tool",
+                "clipId": "player.wave04.tool",
+                "actionLockMode": "UntilClipComplete",
+                "completionStateId": "idle"
+              },
+              { "id": "block", "clipId": "player.wave04.block" },
+              {
+                "id": "hurt",
+                "clipId": "player.wave04.hurt",
+                "actionLockMode": "UntilClipComplete",
+                "completionStateId": "idle"
+              },
+              { "id": "death", "clipId": "player.wave04.death" }
+            ],
+            "transitions": [
+              { "fromStateId": "*", "toStateId": "idle", "blendTicks": 2 },
+              { "fromStateId": "*", "toStateId": "run", "blendTicks": 2 },
+              { "fromStateId": "*", "toStateId": "jump", "blendTicks": 1 },
+              { "fromStateId": "*", "toStateId": "fall", "blendTicks": 1 },
+              { "fromStateId": "*", "toStateId": "tool", "blendTicks": 1 },
+              { "fromStateId": "*", "toStateId": "block", "blendTicks": 1 },
+              { "fromStateId": "*", "toStateId": "hurt", "blendTicks": 1 },
+              { "fromStateId": "*", "toStateId": "death", "blendTicks": 0 }
+            ]
+          }
+        ]
+      }
+    ],
+    "entityProfiles": [
+      {
+        "id": "generic.entity",
+        "kind": "Entity",
+        "spriteId": "missing_sprite",
+        "motionStyle": "None",
+        "castsShadow": false,
+        "animations": [
+          { "state": "Idle", "startFrame": 0, "frameCount": 1, "ticksPerFrame": 12 }
+        ]
+      },
+      {
+        "id": "slime",
+        "kind": "Enemy",
+        "spriteId": "entities/slime",
+        "bindings": ["entities/slime", "slime"],
+        "motionStyle": "Bob, SquashStretch",
+        "bobAmplitude": 1.0,
+        "animations": [
+          { "state": "Idle", "startFrame": 0, "frameCount": 1, "ticksPerFrame": 8 },
+          { "state": "Walk", "startFrame": 0, "frameCount": 1, "ticksPerFrame": 8 },
+          { "state": "Run", "startFrame": 0, "frameCount": 1, "ticksPerFrame": 8 }
+        ]
+      },
+      {
+        "id": "meadow_slime_elite",
+        "kind": "Enemy",
+        "spriteId": "entities/slime",
+        "eliteSpriteId": "entities/enemies/meadow_slime_elite",
+        "bindings": ["entities/enemies/meadow_slime_elite", "meadow_slime_elite"],
+        "motionStyle": "Bob, SquashStretch",
+        "isElite": true,
+        "bobAmplitude": 1.0,
+        "animations": [
+          { "state": "Idle", "startFrame": 0, "frameCount": 1, "ticksPerFrame": 8 },
+          { "state": "Walk", "startFrame": 0, "frameCount": 1, "ticksPerFrame": 8 },
+          { "state": "Run", "startFrame": 0, "frameCount": 1, "ticksPerFrame": 8 }
+        ]
+      },
+      {
+        "id": "squirrel",
+        "kind": "Enemy",
+        "spriteId": "entities/critters/squirrel",
+        "bindings": ["entities/critters/squirrel", "squirrel"],
+        "motionStyle": "Bob, SquashStretch",
+        "walkSpeedThreshold": 2.0,
+        "runSpeedThreshold": 55.0,
+        "airborneSpeedThreshold": 14.0,
+        "bobAmplitude": 0.8,
+        "animations": [
+          { "state": "Idle", "startFrame": 0, "frameCount": 4, "ticksPerFrame": 10, "playback": "PingPong" },
+          { "state": "Walk", "startFrame": 0, "frameCount": 4, "ticksPerFrame": 5 },
+          { "state": "Run", "startFrame": 0, "frameCount": 4, "ticksPerFrame": 3 },
+          { "state": "Jump", "startFrame": 2, "frameCount": 1, "ticksPerFrame": 6 }
+        ]
+      },
+      {
+        "id": "rabbit",
+        "kind": "Enemy",
+        "spriteId": "entities/critters/rabbit",
+        "bindings": ["entities/critters/rabbit", "meadow_rabbit", "rabbit"],
+        "motionStyle": "Bob, SquashStretch",
+        "walkSpeedThreshold": 2.0,
+        "runSpeedThreshold": 55.0,
+        "airborneSpeedThreshold": 14.0,
+        "bobAmplitude": 0.8,
+        "animations": [
+          { "state": "Idle", "startFrame": 0, "frameCount": 4, "ticksPerFrame": 10, "playback": "PingPong" },
+          { "state": "Walk", "startFrame": 0, "frameCount": 4, "ticksPerFrame": 5 },
+          { "state": "Run", "startFrame": 0, "frameCount": 4, "ticksPerFrame": 3 },
+          { "state": "Jump", "startFrame": 2, "frameCount": 1, "ticksPerFrame": 6 }
+        ]
+      },
+      {
+        "id": "bird",
+        "kind": "Enemy",
+        "spriteId": "entities/critters/bird",
+        "bindings": ["bird", "entities/critters/bird", "forest_flock_bird"],
+        "motionStyle": "Bob, WingFlap",
+        "isFlying": true,
+        "bobAmplitude": 1.6,
+        "animations": [
+          { "state": "Idle", "startFrame": 0, "frameCount": 4, "ticksPerFrame": 7, "playback": "PingPong" },
+          { "state": "Fly", "startFrame": 0, "frameCount": 4, "ticksPerFrame": 3 }
+        ]
+      },
+      {
+        "id": "firefly",
+        "kind": "Enemy",
+        "spriteId": "entities/critters/firefly",
+        "bindings": ["entities/critters/firefly", "firefly"],
+        "motionStyle": "Bob, WingFlap",
+        "isFlying": true,
+        "displayScale": 0.8,
+        "bobAmplitude": 1.6,
+        "animations": [
+          { "state": "Idle", "startFrame": 0, "frameCount": 4, "ticksPerFrame": 7, "playback": "PingPong" },
+          { "state": "Fly", "startFrame": 0, "frameCount": 4, "ticksPerFrame": 3 }
+        ]
+      },
+      {
+        "id": "bat",
+        "kind": "Enemy",
+        "spriteId": "entities/enemies/bat",
+        "bindings": ["bat", "cave_bat_scout", "entities/enemies/bat"],
+        "motionStyle": "Bob, WingFlap",
+        "isFlying": true,
+        "bobAmplitude": 1.6,
+        "animations": [
+          { "state": "Idle", "startFrame": 0, "frameCount": 4, "ticksPerFrame": 7, "playback": "PingPong" },
+          { "state": "Fly", "startFrame": 0, "frameCount": 4, "ticksPerFrame": 3 },
+          { "state": "Hurt", "startFrame": 3, "frameCount": 1, "ticksPerFrame": 3, "playback": "Clamp" }
+        ]
+      },
+      {
+        "id": "forest_boar",
+        "kind": "Enemy",
+        "spriteId": "entities/enemies/forest_boar",
+        "bindings": ["entities/enemies/forest_boar", "forest_boar"],
+        "motionStyle": "Bob, SquashStretch",
+        "walkSpeedThreshold": 3.0,
+        "runSpeedThreshold": 80.0,
+        "airborneSpeedThreshold": 18.0,
+        "animations": [
+          { "state": "Idle", "startFrame": 0, "frameCount": 4, "ticksPerFrame": 10, "playback": "PingPong" },
+          { "state": "Walk", "startFrame": 0, "frameCount": 4, "ticksPerFrame": 5 },
+          { "state": "Run", "startFrame": 0, "frameCount": 4, "ticksPerFrame": 3 },
+          { "state": "Jump", "startFrame": 2, "frameCount": 1, "ticksPerFrame": 6 },
+          { "state": "Attack", "startFrame": 1, "frameCount": 3, "ticksPerFrame": 3, "playback": "Clamp" }
+        ]
+      },
+      {
+        "id": "forest_boar_elite",
+        "kind": "Enemy",
+        "spriteId": "entities/enemies/forest_boar",
+        "eliteSpriteId": "entities/enemies/forest_boar_elite",
+        "bindings": ["entities/enemies/forest_boar_elite", "forest_boar_elite"],
+        "motionStyle": "Bob, SquashStretch",
+        "isElite": true,
+        "walkSpeedThreshold": 3.0,
+        "runSpeedThreshold": 80.0,
+        "airborneSpeedThreshold": 18.0,
+        "animations": [
+          { "state": "Idle", "startFrame": 0, "frameCount": 4, "ticksPerFrame": 10, "playback": "PingPong" },
+          { "state": "Walk", "startFrame": 0, "frameCount": 4, "ticksPerFrame": 5 },
+          { "state": "Run", "startFrame": 0, "frameCount": 4, "ticksPerFrame": 3 },
+          { "state": "Jump", "startFrame": 2, "frameCount": 1, "ticksPerFrame": 6 },
+          { "state": "Attack", "startFrame": 1, "frameCount": 3, "ticksPerFrame": 3, "playback": "Clamp" }
+        ]
+      },
+      {
+        "id": "cave_spider",
+        "kind": "Enemy",
+        "spriteId": "entities/enemies/cave_spider",
+        "bindings": ["cave_spider", "entities/enemies/cave_spider"],
+        "motionStyle": "Bob, SquashStretch",
+        "walkSpeedThreshold": 3.0,
+        "runSpeedThreshold": 80.0,
+        "airborneSpeedThreshold": 18.0,
+        "animations": [
+          { "state": "Idle", "startFrame": 0, "frameCount": 4, "ticksPerFrame": 10, "playback": "PingPong" },
+          { "state": "Walk", "startFrame": 0, "frameCount": 4, "ticksPerFrame": 5 },
+          { "state": "Run", "startFrame": 0, "frameCount": 4, "ticksPerFrame": 3 },
+          { "state": "Jump", "startFrame": 2, "frameCount": 1, "ticksPerFrame": 6 },
+          { "state": "Attack", "startFrame": 1, "frameCount": 3, "ticksPerFrame": 3, "playback": "Clamp" }
+        ]
+      },
+      {
+        "id": "crystal_cave_spider",
+        "kind": "Enemy",
+        "spriteId": "entities/enemies/cave_spider",
+        "eliteSpriteId": "entities/enemies/cave_spider_elite",
+        "bindings": ["cave_spider_elite", "crystal_cave_spider", "entities/enemies/cave_spider_elite"],
+        "motionStyle": "Bob, SquashStretch",
+        "isElite": true,
+        "walkSpeedThreshold": 3.0,
+        "runSpeedThreshold": 80.0,
+        "airborneSpeedThreshold": 18.0,
+        "animations": [
+          { "state": "Idle", "startFrame": 0, "frameCount": 4, "ticksPerFrame": 10, "playback": "PingPong" },
+          { "state": "Walk", "startFrame": 0, "frameCount": 4, "ticksPerFrame": 5 },
+          { "state": "Run", "startFrame": 0, "frameCount": 4, "ticksPerFrame": 3 },
+          { "state": "Jump", "startFrame": 2, "frameCount": 1, "ticksPerFrame": 6 },
+          { "state": "Attack", "startFrame": 1, "frameCount": 3, "ticksPerFrame": 3, "playback": "Clamp" }
+        ]
+      },
+      {
+        "id": "generic.projectile",
+        "kind": "Projectile",
+        "spriteId": "projectiles/wooden_arrow",
+        "motionStyle": "RotateToVelocity",
+        "isFlying": true,
+        "castsShadow": false,
+        "animations": [
+          { "state": "Idle", "startFrame": 0, "frameCount": 1, "ticksPerFrame": 4 },
+          { "state": "Fly", "startFrame": 0, "frameCount": 1, "ticksPerFrame": 4 }
+        ]
+      },
+      {
+        "id": "generic.dropped-item",
+        "kind": "DroppedItem",
+        "spriteId": "missing_sprite",
+        "motionStyle": "Bob, Spin",
+        "displayScale": 0.8,
+        "bobAmplitude": 1.8,
+        "shadowWidthFactor": 0.6,
+        "shadowOpacity": 0.25,
+        "animations": [
+          { "state": "Idle", "startFrame": 0, "frameCount": 1, "ticksPerFrame": 12 }
+        ]
+      }
+    ],
+    "fallbacks": [
+      { "kind": "Entity", "profileId": "generic.entity" },
+      { "kind": "Enemy", "profileId": "slime" },
+      { "kind": "Projectile", "profileId": "generic.projectile" },
+      { "kind": "DroppedItem", "profileId": "generic.dropped-item" }
+    ]
+  }
+}

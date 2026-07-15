@@ -14,6 +14,12 @@ public sealed record GameSaveCoordinatorOptions
 
     public string FarmPlotsFileName { get; init; } = "farm_plots.json";
 
+    public string SimulationStateFileName { get; init; } = "simulation.json";
+
+    public string RandomStateFileName { get; init; } = RandomStateSaveService.DefaultFileName;
+
+    public string WorldEventStateFileName { get; init; } = WorldEventStateSaveService.DefaultFileName;
+
     public string PlayerId { get; init; } = "player_001";
 
     public string PlayerDisplayName { get; init; } = "Player";

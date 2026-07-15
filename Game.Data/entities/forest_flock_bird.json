@@ -1,0 +1,42 @@
+{
+  "id": "forest_flock_bird",
+  "displayName": "Forest Flock Bird",
+  "texture": "entities/critters/bird",
+  "maxHealth": 5,
+  "width": 10,
+  "height": 8,
+  "faction": "friendly",
+  "movementMode": "flying",
+  "tags": ["critter", "bird", "forest", "surface", "diurnal", "forest_wildlife"],
+  "contactDamage": 0,
+  "contactKnockback": 0,
+  "attackDamage": 0,
+  "lootTable": "forest_bird_forage",
+  "despawn": {
+    "mode": "whenIdle",
+    "spawnProtectionSeconds": 5,
+    "damageProtectionSeconds": 10
+  },
+  "ai": {
+    "kind": "critter",
+    "detectionRange": 96,
+    "loseTargetRange": 144,
+    "moveSpeed": 46,
+    "fleeSpeed": 104,
+    "patrolRadius": 160,
+    "returnHomeDistance": 208,
+    "flockRadius": 128,
+    "flockWeight": 0.8,
+    "minFlockSize": 3,
+    "perceptionMemorySeconds": 2.4,
+    "decisionInterval": 0.55,
+    "idleChance": 0.08,
+    "activityPeriod": "day",
+    "dayMoveSpeedMultiplier": 1.0,
+    "nightMoveSpeedMultiplier": 0.3,
+    "perchWhenInactive": true,
+    "requiresLineOfSight": true,
+    "avoidLedges": false,
+    "avoidLiquid": true
+  }
+}

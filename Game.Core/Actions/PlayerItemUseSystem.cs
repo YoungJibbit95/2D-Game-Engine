@@ -64,7 +64,8 @@ public sealed class PlayerItemUseSystem
         FarmPlotManager? farmPlots = null,
         FarmSeason farmSeason = FarmSeason.Any,
         int currentDay = 1,
-        Random? farmingRandom = null)
+        Random? farmingRandom = null,
+        LootKillContext? lootContext = null)
     {
         ArgumentNullException.ThrowIfNull(world);
         ArgumentNullException.ThrowIfNull(content);
@@ -115,7 +116,14 @@ public sealed class PlayerItemUseSystem
         {
             ItemActionKind.Place => TryBuild(world, content, player, inventory, targetTile, selected.ItemId, action, events),
             ItemActionKind.Mine => TryMine(world, content, player, entities, targetTile, item, action, deltaSeconds, events),
-            ItemActionKind.Melee => TryMelee(player, entities, content, item, targetWorldPosition, events),
+            ItemActionKind.Melee => TryMelee(
+                player,
+                entities,
+                content,
+                item,
+                targetWorldPosition,
+                events,
+                lootContext),
             ItemActionKind.Shoot => TryShoot(content, player, inventory, entities, item, action, targetWorldPosition),
             ItemActionKind.Cast => TryCast(content, player, entities, item, action, targetWorldPosition),
             ItemActionKind.Consume => TryConsume(content, player, inventory, selected.ItemId, item, events),
@@ -214,9 +222,18 @@ public sealed class PlayerItemUseSystem
         GameContentDatabase content,
         ItemDefinition item,
         Vector2 targetWorldPosition,
-        GameEventBus? events)
+        GameEventBus? events,
+        LootKillContext? lootContext)
     {
-        var melee = _melee.Attack(player, entities, item, content.LootTables, targetWorldPosition, events, content.StatusEffects);
+        var melee = _melee.Attack(
+            player,
+            entities,
+            item,
+            content.LootTables,
+            targetWorldPosition,
+            events,
+            content.StatusEffects,
+            lootContext);
         return melee.Attacked
             ? StartCooldown(new PlayerItemUseResult(PlayerItemUseKind.Melee, MiningResult.None, false, melee), item)
             : PlayerItemUseResult.BlockedResult(

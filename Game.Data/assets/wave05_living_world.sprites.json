@@ -1,0 +1,1786 @@
+{
+  "sprites": [
+    {
+      "id": "world/backgrounds/wave05/twilight_marsh",
+      "path": "Assets/Wave05/backgrounds/twilight_marsh_parallax.png",
+      "category": "Background",
+      "width": 512,
+      "height": 128,
+      "pixelsPerUnit": 16,
+      "atlasId": "wave05.backgrounds",
+      "originX": 0,
+      "originY": 127,
+      "renderLayer": "background.mid",
+      "license": "YjsE-Project-Owned",
+      "provenance": "wave_05_living_world_production; deterministic Pillow generator; wave_05_living_world_provenance.json",
+      "tags": [
+        "production-sample",
+        "runtime-preloaded",
+        "wave-05",
+        "living-world",
+        "background",
+        "parallax",
+        "twilight-marsh",
+        "tileable"
+      ]
+    },
+    {
+      "id": "world/backgrounds/wave05/amber_grove",
+      "path": "Assets/Wave05/backgrounds/amber_grove_parallax.png",
+      "category": "Background",
+      "width": 512,
+      "height": 128,
+      "pixelsPerUnit": 16,
+      "atlasId": "wave05.backgrounds",
+      "originX": 0,
+      "originY": 127,
+      "renderLayer": "background.mid",
+      "license": "YjsE-Project-Owned",
+      "provenance": "wave_05_living_world_production; deterministic Pillow generator; wave_05_living_world_provenance.json",
+      "tags": [
+        "production-sample",
+        "runtime-preloaded",
+        "wave-05",
+        "living-world",
+        "background",
+        "parallax",
+        "amber-grove",
+        "tileable"
+      ]
+    },
+    {
+      "id": "world/wave05/mangrove_root_autotile",
+      "path": "Assets/Wave05/world/mangrove_root_autotile.png",
+      "category": "Tile",
+      "width": 256,
+      "height": 16,
+      "pixelsPerUnit": 16,
+      "atlasId": "wave05.world",
+      "originX": 8,
+      "originY": 8,
+      "renderLayer": "tiles.front",
+      "license": "YjsE-Project-Owned",
+      "provenance": "wave_05_living_world_production; deterministic Pillow generator; wave_05_living_world_provenance.json",
+      "tags": [
+        "production-sample",
+        "runtime-preloaded",
+        "wave-05",
+        "living-world",
+        "world",
+        "autotile",
+        "connectable",
+        "root"
+      ],
+      "frames": [
+        {
+          "id": "mask_0",
+          "x": 0,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8,
+          "autoTileMask": 0
+        },
+        {
+          "id": "mask_1",
+          "x": 16,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8,
+          "autoTileMask": 1
+        },
+        {
+          "id": "mask_2",
+          "x": 32,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8,
+          "autoTileMask": 2
+        },
+        {
+          "id": "mask_3",
+          "x": 48,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8,
+          "autoTileMask": 3
+        },
+        {
+          "id": "mask_4",
+          "x": 64,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8,
+          "autoTileMask": 4
+        },
+        {
+          "id": "mask_5",
+          "x": 80,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8,
+          "autoTileMask": 5
+        },
+        {
+          "id": "mask_6",
+          "x": 96,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8,
+          "autoTileMask": 6
+        },
+        {
+          "id": "mask_7",
+          "x": 112,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8,
+          "autoTileMask": 7
+        },
+        {
+          "id": "mask_8",
+          "x": 128,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8,
+          "autoTileMask": 8
+        },
+        {
+          "id": "mask_9",
+          "x": 144,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8,
+          "autoTileMask": 9
+        },
+        {
+          "id": "mask_10",
+          "x": 160,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8,
+          "autoTileMask": 10
+        },
+        {
+          "id": "mask_11",
+          "x": 176,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8,
+          "autoTileMask": 11
+        },
+        {
+          "id": "mask_12",
+          "x": 192,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8,
+          "autoTileMask": 12
+        },
+        {
+          "id": "mask_13",
+          "x": 208,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8,
+          "autoTileMask": 13
+        },
+        {
+          "id": "mask_14",
+          "x": 224,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8,
+          "autoTileMask": 14
+        },
+        {
+          "id": "mask_15",
+          "x": 240,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8,
+          "autoTileMask": 15
+        }
+      ]
+    },
+    {
+      "id": "world/wave05/marsh_moss_autotile",
+      "path": "Assets/Wave05/world/marsh_moss_autotile.png",
+      "category": "Tile",
+      "width": 256,
+      "height": 16,
+      "pixelsPerUnit": 16,
+      "atlasId": "wave05.world",
+      "originX": 8,
+      "originY": 8,
+      "renderLayer": "tiles.front",
+      "license": "YjsE-Project-Owned",
+      "provenance": "wave_05_living_world_production; deterministic Pillow generator; wave_05_living_world_provenance.json",
+      "tags": [
+        "production-sample",
+        "runtime-preloaded",
+        "wave-05",
+        "living-world",
+        "world",
+        "autotile",
+        "connectable",
+        "moss"
+      ],
+      "frames": [
+        {
+          "id": "mask_0",
+          "x": 0,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8,
+          "autoTileMask": 0
+        },
+        {
+          "id": "mask_1",
+          "x": 16,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8,
+          "autoTileMask": 1
+        },
+        {
+          "id": "mask_2",
+          "x": 32,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8,
+          "autoTileMask": 2
+        },
+        {
+          "id": "mask_3",
+          "x": 48,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8,
+          "autoTileMask": 3
+        },
+        {
+          "id": "mask_4",
+          "x": 64,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8,
+          "autoTileMask": 4
+        },
+        {
+          "id": "mask_5",
+          "x": 80,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8,
+          "autoTileMask": 5
+        },
+        {
+          "id": "mask_6",
+          "x": 96,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8,
+          "autoTileMask": 6
+        },
+        {
+          "id": "mask_7",
+          "x": 112,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8,
+          "autoTileMask": 7
+        },
+        {
+          "id": "mask_8",
+          "x": 128,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8,
+          "autoTileMask": 8
+        },
+        {
+          "id": "mask_9",
+          "x": 144,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8,
+          "autoTileMask": 9
+        },
+        {
+          "id": "mask_10",
+          "x": 160,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8,
+          "autoTileMask": 10
+        },
+        {
+          "id": "mask_11",
+          "x": 176,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8,
+          "autoTileMask": 11
+        },
+        {
+          "id": "mask_12",
+          "x": 192,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8,
+          "autoTileMask": 12
+        },
+        {
+          "id": "mask_13",
+          "x": 208,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8,
+          "autoTileMask": 13
+        },
+        {
+          "id": "mask_14",
+          "x": 224,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8,
+          "autoTileMask": 14
+        },
+        {
+          "id": "mask_15",
+          "x": 240,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8,
+          "autoTileMask": 15
+        }
+      ]
+    },
+    {
+      "id": "world/wave05/amberwood_plank_autotile",
+      "path": "Assets/Wave05/world/amberwood_plank_autotile.png",
+      "category": "Tile",
+      "width": 256,
+      "height": 16,
+      "pixelsPerUnit": 16,
+      "atlasId": "wave05.world",
+      "originX": 8,
+      "originY": 8,
+      "renderLayer": "tiles.front",
+      "license": "YjsE-Project-Owned",
+      "provenance": "wave_05_living_world_production; deterministic Pillow generator; wave_05_living_world_provenance.json",
+      "tags": [
+        "production-sample",
+        "runtime-preloaded",
+        "wave-05",
+        "living-world",
+        "world",
+        "autotile",
+        "connectable",
+        "plank"
+      ],
+      "frames": [
+        {
+          "id": "mask_0",
+          "x": 0,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8,
+          "autoTileMask": 0
+        },
+        {
+          "id": "mask_1",
+          "x": 16,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8,
+          "autoTileMask": 1
+        },
+        {
+          "id": "mask_2",
+          "x": 32,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8,
+          "autoTileMask": 2
+        },
+        {
+          "id": "mask_3",
+          "x": 48,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8,
+          "autoTileMask": 3
+        },
+        {
+          "id": "mask_4",
+          "x": 64,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8,
+          "autoTileMask": 4
+        },
+        {
+          "id": "mask_5",
+          "x": 80,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8,
+          "autoTileMask": 5
+        },
+        {
+          "id": "mask_6",
+          "x": 96,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8,
+          "autoTileMask": 6
+        },
+        {
+          "id": "mask_7",
+          "x": 112,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8,
+          "autoTileMask": 7
+        },
+        {
+          "id": "mask_8",
+          "x": 128,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8,
+          "autoTileMask": 8
+        },
+        {
+          "id": "mask_9",
+          "x": 144,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8,
+          "autoTileMask": 9
+        },
+        {
+          "id": "mask_10",
+          "x": 160,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8,
+          "autoTileMask": 10
+        },
+        {
+          "id": "mask_11",
+          "x": 176,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8,
+          "autoTileMask": 11
+        },
+        {
+          "id": "mask_12",
+          "x": 192,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8,
+          "autoTileMask": 12
+        },
+        {
+          "id": "mask_13",
+          "x": 208,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8,
+          "autoTileMask": 13
+        },
+        {
+          "id": "mask_14",
+          "x": 224,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8,
+          "autoTileMask": 14
+        },
+        {
+          "id": "mask_15",
+          "x": 240,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8,
+          "autoTileMask": 15
+        }
+      ]
+    },
+    {
+      "id": "world/wave05/amberstone_autotile",
+      "path": "Assets/Wave05/world/amberstone_autotile.png",
+      "category": "Tile",
+      "width": 256,
+      "height": 16,
+      "pixelsPerUnit": 16,
+      "atlasId": "wave05.world",
+      "originX": 8,
+      "originY": 8,
+      "renderLayer": "tiles.front",
+      "license": "YjsE-Project-Owned",
+      "provenance": "wave_05_living_world_production; deterministic Pillow generator; wave_05_living_world_provenance.json",
+      "tags": [
+        "production-sample",
+        "runtime-preloaded",
+        "wave-05",
+        "living-world",
+        "world",
+        "autotile",
+        "connectable",
+        "stone"
+      ],
+      "frames": [
+        {
+          "id": "mask_0",
+          "x": 0,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8,
+          "autoTileMask": 0
+        },
+        {
+          "id": "mask_1",
+          "x": 16,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8,
+          "autoTileMask": 1
+        },
+        {
+          "id": "mask_2",
+          "x": 32,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8,
+          "autoTileMask": 2
+        },
+        {
+          "id": "mask_3",
+          "x": 48,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8,
+          "autoTileMask": 3
+        },
+        {
+          "id": "mask_4",
+          "x": 64,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8,
+          "autoTileMask": 4
+        },
+        {
+          "id": "mask_5",
+          "x": 80,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8,
+          "autoTileMask": 5
+        },
+        {
+          "id": "mask_6",
+          "x": 96,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8,
+          "autoTileMask": 6
+        },
+        {
+          "id": "mask_7",
+          "x": 112,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8,
+          "autoTileMask": 7
+        },
+        {
+          "id": "mask_8",
+          "x": 128,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8,
+          "autoTileMask": 8
+        },
+        {
+          "id": "mask_9",
+          "x": 144,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8,
+          "autoTileMask": 9
+        },
+        {
+          "id": "mask_10",
+          "x": 160,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8,
+          "autoTileMask": 10
+        },
+        {
+          "id": "mask_11",
+          "x": 176,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8,
+          "autoTileMask": 11
+        },
+        {
+          "id": "mask_12",
+          "x": 192,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8,
+          "autoTileMask": 12
+        },
+        {
+          "id": "mask_13",
+          "x": 208,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8,
+          "autoTileMask": 13
+        },
+        {
+          "id": "mask_14",
+          "x": 224,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8,
+          "autoTileMask": 14
+        },
+        {
+          "id": "mask_15",
+          "x": 240,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8,
+          "autoTileMask": 15
+        }
+      ]
+    },
+    {
+      "id": "world/wave05/hanging_lantern_chain",
+      "path": "Assets/Wave05/world/hanging_lantern_chain.png",
+      "category": "WorldObject",
+      "width": 64,
+      "height": 32,
+      "pixelsPerUnit": 16,
+      "atlasId": "wave05.world",
+      "originX": 8,
+      "originY": 31,
+      "renderLayer": "world.decoration",
+      "license": "YjsE-Project-Owned",
+      "provenance": "wave_05_living_world_production; deterministic Pillow generator; wave_05_living_world_provenance.json",
+      "tags": [
+        "production-sample",
+        "runtime-preloaded",
+        "wave-05",
+        "living-world",
+        "world-object",
+        "furniture",
+        "connectable",
+        "light-source"
+      ],
+      "frames": [
+        {
+          "id": "cap",
+          "x": 0,
+          "y": 0,
+          "width": 16,
+          "height": 32,
+          "originX": 8,
+          "originY": 31
+        },
+        {
+          "id": "chain_short",
+          "x": 16,
+          "y": 0,
+          "width": 16,
+          "height": 32,
+          "originX": 8,
+          "originY": 31
+        },
+        {
+          "id": "chain_long",
+          "x": 32,
+          "y": 0,
+          "width": 16,
+          "height": 32,
+          "originX": 8,
+          "originY": 31
+        },
+        {
+          "id": "lantern",
+          "x": 48,
+          "y": 0,
+          "width": 16,
+          "height": 32,
+          "originX": 8,
+          "originY": 31
+        }
+      ]
+    },
+    {
+      "id": "world/wave05/amber_workshop_set",
+      "path": "Assets/Wave05/world/amber_workshop_set.png",
+      "category": "WorldObject",
+      "width": 128,
+      "height": 32,
+      "pixelsPerUnit": 16,
+      "atlasId": "wave05.world",
+      "originX": 16,
+      "originY": 31,
+      "renderLayer": "world.furniture",
+      "license": "YjsE-Project-Owned",
+      "provenance": "wave_05_living_world_production; deterministic Pillow generator; wave_05_living_world_provenance.json",
+      "tags": [
+        "production-sample",
+        "runtime-preloaded",
+        "wave-05",
+        "living-world",
+        "world-object",
+        "furniture",
+        "modular",
+        "connectable"
+      ],
+      "frames": [
+        {
+          "id": "bench",
+          "x": 0,
+          "y": 0,
+          "width": 32,
+          "height": 32,
+          "originX": 16,
+          "originY": 31
+        },
+        {
+          "id": "shelf",
+          "x": 32,
+          "y": 0,
+          "width": 32,
+          "height": 32,
+          "originX": 16,
+          "originY": 31
+        },
+        {
+          "id": "chair",
+          "x": 64,
+          "y": 0,
+          "width": 32,
+          "height": 32,
+          "originX": 16,
+          "originY": 31
+        },
+        {
+          "id": "tool_rack",
+          "x": 96,
+          "y": 0,
+          "width": 32,
+          "height": 32,
+          "originX": 16,
+          "originY": 31
+        }
+      ]
+    },
+    {
+      "id": "items/wave05/sunsteel_pickaxe",
+      "path": "Assets/Wave05/items/sunsteel_pickaxe.png",
+      "category": "Tool",
+      "width": 32,
+      "height": 32,
+      "pixelsPerUnit": 16,
+      "atlasId": "wave05.items",
+      "originX": 16,
+      "originY": 16,
+      "renderLayer": "items",
+      "license": "YjsE-Project-Owned",
+      "provenance": "wave_05_living_world_production; deterministic Pillow generator; wave_05_living_world_provenance.json",
+      "tags": [
+        "production-sample",
+        "runtime-preloaded",
+        "wave-05",
+        "living-world",
+        "item",
+        "icon",
+        "tool"
+      ]
+    },
+    {
+      "id": "items/wave05/prism_axe",
+      "path": "Assets/Wave05/items/prism_axe.png",
+      "category": "Tool",
+      "width": 32,
+      "height": 32,
+      "pixelsPerUnit": 16,
+      "atlasId": "wave05.items",
+      "originX": 16,
+      "originY": 16,
+      "renderLayer": "items",
+      "license": "YjsE-Project-Owned",
+      "provenance": "wave_05_living_world_production; deterministic Pillow generator; wave_05_living_world_provenance.json",
+      "tags": [
+        "production-sample",
+        "runtime-preloaded",
+        "wave-05",
+        "living-world",
+        "item",
+        "icon",
+        "tool"
+      ]
+    },
+    {
+      "id": "items/wave05/glimmer_rod",
+      "path": "Assets/Wave05/items/glimmer_rod.png",
+      "category": "Tool",
+      "width": 32,
+      "height": 32,
+      "pixelsPerUnit": 16,
+      "atlasId": "wave05.items",
+      "originX": 16,
+      "originY": 16,
+      "renderLayer": "items",
+      "license": "YjsE-Project-Owned",
+      "provenance": "wave_05_living_world_production; deterministic Pillow generator; wave_05_living_world_provenance.json",
+      "tags": [
+        "production-sample",
+        "runtime-preloaded",
+        "wave-05",
+        "living-world",
+        "item",
+        "icon",
+        "tool"
+      ]
+    },
+    {
+      "id": "items/wave05/thornblade",
+      "path": "Assets/Wave05/items/thornblade.png",
+      "category": "Weapon",
+      "width": 32,
+      "height": 32,
+      "pixelsPerUnit": 16,
+      "atlasId": "wave05.items",
+      "originX": 16,
+      "originY": 16,
+      "renderLayer": "items",
+      "license": "YjsE-Project-Owned",
+      "provenance": "wave_05_living_world_production; deterministic Pillow generator; wave_05_living_world_provenance.json",
+      "tags": [
+        "production-sample",
+        "runtime-preloaded",
+        "wave-05",
+        "living-world",
+        "item",
+        "icon",
+        "combat"
+      ]
+    },
+    {
+      "id": "items/wave05/mirror_shield",
+      "path": "Assets/Wave05/items/mirror_shield.png",
+      "category": "Weapon",
+      "width": 32,
+      "height": 32,
+      "pixelsPerUnit": 16,
+      "atlasId": "wave05.items",
+      "originX": 16,
+      "originY": 16,
+      "renderLayer": "items",
+      "license": "YjsE-Project-Owned",
+      "provenance": "wave_05_living_world_production; deterministic Pillow generator; wave_05_living_world_provenance.json",
+      "tags": [
+        "production-sample",
+        "runtime-preloaded",
+        "wave-05",
+        "living-world",
+        "item",
+        "icon",
+        "combat"
+      ]
+    },
+    {
+      "id": "items/wave05/flare_bow",
+      "path": "Assets/Wave05/items/flare_bow.png",
+      "category": "Weapon",
+      "width": 32,
+      "height": 32,
+      "pixelsPerUnit": 16,
+      "atlasId": "wave05.items",
+      "originX": 16,
+      "originY": 16,
+      "renderLayer": "items",
+      "license": "YjsE-Project-Owned",
+      "provenance": "wave_05_living_world_production; deterministic Pillow generator; wave_05_living_world_provenance.json",
+      "tags": [
+        "production-sample",
+        "runtime-preloaded",
+        "wave-05",
+        "living-world",
+        "item",
+        "icon",
+        "combat"
+      ]
+    },
+    {
+      "id": "entities/wave05/marsh_frog",
+      "path": "Assets/Wave05/entities/marsh_frog.png",
+      "category": "Entity",
+      "width": 256,
+      "height": 32,
+      "pixelsPerUnit": 16,
+      "atlasId": "wave05.entities",
+      "originX": 16,
+      "originY": 31,
+      "renderLayer": "entities.front",
+      "license": "YjsE-Project-Owned",
+      "provenance": "wave_05_living_world_production; deterministic Pillow generator; wave_05_living_world_provenance.json",
+      "tags": [
+        "production-sample",
+        "runtime-preloaded",
+        "wave-05",
+        "living-world",
+        "entity",
+        "animated",
+        "friendly",
+        "eight-frame"
+      ],
+      "frames": [
+        {
+          "id": "frame_0",
+          "x": 0,
+          "y": 0,
+          "width": 32,
+          "height": 32,
+          "originX": 16,
+          "originY": 31,
+          "durationMs": 110
+        },
+        {
+          "id": "frame_1",
+          "x": 32,
+          "y": 0,
+          "width": 32,
+          "height": 32,
+          "originX": 16,
+          "originY": 31,
+          "durationMs": 110
+        },
+        {
+          "id": "frame_2",
+          "x": 64,
+          "y": 0,
+          "width": 32,
+          "height": 32,
+          "originX": 16,
+          "originY": 31,
+          "durationMs": 110
+        },
+        {
+          "id": "frame_3",
+          "x": 96,
+          "y": 0,
+          "width": 32,
+          "height": 32,
+          "originX": 16,
+          "originY": 31,
+          "durationMs": 110
+        },
+        {
+          "id": "frame_4",
+          "x": 128,
+          "y": 0,
+          "width": 32,
+          "height": 32,
+          "originX": 16,
+          "originY": 31,
+          "durationMs": 110
+        },
+        {
+          "id": "frame_5",
+          "x": 160,
+          "y": 0,
+          "width": 32,
+          "height": 32,
+          "originX": 16,
+          "originY": 31,
+          "durationMs": 110
+        },
+        {
+          "id": "frame_6",
+          "x": 192,
+          "y": 0,
+          "width": 32,
+          "height": 32,
+          "originX": 16,
+          "originY": 31,
+          "durationMs": 110
+        },
+        {
+          "id": "frame_7",
+          "x": 224,
+          "y": 0,
+          "width": 32,
+          "height": 32,
+          "originX": 16,
+          "originY": 31,
+          "durationMs": 110
+        }
+      ]
+    },
+    {
+      "id": "entities/wave05/canopy_owl",
+      "path": "Assets/Wave05/entities/canopy_owl.png",
+      "category": "Entity",
+      "width": 256,
+      "height": 32,
+      "pixelsPerUnit": 16,
+      "atlasId": "wave05.entities",
+      "originX": 16,
+      "originY": 31,
+      "renderLayer": "entities.front",
+      "license": "YjsE-Project-Owned",
+      "provenance": "wave_05_living_world_production; deterministic Pillow generator; wave_05_living_world_provenance.json",
+      "tags": [
+        "production-sample",
+        "runtime-preloaded",
+        "wave-05",
+        "living-world",
+        "entity",
+        "animated",
+        "friendly",
+        "eight-frame"
+      ],
+      "frames": [
+        {
+          "id": "frame_0",
+          "x": 0,
+          "y": 0,
+          "width": 32,
+          "height": 32,
+          "originX": 16,
+          "originY": 31,
+          "durationMs": 110
+        },
+        {
+          "id": "frame_1",
+          "x": 32,
+          "y": 0,
+          "width": 32,
+          "height": 32,
+          "originX": 16,
+          "originY": 31,
+          "durationMs": 110
+        },
+        {
+          "id": "frame_2",
+          "x": 64,
+          "y": 0,
+          "width": 32,
+          "height": 32,
+          "originX": 16,
+          "originY": 31,
+          "durationMs": 110
+        },
+        {
+          "id": "frame_3",
+          "x": 96,
+          "y": 0,
+          "width": 32,
+          "height": 32,
+          "originX": 16,
+          "originY": 31,
+          "durationMs": 110
+        },
+        {
+          "id": "frame_4",
+          "x": 128,
+          "y": 0,
+          "width": 32,
+          "height": 32,
+          "originX": 16,
+          "originY": 31,
+          "durationMs": 110
+        },
+        {
+          "id": "frame_5",
+          "x": 160,
+          "y": 0,
+          "width": 32,
+          "height": 32,
+          "originX": 16,
+          "originY": 31,
+          "durationMs": 110
+        },
+        {
+          "id": "frame_6",
+          "x": 192,
+          "y": 0,
+          "width": 32,
+          "height": 32,
+          "originX": 16,
+          "originY": 31,
+          "durationMs": 110
+        },
+        {
+          "id": "frame_7",
+          "x": 224,
+          "y": 0,
+          "width": 32,
+          "height": 32,
+          "originX": 16,
+          "originY": 31,
+          "durationMs": 110
+        }
+      ]
+    },
+    {
+      "id": "entities/wave05/amber_beetle",
+      "path": "Assets/Wave05/entities/amber_beetle.png",
+      "category": "Entity",
+      "width": 256,
+      "height": 32,
+      "pixelsPerUnit": 16,
+      "atlasId": "wave05.entities",
+      "originX": 16,
+      "originY": 31,
+      "renderLayer": "entities.front",
+      "license": "YjsE-Project-Owned",
+      "provenance": "wave_05_living_world_production; deterministic Pillow generator; wave_05_living_world_provenance.json",
+      "tags": [
+        "production-sample",
+        "runtime-preloaded",
+        "wave-05",
+        "living-world",
+        "entity",
+        "animated",
+        "neutral",
+        "eight-frame"
+      ],
+      "frames": [
+        {
+          "id": "frame_0",
+          "x": 0,
+          "y": 0,
+          "width": 32,
+          "height": 32,
+          "originX": 16,
+          "originY": 31,
+          "durationMs": 110
+        },
+        {
+          "id": "frame_1",
+          "x": 32,
+          "y": 0,
+          "width": 32,
+          "height": 32,
+          "originX": 16,
+          "originY": 31,
+          "durationMs": 110
+        },
+        {
+          "id": "frame_2",
+          "x": 64,
+          "y": 0,
+          "width": 32,
+          "height": 32,
+          "originX": 16,
+          "originY": 31,
+          "durationMs": 110
+        },
+        {
+          "id": "frame_3",
+          "x": 96,
+          "y": 0,
+          "width": 32,
+          "height": 32,
+          "originX": 16,
+          "originY": 31,
+          "durationMs": 110
+        },
+        {
+          "id": "frame_4",
+          "x": 128,
+          "y": 0,
+          "width": 32,
+          "height": 32,
+          "originX": 16,
+          "originY": 31,
+          "durationMs": 110
+        },
+        {
+          "id": "frame_5",
+          "x": 160,
+          "y": 0,
+          "width": 32,
+          "height": 32,
+          "originX": 16,
+          "originY": 31,
+          "durationMs": 110
+        },
+        {
+          "id": "frame_6",
+          "x": 192,
+          "y": 0,
+          "width": 32,
+          "height": 32,
+          "originX": 16,
+          "originY": 31,
+          "durationMs": 110
+        },
+        {
+          "id": "frame_7",
+          "x": 224,
+          "y": 0,
+          "width": 32,
+          "height": 32,
+          "originX": 16,
+          "originY": 31,
+          "durationMs": 110
+        }
+      ]
+    },
+    {
+      "id": "entities/wave05/prism_wisp",
+      "path": "Assets/Wave05/entities/prism_wisp.png",
+      "category": "Entity",
+      "width": 256,
+      "height": 32,
+      "pixelsPerUnit": 16,
+      "atlasId": "wave05.entities",
+      "originX": 16,
+      "originY": 31,
+      "renderLayer": "entities.front",
+      "license": "YjsE-Project-Owned",
+      "provenance": "wave_05_living_world_production; deterministic Pillow generator; wave_05_living_world_provenance.json",
+      "tags": [
+        "production-sample",
+        "runtime-preloaded",
+        "wave-05",
+        "living-world",
+        "entity",
+        "animated",
+        "hostile",
+        "eight-frame"
+      ],
+      "frames": [
+        {
+          "id": "frame_0",
+          "x": 0,
+          "y": 0,
+          "width": 32,
+          "height": 32,
+          "originX": 16,
+          "originY": 31,
+          "durationMs": 110
+        },
+        {
+          "id": "frame_1",
+          "x": 32,
+          "y": 0,
+          "width": 32,
+          "height": 32,
+          "originX": 16,
+          "originY": 31,
+          "durationMs": 110
+        },
+        {
+          "id": "frame_2",
+          "x": 64,
+          "y": 0,
+          "width": 32,
+          "height": 32,
+          "originX": 16,
+          "originY": 31,
+          "durationMs": 110
+        },
+        {
+          "id": "frame_3",
+          "x": 96,
+          "y": 0,
+          "width": 32,
+          "height": 32,
+          "originX": 16,
+          "originY": 31,
+          "durationMs": 110
+        },
+        {
+          "id": "frame_4",
+          "x": 128,
+          "y": 0,
+          "width": 32,
+          "height": 32,
+          "originX": 16,
+          "originY": 31,
+          "durationMs": 110
+        },
+        {
+          "id": "frame_5",
+          "x": 160,
+          "y": 0,
+          "width": 32,
+          "height": 32,
+          "originX": 16,
+          "originY": 31,
+          "durationMs": 110
+        },
+        {
+          "id": "frame_6",
+          "x": 192,
+          "y": 0,
+          "width": 32,
+          "height": 32,
+          "originX": 16,
+          "originY": 31,
+          "durationMs": 110
+        },
+        {
+          "id": "frame_7",
+          "x": 224,
+          "y": 0,
+          "width": 32,
+          "height": 32,
+          "originX": 16,
+          "originY": 31,
+          "durationMs": 110
+        }
+      ]
+    },
+    {
+      "id": "ui/wave05/glass_panel_9slice",
+      "path": "Assets/Wave05/ui/glass_panel_9slice.png",
+      "category": "UI",
+      "width": 48,
+      "height": 48,
+      "pixelsPerUnit": 16,
+      "atlasId": "wave05.ui",
+      "originX": 8,
+      "originY": 8,
+      "renderLayer": "ui.frame",
+      "license": "YjsE-Project-Owned",
+      "provenance": "wave_05_living_world_production; deterministic Pillow generator; wave_05_living_world_provenance.json",
+      "tags": [
+        "production-sample",
+        "runtime-preloaded",
+        "wave-05",
+        "living-world",
+        "ui",
+        "nine-slice",
+        "panel"
+      ],
+      "frames": [
+        {
+          "id": "top_left",
+          "x": 0,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8
+        },
+        {
+          "id": "top",
+          "x": 16,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8
+        },
+        {
+          "id": "top_right",
+          "x": 32,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8
+        },
+        {
+          "id": "left",
+          "x": 0,
+          "y": 16,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8
+        },
+        {
+          "id": "center",
+          "x": 16,
+          "y": 16,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8
+        },
+        {
+          "id": "right",
+          "x": 32,
+          "y": 16,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8
+        },
+        {
+          "id": "bottom_left",
+          "x": 0,
+          "y": 32,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8
+        },
+        {
+          "id": "bottom",
+          "x": 16,
+          "y": 32,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8
+        },
+        {
+          "id": "bottom_right",
+          "x": 32,
+          "y": 32,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8
+        }
+      ]
+    },
+    {
+      "id": "ui/wave05/brass_modal_9slice",
+      "path": "Assets/Wave05/ui/brass_modal_9slice.png",
+      "category": "UI",
+      "width": 48,
+      "height": 48,
+      "pixelsPerUnit": 16,
+      "atlasId": "wave05.ui",
+      "originX": 8,
+      "originY": 8,
+      "renderLayer": "ui.frame",
+      "license": "YjsE-Project-Owned",
+      "provenance": "wave_05_living_world_production; deterministic Pillow generator; wave_05_living_world_provenance.json",
+      "tags": [
+        "production-sample",
+        "runtime-preloaded",
+        "wave-05",
+        "living-world",
+        "ui",
+        "nine-slice",
+        "modal"
+      ],
+      "frames": [
+        {
+          "id": "top_left",
+          "x": 0,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8
+        },
+        {
+          "id": "top",
+          "x": 16,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8
+        },
+        {
+          "id": "top_right",
+          "x": 32,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8
+        },
+        {
+          "id": "left",
+          "x": 0,
+          "y": 16,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8
+        },
+        {
+          "id": "center",
+          "x": 16,
+          "y": 16,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8
+        },
+        {
+          "id": "right",
+          "x": 32,
+          "y": 16,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8
+        },
+        {
+          "id": "bottom_left",
+          "x": 0,
+          "y": 32,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8
+        },
+        {
+          "id": "bottom",
+          "x": 16,
+          "y": 32,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8
+        },
+        {
+          "id": "bottom_right",
+          "x": 32,
+          "y": 32,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8
+        }
+      ]
+    },
+    {
+      "id": "ui/wave05/quest",
+      "path": "Assets/Wave05/ui/quest.png",
+      "category": "UI",
+      "width": 32,
+      "height": 32,
+      "pixelsPerUnit": 16,
+      "atlasId": "wave05.ui",
+      "originX": 16,
+      "originY": 16,
+      "renderLayer": "ui.icon",
+      "license": "YjsE-Project-Owned",
+      "provenance": "wave_05_living_world_production; deterministic Pillow generator; wave_05_living_world_provenance.json",
+      "tags": [
+        "production-sample",
+        "runtime-preloaded",
+        "wave-05",
+        "living-world",
+        "ui",
+        "icon",
+        "quest"
+      ]
+    },
+    {
+      "id": "ui/wave05/combat",
+      "path": "Assets/Wave05/ui/combat.png",
+      "category": "UI",
+      "width": 32,
+      "height": 32,
+      "pixelsPerUnit": 16,
+      "atlasId": "wave05.ui",
+      "originX": 16,
+      "originY": 16,
+      "renderLayer": "ui.icon",
+      "license": "YjsE-Project-Owned",
+      "provenance": "wave_05_living_world_production; deterministic Pillow generator; wave_05_living_world_provenance.json",
+      "tags": [
+        "production-sample",
+        "runtime-preloaded",
+        "wave-05",
+        "living-world",
+        "ui",
+        "icon",
+        "combat"
+      ]
+    },
+    {
+      "id": "ui/wave05/social",
+      "path": "Assets/Wave05/ui/social.png",
+      "category": "UI",
+      "width": 32,
+      "height": 32,
+      "pixelsPerUnit": 16,
+      "atlasId": "wave05.ui",
+      "originX": 16,
+      "originY": 16,
+      "renderLayer": "ui.icon",
+      "license": "YjsE-Project-Owned",
+      "provenance": "wave_05_living_world_production; deterministic Pillow generator; wave_05_living_world_provenance.json",
+      "tags": [
+        "production-sample",
+        "runtime-preloaded",
+        "wave-05",
+        "living-world",
+        "ui",
+        "icon",
+        "social"
+      ]
+    },
+    {
+      "id": "ui/wave05/building",
+      "path": "Assets/Wave05/ui/building.png",
+      "category": "UI",
+      "width": 32,
+      "height": 32,
+      "pixelsPerUnit": 16,
+      "atlasId": "wave05.ui",
+      "originX": 16,
+      "originY": 16,
+      "renderLayer": "ui.icon",
+      "license": "YjsE-Project-Owned",
+      "provenance": "wave_05_living_world_production; deterministic Pillow generator; wave_05_living_world_provenance.json",
+      "tags": [
+        "production-sample",
+        "runtime-preloaded",
+        "wave-05",
+        "living-world",
+        "ui",
+        "icon",
+        "building"
+      ]
+    }
+  ]
+}

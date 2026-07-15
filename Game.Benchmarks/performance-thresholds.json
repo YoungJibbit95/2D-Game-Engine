@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "profile": "yjse-engine-scale-v1",
+  "notes": "Thresholds are CI regression guardrails, not claimed measurements. Calibrate only from committed Release artifacts on the same hardware class.",
+  "scenarios": {
+    "SimulationPhaseTelemetry.DisabledMeasure": {
+      "maximumAllocatedBytesPerOperation": 0
+    },
+    "SimulationPhaseTelemetry.EnabledMeasure": {
+      "maximumAllocatedBytesPerOperation": 0,
+      "requiredPhaseCoverage": 1.0
+    },
+    "EntityAI.UpdateTwoHundredCritters": {
+      "maximumAverageAllocatedBytesPerTick": 12288,
+      "maximumP95Milliseconds": 50.0
+    },
+    "SpawnScheduler.MaintainTwoHundredEntities": {
+      "maximumP95Milliseconds": 100.0,
+      "maximumFailedJobs": 0
+    },
+    "ChunkStreaming.BidirectionalTrace": {
+      "maximumApplyQueueLength": 24,
+      "maximumPendingLoadJobs": 4,
+      "maximumFailedJobs": 0,
+      "maximumSettleMilliseconds": 10000.0
+    },
+    "Simulation.FixedTick": {
+      "maximumAverageAllocatedBytesPerTick": 16384,
+      "maximumP95Milliseconds": 4.0
+    }
+  }
+}

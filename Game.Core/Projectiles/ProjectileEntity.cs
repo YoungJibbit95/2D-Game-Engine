@@ -8,9 +8,7 @@ namespace Game.Core.Projectiles;
 
 public sealed class ProjectileEntity : Entity
 {
-    private const float GravityPixelsPerSecondSquared = 980f;
-
-    private float _age;
+    private IReadOnlyList<ProjectileHomingTarget>? _homingTargetsForNextUpdate;
 
     public ProjectileEntity(
         string projectileId,
@@ -22,7 +20,17 @@ public sealed class ProjectileEntity : Entity
         float lifetime,
         int? ownerEntityId = null,
         float age = 0)
-        : this(projectileId, position, velocity, damage, DamageType.Ranged, gravity, pierce, lifetime, ownerEntityId, age)
+        : this(
+            projectileId,
+            position,
+            velocity,
+            damage,
+            DamageType.Ranged,
+            gravity,
+            pierce,
+            lifetime,
+            ownerEntityId,
+            age)
     {
     }
 
@@ -37,79 +45,202 @@ public sealed class ProjectileEntity : Entity
         float lifetime,
         int? ownerEntityId = null,
         float age = 0)
+        : this(
+            CreateCompatibilityDefinition(
+                projectileId,
+                velocity,
+                damage,
+                damageType,
+                gravity,
+                pierce,
+                lifetime),
+            position,
+            velocity,
+            ownerEntityId,
+            EntityFaction.Friendly,
+            age: age,
+            remainingPierces: pierce)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(projectileId);
-
-        ProjectileId = projectileId;
-        Position = position;
-        Velocity = velocity;
-        Damage = damage;
-        DamageType = damageType;
-        Gravity = gravity;
-        Pierce = pierce;
-        Lifetime = lifetime;
-        OwnerEntityId = ownerEntityId;
-        _age = Math.Max(0, age);
     }
 
-    public string ProjectileId { get; }
+    public ProjectileEntity(
+        ProjectileDefinition definition,
+        Vector2 position,
+        Vector2 velocity,
+        int? ownerEntityId = null,
+        EntityFaction ownerFaction = EntityFaction.Friendly,
+        ulong instanceId = 0,
+        float age = 0,
+        int? remainingPierces = null,
+        int? remainingBounces = null)
+    {
+        RuntimeState = new ProjectileRuntimeState(
+            instanceId,
+            definition,
+            position,
+            velocity,
+            ownerEntityId,
+            ownerFaction,
+            age,
+            remainingPierces,
+            remainingBounces);
+        Position = position;
+        IsActive = RuntimeState.IsActive;
+    }
 
-    public Vector2 Velocity { get; set; }
+    public ProjectileRuntimeState RuntimeState { get; }
 
-    public int Damage { get; }
+    public ProjectileDefinition Definition => RuntimeState.Definition;
 
-    public DamageType DamageType { get; }
+    public string ProjectileId => Definition.Id;
 
-    public float Gravity { get; }
+    public Vector2 Velocity
+    {
+        get => RuntimeState.Velocity;
+        set => RuntimeState.SetVelocity(value);
+    }
 
-    public int Pierce { get; private set; }
+    public int Damage => Definition.Damage;
 
-    public float Lifetime { get; }
+    public DamageType DamageType => Definition.DamageType;
 
-    public int? OwnerEntityId { get; }
+    public float Gravity => Definition.Gravity;
 
-    public float Age => _age;
+    public int Pierce => RuntimeState.RemainingPierces;
 
-    public DamageInfo DamageInfo => new(Damage, DamageType, OwnerEntityId, Vector2.Normalize(Velocity == Vector2.Zero ? Vector2.UnitX : Velocity), 1f);
+    public int RemainingBounces => RuntimeState.RemainingBounces;
 
-    public override RectI Bounds => new(
-        (int)MathF.Floor(Position.X),
-        (int)MathF.Floor(Position.Y),
-        4,
-        4);
+    public float Lifetime => Definition.Lifetime;
+
+    public int? OwnerEntityId => RuntimeState.OwnerEntityId;
+
+    public EntityFaction OwnerFaction => RuntimeState.OwnerFaction;
+
+    public float Age => RuntimeState.AgeSeconds;
+
+    public DamageInfo DamageInfo => new(
+        Damage,
+        DamageType,
+        OwnerEntityId,
+        Vector2.Normalize(Velocity == Vector2.Zero ? Vector2.UnitX : Velocity),
+        Definition.Knockback);
+
+    public override RectI Bounds
+    {
+        get
+        {
+            var size = Math.Max(1, (int)MathF.Ceiling(Definition.CollisionRadius * 2));
+            return new RectI(
+                (int)MathF.Floor(Position.X),
+                (int)MathF.Floor(Position.Y),
+                size,
+                size);
+        }
+    }
 
     public override void Update(GameWorld world, float deltaSeconds)
     {
-        _age += deltaSeconds;
-        if (_age >= Lifetime)
+        ArgumentNullException.ThrowIfNull(world);
+        var homingTargets = _homingTargetsForNextUpdate;
+        _homingTargetsForNextUpdate = null;
+        var motion = AdvanceRuntime(deltaSeconds, homingTargets);
+        if (!IsActive ||
+            !TryFindSolidTileCollision(world, motion.PreviousPosition, motion.Position, out var collision))
         {
-            IsActive = false;
             return;
         }
 
-        Velocity += new Vector2(0, Gravity * GravityPixelsPerSecondSquared * deltaSeconds);
-        Position += Velocity * deltaSeconds;
+        ResolveTileCollision(collision);
+    }
 
-        if (OverlapsSolidTile(world))
-        {
-            IsActive = false;
-        }
+    public void SetHomingTargetsForNextUpdate(IReadOnlyList<ProjectileHomingTarget> homingTargets)
+    {
+        ArgumentNullException.ThrowIfNull(homingTargets);
+        _homingTargetsForNextUpdate = homingTargets;
+    }
+
+    public ProjectileMotionResult AdvanceRuntime(
+        float deltaSeconds,
+        IReadOnlyList<ProjectileHomingTarget>? homingTargets = null)
+    {
+        EnsureRuntimeIdentity();
+        var result = RuntimeState.Advance(deltaSeconds, homingTargets);
+        SynchronizeRuntimeState();
+        return result;
+    }
+
+    public ProjectileTileCollisionResult ResolveTileCollision(ProjectileTileCollision collision)
+    {
+        var result = RuntimeState.ResolveTileCollision(collision);
+        SynchronizeRuntimeState();
+        return result;
+    }
+
+    public ProjectileEntityCollisionResult ResolveEntityCollision(ProjectileEntityCollision collision)
+    {
+        EnsureRuntimeIdentity();
+        var result = RuntimeState.ResolveEntityCollision(collision);
+        SynchronizeRuntimeState();
+        return result;
     }
 
     public void RegisterHit()
     {
-        if (Pierce <= 0)
-        {
-            IsActive = false;
-            return;
-        }
-
-        Pierce--;
+        RuntimeState.RegisterUntrackedHit();
+        SynchronizeRuntimeState();
     }
 
-    private bool OverlapsSolidTile(GameWorld world)
+    private void EnsureRuntimeIdentity()
     {
-        var bounds = Bounds;
+        if (RuntimeState.InstanceId == 0 && Id > 0)
+        {
+            RuntimeState.BindInstanceId((ulong)Id);
+        }
+    }
+
+    private void SynchronizeRuntimeState()
+    {
+        Position = RuntimeState.Position;
+        IsActive = RuntimeState.IsActive;
+    }
+
+    private bool TryFindSolidTileCollision(
+        GameWorld world,
+        Vector2 start,
+        Vector2 end,
+        out ProjectileTileCollision collision)
+    {
+        var movement = end - start;
+        var distance = movement.Length();
+        var stepLength = Math.Max(1, Definition.CollisionRadius);
+        var steps = Math.Clamp((int)MathF.Ceiling(distance / stepLength), 1, 1024);
+        var previous = start;
+        for (var step = 1; step <= steps; step++)
+        {
+            var amount = step / (float)steps;
+            var candidate = start + movement * amount;
+            if (!OverlapsSolidTile(world, candidate))
+            {
+                previous = candidate;
+                continue;
+            }
+
+            collision = new ProjectileTileCollision(previous, ResolveSurfaceNormal(movement));
+            return true;
+        }
+
+        collision = default;
+        return false;
+    }
+
+    private bool OverlapsSolidTile(GameWorld world, Vector2 position)
+    {
+        var size = Math.Max(1, (int)MathF.Ceiling(Definition.CollisionRadius * 2));
+        var bounds = new RectI(
+            (int)MathF.Floor(position.X),
+            (int)MathF.Floor(position.Y),
+            size,
+            size);
         var min = CoordinateUtils.WorldToTile(bounds.Left, bounds.Top);
         var max = CoordinateUtils.WorldToTile(bounds.Right - 1, bounds.Bottom - 1);
 
@@ -125,5 +256,38 @@ public sealed class ProjectileEntity : Entity
         }
 
         return false;
+    }
+
+    private static Vector2 ResolveSurfaceNormal(Vector2 movement)
+    {
+        if (MathF.Abs(movement.X) >= MathF.Abs(movement.Y))
+        {
+            return movement.X >= 0 ? -Vector2.UnitX : Vector2.UnitX;
+        }
+
+        return movement.Y >= 0 ? -Vector2.UnitY : Vector2.UnitY;
+    }
+
+    private static ProjectileDefinition CreateCompatibilityDefinition(
+        string projectileId,
+        Vector2 velocity,
+        int damage,
+        DamageType damageType,
+        float gravity,
+        int pierce,
+        float lifetime)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(projectileId);
+        return new ProjectileDefinition
+        {
+            Id = projectileId,
+            TexturePath = projectileId,
+            Speed = velocity.Length(),
+            Damage = damage,
+            DamageType = damageType,
+            Gravity = gravity,
+            Pierce = pierce,
+            Lifetime = lifetime
+        };
     }
 }

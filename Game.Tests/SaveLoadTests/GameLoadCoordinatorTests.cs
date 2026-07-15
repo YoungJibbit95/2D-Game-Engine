@@ -13,11 +13,14 @@ using Game.Core.Items;
 using Game.Core.Loot;
 using Game.Core.Physics;
 using Game.Core.Projectiles;
+using Game.Core.Randomness;
 using Game.Core.Saving;
 using Game.Core.Spawning;
 using Game.Core.Tiles;
 using Game.Core.World;
 using Game.Core.World.TileEntities;
+using Game.Core.WorldEvents;
+using Game.Core.Time;
 using System.Numerics;
 using Xunit;
 
@@ -54,12 +57,15 @@ public sealed class GameLoadCoordinatorTests : IDisposable
         farmPlot.IsTilled = true;
         farmPlot.IsWatered = true;
         farmPlot.Crop = new CropInstance("parsnip", plantedDay: 2, daysUntilHarvest: 1);
+        var worldTime = new WorldTime(dayLengthSeconds: 600);
+        worldTime.Update(1_275);
 
         new GameSaveCoordinator().Save(
             new GameSaveRequest(world, player, inventory, entities)
             {
                 TileEntities = tileEntities,
-                FarmPlots = farmPlots
+                FarmPlots = farmPlots,
+                WorldTime = worldTime
             },
             _root,
             new GameSaveCoordinatorOptions
@@ -88,6 +94,7 @@ public sealed class GameLoadCoordinatorTests : IDisposable
         Assert.True(result.RuntimeEntitiesLoaded);
         Assert.True(result.TileEntitiesLoaded);
         Assert.True(result.FarmPlotsLoaded);
+        Assert.True(result.SimulationStateLoaded);
         Assert.Equal(KnownTileIds.Dirt, result.World.GetTile(2, 3).TileId);
         Assert.Equal(KnownTileIds.Stone, result.World.GetTile(3, 3).TileId);
         Assert.Equal(new Vector2(88, 144), result.Player.Body.Position);
@@ -110,6 +117,9 @@ public sealed class GameLoadCoordinatorTests : IDisposable
         Assert.NotNull(loadedFarmPlot.Crop);
         Assert.Equal("parsnip", loadedFarmPlot.Crop!.CropId);
         Assert.Equal(1, result.FarmPlotCount);
+        Assert.Equal(3, result.WorldTime.Day);
+        Assert.Equal(75, result.WorldTime.TimeOfDaySeconds);
+        Assert.Equal(600, result.WorldTime.DayLengthSeconds);
         Assert.NotNull(loadedEvent);
         Assert.Equal(result, loadedEvent.Result);
     }
@@ -207,6 +217,22 @@ public sealed class GameLoadCoordinatorTests : IDisposable
     }
 
     [Fact]
+    public void Load_LegacySaveWithoutSimulationStateUsesDefaultWorldTime()
+    {
+        new GameSaveCoordinator().Save(
+            CreateSaveRequest(),
+            _root,
+            new GameSaveCoordinatorOptions { WorldSaveMode = WorldSaveMode.AllChunks });
+
+        var result = new GameLoadCoordinator().Load(_root, _content);
+
+        Assert.False(result.SimulationStateLoaded);
+        Assert.Equal(1, result.WorldTime.Day);
+        Assert.Equal(0, result.WorldTime.TimeOfDaySeconds);
+        Assert.Equal(24 * 60, result.WorldTime.DayLengthSeconds);
+    }
+
+    [Fact]
     public void Load_SkipsUnknownOrInvalidPlayerIdentityEntriesAndReturnsWarnings()
     {
         var request = CreateSaveRequest();
@@ -284,6 +310,94 @@ public sealed class GameLoadCoordinatorTests : IDisposable
         Assert.Empty(result.PlayerWarnings);
     }
 
+    [Fact]
+    public void SaveThenLoad_RandomStreamsResumeExactlyAtMidTraceCheckpoint()
+    {
+        var randoms = new SessionRandomRegistry(12);
+        var stream = randoms.GetStream("combat.loot");
+        for (var draw = 0; draw < 137; draw++)
+        {
+            stream.NextUInt64();
+        }
+
+        var request = CreateSaveRequest() with { RandomStreams = randoms };
+        new GameSaveCoordinator().Save(
+            request,
+            _root,
+            new GameSaveCoordinatorOptions { WorldSaveMode = WorldSaveMode.AllChunks });
+        var expectedContinuation = Enumerable.Range(0, 96).Select(_ => stream.NextUInt64()).ToArray();
+
+        var loaded = new GameLoadCoordinator().Load(_root, _content);
+        var actualContinuation = Enumerable.Range(0, 96)
+            .Select(_ => loaded.RandomStreams.GetStream("combat.loot").NextUInt64())
+            .ToArray();
+
+        Assert.True(loaded.RandomStateLoaded);
+        Assert.Equal(RandomStateLoadSource.Primary, loaded.RandomStateSource);
+        Assert.Null(loaded.RandomStateWarning);
+        Assert.Equal(expectedContinuation, actualContinuation);
+    }
+
+    [Fact]
+    public void Load_LegacySaveWithoutRandomSidecarCreatesSeededRegistry()
+    {
+        new GameSaveCoordinator().Save(
+            CreateSaveRequest(),
+            _root,
+            new GameSaveCoordinatorOptions { WorldSaveMode = WorldSaveMode.AllChunks });
+
+        var loaded = new GameLoadCoordinator().Load(_root, _content);
+        var expected = new SessionRandomRegistry(12).GetStream("spawning.rules").NextUInt64();
+
+        Assert.False(loaded.RandomStateLoaded);
+        Assert.Equal(RandomStateLoadSource.LegacyFallback, loaded.RandomStateSource);
+        Assert.Equal(expected, loaded.RandomStreams.GetStream("spawning.rules").NextUInt64());
+    }
+
+    [Fact]
+    public void SaveThenLoad_WorldEventStatePreservesActiveEventCooldownsAndJournal()
+    {
+        var worldEventState = CreateWorldEventState();
+        new GameSaveCoordinator().Save(
+            CreateSaveRequest() with { WorldEventState = worldEventState },
+            _root,
+            new GameSaveCoordinatorOptions { WorldSaveMode = WorldSaveMode.AllChunks });
+
+        var loaded = new GameLoadCoordinator().Load(_root, _content);
+
+        Assert.True(loaded.WorldEventStateLoaded);
+        Assert.Equal(WorldEventStateLoadSource.Primary, loaded.WorldEventStateSource);
+        Assert.Null(loaded.WorldEventStateWarning);
+        Assert.NotNull(loaded.WorldEventState);
+        Assert.Equal(worldEventState.Runtime.LastAdvancedTick, loaded.WorldEventState!.Runtime.LastAdvancedTick);
+        Assert.Equal(worldEventState.Runtime.ActiveEventId, loaded.WorldEventState.Runtime.ActiveEventId);
+        Assert.Equal(
+            worldEventState.Runtime.Cooldowns.ToArray(),
+            loaded.WorldEventState.Runtime.Cooldowns.ToArray());
+        Assert.Equal(
+            worldEventState.Journal.Entries.ToArray(),
+            loaded.WorldEventState.Journal.Entries.ToArray());
+        Assert.Equal(
+            worldEventState.LastProcessedPlayerActionSequence,
+            loaded.WorldEventState.LastProcessedPlayerActionSequence);
+        Assert.True(File.Exists(Path.Combine(_root, WorldEventStateSaveService.DefaultFileName)));
+    }
+
+    [Fact]
+    public void Load_LegacySaveWithoutWorldEventSidecarUsesEmptyDefault()
+    {
+        new GameSaveCoordinator().Save(
+            CreateSaveRequest(),
+            _root,
+            new GameSaveCoordinatorOptions { WorldSaveMode = WorldSaveMode.AllChunks });
+
+        var loaded = new GameLoadCoordinator().Load(_root, _content);
+
+        Assert.False(loaded.WorldEventStateLoaded);
+        Assert.Equal(WorldEventStateLoadSource.LegacyFallback, loaded.WorldEventStateSource);
+        Assert.Null(loaded.WorldEventState);
+    }
+
     public void Dispose()
     {
         if (Directory.Exists(_root))
@@ -301,6 +415,47 @@ public sealed class GameLoadCoordinatorTests : IDisposable
             new PlayerEntity(new Vector2(16, 32), new TileCollisionResolver()),
             new PlayerInventory(_content.Items),
             new EntityManager());
+    }
+
+    private static WorldEventRuntimeStateSnapshot CreateWorldEventState()
+    {
+        return new WorldEventRuntimeStateSnapshot
+        {
+            Runtime = new WorldEventRuntimeSnapshot
+            {
+                LastAdvancedTick = 600,
+                RegionIndex = 2,
+                BiomeId = "forest",
+                Status = WorldEventRuntimeStatus.Active,
+                ActiveEventId = "firefly_bloom",
+                LastEventId = "firefly_bloom",
+                StartTick = 540,
+                EndTickExclusive = 1_200,
+                PhaseId = "bloom",
+                PhaseIndex = 1,
+                Progress = 0.1f,
+                PhaseProgress = 0.2f,
+                Intensity = 0.75f,
+                EffectiveModifiers = WorldEventModifierSet.Identity with
+                {
+                    RareLootChanceMultiplier = 1.25f
+                },
+                Cooldowns = [new WorldEventCooldownState("wildlife_migration", 2_000)]
+            },
+            Journal = new WorldEventJournalSnapshot(
+                WorldEventJournalSnapshot.CurrentFormatVersion,
+                1,
+                [new WorldEventDomainEvent(
+                    0,
+                    600,
+                    2,
+                    "firefly_bloom",
+                    WorldEventDomainEventKind.Progressed,
+                    "bloom",
+                    0.1f,
+                    0)]),
+            LastProcessedPlayerActionSequence = 7
+        };
     }
 
     private static GameContentDatabase CreateContent()

@@ -1,9 +1,15 @@
 {
   "id": "healing_potion",
   "displayName": "Healing Potion",
+  "description": "Restores 50 health when the drinker is injured.",
+  "rarity": "Uncommon",
+  "value": 25,
+  "category": "Consumable",
+  "sortPriority": 10,
   "type": "Consumable",
   "texture": "items/healing_potion",
   "maxStack": 30,
   "useTime": 0.6,
+  "healthRestore": 50,
   "tags": ["item", "consumable", "healing"]
 }

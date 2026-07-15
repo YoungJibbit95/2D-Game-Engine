@@ -1,6 +1,12 @@
 {
   "id": "copper_coin",
   "displayName": "Copper Coin",
+  "description": "Basic currency accepted by merchants and service NPCs.",
+  "rarity": "Common",
+  "value": 1,
+  "category": "Miscellaneous",
+  "sortPriority": 5,
+  "canTrash": false,
   "type": "Material",
   "texture": "items/copper_coin",
   "maxStack": 999

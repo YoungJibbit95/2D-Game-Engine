@@ -5,7 +5,7 @@ namespace Game.Core.Saving;
 
 public sealed record PlayerSaveData
 {
-    public const int CurrentFormatVersion = 2;
+    public const int CurrentFormatVersion = 3;
 
     public int FormatVersion { get; init; } = CurrentFormatVersion;
 
@@ -26,6 +26,9 @@ public sealed record PlayerSaveData
     public required int SelectedHotbarSlot { get; init; }
 
     public required IReadOnlyList<ItemStack> InventorySlots { get; init; }
+
+    public IReadOnlyList<InventorySlotState> InventorySlotStates { get; init; } =
+        Array.Empty<InventorySlotState>();
 
     public EquipmentLoadoutSaveData? EquipmentLoadout { get; init; }
 

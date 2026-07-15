@@ -1,0 +1,38 @@
+{
+  "id": "cave_spider",
+  "displayName": "Cave Spider",
+  "texture": "entities/enemies/cave_spider",
+  "maxHealth": 30,
+  "width": 18,
+  "height": 12,
+  "faction": "hostile",
+  "movementMode": "ground",
+  "tags": ["enemy", "arachnid", "cave", "underground", "cave_hostiles"],
+  "contactDamage": 12,
+  "contactKnockback": 175,
+  "attackDamage": 14,
+  "attackKnockback": 205,
+  "lootTable": "cave_spider",
+  "despawn": {
+    "mode": "whenIdle",
+    "spawnProtectionSeconds": 8,
+    "damageProtectionSeconds": 16
+  },
+  "ai": {
+    "kind": "hostile",
+    "detectionRange": 128,
+    "loseTargetRange": 192,
+    "moveSpeed": 66,
+    "fleeSpeed": 96,
+    "patrolRadius": 80,
+    "attackRange": 20,
+    "attackCooldown": 0.7,
+    "perceptionMemorySeconds": 4,
+    "fleeHealthThreshold": 0.12,
+    "jumpSpeed": 305,
+    "decisionInterval": 0.8,
+    "requiresLineOfSight": true,
+    "avoidLedges": true,
+    "avoidLiquid": true
+  }
+}

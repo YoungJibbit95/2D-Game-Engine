@@ -1,0 +1,257 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  DOTNET_CLI_TELEMETRY_OPTOUT: "1"
+  DOTNET_NOLOGO: "1"
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: "1"
+  NUGET_XMLDOC_MODE: skip
+
+jobs:
+  validate:
+    name: ${{ matrix.os }} / ${{ matrix.configuration }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - windows-latest
+          - ubuntu-latest
+        configuration:
+          - Debug
+          - Release
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Install pinned .NET SDK
+        uses: actions/setup-dotnet@v5
+        with:
+          global-json-file: global.json
+
+      - name: Install Python for asset audit
+        if: matrix.configuration == 'Debug'
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Report .NET environment
+        run: dotnet --info
+
+      - name: Restore
+        run: dotnet restore YjsE.sln --nologo --locked-mode
+
+      - name: Verify C# style policy
+        if: matrix.configuration == 'Debug'
+        run: dotnet format style YjsE.sln --verify-no-changes --no-restore --severity warn --verbosity minimal
+
+      - name: Build
+        run: >-
+          dotnet build YjsE.sln
+          --configuration ${{ matrix.configuration }}
+          --no-restore
+          --nologo
+          --warnaserror
+          -p:ContinuousIntegrationBuild=true
+
+      - name: Validate sprite assets
+        run: >-
+          dotnet test Game.Tests/Game.Tests.csproj
+          --configuration ${{ matrix.configuration }}
+          --no-build
+          --no-restore
+          --nologo
+          --filter "FullyQualifiedName~Game.Tests.AssetTests.SpriteAssetTests"
+          --logger "trx;LogFileName=assets.trx"
+          --results-directory "artifacts/test-results/${{ matrix.os }}/${{ matrix.configuration }}"
+
+      - name: Install sprite-audit dependencies
+        if: matrix.configuration == 'Debug'
+        run: python -m pip install --disable-pip-version-check -r Game.Data/art_direction/requirements.txt
+
+      - name: Run strict sprite audit
+        if: matrix.configuration == 'Debug'
+        run: >-
+          python Game.Data/art_direction/tools/audit_sprites.py
+          --data-root Game.Data
+          --manifest Game.Data/assets/sprites.json
+          --style Game.Data/art_direction/yjse_pixel_style.json
+          --output artifacts/asset-audit.json
+          --fail-on-hard-issues
+
+      - name: Run strict Wave05 sprite audit
+        if: matrix.configuration == 'Debug'
+        run: >-
+          python Game.Data/art_direction/tools/audit_sprites.py
+          --data-root Game.Data
+          --manifest Game.Data/assets/wave05_living_world.sprites.json
+          --style Game.Data/art_direction/yjse_pixel_style.json
+          --scan-root Assets/Wave05
+          --output artifacts/asset-audit-wave05.json
+          --fail-on-hard-issues
+
+      - name: Verify deterministic UI sample preview
+        if: matrix.configuration == 'Debug'
+        run: >-
+          python Game.Data/art_direction/tools/build_ui_sample_preview.py
+          --data-root Game.Data
+          --manifest Game.Data/assets/sprites.json
+          --output artifacts/ui-sample-preview.png
+          --check-existing Game.Data/art_direction/ui_sample_preview.png
+
+      - name: Verify deterministic Wave05 preview
+        if: matrix.configuration == 'Debug'
+        shell: pwsh
+        run: |
+          python Game.Data/Assets/Wave05/tools/build_wave05_preview.py
+          git diff --exit-code -- Game.Data/art_direction/wave_05_living_world_preview.png Game.Data/art_direction/wave_05_living_world_preview_summary.json
+
+      - name: Validate content and cross-references
+        run: >-
+          dotnet test Game.Tests/Game.Tests.csproj
+          --configuration ${{ matrix.configuration }}
+          --no-build
+          --no-restore
+          --nologo
+          --filter "FullyQualifiedName~Game.Tests.DataTests.GameContentLoaderTests"
+          --logger "trx;LogFileName=content.trx"
+          --results-directory "artifacts/test-results/${{ matrix.os }}/${{ matrix.configuration }}"
+
+      - name: Validate negative-X contracts
+        run: >-
+          dotnet test Game.Tests/Game.Tests.csproj
+          --configuration ${{ matrix.configuration }}
+          --no-build
+          --no-restore
+          --nologo
+          --filter "FullyQualifiedName~Game.Tests.WorldTests.CoordinateUtilsTests|FullyQualifiedName~Game.Tests.WorldTests.InfiniteWorldChunkGeneratorTests|FullyQualifiedName~Game.Tests.WorldStreamingTests.ChunkStreamingPlannerTests|FullyQualifiedName~Game.Tests.WorldTests.LiquidSimulationSystemTests|FullyQualifiedName~Game.Tests.StructureTests.StructurePlacerTests|FullyQualifiedName~Game.Tests.SaveLoadTests.WorldSaveServiceTests"
+          --logger "trx;LogFileName=negative-x.trx"
+          --results-directory "artifacts/test-results/${{ matrix.os }}/${{ matrix.configuration }}"
+
+      - name: Run full test suite
+        run: >-
+          dotnet test YjsE.sln
+          --configuration ${{ matrix.configuration }}
+          --no-build
+          --no-restore
+          --nologo
+          --logger "trx;LogFileName=full.trx"
+          --results-directory "artifacts/test-results/${{ matrix.os }}/${{ matrix.configuration }}"
+
+      - name: Run quick performance harness
+        if: matrix.configuration == 'Release'
+        env:
+          YJSE_BENCHMARK_REPOSITORY_STATE: clean-ci-checkout
+        run: >-
+          dotnet run --project Game.Benchmarks
+          --configuration Release
+          --no-build
+          --
+          --quick
+          --output artifacts/performance-quick.json
+
+      - name: Publish isolated client smoke bundle
+        if: matrix.configuration == 'Release'
+        run: >-
+          dotnet publish Game.Client/Game.Client.csproj
+          --configuration Release
+          --no-build
+          --no-restore
+          --output "${{ runner.temp }}/yjse-client-publish"
+
+      - name: Verify published game project contract
+        if: matrix.configuration == 'Release'
+        shell: pwsh
+        run: |
+          $publishRoot = "${{ runner.temp }}/yjse-client-publish"
+          if (-not (Test-Path -LiteralPath (Join-Path $publishRoot "yjse.game.json") -PathType Leaf)) {
+            throw "Published client is missing yjse.game.json."
+          }
+          if (-not (Test-Path -LiteralPath (Join-Path $publishRoot "Game.Data/assets/sprites.json") -PathType Leaf)) {
+            throw "Published client is missing Game.Data content."
+          }
+          if (Test-Path -LiteralPath (Join-Path $publishRoot "Game.Data/art_direction")) {
+            throw "Published client contains authoring-only art_direction files."
+          }
+          if (Test-Path -LiteralPath (Join-Path $publishRoot "Game.Data/asset_briefs")) {
+            throw "Published client contains authoring-only asset briefs."
+          }
+
+      - name: Install virtual display
+        if: matrix.configuration == 'Release' && runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install --yes xvfb
+
+      - name: Run client nonblank smoke on Windows
+        if: matrix.configuration == 'Release' && runner.os == 'Windows'
+        timeout-minutes: 2
+        working-directory: ${{ runner.temp }}/yjse-client-publish
+        run: >-
+          dotnet Game.Client.dll
+          --smoke
+          --frames 3
+          --timeout-seconds 30
+          --output "${{ github.workspace }}/artifacts/client-smoke.png"
+
+      - name: Run client nonblank smoke on Ubuntu
+        if: matrix.configuration == 'Release' && runner.os == 'Linux'
+        timeout-minutes: 2
+        working-directory: ${{ runner.temp }}/yjse-client-publish
+        env:
+          LIBGL_ALWAYS_SOFTWARE: "1"
+          SDL_AUDIODRIVER: dummy
+        run: >-
+          xvfb-run -a
+          dotnet Game.Client.dll
+          --smoke
+          --frames 3
+          --timeout-seconds 30
+          --output "${{ github.workspace }}/artifacts/client-smoke.png"
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: test-results-${{ matrix.os }}-${{ matrix.configuration }}
+          path: artifacts/test-results/${{ matrix.os }}/${{ matrix.configuration }}/
+          if-no-files-found: warn
+
+      - name: Upload sprite-audit report
+        if: always() && matrix.configuration == 'Debug'
+        uses: actions/upload-artifact@v7
+        with:
+          name: sprite-audit-${{ matrix.os }}
+          path: |
+            artifacts/asset-audit.json
+            artifacts/asset-audit-wave05.json
+            artifacts/ui-sample-preview.png
+            Game.Data/art_direction/wave_05_living_world_preview.png
+          if-no-files-found: warn
+
+      - name: Upload quick performance report
+        if: always() && matrix.configuration == 'Release'
+        uses: actions/upload-artifact@v7
+        with:
+          name: performance-quick-${{ matrix.os }}
+          path: artifacts/performance-quick.json
+          if-no-files-found: warn
+
+      - name: Upload client-smoke artifacts
+        if: always() && matrix.configuration == 'Release'
+        uses: actions/upload-artifact@v7
+        with:
+          name: client-smoke-${{ matrix.os }}
+          path: artifacts/client-smoke.*
+          if-no-files-found: warn

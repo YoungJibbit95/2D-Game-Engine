@@ -8,6 +8,8 @@ public sealed record SpriteAssetDefinition
 
     public required string Path { get; init; }
 
+    public string? SourceRoot { get; init; }
+
     public SpriteAssetCategory Category { get; init; }
 
     public int Width { get; init; } = 16;
@@ -17,6 +19,18 @@ public sealed record SpriteAssetDefinition
     public int PixelsPerUnit { get; init; } = 16;
 
     public string? AtlasId { get; init; }
+
+    public string? SourceAliasOf { get; init; }
+
+    public int? OriginX { get; init; }
+
+    public int? OriginY { get; init; }
+
+    public string? RenderLayer { get; init; }
+
+    public string? License { get; init; }
+
+    public string? Provenance { get; init; }
 
     public IReadOnlyList<SpriteFrameDefinition> Frames { get; init; } = Array.Empty<SpriteFrameDefinition>();
 

@@ -4,5 +4,83 @@
   "surfaceTile": "grass",
   "undergroundTile": "dirt",
   "treeType": "normal_tree",
-  "enemySpawnTable": "forest_day"
+  "enemySpawnTable": "forest_day_squirrel",
+  "isRegionalBiome": true,
+  "selectionWeight": 4,
+  "climate": {
+    "temperature": 0.58,
+    "humidity": 0.68
+  },
+  "terrain": {
+    "elevationMultiplier": 1.08,
+    "soilDepthMultiplier": 1.12,
+    "caveDensityMultiplier": 1.0,
+    "featureDensityMultiplier": 1.25
+  },
+  "weather": {
+    "clearWeight": 48,
+    "rainWeight": 34,
+    "stormWeight": 8,
+    "fogWeight": 10,
+    "minDurationTicks": 1800,
+    "maxDurationTicks": 4800,
+    "transitionDurationTicks": 240
+  },
+  "ambient": {
+    "surfaceSoundscapeId": "forest_day",
+    "caveSoundscapeId": "forest_cave",
+    "baseLight": 1.0,
+    "baseVisibility": 0.96
+  },
+  "lighting": {
+    "colorGradeId": "forest_green",
+    "skyLightMultiplier": 0.92,
+    "emissiveLightMultiplier": 1.0,
+    "fogDensity": 0.08
+  },
+  "spawning": {
+    "surfaceDayTableId": "forest_day_squirrel",
+    "surfaceNightTableId": "forest_night_firefly",
+    "caveTableId": "underground_bat",
+    "densityMultiplier": 1.05,
+    "habitatTags": ["forest", "surface", "wooded"]
+  },
+  "resources": {
+    "oreDensityMultiplier": 0.92,
+    "vegetationDensityMultiplier": 1.35,
+    "forageDensityMultiplier": 1.25,
+    "resourceTableIds": ["forest_timber", "forest_forage"]
+  },
+  "presentation": {
+    "backgroundSpriteId": "world/backgrounds/wave04/forest_parallax_layer",
+    "ambientParticleSpriteId": "particles/forest_leaf_drift",
+    "ambientCritterSpriteId": "entities/critters/forest_moth",
+    "biomeIconSpriteId": "ui/biomes/forest",
+    "eliteSpriteId": "entities/enemies/forest_boar_elite",
+    "ambientParticleDensity": 0.42,
+    "surfaceReflectionStrength": 0.28,
+    "windResponse": 1.35
+  },
+  "subBiomes": [
+    {
+      "id": "old_growth",
+      "displayName": "Old Growth",
+      "selectionWeight": 1,
+      "temperatureOffset": -0.04,
+      "humidityOffset": 0.08,
+      "elevationMultiplier": 1.12,
+      "caveDensityMultiplier": 1.08,
+      "surfaceFeatureSetId": "old_growth_trees",
+      "soundscapeId": "old_growth"
+    },
+    {
+      "id": "woodland",
+      "displayName": "Woodland",
+      "selectionWeight": 3,
+      "elevationMultiplier": 1.0,
+      "caveDensityMultiplier": 1.0,
+      "surfaceFeatureSetId": "woodland_trees",
+      "soundscapeId": "forest_day"
+    }
+  ]
 }

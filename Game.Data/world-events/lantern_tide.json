@@ -1,0 +1,66 @@
+{
+  "id": "lantern_tide",
+  "displayName": "Lantern Tide",
+  "chancePerWindow": 0.2,
+  "minDurationTicks": 900,
+  "maxDurationTicks": 1560,
+  "cooldownTicks": 4200,
+  "intensity": 0.86,
+  "allowedBiomeIds": ["twilight_marsh"],
+  "requiresNight": true,
+  "modifiers": {
+    "spawnWeightMultiplier": 1.42,
+    "skyLightMultiplier": 0.78,
+    "ambientLightAdd": 0.12,
+    "weatherIntensityMultiplier": 1.15,
+    "lootQuantityMultiplier": 1.16,
+    "rareLootChanceMultiplier": 1.28,
+    "presentationIntensity": 1.28,
+    "colorGradeId": "lantern_tide_teal",
+    "soundscapeId": "twilight_marsh"
+  },
+  "phases": [
+    {
+      "id": "rising",
+      "startProgress": 0.0,
+      "endProgress": 0.25,
+      "modifiers": {
+        "spawnWeightMultiplier": 0.9,
+        "skyLightMultiplier": 1.0,
+        "ambientLightAdd": 0.02,
+        "weatherIntensityMultiplier": 1.0,
+        "lootQuantityMultiplier": 1.0,
+        "rareLootChanceMultiplier": 1.0,
+        "presentationIntensity": 0.5
+      }
+    },
+    {
+      "id": "high_tide",
+      "startProgress": 0.25,
+      "endProgress": 0.82,
+      "modifiers": {
+        "spawnWeightMultiplier": 1.35,
+        "skyLightMultiplier": 0.86,
+        "ambientLightAdd": 0.08,
+        "weatherIntensityMultiplier": 1.12,
+        "lootQuantityMultiplier": 1.12,
+        "rareLootChanceMultiplier": 1.2,
+        "presentationIntensity": 1.1
+      }
+    },
+    {
+      "id": "ebb",
+      "startProgress": 0.82,
+      "endProgress": 1.0,
+      "modifiers": {
+        "spawnWeightMultiplier": 0.78,
+        "skyLightMultiplier": 1.0,
+        "ambientLightAdd": 0.03,
+        "weatherIntensityMultiplier": 0.9,
+        "lootQuantityMultiplier": 1.0,
+        "rareLootChanceMultiplier": 1.0,
+        "presentationIntensity": 0.4
+      }
+    }
+  ]
+}

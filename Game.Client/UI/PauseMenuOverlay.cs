@@ -1,6 +1,7 @@
 using Game.Client.Input;
 using Game.Client.Rendering;
 using Game.Core.Settings;
+using Game.Core.UI;
 using Game.Core.UI.Animation;
 using Microsoft.Xna.Framework;
 
@@ -8,6 +9,11 @@ namespace Game.Client.UI;
 
 public sealed class PauseMenuOverlay
 {
+    private const int TabRegionBase = 1_000;
+    private const int OptionRegionBase = 2_000;
+    private const int ControlRegionBase = 3_000;
+    private static readonly string[] FrameRateChoices = ["UNLIMITED", "30 FPS", "60 FPS", "90 FPS", "120 FPS", "144 FPS", "165 FPS", "240 FPS", "360 FPS"];
+
     private readonly GameSettingsService _settingsService = new();
     private readonly string _settingsPath;
     private readonly Action _resume;
@@ -20,13 +26,24 @@ public sealed class PauseMenuOverlay
     private readonly List<MenuSection> _sections = new();
     private readonly List<HitZone> _tabHitZones = new();
     private readonly List<HitZone> _optionHitZones = new();
+    private readonly List<ControlHitZone> _controlHitZones = new();
+    private readonly List<UiHitRegion> _pointerRegions = new();
+    private readonly UiPointerRouter _pointer = new();
+    private readonly UiGamepadNavigator _gamepad = new();
     private int _sectionIndex;
     private int _optionIndex;
     private int _hoveredSectionIndex = -1;
     private int _hoveredOptionIndex = -1;
+    private int _openDropdownOptionIndex = -1;
+    private int _tooltipOptionIndex = -1;
+    private float _tooltipHoverSeconds;
+    private int _draggingSliderOptionIndex = -1;
+    private Point _mousePosition;
     private KeyCapture? _keyCapture;
     private string _status = "SETTINGS AUTOSAVE ON CHANGE";
     private bool _confirmResetKeybinds;
+    private bool _focusVisible = true;
+    private UiTypographyTokens _typography = UiTheme.Contract.Typography;
 
     public PauseMenuOverlay(
         string settingsPath,
@@ -57,7 +74,11 @@ public sealed class PauseMenuOverlay
     {
         IsOpen = true;
         _keyCapture = null;
-        _status = "PAUSED";
+        _openDropdownOptionIndex = -1;
+        _pointer.Reset();
+        _gamepad.Reset();
+        _focusVisible = true;
+        _status = _title;
         var duration = Settings.Ui.ReducedMotion ? 0.001f : 0.18f;
         _openAnimation.Play(UiAnimationClip.SlideFadeIn(duration, -16f));
     }
@@ -78,6 +99,8 @@ public sealed class PauseMenuOverlay
             return false;
         }
 
+        _gamepad.Update(deltaSeconds);
+        _pointer.Update(input.MousePosition, input.IsLeftMouseDown, _pointerRegions);
         _openAnimation.Update((float)deltaSeconds, Settings.Ui.AnimationSpeed);
 
         if (_keyCapture is not null)
@@ -87,52 +110,78 @@ public sealed class PauseMenuOverlay
         }
 
         if (input.IsBindingPressed(Settings.Input.KeyBindings.Pause) ||
-            input.IsKeyPressed(Microsoft.Xna.Framework.Input.Keys.Escape))
+            input.IsKeyPressed(Microsoft.Xna.Framework.Input.Keys.Escape) ||
+            _gamepad.CancelPressed)
         {
             Close();
             return true;
         }
 
-        UpdateMouse(input);
+        UpdateMouse(input, (float)deltaSeconds);
 
         if (input.IsKeyPressed(Microsoft.Xna.Framework.Input.Keys.Tab) ||
             input.IsKeyPressed(Microsoft.Xna.Framework.Input.Keys.E) ||
-            input.IsKeyPressed(Microsoft.Xna.Framework.Input.Keys.PageDown))
+            input.IsKeyPressed(Microsoft.Xna.Framework.Input.Keys.PageDown) ||
+            _gamepad.NextTabPressed)
         {
             MoveSection(1);
+            _focusVisible = true;
         }
         else if (input.IsKeyPressed(Microsoft.Xna.Framework.Input.Keys.Q) ||
-                 input.IsKeyPressed(Microsoft.Xna.Framework.Input.Keys.PageUp))
+                 input.IsKeyPressed(Microsoft.Xna.Framework.Input.Keys.PageUp) ||
+                 _gamepad.PreviousTabPressed)
         {
             MoveSection(-1);
+            _focusVisible = true;
         }
 
         if (input.IsKeyPressed(Microsoft.Xna.Framework.Input.Keys.Down) ||
-            input.IsKeyPressed(Microsoft.Xna.Framework.Input.Keys.S))
+            input.IsKeyPressed(Microsoft.Xna.Framework.Input.Keys.S) ||
+            _gamepad.DownPressed)
         {
             MoveOption(1);
+            _focusVisible = true;
         }
         else if (input.IsKeyPressed(Microsoft.Xna.Framework.Input.Keys.Up) ||
-                 input.IsKeyPressed(Microsoft.Xna.Framework.Input.Keys.W))
+                 input.IsKeyPressed(Microsoft.Xna.Framework.Input.Keys.W) ||
+                 _gamepad.UpPressed)
         {
             MoveOption(-1);
+            _focusVisible = true;
+        }
+
+        if (input.IsKeyPressed(Microsoft.Xna.Framework.Input.Keys.Home))
+        {
+            _optionIndex = 0;
+            CloseDropdown();
+        }
+        else if (input.IsKeyPressed(Microsoft.Xna.Framework.Input.Keys.End))
+        {
+            _optionIndex = _sections[_sectionIndex].Options.Count - 1;
+            CloseDropdown();
         }
 
         if (input.IsKeyPressed(Microsoft.Xna.Framework.Input.Keys.Left) ||
-            input.IsKeyPressed(Microsoft.Xna.Framework.Input.Keys.A))
+            input.IsKeyPressed(Microsoft.Xna.Framework.Input.Keys.A) ||
+            _gamepad.LeftPressed)
         {
             CurrentOption()?.Change(-1);
+            _focusVisible = true;
         }
         else if (input.IsKeyPressed(Microsoft.Xna.Framework.Input.Keys.Right) ||
-                 input.IsKeyPressed(Microsoft.Xna.Framework.Input.Keys.D))
+                 input.IsKeyPressed(Microsoft.Xna.Framework.Input.Keys.D) ||
+                 _gamepad.RightPressed)
         {
             CurrentOption()?.Change(1);
+            _focusVisible = true;
         }
 
         if (input.IsKeyPressed(Microsoft.Xna.Framework.Input.Keys.Enter) ||
-            input.IsKeyPressed(Microsoft.Xna.Framework.Input.Keys.Space))
+            input.IsKeyPressed(Microsoft.Xna.Framework.Input.Keys.Space) ||
+            _gamepad.ConfirmPressed)
         {
-            CurrentOption()?.Activate();
+            ActivateCurrentOption();
+            _focusVisible = true;
         }
 
         return true;
@@ -146,38 +195,52 @@ public sealed class PauseMenuOverlay
         }
 
         var palette = UiTheme.Resolve(Settings);
+        _typography = UiTheme.ResolveContract(Settings).Typography;
         var fade = _openAnimation.GetValue(UiAnimationProperty.Opacity, 1f);
         var offsetY = (int)MathF.Round(_openAnimation.GetValue(UiAnimationProperty.OffsetY, 0f));
-        context.SpriteBatch.Draw(context.Pixel, context.ViewportBounds, UiTheme.WithAlpha(palette.Backdrop, Settings.Ui.MenuBackdropOpacity * fade));
+        UiTheme.DrawBackdrop(context, palette, Settings.Ui.MenuBackdropOpacity * fade, Settings);
 
-        var panelWidth = Math.Min(980, context.ViewportBounds.Width - 56);
-        var panelHeight = Math.Min(610, context.ViewportBounds.Height - 48);
+        var panelWidth = Math.Min(1040, context.ViewportBounds.Width - 32);
+        var panelHeight = Math.Min(650, context.ViewportBounds.Height - 28);
         var panel = new Rectangle(
             context.ViewportBounds.Width / 2 - panelWidth / 2,
             context.ViewportBounds.Height / 2 - panelHeight / 2 + offsetY,
             panelWidth,
             panelHeight);
 
-        UiTheme.DrawPanel(context, panel, palette, Settings.Ui.PanelOpacity * fade);
+        UiTheme.DrawPanel(context, panel, palette, Settings.Ui.PanelOpacity * fade, settings: Settings);
+        UiTheme.DrawHeader(context, new Rectangle(panel.X + 1, panel.Y + 1, panel.Width - 2, 58), palette, settings: Settings);
 
-        context.DebugText.Draw(new Vector2(panel.X + 24, panel.Y + 20), _title, palette.Accent, 4);
-        if (Settings.Ui.ShowControlHints)
-        {
-            context.DebugText.Draw(new Vector2(panel.X + 26, panel.Y + 64), "Q/E TABS   UP/DOWN SELECT   LEFT/RIGHT CHANGE   ENTER/CLICK EDIT", palette.TextMuted, 2);
-        }
+        context.DebugText.Draw(new Vector2(panel.X + 22, panel.Y + 18), _title, palette.Accent, _typography.TitleScale);
+        context.DebugText.Draw(new Vector2(panel.Right - 184, panel.Y + 24), "AUTOSAVE", palette.TextMuted, _typography.CaptionScale);
+        DrawSaveIndicator(context, palette, new Rectangle(panel.Right - 80, panel.Y + 19, 54, 22), _typography.CaptionScale);
 
         _tabHitZones.Clear();
         _optionHitZones.Clear();
+        _controlHitZones.Clear();
         DrawTabs(context, panel, palette);
         DrawOptions(context, panel, palette);
 
-        var footer = new Rectangle(panel.X + 18, panel.Bottom - 46, panel.Width - 36, 28);
-        context.SpriteBatch.Draw(context.Pixel, footer, UiTheme.WithAlpha(palette.Surface, Settings.Ui.PanelOpacity));
-        UiTheme.DrawBorder(context, footer, UiTheme.WithAlpha(palette.SurfaceHover, 0.9f), 1);
+        var footer = new Rectangle(panel.X + 18, panel.Bottom - 51, panel.Width - 36, 34);
+        UiTheme.DrawTooltipSurface(context, footer, palette, Settings.Ui.PanelOpacity, Settings);
         var footerText = _keyCapture is null
-            ? _status
+            ? TooltipText()
             : $"PRESS A KEY FOR {_keyCapture.Label}   ESC CANCEL";
-        context.DebugText.Draw(new Vector2(footer.X + 10, footer.Y + 7), footerText, palette.Warning, 2);
+        var footerTextLimit = CharactersThatFit(Math.Max(24, footer.Width - 184), _typography.CaptionScale);
+        context.DebugText.Draw(
+            new Vector2(footer.X + 10, footer.Y + 11),
+            Abbreviate(footerText, footerTextLimit),
+            _keyCapture is null ? palette.TextMuted : palette.Warning,
+            _typography.CaptionScale);
+        var statusLimit = CharactersThatFit(Math.Min(142, footer.Width / 4), _typography.CaptionScale);
+        var shownStatus = Abbreviate(_status, statusLimit);
+        context.DebugText.Draw(
+            new Vector2(footer.Right - shownStatus.Length * 6 * _typography.CaptionScale - 10, footer.Y + 11),
+            shownStatus,
+            palette.Warning,
+            _typography.CaptionScale);
+        RebuildPointerRegions();
+        UiTheme.DrawCursorAccent(context, _mousePosition, palette, Settings);
     }
 
     private GameSettings LoadSettings()
@@ -203,6 +266,7 @@ public sealed class PauseMenuOverlay
         _sections.Add(new MenuSection("DEBUG", BuildDebugOptions()));
         _sections.Add(new MenuSection("AUDIO", BuildAudioOptions()));
         _sections.Add(new MenuSection("KEYBINDS", BuildKeybindOptions()));
+        _sections.Add(new MenuSection("ACCESSIBILITY", BuildAccessibilityOptions()));
         _sections.Add(new MenuSection("SYSTEM", BuildSystemOptions()));
     }
 
@@ -216,6 +280,7 @@ public sealed class PauseMenuOverlay
             Number("INTERACTION REACH", () => Settings.Gameplay.InteractionReachPixels, 16f, 512f, 8f, value => SetGameplay(g => g with { InteractionReachPixels = value })),
             Toggle("SHOW TARGET TILE", () => Settings.Gameplay.ShowInteractionTarget, value => SetGameplay(g => g with { ShowInteractionTarget = value })),
             Toggle("HOLD TO MINE", () => Settings.Gameplay.HoldToMine, value => SetGameplay(g => g with { HoldToMine = value })),
+            Toggle("HOLD TO BLOCK", () => Settings.Gameplay.HoldToBlock, value => SetGameplay(g => g with { HoldToBlock = value })),
             Toggle("PAUSE ON FOCUS LOST", () => Settings.Gameplay.PauseOnFocusLost, value => SetGameplay(g => g with { PauseOnFocusLost = value })),
             Number("SPAWN RATE", () => Settings.Gameplay.EnemySpawnRateMultiplier, 0f, 5f, 0.25f, value => SetGameplay(g => g with { EnemySpawnRateMultiplier = value })),
             Toggle("AUTO PICKUP", () => Settings.Gameplay.AutoPickupItems, value => SetGameplay(g => g with { AutoPickupItems = value })),
@@ -234,6 +299,7 @@ public sealed class PauseMenuOverlay
             Choice("RESOLUTION", CurrentResolution, resolutions, SetResolution),
             Toggle("FULLSCREEN", () => Settings.Video.Fullscreen, value => SetVideo(v => v with { Fullscreen = value })),
             Toggle("VSYNC", () => Settings.Video.VSync, value => SetVideo(v => v with { VSync = value })),
+            Choice("FRAME LIMIT", CurrentFrameRateLimit, FrameRateChoices, SetFrameRateLimit, UiControlKind.Dropdown),
             Number("UI SCALE", () => Settings.Video.UiScale, 0.5f, 4f, 0.25f, value => SetVideo(v => v with { UiScale = value })),
             Number("RENDER SCALE", () => Settings.Video.RenderScale, 0.25f, 2f, 0.25f, value => SetVideo(v => v with { RenderScale = value }))
         ];
@@ -245,13 +311,28 @@ public sealed class PauseMenuOverlay
         return
         [
             Toggle("INFINITE HORIZONTAL", () => Settings.World.InfiniteHorizontalGeneration, value => SetWorld(w => w with { InfiniteHorizontalGeneration = value })),
-            Choice("WORLD PROFILE", () => Settings.World.WorldProfileId, profiles, value => SetWorld(w => w with { WorldProfileId = value })),
+            Choice("WORLD PROFILE", () => Settings.World.WorldProfileId, profiles, value => SetWorld(w => w with { WorldProfileId = value }), UiControlKind.Segmented),
             Number("CHUNK LOAD MARGIN", () => Settings.World.ChunkLoadMargin, 0, 16, 1, value => SetWorld(w => w with { ChunkLoadMargin = value })),
             Number("CHUNK UNLOAD MARGIN", () => Settings.World.ChunkUnloadMargin, Settings.World.ChunkLoadMargin, 32, 1, value => SetWorld(w => w with { ChunkUnloadMargin = Math.Max(value, Settings.World.ChunkLoadMargin) })),
             Toggle("KEEP DIRTY CHUNKS", () => Settings.World.KeepDirtyChunksLoaded, value => SetWorld(w => w with { KeepDirtyChunksLoaded = value })),
             Toggle("PRELOAD VERTICAL SLICE", () => Settings.World.PreloadFullVerticalSlice, value => SetWorld(w => w with { PreloadFullVerticalSlice = value })),
             Toggle("SAVE BEFORE UNLOAD", () => Settings.World.SaveChunksBeforeUnload, value => SetWorld(w => w with { SaveChunksBeforeUnload = value })),
-            Number("STREAMING BUDGET", () => Settings.World.StreamingBudgetChunksPerFrame, 1, 512, 8, value => SetWorld(w => w with { StreamingBudgetChunksPerFrame = value }))
+            Number("STREAM OPS", () => Settings.World.StreamingBudgetChunksPerFrame, 1, 512, 8, value => SetWorld(w => w with { StreamingBudgetChunksPerFrame = value })),
+            Number("LOAD JOBS", () => Settings.World.StreamingConcurrentLoads, 1, 32, 1, value => SetWorld(w => w with { StreamingConcurrentLoads = value })),
+            Number("SAVE JOBS", () => Settings.World.StreamingConcurrentSaves, 1, 8, 1, value => SetWorld(w => w with { StreamingConcurrentSaves = value })),
+            Number("APPLY QUEUE", () => Settings.World.StreamingApplyQueueLimit, 8, 2048, 8, value => SetWorld(w => w with { StreamingApplyQueueLimit = value })),
+            Number("APPLY TIME MS", () => Settings.World.StreamingApplyBudgetMilliseconds, 0.25f, 33f, 0.25f, value => SetWorld(w => w with { StreamingApplyBudgetMilliseconds = value })),
+            Number("APPLY BUDGET KB", () => Settings.World.StreamingApplyBudgetKilobytes, 64, 16384, 64, value => SetWorld(w => w with { StreamingApplyBudgetKilobytes = value })),
+            Number("RETRY ATTEMPTS", () => Settings.World.StreamingRetryAttempts, 1, 16, 1, value => SetWorld(w => w with { StreamingRetryAttempts = value })),
+            Number("RETRY INITIAL", () => Settings.World.StreamingRetryInitialBackoffUpdates, 1, 256, 1, value => SetWorld(w => w with
+            {
+                StreamingRetryInitialBackoffUpdates = value,
+                StreamingRetryMaximumBackoffUpdates = Math.Max(value, w.StreamingRetryMaximumBackoffUpdates)
+            })),
+            Number("RETRY MAX", () => Settings.World.StreamingRetryMaximumBackoffUpdates, Settings.World.StreamingRetryInitialBackoffUpdates, 4096, 8, value => SetWorld(w => w with
+            {
+                StreamingRetryMaximumBackoffUpdates = Math.Max(value, w.StreamingRetryInitialBackoffUpdates)
+            }))
         ];
     }
 
@@ -272,11 +353,13 @@ public sealed class PauseMenuOverlay
             Number("BLOOM", () => Settings.Rendering.BloomStrength, 0f, 1f, 0.05f, value => SetRendering(r => r with { BloomStrength = value })),
             Number("VIGNETTE", () => Settings.Rendering.VignetteStrength, 0f, 1f, 0.05f, value => SetRendering(r => r with { VignetteStrength = value })),
             Number("COLOR GRADE", () => Settings.Rendering.ColorGradeIntensity, 0f, 1f, 0.05f, value => SetRendering(r => r with { ColorGradeIntensity = value })),
-            Choice("PARTICLE QUALITY", ParticleQualityLabel, new[] { "OFF", "LOW", "MEDIUM", "HIGH" }, SetParticleQuality),
+            Choice("PARTICLE QUALITY", ParticleQualityLabel, new[] { "OFF", "LOW", "MEDIUM", "HIGH" }, SetParticleQuality, UiControlKind.Segmented),
             Number("LIQUID OPACITY", () => Settings.Rendering.LiquidOpacity, 0f, 1f, 0.05f, value => SetRendering(r => r with { LiquidOpacity = value })),
             Number("LIGHTING BLEND", () => Settings.Rendering.LightingBlendStrength, 0f, 1f, 0.05f, value => SetRendering(r => r with { LightingBlendStrength = value })),
             Number("CHUNK CACHE LIMIT", () => Settings.Rendering.MaxChunkRenderCacheEntries, 32, 4096, 32, value => SetRendering(r => r with { MaxChunkRenderCacheEntries = value })),
-            Toggle("ENTITY INTERPOLATION", () => Settings.Rendering.EntityInterpolation, value => SetRendering(r => r with { EntityInterpolation = value }))
+            Toggle("ENTITY INTERPOLATION", () => Settings.Rendering.EntityInterpolation, value => SetRendering(r => r with { EntityInterpolation = value })),
+            Choice("UI EFFECT QUALITY", UiEffectQualityLabel, new[] { "OFF", "LOW", "MEDIUM", "HIGH" }, SetUiEffectQuality, UiControlKind.Segmented),
+            Number("BLUR RADIUS", () => Settings.Rendering.BlurRadiusPixels, 0, 24, 1, value => SetRendering(r => r with { BlurRadiusPixels = value }))
         ];
     }
 
@@ -284,11 +367,17 @@ public sealed class PauseMenuOverlay
     {
         return
         [
-            Choice("THEME", () => Settings.Ui.Theme, new[] { "Midnight", "Forest", "Ember" }, value => SetUi(ui => ui with { Theme = value })),
+            Choice("THEME", () => Settings.Ui.Theme, new[] { "Midnight", "Forest", "Ember" }, value => SetUi(ui => ui with { Theme = value }), UiControlKind.Segmented),
             Number("PANEL OPACITY", () => Settings.Ui.PanelOpacity, 0.35f, 1f, 0.05f, value => SetUi(ui => ui with { PanelOpacity = value })),
             Number("HUD OPACITY", () => Settings.Ui.HudOpacity, 0.35f, 1f, 0.05f, value => SetUi(ui => ui with { HudOpacity = value })),
             Number("BACKDROP OPACITY", () => Settings.Ui.MenuBackdropOpacity, 0f, 1f, 0.05f, value => SetUi(ui => ui with { MenuBackdropOpacity = value })),
             Number("ANIMATION SPEED", () => Settings.Ui.AnimationSpeed, 0.1f, 4f, 0.1f, value => SetUi(ui => ui with { AnimationSpeed = value })),
+            Number("CORNER RADIUS", () => Settings.Ui.CornerRadiusPixels, 0, 16, 1, value => SetUi(ui => ui with { CornerRadiusPixels = value })),
+            Number("BACKDROP BLUR", () => Settings.Ui.BackdropBlurStrength, 0f, 1f, 0.05f, value => SetUi(ui => ui with { BackdropBlurStrength = value })),
+            Number("GLOW STRENGTH", () => Settings.Ui.GlowStrength, 0f, 1f, 0.05f, value => SetUi(ui => ui with { GlowStrength = value })),
+            Number("TEXT SCALE", () => Settings.Ui.TextScale, 0.75f, 2f, 0.05f, value => SetUi(ui => ui with { TextScale = value })),
+            Toggle("HIGH CONTRAST PANELS", () => Settings.Ui.HighContrastPanels, value => SetUi(ui => ui with { HighContrastPanels = value })),
+            Toggle("LARGE CURSOR", () => Settings.Ui.LargeCursor, value => SetUi(ui => ui with { LargeCursor = value })),
             Toggle("REDUCED MOTION", () => Settings.Ui.ReducedMotion, value => SetUi(ui => ui with { ReducedMotion = value })),
             Toggle("COMPACT LISTS", () => Settings.Ui.CompactLists, value => SetUi(ui => ui with { CompactLists = value })),
             Toggle("CONTROL HINTS", () => Settings.Ui.ShowControlHints, value => SetUi(ui => ui with { ShowControlHints = value }))
@@ -356,6 +445,20 @@ public sealed class PauseMenuOverlay
         ];
     }
 
+    private IReadOnlyList<MenuOption> BuildAccessibilityOptions()
+    {
+        return
+        [
+            Toggle("REDUCE SCREEN FLASH", () => Settings.Accessibility.ScreenFlashReduction, value => SetAccessibility(a => a with { ScreenFlashReduction = value })),
+            Toggle("DISABLE CAMERA SHAKE", () => Settings.Accessibility.DisableCameraShake, value => SetAccessibility(a => a with { DisableCameraShake = value })),
+            Toggle("HOLD ACTIONS AS TOGGLE", () => Settings.Accessibility.HoldActionsBecomeToggle, value => SetAccessibility(a => a with { HoldActionsBecomeToggle = value })),
+            Toggle("HIGH CONTRAST OUTLINE", () => Settings.Accessibility.HighContrastInteractionOutline, value => SetAccessibility(a => a with { HighContrastInteractionOutline = value })),
+            Toggle("COLORBLIND INDICATORS", () => Settings.Accessibility.ColorBlindFriendlyIndicators, value => SetAccessibility(a => a with { ColorBlindFriendlyIndicators = value })),
+            Number("INTERFACE CONTRAST", () => Settings.Accessibility.InterfaceContrast, 0.5f, 2f, 0.05f, value => SetAccessibility(a => a with { InterfaceContrast = value })),
+            Number("TOOLTIP DELAY", () => Settings.Accessibility.TooltipDelaySeconds, 0f, 2f, 0.05f, value => SetAccessibility(a => a with { TooltipDelaySeconds = value }))
+        ];
+    }
+
     private IReadOnlyList<MenuOption> BuildSystemOptions()
     {
         return
@@ -369,7 +472,7 @@ public sealed class PauseMenuOverlay
 
     private void UpdateKeyCapture(InputManager input)
     {
-        if (input.IsKeyPressed(Microsoft.Xna.Framework.Input.Keys.Escape))
+        if (input.IsKeyPressed(Microsoft.Xna.Framework.Input.Keys.Escape) || _gamepad.CancelPressed)
         {
             _status = "KEYBIND CANCELLED";
             _keyCapture = null;
@@ -396,50 +499,127 @@ public sealed class PauseMenuOverlay
         _keyCapture = null;
     }
 
-    private void UpdateMouse(InputManager input)
+    private void UpdateMouse(InputManager input, float deltaSeconds)
     {
-        _hoveredSectionIndex = FindHit(_tabHitZones, input.MousePosition);
-        _hoveredOptionIndex = FindHit(_optionHitZones, input.MousePosition);
-
-        if (_hoveredSectionIndex >= 0 && input.IsLeftMousePressed)
+        _mousePosition = input.MousePosition;
+        if (_draggingSliderOptionIndex >= 0 && !input.IsLeftMouseDown)
         {
-            _sectionIndex = _hoveredSectionIndex;
+            _draggingSliderOptionIndex = -1;
+            SaveSettings();
+        }
+
+        _hoveredSectionIndex = DecodeTabRegion(_pointer.HoveredId);
+        _hoveredOptionIndex = DecodeOptionRegion(_pointer.HoveredId);
+        if (_hoveredOptionIndex < 0)
+        {
+            var hoveredControl = FindControlHit(_pointer.HoveredId);
+            _hoveredOptionIndex = hoveredControl?.OptionIndex ?? -1;
+        }
+
+        if (_hoveredOptionIndex != _tooltipOptionIndex)
+        {
+            _tooltipOptionIndex = _hoveredOptionIndex;
+            _tooltipHoverSeconds = 0;
+        }
+        else if (_hoveredOptionIndex >= 0)
+        {
+            _tooltipHoverSeconds += Math.Max(0, deltaSeconds);
+        }
+
+        if (input.ScrollDelta != 0 && _hoveredSectionIndex < 0)
+        {
+            MoveOption(input.ScrollDelta < 0 ? 1 : -1);
+            _focusVisible = false;
+        }
+
+        if (input.IsLeftMousePressed && _pointer.HoveredId < 0)
+        {
+            CloseDropdown();
+        }
+
+        var pressedControl = FindControlHit(_pointer.PressedId);
+        if (pressedControl is { Part: ControlPart.Slider } sliderHit && input.IsLeftMouseDown)
+        {
+            _optionIndex = sliderHit.OptionIndex;
+            var option = CurrentOption();
+            if (option is not null)
+            {
+                _draggingSliderOptionIndex = sliderHit.OptionIndex;
+                option.SetFromNormalized((input.MousePosition.X - sliderHit.Bounds.X) / (float)Math.Max(1, sliderHit.Bounds.Width));
+                _status = $"{option.Label} {option.Value()}";
+                _focusVisible = false;
+            }
+        }
+
+        var clickedTab = DecodeTabRegion(_pointer.ClickedId);
+        if (clickedTab >= 0)
+        {
+            _sectionIndex = clickedTab;
             _optionIndex = Math.Clamp(_optionIndex, 0, _sections[_sectionIndex].Options.Count - 1);
+            CloseDropdown();
             _confirmResetKeybinds = false;
             _status = _sections[_sectionIndex].Title;
+            _focusVisible = false;
             return;
         }
 
-        if (_hoveredOptionIndex >= 0)
+        var clickedControl = FindControlHit(_pointer.ClickedId);
+        if (clickedControl is { } hit)
         {
-            _optionIndex = _hoveredOptionIndex;
-
-            if (input.IsLeftMousePressed)
+            _optionIndex = hit.OptionIndex;
+            var option = CurrentOption();
+            if (option is null)
             {
-                CurrentOption()?.Activate();
+                return;
             }
-            else if (input.IsRightMousePressed)
+
+            if (hit.Part != ControlPart.Slider)
             {
-                CurrentOption()?.Change(-1);
+                HandleControlClick(option, hit);
+            }
+
+            _focusVisible = false;
+            return;
+        }
+
+        var clickedOption = DecodeOptionRegion(_pointer.ClickedId);
+        if (clickedOption >= 0)
+        {
+            _optionIndex = clickedOption;
+            _focusVisible = false;
+            var option = CurrentOption();
+            if (option is not null &&
+                option.Kind is UiControlKind.Toggle or UiControlKind.Dropdown or UiControlKind.KeyBinding or UiControlKind.Command)
+            {
+                ActivateCurrentOption();
+            }
+            else
+            {
+                CloseDropdown();
             }
         }
     }
 
     private void DrawTabs(RenderContext context, Rectangle panel, UiPalette palette)
     {
-        var tabX = panel.X + 22;
-        var tabY = panel.Y + 96;
+        var tabX = panel.X + 18;
+        var tabY = panel.Y + 74;
+        var tabWidth = Math.Clamp(panel.Width / 5, 148, 184);
+        var tabStep = Math.Max(18, Math.Min(39, (panel.Height - 143) / _sections.Count));
         for (var index = 0; index < _sections.Count; index++)
         {
             var title = _sections[index].Title;
-            var width = Math.Max(90, title.Length * 11 + 22);
-            var bounds = new Rectangle(tabX, tabY, width, 28);
+            var bounds = new Rectangle(tabX, tabY + index * tabStep, tabWidth, Math.Max(15, tabStep - 5));
             var selected = index == _sectionIndex;
             var hovered = index == _hoveredSectionIndex;
-            UiTheme.DrawButton(context, bounds, palette, selected, hovered);
-            context.DebugText.Draw(new Vector2(bounds.X + 10, bounds.Y + 7), title, selected ? palette.Text : palette.TextMuted, 1);
+            UiTheme.DrawButton(context, bounds, palette, selected, hovered, pressed: _pointer.IsPressed(TabRegionId(index)), settings: Settings);
+            if (selected)
+            {
+                context.SpriteBatch.Draw(context.Pixel, new Rectangle(bounds.X + 4, bounds.Y + 5, 3, bounds.Height - 10), palette.Accent);
+            }
+
+            context.DebugText.Draw(new Vector2(bounds.X + 14, bounds.Y + Math.Max(4, (bounds.Height - 7 * _typography.CaptionScale) / 2)), title, selected ? palette.Text : palette.TextMuted, _typography.CaptionScale);
             _tabHitZones.Add(new HitZone(bounds, index));
-            tabX += width + 8;
         }
     }
 
@@ -447,9 +627,18 @@ public sealed class PauseMenuOverlay
     {
         var section = _sections[_sectionIndex];
         var list = section.Options;
-        var startY = panel.Y + 140;
-        var rowHeight = Settings.Ui.CompactLists ? 26 : 30;
-        var visibleRows = Math.Max(1, (panel.Bottom - 198 - startY) / rowHeight);
+        var navWidth = Math.Clamp(panel.Width / 5, 148, 184);
+        var content = new Rectangle(panel.X + navWidth + 34, panel.Y + 74, panel.Width - navWidth - 52, panel.Height - 143);
+        context.DebugText.Draw(new Vector2(content.X + 2, content.Y + 2), section.Title, palette.Text, _typography.BodyScale);
+        context.DebugText.Draw(
+            new Vector2(content.X + 2, content.Y + 25),
+            Abbreviate(SectionDescription(section.Title), CharactersThatFit(content.Width - 4, _typography.CaptionScale)),
+            palette.TextMuted,
+            _typography.CaptionScale);
+
+        var startY = content.Y + 48;
+        var rowHeight = Math.Max(Settings.Ui.CompactLists ? 39 : 44, _typography.DenseLineHeight + 22);
+        var visibleRows = Math.Max(1, (content.Bottom - startY) / rowHeight);
         var scroll = Math.Clamp(_optionIndex - visibleRows + 1, 0, Math.Max(0, list.Count - visibleRows));
         var end = Math.Min(list.Count, scroll + visibleRows);
 
@@ -457,36 +646,319 @@ public sealed class PauseMenuOverlay
         {
             var row = index - scroll;
             var option = list[index];
-            var bounds = new Rectangle(panel.X + 24, startY + row * rowHeight, panel.Width - 48, 25);
+            var bounds = new Rectangle(content.X, startY + row * rowHeight, content.Width, rowHeight - 5);
             var selected = index == _optionIndex;
             var hovered = index == _hoveredOptionIndex;
+            var pressed = _pointer.IsPressed(OptionRegionId(index));
+            UiTheme.DrawButton(context, bounds, palette, selected, hovered, pressed: pressed, focused: _focusVisible && selected, settings: Settings);
 
-            if (selected)
-            {
-                UiTheme.DrawButton(context, bounds, palette, selected: true, hovered: false);
-            }
-            else if (hovered)
-            {
-                UiTheme.DrawButton(context, bounds, palette, selected: false, hovered: true);
-            }
-
-            context.DebugText.Draw(new Vector2(bounds.X + 10, bounds.Y + 6), option.Label, selected ? palette.Text : palette.TextMuted, 1);
-            var value = option.Value();
-            var valueX = bounds.Right - Math.Min(360, Math.Max(118, value.Length * 9 + 12));
-            context.DebugText.Draw(new Vector2(valueX, bounds.Y + 6), value, selected ? palette.Warning : palette.TextMuted, 1);
+            var controlWidth = Math.Clamp(bounds.Width / 2, 220, 350);
+            context.DebugText.Draw(
+                new Vector2(bounds.X + 12, bounds.Y + 14 + (pressed ? 1 : 0)),
+                Abbreviate(option.Label, CharactersThatFit(bounds.Width - controlWidth - 30, _typography.CaptionScale)),
+                selected ? palette.Text : palette.TextMuted,
+                _typography.CaptionScale);
+            DrawOptionControl(context, palette, bounds, option, index, selected);
             _optionHitZones.Add(new HitZone(bounds, index));
         }
 
         if (list.Count > visibleRows)
         {
-            context.DebugText.Draw(new Vector2(panel.Right - 118, panel.Bottom - 84), $"{_optionIndex + 1}/{list.Count}", palette.TextMuted, 1);
+            DrawScrollRail(context, palette, new Rectangle(content.Right - 4, startY, 3, content.Bottom - startY), scroll, visibleRows, list.Count);
         }
+
+        DrawOpenDropdown(context, palette);
+    }
+
+    private void DrawOptionControl(
+        RenderContext context,
+        UiPalette palette,
+        Rectangle row,
+        MenuOption option,
+        int optionIndex,
+        bool selected)
+    {
+        var controlWidth = Math.Clamp(row.Width / 2, 220, 350);
+        var bounds = new Rectangle(row.Right - controlWidth - 10, row.Y + 6, controlWidth, row.Height - 12);
+        switch (option.Kind)
+        {
+            case UiControlKind.Toggle:
+                DrawToggle(context, palette, bounds, option, optionIndex);
+                break;
+            case UiControlKind.Slider:
+                DrawSlider(context, palette, bounds, option, optionIndex);
+                break;
+            case UiControlKind.Stepper:
+                DrawStepper(context, palette, bounds, option, optionIndex);
+                break;
+            case UiControlKind.Segmented:
+                DrawSegments(context, palette, bounds, option, optionIndex);
+                break;
+            case UiControlKind.Dropdown:
+                DrawDropdown(context, palette, bounds, option, optionIndex);
+                break;
+            case UiControlKind.KeyBinding:
+            case UiControlKind.Command:
+                var primaryId = ControlRegionId(optionIndex, ControlPart.Primary, -1);
+                UiTheme.DrawButton(
+                    context,
+                    bounds,
+                    palette,
+                    selected,
+                    bounds.Contains(_mousePosition),
+                    pressed: _pointer.IsPressed(primaryId),
+                    settings: Settings);
+                context.DebugText.Draw(
+                    new Vector2(bounds.X + 10, bounds.Y + 8 + (_pointer.IsPressed(primaryId) ? 1 : 0)),
+                    Abbreviate(option.Value(), CharactersThatFit(bounds.Width - 20, _typography.CaptionScale)),
+                    option.Kind == UiControlKind.Command ? palette.Warning : palette.Text,
+                    _typography.CaptionScale);
+                _controlHitZones.Add(new ControlHitZone(bounds, optionIndex, ControlPart.Primary, -1));
+                break;
+        }
+    }
+
+    private void DrawToggle(RenderContext context, UiPalette palette, Rectangle bounds, MenuOption option, int optionIndex)
+    {
+        var on = string.Equals(option.Value(), "ON", StringComparison.OrdinalIgnoreCase);
+        var toggle = new Rectangle(bounds.Right - 74, bounds.Y + 1, 72, bounds.Height - 2);
+        var regionId = ControlRegionId(optionIndex, ControlPart.Primary, -1);
+        UiTheme.DrawButton(context, toggle, palette, on, toggle.Contains(_mousePosition), pressed: _pointer.IsPressed(regionId), settings: Settings);
+        var knobSize = Math.Max(12, toggle.Height - 8);
+        var knobX = on ? toggle.Right - knobSize - 4 : toggle.X + 4;
+        UiTheme.DrawRoundedRectangle(context, new Rectangle(knobX, toggle.Y + 4, knobSize, knobSize), on ? palette.Warning : palette.TextMuted, 4);
+        context.DebugText.Draw(new Vector2(toggle.X - 37 * _typography.CaptionScale, toggle.Y + 7 + (_pointer.IsPressed(regionId) ? 1 : 0)), on ? "ON" : "OFF", on ? palette.Text : palette.TextMuted, _typography.CaptionScale);
+        _controlHitZones.Add(new ControlHitZone(toggle, optionIndex, ControlPart.Primary, -1));
+    }
+
+    private void DrawSlider(RenderContext context, UiPalette palette, Rectangle bounds, MenuOption option, int optionIndex)
+    {
+        var valueWidth = 68;
+        var track = new Rectangle(bounds.X, bounds.Center.Y - 4, bounds.Width - valueWidth - 10, 8);
+        var normalized = option.NormalizedValue();
+        var regionId = ControlRegionId(optionIndex, ControlPart.Slider, -1);
+        UiTheme.DrawRoundedRectangle(context, track, UiTheme.WithAlpha(palette.Backdrop, 0.85f), 4);
+        var fill = new Rectangle(track.X, track.Y, (int)MathF.Round(track.Width * normalized), track.Height);
+        UiTheme.DrawRoundedRectangle(context, fill, _pointer.IsPressed(regionId) ? palette.Warning : palette.Accent, 4);
+        UiTheme.DrawRoundedBorder(context, track, palette.SurfaceHover, 4, 1);
+        var thumbX = Math.Clamp(track.X + (int)MathF.Round(track.Width * normalized) - 4, track.X - 1, track.Right - 7);
+        UiTheme.DrawRoundedRectangle(context, new Rectangle(thumbX, track.Y - 4, 9, 16), palette.Warning, 4);
+        context.DebugText.Draw(new Vector2(bounds.Right - valueWidth, bounds.Y + 8), option.Value(), palette.Text, _typography.CaptionScale);
+        _controlHitZones.Add(new ControlHitZone(new Rectangle(track.X, track.Y - 7, track.Width, 22), optionIndex, ControlPart.Slider, -1));
+    }
+
+    private void DrawStepper(RenderContext context, UiPalette palette, Rectangle bounds, MenuOption option, int optionIndex)
+    {
+        var buttonWidth = 32;
+        var centerWidth = Math.Min(106, Math.Max(62, bounds.Width - buttonWidth * 2 - 8));
+        var groupX = bounds.Right - centerWidth - buttonWidth * 2 - 8;
+        var decrement = new Rectangle(groupX, bounds.Y, buttonWidth, bounds.Height);
+        var value = new Rectangle(decrement.Right + 4, bounds.Y, centerWidth, bounds.Height);
+        var increment = new Rectangle(value.Right + 4, bounds.Y, buttonWidth, bounds.Height);
+        UiTheme.DrawButton(context, decrement, palette, false, decrement.Contains(_mousePosition), pressed: _pointer.IsPressed(ControlRegionId(optionIndex, ControlPart.Decrement, -1)), settings: Settings);
+        UiTheme.DrawButton(context, value, palette, true, false, settings: Settings);
+        UiTheme.DrawButton(context, increment, palette, false, increment.Contains(_mousePosition), pressed: _pointer.IsPressed(ControlRegionId(optionIndex, ControlPart.Increment, -1)), settings: Settings);
+        context.DebugText.Draw(new Vector2(decrement.X + 12, decrement.Y + 8), "-", palette.Text, _typography.CaptionScale);
+        context.DebugText.Draw(new Vector2(value.X + 8, value.Y + 8), Abbreviate(option.Value(), CharactersThatFit(value.Width - 12, _typography.CaptionScale)), palette.Text, _typography.CaptionScale);
+        context.DebugText.Draw(new Vector2(increment.X + 11, increment.Y + 8), "+", palette.Text, _typography.CaptionScale);
+        _controlHitZones.Add(new ControlHitZone(decrement, optionIndex, ControlPart.Decrement, -1));
+        _controlHitZones.Add(new ControlHitZone(increment, optionIndex, ControlPart.Increment, -1));
+    }
+
+    private void DrawSegments(RenderContext context, UiPalette palette, Rectangle bounds, MenuOption option, int optionIndex)
+    {
+        var choices = option.Choices;
+        if (choices is null || choices.Count == 0)
+        {
+            return;
+        }
+
+        var segmentWidth = Math.Max(1, bounds.Width / choices.Count);
+        for (var index = 0; index < choices.Count; index++)
+        {
+            var segment = new Rectangle(bounds.X + index * segmentWidth, bounds.Y, index == choices.Count - 1 ? bounds.Right - (bounds.X + index * segmentWidth) : segmentWidth - 2, bounds.Height);
+            var active = string.Equals(choices[index], option.Value(), StringComparison.OrdinalIgnoreCase);
+            UiTheme.DrawButton(context, segment, palette, active, segment.Contains(_mousePosition), pressed: _pointer.IsPressed(ControlRegionId(optionIndex, ControlPart.Choice, index)), settings: Settings);
+            context.DebugText.Draw(new Vector2(segment.X + 7, segment.Y + 8), Abbreviate(choices[index], CharactersThatFit(segment.Width - 10, _typography.CaptionScale)), active ? palette.Text : palette.TextMuted, _typography.CaptionScale);
+            _controlHitZones.Add(new ControlHitZone(segment, optionIndex, ControlPart.Choice, index));
+        }
+    }
+
+    private void DrawDropdown(RenderContext context, UiPalette palette, Rectangle bounds, MenuOption option, int optionIndex)
+    {
+        var open = optionIndex == _openDropdownOptionIndex;
+        UiTheme.DrawButton(context, bounds, palette, open, bounds.Contains(_mousePosition), pressed: _pointer.IsPressed(ControlRegionId(optionIndex, ControlPart.Dropdown, -1)), settings: Settings);
+        context.DebugText.Draw(new Vector2(bounds.X + 10, bounds.Y + 8), Abbreviate(option.Value(), CharactersThatFit(bounds.Width - 40, _typography.CaptionScale)), palette.Text, _typography.CaptionScale);
+        context.DebugText.Draw(new Vector2(bounds.Right - 22, bounds.Y + 8), open ? "^" : "v", palette.Warning, _typography.CaptionScale);
+        _controlHitZones.Add(new ControlHitZone(bounds, optionIndex, ControlPart.Dropdown, -1));
+    }
+
+    private void DrawOpenDropdown(RenderContext context, UiPalette palette)
+    {
+        if (_openDropdownOptionIndex < 0 || _openDropdownOptionIndex >= _sections[_sectionIndex].Options.Count)
+        {
+            return;
+        }
+
+        var option = _sections[_sectionIndex].Options[_openDropdownOptionIndex];
+        var choices = option.Choices;
+        var anchor = _controlHitZones.LastOrDefault(zone => zone.OptionIndex == _openDropdownOptionIndex && zone.Part == ControlPart.Dropdown).Bounds;
+        if (choices is null || choices.Count == 0 || anchor == Rectangle.Empty)
+        {
+            return;
+        }
+
+        var itemHeight = 29;
+        var dropUp = anchor.Bottom + choices.Count * itemHeight > _optionHitZones.LastOrDefault().Bounds.Bottom + 18;
+        var startY = dropUp ? anchor.Y - choices.Count * itemHeight : anchor.Bottom + 3;
+        for (var index = 0; index < choices.Count; index++)
+        {
+            var choiceBounds = new Rectangle(anchor.X, startY + index * itemHeight, anchor.Width, itemHeight - 1);
+            var selected = string.Equals(option.Value(), choices[index], StringComparison.OrdinalIgnoreCase);
+            UiTheme.DrawButton(context, choiceBounds, palette, selected, choiceBounds.Contains(_mousePosition), pressed: _pointer.IsPressed(ControlRegionId(_openDropdownOptionIndex, ControlPart.Choice, index)), settings: Settings);
+            context.DebugText.Draw(new Vector2(choiceBounds.X + 10, choiceBounds.Y + 9), Abbreviate(choices[index], CharactersThatFit(choiceBounds.Width - 20, _typography.CaptionScale)), selected ? palette.Text : palette.TextMuted, _typography.CaptionScale);
+            _controlHitZones.Add(new ControlHitZone(choiceBounds, _openDropdownOptionIndex, ControlPart.Choice, index));
+        }
+    }
+
+    private static void DrawScrollRail(RenderContext context, UiPalette palette, Rectangle rail, int scroll, int visibleRows, int totalRows)
+    {
+        UiTheme.DrawScrollRail(context, rail, scroll, visibleRows, totalRows, palette);
+    }
+
+    private static void DrawSaveIndicator(RenderContext context, UiPalette palette, Rectangle bounds, int textScale)
+    {
+        context.SpriteBatch.Draw(context.Pixel, bounds, UiTheme.WithAlpha(palette.AccentSoft, 0.75f));
+        UiTheme.DrawBorder(context, bounds, palette.Accent, 1);
+        context.DebugText.Draw(new Vector2(bounds.X + 11, bounds.Y + 7), "ON", palette.Text, textScale);
+    }
+
+    private void HandleControlClick(MenuOption option, ControlHitZone hit)
+    {
+        switch (hit.Part)
+        {
+            case ControlPart.Decrement:
+                option.Change(-1);
+                break;
+            case ControlPart.Increment:
+                option.Change(1);
+                break;
+            case ControlPart.Choice:
+                option.SelectChoice(hit.ChoiceIndex);
+                CloseDropdown();
+                break;
+            case ControlPart.Dropdown:
+                _openDropdownOptionIndex = _openDropdownOptionIndex == hit.OptionIndex ? -1 : hit.OptionIndex;
+                break;
+            case ControlPart.Primary:
+                option.Activate();
+                CloseDropdown();
+                break;
+        }
+    }
+
+    private void ActivateCurrentOption()
+    {
+        var option = CurrentOption();
+        if (option is null)
+        {
+            return;
+        }
+
+        if (option.Kind == UiControlKind.Dropdown)
+        {
+            _openDropdownOptionIndex = _openDropdownOptionIndex == _optionIndex ? -1 : _optionIndex;
+            return;
+        }
+
+        option.Activate();
+    }
+
+    private ControlHitZone? FindControlHit(int regionId)
+    {
+        if (regionId < ControlRegionBase)
+        {
+            return null;
+        }
+
+        for (var index = _controlHitZones.Count - 1; index >= 0; index--)
+        {
+            var hit = _controlHitZones[index];
+            if (ControlRegionId(hit.OptionIndex, hit.Part, hit.ChoiceIndex) == regionId)
+            {
+                return hit;
+            }
+        }
+
+        return null;
+    }
+
+    private void RebuildPointerRegions()
+    {
+        _pointerRegions.Clear();
+        foreach (var tab in _tabHitZones)
+        {
+            _pointerRegions.Add(new UiHitRegion(TabRegionId(tab.Index), tab.Bounds));
+        }
+
+        foreach (var option in _optionHitZones)
+        {
+            _pointerRegions.Add(new UiHitRegion(OptionRegionId(option.Index), option.Bounds));
+        }
+
+        foreach (var control in _controlHitZones)
+        {
+            _pointerRegions.Add(new UiHitRegion(
+                ControlRegionId(control.OptionIndex, control.Part, control.ChoiceIndex),
+                control.Bounds));
+        }
+    }
+
+    private static int TabRegionId(int index)
+    {
+        return TabRegionBase + index;
+    }
+
+    private static int OptionRegionId(int index)
+    {
+        return OptionRegionBase + index;
+    }
+
+    private static int ControlRegionId(int optionIndex, ControlPart part, int choiceIndex)
+    {
+        return ControlRegionBase + optionIndex * 100 + (int)part * 10 + choiceIndex + 1;
+    }
+
+    private int DecodeTabRegion(int regionId)
+    {
+        var index = regionId - TabRegionBase;
+        return index >= 0 && index < _sections.Count ? index : -1;
+    }
+
+    private int DecodeOptionRegion(int regionId)
+    {
+        var index = regionId - OptionRegionBase;
+        return index >= 0 && index < _sections[_sectionIndex].Options.Count ? index : -1;
+    }
+
+    private void CloseDropdown()
+    {
+        _openDropdownOptionIndex = -1;
+    }
+
+    private string TooltipText()
+    {
+        var delay = Math.Clamp(Settings.Accessibility.TooltipDelaySeconds, 0f, 2f);
+        var index = _tooltipHoverSeconds >= delay ? _hoveredOptionIndex : _optionIndex;
+        var options = _sections[_sectionIndex].Options;
+        return index >= 0 && index < options.Count ? options[index].Description : _status;
     }
 
     private void MoveSection(int direction)
     {
         _sectionIndex = ((_sectionIndex + direction) % _sections.Count + _sections.Count) % _sections.Count;
         _optionIndex = Math.Clamp(_optionIndex, 0, _sections[_sectionIndex].Options.Count - 1);
+        CloseDropdown();
         _confirmResetKeybinds = false;
         _status = _sections[_sectionIndex].Title;
     }
@@ -495,6 +967,7 @@ public sealed class PauseMenuOverlay
     {
         var count = _sections[_sectionIndex].Options.Count;
         _optionIndex = ((_optionIndex + direction) % count + count) % count;
+        CloseDropdown();
         _confirmResetKeybinds = false;
     }
 
@@ -509,34 +982,61 @@ public sealed class PauseMenuOverlay
     private MenuOption Toggle(string label, Func<bool> get, Action<bool> set)
     {
         return new MenuOption(
+            UiControlKind.Toggle,
             label,
+            Describe(label),
             () => get() ? "ON" : "OFF",
             direction => Commit(() => set(!get())),
-            () => Commit(() => set(!get())));
+            () => Commit(() => set(!get())),
+            () => get() ? 1f : 0f,
+            normalized => Commit(() => set(normalized >= 0.5f)),
+            null,
+            null);
     }
 
     private MenuOption Number(string label, Func<float> get, float min, float max, float step, Action<float> set)
     {
+        var range = new UiNumericRange(min, max, step);
         return new MenuOption(
+            UiControlKind.Slider,
             label,
+            Describe(label),
             () => get().ToString("0.##", System.Globalization.CultureInfo.InvariantCulture),
-            direction => Commit(() => set(Math.Clamp(get() + step * Math.Sign(direction), min, max))),
-            () => Commit(() => set(Math.Clamp(get() + step, min, max))));
+            direction => Commit(() => set(range.StepBy(get(), direction))),
+            () => Commit(() => set(range.StepBy(get(), 1))),
+            () => range.Normalize(get()),
+            normalized => set(range.ValueAt(normalized)),
+            null,
+            null);
     }
 
     private MenuOption Number(string label, Func<int> get, int min, int max, int step, Action<int> set)
     {
+        var range = new UiNumericRange(min, max, step);
         return new MenuOption(
+            UiControlKind.Stepper,
             label,
+            Describe(label),
             () => get().ToString(System.Globalization.CultureInfo.InvariantCulture),
-            direction => Commit(() => set(Math.Clamp(get() + step * Math.Sign(direction), min, max))),
-            () => Commit(() => set(Math.Clamp(get() + step, min, max))));
+            direction => Commit(() => set((int)range.StepBy(get(), direction))),
+            () => Commit(() => set((int)range.StepBy(get(), 1))),
+            () => range.Normalize(get()),
+            normalized => set((int)range.ValueAt(normalized)),
+            null,
+            null);
     }
 
-    private MenuOption Choice(string label, Func<string> get, IReadOnlyList<string> choices, Action<string> set)
+    private MenuOption Choice(
+        string label,
+        Func<string> get,
+        IReadOnlyList<string> choices,
+        Action<string> set,
+        UiControlKind kind = UiControlKind.Dropdown)
     {
         return new MenuOption(
+            kind,
             label,
+            Describe(label),
             get,
             direction => Commit(() =>
             {
@@ -554,21 +1054,41 @@ public sealed class PauseMenuOverlay
                 var current = IndexOf(choices, get());
                 var next = current < 0 ? 0 : (current + 1) % choices.Count;
                 set(choices[next]);
-            }));
+            }),
+            () => choices.Count <= 1 ? 0f : Math.Max(0, IndexOf(choices, get())) / (float)(choices.Count - 1),
+            _ => { },
+            choices,
+            index => Commit(() => set(choices[Math.Clamp(index, 0, choices.Count - 1)])));
     }
 
     private MenuOption Key(string label, Func<string> get, Action<string> set)
     {
         return new MenuOption(
+            UiControlKind.KeyBinding,
             label,
+            Describe(label),
             get,
             _ => BeginKeyCapture(label, set),
-            () => BeginKeyCapture(label, set));
+            () => BeginKeyCapture(label, set),
+            () => 0f,
+            _ => { },
+            null,
+            null);
     }
 
     private static MenuOption Command(string label, Action action)
     {
-        return new MenuOption(label, () => ">", _ => action(), action);
+        return new MenuOption(
+            UiControlKind.Command,
+            label,
+            Describe(label),
+            () => "SELECT",
+            _ => action(),
+            action,
+            () => 0f,
+            _ => { },
+            null,
+            null);
     }
 
     private void BeginKeyCapture(string label, Action<string> setter)
@@ -629,6 +1149,28 @@ public sealed class PauseMenuOverlay
         return $"{Settings.Video.Width}x{Settings.Video.Height}";
     }
 
+    private string CurrentFrameRateLimit()
+    {
+        return Settings.Video.FrameRateLimit == 0
+            ? "UNLIMITED"
+            : $"{Settings.Video.FrameRateLimit} FPS";
+    }
+
+    private void SetFrameRateLimit(string value)
+    {
+        if (string.Equals(value, "UNLIMITED", StringComparison.OrdinalIgnoreCase))
+        {
+            SetVideo(video => video with { FrameRateLimit = 0 });
+            return;
+        }
+
+        var digits = value.AsSpan(0, Math.Max(0, value.IndexOf(' ')));
+        if (int.TryParse(digits, out var limit))
+        {
+            SetVideo(video => video with { FrameRateLimit = limit });
+        }
+    }
+
     private string ParticleQualityLabel()
     {
         return Settings.Rendering.ParticleQuality switch
@@ -651,6 +1193,29 @@ public sealed class PauseMenuOverlay
         };
 
         SetRendering(rendering => rendering with { ParticleQuality = quality });
+    }
+
+    private string UiEffectQualityLabel()
+    {
+        return Settings.Rendering.UiEffectQuality switch
+        {
+            0 => "OFF",
+            1 => "LOW",
+            2 => "MEDIUM",
+            _ => "HIGH"
+        };
+    }
+
+    private void SetUiEffectQuality(string value)
+    {
+        var quality = value switch
+        {
+            "OFF" => 0,
+            "LOW" => 1,
+            "MEDIUM" => 2,
+            _ => 3
+        };
+        SetRendering(rendering => rendering with { UiEffectQuality = quality });
     }
 
     private void SetVideo(Func<VideoSettings, VideoSettings> update)
@@ -686,6 +1251,11 @@ public sealed class PauseMenuOverlay
     private void SetDebug(Func<DebugSettings, DebugSettings> update)
     {
         Settings = Settings with { Debug = update(Settings.Debug) };
+    }
+
+    private void SetAccessibility(Func<AccessibilitySettings, AccessibilitySettings> update)
+    {
+        Settings = Settings with { Accessibility = update(Settings.Accessibility) };
     }
 
     private void SetKeyBindings(Func<KeyBindingSettings, KeyBindingSettings> update)
@@ -764,24 +1334,184 @@ public sealed class PauseMenuOverlay
         }
     }
 
-    private static int FindHit(IEnumerable<HitZone> zones, Point point)
+    private static string SectionDescription(string title)
     {
-        foreach (var zone in zones)
+        return title switch
         {
-            if (zone.Bounds.Contains(point))
-            {
-                return zone.Index;
-            }
+            "GAMEPLAY" => "PACING, CAMERA AND MOMENT-TO-MOMENT PLAY",
+            "WORLD" => "STREAMING AND WORLD SESSION BEHAVIOR",
+            "GRAPHICS" => "DISPLAY MODE, SCALE AND PRESENTATION",
+            "RENDERING" => "PIXEL EFFECTS, LIGHTING AND CACHE QUALITY",
+            "UI" => "READABILITY, MOTION AND INTERFACE STYLE",
+            "DEBUG" => "DIAGNOSTIC LAYERS AND PROFILER DETAILS",
+            "AUDIO" => "MIX LEVELS FOR MUSIC, EFFECTS AND MENUS",
+            "KEYBINDS" => "KEYBOARD AND MOUSE ACTION MAPPING",
+            "ACCESSIBILITY" => "READABILITY, MOTION AND INPUT ASSISTANCE",
+            "SYSTEM" => "SAVE, LEAVE OR RETURN TO THE GAME",
+            _ => title
+        };
+    }
+
+    private static string Describe(string label)
+    {
+        return label switch
+        {
+            "AUTOSAVE MIN" => "TIME BETWEEN AUTOMATIC PLAYER AND WORLD SAVES.",
+            "MAX ENEMIES" => "MAXIMUM ACTIVE ENEMY COUNT AROUND THE PLAYER.",
+            "CAMERA ZOOM" => "WORLD PIXEL SCALE. HIGHER VALUES SHOW A CLOSER VIEW.",
+            "INTERACTION REACH" => "MAXIMUM DISTANCE FOR TILES, OBJECTS AND STATIONS.",
+            "SHOW TARGET TILE" => "HIGHLIGHT THE TILE CURRENTLY TARGETED BY THE PLAYER.",
+            "HOLD TO MINE" => "CONTINUE MINING WHILE THE PRIMARY ACTION IS HELD.",
+            "HOLD TO BLOCK" => "HOLD SECONDARY USE TO GUARD. OFF USES PRESS-TO-TOGGLE GUARD.",
+            "PAUSE ON FOCUS LOST" => "PAUSE THE SESSION WHEN THE GAME WINDOW LOSES FOCUS.",
+            "SPAWN RATE" => "MULTIPLIER FOR ENEMY SPAWN ATTEMPTS.",
+            "AUTO PICKUP" => "MOVE NEARBY DROPS INTO AVAILABLE INVENTORY SLOTS.",
+            "COMBAT LINE OF SIGHT" => "REQUIRE AN UNBLOCKED PATH FOR COMBAT TARGETING.",
+            "RESPAWN DELAY" => "SECONDS BEFORE THE PLAYER RETURNS AFTER DEFEAT.",
+            "CAMERA LOOK AHEAD" => "CAMERA LEAD IN THE PLAYER'S MOVEMENT DIRECTION.",
+            "SCREEN SHAKE" => "STRENGTH OF IMPACT AND DAMAGE CAMERA MOTION.",
+            "RESOLUTION" => "WINDOW OR FULLSCREEN OUTPUT RESOLUTION.",
+            "FULLSCREEN" => "USE BORDERLESS FULLSCREEN PRESENTATION.",
+            "VSYNC" => "SYNCHRONIZE FRAME PRESENTATION TO THE DISPLAY.",
+            "UI SCALE" => "SCALE MENUS, HUD AND INTERACTIVE CONTROLS.",
+            "RENDER SCALE" => "INTERNAL WORLD RENDERING SCALE BEFORE PRESENTATION.",
+            "WORLD PROFILE" => "BASE SIZE PROFILE USED WHEN CREATING WORLD CONTENT.",
+            "CHUNK LOAD MARGIN" => "EXTRA CHUNK COLUMNS KEPT AHEAD OF THE CAMERA.",
+            "CHUNK UNLOAD MARGIN" => "DISTANCE BEFORE INACTIVE CHUNKS MAY BE RELEASED.",
+            "STREAMING BUDGET" => "MAXIMUM STREAMING RESULTS APPLIED PER FRAME.",
+            "BLOOM" => "GLOW STRENGTH FOR BRIGHT PIXELS.",
+            "VIGNETTE" => "DARKENING STRENGTH AROUND THE VIEW EDGES.",
+            "COLOR GRADE" => "INTENSITY OF THE ACTIVE COLOR-GRADING PASS.",
+            "PARTICLE QUALITY" => "DENSITY AND LIFETIME BUDGET FOR GAMEPLAY PARTICLES.",
+            "CHUNK CACHE LIMIT" => "MAXIMUM RETAINED CHUNK RENDER CACHE ENTRIES.",
+            "UI EFFECT QUALITY" => "QUALITY BUDGET FOR UI GRADIENTS, GLOW AND BACKDROP EFFECTS.",
+            "BLUR RADIUS" => "MAXIMUM PIXEL RADIUS USED BY BLUR-CAPABLE UI EFFECTS.",
+            "THEME" => "COLOR PALETTE USED BY HUDS, MENUS AND OVERLAYS.",
+            "PANEL OPACITY" => "OPACITY OF MENU AND TOOL WINDOW SURFACES.",
+            "HUD OPACITY" => "OPACITY OF IN-GAME STATUS AND HOTBAR SURFACES.",
+            "BACKDROP OPACITY" => "DARKENING BEHIND OPEN MODAL MENUS.",
+            "ANIMATION SPEED" => "PLAYBACK SPEED FOR MENU TRANSITIONS AND FEEDBACK.",
+            "CORNER RADIUS" => "PIXEL RADIUS USED BY PANELS, BUTTONS AND TOOLTIPS.",
+            "BACKDROP BLUR" => "STRENGTH APPLIED TO THE CONFIGURED UI BLUR RADIUS.",
+            "GLOW STRENGTH" => "INTENSITY OF FOCUS AND RAISED-SURFACE EDGE GLOW.",
+            "TEXT SCALE" => "SIZE OF MENU TITLES, LABELS AND SUPPORTING TEXT.",
+            "HIGH CONTRAST PANELS" => "DARKEN SURFACES AND STRENGTHEN BORDERS FOR READABILITY.",
+            "LARGE CURSOR" => "ADD A LARGE HIGH-CONTRAST POINTER ACCENT IN MENUS.",
+            "REDUCED MOTION" => "MINIMIZE SLIDING AND TRANSITION ANIMATIONS.",
+            "COMPACT LISTS" => "SHOW MORE ROWS WITH TIGHTER VERTICAL SPACING.",
+            "CONTROL HINTS" => "SHOW SHORT CONTEXTUAL ACTION HINTS IN GAMEPLAY UI.",
+            "MASTER" => "OVERALL OUTPUT LEVEL FOR ALL GAME AUDIO.",
+            "MUSIC" => "BACKGROUND MUSIC LEVEL BEFORE MASTER VOLUME.",
+            "SFX" => "WORLD AND COMBAT EFFECT LEVEL BEFORE MASTER VOLUME.",
+            "UI" => "MENU AND INTERACTION SOUND LEVEL BEFORE MASTER VOLUME.",
+            "MOUSE SENSITIVITY" => "POINTER AND AIM RESPONSE MULTIPLIER.",
+            "INVERT HOTBAR SCROLL" => "REVERSE MOUSE-WHEEL HOTBAR DIRECTION.",
+            "REDUCE SCREEN FLASH" => "REDUCE BRIGHT UI GLOW AND SCREEN-FLASH INTENSITY.",
+            "DISABLE CAMERA SHAKE" => "DISABLE CAMERA SHAKE FROM IMPACTS AND DAMAGE.",
+            "HOLD ACTIONS AS TOGGLE" => "ACCESSIBILITY OVERRIDE FOR SUPPORTED HOLD ACTIONS, INCLUDING GUARD.",
+            "HIGH CONTRAST OUTLINE" => "USE A THICKER FOCUS AND INTERACTION OUTLINE.",
+            "COLORBLIND INDICATORS" => "USE DISTINCT WARNING AND DANGER INDICATOR COLORS.",
+            "INTERFACE CONTRAST" => "ADJUST CONTRAST BETWEEN UI SURFACES AND TEXT.",
+            "TOOLTIP DELAY" => "SECONDS OF HOVER BEFORE THE CONTROL DESCRIPTION APPEARS.",
+            "RESET KEYBINDS" => "RESTORE EVERY ACTION TO ITS DEFAULT BINDING.",
+            "SAVE SETTINGS" => "WRITE THE CURRENT SETTINGS TO DISK NOW.",
+            "BACK TO MAIN MENU" => "LEAVE THE CURRENT SCREEN AND RETURN TO THE MAIN MENU.",
+            "EXIT GAME" => "CLOSE THE GAME APPLICATION.",
+            _ when label.StartsWith("HOTBAR ", StringComparison.Ordinal) => "KEY USED TO SELECT THIS HOTBAR SLOT.",
+            _ => $"CHANGE {label}."
+        };
+    }
+
+    private static string Abbreviate(string value, int maxLength)
+    {
+        if (string.IsNullOrWhiteSpace(value) || value.Length <= maxLength)
+        {
+            return value;
         }
 
-        return -1;
+        return value[..Math.Max(1, maxLength - 1)] + ".";
+    }
+
+    private static int CharactersThatFit(int width, int scale)
+    {
+        return Math.Max(1, width / Math.Max(6, 6 * scale));
     }
 
     private sealed record MenuSection(string Title, IReadOnlyList<MenuOption> Options);
 
-    private sealed record MenuOption(string Label, Func<string> Value, Action<int> Change, Action Activate);
+    private sealed class MenuOption
+    {
+        private readonly Func<float> _normalizedValue;
+        private readonly Action<float> _setFromNormalized;
+        private readonly Action<int>? _selectChoice;
+
+        public MenuOption(
+            UiControlKind kind,
+            string label,
+            string description,
+            Func<string> value,
+            Action<int> change,
+            Action activate,
+            Func<float> normalizedValue,
+            Action<float> setFromNormalized,
+            IReadOnlyList<string>? choices,
+            Action<int>? selectChoice)
+        {
+            Kind = kind;
+            Label = label;
+            Description = description;
+            Value = value;
+            Change = change;
+            Activate = activate;
+            _normalizedValue = normalizedValue;
+            _setFromNormalized = setFromNormalized;
+            Choices = choices;
+            _selectChoice = selectChoice;
+        }
+
+        public UiControlKind Kind { get; }
+
+        public string Label { get; }
+
+        public string Description { get; }
+
+        public Func<string> Value { get; }
+
+        public Action<int> Change { get; }
+
+        public Action Activate { get; }
+
+        public IReadOnlyList<string>? Choices { get; }
+
+        public float NormalizedValue()
+        {
+            return Math.Clamp(_normalizedValue(), 0f, 1f);
+        }
+
+        public void SetFromNormalized(float value)
+        {
+            _setFromNormalized(value);
+        }
+
+        public void SelectChoice(int index)
+        {
+            _selectChoice?.Invoke(index);
+        }
+    }
 
     private sealed record KeyCapture(string Label, Action<string> Setter);
 
     private readonly record struct HitZone(Rectangle Bounds, int Index);
+
+    private readonly record struct ControlHitZone(Rectangle Bounds, int OptionIndex, ControlPart Part, int ChoiceIndex);
+
+    private enum ControlPart
+    {
+        Primary,
+        Slider,
+        Decrement,
+        Increment,
+        Dropdown,
+        Choice
+    }
 }

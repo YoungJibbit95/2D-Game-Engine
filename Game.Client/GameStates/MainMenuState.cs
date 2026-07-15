@@ -16,10 +16,13 @@ public sealed class MainMenuState : IGameState
     private readonly Action _exit;
     private readonly InputManager _input = new();
     private readonly List<MenuItem> _items;
-    private readonly List<Rectangle> _itemBounds = new();
+    private readonly List<UiHitRegion> _hitRegions = new();
+    private readonly UiPointerRouter _pointer = new();
+    private readonly UiGamepadNavigator _gamepad = new();
     private readonly UiAnimationPlayer _introAnimation = new();
     private GameSettings _settings = GameSettings.CreateDefault();
     private int _selectedIndex;
+    private bool _focusVisible = true;
 
     public MainMenuState(GameStateManager states, Action exit)
     {
@@ -40,6 +43,9 @@ public sealed class MainMenuState : IGameState
     public void Initialize()
     {
         _settings = LoadSettings();
+        _pointer.Reset();
+        _gamepad.Reset();
+        _focusVisible = true;
         var duration = _settings.Ui.ReducedMotion ? 0.001f : 0.28f;
         _introAnimation.Play(UiAnimationClip.SlideFadeIn(duration, -20f));
     }
@@ -55,21 +61,38 @@ public sealed class MainMenuState : IGameState
     public void Update(double deltaSeconds)
     {
         _input.Update();
+        _gamepad.Update(deltaSeconds);
+        _pointer.Update(_input.MousePosition, _input.IsLeftMouseDown, _hitRegions);
         _introAnimation.Update((float)deltaSeconds, _settings.Ui.AnimationSpeed);
 
-        if (_input.IsKeyPressed(Keys.Down) || _input.IsKeyPressed(Keys.S))
+        if (_pointer.HoveredId >= 0 &&
+            _pointer.HoveredId < _items.Count &&
+            _items[_pointer.HoveredId].Enabled)
+        {
+            _selectedIndex = _pointer.HoveredId;
+            _focusVisible = false;
+        }
+
+        if (_input.IsKeyPressed(Keys.Down) || _input.IsKeyPressed(Keys.S) || _gamepad.DownPressed)
         {
             MoveSelection(1);
+            _focusVisible = true;
         }
-        else if (_input.IsKeyPressed(Keys.Up) || _input.IsKeyPressed(Keys.W))
+        else if (_input.IsKeyPressed(Keys.Up) || _input.IsKeyPressed(Keys.W) || _gamepad.UpPressed)
         {
             MoveSelection(-1);
+            _focusVisible = true;
         }
 
-        UpdateMouseSelection();
-
-        if (_input.IsKeyPressed(Keys.Enter) || _input.IsKeyPressed(Keys.Space) || _input.IsLeftMousePressed)
+        if (_pointer.ClickedId >= 0 && _pointer.ClickedId < _items.Count)
         {
+            _selectedIndex = _pointer.ClickedId;
+            _focusVisible = false;
+            ActivateSelected();
+        }
+        else if (_input.IsKeyPressed(Keys.Enter) || _input.IsKeyPressed(Keys.Space) || _gamepad.ConfirmPressed)
+        {
+            _focusVisible = true;
             ActivateSelected();
         }
 
@@ -79,58 +102,83 @@ public sealed class MainMenuState : IGameState
     public void Draw(RenderContext context)
     {
         var palette = UiTheme.Resolve(_settings);
+        var typography = UiTheme.ResolveContract(_settings).Typography;
         var fade = _introAnimation.GetValue(UiAnimationProperty.Opacity, 1f);
         var offsetY = (int)MathF.Round(_introAnimation.GetValue(UiAnimationProperty.OffsetY, 0f));
         DrawBackground(context, palette);
+        var compact = context.ViewportBounds.Height < 560;
 
-        var titleX = Math.Max(36, context.ViewportBounds.Width / 2 - 250);
-        context.DebugText.Draw(new Vector2(titleX, 64 + offsetY), "YJSE", palette.Accent, 4);
-        context.DebugText.Draw(new Vector2(titleX + 4, 112 + offsetY), "YOUNGJIBBITS ENGINE", palette.TextMuted, 2);
+        var titleX = Math.Max(24, context.ViewportBounds.Width / 2 - 250);
+        var titleScale = compact ? Math.Min(4, typography.DisplayScale) : typography.DisplayScale;
+        var subtitleScale = compact ? 1 : typography.BodyScale;
+        var titleY = compact ? 52 : 64;
+        var subtitleY = titleY + titleScale * 7 + 10;
+        context.DebugText.Draw(new Vector2(titleX, titleY + offsetY), "YJSE", palette.Accent, titleScale);
+        context.DebugText.Draw(new Vector2(titleX + 4, subtitleY + offsetY), "YOUNGJIBBITS ENGINE", palette.TextMuted, subtitleScale);
 
-        _itemBounds.Clear();
-        var startY = 172 + offsetY;
-        var width = Math.Min(520, context.ViewportBounds.Width - 72);
-        var x = Math.Max(36, context.ViewportBounds.Width / 2 - width / 2);
+        _hitRegions.Clear();
+        var startY = (compact ? 120 : 172) + offsetY;
+        var width = Math.Min(520, Math.Max(180, context.ViewportBounds.Width - 48));
+        var x = context.ViewportBounds.Width / 2 - width / 2;
+        var itemHeight = compact ? 38 : 48;
+        var itemStep = compact ? 46 : 62;
+        var menuPanel = new Rectangle(x - 12, startY - 12, width + 24, itemStep * (_items.Count - 1) + itemHeight + 24);
+        UiTheme.DrawPanel(context, menuPanel, palette, _settings.Ui.PanelOpacity * fade, raised: false, settings: _settings);
 
         for (var index = 0; index < _items.Count; index++)
         {
-            var bounds = new Rectangle(x, startY + index * 62, width, 48);
-            _itemBounds.Add(bounds);
-            DrawMenuItem(context, _items[index], bounds, index == _selectedIndex, palette, fade);
+            var bounds = new Rectangle(x, startY + index * itemStep, width, itemHeight);
+            DrawMenuItem(context, _items[index], bounds, index, index == _selectedIndex, palette, fade, compact, typography);
+            _hitRegions.Add(new UiHitRegion(index, bounds, _items[index].Enabled));
         }
 
-        var footerY = context.ViewportBounds.Height - 48;
-        if (_settings.Ui.ShowControlHints)
-        {
-            context.DebugText.Draw(new Vector2(36, footerY), "ENTER SELECT   ESC STAYS HERE   F10 CONSOLE IN GAME", palette.TextMuted, 2);
-        }
+        UiTheme.DrawCursorAccent(context, _input.MousePosition, palette, _settings);
     }
 
     public void Dispose()
     {
     }
 
-    private void DrawMenuItem(RenderContext context, MenuItem item, Rectangle bounds, bool selected, UiPalette palette, float fade)
+    private void DrawMenuItem(
+        RenderContext context,
+        MenuItem item,
+        Rectangle bounds,
+        int index,
+        bool selected,
+        UiPalette palette,
+        float fade,
+        bool compact,
+        UiTypographyTokens typography)
     {
-        var hovered = bounds.Contains(_input.MousePosition);
-        UiTheme.DrawButton(context, bounds, palette, selected, hovered, item.Enabled);
+        var hovered = _pointer.HoveredId == index || bounds.Contains(_input.MousePosition);
+        var pressed = _pointer.IsPressed(index);
+        UiTheme.DrawButton(context, bounds, palette, selected, hovered, item.Enabled, pressed, _focusVisible && selected, _settings);
 
         var text = item.Enabled ? palette.Text : UiTheme.WithAlpha(palette.TextMuted, 0.62f * fade);
         var hint = item.Enabled ? palette.TextMuted : UiTheme.WithAlpha(palette.TextMuted, 0.45f * fade);
-        context.DebugText.Draw(new Vector2(bounds.X + 16, bounds.Y + 8), item.Label, text, 2);
-        context.DebugText.Draw(new Vector2(bounds.X + 16, bounds.Y + 28), item.Hint, hint, 1);
+        var pressOffset = pressed ? 1 : 0;
+        var bodyScale = compact ? Math.Min(2, typography.BodyScale) : typography.BodyScale;
+        var captionScale = compact ? 1 : typography.CaptionScale;
+        context.DebugText.Draw(new Vector2(bounds.X + 16, bounds.Y + (compact ? 5 : 8) + pressOffset), item.Label, text, bodyScale);
+        context.DebugText.Draw(new Vector2(bounds.X + 16, bounds.Y + (compact ? 23 : 28) + pressOffset), item.Hint, hint, captionScale);
 
         if (!item.Enabled)
         {
-            context.DebugText.Draw(new Vector2(bounds.Right - 118, bounds.Y + 17), "PLANNED", palette.Warning, 2);
+            context.DebugText.Draw(
+                new Vector2(bounds.Right - (compact ? 70 : 118), bounds.Y + (compact ? 15 : 17)),
+                "PLANNED",
+                palette.Warning,
+                compact ? 1 : typography.BodyScale);
         }
     }
 
     private static void DrawBackground(RenderContext context, UiPalette palette)
     {
         context.SpriteBatch.Draw(context.Pixel, context.ViewportBounds, palette.Backdrop);
-        var horizon = new Rectangle(0, context.ViewportBounds.Height / 2, context.ViewportBounds.Width, context.ViewportBounds.Height / 2);
-        context.SpriteBatch.Draw(context.Pixel, horizon, UiTheme.WithAlpha(palette.AccentSoft, 0.55f));
+        var skyBand = new Rectangle(0, context.ViewportBounds.Height / 3, context.ViewportBounds.Width, context.ViewportBounds.Height * 2 / 3);
+        context.SpriteBatch.Draw(context.Pixel, skyBand, UiTheme.WithAlpha(palette.AccentSoft, 0.32f));
+        var horizon = new Rectangle(0, context.ViewportBounds.Height * 2 / 3, context.ViewportBounds.Width, context.ViewportBounds.Height / 3);
+        context.SpriteBatch.Draw(context.Pixel, horizon, UiTheme.WithAlpha(palette.SurfaceHover, 0.38f));
         var ground = new Rectangle(0, context.ViewportBounds.Height - 86, context.ViewportBounds.Width, 86);
         context.SpriteBatch.Draw(context.Pixel, ground, new Color(45, 39, 35));
         var grass = new Rectangle(0, ground.Y, context.ViewportBounds.Width, 8);
@@ -151,18 +199,6 @@ public sealed class MainMenuState : IGameState
             if (_items[next].Enabled)
             {
                 _selectedIndex = next;
-                return;
-            }
-        }
-    }
-
-    private void UpdateMouseSelection()
-    {
-        for (var index = 0; index < _itemBounds.Count; index++)
-        {
-            if (_itemBounds[index].Contains(_input.MousePosition))
-            {
-                _selectedIndex = index;
                 return;
             }
         }

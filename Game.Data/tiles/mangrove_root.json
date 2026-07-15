@@ -1,0 +1,13 @@
+{
+  "id": "mangrove_root",
+  "numericId": 14,
+  "displayName": "Mangrove Root",
+  "texture": "world/wave05/mangrove_root_autotile",
+  "solid": false,
+  "blocksLight": false,
+  "hardness": 1.4,
+  "miningPowerRequired": 0,
+  "dropItem": "mangrove_root_block",
+  "mergeGroup": "mangrove",
+  "tags": ["wood", "tree", "pass-through", "twilight-marsh", "mineable"]
+}

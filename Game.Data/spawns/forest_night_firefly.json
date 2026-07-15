@@ -1,0 +1,17 @@
+{
+  "id": "forest_night_firefly",
+  "entityId": "firefly",
+  "biomeId": "forest",
+  "time": "night",
+  "habitats": ["surface", "openAir"],
+  "minTileY": 0,
+  "maxTileY": 104,
+  "chance": 0.34,
+  "maxActive": 8,
+  "populationGroup": "forest_wildlife",
+  "maxActiveInGroup": 12,
+  "populationRegionSizeTiles": 64,
+  "maxActiveInRegion": 5,
+  "maxActiveInHabitat": 10,
+  "cooldownSeconds": 2.2
+}

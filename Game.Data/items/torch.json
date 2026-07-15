@@ -1,0 +1,16 @@
+{
+  "id": "torch",
+  "displayName": "Torch",
+  "description": "A portable light source for caves, homes and landmarks.",
+  "rarity": "Common",
+  "value": 2,
+  "category": "Block",
+  "sortPriority": 30,
+  "type": "PlaceableTile",
+  "texture": "world/objects/torch",
+  "maxStack": 999,
+  "useTime": 0.12,
+  "placesTile": "torch",
+  "placementSupport": "AdjacentSolid",
+  "tags": ["item", "placeable", "light", "decoration"]
+}

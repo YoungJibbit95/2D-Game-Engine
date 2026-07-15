@@ -23,20 +23,40 @@ public sealed class EntityFactory
             spawnPosition,
             new Vector2(definition.Width, definition.Height),
             new HealthComponent(definition.MaxHealth, currentHealth),
-            CreateAiBehavior(definition.AiBehavior),
+            CreateAiBehavior(definition),
             _collisionResolver,
             definition.LootTableId,
             definition.ContactDamage,
             definition.ContactKnockback,
-            definition.OnContactEffects);
+            definition.AttackDamage,
+            definition.AttackKnockback,
+            definition.Despawn,
+            definition.OnContactEffects,
+            definition.Faction,
+            definition.MovementMode,
+            definition.Tags);
     }
 
-    private static IAiBehavior CreateAiBehavior(string? aiBehavior)
+    private static IAiBehavior CreateAiBehavior(EntityDefinition definition)
+    {
+        var profile = definition.Ai ?? CreateLegacyProfile(definition.AiBehavior);
+        return profile.Kind switch
+        {
+            AiBehaviorKind.Slime => new SlimeAiBehavior(),
+            AiBehaviorKind.Critter or AiBehaviorKind.Wander => new CritterAiBehavior(profile),
+            AiBehaviorKind.Hostile => new HostileAiBehavior(profile),
+            _ => NullAiBehavior.Instance
+        };
+    }
+
+    private static AiProfileDefinition CreateLegacyProfile(string? aiBehavior)
     {
         return aiBehavior?.ToLowerInvariant() switch
         {
-            "slime" => new SlimeAiBehavior(),
-            _ => NullAiBehavior.Instance
+            "slime" => new AiProfileDefinition { Kind = AiBehaviorKind.Slime },
+            "critter" or "wander" or "flee" => new AiProfileDefinition { Kind = AiBehaviorKind.Critter },
+            "hostile" or "patrol" or "chase" => new AiProfileDefinition { Kind = AiBehaviorKind.Hostile },
+            _ => new AiProfileDefinition { Kind = AiBehaviorKind.None }
         };
     }
 }

@@ -27,10 +27,10 @@ The engine is now a playable YjsE prototype shell with a growing reusable 2D san
 - JSON-driven tile definitions and registry.
 - JSON-driven item definitions and registry.
 - JSON-driven crop definitions and registry for Stardew-like farming loops.
-- Inventory stack rules, split, merge, swap, and removal behavior.
+- Inventory stack rules, atomic transfers, protected favorites, split/merge/swap, sorting, compaction, querying, rarity/value metadata, and player-save v3 migration.
 - Inventory cursor interaction foundation with left-click pick/place/merge/swap and right-click split/place-one rules.
 - In-game inventory overlay with hotbar/main slots, cursor-held stack rendering, shift-click quick move, and item stat/effect/tag tooltips.
-- In-game crafting overlay with known recipe list, result details, ingredient and station checks, craft button, and shift-repeat crafting.
+- In-game crafting overlay with search/category/visibility filters, recipe pinning, result details, station/ingredient/output planning, quantity controls, atomic batch craft, and craft-maximum.
 - Tilemap rendering with visible chunk iteration.
 - Camera follow.
 - Player entity with keyboard movement, jumping, gravity, and tile collision.
@@ -47,6 +47,10 @@ The engine is now a playable YjsE prototype shell with a growing reusable 2D san
 - Recipe registry and crafting core with known recipe, station, ingredient, category, and sort query results.
 - Loot table registry and deterministic loot rolling support.
 - Biome registry and biome map baseline.
+- Data-driven living-world regions with Forest, Meadow, Mushroom Cave, Crystal Depths and Deep Cave layers, deterministic weather/events and biome-aware infinite generation/rendering/spawning.
+- Session-owned named RNG streams with atomic save/resume, backup recovery and deterministic replay hashing.
+- Friendly/hostile AI with perception memory, flee/attack intents, habitat caps, protected despawn, exactly-once loot deaths and an elite ecosystem path.
+- Texture residency groups with decoded-byte budgets, LRU eviction, pinning, alias-shared leases and telemetry.
 - Mod/content-pack loader with `mod.json`, override reporting, and tile numeric-id conflict detection.
 - Combat health component with damage types, damage info, and invulnerability timing.
 - Projectile and entity definition registries in the content pipeline.
@@ -82,7 +86,7 @@ The engine is now a playable YjsE prototype shell with a growing reusable 2D san
 - `MeleeAttackSystem` resolves player melee hitboxes, cooldowns, enemy damage, death events, and loot drops.
 - `PlayerRespawnSystem` restores dead players at the world metadata spawn point after a delay.
 - Chunk streaming planner computes load/unload boundaries around visible tile areas and keeps dirty chunks loaded.
-- Chunk streaming service owns load/generate/save-before-unload lifecycle for infinite worlds and exposes runtime metrics.
+- Chunk streaming service owns cancellable background load/generate/decode/save jobs, session-token stale rejection, bounded main-thread apply, recovery-safe save-before-unload, and detailed queue/byte/timing telemetry.
 - Chunk streaming publishes typed lifecycle events for loaded, generated, saved, unloaded, and skipped chunks.
 - Structure templates and placer support reusable worldgen structures, with an initial surface shelter generation step.
 - Advanced world generation now includes underground liquid pockets using tile liquid data.

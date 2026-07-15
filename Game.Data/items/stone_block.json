@@ -1,6 +1,11 @@
 {
   "id": "stone_block",
   "displayName": "Stone Block",
+  "description": "A durable building block and the foundation of basic furnaces.",
+  "rarity": "Common",
+  "value": 2,
+  "category": "Block",
+  "sortPriority": 20,
   "type": "PlaceableTile",
   "texture": "items/stone_block",
   "maxStack": 999,

@@ -1,0 +1,13 @@
+{
+  "id": "amberstone",
+  "numericId": 12,
+  "displayName": "Amberstone",
+  "texture": "world/wave05/amberstone_autotile",
+  "solid": true,
+  "blocksLight": true,
+  "hardness": 3.2,
+  "miningPowerRequired": 30,
+  "dropItem": "amberstone_block",
+  "mergeGroup": "stone",
+  "tags": ["stone", "amber-grove", "natural", "mineable"]
+}

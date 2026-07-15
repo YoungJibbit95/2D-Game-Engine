@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Game.Core.Spawning;
 
@@ -8,7 +9,8 @@ public sealed class SpawnRuleJsonLoader
     {
         PropertyNameCaseInsensitive = true,
         ReadCommentHandling = JsonCommentHandling.Skip,
-        AllowTrailingCommas = true
+        AllowTrailingCommas = true,
+        Converters = { new JsonStringEnumConverter() }
     };
 
     public SpawnRuleRegistry LoadRegistryFromDirectory(string directoryPath)

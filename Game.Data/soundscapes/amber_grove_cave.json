@@ -1,0 +1,8 @@
+{
+  "id": "amber_grove_cave",
+  "undergroundMusicLoopId": "music/amber_hollows",
+  "undergroundAmbientLoopId": "ambient/resin_hollows",
+  "musicVolume": 0.62,
+  "ambientVolume": 0.74,
+  "crossfadeSeconds": 2.3
+}

@@ -1,0 +1,50 @@
+{
+    "version":  "Development snapshot",
+    "updated":  "2026-07-15",
+    "summary":  "Bounded gameplay feedback, deterministic replay capture, phased combat runtime and retry-budgeted streaming are integrated.",
+    "metrics":  [
+                    {
+                        "value":  "24 / 122",
+                        "label":  "Wave 05 assets / frames"
+                    },
+                    {
+                        "value":  "2 regional",
+                        "label":  "New biomes"
+                    },
+                    {
+                        "value":  "5 / 15",
+                        "label":  "World events / phases"
+                    },
+                    {
+                        "value":  "995 / 995",
+                        "label":  "Debug + Release suites"
+                    }
+                ],
+    "features":  [
+                     {
+                         "title":  "Phasenbasierte World Events",
+                         "text":  "Fuenf JSON-Events steuern Phasen und Modifier; aktive Events, Cooldowns, Journal und Action-Sequenz werden atomar gespeichert und deterministisch fortgesetzt.",
+                         "status":  "verified"
+                     },
+                     {
+                         "title":  "Amber Grove und Twilight Marsh",
+                         "text":  "Zwei regionale Biome verbinden Klima, Terrain, Wetter, Soundscape, Lighting, Spawn-Tabellen, Ressourcen, Strukturen und Wave-05-Praesentation.",
+                         "status":  "verified"
+                     },
+                     {
+                         "title":  "Retry-budgeted Streaming",
+                         "text":  "Klassifizierte Fehler, exponentieller Backoff und Operation-, Zeit- sowie Byte-Budgets halten Hintergrundjobs und Main-Thread-Apply begrenzt.",
+                         "status":  "verified"
+                     },
+                     {
+                         "title":  "Replay und Feedback",
+                         "text":  "Versionierte Input-Replays liefern First-Divergence-Diagnosen; feste Visual-/Audio-Ringe routen autoritative Gameplay-Ereignisse ohne ungebremste Queues.",
+                         "status":  "verified"
+                     },
+                     {
+                         "title":  "Lesbares Cave Lighting",
+                         "text":  "Open-, Unknown- und Occluded-Sky-States verhindern Lichtlecks an Streaming-Grenzen; sichtbare Regionen werden zuerst aktualisiert und Hoehlenschaechte behalten weichen Restlichteinfall.",
+                         "status":  "verified"
+                     }
+                 ]
+}

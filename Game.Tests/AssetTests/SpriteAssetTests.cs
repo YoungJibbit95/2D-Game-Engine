@@ -20,6 +20,14 @@ public sealed class SpriteAssetTests
               "category": "Tool",
               "width": 64,
               "height": 16,
+              "pixelsPerUnit": 32,
+              "atlasId": "items",
+              "sourceAliasOf": "items/canonical_pickaxe",
+              "originX": 8,
+              "originY": 16,
+              "renderLayer": "ui.icon",
+              "license": "YjsE-Project-Owned",
+              "provenance": "representative test asset",
               "frames": [
                 { "id": "mask_0", "x": 0, "y": 0, "width": 16, "height": 16, "autoTileMask": 0 },
                 { "id": "mask_3", "x": 48, "y": 0, "width": 16, "height": 16, "autoTileMask": 3 }
@@ -34,6 +42,14 @@ public sealed class SpriteAssetTests
 
         Assert.Equal("items/copper_pickaxe", definition.Id);
         Assert.Equal(SpriteAssetCategory.Tool, definition.Category);
+        Assert.Equal(32, definition.PixelsPerUnit);
+        Assert.Equal("items", definition.AtlasId);
+        Assert.Equal("items/canonical_pickaxe", definition.SourceAliasOf);
+        Assert.Equal(8, definition.OriginX);
+        Assert.Equal(16, definition.OriginY);
+        Assert.Equal("ui.icon", definition.RenderLayer);
+        Assert.Equal("YjsE-Project-Owned", definition.License);
+        Assert.Equal("representative test asset", definition.Provenance);
         Assert.Equal(1, definition.ResolveFrameIndexForAutoTileMask(3));
         Assert.Equal(0, definition.ResolveFrameIndexForAutoTileMask(8));
         Assert.True(definition.HasTag("pickaxe"));
@@ -78,6 +94,33 @@ public sealed class SpriteAssetTests
         };
 
         Assert.Throws<RegistryValidationException>(() => SpriteAssetRegistry.Create(definitions));
+    }
+
+    [Fact]
+    public void Registry_RejectsIncompleteOrOutOfBoundsSpriteOrigins()
+    {
+        var incomplete = CreateSprite("ui/incomplete") with { OriginX = 8 };
+        var outside = CreateSprite("ui/outside") with { OriginX = 17, OriginY = 8 };
+
+        Assert.Throws<RegistryValidationException>(() => SpriteAssetRegistry.Create(new[] { incomplete }));
+        Assert.Throws<RegistryValidationException>(() => SpriteAssetRegistry.Create(new[] { outside }));
+    }
+
+    [Fact]
+    public void Registry_ValidatesSourceAliasesShareCanonicalPathAndDimensions()
+    {
+        var canonical = CreateSprite("items/canonical") with { Path = "sprites/items/shared.png" };
+        var alias = CreateSprite("projectiles/alias") with
+        {
+            Path = "sprites/items/shared.png",
+            SourceAliasOf = canonical.Id
+        };
+        var wrongPath = alias with { Id = "projectiles/wrong", Path = "sprites/projectiles/other.png" };
+
+        var registry = SpriteAssetRegistry.Create(new[] { alias, canonical });
+
+        Assert.Equal(canonical.Id, registry.GetById(alias.Id).SourceAliasOf);
+        Assert.Throws<RegistryValidationException>(() => SpriteAssetRegistry.Create(new[] { canonical, wrongPath }));
     }
 
     [Fact]
@@ -341,7 +384,9 @@ public sealed class SpriteAssetTests
         while (directory is not null)
         {
             var candidate = Path.Combine(directory.FullName, "Game.Data");
-            if (Directory.Exists(candidate))
+            if (File.Exists(Path.Combine(directory.FullName, "YjsE.sln")) &&
+                Directory.Exists(Path.Combine(candidate, "assets")) &&
+                Directory.Exists(Path.Combine(candidate, "asset_briefs")))
             {
                 return candidate;
             }

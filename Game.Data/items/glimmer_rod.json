@@ -1,0 +1,24 @@
+{
+  "id": "glimmer_rod",
+  "displayName": "Glimmer Rod",
+  "description": "Focuses cave light into quick, mana-efficient bolts.",
+  "rarity": "Rare",
+  "value": 520,
+  "category": "Weapon",
+  "sortPriority": 74,
+  "type": "WeaponMagic",
+  "texture": "items/wave05/glimmer_rod",
+  "maxStack": 1,
+  "useTime": 0.28,
+  "damage": 12,
+  "knockback": 1.4,
+  "manaCost": 5,
+  "actions": [
+    {
+      "kind": "Cast",
+      "projectile": "spark_bolt",
+      "projectileSpeedMultiplier": 1.2
+    }
+  ],
+  "tags": ["weapon", "magic", "mana", "wave05"]
+}

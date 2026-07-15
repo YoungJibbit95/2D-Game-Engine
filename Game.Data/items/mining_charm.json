@@ -1,6 +1,11 @@
 {
   "id": "mining_charm",
   "displayName": "Mining Charm",
+  "description": "A practical accessory that improves mining rhythm and control.",
+  "rarity": "Uncommon",
+  "value": 120,
+  "category": "Equipment",
+  "sortPriority": 50,
   "type": "Accessory",
   "texture": "items/mining_charm",
   "maxStack": 1,

@@ -8,12 +8,14 @@
       "height": 16,
       "tags": [
         "world",
-        "tile"
+        "tile",
+        "empty"
       ]
     },
     {
       "id": "tiles/dirt",
-      "path": "sprites/world/tiles/dirt.png",
+      "path": "sprites/world/tiles/dirt_autotile.png",
+      "sourceAliasOf": "tiles/dirt_autotile",
       "category": "Tile",
       "width": 256,
       "height": 16,
@@ -157,7 +159,8 @@
     },
     {
       "id": "tiles/grass",
-      "path": "sprites/world/tiles/grass.png",
+      "path": "sprites/world/tiles/grass_autotile.png",
+      "sourceAliasOf": "tiles/grass_autotile",
       "category": "Tile",
       "width": 256,
       "height": 16,
@@ -301,7 +304,8 @@
     },
     {
       "id": "tiles/stone",
-      "path": "sprites/world/tiles/stone.png",
+      "path": "sprites/world/tiles/stone_autotile.png",
+      "sourceAliasOf": "tiles/stone_autotile",
       "category": "Tile",
       "width": 256,
       "height": 16,
@@ -757,12 +761,20 @@
       "id": "tiles/workbench",
       "path": "sprites/world/objects/workbench.png",
       "category": "WorldObject",
-      "width": 32,
-      "height": 16,
+      "width": 64,
+      "height": 32,
+      "atlasId": "world",
+      "originX": 32,
+      "originY": 30,
+      "renderLayer": "world.object",
+      "license": "YjsE-Project-Owned",
+      "provenance": "YjsE pixel wave 01; built-in image generation with chroma-key removal and deterministic palette/alpha post-processing",
       "tags": [
         "world",
         "station",
-        "crafting"
+        "crafting",
+        "production-sample",
+        "runtime-used"
       ]
     },
     {
@@ -848,12 +860,20 @@
       "id": "items/copper_pickaxe",
       "path": "sprites/tools/copper_pickaxe.png",
       "category": "Tool",
-      "width": 16,
-      "height": 16,
+      "width": 32,
+      "height": 32,
+      "atlasId": "items",
+      "originX": 16,
+      "originY": 16,
+      "renderLayer": "item.icon",
+      "license": "YjsE-Project-Owned",
+      "provenance": "YjsE pixel wave 01; built-in image generation with chroma-key removal and deterministic palette/alpha post-processing",
       "tags": [
         "item",
         "tool",
-        "pickaxe"
+        "pickaxe",
+        "production-sample",
+        "runtime-used"
       ]
     },
     {
@@ -886,12 +906,20 @@
       "id": "items/copper_sword",
       "path": "sprites/weapons/copper_sword.png",
       "category": "Weapon",
-      "width": 16,
-      "height": 16,
+      "width": 32,
+      "height": 32,
+      "atlasId": "items",
+      "originX": 16,
+      "originY": 16,
+      "renderLayer": "item.icon",
+      "license": "YjsE-Project-Owned",
+      "provenance": "YjsE pixel wave 01; built-in image generation with chroma-key removal and deterministic palette/alpha post-processing",
       "tags": [
         "item",
         "weapon",
-        "melee"
+        "melee",
+        "production-sample",
+        "runtime-used"
       ]
     },
     {
@@ -984,12 +1012,20 @@
       "id": "items/workbench",
       "path": "sprites/items/stations/workbench.png",
       "category": "Item",
-      "width": 16,
-      "height": 16,
+      "width": 32,
+      "height": 32,
+      "atlasId": "items",
+      "originX": 16,
+      "originY": 16,
+      "renderLayer": "item.icon",
+      "license": "YjsE-Project-Owned",
+      "provenance": "YjsE pixel wave 01; built-in image generation with chroma-key removal and deterministic palette/alpha post-processing",
       "tags": [
         "item",
         "station",
-        "crafting"
+        "crafting",
+        "production-sample",
+        "runtime-used"
       ]
     },
     {
@@ -998,22 +1034,38 @@
       "category": "Item",
       "width": 16,
       "height": 16,
+      "atlasId": "items",
+      "originX": 8,
+      "originY": 8,
+      "renderLayer": "item.icon",
+      "license": "YjsE-Project-Owned",
+      "provenance": "wave_02_creatures_biomes_character_props; deterministic Pillow pixel primitives; wave_02_provenance.json",
       "tags": [
         "item",
         "accessory",
-        "mining"
+        "mining",
+        "production-sample",
+        "runtime-used"
       ]
     },
     {
       "id": "items/healing_potion",
       "path": "sprites/items/consumables/healing_potion.png",
       "category": "Item",
-      "width": 16,
-      "height": 16,
+      "width": 32,
+      "height": 32,
+      "atlasId": "items",
+      "originX": 16,
+      "originY": 16,
+      "renderLayer": "item.icon",
+      "license": "YjsE-Project-Owned",
+      "provenance": "YjsE pixel wave 01; built-in image generation with chroma-key removal and deterministic palette/alpha post-processing",
       "tags": [
         "item",
         "consumable",
-        "healing"
+        "healing",
+        "production-sample",
+        "runtime-used"
       ]
     },
     {
@@ -1022,25 +1074,41 @@
       "category": "Item",
       "width": 16,
       "height": 16,
+      "atlasId": "items",
+      "originX": 8,
+      "originY": 8,
+      "renderLayer": "item.icon",
+      "license": "YjsE-Project-Owned",
+      "provenance": "wave_02_creatures_biomes_character_props; deterministic Pillow pixel primitives; wave_02_provenance.json",
       "tags": [
         "item",
         "accessory",
         "magic",
         "mana",
-        "crystal"
+        "crystal",
+        "production-sample",
+        "runtime-used"
       ]
     },
     {
       "id": "items/spark_wand",
       "path": "sprites/weapons/spark_wand.png",
       "category": "Weapon",
-      "width": 16,
-      "height": 16,
+      "width": 32,
+      "height": 32,
+      "atlasId": "items",
+      "originX": 16,
+      "originY": 16,
+      "renderLayer": "item.icon",
+      "license": "YjsE-Project-Owned",
+      "provenance": "YjsE pixel wave 01; built-in image generation with chroma-key removal and deterministic palette/alpha post-processing",
       "tags": [
         "item",
         "weapon",
         "magic",
-        "wand"
+        "wand",
+        "production-sample",
+        "runtime-used"
       ]
     },
     {
@@ -1062,11 +1130,19 @@
       "category": "Tool",
       "width": 16,
       "height": 16,
+      "atlasId": "items",
+      "originX": 8,
+      "originY": 8,
+      "renderLayer": "item.icon",
+      "license": "YjsE-Project-Owned",
+      "provenance": "wave_03_player_biome_production; deterministic Pillow pixel primitives; wave_03_provenance.json",
       "tags": [
         "item",
         "tool",
         "farming",
-        "hoe"
+        "hoe",
+        "production-sample",
+        "runtime-used"
       ]
     },
     {
@@ -1157,6 +1233,12 @@
       "category": "Entity",
       "width": 192,
       "height": 32,
+      "atlasId": "entities",
+      "originX": 8,
+      "originY": 16,
+      "renderLayer": "world.entity.player.base",
+      "license": "YjsE-Project-Owned",
+      "provenance": "wave_03_player_biome_production; deterministic Pillow pixel primitives; wave_03_provenance.json",
       "frames": [
         {
           "id": "idle_0",
@@ -1272,7 +1354,9 @@
         "player",
         "character",
         "animated",
-        "side-view"
+        "side-view",
+        "production-sample",
+        "runtime-used"
       ]
     },
     {
@@ -1584,12 +1668,20 @@
       "category": "Background",
       "width": 512,
       "height": 128,
+      "atlasId": "backgrounds",
+      "originX": 0,
+      "originY": 128,
+      "renderLayer": "background.mid",
+      "license": "YjsE-Project-Owned",
+      "provenance": "wave_03_player_biome_production; deterministic Pillow pixel primitives; wave_03_provenance.json",
       "tags": [
         "background",
         "forest",
         "parallax",
         "tileable",
-        "world"
+        "world",
+        "production-sample",
+        "runtime-used"
       ]
     },
     {
@@ -1598,12 +1690,20 @@
       "category": "Background",
       "width": 512,
       "height": 128,
+      "atlasId": "backgrounds",
+      "originX": 0,
+      "originY": 128,
+      "renderLayer": "background.mid",
+      "license": "YjsE-Project-Owned",
+      "provenance": "wave_03_player_biome_production; deterministic Pillow pixel primitives; wave_03_provenance.json",
       "tags": [
         "background",
         "cave",
         "parallax",
         "tileable",
-        "world"
+        "world",
+        "production-sample",
+        "runtime-used"
       ]
     },
     {
@@ -1623,14 +1723,23 @@
       "category": "Projectile",
       "width": 16,
       "height": 16,
+      "atlasId": "projectiles",
+      "originX": 8,
+      "originY": 8,
+      "renderLayer": "world.projectile",
+      "license": "YjsE-Project-Owned",
+      "provenance": "wave_03_player_biome_production; deterministic Pillow pixel primitives; wave_03_provenance.json",
       "tags": [
         "projectile",
-        "arrow"
+        "arrow",
+        "production-sample",
+        "runtime-used"
       ]
     },
     {
       "id": "projectiles/poison_arrow",
-      "path": "sprites/projectiles/poison_arrow.png",
+      "path": "sprites/items/ammo/poison_arrow.png",
+      "sourceAliasOf": "items/poison_arrow",
       "category": "Projectile",
       "width": 16,
       "height": 16,
@@ -2394,6 +2503,12 @@
       "category": "Entity",
       "width": 128,
       "height": 32,
+      "atlasId": "entities",
+      "originX": 8,
+      "originY": 16,
+      "renderLayer": "world.entity.player.hair",
+      "license": "YjsE-Project-Owned",
+      "provenance": "wave_03_player_biome_production; deterministic Pillow pixel primitives; wave_03_provenance.json",
       "frames": [
         {
           "id": "short_brown",
@@ -2458,7 +2573,9 @@
         "character",
         "editor",
         "hair",
-        "variants"
+        "variants",
+        "production-sample",
+        "runtime-used"
       ]
     },
     {
@@ -2467,6 +2584,12 @@
       "category": "Entity",
       "width": 128,
       "height": 32,
+      "atlasId": "entities",
+      "originX": 8,
+      "originY": 16,
+      "renderLayer": "world.entity.player.clothes",
+      "license": "YjsE-Project-Owned",
+      "provenance": "wave_03_player_biome_production; deterministic Pillow pixel primitives; wave_03_provenance.json",
       "frames": [
         {
           "id": "blue_jeans",
@@ -2531,7 +2654,9 @@
         "character",
         "editor",
         "clothes",
-        "palette"
+        "palette",
+        "production-sample",
+        "runtime-used"
       ]
     },
     {
@@ -2540,6 +2665,12 @@
       "category": "Entity",
       "width": 64,
       "height": 32,
+      "atlasId": "entities",
+      "originX": 8,
+      "originY": 16,
+      "renderLayer": "world.entity.player.body",
+      "license": "YjsE-Project-Owned",
+      "provenance": "wave_03_player_biome_production; deterministic Pillow pixel primitives; wave_03_provenance.json",
       "frames": [
         {
           "id": "light",
@@ -2576,7 +2707,9 @@
         "character",
         "editor",
         "skin",
-        "body"
+        "body",
+        "production-sample",
+        "runtime-used"
       ]
     },
     {
@@ -2585,6 +2718,12 @@
       "category": "Entity",
       "width": 96,
       "height": 32,
+      "atlasId": "entities",
+      "originX": 8,
+      "originY": 16,
+      "renderLayer": "world.entity.player.accessory",
+      "license": "YjsE-Project-Owned",
+      "provenance": "wave_03_player_biome_production; deterministic Pillow pixel primitives; wave_03_provenance.json",
       "frames": [
         {
           "id": "straw_hat",
@@ -2635,7 +2774,9 @@
         "character",
         "editor",
         "accessory",
-        "hat"
+        "hat",
+        "production-sample",
+        "runtime-used"
       ]
     },
     {
@@ -5952,7 +6093,8 @@
     },
     {
       "id": "world/backgrounds/forest_parallax_layer_v2",
-      "path": "sprites/world/backgrounds/forest_parallax_layer_v2.png",
+      "path": "sprites/world/backgrounds/forest_parallax_layer.png",
+      "sourceAliasOf": "world/backgrounds/forest_parallax_layer",
       "category": "Background",
       "width": 512,
       "height": 128,
@@ -5965,7 +6107,8 @@
     },
     {
       "id": "world/backgrounds/cave_parallax_layer_v2",
-      "path": "sprites/world/backgrounds/cave_parallax_layer_v2.png",
+      "path": "sprites/world/backgrounds/cave_parallax_layer.png",
+      "sourceAliasOf": "world/backgrounds/cave_parallax_layer",
       "category": "Background",
       "width": 512,
       "height": 128,
@@ -6021,10 +6164,18 @@
       "category": "WorldObject",
       "width": 16,
       "height": 32,
+      "atlasId": "world",
+      "originX": 8,
+      "originY": 31,
+      "renderLayer": "world.object",
+      "license": "YjsE-Project-Owned",
+      "provenance": "wave_02_creatures_biomes_character_props; deterministic Pillow pixel primitives; wave_02_provenance.json",
       "tags": [
         "world",
         "object",
-        "decor"
+        "decor",
+        "production-sample",
+        "runtime-preloaded"
       ]
     },
     {
@@ -6033,10 +6184,18 @@
       "category": "WorldObject",
       "width": 32,
       "height": 16,
+      "atlasId": "world",
+      "originX": 16,
+      "originY": 15,
+      "renderLayer": "world.object",
+      "license": "YjsE-Project-Owned",
+      "provenance": "wave_02_creatures_biomes_character_props; deterministic Pillow pixel primitives; wave_02_provenance.json",
       "tags": [
         "world",
         "object",
-        "decor"
+        "decor",
+        "production-sample",
+        "runtime-preloaded"
       ]
     },
     {
@@ -6069,10 +6228,19 @@
       "category": "WorldObject",
       "width": 16,
       "height": 16,
+      "atlasId": "world",
+      "originX": 8,
+      "originY": 15,
+      "renderLayer": "world.object.light",
+      "license": "YjsE-Project-Owned",
+      "provenance": "wave_02_creatures_biomes_character_props; deterministic Pillow pixel primitives; wave_02_provenance.json",
       "tags": [
         "world",
         "object",
-        "decor"
+        "decor",
+        "light",
+        "production-sample",
+        "runtime-preloaded"
       ]
     },
     {
@@ -6081,10 +6249,19 @@
       "category": "WorldObject",
       "width": 32,
       "height": 16,
+      "atlasId": "world",
+      "originX": 16,
+      "originY": 15,
+      "renderLayer": "world.object",
+      "license": "YjsE-Project-Owned",
+      "provenance": "wave_02_creatures_biomes_character_props; deterministic Pillow pixel primitives; wave_02_provenance.json",
       "tags": [
         "world",
         "object",
-        "decor"
+        "decor",
+        "storage",
+        "production-sample",
+        "runtime-preloaded"
       ]
     },
     {
@@ -6277,12 +6454,20 @@
       "category": "Tool",
       "width": 16,
       "height": 16,
+      "atlasId": "items",
+      "originX": 8,
+      "originY": 8,
+      "renderLayer": "item.icon",
+      "license": "YjsE-Project-Owned",
+      "provenance": "wave_03_player_biome_production; deterministic Pillow pixel primitives; wave_03_provenance.json",
       "tags": [
         "item",
         "tool",
         "hoe",
         "farming",
-        "iron"
+        "iron",
+        "production-sample",
+        "runtime-used"
       ]
     },
     {
@@ -6327,13 +6512,21 @@
       "id": "items/mana_potion",
       "path": "sprites/items/consumables/mana_potion.png",
       "category": "Item",
-      "width": 16,
-      "height": 16,
+      "width": 32,
+      "height": 32,
+      "atlasId": "items",
+      "originX": 16,
+      "originY": 16,
+      "renderLayer": "item.icon",
+      "license": "YjsE-Project-Owned",
+      "provenance": "YjsE pixel wave 01; built-in image generation with chroma-key removal and deterministic palette/alpha post-processing",
       "tags": [
         "item",
         "consumable",
         "mana",
-        "potion"
+        "potion",
+        "production-sample",
+        "runtime-used"
       ]
     },
     {
@@ -6366,10 +6559,18 @@
       "category": "Projectile",
       "width": 16,
       "height": 16,
+      "atlasId": "effects",
+      "originX": 8,
+      "originY": 8,
+      "renderLayer": "world.effect",
+      "license": "YjsE-Project-Owned",
+      "provenance": "wave_03_player_biome_production; deterministic Pillow pixel primitives; wave_03_provenance.json",
       "tags": [
         "projectile",
         "particle",
-        "magic"
+        "magic",
+        "production-sample",
+        "runtime-preloaded"
       ]
     },
     {
@@ -6389,9 +6590,17 @@
       "category": "UI",
       "width": 16,
       "height": 16,
+      "atlasId": "ui",
+      "originX": 8,
+      "originY": 8,
+      "renderLayer": "ui.hud",
+      "license": "YjsE-Project-Owned",
+      "provenance": "YjsE generated base asset; exact generation run not recorded",
       "tags": [
         "ui",
-        "icon"
+        "icon",
+        "production-sample",
+        "runtime-used"
       ]
     },
     {
@@ -6453,22 +6662,38 @@
       "id": "ui/inventory_tab",
       "path": "sprites/ui/inventory_tab.png",
       "category": "UI",
-      "width": 16,
-      "height": 16,
+      "width": 32,
+      "height": 32,
+      "atlasId": "ui",
+      "originX": 16,
+      "originY": 16,
+      "renderLayer": "ui.navigation",
+      "license": "YjsE-Project-Owned",
+      "provenance": "YjsE pixel wave 01; built-in image generation with chroma-key removal and deterministic palette/alpha post-processing",
       "tags": [
         "ui",
-        "icon"
+        "icon",
+        "production-sample",
+        "runtime-used"
       ]
     },
     {
       "id": "ui/crafting_hammer",
       "path": "sprites/ui/crafting_hammer.png",
       "category": "UI",
-      "width": 16,
-      "height": 16,
+      "width": 32,
+      "height": 32,
+      "atlasId": "ui",
+      "originX": 16,
+      "originY": 16,
+      "renderLayer": "ui.navigation",
+      "license": "YjsE-Project-Owned",
+      "provenance": "YjsE pixel wave 01; built-in image generation with chroma-key removal and deterministic palette/alpha post-processing",
       "tags": [
         "ui",
-        "icon"
+        "icon",
+        "production-sample",
+        "runtime-used"
       ]
     },
     {
@@ -6491,6 +6716,2674 @@
       "tags": [
         "ui",
         "icon"
+      ]
+    },
+    {
+      "id": "entities/critters/squirrel",
+      "path": "sprites/entities/critters/squirrel.png",
+      "category": "Entity",
+      "width": 64,
+      "height": 16,
+      "atlasId": "entities",
+      "originX": 8,
+      "originY": 15,
+      "renderLayer": "world.entity",
+      "license": "YjsE-Project-Owned",
+      "provenance": "wave_02_creatures_biomes_character_props; deterministic Pillow pixel primitives; wave_02_provenance.json",
+      "frames": [
+        { "id": "idle_0", "x": 0, "y": 0, "width": 16, "height": 16, "originX": 8, "originY": 15 },
+        { "id": "idle_1", "x": 16, "y": 0, "width": 16, "height": 16, "originX": 8, "originY": 15 },
+        { "id": "run_0", "x": 32, "y": 0, "width": 16, "height": 16, "originX": 8, "originY": 15 },
+        { "id": "run_1", "x": 48, "y": 0, "width": 16, "height": 16, "originX": 8, "originY": 15 }
+      ],
+      "tags": ["entity", "critter", "forest", "animated", "production-sample", "runtime-preloaded"]
+    },
+    {
+      "id": "entities/critters/firefly",
+      "path": "sprites/entities/critters/firefly.png",
+      "category": "Entity",
+      "width": 64,
+      "height": 16,
+      "atlasId": "entities",
+      "originX": 8,
+      "originY": 8,
+      "renderLayer": "world.entity",
+      "license": "YjsE-Project-Owned",
+      "provenance": "wave_02_creatures_biomes_character_props; deterministic Pillow pixel primitives; wave_02_provenance.json",
+      "frames": [
+        { "id": "flight_0", "x": 0, "y": 0, "width": 16, "height": 16, "originX": 8, "originY": 8 },
+        { "id": "flight_1", "x": 16, "y": 0, "width": 16, "height": 16, "originX": 8, "originY": 8 },
+        { "id": "flight_2", "x": 32, "y": 0, "width": 16, "height": 16, "originX": 8, "originY": 8 },
+        { "id": "flight_3", "x": 48, "y": 0, "width": 16, "height": 16, "originX": 8, "originY": 8 }
+      ],
+      "tags": ["entity", "critter", "forest", "light", "animated", "production-sample", "runtime-preloaded"]
+    },
+    {
+      "id": "entities/enemies/forest_boar",
+      "path": "sprites/entities/enemies/forest_boar.png",
+      "category": "Entity",
+      "width": 128,
+      "height": 32,
+      "atlasId": "entities",
+      "originX": 16,
+      "originY": 31,
+      "renderLayer": "world.entity",
+      "license": "YjsE-Project-Owned",
+      "provenance": "wave_02_creatures_biomes_character_props; deterministic Pillow pixel primitives; wave_02_provenance.json",
+      "frames": [
+        { "id": "idle", "x": 0, "y": 0, "width": 32, "height": 32, "originX": 16, "originY": 31 },
+        { "id": "windup", "x": 32, "y": 0, "width": 32, "height": 32, "originX": 16, "originY": 31 },
+        { "id": "charge", "x": 64, "y": 0, "width": 32, "height": 32, "originX": 16, "originY": 31 },
+        { "id": "attack", "x": 96, "y": 0, "width": 32, "height": 32, "originX": 16, "originY": 31 }
+      ],
+      "tags": ["entity", "enemy", "forest", "animated", "production-sample", "runtime-preloaded"]
+    },
+    {
+      "id": "entities/enemies/cave_spider",
+      "path": "sprites/entities/enemies/cave_spider.png",
+      "category": "Entity",
+      "width": 128,
+      "height": 32,
+      "atlasId": "entities",
+      "originX": 16,
+      "originY": 28,
+      "renderLayer": "world.entity",
+      "license": "YjsE-Project-Owned",
+      "provenance": "wave_02_creatures_biomes_character_props; deterministic Pillow pixel primitives; wave_02_provenance.json",
+      "frames": [
+        { "id": "idle", "x": 0, "y": 0, "width": 32, "height": 32, "originX": 16, "originY": 28 },
+        { "id": "crawl_0", "x": 32, "y": 0, "width": 32, "height": 32, "originX": 16, "originY": 28 },
+        { "id": "crawl_1", "x": 64, "y": 0, "width": 32, "height": 32, "originX": 16, "originY": 28 },
+        { "id": "attack", "x": 96, "y": 0, "width": 32, "height": 32, "originX": 16, "originY": 28 }
+      ],
+      "tags": ["entity", "enemy", "cave", "animated", "production-sample", "runtime-preloaded"]
+    },
+    {
+      "id": "world/backgrounds/meadow_parallax_layer",
+      "path": "sprites/world/backgrounds/meadow_parallax_layer.png",
+      "category": "Background",
+      "width": 512,
+      "height": 128,
+      "atlasId": "backgrounds",
+      "originX": 0,
+      "originY": 128,
+      "renderLayer": "background.mid",
+      "license": "YjsE-Project-Owned",
+      "provenance": "wave_03_player_biome_production; deterministic Pillow pixel primitives; wave_03_provenance.json",
+      "tags": ["world", "background", "meadow", "parallax", "tileable", "production-sample", "runtime-preloaded"]
+    },
+    {
+      "id": "world/backgrounds/mushroom_cave_parallax_layer",
+      "path": "sprites/world/backgrounds/mushroom_cave_parallax_layer.png",
+      "category": "Background",
+      "width": 512,
+      "height": 128,
+      "atlasId": "backgrounds",
+      "originX": 0,
+      "originY": 128,
+      "renderLayer": "background.mid",
+      "license": "YjsE-Project-Owned",
+      "provenance": "wave_02_creatures_biomes_character_props; deterministic Pillow pixel primitives; wave_02_provenance.json",
+      "tags": ["world", "background", "mushroom-cave", "parallax", "tileable", "production-sample", "runtime-preloaded"]
+    },
+    {
+      "id": "world/backgrounds/crystal_depths_parallax_layer",
+      "path": "sprites/world/backgrounds/crystal_depths_parallax_layer.png",
+      "category": "Background",
+      "width": 512,
+      "height": 128,
+      "atlasId": "backgrounds",
+      "originX": 0,
+      "originY": 128,
+      "renderLayer": "background.mid",
+      "license": "YjsE-Project-Owned",
+      "provenance": "wave_02_creatures_biomes_character_props; deterministic Pillow pixel primitives; wave_02_provenance.json",
+      "tags": ["world", "background", "crystal-depths", "parallax", "tileable", "production-sample", "runtime-preloaded"]
+    },
+    {
+      "id": "entities/critters/meadow_butterfly",
+      "path": "sprites/entities/critters/meadow_butterfly.png",
+      "category": "Entity",
+      "width": 64,
+      "height": 16,
+      "atlasId": "entities",
+      "originX": 8,
+      "originY": 8,
+      "renderLayer": "world.entity.ambient",
+      "license": "YjsE-Project-Owned",
+      "provenance": "wave_03_player_biome_production; deterministic Pillow pixel primitives; wave_03_provenance.json",
+      "frames": [
+        { "id": "flight_0", "x": 0, "y": 0, "width": 16, "height": 16, "originX": 8, "originY": 8 },
+        { "id": "flight_1", "x": 16, "y": 0, "width": 16, "height": 16, "originX": 8, "originY": 8 },
+        { "id": "flight_2", "x": 32, "y": 0, "width": 16, "height": 16, "originX": 8, "originY": 8 },
+        { "id": "flight_3", "x": 48, "y": 0, "width": 16, "height": 16, "originX": 8, "originY": 8 }
+      ],
+      "tags": ["entity", "critter", "ambient", "meadow", "animated", "production-sample", "runtime-preloaded"]
+    },
+    {
+      "id": "entities/critters/forest_moth",
+      "path": "sprites/entities/critters/forest_moth.png",
+      "category": "Entity",
+      "width": 64,
+      "height": 16,
+      "atlasId": "entities",
+      "originX": 8,
+      "originY": 8,
+      "renderLayer": "world.entity.ambient",
+      "license": "YjsE-Project-Owned",
+      "provenance": "wave_03_player_biome_production; deterministic Pillow pixel primitives; wave_03_provenance.json",
+      "frames": [
+        { "id": "flight_0", "x": 0, "y": 0, "width": 16, "height": 16, "originX": 8, "originY": 8 },
+        { "id": "flight_1", "x": 16, "y": 0, "width": 16, "height": 16, "originX": 8, "originY": 8 },
+        { "id": "flight_2", "x": 32, "y": 0, "width": 16, "height": 16, "originX": 8, "originY": 8 },
+        { "id": "flight_3", "x": 48, "y": 0, "width": 16, "height": 16, "originX": 8, "originY": 8 }
+      ],
+      "tags": ["entity", "critter", "ambient", "forest", "animated", "production-sample", "runtime-preloaded"]
+    },
+    {
+      "id": "entities/critters/cave_glowbug",
+      "path": "sprites/entities/critters/cave_glowbug.png",
+      "category": "Entity",
+      "width": 64,
+      "height": 16,
+      "atlasId": "entities",
+      "originX": 8,
+      "originY": 8,
+      "renderLayer": "world.entity.ambient",
+      "license": "YjsE-Project-Owned",
+      "provenance": "wave_03_player_biome_production; deterministic Pillow pixel primitives; wave_03_provenance.json",
+      "frames": [
+        { "id": "flight_0", "x": 0, "y": 0, "width": 16, "height": 16, "originX": 8, "originY": 8 },
+        { "id": "flight_1", "x": 16, "y": 0, "width": 16, "height": 16, "originX": 8, "originY": 8 },
+        { "id": "flight_2", "x": 32, "y": 0, "width": 16, "height": 16, "originX": 8, "originY": 8 },
+        { "id": "flight_3", "x": 48, "y": 0, "width": 16, "height": 16, "originX": 8, "originY": 8 }
+      ],
+      "tags": ["entity", "critter", "ambient", "cave", "animated", "production-sample", "runtime-preloaded"]
+    },
+    {
+      "id": "particles/meadow_pollen",
+      "path": "sprites/particles/meadow_pollen.png",
+      "category": "Particle",
+      "width": 64,
+      "height": 16,
+      "atlasId": "effects",
+      "originX": 8,
+      "originY": 8,
+      "renderLayer": "world.effect.ambient",
+      "license": "YjsE-Project-Owned",
+      "provenance": "wave_03_player_biome_production; deterministic Pillow pixel primitives; wave_03_provenance.json",
+      "frames": [
+        { "id": "drift_0", "x": 0, "y": 0, "width": 16, "height": 16, "originX": 8, "originY": 8 },
+        { "id": "drift_1", "x": 16, "y": 0, "width": 16, "height": 16, "originX": 8, "originY": 8 },
+        { "id": "drift_2", "x": 32, "y": 0, "width": 16, "height": 16, "originX": 8, "originY": 8 },
+        { "id": "drift_3", "x": 48, "y": 0, "width": 16, "height": 16, "originX": 8, "originY": 8 }
+      ],
+      "tags": ["particle", "ambient", "meadow", "animated", "production-sample", "runtime-preloaded"]
+    },
+    {
+      "id": "particles/forest_leaf_drift",
+      "path": "sprites/particles/forest_leaf_drift.png",
+      "category": "Particle",
+      "width": 64,
+      "height": 16,
+      "atlasId": "effects",
+      "originX": 8,
+      "originY": 8,
+      "renderLayer": "world.effect.ambient",
+      "license": "YjsE-Project-Owned",
+      "provenance": "wave_03_player_biome_production; deterministic Pillow pixel primitives; wave_03_provenance.json",
+      "frames": [
+        { "id": "drift_0", "x": 0, "y": 0, "width": 16, "height": 16, "originX": 8, "originY": 8 },
+        { "id": "drift_1", "x": 16, "y": 0, "width": 16, "height": 16, "originX": 8, "originY": 8 },
+        { "id": "drift_2", "x": 32, "y": 0, "width": 16, "height": 16, "originX": 8, "originY": 8 },
+        { "id": "drift_3", "x": 48, "y": 0, "width": 16, "height": 16, "originX": 8, "originY": 8 }
+      ],
+      "tags": ["particle", "ambient", "forest", "animated", "production-sample", "runtime-preloaded"]
+    },
+    {
+      "id": "particles/cave_dust",
+      "path": "sprites/particles/cave_dust.png",
+      "category": "Particle",
+      "width": 64,
+      "height": 16,
+      "atlasId": "effects",
+      "originX": 8,
+      "originY": 8,
+      "renderLayer": "world.effect.ambient",
+      "license": "YjsE-Project-Owned",
+      "provenance": "wave_03_player_biome_production; deterministic Pillow pixel primitives; wave_03_provenance.json",
+      "frames": [
+        { "id": "drift_0", "x": 0, "y": 0, "width": 16, "height": 16, "originX": 8, "originY": 8 },
+        { "id": "drift_1", "x": 16, "y": 0, "width": 16, "height": 16, "originX": 8, "originY": 8 },
+        { "id": "drift_2", "x": 32, "y": 0, "width": 16, "height": 16, "originX": 8, "originY": 8 },
+        { "id": "drift_3", "x": 48, "y": 0, "width": 16, "height": 16, "originX": 8, "originY": 8 }
+      ],
+      "tags": ["particle", "ambient", "cave", "animated", "production-sample", "runtime-preloaded"]
+    },
+    {
+      "id": "entities/enemies/meadow_slime_elite",
+      "path": "sprites/entities/enemies/meadow_slime_elite.png",
+      "category": "Entity",
+      "width": 128,
+      "height": 32,
+      "atlasId": "entities",
+      "originX": 16,
+      "originY": 31,
+      "renderLayer": "world.entity",
+      "license": "YjsE-Project-Owned",
+      "provenance": "wave_03_player_biome_production; deterministic Pillow pixel primitives; wave_03_provenance.json",
+      "frames": [
+        { "id": "idle", "x": 0, "y": 0, "width": 32, "height": 32, "originX": 16, "originY": 31 },
+        { "id": "windup", "x": 32, "y": 0, "width": 32, "height": 32, "originX": 16, "originY": 31 },
+        { "id": "move", "x": 64, "y": 0, "width": 32, "height": 32, "originX": 16, "originY": 31 },
+        { "id": "attack", "x": 96, "y": 0, "width": 32, "height": 32, "originX": 16, "originY": 31 }
+      ],
+      "tags": ["entity", "enemy", "elite", "meadow", "animated", "production-sample", "runtime-preloaded"]
+    },
+    {
+      "id": "entities/enemies/forest_boar_elite",
+      "path": "sprites/entities/enemies/forest_boar_elite.png",
+      "category": "Entity",
+      "width": 128,
+      "height": 32,
+      "atlasId": "entities",
+      "originX": 16,
+      "originY": 31,
+      "renderLayer": "world.entity",
+      "license": "YjsE-Project-Owned",
+      "provenance": "wave_03_player_biome_production; deterministic Pillow pixel primitives; wave_03_provenance.json",
+      "frames": [
+        { "id": "idle", "x": 0, "y": 0, "width": 32, "height": 32, "originX": 16, "originY": 31 },
+        { "id": "windup", "x": 32, "y": 0, "width": 32, "height": 32, "originX": 16, "originY": 31 },
+        { "id": "charge", "x": 64, "y": 0, "width": 32, "height": 32, "originX": 16, "originY": 31 },
+        { "id": "attack", "x": 96, "y": 0, "width": 32, "height": 32, "originX": 16, "originY": 31 }
+      ],
+      "tags": ["entity", "enemy", "elite", "forest", "animated", "production-sample", "runtime-preloaded"]
+    },
+    {
+      "id": "entities/enemies/cave_spider_elite",
+      "path": "sprites/entities/enemies/cave_spider_elite.png",
+      "category": "Entity",
+      "width": 128,
+      "height": 32,
+      "atlasId": "entities",
+      "originX": 16,
+      "originY": 28,
+      "renderLayer": "world.entity",
+      "license": "YjsE-Project-Owned",
+      "provenance": "wave_03_player_biome_production; deterministic Pillow pixel primitives; wave_03_provenance.json",
+      "frames": [
+        { "id": "idle", "x": 0, "y": 0, "width": 32, "height": 32, "originX": 16, "originY": 28 },
+        { "id": "crawl_0", "x": 32, "y": 0, "width": 32, "height": 32, "originX": 16, "originY": 28 },
+        { "id": "crawl_1", "x": 64, "y": 0, "width": 32, "height": 32, "originX": 16, "originY": 28 },
+        { "id": "attack", "x": 96, "y": 0, "width": 32, "height": 32, "originX": 16, "originY": 28 }
+      ],
+      "tags": ["entity", "enemy", "elite", "cave", "animated", "production-sample", "runtime-preloaded"]
+    },
+    {
+      "id": "ui/biomes/meadow",
+      "path": "sprites/ui/biomes/meadow.png",
+      "category": "UI",
+      "width": 32,
+      "height": 32,
+      "atlasId": "ui",
+      "originX": 16,
+      "originY": 16,
+      "renderLayer": "ui.icon.biome",
+      "license": "YjsE-Project-Owned",
+      "provenance": "wave_03_player_biome_production; deterministic Pillow pixel primitives; wave_03_provenance.json",
+      "tags": ["ui", "icon", "biome", "meadow", "production-sample", "runtime-preloaded"]
+    },
+    {
+      "id": "ui/biomes/forest",
+      "path": "sprites/ui/biomes/forest.png",
+      "category": "UI",
+      "width": 32,
+      "height": 32,
+      "atlasId": "ui",
+      "originX": 16,
+      "originY": 16,
+      "renderLayer": "ui.icon.biome",
+      "license": "YjsE-Project-Owned",
+      "provenance": "wave_03_player_biome_production; deterministic Pillow pixel primitives; wave_03_provenance.json",
+      "tags": ["ui", "icon", "biome", "forest", "production-sample", "runtime-preloaded"]
+    },
+    {
+      "id": "ui/biomes/cave",
+      "path": "sprites/ui/biomes/cave.png",
+      "category": "UI",
+      "width": 32,
+      "height": 32,
+      "atlasId": "ui",
+      "originX": 16,
+      "originY": 16,
+      "renderLayer": "ui.icon.biome",
+      "license": "YjsE-Project-Owned",
+      "provenance": "wave_03_player_biome_production; deterministic Pillow pixel primitives; wave_03_provenance.json",
+      "tags": ["ui", "icon", "biome", "cave", "production-sample", "runtime-preloaded"]
+    },
+    {
+      "id": "entities/player/character_v1_wave04/body",
+      "path": "sprites/entities/player/wave04/player_body_actions.png",
+      "category": "Entity",
+      "width": 256,
+      "height": 32,
+      "atlasId": "entities",
+      "originX": 8,
+      "originY": 16,
+      "renderLayer": "world.entity.player.00.body",
+      "license": "YjsE-Project-Owned",
+      "provenance": "wave_04_character_atmosphere_ui_production; generated source plus deterministic Pillow conversion; wave_04_provenance.json",
+      "frames": [
+        {
+          "id": "idle_0",
+          "x": 0,
+          "y": 0,
+          "width": 16,
+          "height": 32,
+          "originX": 8,
+          "originY": 16
+        },
+        {
+          "id": "idle_1",
+          "x": 16,
+          "y": 0,
+          "width": 16,
+          "height": 32,
+          "originX": 8,
+          "originY": 16
+        },
+        {
+          "id": "run_0",
+          "x": 32,
+          "y": 0,
+          "width": 16,
+          "height": 32,
+          "originX": 8,
+          "originY": 16
+        },
+        {
+          "id": "run_1",
+          "x": 48,
+          "y": 0,
+          "width": 16,
+          "height": 32,
+          "originX": 8,
+          "originY": 16
+        },
+        {
+          "id": "run_2",
+          "x": 64,
+          "y": 0,
+          "width": 16,
+          "height": 32,
+          "originX": 8,
+          "originY": 16
+        },
+        {
+          "id": "run_3",
+          "x": 80,
+          "y": 0,
+          "width": 16,
+          "height": 32,
+          "originX": 8,
+          "originY": 16
+        },
+        {
+          "id": "run_4",
+          "x": 96,
+          "y": 0,
+          "width": 16,
+          "height": 32,
+          "originX": 8,
+          "originY": 16
+        },
+        {
+          "id": "run_5",
+          "x": 112,
+          "y": 0,
+          "width": 16,
+          "height": 32,
+          "originX": 8,
+          "originY": 16
+        },
+        {
+          "id": "jump",
+          "x": 128,
+          "y": 0,
+          "width": 16,
+          "height": 32,
+          "originX": 8,
+          "originY": 16
+        },
+        {
+          "id": "fall",
+          "x": 144,
+          "y": 0,
+          "width": 16,
+          "height": 32,
+          "originX": 8,
+          "originY": 16
+        },
+        {
+          "id": "tool_0",
+          "x": 160,
+          "y": 0,
+          "width": 16,
+          "height": 32,
+          "originX": 8,
+          "originY": 16
+        },
+        {
+          "id": "tool_1",
+          "x": 176,
+          "y": 0,
+          "width": 16,
+          "height": 32,
+          "originX": 8,
+          "originY": 16
+        },
+        {
+          "id": "tool_2",
+          "x": 192,
+          "y": 0,
+          "width": 16,
+          "height": 32,
+          "originX": 8,
+          "originY": 16
+        },
+        {
+          "id": "block",
+          "x": 208,
+          "y": 0,
+          "width": 16,
+          "height": 32,
+          "originX": 8,
+          "originY": 16
+        },
+        {
+          "id": "hurt_0",
+          "x": 224,
+          "y": 0,
+          "width": 16,
+          "height": 32,
+          "originX": 8,
+          "originY": 16
+        },
+        {
+          "id": "hurt_1",
+          "x": 240,
+          "y": 0,
+          "width": 16,
+          "height": 32,
+          "originX": 8,
+          "originY": 16
+        }
+      ],
+      "tags": [
+        "entity",
+        "player",
+        "character-v1",
+        "layered",
+        "body",
+        "animated",
+        "production-sample",
+        "runtime-preloaded",
+        "wave-04"
+      ]
+    },
+    {
+      "id": "entities/player/character_v1_wave04/hair",
+      "path": "sprites/entities/player/wave04/player_hair_actions.png",
+      "category": "Entity",
+      "width": 256,
+      "height": 32,
+      "atlasId": "entities",
+      "originX": 8,
+      "originY": 16,
+      "renderLayer": "world.entity.player.01.hair",
+      "license": "YjsE-Project-Owned",
+      "provenance": "wave_04_character_atmosphere_ui_production; generated source plus deterministic Pillow conversion; wave_04_provenance.json",
+      "frames": [
+        {
+          "id": "idle_0",
+          "x": 0,
+          "y": 0,
+          "width": 16,
+          "height": 32,
+          "originX": 8,
+          "originY": 16
+        },
+        {
+          "id": "idle_1",
+          "x": 16,
+          "y": 0,
+          "width": 16,
+          "height": 32,
+          "originX": 8,
+          "originY": 16
+        },
+        {
+          "id": "run_0",
+          "x": 32,
+          "y": 0,
+          "width": 16,
+          "height": 32,
+          "originX": 8,
+          "originY": 16
+        },
+        {
+          "id": "run_1",
+          "x": 48,
+          "y": 0,
+          "width": 16,
+          "height": 32,
+          "originX": 8,
+          "originY": 16
+        },
+        {
+          "id": "run_2",
+          "x": 64,
+          "y": 0,
+          "width": 16,
+          "height": 32,
+          "originX": 8,
+          "originY": 16
+        },
+        {
+          "id": "run_3",
+          "x": 80,
+          "y": 0,
+          "width": 16,
+          "height": 32,
+          "originX": 8,
+          "originY": 16
+        },
+        {
+          "id": "run_4",
+          "x": 96,
+          "y": 0,
+          "width": 16,
+          "height": 32,
+          "originX": 8,
+          "originY": 16
+        },
+        {
+          "id": "run_5",
+          "x": 112,
+          "y": 0,
+          "width": 16,
+          "height": 32,
+          "originX": 8,
+          "originY": 16
+        },
+        {
+          "id": "jump",
+          "x": 128,
+          "y": 0,
+          "width": 16,
+          "height": 32,
+          "originX": 8,
+          "originY": 16
+        },
+        {
+          "id": "fall",
+          "x": 144,
+          "y": 0,
+          "width": 16,
+          "height": 32,
+          "originX": 8,
+          "originY": 16
+        },
+        {
+          "id": "tool_0",
+          "x": 160,
+          "y": 0,
+          "width": 16,
+          "height": 32,
+          "originX": 8,
+          "originY": 16
+        },
+        {
+          "id": "tool_1",
+          "x": 176,
+          "y": 0,
+          "width": 16,
+          "height": 32,
+          "originX": 8,
+          "originY": 16
+        },
+        {
+          "id": "tool_2",
+          "x": 192,
+          "y": 0,
+          "width": 16,
+          "height": 32,
+          "originX": 8,
+          "originY": 16
+        },
+        {
+          "id": "block",
+          "x": 208,
+          "y": 0,
+          "width": 16,
+          "height": 32,
+          "originX": 8,
+          "originY": 16
+        },
+        {
+          "id": "hurt_0",
+          "x": 224,
+          "y": 0,
+          "width": 16,
+          "height": 32,
+          "originX": 8,
+          "originY": 16
+        },
+        {
+          "id": "hurt_1",
+          "x": 240,
+          "y": 0,
+          "width": 16,
+          "height": 32,
+          "originX": 8,
+          "originY": 16
+        }
+      ],
+      "tags": [
+        "entity",
+        "player",
+        "character-v1",
+        "layered",
+        "hair",
+        "animated",
+        "production-sample",
+        "runtime-preloaded",
+        "wave-04"
+      ]
+    },
+    {
+      "id": "entities/player/character_v1_wave04/clothes",
+      "path": "sprites/entities/player/wave04/player_clothes_actions.png",
+      "category": "Entity",
+      "width": 256,
+      "height": 32,
+      "atlasId": "entities",
+      "originX": 8,
+      "originY": 16,
+      "renderLayer": "world.entity.player.02.clothes",
+      "license": "YjsE-Project-Owned",
+      "provenance": "wave_04_character_atmosphere_ui_production; generated source plus deterministic Pillow conversion; wave_04_provenance.json",
+      "frames": [
+        {
+          "id": "idle_0",
+          "x": 0,
+          "y": 0,
+          "width": 16,
+          "height": 32,
+          "originX": 8,
+          "originY": 16
+        },
+        {
+          "id": "idle_1",
+          "x": 16,
+          "y": 0,
+          "width": 16,
+          "height": 32,
+          "originX": 8,
+          "originY": 16
+        },
+        {
+          "id": "run_0",
+          "x": 32,
+          "y": 0,
+          "width": 16,
+          "height": 32,
+          "originX": 8,
+          "originY": 16
+        },
+        {
+          "id": "run_1",
+          "x": 48,
+          "y": 0,
+          "width": 16,
+          "height": 32,
+          "originX": 8,
+          "originY": 16
+        },
+        {
+          "id": "run_2",
+          "x": 64,
+          "y": 0,
+          "width": 16,
+          "height": 32,
+          "originX": 8,
+          "originY": 16
+        },
+        {
+          "id": "run_3",
+          "x": 80,
+          "y": 0,
+          "width": 16,
+          "height": 32,
+          "originX": 8,
+          "originY": 16
+        },
+        {
+          "id": "run_4",
+          "x": 96,
+          "y": 0,
+          "width": 16,
+          "height": 32,
+          "originX": 8,
+          "originY": 16
+        },
+        {
+          "id": "run_5",
+          "x": 112,
+          "y": 0,
+          "width": 16,
+          "height": 32,
+          "originX": 8,
+          "originY": 16
+        },
+        {
+          "id": "jump",
+          "x": 128,
+          "y": 0,
+          "width": 16,
+          "height": 32,
+          "originX": 8,
+          "originY": 16
+        },
+        {
+          "id": "fall",
+          "x": 144,
+          "y": 0,
+          "width": 16,
+          "height": 32,
+          "originX": 8,
+          "originY": 16
+        },
+        {
+          "id": "tool_0",
+          "x": 160,
+          "y": 0,
+          "width": 16,
+          "height": 32,
+          "originX": 8,
+          "originY": 16
+        },
+        {
+          "id": "tool_1",
+          "x": 176,
+          "y": 0,
+          "width": 16,
+          "height": 32,
+          "originX": 8,
+          "originY": 16
+        },
+        {
+          "id": "tool_2",
+          "x": 192,
+          "y": 0,
+          "width": 16,
+          "height": 32,
+          "originX": 8,
+          "originY": 16
+        },
+        {
+          "id": "block",
+          "x": 208,
+          "y": 0,
+          "width": 16,
+          "height": 32,
+          "originX": 8,
+          "originY": 16
+        },
+        {
+          "id": "hurt_0",
+          "x": 224,
+          "y": 0,
+          "width": 16,
+          "height": 32,
+          "originX": 8,
+          "originY": 16
+        },
+        {
+          "id": "hurt_1",
+          "x": 240,
+          "y": 0,
+          "width": 16,
+          "height": 32,
+          "originX": 8,
+          "originY": 16
+        }
+      ],
+      "tags": [
+        "entity",
+        "player",
+        "character-v1",
+        "layered",
+        "clothes",
+        "animated",
+        "production-sample",
+        "runtime-preloaded",
+        "wave-04"
+      ]
+    },
+    {
+      "id": "entities/player/character_v1_wave04/armor",
+      "path": "sprites/entities/player/wave04/player_armor_actions.png",
+      "category": "Entity",
+      "width": 256,
+      "height": 32,
+      "atlasId": "entities",
+      "originX": 8,
+      "originY": 16,
+      "renderLayer": "world.entity.player.03.armor",
+      "license": "YjsE-Project-Owned",
+      "provenance": "wave_04_character_atmosphere_ui_production; generated source plus deterministic Pillow conversion; wave_04_provenance.json",
+      "frames": [
+        {
+          "id": "idle_0",
+          "x": 0,
+          "y": 0,
+          "width": 16,
+          "height": 32,
+          "originX": 8,
+          "originY": 16
+        },
+        {
+          "id": "idle_1",
+          "x": 16,
+          "y": 0,
+          "width": 16,
+          "height": 32,
+          "originX": 8,
+          "originY": 16
+        },
+        {
+          "id": "run_0",
+          "x": 32,
+          "y": 0,
+          "width": 16,
+          "height": 32,
+          "originX": 8,
+          "originY": 16
+        },
+        {
+          "id": "run_1",
+          "x": 48,
+          "y": 0,
+          "width": 16,
+          "height": 32,
+          "originX": 8,
+          "originY": 16
+        },
+        {
+          "id": "run_2",
+          "x": 64,
+          "y": 0,
+          "width": 16,
+          "height": 32,
+          "originX": 8,
+          "originY": 16
+        },
+        {
+          "id": "run_3",
+          "x": 80,
+          "y": 0,
+          "width": 16,
+          "height": 32,
+          "originX": 8,
+          "originY": 16
+        },
+        {
+          "id": "run_4",
+          "x": 96,
+          "y": 0,
+          "width": 16,
+          "height": 32,
+          "originX": 8,
+          "originY": 16
+        },
+        {
+          "id": "run_5",
+          "x": 112,
+          "y": 0,
+          "width": 16,
+          "height": 32,
+          "originX": 8,
+          "originY": 16
+        },
+        {
+          "id": "jump",
+          "x": 128,
+          "y": 0,
+          "width": 16,
+          "height": 32,
+          "originX": 8,
+          "originY": 16
+        },
+        {
+          "id": "fall",
+          "x": 144,
+          "y": 0,
+          "width": 16,
+          "height": 32,
+          "originX": 8,
+          "originY": 16
+        },
+        {
+          "id": "tool_0",
+          "x": 160,
+          "y": 0,
+          "width": 16,
+          "height": 32,
+          "originX": 8,
+          "originY": 16
+        },
+        {
+          "id": "tool_1",
+          "x": 176,
+          "y": 0,
+          "width": 16,
+          "height": 32,
+          "originX": 8,
+          "originY": 16
+        },
+        {
+          "id": "tool_2",
+          "x": 192,
+          "y": 0,
+          "width": 16,
+          "height": 32,
+          "originX": 8,
+          "originY": 16
+        },
+        {
+          "id": "block",
+          "x": 208,
+          "y": 0,
+          "width": 16,
+          "height": 32,
+          "originX": 8,
+          "originY": 16
+        },
+        {
+          "id": "hurt_0",
+          "x": 224,
+          "y": 0,
+          "width": 16,
+          "height": 32,
+          "originX": 8,
+          "originY": 16
+        },
+        {
+          "id": "hurt_1",
+          "x": 240,
+          "y": 0,
+          "width": 16,
+          "height": 32,
+          "originX": 8,
+          "originY": 16
+        }
+      ],
+      "tags": [
+        "entity",
+        "player",
+        "character-v1",
+        "layered",
+        "armor",
+        "animated",
+        "production-sample",
+        "runtime-preloaded",
+        "wave-04"
+      ]
+    },
+    {
+      "id": "entities/player/character_v1_wave04/equipment",
+      "path": "sprites/entities/player/wave04/player_equipment_actions.png",
+      "category": "Entity",
+      "width": 256,
+      "height": 32,
+      "atlasId": "entities",
+      "originX": 8,
+      "originY": 16,
+      "renderLayer": "world.entity.player.04.equipment",
+      "license": "YjsE-Project-Owned",
+      "provenance": "wave_04_character_atmosphere_ui_production; generated source plus deterministic Pillow conversion; wave_04_provenance.json",
+      "frames": [
+        {
+          "id": "idle_0",
+          "x": 0,
+          "y": 0,
+          "width": 16,
+          "height": 32,
+          "originX": 8,
+          "originY": 16
+        },
+        {
+          "id": "idle_1",
+          "x": 16,
+          "y": 0,
+          "width": 16,
+          "height": 32,
+          "originX": 8,
+          "originY": 16
+        },
+        {
+          "id": "run_0",
+          "x": 32,
+          "y": 0,
+          "width": 16,
+          "height": 32,
+          "originX": 8,
+          "originY": 16
+        },
+        {
+          "id": "run_1",
+          "x": 48,
+          "y": 0,
+          "width": 16,
+          "height": 32,
+          "originX": 8,
+          "originY": 16
+        },
+        {
+          "id": "run_2",
+          "x": 64,
+          "y": 0,
+          "width": 16,
+          "height": 32,
+          "originX": 8,
+          "originY": 16
+        },
+        {
+          "id": "run_3",
+          "x": 80,
+          "y": 0,
+          "width": 16,
+          "height": 32,
+          "originX": 8,
+          "originY": 16
+        },
+        {
+          "id": "run_4",
+          "x": 96,
+          "y": 0,
+          "width": 16,
+          "height": 32,
+          "originX": 8,
+          "originY": 16
+        },
+        {
+          "id": "run_5",
+          "x": 112,
+          "y": 0,
+          "width": 16,
+          "height": 32,
+          "originX": 8,
+          "originY": 16
+        },
+        {
+          "id": "jump",
+          "x": 128,
+          "y": 0,
+          "width": 16,
+          "height": 32,
+          "originX": 8,
+          "originY": 16
+        },
+        {
+          "id": "fall",
+          "x": 144,
+          "y": 0,
+          "width": 16,
+          "height": 32,
+          "originX": 8,
+          "originY": 16
+        },
+        {
+          "id": "tool_0",
+          "x": 160,
+          "y": 0,
+          "width": 16,
+          "height": 32,
+          "originX": 8,
+          "originY": 16
+        },
+        {
+          "id": "tool_1",
+          "x": 176,
+          "y": 0,
+          "width": 16,
+          "height": 32,
+          "originX": 8,
+          "originY": 16
+        },
+        {
+          "id": "tool_2",
+          "x": 192,
+          "y": 0,
+          "width": 16,
+          "height": 32,
+          "originX": 8,
+          "originY": 16
+        },
+        {
+          "id": "block",
+          "x": 208,
+          "y": 0,
+          "width": 16,
+          "height": 32,
+          "originX": 8,
+          "originY": 16
+        },
+        {
+          "id": "hurt_0",
+          "x": 224,
+          "y": 0,
+          "width": 16,
+          "height": 32,
+          "originX": 8,
+          "originY": 16
+        },
+        {
+          "id": "hurt_1",
+          "x": 240,
+          "y": 0,
+          "width": 16,
+          "height": 32,
+          "originX": 8,
+          "originY": 16
+        }
+      ],
+      "tags": [
+        "entity",
+        "player",
+        "character-v1",
+        "layered",
+        "equipment",
+        "animated",
+        "production-sample",
+        "runtime-preloaded",
+        "wave-04"
+      ]
+    },
+    {
+      "id": "world/backgrounds/wave04/meadow_parallax_layer",
+      "path": "sprites/world/backgrounds/wave04/meadow_parallax_layer.png",
+      "category": "Background",
+      "width": 512,
+      "height": 128,
+      "atlasId": "backgrounds",
+      "originX": 0,
+      "originY": 127,
+      "renderLayer": "background.mid",
+      "license": "YjsE-Project-Owned",
+      "provenance": "wave_04_character_atmosphere_ui_production; generated source plus deterministic Pillow conversion; wave_04_provenance.json",
+      "tags": [
+        "world",
+        "background",
+        "meadow",
+        "parallax",
+        "tileable",
+        "tile-palette-matched",
+        "production-sample",
+        "runtime-preloaded",
+        "wave-04"
+      ]
+    },
+    {
+      "id": "world/backgrounds/wave04/forest_parallax_layer",
+      "path": "sprites/world/backgrounds/wave04/forest_parallax_layer.png",
+      "category": "Background",
+      "width": 512,
+      "height": 128,
+      "atlasId": "backgrounds",
+      "originX": 0,
+      "originY": 127,
+      "renderLayer": "background.mid",
+      "license": "YjsE-Project-Owned",
+      "provenance": "wave_04_character_atmosphere_ui_production; generated source plus deterministic Pillow conversion; wave_04_provenance.json",
+      "tags": [
+        "world",
+        "background",
+        "forest",
+        "parallax",
+        "tileable",
+        "tile-palette-matched",
+        "production-sample",
+        "runtime-preloaded",
+        "wave-04"
+      ]
+    },
+    {
+      "id": "world/backgrounds/wave04/cave_parallax_layer",
+      "path": "sprites/world/backgrounds/wave04/cave_parallax_layer.png",
+      "category": "Background",
+      "width": 512,
+      "height": 128,
+      "atlasId": "backgrounds",
+      "originX": 0,
+      "originY": 127,
+      "renderLayer": "background.mid",
+      "license": "YjsE-Project-Owned",
+      "provenance": "wave_04_character_atmosphere_ui_production; generated source plus deterministic Pillow conversion; wave_04_provenance.json",
+      "tags": [
+        "world",
+        "background",
+        "cave",
+        "parallax",
+        "tileable",
+        "tile-palette-matched",
+        "production-sample",
+        "runtime-preloaded",
+        "wave-04"
+      ]
+    },
+    {
+      "id": "world/backgrounds/wave04/mushroom_parallax_layer",
+      "path": "sprites/world/backgrounds/wave04/mushroom_cave_parallax_layer.png",
+      "category": "Background",
+      "width": 512,
+      "height": 128,
+      "atlasId": "backgrounds",
+      "originX": 0,
+      "originY": 127,
+      "renderLayer": "background.mid",
+      "license": "YjsE-Project-Owned",
+      "provenance": "wave_04_character_atmosphere_ui_production; generated source plus deterministic Pillow conversion; wave_04_provenance.json",
+      "tags": [
+        "world",
+        "background",
+        "mushroom",
+        "parallax",
+        "tileable",
+        "tile-palette-matched",
+        "production-sample",
+        "runtime-preloaded",
+        "wave-04"
+      ]
+    },
+    {
+      "id": "world/backgrounds/wave04/crystal_parallax_layer",
+      "path": "sprites/world/backgrounds/wave04/crystal_depths_parallax_layer.png",
+      "category": "Background",
+      "width": 512,
+      "height": 128,
+      "atlasId": "backgrounds",
+      "originX": 0,
+      "originY": 127,
+      "renderLayer": "background.mid",
+      "license": "YjsE-Project-Owned",
+      "provenance": "wave_04_character_atmosphere_ui_production; generated source plus deterministic Pillow conversion; wave_04_provenance.json",
+      "tags": [
+        "world",
+        "background",
+        "crystal",
+        "parallax",
+        "tileable",
+        "tile-palette-matched",
+        "production-sample",
+        "runtime-preloaded",
+        "wave-04"
+      ]
+    },
+    {
+      "id": "effects/ambient/meadow_seed_drift",
+      "path": "sprites/effects/ambient/meadow_seed_drift.png",
+      "category": "Effect",
+      "width": 96,
+      "height": 16,
+      "atlasId": "effects",
+      "originX": 8,
+      "originY": 8,
+      "renderLayer": "world.effect.ambient",
+      "license": "YjsE-Project-Owned",
+      "provenance": "wave_04_character_atmosphere_ui_production; generated source plus deterministic Pillow conversion; wave_04_provenance.json",
+      "frames": [
+        {
+          "id": "frame_0",
+          "x": 0,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8
+        },
+        {
+          "id": "frame_1",
+          "x": 16,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8
+        },
+        {
+          "id": "frame_2",
+          "x": 32,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8
+        },
+        {
+          "id": "frame_3",
+          "x": 48,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8
+        },
+        {
+          "id": "frame_4",
+          "x": 64,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8
+        },
+        {
+          "id": "frame_5",
+          "x": 80,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8
+        }
+      ],
+      "tags": [
+        "effect",
+        "ambient",
+        "meadow",
+        "animated",
+        "production-sample",
+        "runtime-preloaded",
+        "wave-04"
+      ]
+    },
+    {
+      "id": "effects/ambient/forest_leaf_swirl",
+      "path": "sprites/effects/ambient/forest_leaf_swirl.png",
+      "category": "Effect",
+      "width": 96,
+      "height": 16,
+      "atlasId": "effects",
+      "originX": 8,
+      "originY": 8,
+      "renderLayer": "world.effect.ambient",
+      "license": "YjsE-Project-Owned",
+      "provenance": "wave_04_character_atmosphere_ui_production; generated source plus deterministic Pillow conversion; wave_04_provenance.json",
+      "frames": [
+        {
+          "id": "frame_0",
+          "x": 0,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8
+        },
+        {
+          "id": "frame_1",
+          "x": 16,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8
+        },
+        {
+          "id": "frame_2",
+          "x": 32,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8
+        },
+        {
+          "id": "frame_3",
+          "x": 48,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8
+        },
+        {
+          "id": "frame_4",
+          "x": 64,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8
+        },
+        {
+          "id": "frame_5",
+          "x": 80,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8
+        }
+      ],
+      "tags": [
+        "effect",
+        "ambient",
+        "forest",
+        "animated",
+        "production-sample",
+        "runtime-preloaded",
+        "wave-04"
+      ]
+    },
+    {
+      "id": "effects/ambient/cave_motes",
+      "path": "sprites/effects/ambient/cave_motes.png",
+      "category": "Effect",
+      "width": 96,
+      "height": 16,
+      "atlasId": "effects",
+      "originX": 8,
+      "originY": 8,
+      "renderLayer": "world.effect.ambient",
+      "license": "YjsE-Project-Owned",
+      "provenance": "wave_04_character_atmosphere_ui_production; generated source plus deterministic Pillow conversion; wave_04_provenance.json",
+      "frames": [
+        {
+          "id": "frame_0",
+          "x": 0,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8
+        },
+        {
+          "id": "frame_1",
+          "x": 16,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8
+        },
+        {
+          "id": "frame_2",
+          "x": 32,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8
+        },
+        {
+          "id": "frame_3",
+          "x": 48,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8
+        },
+        {
+          "id": "frame_4",
+          "x": 64,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8
+        },
+        {
+          "id": "frame_5",
+          "x": 80,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8
+        }
+      ],
+      "tags": [
+        "effect",
+        "ambient",
+        "cave",
+        "animated",
+        "production-sample",
+        "runtime-preloaded",
+        "wave-04"
+      ]
+    },
+    {
+      "id": "effects/ambient/mushroom_spores",
+      "path": "sprites/effects/ambient/mushroom_spores.png",
+      "category": "Effect",
+      "width": 96,
+      "height": 16,
+      "atlasId": "effects",
+      "originX": 8,
+      "originY": 8,
+      "renderLayer": "world.effect.ambient",
+      "license": "YjsE-Project-Owned",
+      "provenance": "wave_04_character_atmosphere_ui_production; generated source plus deterministic Pillow conversion; wave_04_provenance.json",
+      "frames": [
+        {
+          "id": "frame_0",
+          "x": 0,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8
+        },
+        {
+          "id": "frame_1",
+          "x": 16,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8
+        },
+        {
+          "id": "frame_2",
+          "x": 32,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8
+        },
+        {
+          "id": "frame_3",
+          "x": 48,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8
+        },
+        {
+          "id": "frame_4",
+          "x": 64,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8
+        },
+        {
+          "id": "frame_5",
+          "x": 80,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8
+        }
+      ],
+      "tags": [
+        "effect",
+        "ambient",
+        "mushroom",
+        "animated",
+        "production-sample",
+        "runtime-preloaded",
+        "wave-04"
+      ]
+    },
+    {
+      "id": "effects/ambient/crystal_glints",
+      "path": "sprites/effects/ambient/crystal_glints.png",
+      "category": "Effect",
+      "width": 96,
+      "height": 16,
+      "atlasId": "effects",
+      "originX": 8,
+      "originY": 8,
+      "renderLayer": "world.effect.ambient",
+      "license": "YjsE-Project-Owned",
+      "provenance": "wave_04_character_atmosphere_ui_production; generated source plus deterministic Pillow conversion; wave_04_provenance.json",
+      "frames": [
+        {
+          "id": "frame_0",
+          "x": 0,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8
+        },
+        {
+          "id": "frame_1",
+          "x": 16,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8
+        },
+        {
+          "id": "frame_2",
+          "x": 32,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8
+        },
+        {
+          "id": "frame_3",
+          "x": 48,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8
+        },
+        {
+          "id": "frame_4",
+          "x": 64,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8
+        },
+        {
+          "id": "frame_5",
+          "x": 80,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8
+        }
+      ],
+      "tags": [
+        "effect",
+        "ambient",
+        "crystal",
+        "animated",
+        "production-sample",
+        "runtime-preloaded",
+        "wave-04"
+      ]
+    },
+    {
+      "id": "effects/weather/rain_streaks",
+      "path": "sprites/effects/weather/rain_streaks.png",
+      "category": "Effect",
+      "width": 96,
+      "height": 16,
+      "atlasId": "effects",
+      "originX": 8,
+      "originY": 8,
+      "renderLayer": "world.effect.weather",
+      "license": "YjsE-Project-Owned",
+      "provenance": "wave_04_character_atmosphere_ui_production; generated source plus deterministic Pillow conversion; wave_04_provenance.json",
+      "frames": [
+        {
+          "id": "frame_0",
+          "x": 0,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8
+        },
+        {
+          "id": "frame_1",
+          "x": 16,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8
+        },
+        {
+          "id": "frame_2",
+          "x": 32,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8
+        },
+        {
+          "id": "frame_3",
+          "x": 48,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8
+        },
+        {
+          "id": "frame_4",
+          "x": 64,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8
+        },
+        {
+          "id": "frame_5",
+          "x": 80,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8
+        }
+      ],
+      "tags": [
+        "effect",
+        "weather",
+        "rain",
+        "animated",
+        "production-sample",
+        "runtime-preloaded",
+        "wave-04"
+      ]
+    },
+    {
+      "id": "effects/weather/snow_flurry",
+      "path": "sprites/effects/weather/snow_flurry.png",
+      "category": "Effect",
+      "width": 96,
+      "height": 16,
+      "atlasId": "effects",
+      "originX": 8,
+      "originY": 8,
+      "renderLayer": "world.effect.weather",
+      "license": "YjsE-Project-Owned",
+      "provenance": "wave_04_character_atmosphere_ui_production; generated source plus deterministic Pillow conversion; wave_04_provenance.json",
+      "frames": [
+        {
+          "id": "frame_0",
+          "x": 0,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8
+        },
+        {
+          "id": "frame_1",
+          "x": 16,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8
+        },
+        {
+          "id": "frame_2",
+          "x": 32,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8
+        },
+        {
+          "id": "frame_3",
+          "x": 48,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8
+        },
+        {
+          "id": "frame_4",
+          "x": 64,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8
+        },
+        {
+          "id": "frame_5",
+          "x": 80,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8
+        }
+      ],
+      "tags": [
+        "effect",
+        "weather",
+        "snow",
+        "animated",
+        "production-sample",
+        "runtime-preloaded",
+        "wave-04"
+      ]
+    },
+    {
+      "id": "effects/weather/wind_gust",
+      "path": "sprites/effects/weather/wind_gust.png",
+      "category": "Effect",
+      "width": 96,
+      "height": 16,
+      "atlasId": "effects",
+      "originX": 8,
+      "originY": 8,
+      "renderLayer": "world.effect.weather",
+      "license": "YjsE-Project-Owned",
+      "provenance": "wave_04_character_atmosphere_ui_production; generated source plus deterministic Pillow conversion; wave_04_provenance.json",
+      "frames": [
+        {
+          "id": "frame_0",
+          "x": 0,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8
+        },
+        {
+          "id": "frame_1",
+          "x": 16,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8
+        },
+        {
+          "id": "frame_2",
+          "x": 32,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8
+        },
+        {
+          "id": "frame_3",
+          "x": 48,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8
+        },
+        {
+          "id": "frame_4",
+          "x": 64,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8
+        },
+        {
+          "id": "frame_5",
+          "x": 80,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8
+        }
+      ],
+      "tags": [
+        "effect",
+        "weather",
+        "wind",
+        "animated",
+        "production-sample",
+        "runtime-preloaded",
+        "wave-04"
+      ]
+    },
+    {
+      "id": "effects/weather/storm_spark",
+      "path": "sprites/effects/weather/storm_spark.png",
+      "category": "Effect",
+      "width": 96,
+      "height": 16,
+      "atlasId": "effects",
+      "originX": 8,
+      "originY": 8,
+      "renderLayer": "world.effect.weather",
+      "license": "YjsE-Project-Owned",
+      "provenance": "wave_04_character_atmosphere_ui_production; generated source plus deterministic Pillow conversion; wave_04_provenance.json",
+      "frames": [
+        {
+          "id": "frame_0",
+          "x": 0,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8
+        },
+        {
+          "id": "frame_1",
+          "x": 16,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8
+        },
+        {
+          "id": "frame_2",
+          "x": 32,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8
+        },
+        {
+          "id": "frame_3",
+          "x": 48,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8
+        },
+        {
+          "id": "frame_4",
+          "x": 64,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8
+        },
+        {
+          "id": "frame_5",
+          "x": 80,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8
+        }
+      ],
+      "tags": [
+        "effect",
+        "weather",
+        "storm",
+        "animated",
+        "production-sample",
+        "runtime-preloaded",
+        "wave-04"
+      ]
+    },
+    {
+      "id": "effects/combat/sword_arc",
+      "path": "sprites/effects/combat/sword_arc.png",
+      "category": "Effect",
+      "width": 192,
+      "height": 32,
+      "atlasId": "effects",
+      "originX": 16,
+      "originY": 16,
+      "renderLayer": "world.effect.combat",
+      "license": "YjsE-Project-Owned",
+      "provenance": "wave_04_character_atmosphere_ui_production; generated source plus deterministic Pillow conversion; wave_04_provenance.json",
+      "frames": [
+        {
+          "id": "frame_0",
+          "x": 0,
+          "y": 0,
+          "width": 32,
+          "height": 32,
+          "originX": 16,
+          "originY": 16
+        },
+        {
+          "id": "frame_1",
+          "x": 32,
+          "y": 0,
+          "width": 32,
+          "height": 32,
+          "originX": 16,
+          "originY": 16
+        },
+        {
+          "id": "frame_2",
+          "x": 64,
+          "y": 0,
+          "width": 32,
+          "height": 32,
+          "originX": 16,
+          "originY": 16
+        },
+        {
+          "id": "frame_3",
+          "x": 96,
+          "y": 0,
+          "width": 32,
+          "height": 32,
+          "originX": 16,
+          "originY": 16
+        },
+        {
+          "id": "frame_4",
+          "x": 128,
+          "y": 0,
+          "width": 32,
+          "height": 32,
+          "originX": 16,
+          "originY": 16
+        },
+        {
+          "id": "frame_5",
+          "x": 160,
+          "y": 0,
+          "width": 32,
+          "height": 32,
+          "originX": 16,
+          "originY": 16
+        }
+      ],
+      "tags": [
+        "effect",
+        "combat",
+        "sword",
+        "animated",
+        "production-sample",
+        "runtime-preloaded",
+        "wave-04"
+      ]
+    },
+    {
+      "id": "effects/combat/block_impact",
+      "path": "sprites/effects/combat/block_impact.png",
+      "category": "Effect",
+      "width": 192,
+      "height": 32,
+      "atlasId": "effects",
+      "originX": 16,
+      "originY": 16,
+      "renderLayer": "world.effect.combat",
+      "license": "YjsE-Project-Owned",
+      "provenance": "wave_04_character_atmosphere_ui_production; generated source plus deterministic Pillow conversion; wave_04_provenance.json",
+      "frames": [
+        {
+          "id": "frame_0",
+          "x": 0,
+          "y": 0,
+          "width": 32,
+          "height": 32,
+          "originX": 16,
+          "originY": 16
+        },
+        {
+          "id": "frame_1",
+          "x": 32,
+          "y": 0,
+          "width": 32,
+          "height": 32,
+          "originX": 16,
+          "originY": 16
+        },
+        {
+          "id": "frame_2",
+          "x": 64,
+          "y": 0,
+          "width": 32,
+          "height": 32,
+          "originX": 16,
+          "originY": 16
+        },
+        {
+          "id": "frame_3",
+          "x": 96,
+          "y": 0,
+          "width": 32,
+          "height": 32,
+          "originX": 16,
+          "originY": 16
+        },
+        {
+          "id": "frame_4",
+          "x": 128,
+          "y": 0,
+          "width": 32,
+          "height": 32,
+          "originX": 16,
+          "originY": 16
+        },
+        {
+          "id": "frame_5",
+          "x": 160,
+          "y": 0,
+          "width": 32,
+          "height": 32,
+          "originX": 16,
+          "originY": 16
+        }
+      ],
+      "tags": [
+        "effect",
+        "combat",
+        "block",
+        "animated",
+        "production-sample",
+        "runtime-preloaded",
+        "wave-04"
+      ]
+    },
+    {
+      "id": "effects/combat/hurt_burst",
+      "path": "sprites/effects/combat/hurt_burst.png",
+      "category": "Effect",
+      "width": 192,
+      "height": 32,
+      "atlasId": "effects",
+      "originX": 16,
+      "originY": 16,
+      "renderLayer": "world.effect.combat",
+      "license": "YjsE-Project-Owned",
+      "provenance": "wave_04_character_atmosphere_ui_production; generated source plus deterministic Pillow conversion; wave_04_provenance.json",
+      "frames": [
+        {
+          "id": "frame_0",
+          "x": 0,
+          "y": 0,
+          "width": 32,
+          "height": 32,
+          "originX": 16,
+          "originY": 16
+        },
+        {
+          "id": "frame_1",
+          "x": 32,
+          "y": 0,
+          "width": 32,
+          "height": 32,
+          "originX": 16,
+          "originY": 16
+        },
+        {
+          "id": "frame_2",
+          "x": 64,
+          "y": 0,
+          "width": 32,
+          "height": 32,
+          "originX": 16,
+          "originY": 16
+        },
+        {
+          "id": "frame_3",
+          "x": 96,
+          "y": 0,
+          "width": 32,
+          "height": 32,
+          "originX": 16,
+          "originY": 16
+        },
+        {
+          "id": "frame_4",
+          "x": 128,
+          "y": 0,
+          "width": 32,
+          "height": 32,
+          "originX": 16,
+          "originY": 16
+        },
+        {
+          "id": "frame_5",
+          "x": 160,
+          "y": 0,
+          "width": 32,
+          "height": 32,
+          "originX": 16,
+          "originY": 16
+        }
+      ],
+      "tags": [
+        "effect",
+        "combat",
+        "hurt",
+        "animated",
+        "production-sample",
+        "runtime-preloaded",
+        "wave-04"
+      ]
+    },
+    {
+      "id": "effects/combat/tool_impact",
+      "path": "sprites/effects/combat/tool_impact.png",
+      "category": "Effect",
+      "width": 192,
+      "height": 32,
+      "atlasId": "effects",
+      "originX": 16,
+      "originY": 16,
+      "renderLayer": "world.effect.combat",
+      "license": "YjsE-Project-Owned",
+      "provenance": "wave_04_character_atmosphere_ui_production; generated source plus deterministic Pillow conversion; wave_04_provenance.json",
+      "frames": [
+        {
+          "id": "frame_0",
+          "x": 0,
+          "y": 0,
+          "width": 32,
+          "height": 32,
+          "originX": 16,
+          "originY": 16
+        },
+        {
+          "id": "frame_1",
+          "x": 32,
+          "y": 0,
+          "width": 32,
+          "height": 32,
+          "originX": 16,
+          "originY": 16
+        },
+        {
+          "id": "frame_2",
+          "x": 64,
+          "y": 0,
+          "width": 32,
+          "height": 32,
+          "originX": 16,
+          "originY": 16
+        },
+        {
+          "id": "frame_3",
+          "x": 96,
+          "y": 0,
+          "width": 32,
+          "height": 32,
+          "originX": 16,
+          "originY": 16
+        },
+        {
+          "id": "frame_4",
+          "x": 128,
+          "y": 0,
+          "width": 32,
+          "height": 32,
+          "originX": 16,
+          "originY": 16
+        },
+        {
+          "id": "frame_5",
+          "x": 160,
+          "y": 0,
+          "width": 32,
+          "height": 32,
+          "originX": 16,
+          "originY": 16
+        }
+      ],
+      "tags": [
+        "effect",
+        "combat",
+        "tool",
+        "animated",
+        "production-sample",
+        "runtime-preloaded",
+        "wave-04"
+      ]
+    },
+    {
+      "id": "ui/wave04/panel_9slice",
+      "path": "sprites/ui/wave04/panel_9slice.png",
+      "category": "UI",
+      "width": 48,
+      "height": 48,
+      "atlasId": "ui",
+      "originX": 8,
+      "originY": 8,
+      "renderLayer": "ui.frame",
+      "license": "YjsE-Project-Owned",
+      "provenance": "wave_04_character_atmosphere_ui_production; generated source plus deterministic Pillow conversion; wave_04_provenance.json",
+      "frames": [
+        {
+          "id": "top_left",
+          "x": 0,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8
+        },
+        {
+          "id": "top",
+          "x": 16,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8
+        },
+        {
+          "id": "top_right",
+          "x": 32,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8
+        },
+        {
+          "id": "left",
+          "x": 0,
+          "y": 16,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8
+        },
+        {
+          "id": "center",
+          "x": 16,
+          "y": 16,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8
+        },
+        {
+          "id": "right",
+          "x": 32,
+          "y": 16,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8
+        },
+        {
+          "id": "bottom_left",
+          "x": 0,
+          "y": 32,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8
+        },
+        {
+          "id": "bottom",
+          "x": 16,
+          "y": 32,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8
+        },
+        {
+          "id": "bottom_right",
+          "x": 32,
+          "y": 32,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8
+        }
+      ],
+      "tags": [
+        "ui",
+        "nine-slice",
+        "panel",
+        "production-sample",
+        "runtime-preloaded",
+        "wave-04"
+      ]
+    },
+    {
+      "id": "ui/wave04/tooltip_9slice",
+      "path": "sprites/ui/wave04/tooltip_9slice.png",
+      "category": "UI",
+      "width": 48,
+      "height": 48,
+      "atlasId": "ui",
+      "originX": 8,
+      "originY": 8,
+      "renderLayer": "ui.frame",
+      "license": "YjsE-Project-Owned",
+      "provenance": "wave_04_character_atmosphere_ui_production; generated source plus deterministic Pillow conversion; wave_04_provenance.json",
+      "frames": [
+        {
+          "id": "top_left",
+          "x": 0,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8
+        },
+        {
+          "id": "top",
+          "x": 16,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8
+        },
+        {
+          "id": "top_right",
+          "x": 32,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8
+        },
+        {
+          "id": "left",
+          "x": 0,
+          "y": 16,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8
+        },
+        {
+          "id": "center",
+          "x": 16,
+          "y": 16,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8
+        },
+        {
+          "id": "right",
+          "x": 32,
+          "y": 16,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8
+        },
+        {
+          "id": "bottom_left",
+          "x": 0,
+          "y": 32,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8
+        },
+        {
+          "id": "bottom",
+          "x": 16,
+          "y": 32,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8
+        },
+        {
+          "id": "bottom_right",
+          "x": 32,
+          "y": 32,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8
+        }
+      ],
+      "tags": [
+        "ui",
+        "nine-slice",
+        "tooltip",
+        "production-sample",
+        "runtime-preloaded",
+        "wave-04"
+      ]
+    },
+    {
+      "id": "ui/wave04/run",
+      "path": "sprites/ui/wave04/run.png",
+      "category": "UI",
+      "width": 32,
+      "height": 32,
+      "atlasId": "ui",
+      "originX": 16,
+      "originY": 16,
+      "renderLayer": "ui.icon.action",
+      "license": "YjsE-Project-Owned",
+      "provenance": "wave_04_character_atmosphere_ui_production; generated source plus deterministic Pillow conversion; wave_04_provenance.json",
+      "tags": [
+        "ui",
+        "icon",
+        "action",
+        "run",
+        "production-sample",
+        "runtime-preloaded",
+        "wave-04"
+      ]
+    },
+    {
+      "id": "ui/wave04/block",
+      "path": "sprites/ui/wave04/block.png",
+      "category": "UI",
+      "width": 32,
+      "height": 32,
+      "atlasId": "ui",
+      "originX": 16,
+      "originY": 16,
+      "renderLayer": "ui.icon.action",
+      "license": "YjsE-Project-Owned",
+      "provenance": "wave_04_character_atmosphere_ui_production; generated source plus deterministic Pillow conversion; wave_04_provenance.json",
+      "tags": [
+        "ui",
+        "icon",
+        "action",
+        "block",
+        "production-sample",
+        "runtime-preloaded",
+        "wave-04"
+      ]
+    },
+    {
+      "id": "ui/wave04/hurt",
+      "path": "sprites/ui/wave04/hurt.png",
+      "category": "UI",
+      "width": 32,
+      "height": 32,
+      "atlasId": "ui",
+      "originX": 16,
+      "originY": 16,
+      "renderLayer": "ui.icon.action",
+      "license": "YjsE-Project-Owned",
+      "provenance": "wave_04_character_atmosphere_ui_production; generated source plus deterministic Pillow conversion; wave_04_provenance.json",
+      "tags": [
+        "ui",
+        "icon",
+        "action",
+        "hurt",
+        "production-sample",
+        "runtime-preloaded",
+        "wave-04"
+      ]
+    },
+    {
+      "id": "ui/wave04/tool",
+      "path": "sprites/ui/wave04/tool.png",
+      "category": "UI",
+      "width": 32,
+      "height": 32,
+      "atlasId": "ui",
+      "originX": 16,
+      "originY": 16,
+      "renderLayer": "ui.icon.action",
+      "license": "YjsE-Project-Owned",
+      "provenance": "wave_04_character_atmosphere_ui_production; generated source plus deterministic Pillow conversion; wave_04_provenance.json",
+      "tags": [
+        "ui",
+        "icon",
+        "action",
+        "tool",
+        "production-sample",
+        "runtime-preloaded",
+        "wave-04"
+      ]
+    },
+    {
+      "id": "ui/wave04/weather",
+      "path": "sprites/ui/wave04/weather.png",
+      "category": "UI",
+      "width": 32,
+      "height": 32,
+      "atlasId": "ui",
+      "originX": 16,
+      "originY": 16,
+      "renderLayer": "ui.icon.action",
+      "license": "YjsE-Project-Owned",
+      "provenance": "wave_04_character_atmosphere_ui_production; generated source plus deterministic Pillow conversion; wave_04_provenance.json",
+      "tags": [
+        "ui",
+        "icon",
+        "action",
+        "weather",
+        "production-sample",
+        "runtime-preloaded",
+        "wave-04"
+      ]
+    },
+    {
+      "id": "ui/wave04/armor",
+      "path": "sprites/ui/wave04/armor.png",
+      "category": "UI",
+      "width": 32,
+      "height": 32,
+      "atlasId": "ui",
+      "originX": 16,
+      "originY": 16,
+      "renderLayer": "ui.icon.action",
+      "license": "YjsE-Project-Owned",
+      "provenance": "wave_04_character_atmosphere_ui_production; generated source plus deterministic Pillow conversion; wave_04_provenance.json",
+      "tags": [
+        "ui",
+        "icon",
+        "action",
+        "armor",
+        "production-sample",
+        "runtime-preloaded",
+        "wave-04"
       ]
     }
   ]

@@ -1,6 +1,11 @@
 {
   "id": "poison_arrow",
   "displayName": "Poison Arrow",
+  "description": "Treated ammunition that can inflict poison on impact.",
+  "rarity": "Uncommon",
+  "value": 4,
+  "category": "Ammo",
+  "sortPriority": 20,
   "type": "Ammo",
   "texture": "items/poison_arrow",
   "maxStack": 999,

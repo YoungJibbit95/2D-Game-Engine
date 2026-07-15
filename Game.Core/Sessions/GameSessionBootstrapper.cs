@@ -1,11 +1,14 @@
+using Game.Core.Biomes;
 using Game.Core.Data;
 using Game.Core.Entities;
+using Game.Core.Equipment;
 using Game.Core.Events;
 using Game.Core.Farming;
 using Game.Core.Inventory;
 using Game.Core.Lighting;
 using Game.Core.Physics;
 using Game.Core.Projects;
+using Game.Core.Runtime;
 using Game.Core.Saving;
 using Game.Core.Settings;
 using Game.Core.Startup;
@@ -77,31 +80,55 @@ public sealed class GameSessionBootstrapper
         }
 
         var starterInventory = _startupInventory.BuildPlayerInventory(content.Items, startup);
-        var worldBuild = CreateWorld(request, profile);
+        var worldBuild = CreateWorld(request, profile, content);
         var player = CreatePlayerAtSpawn(worldBuild.World);
+        var entities = new EntityManager();
+        var events = new GameEventBus();
+        var worldTime = new WorldTime();
+        worldTime.SetDay();
+        var farmPlots = new FarmPlotManager();
+        var equipmentLoadout = new EquipmentLoadout();
+        var simulation = new GameSimulation(
+            content,
+            worldBuild.World,
+            worldBuild.Biomes,
+            player,
+            starterInventory.Inventory,
+            entities,
+            worldTime,
+            events,
+            farmPlots: farmPlots,
+            equipmentLoadout: equipmentLoadout,
+            livingWorld: worldBuild.LivingWorld);
         worldBuild.World.ClearAllDirtyFlags();
+        foreach (var chunk in worldBuild.World.Chunks.Values)
+        {
+            chunk.MarkLightDirty();
+        }
 
         var session = new LoadedGameSession(
             content,
             worldBuild.World,
             player,
             starterInventory.Inventory,
-            new EntityManager(),
-            new GameEventBus(),
-            new WorldTime(),
+            entities,
+            events,
+            worldTime,
+            simulation,
             worldBuild.World.IsHorizontallyInfinite ? profile : null,
             request.SaveDirectory,
             new TileEntityManager(),
-            new FarmPlotManager(),
+            farmPlots,
             projectContent.Manifest,
             projectContent.Paths,
             startup,
             starterInventory,
-            LoadedFromSave: false,
-            EquipmentLoadout: new Game.Core.Equipment.EquipmentLoadout(),
-            CharacterAppearance: content.Characters.TryGetById("player", out var playerCharacter)
+            loadedFromSave: false,
+            equipmentLoadout: equipmentLoadout,
+            characterAppearance: content.Characters.TryGetById("player", out var playerCharacter)
                 ? playerCharacter.DefaultAppearance
-                : new Game.Core.Characters.CharacterAppearance());
+                : new Game.Core.Characters.CharacterAppearance(),
+            infiniteChunkGenerator: worldBuild.InfiniteChunkGenerator);
 
         return new GameSessionBootstrapResult(
             session,
@@ -130,6 +157,34 @@ public sealed class GameSessionBootstrapper
 
         var events = new GameEventBus();
         var loaded = _loadCoordinator.Load(request.SaveDirectory, content, events: events);
+        var worldTime = loaded.WorldTime;
+        var livingWorld = CreateLivingWorldRuntime(loaded.World.Metadata.Seed, profile, content);
+        if (loaded.WorldEventState is not null)
+        {
+            livingWorld.RestoreWorldEvents(loaded.WorldEventState);
+        }
+        var infiniteGenerator = loaded.World.IsHorizontallyInfinite
+            ? new InfiniteWorldChunkGenerator(
+                regionalPlanner: new WorldRegionPlanner(
+                    loaded.World.Metadata.Seed,
+                    livingWorld.Profile,
+                    content.Biomes,
+                    content.StructurePlans.Definitions.ToArray()))
+            : null;
+        ConfigureSurfaceResolver(livingWorld, loaded.World, profile, infiniteGenerator);
+        var simulation = new GameSimulation(
+            content,
+            loaded.World,
+            CreateFallbackBiomeMap(content),
+            loaded.Player,
+            loaded.Inventory,
+            loaded.Entities,
+            worldTime,
+            events,
+            farmPlots: loaded.FarmPlots,
+            equipmentLoadout: loaded.EquipmentLoadout,
+            livingWorld: livingWorld,
+            randomStreams: loaded.RandomStreams);
         session = new LoadedGameSession(
             content,
             loaded.World,
@@ -137,7 +192,8 @@ public sealed class GameSessionBootstrapper
             loaded.Inventory,
             loaded.Entities,
             events,
-            new WorldTime(),
+            worldTime,
+            simulation,
             loaded.World.IsHorizontallyInfinite ? profile : null,
             request.SaveDirectory,
             loaded.TileEntities,
@@ -145,11 +201,12 @@ public sealed class GameSessionBootstrapper
             projectContent.Manifest,
             projectContent.Paths,
             startup,
-            StartupInventory: null,
-            LoadedFromSave: true,
-            EquipmentLoadout: loaded.EquipmentLoadout,
-            CharacterAppearance: loaded.CharacterAppearance,
-            PlayerLoadWarnings: loaded.PlayerWarnings);
+            startupInventory: null,
+            loadedFromSave: true,
+            equipmentLoadout: loaded.EquipmentLoadout,
+            characterAppearance: loaded.CharacterAppearance,
+            playerLoadWarnings: loaded.PlayerWarnings,
+            infiniteChunkGenerator: infiniteGenerator);
         return true;
     }
 
@@ -186,31 +243,85 @@ public sealed class GameSessionBootstrapper
         return WorldGenerationProfile.Small;
     }
 
-    private WorldBuildResult CreateWorld(GameSessionBootstrapRequest request, WorldGenerationProfile profile)
+    private WorldBuildResult CreateWorld(
+        GameSessionBootstrapRequest request,
+        WorldGenerationProfile profile,
+        GameContentDatabase content)
     {
         if (request.Settings.World.InfiniteHorizontalGeneration)
         {
-            return CreateInfiniteWorld(profile, request);
+            return CreateInfiniteWorld(profile, request, content);
         }
 
-        var result = new AdvancedWorldGenerator().GenerateDetailed(profile, request.Seed);
-        var world = result.World;
+        var generation = new AdvancedWorldGenerator().GenerateDetailed(profile, request.Seed);
+        var world = generation.World;
         world.SetMetadata(world.Metadata with { Name = NormalizeWorldName(request.WorldName) });
         RecalculateSpawnLighting(world);
-        return new WorldBuildResult(world, SpawnAreaPreloadResult.Empty);
+        var livingWorld = CreateLivingWorldRuntime(request.Seed, profile, content);
+        ConfigureSurfaceResolver(livingWorld, world, profile, generator: null);
+        return new WorldBuildResult(
+            world,
+            generation.Biomes,
+            SpawnAreaPreloadResult.Empty,
+            livingWorld,
+            InfiniteChunkGenerator: null);
     }
 
-    private WorldBuildResult CreateInfiniteWorld(WorldGenerationProfile profile, GameSessionBootstrapRequest request)
+    private WorldBuildResult CreateInfiniteWorld(
+        WorldGenerationProfile profile,
+        GameSessionBootstrapRequest request,
+        GameContentDatabase content)
     {
-        var generator = new InfiniteWorldChunkGenerator();
+        var livingWorld = CreateLivingWorldRuntime(request.Seed, profile, content);
+        var generator = new InfiniteWorldChunkGenerator(
+            regionalPlanner: new WorldRegionPlanner(
+                request.Seed,
+                livingWorld.Profile,
+                content.Biomes,
+                content.StructurePlans.Definitions.ToArray()));
         var world = generator.CreateWorld(profile, request.Seed, NormalizeWorldName(request.WorldName));
+        ConfigureSurfaceResolver(livingWorld, world, profile, generator);
         var preload = PreloadSpawnArea(
             world,
             profile,
             generator,
             request.Settings.World.PreloadFullVerticalSlice,
             request.SaveDirectory);
-        return new WorldBuildResult(world, preload);
+        return new WorldBuildResult(world, CreateFallbackBiomeMap(content), preload, livingWorld, generator);
+    }
+
+    private static void ConfigureSurfaceResolver(
+        LivingWorldRuntime livingWorld,
+        GameWorld world,
+        WorldGenerationProfile profile,
+        InfiniteWorldChunkGenerator? generator)
+    {
+        if (generator is not null)
+        {
+            livingWorld.ConfigureSurfaceHeightResolver(
+                generator.CreateSurfaceHeightResolver(profile, world.Metadata.Seed));
+            return;
+        }
+
+        livingWorld.ConfigureSurfaceHeightResolver(tileX => ResolveLoadedSurfaceHeight(world, tileX, profile.SurfaceBaseY));
+    }
+
+    private static int ResolveLoadedSurfaceHeight(GameWorld world, int tileX, int fallback)
+    {
+        if (!world.IsInBounds(tileX, 0))
+        {
+            return fallback;
+        }
+
+        for (var tileY = 0; tileY < world.HeightTiles; tileY++)
+        {
+            if (world.TryGetTile(tileX, tileY, out var tile) && tile.IsSolid)
+            {
+                return tileY;
+            }
+        }
+
+        return fallback;
     }
 
     private SpawnAreaPreloadResult PreloadSpawnArea(
@@ -275,5 +386,51 @@ public sealed class GameSessionBootstrapper
         return string.IsNullOrWhiteSpace(worldName) ? "New World" : worldName.Trim();
     }
 
-    private sealed record WorldBuildResult(GameWorld World, SpawnAreaPreloadResult SpawnAreaPreload);
+    private static BiomeMap CreateFallbackBiomeMap(GameContentDatabase? content)
+    {
+        var fallback = content?.Biomes.Definitions.FirstOrDefault()?.Id ?? "forest";
+        return new BiomeMap(fallback);
+    }
+
+    private static LivingWorldRuntime CreateLivingWorldRuntime(
+        int seed,
+        WorldGenerationProfile profile,
+        GameContentDatabase content)
+    {
+        var regionalProfile = content.RegionalGenerationProfiles.Profiles
+            .OrderBy(candidate => candidate.Id, StringComparer.OrdinalIgnoreCase)
+            .FirstOrDefault();
+        if (regionalProfile is null)
+        {
+            return LivingWorldRuntime.CreateDefault(
+                seed,
+                profile.HeightTiles,
+                profile.SurfaceBaseY,
+                content.Biomes);
+        }
+
+        var caveMinDepth = Math.Clamp(
+            Math.Max(regionalProfile.CaveMinDepth, profile.SurfaceBaseY + 8),
+            0,
+            Math.Max(0, profile.HeightTiles - 1));
+        var adapted = regionalProfile with
+        {
+            WorldHeightTiles = profile.HeightTiles,
+            SurfaceBaseY = profile.SurfaceBaseY,
+            CaveMinDepth = caveMinDepth,
+            CaveMaxDepth = Math.Max(caveMinDepth, profile.HeightTiles - 8)
+        };
+        return new LivingWorldRuntime(
+            seed,
+            adapted,
+            content.Biomes,
+            content.StructurePlans.Definitions.ToArray());
+    }
+
+    private sealed record WorldBuildResult(
+        GameWorld World,
+        BiomeMap Biomes,
+        SpawnAreaPreloadResult SpawnAreaPreload,
+        LivingWorldRuntime LivingWorld,
+        InfiniteWorldChunkGenerator? InfiniteChunkGenerator);
 }

@@ -16,6 +16,10 @@ public sealed record TileDefinition
 
     public bool BlocksLight { get; init; }
 
+    public byte EmittedLight { get; init; }
+
+    public int LightRadius { get; init; }
+
     public float Hardness { get; init; }
 
     public int MiningPowerRequired { get; init; }

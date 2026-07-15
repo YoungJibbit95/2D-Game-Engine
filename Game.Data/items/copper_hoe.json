@@ -1,6 +1,11 @@
 {
   "id": "copper_hoe",
   "displayName": "Copper Hoe",
+  "description": "Prepares suitable soil for seeds and crop cultivation.",
+  "rarity": "Common",
+  "value": 30,
+  "category": "Tool",
+  "sortPriority": 30,
   "type": "ToolHoe",
   "texture": "items/copper_hoe",
   "maxStack": 1,

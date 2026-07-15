@@ -78,6 +78,10 @@ public sealed class TileDefinitionJsonLoader
 
         public bool BlocksLight { get; init; }
 
+        public byte EmittedLight { get; init; }
+
+        public int LightRadius { get; init; }
+
         public float Hardness { get; init; }
 
         public int MiningPowerRequired { get; init; }
@@ -106,6 +110,8 @@ public sealed class TileDefinitionJsonLoader
                 TexturePath = TexturePath ?? Texture ?? string.Empty,
                 Solid = Solid,
                 BlocksLight = BlocksLight,
+                EmittedLight = EmittedLight,
+                LightRadius = LightRadius,
                 Hardness = Hardness,
                 MiningPowerRequired = MiningPowerRequired,
                 DropItemId = DropItemId ?? DropItem,

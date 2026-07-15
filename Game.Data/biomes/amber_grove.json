@@ -1,0 +1,78 @@
+{
+  "id": "amber_grove",
+  "displayName": "Amber Grove",
+  "surfaceTile": "amberstone",
+  "undergroundTile": "amberstone",
+  "treeType": "amber_tree",
+  "enemySpawnTable": "amber_grove_beetle",
+  "isRegionalBiome": true,
+  "selectionWeight": 2,
+  "climate": {
+    "temperature": 0.7,
+    "humidity": 0.46
+  },
+  "terrain": {
+    "elevationMultiplier": 1.16,
+    "soilDepthMultiplier": 0.82,
+    "caveDensityMultiplier": 0.92,
+    "featureDensityMultiplier": 1.35
+  },
+  "weather": {
+    "clearWeight": 62,
+    "rainWeight": 15,
+    "stormWeight": 5,
+    "fogWeight": 18,
+    "minDurationTicks": 2100,
+    "maxDurationTicks": 5400,
+    "transitionDurationTicks": 260
+  },
+  "ambient": {
+    "surfaceSoundscapeId": "amber_grove",
+    "caveSoundscapeId": "amber_grove_cave",
+    "baseLight": 0.96,
+    "baseVisibility": 0.94
+  },
+  "lighting": {
+    "colorGradeId": "amber_grove_gold",
+    "skyLightMultiplier": 0.88,
+    "emissiveLightMultiplier": 1.08,
+    "fogDensity": 0.11
+  },
+  "spawning": {
+    "surfaceDayTableId": "amber_grove_beetle",
+    "surfaceNightTableId": "amber_grove_owl",
+    "caveTableId": "amber_grove_beetle",
+    "densityMultiplier": 1.12,
+    "habitatTags": ["amber-grove", "surface", "wooded", "warm"]
+  },
+  "resources": {
+    "oreDensityMultiplier": 1.28,
+    "vegetationDensityMultiplier": 1.18,
+    "forageDensityMultiplier": 0.82,
+    "resourceTableIds": ["amberstone", "grove_timber"]
+  },
+  "presentation": {
+    "backgroundSpriteId": "world/backgrounds/wave05/amber_grove",
+    "ambientParticleSpriteId": "particles/forest_leaf_drift",
+    "ambientCritterSpriteId": "entities/wave05/canopy_owl",
+    "biomeIconSpriteId": "ui/wave05/building",
+    "eliteSpriteId": "entities/wave05/amber_beetle",
+    "ambientParticleDensity": 0.38,
+    "caveReverb": 0.22,
+    "surfaceReflectionStrength": 0.36,
+    "windResponse": 1.15
+  },
+  "subBiomes": [
+    {
+      "id": "resin_hollows",
+      "displayName": "Resin Hollows",
+      "selectionWeight": 1,
+      "temperatureOffset": 0.04,
+      "humidityOffset": -0.08,
+      "elevationMultiplier": 1.08,
+      "caveDensityMultiplier": 1.18,
+      "surfaceFeatureSetId": "amber_workshops",
+      "soundscapeId": "amber_grove_cave"
+    }
+  ]
+}

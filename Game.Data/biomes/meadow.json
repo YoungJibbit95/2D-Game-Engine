@@ -1,0 +1,83 @@
+{
+  "id": "meadow",
+  "displayName": "Meadow",
+  "surfaceTile": "grass",
+  "undergroundTile": "dirt",
+  "isRegionalBiome": true,
+  "selectionWeight": 3,
+  "climate": {
+    "temperature": 0.64,
+    "humidity": 0.52
+  },
+  "terrain": {
+    "elevationMultiplier": 0.82,
+    "soilDepthMultiplier": 0.94,
+    "caveDensityMultiplier": 0.82,
+    "featureDensityMultiplier": 1.35
+  },
+  "weather": {
+    "clearWeight": 66,
+    "rainWeight": 20,
+    "stormWeight": 4,
+    "fogWeight": 10,
+    "minDurationTicks": 2100,
+    "maxDurationTicks": 5400,
+    "transitionDurationTicks": 300
+  },
+  "ambient": {
+    "surfaceSoundscapeId": "meadow_breeze",
+    "caveSoundscapeId": "meadow_cave",
+    "baseLight": 1.0,
+    "baseVisibility": 1.0
+  },
+  "lighting": {
+    "colorGradeId": "meadow_warm",
+    "skyLightMultiplier": 1.08,
+    "emissiveLightMultiplier": 0.95,
+    "fogDensity": 0.04
+  },
+  "spawning": {
+    "surfaceDayTableId": "forest_day_rabbit",
+    "surfaceNightTableId": "forest_night_firefly",
+    "caveTableId": "underground_bat",
+    "densityMultiplier": 0.9,
+    "habitatTags": ["meadow", "surface", "openAir"]
+  },
+  "resources": {
+    "oreDensityMultiplier": 0.84,
+    "vegetationDensityMultiplier": 1.18,
+    "forageDensityMultiplier": 1.5,
+    "resourceTableIds": ["meadow_flowers", "meadow_forage"]
+  },
+  "presentation": {
+    "backgroundSpriteId": "world/backgrounds/wave04/meadow_parallax_layer",
+    "ambientParticleSpriteId": "particles/meadow_pollen",
+    "ambientCritterSpriteId": "entities/critters/meadow_butterfly",
+    "biomeIconSpriteId": "ui/biomes/meadow",
+    "eliteSpriteId": "entities/enemies/meadow_slime_elite",
+    "ambientParticleDensity": 0.58,
+    "surfaceReflectionStrength": 0.34,
+    "windResponse": 1.2
+  },
+  "subBiomes": [
+    {
+      "id": "wildflower_field",
+      "displayName": "Wildflower Field",
+      "selectionWeight": 2,
+      "humidityOffset": 0.04,
+      "elevationMultiplier": 0.9,
+      "caveDensityMultiplier": 0.9,
+      "surfaceFeatureSetId": "wildflowers",
+      "soundscapeId": "meadow_pollinators"
+    },
+    {
+      "id": "rolling_grassland",
+      "displayName": "Rolling Grassland",
+      "selectionWeight": 3,
+      "elevationMultiplier": 1.04,
+      "caveDensityMultiplier": 0.8,
+      "surfaceFeatureSetId": "grassland",
+      "soundscapeId": "meadow_breeze"
+    }
+  ]
+}

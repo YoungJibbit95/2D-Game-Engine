@@ -1,4 +1,5 @@
 using Game.Core.Animations;
+using Game.Core.Animation;
 using Game.Core.Assets;
 using Game.Core.Characters;
 using Game.Core.Biomes;
@@ -16,6 +17,7 @@ using Game.Core.Spawning;
 using Game.Core.Startup;
 using Game.Core.Tiles;
 using Game.Core.World.Generation;
+using Game.Core.WorldEvents;
 
 namespace Game.Core.Data;
 
@@ -36,6 +38,12 @@ public sealed record GameContentDatabase(
     public WorldGenerationProfileRegistry WorldGenerationProfiles { get; init; } =
         WorldGenerationProfileRegistry.Create(Array.Empty<WorldGenerationProfile>());
 
+    public RegionalGenerationProfileRegistry RegionalGenerationProfiles { get; init; } =
+        RegionalGenerationProfileRegistry.Create(Array.Empty<RegionalGenerationProfile>());
+
+    public StructurePlanDefinitionRegistry StructurePlans { get; init; } =
+        StructurePlanDefinitionRegistry.Create(Array.Empty<StructurePlanDefinition>());
+
     public CropRegistry Crops { get; init; } = CropRegistry.Create(Array.Empty<CropDefinition>());
 
     public MapRegistry Maps { get; init; } = MapRegistry.Create(Array.Empty<MapDefinition>());
@@ -48,5 +56,10 @@ public sealed record GameContentDatabase(
 
     public SpriteAnimationRegistry Animations { get; init; } = SpriteAnimationRegistry.Create(Array.Empty<SpriteAnimationClip>());
 
+    public AnimationContentRegistry? RuntimeAnimations { get; init; }
+
     public CharacterDefinitionRegistry Characters { get; init; } = CharacterDefinitionRegistry.Create(Array.Empty<CharacterDefinition>());
+
+    public WorldEventDefinitionRegistry WorldEvents { get; init; } =
+        WorldEventDefinitionRegistry.Create(Array.Empty<WorldEventDefinition>());
 }

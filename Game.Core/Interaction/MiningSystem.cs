@@ -16,6 +16,13 @@ public sealed class MiningSystem
     private TilePos? _lastBlockedTarget;
     private GameplayActionFailureReason _lastBlockedReason;
     private GameEventBus? _lastBlockedEventBus;
+    private readonly MiningTuning _tuning;
+
+    public MiningSystem(MiningTuning? tuning = null)
+    {
+        _tuning = tuning ?? MiningTuning.Default;
+        _tuning.Validate();
+    }
 
     public float Progress => _progress;
 
@@ -71,10 +78,9 @@ public sealed class MiningSystem
             events?.Publish(new MiningStartedEvent(target, tile.TileId));
         }
 
-        var hardness = Math.Max(0.05f, definition.Hardness);
-        var speed = 1f + Math.Max(0, toolPower - definition.MiningPowerRequired) / 100f;
+        var speed = MiningProgressCalculator.GetProgressPerSecond(definition, toolPower, _tuning);
         var previousProgress = Math.Clamp(_progress, 0f, 1f);
-        _progress += deltaSeconds * speed / hardness;
+        _progress += deltaSeconds * speed;
         var currentProgress = Math.Clamp(_progress, 0f, 1f);
 
         if (_progress < 1f)

@@ -52,4 +52,22 @@ public sealed class WorldTime
     {
         SetTimeNormalized(0.0);
     }
+
+    public void RestoreState(int day, double timeOfDaySeconds)
+    {
+        if (day < 1)
+        {
+            throw new ArgumentOutOfRangeException(nameof(day), "Day must be at least one.");
+        }
+
+        if (!double.IsFinite(timeOfDaySeconds) || timeOfDaySeconds < 0 || timeOfDaySeconds >= DayLengthSeconds)
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(timeOfDaySeconds),
+                "Time of day must be finite and within the configured day length.");
+        }
+
+        Day = day;
+        TimeOfDaySeconds = timeOfDaySeconds;
+    }
 }

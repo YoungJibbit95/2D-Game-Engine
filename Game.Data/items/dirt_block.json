@@ -1,6 +1,11 @@
 {
   "id": "dirt_block",
   "displayName": "Dirt Block",
+  "description": "Loose soil for terrain shaping, farming and simple construction.",
+  "rarity": "Common",
+  "value": 1,
+  "category": "Block",
+  "sortPriority": 10,
   "type": "PlaceableTile",
   "texture": "items/dirt_block",
   "maxStack": 999,

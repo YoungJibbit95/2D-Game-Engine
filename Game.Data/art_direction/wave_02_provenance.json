@@ -1,0 +1,200 @@
+{
+  "schemaVersion": 1,
+  "waveId": "wave_02_creatures_biomes_character_props",
+  "generatedOn": "2026-07-12",
+  "sourceAttempt": "Built-in image generation was attempted for creature concepts but aborted before integration; final assets do not derive from those outputs.",
+  "assets": [
+    {
+      "path": "sprites/entities/critters/squirrel.png",
+      "sha256": "ce8a778cd3ec7cc9dbe313ce046db61dadd239d3af1fbcbfa2f2491e92500cce",
+      "dimensions": [
+        64,
+        16
+      ],
+      "generator": "Game.Data/art_direction/tools/generate_wave_02_assets.py",
+      "method": "deterministic hand-authored Pillow pixel primitives",
+      "license": "YjsE-Project-Owned",
+      "references": "No third-party art; YjsE yjse-pixel-v1 palette and contracts only"
+    },
+    {
+      "path": "sprites/entities/critters/firefly.png",
+      "sha256": "826c2f530e49d53b26d7e89b0d76be3990ae6283c5b98b3f01d297a6c1a7cf13",
+      "dimensions": [
+        64,
+        16
+      ],
+      "generator": "Game.Data/art_direction/tools/generate_wave_02_assets.py",
+      "method": "deterministic hand-authored Pillow pixel primitives",
+      "license": "YjsE-Project-Owned",
+      "references": "No third-party art; YjsE yjse-pixel-v1 palette and contracts only"
+    },
+    {
+      "path": "sprites/entities/enemies/forest_boar.png",
+      "sha256": "8ce3cde7d6cfbb3c3d54afe1bd8f798d4bf3ff56516c27bca62744e77da58f98",
+      "dimensions": [
+        128,
+        32
+      ],
+      "generator": "Game.Data/art_direction/tools/generate_wave_02_assets.py",
+      "method": "deterministic hand-authored Pillow pixel primitives",
+      "license": "YjsE-Project-Owned",
+      "references": "No third-party art; YjsE yjse-pixel-v1 palette and contracts only"
+    },
+    {
+      "path": "sprites/entities/enemies/cave_spider.png",
+      "sha256": "eb50288750662a8d5185e6f1313c04d033406b411b10a2bc8263189ad4b067b1",
+      "dimensions": [
+        128,
+        32
+      ],
+      "generator": "Game.Data/art_direction/tools/generate_wave_02_assets.py",
+      "method": "deterministic hand-authored Pillow pixel primitives",
+      "license": "YjsE-Project-Owned",
+      "references": "No third-party art; YjsE yjse-pixel-v1 palette and contracts only"
+    },
+    {
+      "path": "sprites/world/backgrounds/meadow_parallax_layer.png",
+      "sha256": "88cb9169b9eb430f33923937469e09695e1a2764f18d84d1f902f1cd3b58c5bf",
+      "dimensions": [
+        512,
+        128
+      ],
+      "generator": "Game.Data/art_direction/tools/generate_wave_02_assets.py",
+      "method": "deterministic hand-authored Pillow pixel primitives",
+      "license": "YjsE-Project-Owned",
+      "references": "No third-party art; YjsE yjse-pixel-v1 palette and contracts only"
+    },
+    {
+      "path": "sprites/world/backgrounds/mushroom_cave_parallax_layer.png",
+      "sha256": "602078e97785151335fed6f76165eb674a2520f3552de45e20d208597d138d05",
+      "dimensions": [
+        512,
+        128
+      ],
+      "generator": "Game.Data/art_direction/tools/generate_wave_02_assets.py",
+      "method": "deterministic hand-authored Pillow pixel primitives",
+      "license": "YjsE-Project-Owned",
+      "references": "No third-party art; YjsE yjse-pixel-v1 palette and contracts only"
+    },
+    {
+      "path": "sprites/world/backgrounds/crystal_depths_parallax_layer.png",
+      "sha256": "98370e1b697ee70a9b67ce7cef38189ea354b3e53b71dac1af775e47b6ca912e",
+      "dimensions": [
+        512,
+        128
+      ],
+      "generator": "Game.Data/art_direction/tools/generate_wave_02_assets.py",
+      "method": "deterministic hand-authored Pillow pixel primitives",
+      "license": "YjsE-Project-Owned",
+      "references": "No third-party art; YjsE yjse-pixel-v1 palette and contracts only"
+    },
+    {
+      "path": "sprites/entities/player/player_hair_variants_v2.png",
+      "sha256": "1f9f1d1a5c85fb6bbc03f35f4b4cb0d5e54ac37bffcfdf142f31c888d03535be",
+      "dimensions": [
+        128,
+        32
+      ],
+      "generator": "Game.Data/art_direction/tools/generate_wave_02_assets.py",
+      "method": "deterministic hand-authored Pillow pixel primitives",
+      "license": "YjsE-Project-Owned",
+      "references": "No third-party art; YjsE yjse-pixel-v1 palette and contracts only"
+    },
+    {
+      "path": "sprites/entities/player/player_clothes_variants_v2.png",
+      "sha256": "edecaa7ee6a27ffae6d0b2ffc6ee20cd07c60127a9edebbd97502c4295fdba36",
+      "dimensions": [
+        128,
+        32
+      ],
+      "generator": "Game.Data/art_direction/tools/generate_wave_02_assets.py",
+      "method": "deterministic hand-authored Pillow pixel primitives",
+      "license": "YjsE-Project-Owned",
+      "references": "No third-party art; YjsE yjse-pixel-v1 palette and contracts only"
+    },
+    {
+      "path": "sprites/entities/player/player_accessories_hats.png",
+      "sha256": "450b22ee02d24d1ca55880f888595eb27905ce39504453231bcda46bf5331559",
+      "dimensions": [
+        96,
+        32
+      ],
+      "generator": "Game.Data/art_direction/tools/generate_wave_02_assets.py",
+      "method": "deterministic hand-authored Pillow pixel primitives",
+      "license": "YjsE-Project-Owned",
+      "references": "No third-party art; YjsE yjse-pixel-v1 palette and contracts only"
+    },
+    {
+      "path": "sprites/items/accessories/mana_crystal.png",
+      "sha256": "0a9978be312190072823f5f82d4b8a708d534c728245a997cd2727bd0a984571",
+      "dimensions": [
+        16,
+        16
+      ],
+      "generator": "Game.Data/art_direction/tools/generate_wave_02_assets.py",
+      "method": "deterministic hand-authored Pillow pixel primitives",
+      "license": "YjsE-Project-Owned",
+      "references": "No third-party art; YjsE yjse-pixel-v1 palette and contracts only"
+    },
+    {
+      "path": "sprites/items/accessories/mining_charm.png",
+      "sha256": "c37eb3a562d022c44ed2a10befb415cc3412959fb1b618ee5c8baaa442481b3f",
+      "dimensions": [
+        16,
+        16
+      ],
+      "generator": "Game.Data/art_direction/tools/generate_wave_02_assets.py",
+      "method": "deterministic hand-authored Pillow pixel primitives",
+      "license": "YjsE-Project-Owned",
+      "references": "No third-party art; YjsE yjse-pixel-v1 palette and contracts only"
+    },
+    {
+      "path": "sprites/world/objects/chair.png",
+      "sha256": "70800bac0cfb5d92e7ac1e2c22b0ba9c7b9dbbe68bc1a067025efb1bef4056d1",
+      "dimensions": [
+        16,
+        32
+      ],
+      "generator": "Game.Data/art_direction/tools/generate_wave_02_assets.py",
+      "method": "deterministic hand-authored Pillow pixel primitives",
+      "license": "YjsE-Project-Owned",
+      "references": "No third-party art; YjsE yjse-pixel-v1 palette and contracts only"
+    },
+    {
+      "path": "sprites/world/objects/table.png",
+      "sha256": "344d3013c6166979c09d4e4892a2d2dd7f80699e6c92c8dffb3405e484d00c8c",
+      "dimensions": [
+        32,
+        16
+      ],
+      "generator": "Game.Data/art_direction/tools/generate_wave_02_assets.py",
+      "method": "deterministic hand-authored Pillow pixel primitives",
+      "license": "YjsE-Project-Owned",
+      "references": "No third-party art; YjsE yjse-pixel-v1 palette and contracts only"
+    },
+    {
+      "path": "sprites/world/objects/chest.png",
+      "sha256": "010237eb681ec449b51d3f0d10bb910d477f8d61669cdf3f826f33d554a3a977",
+      "dimensions": [
+        32,
+        16
+      ],
+      "generator": "Game.Data/art_direction/tools/generate_wave_02_assets.py",
+      "method": "deterministic hand-authored Pillow pixel primitives",
+      "license": "YjsE-Project-Owned",
+      "references": "No third-party art; YjsE yjse-pixel-v1 palette and contracts only"
+    },
+    {
+      "path": "sprites/world/objects/lantern.png",
+      "sha256": "e9f8cd090cbc0ec41f9df98ebd3fc4ee2ed7a43252cc77b736fc3fa681643856",
+      "dimensions": [
+        16,
+        16
+      ],
+      "generator": "Game.Data/art_direction/tools/generate_wave_02_assets.py",
+      "method": "deterministic hand-authored Pillow pixel primitives",
+      "license": "YjsE-Project-Owned",
+      "references": "No third-party art; YjsE yjse-pixel-v1 palette and contracts only"
+    }
+  ]
+}

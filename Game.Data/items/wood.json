@@ -1,6 +1,11 @@
 {
   "id": "wood",
   "displayName": "Wood",
+  "description": "Sturdy timber used for tools, furniture and early crafting stations.",
+  "rarity": "Common",
+  "value": 2,
+  "category": "Material",
+  "sortPriority": 20,
   "type": "Material",
   "texture": "items/wood",
   "maxStack": 999

@@ -1,0 +1,78 @@
+{
+  "id": "twilight_marsh",
+  "displayName": "Twilight Marsh",
+  "surfaceTile": "marsh_moss",
+  "undergroundTile": "amberstone",
+  "treeType": "mangrove_tree",
+  "enemySpawnTable": "twilight_marsh_frog",
+  "isRegionalBiome": true,
+  "selectionWeight": 2,
+  "climate": {
+    "temperature": 0.62,
+    "humidity": 0.94
+  },
+  "terrain": {
+    "elevationMultiplier": 0.78,
+    "soilDepthMultiplier": 1.4,
+    "caveDensityMultiplier": 1.12,
+    "featureDensityMultiplier": 1.5
+  },
+  "weather": {
+    "clearWeight": 18,
+    "rainWeight": 42,
+    "stormWeight": 14,
+    "fogWeight": 26,
+    "minDurationTicks": 1500,
+    "maxDurationTicks": 4200,
+    "transitionDurationTicks": 300
+  },
+  "ambient": {
+    "surfaceSoundscapeId": "twilight_marsh",
+    "caveSoundscapeId": "twilight_marsh_cave",
+    "baseLight": 0.78,
+    "baseVisibility": 0.82
+  },
+  "lighting": {
+    "colorGradeId": "twilight_marsh_teal",
+    "skyLightMultiplier": 0.72,
+    "emissiveLightMultiplier": 1.22,
+    "fogDensity": 0.28
+  },
+  "spawning": {
+    "surfaceDayTableId": "twilight_marsh_frog",
+    "surfaceNightTableId": "twilight_marsh_frog",
+    "caveTableId": "twilight_marsh_frog",
+    "densityMultiplier": 1.2,
+    "habitatTags": ["twilight-marsh", "surface", "wet", "water-edge"]
+  },
+  "resources": {
+    "oreDensityMultiplier": 0.78,
+    "vegetationDensityMultiplier": 1.6,
+    "forageDensityMultiplier": 1.45,
+    "resourceTableIds": ["marsh_roots", "marsh_forage"]
+  },
+  "presentation": {
+    "backgroundSpriteId": "world/backgrounds/wave05/twilight_marsh",
+    "ambientParticleSpriteId": "particles/meadow_pollen",
+    "ambientCritterSpriteId": "entities/wave05/marsh_frog",
+    "biomeIconSpriteId": "ui/wave05/quest",
+    "eliteSpriteId": "entities/wave05/prism_wisp",
+    "ambientParticleDensity": 0.58,
+    "caveReverb": 0.46,
+    "surfaceReflectionStrength": 0.72,
+    "windResponse": 0.68
+  },
+  "subBiomes": [
+    {
+      "id": "lantern_bog",
+      "displayName": "Lantern Bog",
+      "selectionWeight": 1,
+      "temperatureOffset": -0.05,
+      "humidityOffset": 0.04,
+      "elevationMultiplier": 0.86,
+      "caveDensityMultiplier": 1.2,
+      "surfaceFeatureSetId": "lantern_mangroves",
+      "soundscapeId": "twilight_marsh"
+    }
+  ]
+}

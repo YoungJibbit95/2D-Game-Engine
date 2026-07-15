@@ -1,4 +1,4 @@
-using System.Text.Json;
+﻿using System.Text.Json;
 
 namespace Game.Core.World.Generation;
 
@@ -21,6 +21,7 @@ public sealed class WorldGenerationProfileJsonLoader
 
         return Directory
             .EnumerateFiles(directoryPath, "*.json", SearchOption.AllDirectories)
+            .Where(path => !path.EndsWith(".region.json", StringComparison.OrdinalIgnoreCase))
             .Order(StringComparer.OrdinalIgnoreCase)
             .Select(LoadProfileFromFile)
             .ToArray();

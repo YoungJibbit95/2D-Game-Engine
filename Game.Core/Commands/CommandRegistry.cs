@@ -11,9 +11,23 @@ public sealed class CommandRegistry
     {
         var registry = new CommandRegistry();
         registry.Register(new GiveItemCommand());
+        registry.Register(new RemoveItemCommand());
+        registry.Register(new ClearInventoryCommand());
         registry.Register(new TimeCommand());
         registry.Register(new SpawnCommand());
+        registry.Register(new DespawnCommand());
+        registry.Register(new TeleportCommand());
+        registry.Register(new PositionCommand());
+        registry.Register(new DeveloperMovementModeCommand("godmode", DeveloperTools.DeveloperMovementMode.GodMode, "god"));
+        registry.Register(new DeveloperMovementModeCommand("noclip", DeveloperTools.DeveloperMovementMode.NoClip));
+        registry.Register(new DeveloperMovementModeCommand("fly", DeveloperTools.DeveloperMovementMode.Fly));
+        registry.Register(new SpeedCommand());
+        registry.Register(new ChunkCommand());
+        registry.Register(new SpawnRateCommand());
         registry.Register(new DebugWorldCommand());
+        registry.Register(new PerformanceCommand());
+        registry.Register(new EventDiagnosticsCommand());
+        registry.Register(new HelpCommand(registry));
         return registry;
     }
 
@@ -34,6 +48,14 @@ public sealed class CommandRegistry
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(name);
         return _byName.TryGetValue(name, out command!);
+    }
+
+    public CommandSpecification GetSpecification(IConsoleCommand command)
+    {
+        ArgumentNullException.ThrowIfNull(command);
+        return command is TypedConsoleCommand typed
+            ? typed.Specification
+            : new CommandSpecification(command.Name, command.Description, aliases: command.Aliases);
     }
 
     private void AddName(string name, IConsoleCommand command)

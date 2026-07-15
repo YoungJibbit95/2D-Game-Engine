@@ -2,6 +2,7 @@ using Game.Client.Rendering;
 using Game.Core.Inventory;
 using Game.Core.Items;
 using Game.Core.Settings;
+using Game.Core.Runtime;
 using Microsoft.Xna.Framework;
 
 namespace Game.Client.UI;
@@ -14,24 +15,22 @@ public sealed class HudOverlay
 
     public void Draw(
         RenderContext context,
-        PlayerInventory? inventory,
+        GameFrameSnapshot snapshot,
         IItemDefinitionProvider? items,
         ClientTextureRegistry? textures,
-        int health,
-        int maxHealth,
-        int mana,
-        int maxMana,
         GameSettings settings)
     {
+        ArgumentNullException.ThrowIfNull(snapshot);
         var palette = UiTheme.Resolve(settings);
-        DrawHotbar(context, inventory, items, textures, palette, settings.Ui.HudOpacity);
-        DrawHealthBar(context, health, maxHealth, palette, settings.Ui.HudOpacity);
-        DrawManaBar(context, textures, mana, maxMana, palette, settings.Ui.HudOpacity);
+        DrawHotbar(context, snapshot.Player, items, textures, palette, settings.Ui.HudOpacity);
+        DrawHealthBar(context, snapshot.Hud.Health, snapshot.Hud.MaxHealth, palette, settings.Ui.HudOpacity);
+        DrawManaBar(context, textures, snapshot.Hud.Mana, snapshot.Hud.MaxMana, palette, settings.Ui.HudOpacity);
+        DrawGuardStaminaBar(context, GuardBarPresentation.Create(snapshot.Player), palette, settings);
     }
 
     private static void DrawHotbar(
         RenderContext context,
-        PlayerInventory? inventory,
+        PlayerFrameSnapshot player,
         IItemDefinitionProvider? items,
         ClientTextureRegistry? textures,
         UiPalette palette,
@@ -40,7 +39,7 @@ public sealed class HudOverlay
         var totalWidth = HotbarSlots * SlotSize + (HotbarSlots - 1) * SlotGap;
         var startX = (context.ViewportBounds.Width - totalWidth) / 2;
         var y = context.ViewportBounds.Height - SlotSize - 18;
-        var selectedSlot = inventory?.SelectedHotbarSlot ?? 0;
+        var selectedSlot = player.SelectedHotbarSlot;
 
         for (var slot = 0; slot < HotbarSlots; slot++)
         {
@@ -52,13 +51,13 @@ public sealed class HudOverlay
             var label = slot == 9 ? "0" : (slot + 1).ToString(System.Globalization.CultureInfo.InvariantCulture);
             context.DebugText.Draw(new Vector2(x + 4, y + 4), label, selected ? palette.Text : palette.TextMuted, 1);
 
-            if (inventory is not null && items is not null)
+            if (items is not null && slot < player.Hotbar.Count)
             {
                 ItemIconRenderer.DrawItemStack(
                     context,
                     textures,
                     items,
-                    inventory.Hotbar.Slots[slot].Stack,
+                    player.Hotbar[slot].Stack,
                     bounds,
                     palette,
                     drawCount: true,
@@ -113,5 +112,80 @@ public sealed class HudOverlay
                 UiTheme.DrawBorder(context, starBounds, UiTheme.WithAlpha(palette.AccentSoft, alpha), 1);
             }
         }
+    }
+
+    private static void DrawGuardStaminaBar(
+        RenderContext context,
+        GuardBarPresentation guard,
+        UiPalette palette,
+        GameSettings settings)
+    {
+        if (!guard.IsVisible)
+        {
+            return;
+        }
+
+        const int width = 190;
+        const int height = 12;
+        var bounds = new Rectangle(context.ViewportBounds.Width - width - 18, 82, width, height);
+        var labelWidth = 48;
+        var track = new Rectangle(bounds.X + labelWidth, bounds.Y + 1, bounds.Width - labelWidth, bounds.Height - 2);
+        var radius = Math.Min(4, UiTheme.ResolveContract(settings).Button.CornerRadius);
+        var background = settings.Ui.HighContrastPanels ? palette.Backdrop : palette.Surface;
+        var fillColor = guard.IsBroken
+            ? palette.Danger
+            : guard.IsGuarding
+                ? palette.Warning
+                : palette.AccentSoft;
+        var borderColor = guard.IsBroken ? palette.Danger : guard.IsGuarding ? palette.Warning : palette.Accent;
+
+        UiTheme.DrawRoundedRectangle(context, track, UiTheme.WithAlpha(background, settings.Ui.HudOpacity), radius);
+        var fillWidth = (int)MathF.Round(track.Width * guard.NormalizedStamina);
+        if (fillWidth > 0)
+        {
+            UiTheme.DrawRoundedRectangle(
+                context,
+                new Rectangle(track.X, track.Y, fillWidth, track.Height),
+                UiTheme.WithAlpha(fillColor, guard.IsGuarding || guard.IsBroken ? 0.96f : 0.72f),
+                Math.Min(radius, fillWidth / 2));
+        }
+
+        UiTheme.DrawRoundedBorder(
+            context,
+            track,
+            UiTheme.WithAlpha(borderColor, 0.94f),
+            radius,
+            settings.Accessibility.HighContrastInteractionOutline ? 2 : 1);
+        context.DebugText.Draw(
+            new Vector2(bounds.X, bounds.Y + 3),
+            guard.IsBroken ? "BREAK" : "GUARD",
+            guard.IsBroken ? palette.Danger : palette.TextMuted,
+            1);
+    }
+}
+
+public readonly record struct GuardBarPresentation(
+    bool IsVisible,
+    bool IsGuarding,
+    bool IsBroken,
+    float NormalizedStamina)
+{
+    public static GuardBarPresentation Create(PlayerFrameSnapshot player)
+    {
+        ArgumentNullException.ThrowIfNull(player);
+        return Create(player.IsGuarding, player.IsGuardBroken, player.GuardStamina, player.MaxGuardStamina);
+    }
+
+    public static GuardBarPresentation Create(bool isGuarding, bool isBroken, float stamina, float maximumStamina)
+    {
+        if (!float.IsFinite(maximumStamina) || maximumStamina <= 0f)
+        {
+            return default;
+        }
+
+        var safeStamina = float.IsFinite(stamina) ? Math.Clamp(stamina, 0f, maximumStamina) : 0f;
+        var normalized = safeStamina / maximumStamina;
+        var visible = isGuarding || isBroken || safeStamina < maximumStamina - 0.001f;
+        return new GuardBarPresentation(visible, isGuarding, isBroken, normalized);
     }
 }

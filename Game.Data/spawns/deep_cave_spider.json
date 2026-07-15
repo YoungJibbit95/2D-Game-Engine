@@ -1,0 +1,17 @@
+{
+  "id": "deep_cave_spider",
+  "entityId": "cave_spider",
+  "biomeId": "forest",
+  "time": "any",
+  "habitats": ["underground", "cavern"],
+  "minTileY": 96,
+  "maxTileY": 320,
+  "chance": 0.24,
+  "maxActive": 6,
+  "populationGroup": "cave_hostiles",
+  "maxActiveInGroup": 10,
+  "populationRegionSizeTiles": 64,
+  "maxActiveInRegion": 3,
+  "maxActiveInHabitat": 8,
+  "cooldownSeconds": 5.5
+}

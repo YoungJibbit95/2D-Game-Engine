@@ -1,0 +1,9 @@
+{
+  "id": "mirror_shield",
+  "result": { "itemId": "mirror_shield", "count": 1 },
+  "ingredients": [
+    { "itemId": "amberstone_block", "count": 10 },
+    { "itemId": "iron_ore", "count": 8 }
+  ],
+  "station": "anvil"
+}

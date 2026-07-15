@@ -80,7 +80,35 @@ public sealed class ProjectileDefinitionJsonLoader
 
         public float Gravity { get; init; }
 
+        public float DragPerSecond { get; init; }
+
+        public float HomingTurnRateRadiansPerSecond { get; init; }
+
+        public float HomingRange { get; init; }
+
         public int Pierce { get; init; }
+
+        public int BounceCount { get; init; }
+
+        public float BounceRestitution { get; init; } = 1;
+
+        public float CollisionRadius { get; init; } = 2;
+
+        public ProjectileTileCollisionBehavior TileCollisionBehavior { get; init; } =
+            ProjectileTileCollisionBehavior.Destroy;
+
+        public ProjectileEntityCollisionBehavior EntityCollisionBehavior { get; init; } =
+            ProjectileEntityCollisionBehavior.Damage;
+
+        public bool FriendlyFire { get; init; }
+
+        public bool HitOncePerTarget { get; init; } = true;
+
+        public float Knockback { get; init; } = 1;
+
+        public float CriticalChance { get; init; }
+
+        public float CriticalMultiplier { get; init; } = 2;
 
         public float Lifetime { get; init; }
 
@@ -96,7 +124,20 @@ public sealed class ProjectileDefinitionJsonLoader
                 Damage = Damage,
                 DamageType = DamageType,
                 Gravity = Gravity,
+                DragPerSecond = DragPerSecond,
+                HomingTurnRateRadiansPerSecond = HomingTurnRateRadiansPerSecond,
+                HomingRange = HomingRange,
                 Pierce = Pierce,
+                BounceCount = BounceCount,
+                BounceRestitution = BounceRestitution,
+                CollisionRadius = CollisionRadius,
+                TileCollisionBehavior = TileCollisionBehavior,
+                EntityCollisionBehavior = EntityCollisionBehavior,
+                FriendlyFire = FriendlyFire,
+                HitOncePerTarget = HitOncePerTarget,
+                Knockback = Knockback,
+                CriticalChance = CriticalChance,
+                CriticalMultiplier = CriticalMultiplier,
                 Lifetime = Lifetime,
                 OnHitEffects = OnHitEffects.Select(effect => effect.ToDefinition()).ToArray()
             };

@@ -1,6 +1,11 @@
 {
   "id": "copper_helmet",
   "displayName": "Copper Helmet",
+  "description": "Simple head protection hammered from warm copper plates.",
+  "rarity": "Common",
+  "value": 40,
+  "category": "Equipment",
+  "sortPriority": 10,
   "type": "Armor",
   "texture": "items/copper_helmet",
   "maxStack": 1,

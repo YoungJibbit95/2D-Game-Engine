@@ -1,0 +1,141 @@
+{
+  "id": "living_world",
+  "widthTiles": 384,
+  "heightTiles": 160,
+  "surfaceAmplitude": 10,
+  "dirtDepthMin": 8,
+  "dirtDepthMax": 18,
+  "regionWidthTiles": 256,
+  "biomeSpanRegions": 3,
+  "worldHeightTiles": 160,
+  "surfaceBaseY": 58,
+  "caveRegionAttempts": 4,
+  "caveMinDepth": 68,
+  "caveMaxDepth": 152,
+  "caveMinRadiusX": 10,
+  "caveMaxRadiusX": 30,
+  "caveMinRadiusY": 5,
+  "caveMaxRadiusY": 14,
+  "biomeLayers": [
+    {
+      "id": "mushroom_caves",
+      "minTileY": 68,
+      "maxTileYInclusive": 112,
+      "requiresCave": true,
+      "priority": 30,
+      "biomeIds": ["mushroom_cave"]
+    },
+    {
+      "id": "crystal_depths",
+      "minTileY": 108,
+      "maxTileYInclusive": 140,
+      "requiresCave": true,
+      "priority": 40,
+      "biomeIds": ["crystal_depths"]
+    },
+    {
+      "id": "deep_caverns",
+      "minTileY": 132,
+      "maxTileYInclusive": 159,
+      "requiresCave": true,
+      "priority": 20,
+      "biomeIds": ["deep_cave"]
+    },
+    {
+      "id": "deep_caves",
+      "minTileY": 132,
+      "maxTileYInclusive": 159,
+      "requiresCave": false,
+      "priority": 20,
+      "biomeIds": ["deep_cave"]
+    }
+  ],
+  "features": [
+    {
+      "id": "forest_grove",
+      "kind": "tree_cluster",
+      "chancePerRegion": 0.8,
+      "minCount": 2,
+      "maxCount": 5,
+      "minTileY": 54,
+      "maxTileY": 64,
+      "minSpacingTiles": 18,
+      "allowedBiomeIds": ["forest"]
+    },
+    {
+      "id": "meadow_wildflowers",
+      "kind": "forage_patch",
+      "chancePerRegion": 0.9,
+      "minCount": 3,
+      "maxCount": 7,
+      "minTileY": 54,
+      "maxTileY": 64,
+      "minSpacingTiles": 12,
+      "allowedBiomeIds": ["meadow"]
+    },
+    {
+      "id": "amber_grove_workshops",
+      "kind": "structure_cluster",
+      "chancePerRegion": 0.55,
+      "minCount": 1,
+      "maxCount": 3,
+      "minTileY": 50,
+      "maxTileY": 70,
+      "minSpacingTiles": 24,
+      "allowedBiomeIds": ["amber_grove"]
+    },
+    {
+      "id": "twilight_marsh_roots",
+      "kind": "tree_cluster",
+      "chancePerRegion": 0.88,
+      "minCount": 3,
+      "maxCount": 8,
+      "minTileY": 52,
+      "maxTileY": 72,
+      "minSpacingTiles": 10,
+      "allowedBiomeIds": ["twilight_marsh"]
+    }
+  ],
+  "worldEvents": [
+    {
+      "id": "firefly_bloom",
+      "chancePerWindow": 0.22,
+      "minDurationTicks": 900,
+      "maxDurationTicks": 1800,
+      "intensity": 0.7,
+      "allowedBiomeIds": ["forest"]
+    },
+    {
+      "id": "meadow_bloom",
+      "chancePerWindow": 0.18,
+      "minDurationTicks": 720,
+      "maxDurationTicks": 1500,
+      "intensity": 0.55,
+      "allowedBiomeIds": ["meadow"]
+    },
+    {
+      "id": "spore_bloom",
+      "chancePerWindow": 0.16,
+      "minDurationTicks": 600,
+      "maxDurationTicks": 1200,
+      "intensity": 0.8,
+      "allowedBiomeIds": ["mushroom_cave"]
+    },
+    {
+      "id": "crystal_resonance",
+      "chancePerWindow": 0.12,
+      "minDurationTicks": 480,
+      "maxDurationTicks": 960,
+      "intensity": 0.9,
+      "allowedBiomeIds": ["crystal_depths"]
+    },
+    {
+      "id": "deep_tremor",
+      "chancePerWindow": 0.1,
+      "minDurationTicks": 300,
+      "maxDurationTicks": 720,
+      "intensity": 1.0,
+      "allowedBiomeIds": ["deep_cave"]
+    }
+  ]
+}
