@@ -1,0 +1,21 @@
+{
+  "id": "amber_grove",
+  "dayMusicLoopId": "music/amber_grove_day",
+  "nightMusicLoopId": "music/amber_grove_night",
+  "surfaceAmbientLoopId": "ambient/amber_canopy",
+  "rainLoopId": "ambient/rain_leaves",
+  "stormLoopId": "ambient/storm_forest",
+  "fogLoopId": "ambient/amber_haze",
+  "rainStartStingerId": "stingers/rain_begin",
+  "musicVolume": 0.72,
+  "ambientVolume": 0.7,
+  "weatherVolume": 0.72,
+  "crossfadeSeconds": 2.0,
+  "worldEvents": {
+    "amberfall": {
+      "loopId": "ambient/amberfall",
+      "startStingerId": "stingers/amberfall_begin",
+      "volume": 0.78
+    }
+  }
+}

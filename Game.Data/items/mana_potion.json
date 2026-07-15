@@ -1,6 +1,11 @@
 {
   "id": "mana_potion",
   "displayName": "Mana Potion",
+  "description": "Restores 40 mana when magical reserves are depleted.",
+  "rarity": "Uncommon",
+  "value": 28,
+  "category": "Consumable",
+  "sortPriority": 20,
   "type": "ManaPotion",
   "texture": "items/mana_potion",
   "maxStack": 30,

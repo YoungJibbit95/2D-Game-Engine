@@ -1,0 +1,11 @@
+{
+  "id": "torch",
+  "result": { "itemId": "torch", "count": 4 },
+  "ingredients": [
+    { "itemId": "wood", "count": 1 },
+    { "itemId": "gel", "count": 1 }
+  ],
+  "station": null,
+  "category": "utility",
+  "sortOrder": 12
+}

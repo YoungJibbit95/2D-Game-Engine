@@ -3,10 +3,14 @@ namespace Game.Core.World.Generation;
 public sealed class InfiniteWorldChunkGenerator
 {
     private readonly Func<int, INoiseService> _noiseFactory;
+    private readonly WorldRegionPlanner? _regionalPlanner;
 
-    public InfiniteWorldChunkGenerator(Func<int, INoiseService>? noiseFactory = null)
+    public InfiniteWorldChunkGenerator(
+        Func<int, INoiseService>? noiseFactory = null,
+        WorldRegionPlanner? regionalPlanner = null)
     {
         _noiseFactory = noiseFactory ?? (seed => new FastNoiseLiteNoiseService(seed));
+        _regionalPlanner = regionalPlanner;
     }
 
     public World CreateWorld(WorldGenerationProfile profile, int seed, string? name = null)
@@ -20,7 +24,12 @@ public sealed class InfiniteWorldChunkGenerator
             isHorizontallyInfinite: true);
 
         var spawnX = 0;
-        var spawnY = Math.Max(0, ComputeSurfaceHeight(profile, _noiseFactory(seed), seed, spawnX) - 2);
+        var spawnY = Math.Max(0, ComputeSurfaceHeight(
+            profile,
+            _noiseFactory(seed),
+            seed,
+            spawnX,
+            _regionalPlanner?.PlanAtTileX(spawnX)) - 2);
         world.SetMetadata(world.Metadata with { SpawnTile = new TilePos(spawnX, spawnY) });
         return world;
     }
@@ -80,19 +89,63 @@ public sealed class InfiniteWorldChunkGenerator
         return ResolveDimensions(profile).First(dimension => dimension.Contains(tileY));
     }
 
+    public int GetSurfaceHeightAt(WorldGenerationProfile profile, int seed, int tileX)
+    {
+        ArgumentNullException.ThrowIfNull(profile);
+        return ComputeSurfaceHeight(
+            profile,
+            _noiseFactory(seed),
+            seed,
+            tileX,
+            _regionalPlanner?.PlanAtTileX(tileX));
+    }
+
+    public Func<int, int> CreateSurfaceHeightResolver(WorldGenerationProfile profile, int seed)
+    {
+        ArgumentNullException.ThrowIfNull(profile);
+        var noise = _noiseFactory(seed);
+        return tileX => ComputeSurfaceHeight(
+            profile,
+            noise,
+            seed,
+            tileX,
+            _regionalPlanner?.PlanAtTileX(tileX));
+    }
+
     private void FillTiles(WorldGenerationProfile profile, int seed, ChunkPos position, TileInstance[] tiles)
     {
         var noise = _noiseFactory(seed);
         var dimensions = ResolveDimensions(profile);
+        var tileXs = new int[GameConstants.ChunkSize];
+        var regionPlans = new WorldRegionPlan?[GameConstants.ChunkSize];
+        for (var localX = 0; localX < GameConstants.ChunkSize; localX++)
+        {
+            tileXs[localX] = SaturateToInt((long)position.X * GameConstants.ChunkSize + localX);
+            regionPlans[localX] = _regionalPlanner?.PlanAtTileX(tileXs[localX]);
+        }
 
         for (var localY = 0; localY < GameConstants.ChunkSize; localY++)
         {
-            var tileY = position.Y * GameConstants.ChunkSize + localY;
+            var tileY = SaturateToInt((long)position.Y * GameConstants.ChunkSize + localY);
             for (var localX = 0; localX < GameConstants.ChunkSize; localX++)
             {
-                var tileX = position.X * GameConstants.ChunkSize + localX;
                 var index = localY * GameConstants.ChunkSize + localX;
-                tiles[index] = GenerateTile(profile, dimensions, noise, seed, tileX, tileY);
+                var region = regionPlans[localX];
+                var biome = region is null
+                    ? null
+                    : _regionalPlanner?.ResolveBiome(
+                        region,
+                        tileXs[localX],
+                        Math.Clamp(tileY, 0, profile.HeightTiles - 1));
+                tiles[index] = GenerateTile(
+                    profile,
+                    dimensions,
+                    noise,
+                    seed,
+                    tileXs[localX],
+                    tileY,
+                    region,
+                    biome);
             }
         }
     }
@@ -103,7 +156,9 @@ public sealed class InfiniteWorldChunkGenerator
         INoiseService noise,
         int seed,
         int tileX,
-        int tileY)
+        int tileY,
+        WorldRegionPlan? region,
+        WorldBiomeResolution? biome)
     {
         if (tileY < 0 || tileY >= profile.HeightTiles)
         {
@@ -111,8 +166,20 @@ public sealed class InfiniteWorldChunkGenerator
         }
 
         var dimension = ResolveDimension(dimensions, tileY);
-        var surfaceY = ComputeSurfaceHeight(profile, noise, seed, tileX);
-        if (TryGenerateTreeTile(profile, dimensions, noise, seed, tileX, tileY) is { } treeTile)
+        var surfaceY = ComputeSurfaceHeight(profile, noise, seed, tileX, region);
+        if (TryGenerateStructureTile(
+                profile,
+                dimensions,
+                noise,
+                seed,
+                tileX,
+                tileY,
+                region) is { } structureTile)
+        {
+            return structureTile;
+        }
+
+        if (TryGenerateTreeTile(profile, dimensions, noise, seed, tileX, tileY, region) is { } treeTile)
         {
             return treeTile;
         }
@@ -122,14 +189,17 @@ public sealed class InfiniteWorldChunkGenerator
             return new TileInstance { TileId = KnownTileIds.Air, Light = 255 };
         }
 
-        var dirtDepth = ComputeDirtDepth(profile, seed, tileX);
+        var dirtDepth = ComputeDirtDepth(profile, seed, tileX, region);
+        var surfaceTileId = ResolveBiomeTileId(biome?.Biome.SurfaceTile, dimension.SurfaceTileId);
+        var undergroundTileId = ResolveBiomeTileId(biome?.Biome.UndergroundTile, dimension.SubsurfaceTileId);
         var tileId = tileY == surfaceY
-            ? dimension.SurfaceTileId
+            ? surfaceTileId
             : tileY < surfaceY + dirtDepth
-                ? dimension.SubsurfaceTileId
+                ? undergroundTileId
                 : dimension.FillTileId;
 
-        var isCave = ShouldCarveCave(profile, dimension, noise, surfaceY, tileX, tileY);
+        var isCave = biome?.IsCave == true || IsInsidePlannedCave(region, tileX, tileY) ||
+            ShouldCarveCave(profile, dimension, noise, surfaceY, tileX, tileY, biome);
         var isWaterPocket = ShouldFillWaterPocket(profile, dimension, seed, surfaceY, tileX, tileY);
         if (isCave || isWaterPocket)
         {
@@ -138,16 +208,110 @@ public sealed class InfiniteWorldChunkGenerator
             return tile;
         }
 
-        tileId = MaybePlaceOre(profile, dimension, noise, tileId, surfaceY, tileX, tileY);
+        tileId = MaybePlaceOre(
+            profile,
+            dimension,
+            noise,
+            tileId,
+            surfaceY,
+            tileX,
+            tileY,
+            biome?.Biome.Resources.OreDensityMultiplier ?? 1f);
         var generated = TileInstance.FromTileId(tileId, TileFlags.IsNatural);
         generated.Light = dimension.AmbientLight;
         return generated;
     }
 
-    private static int ComputeSurfaceHeight(WorldGenerationProfile profile, INoiseService noise, int seed, int tileX)
+    private static TileInstance? TryGenerateStructureTile(
+        WorldGenerationProfile profile,
+        IReadOnlyList<WorldDimensionDefinition> dimensions,
+        INoiseService noise,
+        int seed,
+        int tileX,
+        int tileY,
+        WorldRegionPlan? region)
+    {
+        if (region is null || region.Structures.Count == 0)
+        {
+            return null;
+        }
+
+        for (var index = 0; index < region.Structures.Count; index++)
+        {
+            var structure = region.Structures[index];
+            if (!structure.HasMaterializedTemplate)
+            {
+                continue;
+            }
+
+            if (tileX < structure.TileX ||
+                (long)tileX >= structure.TileX + structure.WidthTiles)
+            {
+                continue;
+            }
+
+            var originTileY = ResolveStructureOriginTileY(profile, noise, seed, region, structure);
+            if (!StructureTemplateMaterializer.TryResolveTile(
+                    structure,
+                    tileX,
+                    tileY,
+                    originTileY,
+                    out var tileId))
+            {
+                continue;
+            }
+
+            if (!TryResolveKnownTileId(tileId, out var numericTileId))
+            {
+                continue;
+            }
+            if (numericTileId == KnownTileIds.Air)
+            {
+                var air = TileInstance.Air;
+                air.Light = tileY < ComputeSurfaceHeight(profile, noise, seed, tileX, region)
+                    ? byte.MaxValue
+                    : ResolveDimension(dimensions, tileY).AmbientLight;
+                return air;
+            }
+
+            return TileInstance.FromTileId(numericTileId);
+        }
+
+        return null;
+    }
+
+    private static int ResolveStructureOriginTileY(
+        WorldGenerationProfile profile,
+        INoiseService noise,
+        int seed,
+        WorldRegionPlan region,
+        PlannedStructure structure)
+    {
+        if (structure.Placement.Equals("surface", StringComparison.OrdinalIgnoreCase))
+        {
+            var anchorX = SaturateToInt(structure.TileX);
+            return ComputeSurfaceHeight(profile, noise, seed, anchorX, region) - structure.HeightTiles;
+        }
+
+        if (structure.Placement.Contains("cave", StringComparison.OrdinalIgnoreCase))
+        {
+            return structure.TileY - structure.HeightTiles / 2;
+        }
+
+        return structure.TileY;
+    }
+
+    private static int ComputeSurfaceHeight(
+        WorldGenerationProfile profile,
+        INoiseService noise,
+        int seed,
+        int tileX,
+        WorldRegionPlan? region)
     {
         var baseSurfaceY = Math.Clamp(profile.SurfaceBaseY, 6, profile.HeightTiles - 10);
-        var amplitude = Math.Max(1, profile.SurfaceAmplitude);
+        var elevationMultiplier = (region?.Biome.Terrain.ElevationMultiplier ?? 1f) *
+            (region?.SubBiome?.ElevationMultiplier ?? 1f);
+        var amplitude = Math.Max(1, (int)MathF.Round(profile.SurfaceAmplitude * elevationMultiplier));
         var continental = noise.GetNoise(tileX * 0.65f, seed * 0.013f);
         var detail = noise.GetNoise(tileX * 2.25f + 91, seed * 0.021f) * 0.35f;
         var surfaceY = baseSurfaceY + (int)MathF.Round((continental + detail) * amplitude);
@@ -160,16 +324,20 @@ public sealed class InfiniteWorldChunkGenerator
         INoiseService noise,
         int seed,
         int tileX,
-        int tileY)
+        int tileY,
+        WorldRegionPlan? region)
     {
         if (tileY <= 0)
         {
             return null;
         }
 
-        for (var centerX = tileX - 2; centerX <= tileX + 2; centerX++)
+        var firstCenter = Math.Max(int.MinValue, (long)tileX - 2);
+        var lastCenter = Math.Min(int.MaxValue, (long)tileX + 2);
+        for (var centerValue = firstCenter; centerValue <= lastCenter; centerValue++)
         {
-            var surfaceY = ComputeSurfaceHeight(profile, noise, seed, centerX);
+            var centerX = (int)centerValue;
+            var surfaceY = ComputeSurfaceHeight(profile, noise, seed, centerX, region);
             if (tileY >= surfaceY)
             {
                 continue;
@@ -181,7 +349,7 @@ public sealed class InfiniteWorldChunkGenerator
                 continue;
             }
 
-            if (!ShouldGrowTreeAt(profile, seed, centerX))
+            if (!ShouldGrowTreeAt(profile, seed, centerX, region))
             {
                 continue;
             }
@@ -198,8 +366,8 @@ public sealed class InfiniteWorldChunkGenerator
                 return LitPassThroughTile(KnownTileIds.Wood);
             }
 
-            var dx = Math.Abs(tileX - centerX);
-            var dy = Math.Abs(tileY - topY);
+            var dx = Math.Abs((long)tileX - centerX);
+            var dy = Math.Abs((long)tileY - topY);
             if (tileY >= topY - 2 && tileY <= topY + 1 && dx + dy <= 3)
             {
                 return LitPassThroughTile(KnownTileIds.Leaves);
@@ -209,7 +377,11 @@ public sealed class InfiniteWorldChunkGenerator
         return null;
     }
 
-    private static bool ShouldGrowTreeAt(WorldGenerationProfile profile, int seed, int tileX)
+    private static bool ShouldGrowTreeAt(
+        WorldGenerationProfile profile,
+        int seed,
+        int tileX,
+        WorldRegionPlan? region)
     {
         if (profile.TreeAttempts <= 0 || profile.TreeAttemptChance <= 0f)
         {
@@ -220,6 +392,7 @@ public sealed class InfiniteWorldChunkGenerator
             profile.TreeAttempts * Math.Clamp(profile.TreeAttemptChance, 0f, 1f) / Math.Max(1f, profile.WidthTiles),
             0f,
             0.2f);
+        density = Math.Clamp(density * (region?.Biome.Terrain.FeatureDensityMultiplier ?? 1f), 0f, 0.3f);
 
         if (StableUnit(seed ^ unchecked((int)0x51D7348F), tileX) >= density)
         {
@@ -233,7 +406,7 @@ public sealed class InfiniteWorldChunkGenerator
                 continue;
             }
 
-            if (StableUnit(seed ^ unchecked((int)0x71E2A9D5), tileX + offset) < density * 0.45f)
+            if (StableUnit(seed ^ unchecked((int)0x71E2A9D5), SaturateToInt((long)tileX + offset)) < density * 0.45f)
             {
                 return false;
             }
@@ -256,11 +429,16 @@ public sealed class InfiniteWorldChunkGenerator
         return tile;
     }
 
-    private static int ComputeDirtDepth(WorldGenerationProfile profile, int seed, int tileX)
+    private static int ComputeDirtDepth(
+        WorldGenerationProfile profile,
+        int seed,
+        int tileX,
+        WorldRegionPlan? region)
     {
         var dirtDepthMin = Math.Max(1, Math.Min(profile.DirtDepthMin, profile.DirtDepthMax));
         var dirtDepthMax = Math.Max(dirtDepthMin, Math.Max(profile.DirtDepthMin, profile.DirtDepthMax));
-        return dirtDepthMin + Math.Abs(StableHash(seed, tileX) % (dirtDepthMax - dirtDepthMin + 1));
+        var baseDepth = dirtDepthMin + Math.Abs(StableHash(seed, tileX) % (dirtDepthMax - dirtDepthMin + 1));
+        return Math.Max(1, (int)MathF.Round(baseDepth * (region?.Biome.Terrain.SoilDepthMultiplier ?? 1f)));
     }
 
     private static bool ShouldCarveCave(
@@ -269,7 +447,8 @@ public sealed class InfiniteWorldChunkGenerator
         INoiseService noise,
         int surfaceY,
         int tileX,
-        int tileY)
+        int tileY,
+        WorldBiomeResolution? biome)
     {
         if (tileY < surfaceY + Math.Max(4, profile.CaveMinDepthOffset))
         {
@@ -279,8 +458,54 @@ public sealed class InfiniteWorldChunkGenerator
         var depth = Math.Clamp((tileY - surfaceY) / (float)Math.Max(1, profile.HeightTiles - surfaceY), 0f, 1f);
         var caveNoise = noise.GetNoise(tileX * 2.5f, tileY * 2.5f);
         var tunnelNoise = noise.GetNoise(tileX * 0.55f + 800, tileY * 0.8f - 300);
-        var threshold = 0.68f - depth * 0.12f - Math.Clamp(dimension.CaveMultiplier - 1f, -0.5f, 1.5f) * 0.08f;
+        var regionalCaveMultiplier = (biome?.Biome.Terrain.CaveDensityMultiplier ?? 1f) *
+            (biome?.SubBiome?.CaveDensityMultiplier ?? 1f);
+        var threshold = 0.68f - depth * 0.12f -
+            Math.Clamp(dimension.CaveMultiplier * regionalCaveMultiplier - 1f, -0.5f, 2.5f) * 0.08f;
         return caveNoise > threshold && tunnelNoise > -0.2f;
+    }
+
+    private static bool IsInsidePlannedCave(WorldRegionPlan? region, int tileX, int tileY)
+    {
+        if (region is null)
+        {
+            return false;
+        }
+
+        for (var index = 0; index < region.Caves.Count; index++)
+        {
+            if (region.Caves[index].Contains(tileX, tileY))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static ushort ResolveBiomeTileId(string? tileId, ushort fallback)
+    {
+        return tileId is not null && TryResolveKnownTileId(tileId, out var resolved)
+            ? resolved
+            : fallback;
+    }
+
+    private static bool TryResolveKnownTileId(string tileId, out ushort resolved)
+    {
+        resolved = tileId.ToLowerInvariant() switch
+        {
+            "air" => KnownTileIds.Air,
+            "dirt" => KnownTileIds.Dirt,
+            "grass" => KnownTileIds.Grass,
+            "stone" => KnownTileIds.Stone,
+            "wood" => KnownTileIds.Wood,
+            "leaves" => KnownTileIds.Leaves,
+            "copper_ore" => KnownTileIds.CopperOre,
+            "iron_ore" => KnownTileIds.IronOre,
+            _ => ushort.MaxValue
+        };
+
+        return resolved != ushort.MaxValue;
     }
 
     private static bool ShouldFillWaterPocket(
@@ -317,8 +542,8 @@ public sealed class InfiniteWorldChunkGenerator
                 }
 
                 var centerHash = StableHash(seed ^ unchecked((int)0x4F1BBCDC), x, y);
-                var centerX = x * cellSize + PositiveMod(centerHash, cellSize);
-                var centerY = y * cellSize + PositiveMod(StableHash(centerHash, y), cellSize);
+                var centerX = SaturateToInt((long)x * cellSize + PositiveMod(centerHash, cellSize));
+                var centerY = SaturateToInt((long)y * cellSize + PositiveMod(StableHash(centerHash, y), cellSize));
                 if (centerY < surfaceY + profile.WaterMinDepthOffset)
                 {
                     continue;
@@ -326,8 +551,8 @@ public sealed class InfiniteWorldChunkGenerator
 
                 var radiusX = RandomRange(profile.WaterMinRadiusX, profile.WaterMaxRadiusX, seed ^ unchecked((int)0x165667B1), x, y);
                 var radiusY = RandomRange(profile.WaterMinRadiusY, profile.WaterMaxRadiusY, seed ^ unchecked((int)0x27D4EB2F), x, y);
-                var normalizedX = (tileX - centerX) / (float)Math.Max(1, radiusX);
-                var normalizedY = (tileY - centerY) / (float)Math.Max(1, radiusY);
+                var normalizedX = ((long)tileX - centerX) / (float)Math.Max(1, radiusX);
+                var normalizedY = ((long)tileY - centerY) / (float)Math.Max(1, radiusY);
                 if (normalizedX * normalizedX + normalizedY * normalizedY <= 1f)
                 {
                     return true;
@@ -345,7 +570,8 @@ public sealed class InfiniteWorldChunkGenerator
         ushort currentTileId,
         int surfaceY,
         int tileX,
-        int tileY)
+        int tileY,
+        float regionalOreDensityMultiplier)
     {
         foreach (var ore in profile.Ores)
         {
@@ -363,7 +589,9 @@ public sealed class InfiniteWorldChunkGenerator
 
             var oreNoise = noise.GetNoise(tileX * 3.75f + ore.TileId * 37, tileY * 3.75f - ore.TileId * 19);
             var veinNoise = noise.GetNoise(tileX * 0.85f - ore.TileId * 23, tileY * 0.85f + ore.TileId * 41);
-            var density = Math.Clamp(ore.VeinCount / 120f, 0.02f, 0.65f) * Math.Clamp(dimension.OreMultiplier, 0f, 4f);
+            var density = Math.Clamp(ore.VeinCount / 120f, 0.02f, 0.65f) *
+                Math.Clamp(dimension.OreMultiplier, 0f, 4f) *
+                Math.Clamp(regionalOreDensityMultiplier, 0f, 4f);
             var threshold = 0.84f - density * 0.22f;
             if (oreNoise > threshold && veinNoise > 0.05f)
             {
@@ -525,5 +753,10 @@ public sealed class InfiniteWorldChunkGenerator
     {
         var remainder = value % divisor;
         return remainder < 0 ? remainder + Math.Abs(divisor) : remainder;
+    }
+
+    private static int SaturateToInt(long value)
+    {
+        return (int)Math.Clamp(value, int.MinValue, int.MaxValue);
     }
 }

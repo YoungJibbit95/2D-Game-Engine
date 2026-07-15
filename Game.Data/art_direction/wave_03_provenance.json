@@ -1,0 +1,320 @@
+{
+  "schemaVersion": 1,
+  "waveId": "wave_03_player_biome_production",
+  "generatedOn": "2026-07-12",
+  "source": "Deterministic checked-in generator; no image-generation output or third-party source was used.",
+  "assets": [
+    {
+      "path": "sprites/tools/copper_hoe.png",
+      "sha256": "eac386b5aae13332bda52deae5c58477af332331a81094f28bd89a7263ac8990",
+      "dimensions": [
+        16,
+        16
+      ],
+      "generator": "Game.Data/art_direction/tools/generate_wave_03_assets.py",
+      "method": "deterministic hand-authored Pillow pixel primitives",
+      "license": "YjsE-Project-Owned",
+      "references": "No third-party art; YjsE yjse-pixel-v1 palette and checked-in tile silhouettes only",
+      "runtimeConsumer": "ClientTextureRegistry.PreloadAll; scene selection is content-owner follow-up where tagged runtime-preloaded"
+    },
+    {
+      "path": "sprites/tools/iron_hoe.png",
+      "sha256": "c49c6889baac93b20cbc673eb58516e254edaccb6404c2db97c068f6a34e06d4",
+      "dimensions": [
+        16,
+        16
+      ],
+      "generator": "Game.Data/art_direction/tools/generate_wave_03_assets.py",
+      "method": "deterministic hand-authored Pillow pixel primitives",
+      "license": "YjsE-Project-Owned",
+      "references": "No third-party art; YjsE yjse-pixel-v1 palette and checked-in tile silhouettes only",
+      "runtimeConsumer": "ClientTextureRegistry.PreloadAll; scene selection is content-owner follow-up where tagged runtime-preloaded"
+    },
+    {
+      "path": "sprites/projectiles/wooden_arrow.png",
+      "sha256": "9fa8d6696f3ad811088af349ef5494adc81f073e0f9a9ea8cb684a2d2e36e036",
+      "dimensions": [
+        16,
+        16
+      ],
+      "generator": "Game.Data/art_direction/tools/generate_wave_03_assets.py",
+      "method": "deterministic hand-authored Pillow pixel primitives",
+      "license": "YjsE-Project-Owned",
+      "references": "No third-party art; YjsE yjse-pixel-v1 palette and checked-in tile silhouettes only",
+      "runtimeConsumer": "ClientTextureRegistry.PreloadAll; scene selection is content-owner follow-up where tagged runtime-preloaded"
+    },
+    {
+      "path": "sprites/projectiles/magic_spark_particles.png",
+      "sha256": "6460b1bd4416cf838f10fe7b36ce6f5065d9a6189227896f206867b7f424b5d7",
+      "dimensions": [
+        16,
+        16
+      ],
+      "generator": "Game.Data/art_direction/tools/generate_wave_03_assets.py",
+      "method": "deterministic hand-authored Pillow pixel primitives",
+      "license": "YjsE-Project-Owned",
+      "references": "No third-party art; YjsE yjse-pixel-v1 palette and checked-in tile silhouettes only",
+      "runtimeConsumer": "ClientTextureRegistry.PreloadAll; scene selection is content-owner follow-up where tagged runtime-preloaded"
+    },
+    {
+      "path": "sprites/entities/player/player_base_actions.png",
+      "sha256": "17310f9d087142384ec9c5463dc1ae51e508197a28c0525255143e6ac5069731",
+      "dimensions": [
+        192,
+        32
+      ],
+      "generator": "Game.Data/art_direction/tools/generate_wave_03_assets.py",
+      "method": "deterministic hand-authored Pillow pixel primitives",
+      "license": "YjsE-Project-Owned",
+      "references": "No third-party art; YjsE yjse-pixel-v1 palette and checked-in tile silhouettes only",
+      "runtimeConsumer": "ClientTextureRegistry.PreloadAll; scene selection is content-owner follow-up where tagged runtime-preloaded"
+    },
+    {
+      "path": "sprites/entities/player/player_body_variants.png",
+      "sha256": "c63c361a4f2a60b748e0c45ffec3c6a0813206078f828c90903299ac57534395",
+      "dimensions": [
+        64,
+        32
+      ],
+      "generator": "Game.Data/art_direction/tools/generate_wave_03_assets.py",
+      "method": "deterministic hand-authored Pillow pixel primitives",
+      "license": "YjsE-Project-Owned",
+      "references": "No third-party art; YjsE yjse-pixel-v1 palette and checked-in tile silhouettes only",
+      "runtimeConsumer": "ClientTextureRegistry.PreloadAll; scene selection is content-owner follow-up where tagged runtime-preloaded"
+    },
+    {
+      "path": "sprites/entities/player/player_hair_variants_v2.png",
+      "sha256": "e125183ba7e8ac2b4caa9fde948cc2c98232cd59224db9cc7d57df6da44941ba",
+      "dimensions": [
+        128,
+        32
+      ],
+      "generator": "Game.Data/art_direction/tools/generate_wave_03_assets.py",
+      "method": "deterministic hand-authored Pillow pixel primitives",
+      "license": "YjsE-Project-Owned",
+      "references": "No third-party art; YjsE yjse-pixel-v1 palette and checked-in tile silhouettes only",
+      "runtimeConsumer": "ClientTextureRegistry.PreloadAll; scene selection is content-owner follow-up where tagged runtime-preloaded"
+    },
+    {
+      "path": "sprites/entities/player/player_clothes_variants_v2.png",
+      "sha256": "9fb75faafb23b55fde0b853616c9f105439dd045e8bad30a6647feebd37d11e1",
+      "dimensions": [
+        128,
+        32
+      ],
+      "generator": "Game.Data/art_direction/tools/generate_wave_03_assets.py",
+      "method": "deterministic hand-authored Pillow pixel primitives",
+      "license": "YjsE-Project-Owned",
+      "references": "No third-party art; YjsE yjse-pixel-v1 palette and checked-in tile silhouettes only",
+      "runtimeConsumer": "ClientTextureRegistry.PreloadAll; scene selection is content-owner follow-up where tagged runtime-preloaded"
+    },
+    {
+      "path": "sprites/entities/player/player_accessories_hats.png",
+      "sha256": "30918e02d6c08ddd2a77023f899ef01d0ce30b6b605bdff3234ef7b7d92bf60c",
+      "dimensions": [
+        96,
+        32
+      ],
+      "generator": "Game.Data/art_direction/tools/generate_wave_03_assets.py",
+      "method": "deterministic hand-authored Pillow pixel primitives",
+      "license": "YjsE-Project-Owned",
+      "references": "No third-party art; YjsE yjse-pixel-v1 palette and checked-in tile silhouettes only",
+      "runtimeConsumer": "ClientTextureRegistry.PreloadAll; scene selection is content-owner follow-up where tagged runtime-preloaded"
+    },
+    {
+      "path": "sprites/world/backgrounds/forest_parallax_layer.png",
+      "sha256": "5527af5011af07f1edd2f934fcd2b2a3e48996ac528af48d4fe6c15562e22c83",
+      "dimensions": [
+        512,
+        128
+      ],
+      "generator": "Game.Data/art_direction/tools/generate_wave_03_assets.py",
+      "method": "deterministic hand-authored Pillow pixel primitives",
+      "license": "YjsE-Project-Owned",
+      "references": "No third-party art; YjsE yjse-pixel-v1 palette and checked-in tile silhouettes only",
+      "runtimeConsumer": "ClientTextureRegistry.PreloadAll; scene selection is content-owner follow-up where tagged runtime-preloaded"
+    },
+    {
+      "path": "sprites/world/backgrounds/cave_parallax_layer.png",
+      "sha256": "bd5ef946e62c709e37c5414105732578c4a8d800aeeb5ec98ccd97d845bd11e8",
+      "dimensions": [
+        512,
+        128
+      ],
+      "generator": "Game.Data/art_direction/tools/generate_wave_03_assets.py",
+      "method": "deterministic hand-authored Pillow pixel primitives",
+      "license": "YjsE-Project-Owned",
+      "references": "No third-party art; YjsE yjse-pixel-v1 palette and checked-in tile silhouettes only",
+      "runtimeConsumer": "ClientTextureRegistry.PreloadAll; scene selection is content-owner follow-up where tagged runtime-preloaded"
+    },
+    {
+      "path": "sprites/world/backgrounds/meadow_parallax_layer.png",
+      "sha256": "69f330d7ada88ba7ff0eed8f5332d7b8931711d7016ca0294c7dc09433a5bd6b",
+      "dimensions": [
+        512,
+        128
+      ],
+      "generator": "Game.Data/art_direction/tools/generate_wave_03_assets.py",
+      "method": "deterministic hand-authored Pillow pixel primitives",
+      "license": "YjsE-Project-Owned",
+      "references": "No third-party art; YjsE yjse-pixel-v1 palette and checked-in tile silhouettes only",
+      "runtimeConsumer": "ClientTextureRegistry.PreloadAll; scene selection is content-owner follow-up where tagged runtime-preloaded"
+    },
+    {
+      "path": "sprites/entities/critters/meadow_butterfly.png",
+      "sha256": "d8c7b82e028ce4fee0a1f246a143cff57f42d7dfd36163506007d7485b3f8184",
+      "dimensions": [
+        64,
+        16
+      ],
+      "generator": "Game.Data/art_direction/tools/generate_wave_03_assets.py",
+      "method": "deterministic hand-authored Pillow pixel primitives",
+      "license": "YjsE-Project-Owned",
+      "references": "No third-party art; YjsE yjse-pixel-v1 palette and checked-in tile silhouettes only",
+      "runtimeConsumer": "ClientTextureRegistry.PreloadAll; scene selection is content-owner follow-up where tagged runtime-preloaded"
+    },
+    {
+      "path": "sprites/entities/critters/forest_moth.png",
+      "sha256": "8117653c0cf034379d06a70c7f852297bdc3e5bcd7d78cc5424d7745ccc13172",
+      "dimensions": [
+        64,
+        16
+      ],
+      "generator": "Game.Data/art_direction/tools/generate_wave_03_assets.py",
+      "method": "deterministic hand-authored Pillow pixel primitives",
+      "license": "YjsE-Project-Owned",
+      "references": "No third-party art; YjsE yjse-pixel-v1 palette and checked-in tile silhouettes only",
+      "runtimeConsumer": "ClientTextureRegistry.PreloadAll; scene selection is content-owner follow-up where tagged runtime-preloaded"
+    },
+    {
+      "path": "sprites/entities/critters/cave_glowbug.png",
+      "sha256": "2a8add2b66fe3272fdfacbee1c6d2cbdb1738c3e0b8a210f4af75f8613fcfa50",
+      "dimensions": [
+        64,
+        16
+      ],
+      "generator": "Game.Data/art_direction/tools/generate_wave_03_assets.py",
+      "method": "deterministic hand-authored Pillow pixel primitives",
+      "license": "YjsE-Project-Owned",
+      "references": "No third-party art; YjsE yjse-pixel-v1 palette and checked-in tile silhouettes only",
+      "runtimeConsumer": "ClientTextureRegistry.PreloadAll; scene selection is content-owner follow-up where tagged runtime-preloaded"
+    },
+    {
+      "path": "sprites/particles/meadow_pollen.png",
+      "sha256": "2da1f291f617fbb7ecf31d691ee0b01ee705f3b706251797720b68709300b450",
+      "dimensions": [
+        64,
+        16
+      ],
+      "generator": "Game.Data/art_direction/tools/generate_wave_03_assets.py",
+      "method": "deterministic hand-authored Pillow pixel primitives",
+      "license": "YjsE-Project-Owned",
+      "references": "No third-party art; YjsE yjse-pixel-v1 palette and checked-in tile silhouettes only",
+      "runtimeConsumer": "ClientTextureRegistry.PreloadAll; scene selection is content-owner follow-up where tagged runtime-preloaded"
+    },
+    {
+      "path": "sprites/particles/forest_leaf_drift.png",
+      "sha256": "85d31b537fc2c0813b96fd38bd19b44d2618da28e2026ebcff190b658c171a54",
+      "dimensions": [
+        64,
+        16
+      ],
+      "generator": "Game.Data/art_direction/tools/generate_wave_03_assets.py",
+      "method": "deterministic hand-authored Pillow pixel primitives",
+      "license": "YjsE-Project-Owned",
+      "references": "No third-party art; YjsE yjse-pixel-v1 palette and checked-in tile silhouettes only",
+      "runtimeConsumer": "ClientTextureRegistry.PreloadAll; scene selection is content-owner follow-up where tagged runtime-preloaded"
+    },
+    {
+      "path": "sprites/particles/cave_dust.png",
+      "sha256": "802e7fb7f82fa52d6c7987a14e8a33e9c46bd0ecc74feb38673e445a7a5f1e3b",
+      "dimensions": [
+        64,
+        16
+      ],
+      "generator": "Game.Data/art_direction/tools/generate_wave_03_assets.py",
+      "method": "deterministic hand-authored Pillow pixel primitives",
+      "license": "YjsE-Project-Owned",
+      "references": "No third-party art; YjsE yjse-pixel-v1 palette and checked-in tile silhouettes only",
+      "runtimeConsumer": "ClientTextureRegistry.PreloadAll; scene selection is content-owner follow-up where tagged runtime-preloaded"
+    },
+    {
+      "path": "sprites/entities/enemies/meadow_slime_elite.png",
+      "sha256": "25114a4b1a82fab246ac30423a8db388746393bde7383aaa853eebc413438856",
+      "dimensions": [
+        128,
+        32
+      ],
+      "generator": "Game.Data/art_direction/tools/generate_wave_03_assets.py",
+      "method": "deterministic hand-authored Pillow pixel primitives",
+      "license": "YjsE-Project-Owned",
+      "references": "No third-party art; YjsE yjse-pixel-v1 palette and checked-in tile silhouettes only",
+      "runtimeConsumer": "ClientTextureRegistry.PreloadAll; scene selection is content-owner follow-up where tagged runtime-preloaded"
+    },
+    {
+      "path": "sprites/entities/enemies/forest_boar_elite.png",
+      "sha256": "f16cf40c1b0d9a122362e8e989444508deb407ef12b7b0b877261cd74435c452",
+      "dimensions": [
+        128,
+        32
+      ],
+      "generator": "Game.Data/art_direction/tools/generate_wave_03_assets.py",
+      "method": "deterministic hand-authored Pillow pixel primitives",
+      "license": "YjsE-Project-Owned",
+      "references": "No third-party art; YjsE yjse-pixel-v1 palette and checked-in tile silhouettes only",
+      "runtimeConsumer": "ClientTextureRegistry.PreloadAll; scene selection is content-owner follow-up where tagged runtime-preloaded"
+    },
+    {
+      "path": "sprites/entities/enemies/cave_spider_elite.png",
+      "sha256": "2162b78fc04b93596e988bdd61f58c7d14af1fc7c5611eab9d6f22583005e6f6",
+      "dimensions": [
+        128,
+        32
+      ],
+      "generator": "Game.Data/art_direction/tools/generate_wave_03_assets.py",
+      "method": "deterministic hand-authored Pillow pixel primitives",
+      "license": "YjsE-Project-Owned",
+      "references": "No third-party art; YjsE yjse-pixel-v1 palette and checked-in tile silhouettes only",
+      "runtimeConsumer": "ClientTextureRegistry.PreloadAll; scene selection is content-owner follow-up where tagged runtime-preloaded"
+    },
+    {
+      "path": "sprites/ui/biomes/meadow.png",
+      "sha256": "323c5b8ef079d175acc5184b194bc3add916f80a85e53b8e31ce0182e220fdb3",
+      "dimensions": [
+        32,
+        32
+      ],
+      "generator": "Game.Data/art_direction/tools/generate_wave_03_assets.py",
+      "method": "deterministic hand-authored Pillow pixel primitives",
+      "license": "YjsE-Project-Owned",
+      "references": "No third-party art; YjsE yjse-pixel-v1 palette and checked-in tile silhouettes only",
+      "runtimeConsumer": "ClientTextureRegistry.PreloadAll; scene selection is content-owner follow-up where tagged runtime-preloaded"
+    },
+    {
+      "path": "sprites/ui/biomes/forest.png",
+      "sha256": "744f5ae488266de7583e7f2d8508c1405deb07fb0adb5503bc7a28f7c8f357db",
+      "dimensions": [
+        32,
+        32
+      ],
+      "generator": "Game.Data/art_direction/tools/generate_wave_03_assets.py",
+      "method": "deterministic hand-authored Pillow pixel primitives",
+      "license": "YjsE-Project-Owned",
+      "references": "No third-party art; YjsE yjse-pixel-v1 palette and checked-in tile silhouettes only",
+      "runtimeConsumer": "ClientTextureRegistry.PreloadAll; scene selection is content-owner follow-up where tagged runtime-preloaded"
+    },
+    {
+      "path": "sprites/ui/biomes/cave.png",
+      "sha256": "a5e87f57f2e7401a02977b87d65209f14eafd3aec07c4aa2ad331c69f3e5d83a",
+      "dimensions": [
+        32,
+        32
+      ],
+      "generator": "Game.Data/art_direction/tools/generate_wave_03_assets.py",
+      "method": "deterministic hand-authored Pillow pixel primitives",
+      "license": "YjsE-Project-Owned",
+      "references": "No third-party art; YjsE yjse-pixel-v1 palette and checked-in tile silhouettes only",
+      "runtimeConsumer": "ClientTextureRegistry.PreloadAll; scene selection is content-owner follow-up where tagged runtime-preloaded"
+    }
+  ]
+}

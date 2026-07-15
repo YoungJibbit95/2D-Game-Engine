@@ -12,15 +12,15 @@ public static class CoordinateUtils
     public static TilePos WorldToTile(float pixelX, float pixelY)
     {
         return new TilePos(
-            (int)MathF.Floor(pixelX / GameConstants.TileSize),
-            (int)MathF.Floor(pixelY / GameConstants.TileSize));
+            FloorToInt(pixelX / GameConstants.TileSize),
+            FloorToInt(pixelY / GameConstants.TileSize));
     }
 
     public static Vector2 TileToWorld(TilePos tilePosition)
     {
         return new Vector2(
-            tilePosition.X * GameConstants.TileSize,
-            tilePosition.Y * GameConstants.TileSize);
+            (float)tilePosition.X * GameConstants.TileSize,
+            (float)tilePosition.Y * GameConstants.TileSize);
     }
 
     public static ChunkPos TileToChunk(TilePos tilePosition)
@@ -30,9 +30,7 @@ public static class CoordinateUtils
 
     public static ChunkPos TileToChunk(int tileX, int tileY)
     {
-        return new ChunkPos(
-            FloorDiv(tileX, GameConstants.ChunkSize),
-            FloorDiv(tileY, GameConstants.ChunkSize));
+        return new ChunkPos(FloorDiv(tileX), FloorDiv(tileY));
     }
 
     public static TilePos LocalTileInChunk(TilePos tilePosition)
@@ -42,16 +40,21 @@ public static class CoordinateUtils
 
     public static TilePos LocalTileInChunk(int tileX, int tileY)
     {
+        return new TilePos(FloorMod(tileX), FloorMod(tileY));
+    }
+
+    public static TilePos ChunkToTileOrigin(ChunkPos chunkPosition)
+    {
         return new TilePos(
-            FloorMod(tileX, GameConstants.ChunkSize),
-            FloorMod(tileY, GameConstants.ChunkSize));
+            SaturateToInt((long)chunkPosition.X * GameConstants.ChunkSize),
+            SaturateToInt((long)chunkPosition.Y * GameConstants.ChunkSize));
     }
 
     public static RectI ChunkTileBounds(ChunkPos chunkPosition)
     {
         return new RectI(
-            chunkPosition.X * GameConstants.ChunkSize,
-            chunkPosition.Y * GameConstants.ChunkSize,
+            SaturatingChunkOrigin(chunkPosition.X),
+            SaturatingChunkOrigin(chunkPosition.Y),
             GameConstants.ChunkSize,
             GameConstants.ChunkSize);
     }
@@ -64,33 +67,61 @@ public static class CoordinateUtils
         }
 
         var min = TileToChunk(tileRegion.Left, tileRegion.Top);
-        var max = TileToChunk(tileRegion.Right - 1, tileRegion.Bottom - 1);
-
-        for (var cy = min.Y; cy <= max.Y; cy++)
+        var max = TileToChunk(
+            SaturateToInt((long)tileRegion.Right - 1),
+            SaturateToInt((long)tileRegion.Bottom - 1));
+        for (var y = (long)min.Y; y <= max.Y; y++)
         {
-            for (var cx = min.X; cx <= max.X; cx++)
+            for (var x = (long)min.X; x <= max.X; x++)
             {
-                yield return new ChunkPos(cx, cy);
+                yield return new ChunkPos((int)x, (int)y);
             }
         }
     }
 
-    private static int FloorDiv(int value, int divisor)
+    private static int FloorDiv(int value)
     {
-        var quotient = value / divisor;
-        var remainder = value % divisor;
-
-        if (remainder != 0 && ((remainder < 0) != (divisor < 0)))
-        {
-            quotient--;
-        }
-
-        return quotient;
+        var quotient = value / GameConstants.ChunkSize;
+        return value % GameConstants.ChunkSize < 0 ? quotient - 1 : quotient;
     }
 
-    private static int FloorMod(int value, int divisor)
+    private static int FloorMod(int value)
     {
-        var remainder = value % divisor;
-        return remainder < 0 ? remainder + Math.Abs(divisor) : remainder;
+        var remainder = value % GameConstants.ChunkSize;
+        return remainder < 0 ? remainder + GameConstants.ChunkSize : remainder;
+    }
+
+    private static int FloorToInt(float value)
+    {
+        if (float.IsNaN(value))
+        {
+            return 0;
+        }
+
+        if (float.IsPositiveInfinity(value))
+        {
+            return int.MaxValue;
+        }
+
+        if (float.IsNegativeInfinity(value))
+        {
+            return int.MinValue;
+        }
+
+        return SaturateToInt((long)Math.Floor(value));
+    }
+
+    private static int SaturatingChunkOrigin(int chunkCoordinate)
+    {
+        var origin = (long)chunkCoordinate * GameConstants.ChunkSize;
+        return (int)Math.Clamp(
+            origin,
+            int.MinValue,
+            (long)int.MaxValue - GameConstants.ChunkSize);
+    }
+
+    private static int SaturateToInt(long value)
+    {
+        return (int)Math.Clamp(value, int.MinValue, int.MaxValue);
     }
 }

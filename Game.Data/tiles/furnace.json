@@ -1,0 +1,14 @@
+{
+  "id": "furnace",
+  "numericId": 9,
+  "displayName": "Stone Furnace",
+  "texture": "world/objects/furnace",
+  "solid": false,
+  "blocksLight": false,
+  "hardness": 2.5,
+  "miningPowerRequired": 15,
+  "dropItem": "furnace",
+  "mergeGroup": "furniture",
+  "craftingStation": "furnace",
+  "tags": ["station", "crafting", "smelting", "furniture", "mineable"]
+}

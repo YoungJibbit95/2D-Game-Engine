@@ -1,6 +1,11 @@
 {
   "id": "wooden_sword",
   "displayName": "Wooden Sword",
+  "description": "A light training blade carved from sturdy timber.",
+  "rarity": "Common",
+  "value": 18,
+  "category": "Weapon",
+  "sortPriority": 10,
   "type": "WeaponMelee",
   "texture": "items/wooden_sword",
   "maxStack": 1,

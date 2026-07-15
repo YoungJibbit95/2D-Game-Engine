@@ -11,6 +11,24 @@ namespace Game.Tests.InteractionTests;
 public sealed class MiningAndBuildingTests
 {
     [Fact]
+    public void MiningSystem_DefaultTuningIsFastAndPreservesToolPowerProgression()
+    {
+        var weakWorld = CreateWorld();
+        weakWorld.SetTile(2, 2, KnownTileIds.Dirt);
+        var strongWorld = CreateWorld();
+        strongWorld.SetTile(2, 2, KnownTileIds.Dirt);
+
+        var weak = new MiningSystem().Update(
+            weakWorld, CreateTiles(), new TilePos(2, 2), new Vector2(40, 40), 96, 0, 0.1f);
+        var strong = new MiningSystem().Update(
+            strongWorld, CreateTiles(), new TilePos(2, 2), new Vector2(40, 40), 96, 50, 0.1f);
+
+        Assert.InRange(weak.Progress, 0.159f, 0.161f);
+        Assert.True(strong.Progress > weak.Progress);
+        Assert.InRange(strong.Progress / weak.Progress, 1.49f, 1.51f);
+    }
+
+    [Fact]
     public void MiningSystem_RemovesTileAndReturnsDropAfterProgressCompletes()
     {
         var world = CreateWorld();

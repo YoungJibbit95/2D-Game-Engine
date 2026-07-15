@@ -4,5 +4,9 @@ obj/
 .vscode/
 .idea/
 TestResults/
+.artifacts/
+artifacts/
 *.user
 *.suo
+__pycache__/
+*.py[cod]

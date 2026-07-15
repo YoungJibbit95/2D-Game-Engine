@@ -1,0 +1,16 @@
+{
+  "id": "amberstone_block",
+  "displayName": "Amberstone Block",
+  "description": "Warm mineral stone used for resilient foundations.",
+  "rarity": "Uncommon",
+  "value": 3,
+  "category": "Block",
+  "sortPriority": 30,
+  "type": "PlaceableTile",
+  "texture": "world/wave05/amberstone_autotile",
+  "maxStack": 999,
+  "useTime": 0.08,
+  "placesTile": "amberstone",
+  "placementSupport": "AdjacentSolid",
+  "tags": ["block", "stone", "amber-grove", "placeable"]
+}

@@ -1,6 +1,11 @@
 {
   "id": "watering_can",
   "displayName": "Watering Can",
+  "description": "Waters tilled farm plots so thirsty crops can grow.",
+  "rarity": "Common",
+  "value": 25,
+  "category": "Tool",
+  "sortPriority": 40,
   "type": "ToolWateringCan",
   "texture": "items/watering_can",
   "maxStack": 1,

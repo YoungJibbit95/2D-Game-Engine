@@ -18,6 +18,34 @@ public sealed record ChunkStreamingUpdateResult(
 {
     public bool BudgetExhausted => DeferredLoadChunks > 0 || DeferredUnloadChunks > 0;
 
+    public int ApplyOperationsProcessed { get; init; }
+
+    public int CancellationRequests { get; init; }
+
+    public int CancelledJobs { get; init; }
+
+    public int StaleResultsRejected { get; init; }
+
+    public int FailedJobs { get; init; }
+
+    public int RetryableFailures { get; init; }
+
+    public int PermanentFailures { get; init; }
+
+    public int RetryScheduled { get; init; }
+
+    public int RetryExhausted { get; init; }
+
+    public int DeferredApplyItemsByTime { get; init; }
+
+    public int DeferredApplyItemsByBytes { get; init; }
+
+    public long AppliedDecodedBytes { get; init; }
+
+    public int OversizeApplyOperations { get; init; }
+
+    public ChunkStreamingTelemetry Telemetry { get; init; } = ChunkStreamingTelemetry.Empty;
+
     public static ChunkStreamingUpdateResult Empty { get; } = new(
         new ChunkStreamingPlan(
             new HashSet<ChunkPos>(),

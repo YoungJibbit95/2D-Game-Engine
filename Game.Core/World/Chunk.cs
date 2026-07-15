@@ -52,6 +52,10 @@ public sealed class Chunk
         }
 
         Tiles[index].Light = light;
+    }
+
+    public void MarkLightDirty()
+    {
         NeedsLightUpdate = true;
     }
 
@@ -70,6 +74,7 @@ public sealed class Chunk
         }
 
         ClearDirtyFlags();
+        MarkLightDirty();
     }
 
     public void MarkDirty(bool needsMeshRebuild = true, bool needsLightUpdate = true)

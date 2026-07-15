@@ -1,6 +1,11 @@
 {
   "id": "parsnip_seeds",
   "displayName": "Parsnip Seeds",
+  "description": "Plant in tilled spring soil and water daily until harvest.",
+  "rarity": "Common",
+  "value": 5,
+  "category": "Farming",
+  "sortPriority": 10,
   "type": "Seed",
   "texture": "items/parsnip_seeds",
   "maxStack": 999,

@@ -46,7 +46,7 @@ public sealed class GameplayInteractionFeedbackTests
         Assert.True(first.Started);
         Assert.Equal(new TilePos(2, 2), first.TilePosition);
         Assert.Equal(KnownTileIds.Dirt, first.TargetTileId);
-        Assert.InRange(first.Progress, 0.009f, 0.011f);
+        Assert.InRange(first.Progress, 0.017f, 0.018f);
         Assert.Equal(1, startedEvents);
         Assert.Equal(1, progressEvents);
 

@@ -1,0 +1,17 @@
+{
+  "id": "sunsteel_pickaxe",
+  "displayName": "Sunsteel Pickaxe",
+  "description": "A fast precision pick forged for amberstone and deep ore.",
+  "rarity": "Rare",
+  "value": 420,
+  "category": "Tool",
+  "sortPriority": 70,
+  "type": "ToolPickaxe",
+  "texture": "items/wave05/sunsteel_pickaxe",
+  "maxStack": 1,
+  "useTime": 0.22,
+  "toolPower": 70,
+  "damage": 10,
+  "knockback": 2.2,
+  "tags": ["tool", "pickaxe", "sunsteel", "wave05"]
+}

@@ -15,14 +15,7 @@ Only open work is kept here. Completed items are removed after implementation.
 - [ ] Add liquid/debug overlay showing tile liquid amount and flow direction.
 - [ ] Add combat damage numbers and entity hit flashes.
 
-## Inventory And Equipment UI
-
-- [ ] Add sorting, stack compaction, and category filters.
-
 ## Crafting UI
-- [ ] Add recipe search.
-- [ ] Add craft amount controls and hold-to-repeat timing.
-- [ ] Add recipe pinning/tracking in HUD.
 - [ ] Add station-range indicator and recipe unlock source hints.
 
 ## Menus

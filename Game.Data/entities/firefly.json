@@ -1,0 +1,41 @@
+{
+  "id": "firefly",
+  "displayName": "Firefly",
+  "texture": "entities/critters/firefly",
+  "maxHealth": 3,
+  "width": 8,
+  "height": 6,
+  "faction": "friendly",
+  "movementMode": "flying",
+  "tags": ["critter", "forest", "surface", "nocturnal", "forest_wildlife"],
+  "contactDamage": 0,
+  "contactKnockback": 0,
+  "attackDamage": 0,
+  "lootTable": "firefly",
+  "despawn": {
+    "mode": "whenIdle",
+    "spawnProtectionSeconds": 5,
+    "damageProtectionSeconds": 10
+  },
+  "ai": {
+    "kind": "wander",
+    "detectionRange": 80,
+    "loseTargetRange": 120,
+    "moveSpeed": 28,
+    "fleeSpeed": 62,
+    "returnHomeDistance": 144,
+    "flockRadius": 96,
+    "flockWeight": 0.7,
+    "minFlockSize": 3,
+    "perceptionMemorySeconds": 1.8,
+    "decisionInterval": 0.65,
+    "idleChance": 0.12,
+    "activityPeriod": "night",
+    "dayMoveSpeedMultiplier": 0.35,
+    "nightMoveSpeedMultiplier": 1.15,
+    "perchWhenInactive": true,
+    "requiresLineOfSight": true,
+    "avoidLedges": false,
+    "avoidLiquid": true
+  }
+}

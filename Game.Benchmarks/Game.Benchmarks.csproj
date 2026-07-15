@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <AssemblyName>Game.Benchmarks</AssemblyName>
+    <RootNamespace>Game.Benchmarks</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Game.Core\Game.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="BenchmarkDotNet" Version="0.15.8" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="performance-thresholds.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Update="performance-baseline.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>

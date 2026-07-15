@@ -1,0 +1,8 @@
+{
+  "id": "amberwood_planks",
+  "result": { "itemId": "amberwood_plank_block", "count": 4 },
+  "ingredients": [
+    { "itemId": "wood", "count": 1 }
+  ],
+  "station": "workbench"
+}

@@ -1,0 +1,42 @@
+{
+  "id": "squirrel",
+  "displayName": "Forest Squirrel",
+  "texture": "entities/critters/squirrel",
+  "maxHealth": 6,
+  "width": 12,
+  "height": 10,
+  "faction": "friendly",
+  "movementMode": "ground",
+  "tags": ["critter", "forest", "surface", "forest_wildlife"],
+  "contactDamage": 0,
+  "contactKnockback": 0,
+  "attackDamage": 0,
+  "lootTable": "squirrel_forage",
+  "despawn": {
+    "mode": "whenIdle",
+    "spawnProtectionSeconds": 6,
+    "damageProtectionSeconds": 12
+  },
+  "ai": {
+    "kind": "critter",
+    "detectionRange": 104,
+    "loseTargetRange": 144,
+    "moveSpeed": 42,
+    "fleeSpeed": 92,
+    "returnHomeDistance": 128,
+    "flockRadius": 88,
+    "flockWeight": 0.25,
+    "minFlockSize": 2,
+    "perceptionMemorySeconds": 2.8,
+    "jumpSpeed": 235,
+    "decisionInterval": 0.9,
+    "idleChance": 0.35,
+    "activityPeriod": "day",
+    "dayMoveSpeedMultiplier": 1.0,
+    "nightMoveSpeedMultiplier": 0.45,
+    "perchWhenInactive": false,
+    "requiresLineOfSight": true,
+    "avoidLedges": true,
+    "avoidLiquid": true
+  }
+}

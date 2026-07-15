@@ -1,0 +1,717 @@
+{
+  "schemaVersion": 1,
+  "waveId": "wave_04_character_atmosphere_ui_production",
+  "generatedOn": "2026-07-14",
+  "generatedSource": {
+    "path": "art_direction/generated_sources/wave_04_character_source.png",
+    "sha256": "da0534fd0e76f9172bb57d880080fd4b7095d3d3dd8d93f5cd870b7fafa2e661",
+    "dimensions": [
+      1983,
+      793
+    ],
+    "toolPath": "built-in image_gen (imagegen skill default mode)",
+    "promptId": "wave04_character_source_v1",
+    "chromaKey": "#FF00FF",
+    "postProcessing": "Nearest-neighbor sample, chroma exclusion, quantization to yjse-pixel-v1, deterministic pixel-native reconstruction at final frame grids.",
+    "quantizedTopPaletteNames": [
+      "outline",
+      "copper1",
+      "wood0",
+      "copper0",
+      "copper2",
+      "teal0",
+      "mush3",
+      "wood2",
+      "leaf0",
+      "wood1",
+      "mid",
+      "cloth_grey"
+    ],
+    "selectedCharacterPaletteNames": {
+      "hair_base": "copper0",
+      "hair_light": "copper1",
+      "cloth_base": "teal0",
+      "cloth_light": "teal1",
+      "armor_base": "copper1",
+      "armor_light": "copper2"
+    }
+  },
+  "generatorSha256": "9dfb09f58273bb3b4c4dac6c128b4a9f068f2ccd9bf56081b028146d382a1e41",
+  "promptSet": {
+    "path": "art_direction/wave_04_promptset.json",
+    "sha256": "1db8fe29c521db64bd85833b00efe339b6df8bac9f2be515bdc95f9684fc3f9e"
+  },
+  "assets": [
+    {
+      "spriteId": "entities/player/character_v1_wave04/body",
+      "path": "sprites/entities/player/wave04/player_body_actions.png",
+      "sha256": "dcc5577558e01a7612b1dd841ec433973e807a0168a5799d6a3020f25e5c8573",
+      "dimensions": [
+        256,
+        32
+      ],
+      "frameCount": 16,
+      "generator": "Game.Data/art_direction/tools/generate_wave_04_assets.py",
+      "method": "deterministic Pillow pixel primitives with nearest-neighbor generated-source palette quantization",
+      "sourcePromptId": "wave04_character_source_v1",
+      "generatedSourceSha256": "da0534fd0e76f9172bb57d880080fd4b7095d3d3dd8d93f5cd870b7fafa2e661",
+      "alphaValues": [
+        0,
+        255
+      ],
+      "license": "YjsE-Project-Owned",
+      "runtimeIdTarget": "entities/player/character_v1_wave04/body",
+      "runtimeConsumer": "ClientTextureRegistry.PreloadAll; scene selection remains content/runtime-owner follow-up"
+    },
+    {
+      "spriteId": "entities/player/character_v1_wave04/hair",
+      "path": "sprites/entities/player/wave04/player_hair_actions.png",
+      "sha256": "de9ccfc050272165e64666661bd4c11b0b181c6e4d4df9e8859bbcabf77de0fa",
+      "dimensions": [
+        256,
+        32
+      ],
+      "frameCount": 16,
+      "generator": "Game.Data/art_direction/tools/generate_wave_04_assets.py",
+      "method": "deterministic Pillow pixel primitives with nearest-neighbor generated-source palette quantization",
+      "sourcePromptId": "wave04_character_source_v1",
+      "generatedSourceSha256": "da0534fd0e76f9172bb57d880080fd4b7095d3d3dd8d93f5cd870b7fafa2e661",
+      "alphaValues": [
+        0,
+        255
+      ],
+      "license": "YjsE-Project-Owned",
+      "runtimeIdTarget": "entities/player/character_v1_wave04/hair",
+      "runtimeConsumer": "ClientTextureRegistry.PreloadAll; scene selection remains content/runtime-owner follow-up"
+    },
+    {
+      "spriteId": "entities/player/character_v1_wave04/clothes",
+      "path": "sprites/entities/player/wave04/player_clothes_actions.png",
+      "sha256": "8c50ac0d1ad0d51e1830d22d97a14bd6e511dfb2b122975178ca51492009aba5",
+      "dimensions": [
+        256,
+        32
+      ],
+      "frameCount": 16,
+      "generator": "Game.Data/art_direction/tools/generate_wave_04_assets.py",
+      "method": "deterministic Pillow pixel primitives with nearest-neighbor generated-source palette quantization",
+      "sourcePromptId": "wave04_character_source_v1",
+      "generatedSourceSha256": "da0534fd0e76f9172bb57d880080fd4b7095d3d3dd8d93f5cd870b7fafa2e661",
+      "alphaValues": [
+        0,
+        255
+      ],
+      "license": "YjsE-Project-Owned",
+      "runtimeIdTarget": "entities/player/character_v1_wave04/clothes",
+      "runtimeConsumer": "ClientTextureRegistry.PreloadAll; scene selection remains content/runtime-owner follow-up"
+    },
+    {
+      "spriteId": "entities/player/character_v1_wave04/armor",
+      "path": "sprites/entities/player/wave04/player_armor_actions.png",
+      "sha256": "c19911e5d827f83c5765cfbaeee893cddbf768696660cfdc5ee01ee5900622f1",
+      "dimensions": [
+        256,
+        32
+      ],
+      "frameCount": 16,
+      "generator": "Game.Data/art_direction/tools/generate_wave_04_assets.py",
+      "method": "deterministic Pillow pixel primitives with nearest-neighbor generated-source palette quantization",
+      "sourcePromptId": "wave04_character_source_v1",
+      "generatedSourceSha256": "da0534fd0e76f9172bb57d880080fd4b7095d3d3dd8d93f5cd870b7fafa2e661",
+      "alphaValues": [
+        0,
+        255
+      ],
+      "license": "YjsE-Project-Owned",
+      "runtimeIdTarget": "entities/player/character_v1_wave04/armor",
+      "runtimeConsumer": "ClientTextureRegistry.PreloadAll; scene selection remains content/runtime-owner follow-up"
+    },
+    {
+      "spriteId": "entities/player/character_v1_wave04/equipment",
+      "path": "sprites/entities/player/wave04/player_equipment_actions.png",
+      "sha256": "342ff1e8937b88169c93bf1b7c6a044e9c9b83171722a08a222494701ee98348",
+      "dimensions": [
+        256,
+        32
+      ],
+      "frameCount": 16,
+      "generator": "Game.Data/art_direction/tools/generate_wave_04_assets.py",
+      "method": "deterministic Pillow pixel primitives with nearest-neighbor generated-source palette quantization",
+      "sourcePromptId": "wave04_character_source_v1",
+      "generatedSourceSha256": "da0534fd0e76f9172bb57d880080fd4b7095d3d3dd8d93f5cd870b7fafa2e661",
+      "alphaValues": [
+        0,
+        255
+      ],
+      "license": "YjsE-Project-Owned",
+      "runtimeIdTarget": "entities/player/character_v1_wave04/equipment",
+      "runtimeConsumer": "ClientTextureRegistry.PreloadAll; scene selection remains content/runtime-owner follow-up"
+    },
+    {
+      "spriteId": "world/backgrounds/wave04/meadow_parallax_layer",
+      "path": "sprites/world/backgrounds/wave04/meadow_parallax_layer.png",
+      "sha256": "dd8b897862482261c6b52898c7fcd1004ff723e78976938a531cdff596c623ed",
+      "dimensions": [
+        512,
+        128
+      ],
+      "frameCount": 0,
+      "generator": "Game.Data/art_direction/tools/generate_wave_04_assets.py",
+      "method": "deterministic Pillow pixel primitives with nearest-neighbor generated-source palette quantization",
+      "sourcePromptId": "wave04_deterministic_extension_v1",
+      "generatedSourceSha256": "da0534fd0e76f9172bb57d880080fd4b7095d3d3dd8d93f5cd870b7fafa2e661",
+      "alphaValues": [
+        255
+      ],
+      "license": "YjsE-Project-Owned",
+      "runtimeIdTarget": "world/backgrounds/wave04/meadow_parallax_layer",
+      "runtimeConsumer": "ClientTextureRegistry.PreloadAll; scene selection remains content/runtime-owner follow-up",
+      "tilePaletteReferences": [
+        "grass_autotile",
+        "dirt_autotile"
+      ],
+      "horizontalSeamColumnsEqual": true
+    },
+    {
+      "spriteId": "world/backgrounds/wave04/forest_parallax_layer",
+      "path": "sprites/world/backgrounds/wave04/forest_parallax_layer.png",
+      "sha256": "a2f3c0d041edf54b77ceddb42161dc8a097d87a1158fb5a33fb2ec4e9534588c",
+      "dimensions": [
+        512,
+        128
+      ],
+      "frameCount": 0,
+      "generator": "Game.Data/art_direction/tools/generate_wave_04_assets.py",
+      "method": "deterministic Pillow pixel primitives with nearest-neighbor generated-source palette quantization",
+      "sourcePromptId": "wave04_deterministic_extension_v1",
+      "generatedSourceSha256": "da0534fd0e76f9172bb57d880080fd4b7095d3d3dd8d93f5cd870b7fafa2e661",
+      "alphaValues": [
+        255
+      ],
+      "license": "YjsE-Project-Owned",
+      "runtimeIdTarget": "world/backgrounds/wave04/forest_parallax_layer",
+      "runtimeConsumer": "ClientTextureRegistry.PreloadAll; scene selection remains content/runtime-owner follow-up",
+      "tilePaletteReferences": [
+        "leaves_autotile",
+        "oak_trunk_autotile"
+      ],
+      "horizontalSeamColumnsEqual": true
+    },
+    {
+      "spriteId": "world/backgrounds/wave04/cave_parallax_layer",
+      "path": "sprites/world/backgrounds/wave04/cave_parallax_layer.png",
+      "sha256": "37abc9eab6a517bcd9c867cdbbc149dc99b5e100efdaea043ab020cab73500b8",
+      "dimensions": [
+        512,
+        128
+      ],
+      "frameCount": 0,
+      "generator": "Game.Data/art_direction/tools/generate_wave_04_assets.py",
+      "method": "deterministic Pillow pixel primitives with nearest-neighbor generated-source palette quantization",
+      "sourcePromptId": "wave04_deterministic_extension_v1",
+      "generatedSourceSha256": "da0534fd0e76f9172bb57d880080fd4b7095d3d3dd8d93f5cd870b7fafa2e661",
+      "alphaValues": [
+        255
+      ],
+      "license": "YjsE-Project-Owned",
+      "runtimeIdTarget": "world/backgrounds/wave04/cave_parallax_layer",
+      "runtimeConsumer": "ClientTextureRegistry.PreloadAll; scene selection remains content/runtime-owner follow-up",
+      "tilePaletteReferences": [
+        "stone_autotile",
+        "granite_autotile"
+      ],
+      "horizontalSeamColumnsEqual": true
+    },
+    {
+      "spriteId": "world/backgrounds/wave04/mushroom_parallax_layer",
+      "path": "sprites/world/backgrounds/wave04/mushroom_cave_parallax_layer.png",
+      "sha256": "a8eeaafe0f5b5e1a25e8e1c74c9b3c1a776ebdbd4636e6ddc6fc9e1d752a1c76",
+      "dimensions": [
+        512,
+        128
+      ],
+      "frameCount": 0,
+      "generator": "Game.Data/art_direction/tools/generate_wave_04_assets.py",
+      "method": "deterministic Pillow pixel primitives with nearest-neighbor generated-source palette quantization",
+      "sourcePromptId": "wave04_deterministic_extension_v1",
+      "generatedSourceSha256": "da0534fd0e76f9172bb57d880080fd4b7095d3d3dd8d93f5cd870b7fafa2e661",
+      "alphaValues": [
+        255
+      ],
+      "license": "YjsE-Project-Owned",
+      "runtimeIdTarget": "world/backgrounds/wave04/mushroom_parallax_layer",
+      "runtimeConsumer": "ClientTextureRegistry.PreloadAll; scene selection remains content/runtime-owner follow-up",
+      "tilePaletteReferences": [
+        "mud_autotile",
+        "granite_autotile"
+      ],
+      "horizontalSeamColumnsEqual": true
+    },
+    {
+      "spriteId": "world/backgrounds/wave04/crystal_parallax_layer",
+      "path": "sprites/world/backgrounds/wave04/crystal_depths_parallax_layer.png",
+      "sha256": "b7f7af389ed51c3ca60e37ef7b7fee15c78a2768dc9da952e231c376e68c65d5",
+      "dimensions": [
+        512,
+        128
+      ],
+      "frameCount": 0,
+      "generator": "Game.Data/art_direction/tools/generate_wave_04_assets.py",
+      "method": "deterministic Pillow pixel primitives with nearest-neighbor generated-source palette quantization",
+      "sourcePromptId": "wave04_deterministic_extension_v1",
+      "generatedSourceSha256": "da0534fd0e76f9172bb57d880080fd4b7095d3d3dd8d93f5cd870b7fafa2e661",
+      "alphaValues": [
+        255
+      ],
+      "license": "YjsE-Project-Owned",
+      "runtimeIdTarget": "world/backgrounds/wave04/crystal_parallax_layer",
+      "runtimeConsumer": "ClientTextureRegistry.PreloadAll; scene selection remains content/runtime-owner follow-up",
+      "tilePaletteReferences": [
+        "stone_autotile",
+        "ice_autotile"
+      ],
+      "horizontalSeamColumnsEqual": true
+    },
+    {
+      "spriteId": "effects/ambient/meadow_seed_drift",
+      "path": "sprites/effects/ambient/meadow_seed_drift.png",
+      "sha256": "db858bc58a82a0f68e3b1f118a4db38618021ead1c41239e62fb5dce52da32c6",
+      "dimensions": [
+        96,
+        16
+      ],
+      "frameCount": 6,
+      "generator": "Game.Data/art_direction/tools/generate_wave_04_assets.py",
+      "method": "deterministic Pillow pixel primitives with nearest-neighbor generated-source palette quantization",
+      "sourcePromptId": "wave04_deterministic_extension_v1",
+      "generatedSourceSha256": "da0534fd0e76f9172bb57d880080fd4b7095d3d3dd8d93f5cd870b7fafa2e661",
+      "alphaValues": [
+        0,
+        255
+      ],
+      "license": "YjsE-Project-Owned",
+      "runtimeIdTarget": "effects/ambient/meadow_seed_drift",
+      "runtimeConsumer": "ClientTextureRegistry.PreloadAll; scene selection remains content/runtime-owner follow-up"
+    },
+    {
+      "spriteId": "effects/ambient/forest_leaf_swirl",
+      "path": "sprites/effects/ambient/forest_leaf_swirl.png",
+      "sha256": "2148590d06caffe4b548392b229897eb807e43526d0704eb16d91ec30fb1bbb0",
+      "dimensions": [
+        96,
+        16
+      ],
+      "frameCount": 6,
+      "generator": "Game.Data/art_direction/tools/generate_wave_04_assets.py",
+      "method": "deterministic Pillow pixel primitives with nearest-neighbor generated-source palette quantization",
+      "sourcePromptId": "wave04_deterministic_extension_v1",
+      "generatedSourceSha256": "da0534fd0e76f9172bb57d880080fd4b7095d3d3dd8d93f5cd870b7fafa2e661",
+      "alphaValues": [
+        0,
+        255
+      ],
+      "license": "YjsE-Project-Owned",
+      "runtimeIdTarget": "effects/ambient/forest_leaf_swirl",
+      "runtimeConsumer": "ClientTextureRegistry.PreloadAll; scene selection remains content/runtime-owner follow-up"
+    },
+    {
+      "spriteId": "effects/ambient/cave_motes",
+      "path": "sprites/effects/ambient/cave_motes.png",
+      "sha256": "d406907e3fe7670c00b92af90a1371911b5eff3cc8ec3da0596700114fbea35f",
+      "dimensions": [
+        96,
+        16
+      ],
+      "frameCount": 6,
+      "generator": "Game.Data/art_direction/tools/generate_wave_04_assets.py",
+      "method": "deterministic Pillow pixel primitives with nearest-neighbor generated-source palette quantization",
+      "sourcePromptId": "wave04_deterministic_extension_v1",
+      "generatedSourceSha256": "da0534fd0e76f9172bb57d880080fd4b7095d3d3dd8d93f5cd870b7fafa2e661",
+      "alphaValues": [
+        0,
+        255
+      ],
+      "license": "YjsE-Project-Owned",
+      "runtimeIdTarget": "effects/ambient/cave_motes",
+      "runtimeConsumer": "ClientTextureRegistry.PreloadAll; scene selection remains content/runtime-owner follow-up"
+    },
+    {
+      "spriteId": "effects/ambient/mushroom_spores",
+      "path": "sprites/effects/ambient/mushroom_spores.png",
+      "sha256": "742577d26af437db6c1f2fe74297eeecfebcaf969599b922d51a794e77c0d93b",
+      "dimensions": [
+        96,
+        16
+      ],
+      "frameCount": 6,
+      "generator": "Game.Data/art_direction/tools/generate_wave_04_assets.py",
+      "method": "deterministic Pillow pixel primitives with nearest-neighbor generated-source palette quantization",
+      "sourcePromptId": "wave04_deterministic_extension_v1",
+      "generatedSourceSha256": "da0534fd0e76f9172bb57d880080fd4b7095d3d3dd8d93f5cd870b7fafa2e661",
+      "alphaValues": [
+        0,
+        255
+      ],
+      "license": "YjsE-Project-Owned",
+      "runtimeIdTarget": "effects/ambient/mushroom_spores",
+      "runtimeConsumer": "ClientTextureRegistry.PreloadAll; scene selection remains content/runtime-owner follow-up"
+    },
+    {
+      "spriteId": "effects/ambient/crystal_glints",
+      "path": "sprites/effects/ambient/crystal_glints.png",
+      "sha256": "8284329bcb940387279a595f3ebfe514cefd2f0a04ac7e814c3dcce0ef67287b",
+      "dimensions": [
+        96,
+        16
+      ],
+      "frameCount": 6,
+      "generator": "Game.Data/art_direction/tools/generate_wave_04_assets.py",
+      "method": "deterministic Pillow pixel primitives with nearest-neighbor generated-source palette quantization",
+      "sourcePromptId": "wave04_deterministic_extension_v1",
+      "generatedSourceSha256": "da0534fd0e76f9172bb57d880080fd4b7095d3d3dd8d93f5cd870b7fafa2e661",
+      "alphaValues": [
+        0,
+        255
+      ],
+      "license": "YjsE-Project-Owned",
+      "runtimeIdTarget": "effects/ambient/crystal_glints",
+      "runtimeConsumer": "ClientTextureRegistry.PreloadAll; scene selection remains content/runtime-owner follow-up"
+    },
+    {
+      "spriteId": "effects/weather/rain_streaks",
+      "path": "sprites/effects/weather/rain_streaks.png",
+      "sha256": "cab2e2892d862883173de02ffef9822b93a8804e60f0d62cf8b35d516bb03528",
+      "dimensions": [
+        96,
+        16
+      ],
+      "frameCount": 6,
+      "generator": "Game.Data/art_direction/tools/generate_wave_04_assets.py",
+      "method": "deterministic Pillow pixel primitives with nearest-neighbor generated-source palette quantization",
+      "sourcePromptId": "wave04_deterministic_extension_v1",
+      "generatedSourceSha256": "da0534fd0e76f9172bb57d880080fd4b7095d3d3dd8d93f5cd870b7fafa2e661",
+      "alphaValues": [
+        0,
+        255
+      ],
+      "license": "YjsE-Project-Owned",
+      "runtimeIdTarget": "effects/weather/rain_streaks",
+      "runtimeConsumer": "ClientTextureRegistry.PreloadAll; scene selection remains content/runtime-owner follow-up"
+    },
+    {
+      "spriteId": "effects/weather/snow_flurry",
+      "path": "sprites/effects/weather/snow_flurry.png",
+      "sha256": "44831672a61633f74a30542a647db9c50a149d22626f9e9b9fa78f54b6244125",
+      "dimensions": [
+        96,
+        16
+      ],
+      "frameCount": 6,
+      "generator": "Game.Data/art_direction/tools/generate_wave_04_assets.py",
+      "method": "deterministic Pillow pixel primitives with nearest-neighbor generated-source palette quantization",
+      "sourcePromptId": "wave04_deterministic_extension_v1",
+      "generatedSourceSha256": "da0534fd0e76f9172bb57d880080fd4b7095d3d3dd8d93f5cd870b7fafa2e661",
+      "alphaValues": [
+        0,
+        255
+      ],
+      "license": "YjsE-Project-Owned",
+      "runtimeIdTarget": "effects/weather/snow_flurry",
+      "runtimeConsumer": "ClientTextureRegistry.PreloadAll; scene selection remains content/runtime-owner follow-up"
+    },
+    {
+      "spriteId": "effects/weather/wind_gust",
+      "path": "sprites/effects/weather/wind_gust.png",
+      "sha256": "11734f944dfc28a7a2db77511f205c49827ac99ddd99cc6fb15a5193a8498a06",
+      "dimensions": [
+        96,
+        16
+      ],
+      "frameCount": 6,
+      "generator": "Game.Data/art_direction/tools/generate_wave_04_assets.py",
+      "method": "deterministic Pillow pixel primitives with nearest-neighbor generated-source palette quantization",
+      "sourcePromptId": "wave04_deterministic_extension_v1",
+      "generatedSourceSha256": "da0534fd0e76f9172bb57d880080fd4b7095d3d3dd8d93f5cd870b7fafa2e661",
+      "alphaValues": [
+        0,
+        255
+      ],
+      "license": "YjsE-Project-Owned",
+      "runtimeIdTarget": "effects/weather/wind_gust",
+      "runtimeConsumer": "ClientTextureRegistry.PreloadAll; scene selection remains content/runtime-owner follow-up"
+    },
+    {
+      "spriteId": "effects/weather/storm_spark",
+      "path": "sprites/effects/weather/storm_spark.png",
+      "sha256": "b7464ea018e3488c144d3b1185df486bdc8a62f75e881a93ce11f9e340575fa0",
+      "dimensions": [
+        96,
+        16
+      ],
+      "frameCount": 6,
+      "generator": "Game.Data/art_direction/tools/generate_wave_04_assets.py",
+      "method": "deterministic Pillow pixel primitives with nearest-neighbor generated-source palette quantization",
+      "sourcePromptId": "wave04_deterministic_extension_v1",
+      "generatedSourceSha256": "da0534fd0e76f9172bb57d880080fd4b7095d3d3dd8d93f5cd870b7fafa2e661",
+      "alphaValues": [
+        0,
+        255
+      ],
+      "license": "YjsE-Project-Owned",
+      "runtimeIdTarget": "effects/weather/storm_spark",
+      "runtimeConsumer": "ClientTextureRegistry.PreloadAll; scene selection remains content/runtime-owner follow-up"
+    },
+    {
+      "spriteId": "effects/combat/sword_arc",
+      "path": "sprites/effects/combat/sword_arc.png",
+      "sha256": "ed8709335fbf9fe8d25bc666345c354adf580e5c897185935874e2e9ab7b11bc",
+      "dimensions": [
+        192,
+        32
+      ],
+      "frameCount": 6,
+      "generator": "Game.Data/art_direction/tools/generate_wave_04_assets.py",
+      "method": "deterministic Pillow pixel primitives with nearest-neighbor generated-source palette quantization",
+      "sourcePromptId": "wave04_deterministic_extension_v1",
+      "generatedSourceSha256": "da0534fd0e76f9172bb57d880080fd4b7095d3d3dd8d93f5cd870b7fafa2e661",
+      "alphaValues": [
+        0,
+        255
+      ],
+      "license": "YjsE-Project-Owned",
+      "runtimeIdTarget": "effects/combat/sword_arc",
+      "runtimeConsumer": "ClientTextureRegistry.PreloadAll; scene selection remains content/runtime-owner follow-up"
+    },
+    {
+      "spriteId": "effects/combat/block_impact",
+      "path": "sprites/effects/combat/block_impact.png",
+      "sha256": "fc6d822ee1dee898d47ecc510745ae187868b5df1082116eab55177de1c7bd08",
+      "dimensions": [
+        192,
+        32
+      ],
+      "frameCount": 6,
+      "generator": "Game.Data/art_direction/tools/generate_wave_04_assets.py",
+      "method": "deterministic Pillow pixel primitives with nearest-neighbor generated-source palette quantization",
+      "sourcePromptId": "wave04_deterministic_extension_v1",
+      "generatedSourceSha256": "da0534fd0e76f9172bb57d880080fd4b7095d3d3dd8d93f5cd870b7fafa2e661",
+      "alphaValues": [
+        0,
+        255
+      ],
+      "license": "YjsE-Project-Owned",
+      "runtimeIdTarget": "effects/combat/block_impact",
+      "runtimeConsumer": "ClientTextureRegistry.PreloadAll; scene selection remains content/runtime-owner follow-up"
+    },
+    {
+      "spriteId": "effects/combat/hurt_burst",
+      "path": "sprites/effects/combat/hurt_burst.png",
+      "sha256": "2cb2fb60e0f7c41a651a2ab661397878feccc095cb584f9a25789ece55eb4ff2",
+      "dimensions": [
+        192,
+        32
+      ],
+      "frameCount": 6,
+      "generator": "Game.Data/art_direction/tools/generate_wave_04_assets.py",
+      "method": "deterministic Pillow pixel primitives with nearest-neighbor generated-source palette quantization",
+      "sourcePromptId": "wave04_deterministic_extension_v1",
+      "generatedSourceSha256": "da0534fd0e76f9172bb57d880080fd4b7095d3d3dd8d93f5cd870b7fafa2e661",
+      "alphaValues": [
+        0,
+        255
+      ],
+      "license": "YjsE-Project-Owned",
+      "runtimeIdTarget": "effects/combat/hurt_burst",
+      "runtimeConsumer": "ClientTextureRegistry.PreloadAll; scene selection remains content/runtime-owner follow-up"
+    },
+    {
+      "spriteId": "effects/combat/tool_impact",
+      "path": "sprites/effects/combat/tool_impact.png",
+      "sha256": "8b6398a2959781eae3db551c4cfaa9cf3a731980c1f9885fa3973ccf81b9f5f2",
+      "dimensions": [
+        192,
+        32
+      ],
+      "frameCount": 6,
+      "generator": "Game.Data/art_direction/tools/generate_wave_04_assets.py",
+      "method": "deterministic Pillow pixel primitives with nearest-neighbor generated-source palette quantization",
+      "sourcePromptId": "wave04_deterministic_extension_v1",
+      "generatedSourceSha256": "da0534fd0e76f9172bb57d880080fd4b7095d3d3dd8d93f5cd870b7fafa2e661",
+      "alphaValues": [
+        0,
+        255
+      ],
+      "license": "YjsE-Project-Owned",
+      "runtimeIdTarget": "effects/combat/tool_impact",
+      "runtimeConsumer": "ClientTextureRegistry.PreloadAll; scene selection remains content/runtime-owner follow-up"
+    },
+    {
+      "spriteId": "ui/wave04/panel_9slice",
+      "path": "sprites/ui/wave04/panel_9slice.png",
+      "sha256": "bf6c2cd98698f526e5129750c076ae548396c4a31c9fc0f3959a6d7ff8427c63",
+      "dimensions": [
+        48,
+        48
+      ],
+      "frameCount": 9,
+      "generator": "Game.Data/art_direction/tools/generate_wave_04_assets.py",
+      "method": "deterministic Pillow pixel primitives with nearest-neighbor generated-source palette quantization",
+      "sourcePromptId": "wave04_deterministic_extension_v1",
+      "generatedSourceSha256": "da0534fd0e76f9172bb57d880080fd4b7095d3d3dd8d93f5cd870b7fafa2e661",
+      "alphaValues": [
+        0,
+        255
+      ],
+      "license": "YjsE-Project-Owned",
+      "runtimeIdTarget": "ui/wave04/panel_9slice",
+      "runtimeConsumer": "ClientTextureRegistry.PreloadAll; scene selection remains content/runtime-owner follow-up"
+    },
+    {
+      "spriteId": "ui/wave04/tooltip_9slice",
+      "path": "sprites/ui/wave04/tooltip_9slice.png",
+      "sha256": "dac2f3e193a337d929dd9ee763a96bf3b9d441e0aa6ee1babd31f5a31649dc39",
+      "dimensions": [
+        48,
+        48
+      ],
+      "frameCount": 9,
+      "generator": "Game.Data/art_direction/tools/generate_wave_04_assets.py",
+      "method": "deterministic Pillow pixel primitives with nearest-neighbor generated-source palette quantization",
+      "sourcePromptId": "wave04_deterministic_extension_v1",
+      "generatedSourceSha256": "da0534fd0e76f9172bb57d880080fd4b7095d3d3dd8d93f5cd870b7fafa2e661",
+      "alphaValues": [
+        0,
+        255
+      ],
+      "license": "YjsE-Project-Owned",
+      "runtimeIdTarget": "ui/wave04/tooltip_9slice",
+      "runtimeConsumer": "ClientTextureRegistry.PreloadAll; scene selection remains content/runtime-owner follow-up"
+    },
+    {
+      "spriteId": "ui/wave04/run",
+      "path": "sprites/ui/wave04/run.png",
+      "sha256": "46f8aeba149c29957359086cf5a74419a2671cd8adb229594d13602600c596c0",
+      "dimensions": [
+        32,
+        32
+      ],
+      "frameCount": 0,
+      "generator": "Game.Data/art_direction/tools/generate_wave_04_assets.py",
+      "method": "deterministic Pillow pixel primitives with nearest-neighbor generated-source palette quantization",
+      "sourcePromptId": "wave04_deterministic_extension_v1",
+      "generatedSourceSha256": "da0534fd0e76f9172bb57d880080fd4b7095d3d3dd8d93f5cd870b7fafa2e661",
+      "alphaValues": [
+        0,
+        255
+      ],
+      "license": "YjsE-Project-Owned",
+      "runtimeIdTarget": "ui/wave04/run",
+      "runtimeConsumer": "ClientTextureRegistry.PreloadAll; scene selection remains content/runtime-owner follow-up"
+    },
+    {
+      "spriteId": "ui/wave04/block",
+      "path": "sprites/ui/wave04/block.png",
+      "sha256": "0a963e9b70bc68f9c161245463c718a912aacc1323f4b986ad461503833de3e1",
+      "dimensions": [
+        32,
+        32
+      ],
+      "frameCount": 0,
+      "generator": "Game.Data/art_direction/tools/generate_wave_04_assets.py",
+      "method": "deterministic Pillow pixel primitives with nearest-neighbor generated-source palette quantization",
+      "sourcePromptId": "wave04_deterministic_extension_v1",
+      "generatedSourceSha256": "da0534fd0e76f9172bb57d880080fd4b7095d3d3dd8d93f5cd870b7fafa2e661",
+      "alphaValues": [
+        0,
+        255
+      ],
+      "license": "YjsE-Project-Owned",
+      "runtimeIdTarget": "ui/wave04/block",
+      "runtimeConsumer": "ClientTextureRegistry.PreloadAll; scene selection remains content/runtime-owner follow-up"
+    },
+    {
+      "spriteId": "ui/wave04/hurt",
+      "path": "sprites/ui/wave04/hurt.png",
+      "sha256": "58ec99fa26fc1bc0ec0ee5f1304cf5217b14ef8eacf2e65fbc3c8ebd6be141fe",
+      "dimensions": [
+        32,
+        32
+      ],
+      "frameCount": 0,
+      "generator": "Game.Data/art_direction/tools/generate_wave_04_assets.py",
+      "method": "deterministic Pillow pixel primitives with nearest-neighbor generated-source palette quantization",
+      "sourcePromptId": "wave04_deterministic_extension_v1",
+      "generatedSourceSha256": "da0534fd0e76f9172bb57d880080fd4b7095d3d3dd8d93f5cd870b7fafa2e661",
+      "alphaValues": [
+        0,
+        255
+      ],
+      "license": "YjsE-Project-Owned",
+      "runtimeIdTarget": "ui/wave04/hurt",
+      "runtimeConsumer": "ClientTextureRegistry.PreloadAll; scene selection remains content/runtime-owner follow-up"
+    },
+    {
+      "spriteId": "ui/wave04/tool",
+      "path": "sprites/ui/wave04/tool.png",
+      "sha256": "dd4f6f0a5bc07f935132c6a4b678d4d54140c4b9c44637eb0eb219c9ced67535",
+      "dimensions": [
+        32,
+        32
+      ],
+      "frameCount": 0,
+      "generator": "Game.Data/art_direction/tools/generate_wave_04_assets.py",
+      "method": "deterministic Pillow pixel primitives with nearest-neighbor generated-source palette quantization",
+      "sourcePromptId": "wave04_deterministic_extension_v1",
+      "generatedSourceSha256": "da0534fd0e76f9172bb57d880080fd4b7095d3d3dd8d93f5cd870b7fafa2e661",
+      "alphaValues": [
+        0,
+        255
+      ],
+      "license": "YjsE-Project-Owned",
+      "runtimeIdTarget": "ui/wave04/tool",
+      "runtimeConsumer": "ClientTextureRegistry.PreloadAll; scene selection remains content/runtime-owner follow-up"
+    },
+    {
+      "spriteId": "ui/wave04/weather",
+      "path": "sprites/ui/wave04/weather.png",
+      "sha256": "d358188c38a020235077bad503e9cf88f4f75082ded3e3b4c5f1b2488c044cad",
+      "dimensions": [
+        32,
+        32
+      ],
+      "frameCount": 0,
+      "generator": "Game.Data/art_direction/tools/generate_wave_04_assets.py",
+      "method": "deterministic Pillow pixel primitives with nearest-neighbor generated-source palette quantization",
+      "sourcePromptId": "wave04_deterministic_extension_v1",
+      "generatedSourceSha256": "da0534fd0e76f9172bb57d880080fd4b7095d3d3dd8d93f5cd870b7fafa2e661",
+      "alphaValues": [
+        0,
+        255
+      ],
+      "license": "YjsE-Project-Owned",
+      "runtimeIdTarget": "ui/wave04/weather",
+      "runtimeConsumer": "ClientTextureRegistry.PreloadAll; scene selection remains content/runtime-owner follow-up"
+    },
+    {
+      "spriteId": "ui/wave04/armor",
+      "path": "sprites/ui/wave04/armor.png",
+      "sha256": "01cb8bf580fb3a9e57a333393f783ec868873e9c1dbff200bf89874cce4a62e2",
+      "dimensions": [
+        32,
+        32
+      ],
+      "frameCount": 0,
+      "generator": "Game.Data/art_direction/tools/generate_wave_04_assets.py",
+      "method": "deterministic Pillow pixel primitives with nearest-neighbor generated-source palette quantization",
+      "sourcePromptId": "wave04_deterministic_extension_v1",
+      "generatedSourceSha256": "da0534fd0e76f9172bb57d880080fd4b7095d3d3dd8d93f5cd870b7fafa2e661",
+      "alphaValues": [
+        0,
+        255
+      ],
+      "license": "YjsE-Project-Owned",
+      "runtimeIdTarget": "ui/wave04/armor",
+      "runtimeConsumer": "ClientTextureRegistry.PreloadAll; scene selection remains content/runtime-owner follow-up"
+    }
+  ]
+}

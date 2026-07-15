@@ -1,0 +1,11 @@
+{
+  "id": "anvil",
+  "result": { "itemId": "anvil", "count": 1 },
+  "ingredients": [
+    { "itemId": "iron_ore", "count": 12 },
+    { "itemId": "stone_block", "count": 4 }
+  ],
+  "station": "furnace",
+  "category": "stations",
+  "sortOrder": 30
+}

@@ -1,0 +1,61 @@
+{
+  "id": "crystal_depths",
+  "displayName": "Crystal Depths",
+  "surfaceTile": "stone",
+  "undergroundTile": "stone",
+  "isRegionalBiome": false,
+  "selectionWeight": 2,
+  "climate": {
+    "temperature": 0.34,
+    "humidity": 0.38
+  },
+  "terrain": {
+    "elevationMultiplier": 1.0,
+    "soilDepthMultiplier": 0.6,
+    "caveDensityMultiplier": 1.35,
+    "featureDensityMultiplier": 1.25
+  },
+  "weather": {
+    "clearWeight": 1,
+    "rainWeight": 0,
+    "stormWeight": 0,
+    "fogWeight": 0,
+    "minDurationTicks": 4800,
+    "maxDurationTicks": 8400,
+    "transitionDurationTicks": 120
+  },
+  "ambient": {
+    "surfaceSoundscapeId": "crystal_depths",
+    "caveSoundscapeId": "crystal_depths",
+    "baseLight": 0.42,
+    "baseVisibility": 0.9
+  },
+  "lighting": {
+    "colorGradeId": "crystal_cyan",
+    "skyLightMultiplier": 0.0,
+    "emissiveLightMultiplier": 1.65,
+    "fogDensity": 0.16
+  },
+  "spawning": {
+    "caveTableId": "deep_cave_spider",
+    "densityMultiplier": 0.82,
+    "habitatTags": ["underground", "cavern", "crystal"]
+  },
+  "resources": {
+    "oreDensityMultiplier": 1.65,
+    "vegetationDensityMultiplier": 0.28,
+    "forageDensityMultiplier": 0.35,
+    "resourceTableIds": ["crystal_nodes", "deep_ores"]
+  },
+  "presentation": {
+    "backgroundSpriteId": "world/backgrounds/wave04/crystal_parallax_layer",
+    "ambientParticleSpriteId": "particles/cave_dust",
+    "ambientCritterSpriteId": "entities/critters/cave_glowbug",
+    "biomeIconSpriteId": "ui/biomes/cave",
+    "eliteSpriteId": "entities/enemies/cave_spider_elite",
+    "ambientParticleDensity": 0.34,
+    "caveReverb": 0.72,
+    "surfaceReflectionStrength": 0.44,
+    "windResponse": 0.08
+  }
+}

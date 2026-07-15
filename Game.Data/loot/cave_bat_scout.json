@@ -1,0 +1,8 @@
+{
+  "id": "cave_bat_scout",
+  "weightedRolls": 1,
+  "entries": [
+    { "itemId": "gel", "min": 1, "max": 2, "chance": 0.55, "weight": 2.0 },
+    { "itemId": "copper_coin", "min": 2, "max": 5, "chance": 0.7, "weight": 3.0 }
+  ]
+}

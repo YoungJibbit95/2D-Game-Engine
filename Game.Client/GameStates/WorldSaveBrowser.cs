@@ -28,16 +28,42 @@ public sealed class WorldSaveBrowser
         PropertyNameCaseInsensitive = true
     };
 
+    private readonly Func<string> _rootResolver;
+
+    public WorldSaveBrowser(Func<string>? rootResolver = null)
+    {
+        _rootResolver = rootResolver ?? ClientPaths.WorldSavesRoot;
+    }
+
     public IReadOnlyList<WorldSaveEntry> ListWorlds()
     {
-        var root = ClientPaths.WorldSavesRoot();
+        string root;
+        try
+        {
+            root = _rootResolver();
+        }
+        catch (Exception exception) when (IsRecoverableFileSystemFailure(exception))
+        {
+            return Array.Empty<WorldSaveEntry>();
+        }
+
         if (!Directory.Exists(root))
         {
             return Array.Empty<WorldSaveEntry>();
         }
 
+        IEnumerable<string> directories;
+        try
+        {
+            directories = Directory.EnumerateDirectories(root).ToArray();
+        }
+        catch (Exception exception) when (IsRecoverableFileSystemFailure(exception))
+        {
+            return Array.Empty<WorldSaveEntry>();
+        }
+
         var entries = new List<WorldSaveEntry>();
-        foreach (var directory in Directory.EnumerateDirectories(root))
+        foreach (var directory in directories)
         {
             var metadataPath = Path.Combine(directory, "metadata.json");
             if (!File.Exists(metadataPath))
@@ -62,10 +88,7 @@ public sealed class WorldSaveBrowser
                     metadata.IsHorizontallyInfinite,
                     directory));
             }
-            catch (JsonException)
-            {
-            }
-            catch (IOException)
+            catch (Exception exception) when (IsRecoverableFileSystemFailure(exception))
             {
             }
         }
@@ -74,5 +97,10 @@ public sealed class WorldSaveBrowser
             .OrderByDescending(entry => entry.CreatedAtUtc)
             .ThenBy(entry => entry.Name, StringComparer.OrdinalIgnoreCase)
             .ToArray();
+    }
+
+    private static bool IsRecoverableFileSystemFailure(Exception exception)
+    {
+        return exception is IOException or UnauthorizedAccessException or JsonException or InvalidDataException or FormatException;
     }
 }

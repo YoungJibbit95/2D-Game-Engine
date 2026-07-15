@@ -1,0 +1,13 @@
+{
+  "id": "meadow_shrine",
+  "templateId": "meadow_shrine_small",
+  "placement": "surface",
+  "chancePerRegion": 0.38,
+  "minSpacingRegions": 2,
+  "widthTiles": 11,
+  "heightTiles": 9,
+  "minTileY": 50,
+  "maxTileY": 68,
+  "allowedBiomeIds": ["meadow"],
+  "allowedLayerIds": ["surface"]
+}

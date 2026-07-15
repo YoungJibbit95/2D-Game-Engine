@@ -1,0 +1,10 @@
+{
+  "id": "glimmer_rod",
+  "result": { "itemId": "glimmer_rod", "count": 1 },
+  "ingredients": [
+    { "itemId": "amberstone_block", "count": 7 },
+    { "itemId": "mana_crystal", "count": 1 },
+    { "itemId": "wood", "count": 4 }
+  ],
+  "station": "anvil"
+}

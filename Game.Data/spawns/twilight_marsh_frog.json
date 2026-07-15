@@ -1,0 +1,20 @@
+{
+  "id": "twilight_marsh_frog",
+  "entityId": "marsh_frog",
+  "biomeId": "twilight_marsh",
+  "time": "any",
+  "habitats": ["surface", "waterEdge"],
+  "minTileY": 0,
+  "maxTileY": 108,
+  "chance": 0.38,
+  "weight": 1.4,
+  "weatherWeights": { "rain": 1.8, "fog": 1.35 },
+  "maxActive": 7,
+  "populationGroup": "marsh-wildlife",
+  "maxActiveInGroup": 10,
+  "populationRegionSizeTiles": 64,
+  "maxActiveInRegion": 4,
+  "maxActiveInHabitat": 7,
+  "maxActiveInLocalArea": 3,
+  "cooldownSeconds": 3.0
+}

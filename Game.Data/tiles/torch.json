@@ -1,0 +1,15 @@
+{
+  "id": "torch",
+  "numericId": 11,
+  "displayName": "Torch",
+  "texture": "world/objects/torch",
+  "solid": false,
+  "blocksLight": false,
+  "emittedLight": 238,
+  "lightRadius": 10,
+  "hardness": 0.25,
+  "miningPowerRequired": 0,
+  "dropItem": "torch",
+  "mergeGroup": "decoration",
+  "tags": ["light", "decoration", "furniture", "mineable"]
+}

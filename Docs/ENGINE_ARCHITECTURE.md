@@ -6,11 +6,13 @@ This document explains how the engine is intended to fit together. Checklist fil
 
 `Game.Core` contains deterministic engine and gameplay logic. It must stay independent from MonoGame rendering, input devices, and content-pipeline types.
 
-`Game.Client` adapts MonoGame to the core. It owns the window, SpriteBatch rendering, keyboard/mouse input, game states, debug overlays, and temporary placeholder drawing.
+`Game.Client` adapts MonoGame to the core. It owns the window, SpriteBatch rendering, device input/audio, game states, concrete widgets, debug overlays and deterministic missing-resource fallback drawing.
 
-`Game.Data` contains base-game definitions. These files are the first version of the modding contract: tiles, items, crops, recipes, loot, biomes, entities, projectiles, status effects, spawns, worldgen profiles, sprite asset manifests, and sprite generation briefs.
+`Game.Data` contains replaceable reference-game definitions. The modding contract includes tiles, items, crops, recipes, loot, biomes, entities, projectiles, status effects, spawns, finite/regional worldgen, structure templates, world events, soundscapes, sprite manifests and generation/provenance material.
 
 `Game.Tests` is the safety net for core behavior. Any engine rule that can run without graphics should be tested here.
+
+`Website` is a separately deployable static presentation surface. It may copy validated status/docs/art for browsing, but it is not an engine assembly, runtime content root or source of truth. Download links remain disabled until a real versioned artifact exists.
 
 `yjse.game.json` is the boundary between the engine repo and a concrete game repo. The local manifest points at the sample `Game.Data`, while external games can provide their own manifest and content root. `Game.Core.Projects` resolves that manifest and gives client/tools a stable project path contract.
 
@@ -37,6 +39,8 @@ The database currently exposes registries for:
 - Status effects.
 - Sprite assets.
 - World generation profiles.
+- Regional generation profiles and structure plans.
+- World-event definitions with base/mod override semantics and cross-reference validation.
 - Crops and farming definitions.
 - Topdown maps for RPG, town, farm, and life-sim layouts.
 - Dialogue graphs for signs, NPCs, tutorials, quests, and scripted conversations.
@@ -62,9 +66,9 @@ Profiles currently control:
 
 `WorldGenerationService` is the high-level API for menu/tools/server code. It resolves a profile from `GameContentDatabase`, runs `AdvancedWorldGenerator`, analyzes the result with `WorldAnalyzer`, evaluates a `WorldGenerationQualityGate`, and returns one build result containing all of that context.
 
-`InfiniteWorldChunkGenerator` is the streaming-oriented generator. It creates a finite-height, horizontally infinite world and can deterministically materialize any chunk at negative or positive X from the same profile and seed. The first version generates terrain, depth dimensions, ores, caves, pass-through mineable trees, and underground water pockets per chunk. Full-world analysis and quality gates still belong to finite generation until a sampled infinite-world analysis pass exists.
+`InfiniteWorldChunkGenerator` is the streaming-oriented generator. It creates a finite-height, horizontally infinite world and deterministically materializes any chunk at negative or positive X from the same profile and seed. It resolves regional/vertical biome plans, terrain, ores, caves, pass-through mineable trees, water pockets and row/legend structure templates. Forest, Meadow, Amber Grove, Twilight Marsh, Mushroom Cave, Crystal Depths and Deep Cave are replaceable sample profiles; Amber Workshop and Marsh Lantern Grove prove biome-filtered materialization. Templates can use explicit transparent/air symbols and cross chunk boundaries without changing their coordinate result. Full-world analysis and quality gates still belong to finite generation until sampled infinite-world analysis exists.
 
-`ChunkStreamingPlanner` calculates required, load, and unload sets around a visible tile area. `ChunkStreamingService` owns the lifecycle around that plan: it loads saved chunks first, generates missing chunks deterministically, saves dirty chunks before unloading when a save directory exists, skips dirty unloads when data would be lost, and returns metrics plus changed chunk position lists for debug UI. The service uses `WorldSaveService` in region-file mode by default while still benefiting from save-load fallback for older loose chunk files.
+`ChunkStreamingPlanner` calculates required, load, and unload sets around a visible tile area. `ChunkStreamingService` owns the lifecycle around that plan: it loads saved chunks first, generates missing chunks deterministically, saves dirty chunks before unloading when a save directory exists, skips dirty unloads when data would be lost, and returns metrics plus changed chunk position lists for debug UI. The service classifies retryable/cancelled/stale/permanent failures, applies bounded exponential update-backoff and terminal suppression, and independently limits main-thread apply by operations, elapsed time and decoded bytes. One oversize result may make progress from an otherwise empty apply window. Persistent World settings control concurrency, queue, apply and retry budgets. The service uses `WorldSaveService` in region-file mode by default while still benefiting from save-load fallback for older loose chunk files.
 
 Streaming publishes typed events through `GameEventBus` when a caller provides one: `ChunkLoadedEvent`, `ChunkGeneratedEvent`, `ChunkSavedEvent`, `ChunkUnloadedEvent`, and `ChunkUnloadSkippedEvent`. Client UI, tools, audio, profiling, editor overlays, and later server replication can subscribe without duplicating lifecycle logic.
 
@@ -86,11 +90,11 @@ Chunk storage supports two modes. `LooseFiles` writes one compressed MessagePack
 
 The current region format rewrites a full region file when chunks inside it change. That is acceptable for the first engine-facing persistence layer, but future work should add offset tables, tombstones, compaction, save migration tools, and integrity reports.
 
-`GameSaveCoordinator` is the high-level save entrypoint for runtime sessions. It writes world chunks through `WorldSaveService`, player state through `PlayerSaveService`, runtime entities through `EntitySaveService`, and optional tile entities through `TileEntitySaveService`. It returns `GameSaveResult`, publishes `GameSavedEvent` when a bus is provided, and owns an autosave accumulator through `TickAutosave`. The client uses this coordinator so the gameplay autosave setting saves the same layout that tools and future server code can use.
+`GameSaveCoordinator` is the high-level save entrypoint for runtime sessions. It writes world chunks through `WorldSaveService`, player state through `PlayerSaveService`, runtime entities through `EntitySaveService`, optional tile/farm state, and versioned simulation clock state through `SimulationSaveService`. It returns `GameSaveResult`, publishes `GameSavedEvent` when a bus is provided, and owns an autosave accumulator through `TickAutosave`. The client uses this coordinator so gameplay autosave writes the same layout that tools and future server code can use.
 
-`GameLoadCoordinator` is the matching high-level load entrypoint. It validates the session layout, loads world chunks, restores the player body and health, reconstructs `PlayerInventory`, repopulates `EntityManager`, restores `TileEntityManager`, returns `GameLoadResult`, and publishes `GameLoadedEvent`. `GameSessionBootstrapper` now resumes an existing save folder through this coordinator before falling back to fresh generation.
+`GameLoadCoordinator` is the matching high-level load entrypoint. It validates the session layout, loads world chunks, restores player/inventory/entities/tile entities/farm plots and the simulation clock, returns `GameLoadResult`, and publishes `GameLoadedEvent`. `simulation.json` format v1 stores day, exact time-of-day and day length. Its absence is a supported legacy case that restores the historical default clock. `GameSessionBootstrapper` injects the loaded clock into the session simulation before its first tick.
 
-Player saves use format version 2. In addition to inventory and player resources, they persist equipment slot assignments, active status-effect ids with exact remaining duration, and `CharacterAppearance`. Loading validates all referenced item/effect ids, skips removed or incompatible content safely, and returns typed `PlayerLoadWarning` records. `LoadedGameSession` carries the restored loadout and appearance into the client, and autosave writes the same live state back.
+Player saves use format version 3. In addition to inventory and player resources, they persist favorite slot state, equipment assignments, active status-effect ids with exact remaining duration, and `CharacterAppearance`; v1/v2 stacks remain compatible. Loading validates referenced item/effect ids, skips removed or incompatible content safely, and returns typed `PlayerLoadWarning` records. `LoadedGameSession` carries the restored loadout, appearance and simulation clock into the client, and autosave writes the same live state back.
 
 Tile changes should always go through `World.SetTile`, `World.RemoveTile`, `World.TrySetTile`, `World.TryRemoveTile`, or `World.ApplyTileEdits` so chunk dirtiness, render rebuilds, lighting updates, and neighbor invalidation stay consistent.
 
@@ -131,7 +135,7 @@ This separation matters: generated trees use wood and leaf tile ids but can be p
 
 Mining targets any non-air tile along the aim ray. Collision still only blocks solid runtime tiles.
 
-Building resolves the item definition, then the placed tile definition, and writes runtime solidity from the tile definition. This lets furniture/stations be placeable without becoming full collision blocks.
+Building resolves the item definition, then the placed tile definition, and writes runtime solidity from the tile definition. `BuildingSystem` delegates active placement to `BuildingPlacementTransactionService`, which validates reach, support, entity collision and inventory preconditions before committing the world/inventory pair. It supports optimistic inventory and authoritative `PlayerInventory` paths plus negative X. This lets furniture/stations and `mangrove_root` be placeable or mineable without becoming full collision blocks. Durable request IDs, rollback/reconciliation and furniture/wall/liquid anchors remain open.
 
 ## Items And Actions
 
@@ -163,7 +167,15 @@ Melee weapons can define an `attackShape` in item data. The current resolver sup
 
 Items and projectiles can define `onHitEffects`; enemies can define `onContactEffects` alongside contact damage and knockback. Runtime combat paths apply those effects through `StatusEffectApplier` when a status-effect registry is available.
 
-This keeps combat content data-driven while leaving animation timing, weapon arcs, particles, audio, and UI feedback to later client/gameplay layers.
+`GuardRuntimeState` adds directional guard, stamina, regeneration, parry windows and guard break. `CombatSystem.ResolvePlayerDamage` resolves hostile projectiles and contact damage through one query and one `CombatDamageResolver`, producing actual health loss, mitigation, prevented damage, stamina spent and block/parry/break outcomes. `AttackSequencer` advances fixed-tick startup, active, recovery and cooldown phases with bounded input/event/hit buffers, lockouts, buffering, combo/cancel windows, resource metadata and multiple timed swept melee shapes. Projectile runtime state supports gravity, drag, homing, lifetime, friendly fire, exact-once hit tracking, pierce and bounce. Selected-item actions do not yet consume the sequencer and remain the next ownership migration.
+
+Typed combat events are the intended presentation bridge. The active player item-use path uses the authoritative combat system, but not every weapon yet consumes all advanced attack/charge/combo definitions.
+
+`GameplayFeedbackRouter` is the bounded renderer-neutral presentation adapter. It translates mining, placement, hits, deaths, normal/rare drops and pickups, crafting, resource/status changes and world-event activation into fixed-capacity visual/audio command rings. The client drains caller-owned arrays into particles and audio IDs; no MonoGame type or sound device enters Core.
+
+## Replay Diagnostics
+
+`Game.Core.Diagnostics.Replay` records a versioned authoritative input stream containing tick, sequence, fixed-step delta, player command, optional item-use request and optional state hash. `ReplayRecorder` uses a bounded ring and records overwrite count. Snapshot/restore and JSON round trips validate order, numerics, format and a 64 MiB payload ceiling. `ReplayComparer` reports the first missing, extra, reordered, input, checkpoint, hash or version divergence and retains the last matching checkpoint. `GameSimulation` exposes explicit start/snapshot/stop capture; replay capture and hash work are disabled by default.
 
 ## Crafting
 
@@ -236,7 +248,7 @@ The toolkit currently provides:
 - `UiTooltipController` for delayed hover tooltips and pinned debug/tooling tooltips.
 - `UiInteractionSnapshot` so UI routing can carry pointer, hit, focus, and cursor-item drag state together.
 
-The current MonoGame overlays still draw themselves directly. The next step is to migrate those overlays onto the core UI model and add renderer widgets for inventory slots, crafting lists, settings rows, and debug windows.
+The MonoGame adapter adds `UiInteraction`: release-inside activation, pointer capture, hover/pressed/disabled/focus state, slider/dropdown/segmented/toggle/scroll behavior, delayed tooltips and keyboard/gamepad repeat. `UiTheme` maps settings into bounded rounded geometry, stepped gradients, glow, shadows, contrast and cursor treatments. Open modal overlays can reuse the prepared scene capture for a bounded multi-tap backdrop blur. Client overlays still own concrete drawing; migration onto more reusable core widget models remains open.
 
 ## Assets
 
@@ -246,38 +258,48 @@ The current MonoGame overlays still draw themselves directly. The next step is t
 
 `SpriteAssetAuditService` is the engine-side bridge between manifests, generation briefs, and real files on disk. It resolves every sprite path against a content root, checks PNG header dimensions without bringing an image library into `Game.Core`, verifies generation-brief path/size matches, and reports missing files, unreadable files, dimension mismatches, and incomplete 0..15 autotile frame coverage. Tools and CI can use this before packaging a game or accepting generated assets.
 
+Wave 05 adds 24 definitions with 122 explicit source-rectangle frames: two parallax backgrounds, four 16-mask autotiles, two world-object sheets, six item/tool sprites, four eight-frame actors and six UI assets. Entries without explicit frames receive one runtime default descriptor, producing 134 Wave 05 runtime descriptors. The supplemental audit validates existence, dimensions, briefs and provenance, but its 24 `assets/Wave05/**` paths sit outside the main strict audit's `sprites/**` disk inventory; normalizing that root is an open tooling task.
+
 The client has a `ClientTextureRegistry` that resolves `SpriteAssetRegistry` ids into MonoGame textures. If the source PNG does not exist yet, it creates a deterministic category-colored placeholder. This lets gameplay and rendering code use stable sprite ids before the real art pass is finished.
 
 ## Simulation
 
-`GameSimulation` is the core gameplay tick host for tests and future server-friendly logic. It updates time, world simulation, player, entities, projectiles, contact damage, pickups, spawning, respawn, and chunk metadata refreshes.
+`GameSimulation` is the authoritative core gameplay tick host. Its stable phase order covers command/guard submission, time/farming, living-world resolution, equipment/status stats, player item use, entities, AI attack intents, projectile/contact/guard combat, exactly-once deaths/loot, pickups, activity-source spawning, respawn, world simulation, dirty lighting and frame capture. `LoadedGameSession` owns exactly one instance and its session-owned named RNG registry; identity validation prevents a parallel client simulation.
 
-`GameSessionBootstrapper` is the matching session-construction host. It creates or resumes the runtime object graph before simulation begins. The current client still has direct frame orchestration in `PlayingState`; long term, more gameplay should move into core simulation services and the client should mostly feed input and render snapshots.
+`GameFrameSnapshot` is immutable and renderer-neutral. Player state includes guard/break/stamina; entity state includes faction, AI state/target and telemetry; living-world state includes region, biome/layer/cave, weather, ambient, light/resource multipliers, world-event state and presentation sprite/density/reverb/reflection metadata. Parallax, atmosphere, particles, soundscape, debug UI and spawning consume this same truth. `SimulationPhaseTelemetry` measures the 16 authoritative phases into fixed arrays when enabled.
+
+`LivingWorldRuntime` owns `DeterministicWorldEventExecutor` and a bounded `WorldEventJournal`. It advances scheduled events at most once per 60 simulation ticks and evaluates successful Mine/Build/Melee/Shoot/Cast/Consume/Farm actions through an exact-once monotone sequence. Phased modifiers are resolved once into spawn, lighting, weather, presentation, quantity-loot and rare-loot values. `world-events.json` format v1 atomically persists the active snapshot, cooldowns, journal and last processed action sequence with backup recovery, legacy defaults, future-version rejection and removed-mod normalization. Authoritative item-use, melee, projectile and entity-death loot all receive the same immutable modifier context.
+
+`SessionRandomRegistry` derives isolated Xoshiro streams by canonical name. Combat, spawning, effects, farming and death keys use those streams through native and `System.Random` adapters. `random-state.json` is atomically replaced with backup recovery, and `SimulationStateHasher` includes stream state. The calibration benchmark compares two independent sessions every 60 ticks and save tests prove mid-trace continuation.
 
 ## Rendering
 
-The current client renderer draws tiles, liquids, entities, player, lighting overlay, HUD, and debug text. Tile and lighting passes are aware of horizontally infinite worlds and do not clamp visible chunks to `0..WidthTiles` when the world is infinite. Tile rendering now asks `TileDefinition.TexturePath` for a sprite id and can draw a real loaded texture when the PNG exists; otherwise it keeps the existing readable colored fallback. `ParallaxBackgroundRenderer` now blends day/night sky colors and switches layered background scenes by depth: forest, night forest, magical grove, cave, and deep cave. Runtime entity drawing flips sprites by movement direction, bobs dropped items and flying enemies, and tints hurt enemies and magic projectiles.
+The client renderer draws biome parallax, tiles/liquids, prepared player/entity visuals, particles, presentation lighting, atmosphere, screen-space reflections, HUD and debug surfaces. Infinite-world passes preserve negative X. `ParallaxLayerPlanner` consumes the living presentation background ID and composes bounded surface/cave/depth/weather layers. `Wave04PlayerCharacterRenderer` advances one fixed-tick layered rig and prepares body/clothes/hair/armor/equipment commands. `EntityVisualPipeline` converts the central `RuntimeAnimations.ResolveEntity` profiles once during content setup, then prepares bounded state animations, source rectangles, typed fallbacks, shadows, outlines, hit tints and motion styles without steady-state allocation; Draw only camera-transforms and resolves resident frames.
 
-`ChunkRenderCache` stores per-chunk tile draw commands. It rebuilds when a chunk has `NeedsMeshRebuild`, computes a 4-bit autotile neighbor mask for each non-air tile, then clears only that mesh flag so save dirtiness remains intact. `TilemapRenderer` passes those masks into `ClientTextureRegistry`, which selects the best source frame for real terrain sheets and keeps placeholder rendering working until final art exists. The renderer exposes `TilemapRenderMetrics` for visible chunks, cached chunks, rebuilt chunks, evicted chunks, tile commands, and liquid commands.
+Core lighting classifies every sky dependency explicitly as Open, Unknown or Occluded. Unknown streamed space contributes neutral residual light but blocks direct/indirect sunlight and point-light propagation; chunk materialization and unload invalidate dependent light regions. Dirty work is selected deterministically with visible regions first and a bounded offscreen remainder. `LightingRenderer` builds its viewport mask outside Draw from tile-aware CPU ray casts for sunlight and bounded colored point lights, then applies AO, penumbra, bloom and cave residual light. `ScreenSpaceEffectsRenderer` captures scene color under a pixel budget and distorts only planned water/wet surfaces; the same capture can supply UI backdrop blur. Quality tiers cap mask pixels, rays, samples, light count, reflection surfaces and taps. This is 2D ray casting/raymarching and screen-space compositing, not hardware raytracing or path tracing.
+
+`ChunkRenderCache` stores per-chunk tile draw commands and rebuilds only for mesh-dirty chunks. `ClientTextureRegistry` separates canonical resources from frames and manages explicit UI, World, Entities, Backgrounds and Effects residency groups with decoded-byte budgets, LRU eviction, pinning and alias-shared leases. Known Draw lookups are resident-only and expose global/per-group telemetry.
 
 `PerformanceProfiler` is renderer-neutral and uses disposable timestamp/allocation scopes with rolling averages, peaks, per-pass budgets, and ordered snapshots. `MainGame` measures update, fixed simulation, and draw. `PlayingState` measures streaming, background, tilemap, entities, lighting, UI, and debug passes. Optional client overlays show the slowest passes, current allocations, the bounded event journal, and streaming backlogs.
 
-The next renderer evolution should use:
+The next renderer evolution should add:
 
-- Chunk render caches.
 - Render-target or atlas-backed chunk batching.
-- Real terrain sprite sheets with complete autotile frame metadata.
 - Atlas lookup and source-rect resolution.
-- Render targets for world, lighting, liquids, post effects, and UI.
-- Shader registry entries mapped to actual MonoGame effects.
+- Compiled shader-registry entries for GPU presentation alternatives.
+- Actual draw-call, texture-switch, GPU-time and 1080p/1440p capture metrics.
 
 ## Settings And Pause Flow
 
-`GameSettings` is the shared data contract for video, rendering, UI, audio, gameplay, world streaming, input, and debug options. The core stores keybinds as string bindings so it stays independent from MonoGame input types.
+`GameSettings` is the shared data contract for video, rendering/presentation quality, UI effects, audio, gameplay/spawning, world streaming, input, debug and accessibility. The core stores keybinds as strings so it stays independent from MonoGame input types. Render FPS can be unlimited or capped from 30 through 360 independently of the 60 Hz simulation.
 
 `PauseMenuOverlay` is the current client settings surface. It is used both from gameplay pause and the main-menu settings state. Changes are saved through `GameSettingsService`; gameplay and rendering options that are already wired can affect the active `PlayingState` immediately, and video settings flow through `GameStateManager.ApplySettings` into `MainGame` for live resolution, fullscreen, and VSync changes.
 
-The client UI now resolves colors and panel treatments through `UiTheme`, while `Game.Core.UI.Animation` provides engine-neutral UI clips, tracks, keyframes, curves, and a runtime animation player. Main menu, loading, and pause/settings surfaces already use this foundation for simple slide/fade transitions. The overlay still has its own row/tab hit zones for now. This is intentionally practical rather than final; a richer UI toolkit should later absorb focus, hit-testing, keyboard/gamepad navigation, typed input, confirmation dialogs, and reusable list/tab widgets.
+The client UI resolves colors, radii, gradients, glow, shadow, blur budget and contrast through `UiTheme`, while `Game.Core.UI.Animation` provides engine-neutral clips/tracks/curves. Main menu, loading and pause/settings use animated transitions. Pointer capture, release-inside clicks, drag controls and gamepad focus are active. Concrete overlays still own their row/slot composition; reusable core widgets and automated end-to-end click paths remain future work.
+
+## Website Boundary
+
+`Website/index.html` is the concise game/download/info surface; `Website/docs.html` is the larger searchable development wiki. Both are dependency-free and consume copied JSON/PNG presentation data. Validation checks local links, status vocabulary, script locality, PNG headers and byte-exact provenance copies. The website never loads `Game.Core` or becomes a runtime content source. Its current copy reports the 995/995 Debug/Release checkpoint; public downloads remain disabled until a versioned artifact exists. Client scene-smoke truth stays separate from website static validation.
 
 ## Testing Rules
 

@@ -1,0 +1,14 @@
+{
+  "id": "meadow_breeze",
+  "dayMusicLoopId": "music/meadow_day",
+  "nightMusicLoopId": "music/meadow_night",
+  "surfaceAmbientLoopId": "ambient/meadow_breeze",
+  "rainLoopId": "ambient/rain_soft",
+  "stormLoopId": "ambient/storm",
+  "fogLoopId": "ambient/meadow_fog",
+  "rainStartStingerId": "stingers/rain_begin",
+  "musicVolume": 0.72,
+  "ambientVolume": 0.65,
+  "weatherVolume": 0.7,
+  "crossfadeSeconds": 1.8
+}

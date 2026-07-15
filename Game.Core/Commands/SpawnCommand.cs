@@ -3,16 +3,29 @@ using System.Numerics;
 
 namespace Game.Core.Commands;
 
-public sealed class SpawnCommand : IConsoleCommand
+public sealed class SpawnCommand : TypedConsoleCommand
 {
-    public string Name => "spawn";
-
-    public string Description => "Spawns an entity definition at a world position.";
-
-    public IReadOnlyList<string> Aliases { get; } = Array.Empty<string>();
-
-    public CommandResult Execute(CommandContext context, IReadOnlyList<string> arguments)
+    public SpawnCommand()
+        : base(new CommandSpecification(
+            "spawn",
+            "Spawns an entity definition at a world position.",
+            new[]
+            {
+                new CommandArgumentSpecification(
+                    "entityId",
+                    CommandArgumentType.Identifier,
+                    description: "Registered entity id.",
+                    suggestionSource: CommandSuggestionSource.Entities),
+                new CommandArgumentSpecification("x", CommandArgumentType.Number, false, "World X position."),
+                new CommandArgumentSpecification("y", CommandArgumentType.Number, false, "World Y position.")
+            },
+            examples: new[] { "/spawn slime", "/spawn slime 32 48" }))
     {
+    }
+
+    protected override CommandResult Execute(CommandContext context, CommandArguments typedArguments)
+    {
+        var arguments = typedArguments.Raw;
         if (context.Content is null)
         {
             return CommandResult.Failure("Content database is required for /spawn.");
@@ -23,15 +36,15 @@ public sealed class SpawnCommand : IConsoleCommand
             return CommandResult.Failure("Entity manager and factory are required for /spawn.");
         }
 
-        if (arguments.Count == 0)
-        {
-            return CommandResult.Failure("Usage: /spawn <entityId> [x] [y]");
-        }
-
-        var entityId = arguments[0];
+        var entityId = typedArguments.GetString("entityId");
         if (!context.Content.Entities.TryGetById(entityId, out var definition))
         {
             return CommandResult.Failure($"Unknown entity '{entityId}'.");
+        }
+
+        if (arguments.Count == 2)
+        {
+            return CommandResult.Failure("invalid_position", "Spawn X and Y must be provided together.");
         }
 
         var positionResult = TryReadPosition(arguments, context.PlayerPosition);

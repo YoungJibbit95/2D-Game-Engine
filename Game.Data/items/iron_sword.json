@@ -1,6 +1,11 @@
 {
   "id": "iron_sword",
   "displayName": "Iron Sword",
+  "description": "A durable iron blade suited to dangerous underground travel.",
+  "rarity": "Uncommon",
+  "value": 95,
+  "category": "Weapon",
+  "sortPriority": 30,
   "type": "WeaponMelee",
   "texture": "items/iron_sword",
   "maxStack": 1,

@@ -89,6 +89,17 @@ public sealed class TileRegistry
         {
             throw new RegistryValidationException($"Tile '{definition.Id}' has negative mining power requirement.");
         }
+
+        if (definition.LightRadius is < 0 or > 64)
+        {
+            throw new RegistryValidationException($"Tile '{definition.Id}' light radius must be between 0 and 64.");
+        }
+
+        if ((definition.EmittedLight == 0) != (definition.LightRadius == 0))
+        {
+            throw new RegistryValidationException(
+                $"Tile '{definition.Id}' must define both emitted light and a light radius, or neither.");
+        }
     }
 
     private static void RequireText(string value, string name)

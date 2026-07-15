@@ -1,0 +1,50 @@
+{
+  "waveId": "wave_04_character_atmosphere_ui_production",
+  "preview": "art_direction/wave_04_production_preview.png",
+  "dimensions": [
+    2400,
+    4380
+  ],
+  "sha256": "f66a67a9b9fadfcae29943b2e6a76436798235fe1b8e676242aafd8fba5b5815",
+  "integerScales": [
+    1,
+    2,
+    3,
+    4
+  ],
+  "backgroundFields": [
+    "light",
+    "dark"
+  ],
+  "characterLayerCount": 5,
+  "characterFrameCount": 16,
+  "parallax": [
+    {
+      "label": "MEADOW",
+      "path": "sprites/world/backgrounds/wave04/meadow_parallax_layer.png",
+      "horizontalSeamColumnsEqual": true
+    },
+    {
+      "label": "FOREST",
+      "path": "sprites/world/backgrounds/wave04/forest_parallax_layer.png",
+      "horizontalSeamColumnsEqual": true
+    },
+    {
+      "label": "CAVE",
+      "path": "sprites/world/backgrounds/wave04/cave_parallax_layer.png",
+      "horizontalSeamColumnsEqual": true
+    },
+    {
+      "label": "MUSHROOM",
+      "path": "sprites/world/backgrounds/wave04/mushroom_cave_parallax_layer.png",
+      "horizontalSeamColumnsEqual": true
+    },
+    {
+      "label": "CRYSTAL",
+      "path": "sprites/world/backgrounds/wave04/crystal_depths_parallax_layer.png",
+      "horizontalSeamColumnsEqual": true
+    }
+  ],
+  "effectCount": 13,
+  "uiAssetCount": 8
+}

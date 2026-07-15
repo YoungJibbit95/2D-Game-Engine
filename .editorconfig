@@ -2,10 +2,13 @@ root = true
 
 [*]
 charset = utf-8
-end_of_line = crlf
+end_of_line = unset
 insert_final_newline = true
 indent_style = space
 indent_size = 4
 
-[*.{cs,csproj,props,targets,json,md,xml}]
+[*.{cs,csproj,props,targets,json,md,xml,yml,yaml}]
 trim_trailing_whitespace = true
+
+[*.cs]
+csharp_style_namespace_declarations = file_scoped:warning

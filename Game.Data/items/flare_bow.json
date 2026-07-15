@@ -1,0 +1,25 @@
+{
+  "id": "flare_bow",
+  "displayName": "Flare Bow",
+  "description": "A compact amber bow tuned for high projectile velocity.",
+  "rarity": "Rare",
+  "value": 510,
+  "category": "Weapon",
+  "sortPriority": 73,
+  "type": "WeaponRanged",
+  "texture": "items/wave05/flare_bow",
+  "maxStack": 1,
+  "useTime": 0.3,
+  "damage": 11,
+  "knockback": 1.8,
+  "actions": [
+    {
+      "kind": "Shoot",
+      "projectile": "wooden_arrow",
+      "ammo": "wooden_arrow",
+      "ammoCost": 1,
+      "projectileSpeedMultiplier": 1.35
+    }
+  ],
+  "tags": ["weapon", "ranged", "bow", "wave05"]
+}

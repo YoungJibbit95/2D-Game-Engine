@@ -1,0 +1,15 @@
+{
+  "id": "crystal_depths",
+  "undergroundMusicLoopId": "music/crystal_depths",
+  "undergroundAmbientLoopId": "ambient/crystal_resonance",
+  "musicVolume": 0.7,
+  "ambientVolume": 0.74,
+  "crossfadeSeconds": 2.4,
+  "worldEvents": {
+    "crystal_surge": {
+      "loopId": "ambient/crystal_surge",
+      "startStingerId": "stingers/crystal_awaken",
+      "volume": 0.82
+    }
+  }
+}

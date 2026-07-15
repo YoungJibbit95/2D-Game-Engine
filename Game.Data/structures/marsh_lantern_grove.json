@@ -1,0 +1,29 @@
+{
+  "id": "marsh_lantern_grove",
+  "templateId": "marsh_lantern_grove_small",
+  "placement": "surface",
+  "chancePerRegion": 0.46,
+  "minSpacingRegions": 2,
+  "widthTiles": 9,
+  "heightTiles": 7,
+  "minTileY": 50,
+  "maxTileY": 72,
+  "allowedBiomeIds": ["twilight_marsh"],
+  "allowedLayerIds": ["surface"],
+  "transparentSymbol": ".",
+  "legend": {
+    "M": "marsh_moss",
+    "S": "amberstone",
+    "R": "mangrove_root",
+    "_": "air"
+  },
+  "rows": [
+    "....R....",
+    "...RRR...",
+    "....R....",
+    "..R_R_R..",
+    "..R___R..",
+    "MMMMMMMMM",
+    "SSSSSSSSS"
+  ]
+}

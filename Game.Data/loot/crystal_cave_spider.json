@@ -1,0 +1,20 @@
+{
+  "id": "crystal_cave_spider",
+  "weightedRolls": 2,
+  "allowDuplicateWeightedEntries": false,
+  "entries": [
+    { "itemId": "copper_coin", "min": 12, "max": 22, "guaranteed": true },
+    { "itemId": "poison_arrow", "min": 4, "max": 9, "chance": 1.0, "weight": 5.0 },
+    { "itemId": "healing_potion", "min": 1, "max": 2, "chance": 0.65, "weight": 2.0 },
+    {
+      "itemId": "mana_crystal",
+      "min": 1,
+      "max": 1,
+      "chance": 0.12,
+      "weight": 0.5,
+      "isRare": true,
+      "requiredKillerFaction": "friendly",
+      "requiredVictimTags": ["elite", "crystal"]
+    }
+  ]
+}

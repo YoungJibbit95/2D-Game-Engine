@@ -1,0 +1,17 @@
+{
+  "id": "forest_day_squirrel",
+  "entityId": "squirrel",
+  "biomeId": "forest",
+  "time": "day",
+  "habitats": ["surface"],
+  "minTileY": 0,
+  "maxTileY": 96,
+  "chance": 0.28,
+  "maxActive": 5,
+  "populationGroup": "forest_wildlife",
+  "maxActiveInGroup": 9,
+  "populationRegionSizeTiles": 64,
+  "maxActiveInRegion": 3,
+  "maxActiveInHabitat": 8,
+  "cooldownSeconds": 4.5
+}

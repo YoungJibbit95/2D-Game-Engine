@@ -16,12 +16,16 @@ public sealed class CreateWorldState : IGameState, ITextInputReceiver, IKeyboard
     private readonly IGameState _backState;
     private readonly InputManager _input = new();
     private readonly UiAnimationPlayer _introAnimation = new();
-    private readonly List<HitZone> _hitZones = new();
+    private readonly List<UiHitRegion> _hitRegions = new();
+    private readonly UiPointerRouter _pointer = new();
+    private readonly UiGamepadNavigator _gamepad = new();
     private GameSettings _settings = GameSettings.CreateDefault();
     private string _worldName = "New World";
     private string _seedText = Random.Shared.Next(1, int.MaxValue).ToString(System.Globalization.CultureInfo.InvariantCulture);
     private int _selectedIndex;
     private string _status = "CREATE A WORLD";
+    private bool _focusVisible = true;
+    private UiTypographyTokens _typography = UiTheme.Contract.Typography;
 
     public CreateWorldState(GameStateManager states, IGameState backState)
     {
@@ -36,6 +40,9 @@ public sealed class CreateWorldState : IGameState, ITextInputReceiver, IKeyboard
     public void Initialize()
     {
         _settings = LoadSettings();
+        _pointer.Reset();
+        _gamepad.Reset();
+        _focusVisible = true;
         _introAnimation.Play(UiAnimationClip.SlideFadeIn(_settings.Ui.ReducedMotion ? 0.001f : 0.2f, -12f));
     }
 
@@ -50,21 +57,31 @@ public sealed class CreateWorldState : IGameState, ITextInputReceiver, IKeyboard
     public void Update(double deltaSeconds)
     {
         _input.Update();
+        _gamepad.Update(deltaSeconds);
+        _pointer.Update(_input.MousePosition, _input.IsLeftMouseDown, _hitRegions);
         _introAnimation.Update((float)deltaSeconds, _settings.Ui.AnimationSpeed);
 
-        if (_input.IsKeyPressed(Keys.Escape))
+        if (_input.IsKeyPressed(Keys.Escape) || _gamepad.CancelPressed)
         {
             Back();
             return;
         }
 
-        if (_input.IsKeyPressed(Keys.Down) || _input.IsKeyPressed(Keys.S))
+        if (_pointer.HoveredId >= 0 && _pointer.HoveredId < 5 && IsOptionEnabled(_pointer.HoveredId))
+        {
+            _selectedIndex = _pointer.HoveredId;
+            _focusVisible = false;
+        }
+
+        if (_input.IsKeyPressed(Keys.Down) || _input.IsKeyPressed(Keys.S) || _gamepad.DownPressed)
         {
             MoveSelection(1);
+            _focusVisible = true;
         }
-        else if (_input.IsKeyPressed(Keys.Up) || _input.IsKeyPressed(Keys.W))
+        else if (_input.IsKeyPressed(Keys.Up) || _input.IsKeyPressed(Keys.W) || _gamepad.UpPressed)
         {
             MoveSelection(-1);
+            _focusVisible = true;
         }
 
         if (_input.IsKeyPressed(Keys.Back))
@@ -72,10 +89,15 @@ public sealed class CreateWorldState : IGameState, ITextInputReceiver, IKeyboard
             BackspaceField();
         }
 
-        UpdateMouseSelection();
-
-        if (_input.IsKeyPressed(Keys.Enter) || _input.IsKeyPressed(Keys.Space) || _input.IsLeftMousePressed)
+        if (_pointer.ClickedId >= 0 && _pointer.ClickedId < 5)
         {
+            _selectedIndex = _pointer.ClickedId;
+            _focusVisible = false;
+            ActivateSelected();
+        }
+        else if (_input.IsKeyPressed(Keys.Enter) || _input.IsKeyPressed(Keys.Space) || _gamepad.ConfirmPressed)
+        {
+            _focusVisible = true;
             ActivateSelected();
         }
     }
@@ -83,30 +105,37 @@ public sealed class CreateWorldState : IGameState, ITextInputReceiver, IKeyboard
     public void Draw(RenderContext context)
     {
         var palette = UiTheme.Resolve(_settings);
+        _typography = UiTheme.ResolveContract(_settings).Typography;
         var offsetY = (int)MathF.Round(_introAnimation.GetValue(UiAnimationProperty.OffsetY, 0f));
         context.SpriteBatch.Draw(context.Pixel, context.ViewportBounds, palette.Backdrop);
 
-        var panelWidth = Math.Min(660, context.ViewportBounds.Width - 56);
-        var panelHeight = Math.Min(420, context.ViewportBounds.Height - 56);
+        var panelWidth = Math.Min(660, Math.Max(280, context.ViewportBounds.Width - 32));
+        var panelHeight = Math.Min(420, Math.Max(304, context.ViewportBounds.Height - 28));
         var panel = new Rectangle(
             context.ViewportBounds.Width / 2 - panelWidth / 2,
             context.ViewportBounds.Height / 2 - panelHeight / 2 + offsetY,
             panelWidth,
             panelHeight);
 
-        UiTheme.DrawPanel(context, panel, palette, _settings.Ui.PanelOpacity);
-        context.DebugText.Draw(new Vector2(panel.X + 22, panel.Y + 18), "CREATE WORLD", palette.Accent, 3);
-        context.DebugText.Draw(new Vector2(panel.X + 24, panel.Y + 52), "TYPE NAME OR SEED   ENTER ACTIVATE   ESC BACK", palette.TextMuted, 1);
+        UiTheme.DrawPanel(context, panel, palette, _settings.Ui.PanelOpacity, settings: _settings);
+        context.DebugText.Draw(new Vector2(panel.X + 22, panel.Y + 28), "CREATE WORLD", palette.Accent, _typography.TitleScale);
+        context.DebugText.Draw(new Vector2(panel.X + 24, panel.Y + 60), FitText("NAME YOUR WORLD AND CHOOSE ITS SEED", Math.Max(1, (panel.Width - 48) / (6 * _typography.CaptionScale))), palette.TextMuted, _typography.CaptionScale);
 
-        _hitZones.Clear();
+        _hitRegions.Clear();
         DrawField(context, palette, panel, index: 0, label: "WORLD NAME", value: _worldName, row: 0);
         DrawField(context, palette, panel, index: 1, label: "SEED", value: _seedText, row: 1);
-        DrawButton(context, palette, new Rectangle(panel.X + 24, panel.Y + 210, 190, 36), "CREATE", 2);
-        DrawButton(context, palette, new Rectangle(panel.X + 230, panel.Y + 210, 190, 36), "RANDOM SEED", 3);
-        DrawButton(context, palette, new Rectangle(panel.X + 436, panel.Y + 210, 120, 36), "BACK", 4);
+        var buttonRow = new Rectangle(panel.X + 24, panel.Y + 210, panel.Width - 48, 36);
+        var gap = 8;
+        var backWidth = Math.Clamp(buttonRow.Width * 18 / 100, 56, 120);
+        var randomWidth = Math.Clamp(buttonRow.Width * 36 / 100, 92, 190);
+        var createWidth = Math.Max(1, buttonRow.Width - backWidth - randomWidth - gap * 2);
+        DrawButton(context, palette, new Rectangle(buttonRow.X, buttonRow.Y, createWidth, buttonRow.Height), "CREATE", 2, int.TryParse(_seedText, out _));
+        DrawButton(context, palette, new Rectangle(buttonRow.X + createWidth + gap, buttonRow.Y, randomWidth, buttonRow.Height), "RANDOM SEED", 3, true);
+        DrawButton(context, palette, new Rectangle(buttonRow.Right - backWidth, buttonRow.Y, backWidth, buttonRow.Height), "BACK", 4, true);
 
-        context.DebugText.Draw(new Vector2(panel.X + 24, panel.Bottom - 52), $"PROFILE {_settings.World.WorldProfileId.ToUpperInvariant()}   INFINITE {(_settings.World.InfiniteHorizontalGeneration ? "ON" : "OFF")}", palette.TextMuted, 1);
-        context.DebugText.Draw(new Vector2(panel.X + 24, panel.Bottom - 30), _status, palette.Warning, 1);
+        context.DebugText.Draw(new Vector2(panel.X + 24, panel.Bottom - 52), $"PROFILE {_settings.World.WorldProfileId.ToUpperInvariant()}   INFINITE {(_settings.World.InfiniteHorizontalGeneration ? "ON" : "OFF")}", palette.TextMuted, _typography.CaptionScale);
+        context.DebugText.Draw(new Vector2(panel.X + 24, panel.Bottom - 30), FitText(_status, Math.Max(1, (panel.Width - 48) / (6 * _typography.CaptionScale))), palette.Warning, _typography.CaptionScale);
+        UiTheme.DrawCursorAccent(context, _input.MousePosition, palette, _settings);
     }
 
     public void Dispose()
@@ -134,31 +163,53 @@ public sealed class CreateWorldState : IGameState, ITextInputReceiver, IKeyboard
     private void DrawField(RenderContext context, UiPalette palette, Rectangle panel, int index, string label, string value, int row)
     {
         var bounds = new Rectangle(panel.X + 24, panel.Y + 86 + row * 58, panel.Width - 48, 40);
-        UiTheme.DrawButton(context, bounds, palette, _selectedIndex == index, bounds.Contains(_input.MousePosition));
-        context.DebugText.Draw(new Vector2(bounds.X + 12, bounds.Y + 6), label, palette.TextMuted, 1);
-        context.DebugText.Draw(new Vector2(bounds.X + 156, bounds.Y + 14), string.IsNullOrWhiteSpace(value) ? "_" : value.ToUpperInvariant(), palette.Text, 2);
-        _hitZones.Add(new HitZone(bounds, index));
+        var selected = _selectedIndex == index;
+        var hovered = _pointer.HoveredId == index || bounds.Contains(_input.MousePosition);
+        var pressed = _pointer.IsPressed(index);
+        UiTheme.DrawButton(context, bounds, palette, selected, hovered, pressed: pressed, focused: _focusVisible && selected, settings: _settings);
+        context.DebugText.Draw(new Vector2(bounds.X + 12, bounds.Y + 6 + (pressed ? 1 : 0)), label, palette.TextMuted, _typography.CaptionScale);
+        var shownValue = string.IsNullOrWhiteSpace(value) ? "_" : value.ToUpperInvariant();
+        if (selected && _focusVisible)
+        {
+            shownValue += "|";
+        }
+
+        var valueX = bounds.X + Math.Min(156, bounds.Width / 3);
+        var availableWidth = Math.Max(6, bounds.Right - valueX - 10);
+        var valueScale = _typography.BodyScale;
+        while (valueScale > 1 && shownValue.Length * 6 * valueScale > availableWidth)
+        {
+            valueScale--;
+        }
+
+        shownValue = FitText(shownValue, Math.Max(1, availableWidth / (6 * valueScale)));
+        context.DebugText.Draw(new Vector2(valueX, bounds.Y + (valueScale == 2 ? 14 : 17) + (pressed ? 1 : 0)), shownValue, palette.Text, valueScale);
+        _hitRegions.Add(new UiHitRegion(index, bounds));
     }
 
-    private void DrawButton(RenderContext context, UiPalette palette, Rectangle bounds, string label, int index)
+    private void DrawButton(RenderContext context, UiPalette palette, Rectangle bounds, string label, int index, bool enabled)
     {
-        UiTheme.DrawButton(context, bounds, palette, _selectedIndex == index, bounds.Contains(_input.MousePosition));
-        context.DebugText.Draw(new Vector2(bounds.X + 12, bounds.Y + 10), label, palette.Text, 1);
-        _hitZones.Add(new HitZone(bounds, index));
+        var selected = _selectedIndex == index;
+        var hovered = _pointer.HoveredId == index || bounds.Contains(_input.MousePosition);
+        var pressed = _pointer.IsPressed(index);
+        UiTheme.DrawButton(context, bounds, palette, selected, hovered, enabled, pressed, _focusVisible && selected, _settings);
+        context.DebugText.Draw(
+            new Vector2(bounds.X + 8, bounds.Y + 10 + (pressed ? 1 : 0)),
+            FitText(label, Math.Max(1, (bounds.Width - 16) / (6 * _typography.CaptionScale))),
+            enabled ? palette.Text : palette.TextMuted,
+            _typography.CaptionScale);
+        _hitRegions.Add(new UiHitRegion(index, bounds, enabled));
     }
 
     private void MoveSelection(int direction)
     {
-        _selectedIndex = ((_selectedIndex + direction) % 5 + 5) % 5;
-    }
-
-    private void UpdateMouseSelection()
-    {
-        foreach (var zone in _hitZones)
+        var next = _selectedIndex;
+        for (var attempt = 0; attempt < 5; attempt++)
         {
-            if (zone.Bounds.Contains(_input.MousePosition))
+            next = ((next + direction) % 5 + 5) % 5;
+            if (IsOptionEnabled(next))
             {
-                _selectedIndex = zone.Index;
+                _selectedIndex = next;
                 return;
             }
         }
@@ -166,6 +217,11 @@ public sealed class CreateWorldState : IGameState, ITextInputReceiver, IKeyboard
 
     private void ActivateSelected()
     {
+        if (!IsOptionEnabled(_selectedIndex))
+        {
+            return;
+        }
+
         switch (_selectedIndex)
         {
             case 2:
@@ -179,6 +235,11 @@ public sealed class CreateWorldState : IGameState, ITextInputReceiver, IKeyboard
                 Back();
                 break;
         }
+    }
+
+    private bool IsOptionEnabled(int index)
+    {
+        return index != 2 || int.TryParse(_seedText, out _);
     }
 
     private void CreateWorld()
@@ -216,6 +277,16 @@ public sealed class CreateWorldState : IGameState, ITextInputReceiver, IKeyboard
         return char.IsLetterOrDigit(character) || character == ' ' || character == '_' || character == '-';
     }
 
+    private static string FitText(string value, int maxLength)
+    {
+        if (value.Length <= maxLength)
+        {
+            return value;
+        }
+
+        return maxLength <= 1 ? value[..1] : value[..(maxLength - 1)] + ".";
+    }
+
     private static GameSettings LoadSettings()
     {
         try
@@ -228,5 +299,4 @@ public sealed class CreateWorldState : IGameState, ITextInputReceiver, IKeyboard
         }
     }
 
-    private sealed record HitZone(Rectangle Bounds, int Index);
 }

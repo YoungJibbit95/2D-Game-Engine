@@ -70,6 +70,33 @@ public sealed class SpawnSchedulerTests
         Assert.Empty(entities.Entities.OfType<EnemyEntity>());
     }
 
+    [Fact]
+    public void Update_DoesNotDespawnPersistentEnemyFarFromPlayer()
+    {
+        var world = CreateWorldWithGround(width: 128, height: 16);
+        var entities = new EntityManager(spatialCellSize: 16);
+        var persistent = CreateSlimeDefinition() with
+        {
+            Despawn = new EntityDespawnPolicyDefinition { Mode = EntityDespawnMode.Never }
+        };
+        entities.Add(new EntityFactory(new Game.Core.Physics.TileCollisionResolver()).CreateEnemy(
+            persistent,
+            new System.Numerics.Vector2(110 * GameConstants.TileSize, 4 * GameConstants.TileSize)));
+
+        var result = new SpawnScheduler(new Random(1)).Update(
+            world,
+            entities,
+            CreateContent(chance: 0, maxActive: 8),
+            new BiomeMap("forest"),
+            new WorldTime(),
+            new TilePos(8, 4),
+            deltaSeconds: 0,
+            new SpawnSchedulerOptions { DespawnDistanceTiles = 20 });
+
+        Assert.Equal(0, result.Despawned);
+        Assert.Single(entities.Entities.OfType<EnemyEntity>());
+    }
+
     private static World CreateWorldWithGround(int width, int height)
     {
         var world = new World(width, height, WorldMetadata.CreateDefault(seed: 1));

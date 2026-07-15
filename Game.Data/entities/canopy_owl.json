@@ -1,0 +1,42 @@
+{
+  "id": "canopy_owl",
+  "displayName": "Canopy Owl",
+  "texture": "entities/wave05/canopy_owl",
+  "maxHealth": 12,
+  "width": 18,
+  "height": 20,
+  "faction": "friendly",
+  "movementMode": "flying",
+  "tags": ["critter", "amber-grove", "surface", "nocturnal", "grove-wildlife"],
+  "contactDamage": 0,
+  "contactKnockback": 0,
+  "attackDamage": 0,
+  "lootTable": "canopy_owl",
+  "despawn": {
+    "mode": "whenIdle",
+    "spawnProtectionSeconds": 8,
+    "damageProtectionSeconds": 16
+  },
+  "ai": {
+    "kind": "wander",
+    "detectionRange": 128,
+    "loseTargetRange": 208,
+    "moveSpeed": 52,
+    "fleeSpeed": 112,
+    "patrolRadius": 144,
+    "returnHomeDistance": 240,
+    "flockRadius": 128,
+    "flockWeight": 0.35,
+    "minFlockSize": 2,
+    "perceptionMemorySeconds": 2.8,
+    "decisionInterval": 1.25,
+    "idleChance": 0.28,
+    "activityPeriod": "night",
+    "dayMoveSpeedMultiplier": 0.2,
+    "nightMoveSpeedMultiplier": 1.15,
+    "perchWhenInactive": true,
+    "requiresLineOfSight": true,
+    "avoidLedges": false,
+    "avoidLiquid": true
+  }
+}

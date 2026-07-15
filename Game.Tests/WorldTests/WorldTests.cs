@@ -175,6 +175,31 @@ public sealed class WorldTests
         Assert.True(chunk.NeedsLightUpdate);
     }
 
+    [Fact]
+    public void TileFlagQueries_AreAllocationFreeInHotLoops()
+    {
+        var tile = new TileInstance
+        {
+            TileId = KnownTileIds.Stone,
+            LiquidAmount = 255,
+            Flags = TileFlags.Solid | TileFlags.HasLiquid
+        };
+        var matches = 0;
+        for (var warmup = 0; warmup < 2_000; warmup++)
+        {
+            matches += tile.IsSolid && tile.HasLiquid ? 1 : 0;
+        }
+
+        var before = GC.GetAllocatedBytesForCurrentThread();
+        for (var iteration = 0; iteration < 100_000; iteration++)
+        {
+            matches += tile.IsSolid && tile.HasLiquid ? 1 : 0;
+        }
+
+        Assert.Equal(0, GC.GetAllocatedBytesForCurrentThread() - before);
+        Assert.Equal(102_000, matches);
+    }
+
     private static World CreateWorld()
     {
         return new World(64, 64, WorldMetadata.CreateDefault(seed: 1234));

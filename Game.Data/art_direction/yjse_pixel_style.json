@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "id": "yjse-pixel-v1",
+  "name": "YjsE Pixel Art Direction",
+  "effectiveDate": "2026-07-10",
+  "intent": [
+    "Readable silhouettes at native 1x scale",
+    "A shared low-color material language across items, tools, weapons, stations, and UI",
+    "Deterministic nearest-neighbor delivery with binary alpha"
+  ],
+  "canvas": {
+    "item": { "width": 32, "height": 32, "paddingPixels": 2 },
+    "tool": { "width": 32, "height": 32, "paddingPixels": 2 },
+    "weapon": { "width": 32, "height": 32, "paddingPixels": 2 },
+    "uiIcon": { "width": 32, "height": 32, "paddingPixels": 2 },
+    "worldStation": { "width": 64, "height": 32, "paddingPixels": 2 },
+    "resampling": "nearest-neighbor",
+    "legacyPolicy": "Existing sprites retain manifest-declared dimensions until their regeneration wave."
+  },
+  "silhouette": {
+    "outlineColor": "#1b1826",
+    "outlineWidthPixels": 1,
+    "rule": "Every standalone sprite uses a continuous one-pixel dark outer silhouette. Interior separators may use the same color sparingly."
+  },
+  "shading": {
+    "lightDirection": "top-left",
+    "materialToneMinimum": 3,
+    "materialToneMaximum": 5,
+    "antiAliasing": false,
+    "dithering": "Only intentional one-pixel clusters on large surfaces; never noise.",
+    "gradients": false
+  },
+  "alpha": {
+    "mode": "binary",
+    "transparentValue": 0,
+    "opaqueValue": 255,
+    "shadowsOutsideSilhouette": false,
+    "transparentCornersRequired": true
+  },
+  "palette": [
+    {
+      "group": "outline",
+      "colors": ["#1b1826"]
+    },
+    {
+      "group": "neutral",
+      "colors": ["#2a2635", "#4a4555", "#716a7b", "#aaa2b0", "#f4e9d8"]
+    },
+    {
+      "group": "wood",
+      "colors": ["#352319", "#5a3825", "#8b5a34", "#c58b52"]
+    },
+    {
+      "group": "copper",
+      "colors": ["#5b2b22", "#8f4531", "#c56d3e", "#f0a35b"]
+    },
+    {
+      "group": "health",
+      "colors": ["#5b1f32", "#a52b46", "#e5484d", "#ff8a67"]
+    },
+    {
+      "group": "mana",
+      "colors": ["#243b78", "#355cb5", "#4b91de", "#91d7ff"]
+    },
+    {
+      "group": "spark",
+      "colors": ["#58412a", "#b97732", "#f0c35a", "#fff1a6"]
+    },
+    {
+      "group": "uiAccent",
+      "colors": ["#1f5c62", "#3d8d84", "#72c3ae"]
+    },
+    {
+      "group": "foliage",
+      "colors": ["#263f38", "#35614a", "#4f8a5b", "#7fba68", "#b8d47a"]
+    },
+    {
+      "group": "caveEarth",
+      "colors": ["#30233d", "#4b3155", "#694060", "#95606b"]
+    },
+    {
+      "group": "mushroom",
+      "colors": ["#7a3f65", "#b65a78", "#e58b91", "#f6c6a8"]
+    },
+    {
+      "group": "crystalDepths",
+      "colors": ["#20244f", "#353c86", "#5367c8", "#78b7e3", "#b9efff"]
+    },
+    {
+      "group": "characterCloth",
+      "colors": ["#2d4777", "#4474a6", "#476b4f", "#6f9b63", "#59436e", "#8b66a1", "#625d68", "#9a927f"]
+    }
+  ],
+  "composition": {
+    "standaloneOccupancyTarget": "65-82 percent of canvas area",
+    "itemView": "front or restrained three-quarter view",
+    "toolAndWeaponView": "single strong diagonal, with neighboring silhouettes kept distinct",
+    "worldObjectView": "front or side-front with a stable horizontal baseline",
+    "extraObjects": false,
+    "frames": false,
+    "text": false,
+    "watermarks": false
+  },
+  "materialLanguage": {
+    "glass": "Opaque stylized rim plus a distinct liquid mass; no translucency at sprite scale.",
+    "metal": "Dark body, one midtone plane, one warm edge highlight, optional pale specular pixel.",
+    "wood": "Broad clustered planes with at most two short grain marks.",
+    "magic": "Contained bright cluster with a dark contour; no soft glow outside alpha."
+  },
+  "generationPipeline": {
+    "source": "Built-in image_gen for concept sources or a checked-in deterministic pixel generator for exact production raster output",
+    "background": "Flat #00ff00 chroma key",
+    "backgroundRemoval": "Official imagegen remove_chroma_key.py helper with border auto-key, soft matte, thresholds 12/220, and despill",
+    "delivery": "Crop visible bounds, fit with nearest-neighbor, quantize to this palette, force binary alpha, and enforce the one-pixel outline. Deterministic generators write directly at final dimensions and record hashes in a wave provenance file."
+  },
+  "validation": {
+    "manifestPathMustExist": true,
+    "manifestDimensionsMustMatchPng": true,
+    "allowedAlphaValues": [0, 255],
+    "transparentCornersRequired": true,
+    "duplicateContentHashesAllowed": false,
+    "standaloneRecommendedUniqueColorMaximum": 16,
+    "smallWorldSpriteRecommendedUniqueColorMaximum": 32
+  }
+}

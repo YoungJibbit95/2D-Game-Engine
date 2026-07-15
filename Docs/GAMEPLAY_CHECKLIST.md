@@ -10,18 +10,16 @@ Only open work is kept here. Completed items are removed after implementation.
 ## Mining, Building, And Interaction
 
 - [ ] Expand placement anchor/support rules for platforms, walls, furniture, and tile entities.
-- [ ] Add tile hit particles and audio hooks on mining progress and completion.
 - [ ] Add interact actions for chests, doors, signs, NPCs, crafting stations, and tile entities.
 - [ ] Add liquid interaction rules for placing blocks in water and mining flooded tiles.
 
 ## Items, Equipment, And Effects
 
 - [ ] Expand startup profiles and starter progression beyond current wood/copper/iron weapons/tools and first copper armor pieces.
-- [ ] Add first consumables: healing potion, regeneration food, antidote.
+- [ ] Expand consumables beyond healing/mana potions with regeneration food, antidote and buff/debuff presentation assets.
 
 ## Crafting
 
-- [ ] Add furnace and anvil station definitions.
 - [ ] Add craft-from-nearby-chests option as a later quality-of-life feature.
 
 ## Farming And Life-Sim Gameplay
@@ -39,30 +37,35 @@ Only open work is kept here. Completed items are removed after implementation.
 ## Combat
 
 - [ ] Use world-aware line-of-sight melee in selected item use.
-- [ ] Add attack arcs, animation phases, and multi-hit windows for melee weapons.
-- [ ] Add audio, particles, and a balancing pass for weapon/projectile/enemy status-effect applications.
-- [ ] Add projectile knockback, pierce tuning, and hit effects.
+- [ ] Make selected-item weapons consume the existing attack phase/combo/swept-shape definitions and add authored multi-hit weapons.
+- [ ] Route block/parry/guard-break, attack, projectile hit and death events to Wave 04/05 particles/icons plus production audio.
+- [ ] Balance projectile knockback, homing, gravity, drag, pierce and bounce per weapon/ammo definition.
 - [ ] Add ranged weapon spread, charge, reload, and ammo preference rules.
-- [ ] Add enemy hurt flash, death particles, and audio hooks.
+- [ ] Add shield/equipment item definitions that modify guard angle, stamina, parry window and break recovery.
+- [ ] Add death particles and audio hooks; hurt flash and elite outlines already use the entity visual pipeline.
 
 ## Enemies And Spawning
 
-- [ ] Add spawn rate tuning by biome and depth.
-- [ ] Add underground danger curve based on depth and time.
-- [ ] Add enemy variants with different AI behaviors.
-- [ ] Add line-of-sight chase rules for AI.
+- [ ] Balance activity-source spawn weights/caps by biome, vertical layer, time, weather and event using recorded population distributions.
+- [ ] Add an underground danger curve that modifies composition and elite chance without exceeding local/region/global caps.
 - [ ] Add despawn fade/cleanup feedback for debug builds.
 
 ## World Generation Gameplay
 
 - [ ] Add chest loot rooms generated near caves.
-- [ ] Add biome-specific small structures.
+- [ ] Expand biome-specific structure variety beyond Forest Camp, Amber Workshop and Marsh Lantern Grove; add spacing/rarity and encounter rules.
 - [ ] Add mineable/placeable background wall items and biome-specific wall materials.
 - [ ] Add ore progression balance pass using profile-driven ore definitions and generation analysis metrics.
 
 ## Time And World Rules
 
-- [ ] Add time-based music and ambient hooks.
-- [ ] Add simple weather hooks affecting sky, spawn rules, and ambient audio.
-- [ ] Add world events triggered by time, depth, biome, or player actions.
+- [ ] Ship real time/biome/weather music and ambient assets through the existing soundscape crossfade path.
+- [ ] Add weather gameplay effects such as rain watering, wetness and event-specific hazards beyond current sky/spawn/particle/soundscape presentation.
 - [ ] Add optional survival-style comfort stats: warmth, wetness, rested.
+
+## Character And Living World Presentation
+
+- [ ] Expand character-editor choices into game-owned body, face, hair, clothing, armor and accessory palettes backed by validated Wave 04/05-compatible layers.
+- [ ] Add authored animation/event definitions for more enemy attacks, deaths, critter perching and flock transitions.
+- [ ] Route biome critter/icon/elite presentation IDs everywhere they are declared and add debug forcing commands for each variant.
+- [ ] Add furniture/decor interaction sets, placement previews, anchors and persistent sideview tile entities.

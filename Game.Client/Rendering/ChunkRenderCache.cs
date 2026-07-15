@@ -7,6 +7,7 @@ namespace Game.Client.Rendering;
 public sealed class ChunkRenderCache
 {
     private readonly Dictionary<ChunkPos, CachedChunk> _chunks = new();
+    private readonly List<TrimCandidate> _trimCandidates = new();
     private long _useTick;
 
     public int CachedChunkCount => _chunks.Count;
@@ -32,24 +33,22 @@ public sealed class ChunkRenderCache
         return new ChunkRenderCacheResult(rebuilt.Commands, Rebuilt: true);
     }
 
-    public int TrimToLoadedChunks(IEnumerable<ChunkPos> loadedChunks)
+    public int TrimToLoadedChunks(IReadOnlyDictionary<ChunkPos, Chunk> loadedChunks)
     {
         ArgumentNullException.ThrowIfNull(loadedChunks);
 
-        var loaded = loadedChunks.ToHashSet();
-        var removed = 0;
-        foreach (var position in _chunks.Keys.ToArray())
+        _trimCandidates.Clear();
+        foreach (var (position, cached) in _chunks)
         {
-            if (loaded.Contains(position))
+            if (loadedChunks.ContainsKey(position))
             {
                 continue;
             }
 
-            _chunks.Remove(position);
-            removed++;
+            _trimCandidates.Add(new TrimCandidate(position, cached.LastUsedTick));
         }
 
-        return removed;
+        return RemoveTrimCandidates(_trimCandidates.Count);
     }
 
     public int TrimToBudget(int maxCachedChunks)
@@ -59,18 +58,14 @@ public sealed class ChunkRenderCache
             return 0;
         }
 
-        var removed = 0;
-        foreach (var position in _chunks
-                     .OrderBy(pair => pair.Value.LastUsedTick)
-                     .Select(pair => pair.Key)
-                     .Take(_chunks.Count - maxCachedChunks)
-                     .ToArray())
+        _trimCandidates.Clear();
+        foreach (var (position, cached) in _chunks)
         {
-            _chunks.Remove(position);
-            removed++;
+            _trimCandidates.Add(new TrimCandidate(position, cached.LastUsedTick));
         }
 
-        return removed;
+        _trimCandidates.Sort();
+        return RemoveTrimCandidates(_chunks.Count - maxCachedChunks);
     }
 
     public void Clear()
@@ -103,6 +98,25 @@ public sealed class ChunkRenderCache
         }
 
         return new CachedChunk(commands.ToArray());
+    }
+
+    private int RemoveTrimCandidates(int count)
+    {
+        for (var index = 0; index < count; index++)
+        {
+            _chunks.Remove(_trimCandidates[index].Position);
+        }
+
+        _trimCandidates.Clear();
+        return count;
+    }
+
+    private readonly record struct TrimCandidate(ChunkPos Position, long LastUsedTick) : IComparable<TrimCandidate>
+    {
+        public int CompareTo(TrimCandidate other)
+        {
+            return LastUsedTick.CompareTo(other.LastUsedTick);
+        }
     }
 
     private sealed class CachedChunk

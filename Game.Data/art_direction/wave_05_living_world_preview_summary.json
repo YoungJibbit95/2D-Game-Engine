@@ -1,0 +1,40 @@
+{
+  "waveId": "wave_05_living_world_production",
+  "preview": "art_direction/wave_05_living_world_preview.png",
+  "dimensions": [
+    1800,
+    2407
+  ],
+  "sha256": "cb37270c5f19af90a0d981a72b2fd78738614bf39e6ecaba65f4acb00873d954",
+  "assetCount": 24,
+  "categoryCounts": {
+    "Background": 2,
+    "Entity": 4,
+    "Tile": 4,
+    "Tool": 3,
+    "UI": 6,
+    "Weapon": 3,
+    "WorldObject": 2
+  },
+  "integerScales": [
+    1,
+    2,
+    3,
+    4,
+    5
+  ],
+  "backgroundFields": [
+    "light",
+    "dark"
+  ],
+  "parallax": [
+    {
+      "spriteId": "world/backgrounds/wave05/twilight_marsh",
+      "horizontalSeamColumnsEqual": true
+    },
+    {
+      "spriteId": "world/backgrounds/wave05/amber_grove",
+      "horizontalSeamColumnsEqual": true
+    }
+  ]
+}

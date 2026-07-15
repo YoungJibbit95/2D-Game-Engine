@@ -1,0 +1,19 @@
+{
+  "id": "amber_grove_owl",
+  "entityId": "canopy_owl",
+  "biomeId": "amber_grove",
+  "time": "night",
+  "habitats": ["surface", "openAir"],
+  "minTileY": 0,
+  "maxTileY": 104,
+  "chance": 0.24,
+  "nightWeight": 1.6,
+  "maxActive": 5,
+  "populationGroup": "grove-wildlife",
+  "maxActiveInGroup": 8,
+  "populationRegionSizeTiles": 80,
+  "maxActiveInRegion": 3,
+  "maxActiveInHabitat": 5,
+  "maxActiveInLocalArea": 2,
+  "cooldownSeconds": 5.5
+}

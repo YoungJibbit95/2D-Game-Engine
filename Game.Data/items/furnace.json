@@ -1,0 +1,16 @@
+{
+  "id": "furnace",
+  "displayName": "Stone Furnace",
+  "description": "A heat-resistant station for smelting and advanced crafting.",
+  "rarity": "Uncommon",
+  "value": 55,
+  "category": "Block",
+  "sortPriority": 110,
+  "type": "PlaceableTile",
+  "texture": "world/objects/furnace",
+  "maxStack": 99,
+  "useTime": 0.2,
+  "placesTile": "furnace",
+  "placementSupport": "OnSolidGround",
+  "tags": ["item", "placeable", "station", "smelting", "furniture"]
+}

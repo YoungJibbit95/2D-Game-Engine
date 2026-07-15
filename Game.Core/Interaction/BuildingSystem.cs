@@ -10,6 +10,54 @@ namespace Game.Core.Interaction;
 
 public sealed class BuildingSystem
 {
+    private readonly BuildingPlacementValidator _placementValidator;
+    private readonly BuildingPlacementTransactionService _placementTransactions;
+
+    public BuildingSystem(
+        BuildingPlacementValidator? placementValidator = null,
+        BuildingPlacementTransactionService? placementTransactions = null)
+    {
+        _placementValidator = placementValidator ?? new BuildingPlacementValidator();
+        _placementTransactions = placementTransactions ??
+            new BuildingPlacementTransactionService(_placementValidator);
+    }
+
+    public BuildingPlacementValidationResult ValidatePlacement(
+        World.World world,
+        ItemRegistry items,
+        TileRegistry tiles,
+        in BuildingPlacementRequest request)
+    {
+        return _placementValidator.Validate(world, items, tiles, request);
+    }
+
+    public BuildingPlacementPrepareResult PreparePlacement(
+        World.World world,
+        InventoryModel inventory,
+        ItemRegistry items,
+        TileRegistry tiles,
+        in BuildingPlacementRequest request)
+    {
+        return _placementTransactions.Prepare(world, inventory, items, tiles, request);
+    }
+
+    public BuildingPlacementPrepareResult PreparePlacement(
+        World.World world,
+        PlayerInventory inventory,
+        ItemRegistry items,
+        TileRegistry tiles,
+        in BuildingPlacementRequest request)
+    {
+        return _placementTransactions.Prepare(world, inventory, items, tiles, request);
+    }
+
+    public BuildingPlacementCommitResult CommitPlacement(
+        BuildingPlacementPlan plan,
+        GameEventBus? events = null)
+    {
+        return _placementTransactions.Commit(plan, events);
+    }
+
     public bool CanPlace(
         World.World world,
         ItemRegistry items,
@@ -125,17 +173,23 @@ public sealed class BuildingSystem
         GameEventBus? events = null)
     {
         ArgumentNullException.ThrowIfNull(inventory);
-        return PlaceTileInternal(
+        var request = new BuildingPlacementRequest(
+            target,
+            new ItemStack(itemId, 1),
+            actorCenterWorld,
+            actorBounds,
+            reachPixels,
+            BuildingPlacementOptions.Strict with
+            {
+                RequireLoadedChunk = world.IsHorizontallyInfinite
+            });
+        var prepared = _placementTransactions.Prepare(
             world,
+            inventory,
             items,
             tiles,
-            target,
-            itemId,
-            actorCenterWorld,
-            reachPixels,
-            actorBounds,
-            inventory.RemoveItem,
-            events);
+            request);
+        return CommitPreparedPlacement(prepared, target, itemId, events);
     }
 
     public bool PlaceTile(
@@ -176,57 +230,63 @@ public sealed class BuildingSystem
         GameEventBus? events = null)
     {
         ArgumentNullException.ThrowIfNull(inventory);
-        return PlaceTileInternal(
-            world,
-            items,
-            tiles,
-            target,
-            itemId,
-            actorCenterWorld,
-            reachPixels,
-            actorBounds,
-            inventory.RemoveItem,
-            events);
-    }
-
-    private BuildingResult PlaceTileInternal(
-        World.World world,
-        ItemRegistry items,
-        TileRegistry tiles,
-        TilePos target,
-        string itemId,
-        Vector2 actorCenterWorld,
-        float reachPixels,
-        RectI actorBounds,
-        Func<string, int, bool> removeItem,
-        GameEventBus? events)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(itemId);
-
-        var evaluation = EvaluatePlacement(
-            world,
-            items,
-            tiles,
+        var request = new BuildingPlacementRequest(
             target,
             new ItemStack(itemId, 1),
             actorCenterWorld,
+            actorBounds,
             reachPixels,
-            actorBounds);
-        if (!evaluation.Success)
+            BuildingPlacementOptions.Strict with
+            {
+                RequireLoadedChunk = world.IsHorizontallyInfinite
+            });
+        var prepared = _placementTransactions.Prepare(
+            world,
+            inventory,
+            items,
+            tiles,
+            request);
+        return CommitPreparedPlacement(prepared, target, itemId, events);
+    }
+
+    private BuildingResult CommitPreparedPlacement(
+        in BuildingPlacementPrepareResult prepared,
+        TilePos target,
+        string itemId,
+        GameEventBus? events)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(itemId);
+        if (!prepared.Success || prepared.Plan is null)
         {
-            return evaluation;
+            return BuildingResult.BlockedResult(
+                target,
+                itemId,
+                MapPlacementFailure(prepared.Failure));
         }
 
-        if (!removeItem(itemId, 1))
-        {
-            return BuildingResult.BlockedResult(target, itemId, GameplayActionFailureReason.InsufficientItem);
-        }
+        var committed = _placementTransactions.Commit(prepared.Plan, events);
+        return committed.Success
+            ? BuildingResult.Placed(target, itemId, committed.TileId)
+            : BuildingResult.BlockedResult(target, itemId, MapPlacementFailure(committed.Failure));
+    }
 
-        var itemDefinition = items.GetById(itemId);
-        var tileDefinition = tiles.GetById(itemDefinition.PlacesTileId!);
-        world.SetTile(target.X, target.Y, TileInstance.FromTileId(tileDefinition.NumericId, isSolid: tileDefinition.Solid));
-        events?.Publish(new TilePlacedEvent(target, tileDefinition.NumericId, itemId));
-        return BuildingResult.Placed(target, itemId, tileDefinition.NumericId);
+    private static GameplayActionFailureReason MapPlacementFailure(BuildingPlacementFailure failure)
+    {
+        return failure switch
+        {
+            BuildingPlacementFailure.OutOfReach => GameplayActionFailureReason.OutOfReach,
+            BuildingPlacementFailure.ActorCollision or
+                BuildingPlacementFailure.Occupied or
+                BuildingPlacementFailure.LiquidOccupied or
+                BuildingPlacementFailure.WorldChanged => GameplayActionFailureReason.Occupied,
+            BuildingPlacementFailure.Unsupported => GameplayActionFailureReason.UnsupportedPlacement,
+            BuildingPlacementFailure.InsufficientItem or
+                BuildingPlacementFailure.InventoryChanged => GameplayActionFailureReason.InsufficientItem,
+            BuildingPlacementFailure.UnknownItem or
+                BuildingPlacementFailure.ItemNotPlaceable or
+                BuildingPlacementFailure.UnknownTile => GameplayActionFailureReason.InvalidItem,
+            _ => GameplayActionFailureReason.InvalidTarget
+        };
     }
 
     private static bool IsWithinReach(Vector2 actorCenterWorld, TilePos target, float reachPixels)

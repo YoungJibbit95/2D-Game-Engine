@@ -1,6 +1,11 @@
 {
   "id": "apprentice_tome",
   "displayName": "Apprentice Tome",
+  "description": "A beginner spellbook that shapes mana into controlled motes.",
+  "rarity": "Uncommon",
+  "value": 110,
+  "category": "Weapon",
+  "sortPriority": 50,
   "type": "WeaponMagic",
   "texture": "items/apprentice_tome",
   "maxStack": 1,

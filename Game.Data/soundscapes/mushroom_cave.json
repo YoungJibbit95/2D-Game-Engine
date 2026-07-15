@@ -1,0 +1,8 @@
+{
+  "id": "mushroom_cave",
+  "undergroundMusicLoopId": "music/mushroom_cave",
+  "undergroundAmbientLoopId": "ambient/mushroom_spores",
+  "musicVolume": 0.68,
+  "ambientVolume": 0.78,
+  "crossfadeSeconds": 2.0
+}

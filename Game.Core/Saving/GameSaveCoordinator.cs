@@ -8,6 +8,9 @@ public sealed class GameSaveCoordinator
     private readonly EntitySaveService _entities;
     private readonly TileEntitySaveService _tileEntities;
     private readonly FarmPlotSaveService _farmPlots;
+    private readonly SimulationSaveService _simulation;
+    private readonly RandomStateSaveService _randomState;
+    private readonly WorldEventStateSaveService _worldEvents;
     private readonly Func<DateTimeOffset> _clock;
     private float _autosaveAccumulator;
 
@@ -21,12 +24,18 @@ public sealed class GameSaveCoordinator
         EntitySaveService entities,
         TileEntitySaveService tileEntities,
         FarmPlotSaveService? farmPlots = null,
+        SimulationSaveService? simulation = null,
+        RandomStateSaveService? randomState = null,
+        WorldEventStateSaveService? worldEvents = null,
         Func<DateTimeOffset>? clock = null)
     {
         _players = players ?? throw new ArgumentNullException(nameof(players));
         _entities = entities ?? throw new ArgumentNullException(nameof(entities));
         _tileEntities = tileEntities ?? throw new ArgumentNullException(nameof(tileEntities));
         _farmPlots = farmPlots ?? new FarmPlotSaveService();
+        _simulation = simulation ?? new SimulationSaveService();
+        _randomState = randomState ?? new RandomStateSaveService();
+        _worldEvents = worldEvents ?? new WorldEventStateSaveService();
         _clock = clock ?? (() => DateTimeOffset.UtcNow);
     }
 
@@ -79,6 +88,26 @@ public sealed class GameSaveCoordinator
             _farmPlots.Save(request.FarmPlots, Path.Combine(saveDirectory, options.FarmPlotsFileName));
         }
 
+        var simulationStateSaved = request.WorldTime is not null;
+        if (request.WorldTime is not null)
+        {
+            _simulation.Save(request.WorldTime, Path.Combine(saveDirectory, options.SimulationStateFileName));
+        }
+
+        var randomStateSaved = request.RandomStreams is not null;
+        if (request.RandomStreams is not null)
+        {
+            _randomState.Save(request.RandomStreams, Path.Combine(saveDirectory, options.RandomStateFileName));
+        }
+
+        var worldEventStateSaved = request.WorldEventState is not null;
+        if (request.WorldEventState is not null)
+        {
+            _worldEvents.Save(
+                request.WorldEventState,
+                Path.Combine(saveDirectory, options.WorldEventStateFileName));
+        }
+
         var result = new GameSaveResult(
             saveDirectory,
             reason,
@@ -93,7 +122,12 @@ public sealed class GameSaveCoordinator
             EntitiesSaved: true,
             TileEntitiesSaved: tileEntitiesWereSaved,
             FarmPlotCount: farmPlotsSaved,
-            FarmPlotsSaved: farmPlotsWereSaved);
+            FarmPlotsSaved: farmPlotsWereSaved)
+        {
+            SimulationStateSaved = simulationStateSaved,
+            RandomStateSaved = randomStateSaved,
+            WorldEventStateSaved = worldEventStateSaved
+        };
 
         events?.Publish(new GameSavedEvent(result));
         return result;

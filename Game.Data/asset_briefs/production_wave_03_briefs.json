@@ -1,0 +1,146 @@
+{
+  "version": 1,
+  "scope": "wave_03_biome_production",
+  "globalStyle": "YjsE yjse-pixel-v1 crisp side-view pixel art. Binary alpha, continuous dark outer silhouette, top-left lighting, clustered palette shading, no antialiasing, no gradients, no text.",
+  "globalNegativePrompt": "blur, partial alpha, soft glow, noise dithering, watermark, logo, copied game art, text, frame labels",
+  "globalRequirements": [
+    "Export exact manifest dimensions.",
+    "Use only colors declared in Game.Data/art_direction/yjse_pixel_style.json.",
+    "Keep transparent corners and a readable one-pixel dark silhouette.",
+    "Keep every frame aligned to its declared source rectangle and origin."
+  ],
+  "briefs": [
+    {
+      "spriteId": "entities/critters/meadow_butterfly",
+      "outputPath": "sprites/entities/critters/meadow_butterfly.png",
+      "width": 64,
+      "height": 16,
+      "subject": "four-frame meadow butterfly ambient mob",
+      "prompt": "Friendly butterfly with broad pink-gold wings and a compact readable body, four alternating wing poses.",
+      "requirements": ["Four 16x16 frames: flight_0 through flight_3.", "Visual center stays at origin 8,8."],
+      "palette": ["#1b1826", "#e58b91", "#f0c35a", "#fff1a6"],
+      "tags": ["entity", "critter", "ambient", "meadow", "animated", "runtime-preloaded"]
+    },
+    {
+      "spriteId": "entities/critters/forest_moth",
+      "outputPath": "sprites/entities/critters/forest_moth.png",
+      "width": 64,
+      "height": 16,
+      "subject": "four-frame forest moth ambient mob",
+      "prompt": "Leaf-green forest moth with warm eye-catching body light and alternating wing poses.",
+      "requirements": ["Four 16x16 frames: flight_0 through flight_3.", "Visual center stays at origin 8,8."],
+      "palette": ["#1b1826", "#35614a", "#7fba68", "#f0c35a"],
+      "tags": ["entity", "critter", "ambient", "forest", "animated", "runtime-preloaded"]
+    },
+    {
+      "spriteId": "entities/critters/cave_glowbug",
+      "outputPath": "sprites/entities/critters/cave_glowbug.png",
+      "width": 64,
+      "height": 16,
+      "subject": "four-frame cave glowbug ambient mob",
+      "prompt": "Tiny blue crystal cave insect with a contained bright abdomen and alternating wing poses.",
+      "requirements": ["Four 16x16 frames: flight_0 through flight_3.", "No soft glow outside alpha."],
+      "palette": ["#1b1826", "#5367c8", "#78b7e3", "#b9efff"],
+      "tags": ["entity", "critter", "ambient", "cave", "animated", "runtime-preloaded"]
+    },
+    {
+      "spriteId": "particles/meadow_pollen",
+      "outputPath": "sprites/particles/meadow_pollen.png",
+      "width": 64,
+      "height": 16,
+      "subject": "four-frame meadow pollen particle sheet",
+      "prompt": "Four restrained gold pollen clusters with dark contours and readable drift changes.",
+      "requirements": ["Four 16x16 frames.", "Each frame has enough opaque pixels for native-scale readability."],
+      "palette": ["#1b1826", "#b97732", "#fff1a6"],
+      "tags": ["particle", "ambient", "meadow", "animated", "runtime-preloaded"]
+    },
+    {
+      "spriteId": "particles/forest_leaf_drift",
+      "outputPath": "sprites/particles/forest_leaf_drift.png",
+      "width": 64,
+      "height": 16,
+      "subject": "four-frame forest leaf drift particle sheet",
+      "prompt": "Four clustered leaf fragments turning through a short wind loop.",
+      "requirements": ["Four 16x16 frames.", "Dark contours separate leaves from light and dark backgrounds."],
+      "palette": ["#1b1826", "#35614a", "#b8d47a"],
+      "tags": ["particle", "ambient", "forest", "animated", "runtime-preloaded"]
+    },
+    {
+      "spriteId": "particles/cave_dust",
+      "outputPath": "sprites/particles/cave_dust.png",
+      "width": 64,
+      "height": 16,
+      "subject": "four-frame cave dust particle sheet",
+      "prompt": "Four compact cave-dust clusters with muted earth bodies and sparse crystal highlights.",
+      "requirements": ["Four 16x16 frames.", "Do not resemble ore or an interactable pickup."],
+      "palette": ["#1b1826", "#694060", "#b9efff"],
+      "tags": ["particle", "ambient", "cave", "animated", "runtime-preloaded"]
+    },
+    {
+      "spriteId": "entities/enemies/meadow_slime_elite",
+      "outputPath": "sprites/entities/enemies/meadow_slime_elite.png",
+      "width": 128,
+      "height": 32,
+      "subject": "four-frame meadow crown slime elite mob",
+      "prompt": "Large readable meadow slime with leaf body, gold eyes, crown-like horns, idle and attack motion.",
+      "requirements": ["Four 32x32 frames: idle, windup, move, attack.", "Ground origin remains 16,31."],
+      "palette": ["#1b1826", "#4f8a5b", "#7fba68", "#fff1a6"],
+      "tags": ["entity", "enemy", "elite", "meadow", "animated", "runtime-preloaded"]
+    },
+    {
+      "spriteId": "entities/enemies/forest_boar_elite",
+      "outputPath": "sprites/entities/enemies/forest_boar_elite.png",
+      "width": 128,
+      "height": 32,
+      "subject": "four-frame forest boar elite mob",
+      "prompt": "Existing boar mob language upgraded with leaf armor and a stronger crown silhouette.",
+      "requirements": ["Four 32x32 frames matching forest_boar order.", "Ground origin remains 16,31."],
+      "palette": ["#1b1826", "#8b5a34", "#35614a", "#b8d47a"],
+      "tags": ["entity", "enemy", "elite", "forest", "animated", "runtime-preloaded"]
+    },
+    {
+      "spriteId": "entities/enemies/cave_spider_elite",
+      "outputPath": "sprites/entities/enemies/cave_spider_elite.png",
+      "width": 128,
+      "height": 32,
+      "subject": "four-frame crystal cave spider elite mob",
+      "prompt": "Existing cave spider mob language upgraded with hard crystal carapace spikes.",
+      "requirements": ["Four 32x32 frames matching cave_spider order.", "Ground origin remains 16,28."],
+      "palette": ["#1b1826", "#353c86", "#78b7e3", "#b9efff"],
+      "tags": ["entity", "enemy", "elite", "cave", "animated", "runtime-preloaded"]
+    },
+    {
+      "spriteId": "ui/biomes/meadow",
+      "outputPath": "sprites/ui/biomes/meadow.png",
+      "width": 32,
+      "height": 32,
+      "subject": "meadow biome UI icon",
+      "prompt": "Compact framed meadow mark with rolling grass and one wildflower.",
+      "requirements": ["Readable at 16x16 display size.", "No text or letter glyphs."],
+      "palette": ["#1b1826", "#4f8a5b", "#7fba68", "#e58b91"],
+      "tags": ["ui", "icon", "biome", "meadow", "runtime-preloaded"]
+    },
+    {
+      "spriteId": "ui/biomes/forest",
+      "outputPath": "sprites/ui/biomes/forest.png",
+      "width": 32,
+      "height": 32,
+      "subject": "forest biome UI icon",
+      "prompt": "Compact framed forest mark with one layered pine silhouette and trunk.",
+      "requirements": ["Readable at 16x16 display size.", "No text or letter glyphs."],
+      "palette": ["#1b1826", "#5a3825", "#35614a", "#7fba68"],
+      "tags": ["ui", "icon", "biome", "forest", "runtime-preloaded"]
+    },
+    {
+      "spriteId": "ui/biomes/cave",
+      "outputPath": "sprites/ui/biomes/cave.png",
+      "width": 32,
+      "height": 32,
+      "subject": "cave biome UI icon",
+      "prompt": "Compact framed cave mark with a dark ceiling and two contained crystal shapes.",
+      "requirements": ["Readable at 16x16 display size.", "No text or letter glyphs."],
+      "palette": ["#1b1826", "#694060", "#78b7e3", "#b9efff"],
+      "tags": ["ui", "icon", "biome", "cave", "runtime-preloaded"]
+    }
+  ]
+}

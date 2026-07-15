@@ -1,0 +1,29 @@
+{
+  "id": "amber_workshop",
+  "templateId": "amber_workshop_small",
+  "placement": "surface",
+  "chancePerRegion": 0.34,
+  "minSpacingRegions": 3,
+  "widthTiles": 12,
+  "heightTiles": 7,
+  "minTileY": 48,
+  "maxTileY": 70,
+  "allowedBiomeIds": ["amber_grove"],
+  "allowedLayerIds": ["surface"],
+  "transparentSymbol": ".",
+  "legend": {
+    "A": "amberwood_plank",
+    "S": "amberstone",
+    "R": "mangrove_root",
+    "_": "air"
+  },
+  "rows": [
+    "..AAAAAA....",
+    ".A______A...",
+    "A________A..",
+    "A___R____A..",
+    "A________A..",
+    "AAAAAAAAAAAA",
+    "SSSSSSSSSSSS"
+  ]
+}

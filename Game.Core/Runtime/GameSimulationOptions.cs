@@ -1,0 +1,30 @@
+namespace Game.Core.Runtime;
+
+public sealed record GameSimulationOptions
+{
+    public static GameSimulationOptions Default { get; } = new();
+
+    public bool AutoPickupItems { get; init; } = true;
+
+    public int PickupRadiusPixels { get; init; } = 28;
+
+    public float ItemMagnetRadiusPixels { get; init; } = 92f;
+
+    public float ItemMagnetStrength { get; init; } = 480f;
+
+    public bool EnablePhaseTelemetry { get; init; }
+
+    public int MaxActiveEnemies { get; init; } = -1;
+
+    public float EnemySpawnRateMultiplier { get; init; } = 1f;
+
+    public int SpawnMinimumDistanceTiles { get; init; } = 18;
+
+    public int SpawnMaximumDistanceTiles { get; init; } = 46;
+
+    public int SpawnVisibleHalfWidthTiles { get; init; } = 16;
+
+    public int SpawnVisibleHalfHeightTiles { get; init; } = 10;
+
+    public bool SpawnOutsideViewportOnly { get; init; } = true;
+}

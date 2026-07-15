@@ -1,0 +1,38 @@
+{
+  "id": "crystal_cave_spider",
+  "displayName": "Crystal Cave Spider",
+  "texture": "entities/enemies/cave_spider",
+  "maxHealth": 110,
+  "width": 22,
+  "height": 14,
+  "faction": "hostile",
+  "movementMode": "ground",
+  "tags": ["enemy", "elite", "arachnid", "crystal", "cave", "cave_hostiles"],
+  "contactDamage": 22,
+  "contactKnockback": 260,
+  "attackDamage": 28,
+  "attackKnockback": 330,
+  "lootTable": "crystal_cave_spider",
+  "despawn": {
+    "mode": "never",
+    "spawnProtectionSeconds": 0,
+    "damageProtectionSeconds": 30
+  },
+  "ai": {
+    "kind": "hostile",
+    "detectionRange": 176,
+    "loseTargetRange": 288,
+    "moveSpeed": 78,
+    "fleeSpeed": 112,
+    "patrolRadius": 72,
+    "attackRange": 26,
+    "attackCooldown": 0.55,
+    "perceptionMemorySeconds": 5.5,
+    "fleeHealthThreshold": 0.08,
+    "jumpSpeed": 330,
+    "decisionInterval": 0.65,
+    "requiresLineOfSight": true,
+    "avoidLedges": true,
+    "avoidLiquid": true
+  }
+}

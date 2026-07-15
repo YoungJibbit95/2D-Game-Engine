@@ -61,6 +61,51 @@ public sealed class GameEventBusTests
     }
 
     [Fact]
+    public void Publish_UsesStableSnapshotWhenSubscriptionChangesDuringDispatch()
+    {
+        var bus = new GameEventBus();
+        var calls = new List<string>();
+        IDisposable? second = null;
+        bus.Subscribe<ChunkGeneratedEvent>(_ =>
+        {
+            calls.Add("first");
+            second?.Dispose();
+            bus.Subscribe<ChunkGeneratedEvent>(_ => calls.Add("late"));
+        });
+        second = bus.Subscribe<ChunkGeneratedEvent>(_ => calls.Add("second"));
+
+        bus.Publish(new ChunkGeneratedEvent(new ChunkPos(0, 0)));
+        Assert.Equal(["first", "second"], calls);
+
+        calls.Clear();
+        bus.Publish(new ChunkGeneratedEvent(new ChunkPos(1, 0)));
+        Assert.Equal(["first", "late"], calls);
+    }
+
+    [Fact]
+    public void Publish_SteadyStateDoesNotAllocate()
+    {
+        var bus = new GameEventBus();
+        var received = 0;
+        bus.Subscribe<ChunkGeneratedEvent>(_ => received++);
+        var gameEvent = new ChunkGeneratedEvent(new ChunkPos(-4, 2));
+        for (var index = 0; index < 32; index++)
+        {
+            bus.Publish(gameEvent);
+        }
+
+        var before = GC.GetAllocatedBytesForCurrentThread();
+        for (var index = 0; index < 1_000; index++)
+        {
+            bus.Publish(gameEvent);
+        }
+
+        var allocated = GC.GetAllocatedBytesForCurrentThread() - before;
+        Assert.Equal(0, allocated);
+        Assert.Equal(1_032, received);
+    }
+
+    [Fact]
     public void GameEventJournal_RecordsEventsWithCapacityAndDrain()
     {
         var bus = new GameEventBus();

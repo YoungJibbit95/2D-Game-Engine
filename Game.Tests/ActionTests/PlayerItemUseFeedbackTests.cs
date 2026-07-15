@@ -45,7 +45,7 @@ public sealed class PlayerItemUseFeedbackTests
         Assert.Equal(PlayerItemUseKind.None, result.Kind);
         Assert.Equal(PlayerItemUseKind.Mine, result.AttemptedKind);
         Assert.Equal(GameplayActionSuccessReason.ActionStarted, result.SuccessReason);
-        Assert.Equal(0.11f, result.ActionProgress, precision: 3);
+        Assert.Equal(0.176f, result.ActionProgress, precision: 3);
         Assert.Equal(result.ActionProgress, result.Mining.Progress);
     }
 

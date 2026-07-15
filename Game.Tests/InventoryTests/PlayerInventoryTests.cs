@@ -60,6 +60,87 @@ public sealed class PlayerInventoryTests
         Assert.Equal(new ItemStack("gel", 3), inventory.Main.Slots[0].Stack);
     }
 
+    [Fact]
+    public void AddTransaction_IsAtomicAcrossHotbarAndMain()
+    {
+        var inventory = new PlayerInventory(CreateItems());
+        foreach (var slot in inventory.Hotbar.Slots.Concat(inventory.Main.Slots))
+        {
+            slot.SetStack(new ItemStack("gel", 99));
+        }
+
+        inventory.Main.Slots[^1].SetStack(new ItemStack("gel", 98));
+        var before = inventory.CountItem("gel");
+
+        var result = inventory.AddTransaction(new ItemStack("gel", 2));
+
+        Assert.Equal(InventoryTransactionStatus.NoSpace, result.Status);
+        Assert.Equal(before, inventory.CountItem("gel"));
+    }
+
+    [Fact]
+    public void QuickMoveToMain_LeavesFavoriteHotbarStackInPlace()
+    {
+        var inventory = new PlayerInventory(CreateItems());
+        inventory.Hotbar.Slots[0].SetStack(new ItemStack("gel", 3));
+        inventory.Hotbar.SetFavorite(0, true);
+
+        var result = inventory.QuickMoveToMainTransaction(0);
+
+        Assert.Equal(InventoryTransactionStatus.Protected, result.Status);
+        Assert.Equal(3, inventory.Hotbar.Slots[0].Stack.Count);
+        Assert.True(inventory.Main.Slots[0].IsEmpty);
+    }
+
+    [Fact]
+    public void AddSlotStateTransaction_PreservesFavoriteStateWithoutMergingIntoRegularStack()
+    {
+        var inventory = new PlayerInventory(CreateItems());
+        inventory.Hotbar.Slots[0].SetStack(new ItemStack("gel", 40));
+
+        var result = inventory.AddSlotStateTransaction(
+            new InventorySlotState(new ItemStack("gel", 12), IsFavorite: true));
+
+        Assert.True(result.Completed);
+        Assert.Equal(40, inventory.Hotbar.Slots[0].Stack.Count);
+        Assert.Equal(new ItemStack("gel", 12), inventory.Hotbar.Slots[1].Stack);
+        Assert.True(inventory.Hotbar.Slots[1].IsFavorite);
+    }
+
+    [Fact]
+    public void AddSlotStateTransaction_NoSpaceDoesNotPartiallyMutateInventory()
+    {
+        var inventory = new PlayerInventory(CreateItems());
+        foreach (var slot in inventory.Hotbar.Slots.Concat(inventory.Main.Slots))
+        {
+            slot.SetStack(new ItemStack("gel", 99));
+        }
+
+        inventory.Main.Slots[^1].SetStack(new ItemStack("gel", 98));
+        var before = inventory.CountItem("gel");
+
+        var result = inventory.AddSlotStateTransaction(
+            new InventorySlotState(new ItemStack("gel", 2), IsFavorite: false));
+
+        Assert.Equal(InventoryTransactionStatus.NoSpace, result.Status);
+        Assert.Equal(before, inventory.CountItem("gel"));
+    }
+
+    [Fact]
+    public void InventoryVersion_ChangesOnlyWhenSlotStateChanges()
+    {
+        var inventory = new PlayerInventory(CreateItems());
+        var initial = inventory.Hotbar.Version;
+
+        inventory.Hotbar.Slots[0].SetStack(new ItemStack("gel", 4));
+        var afterStack = inventory.Hotbar.Version;
+        inventory.Hotbar.Slots[0].SetStack(new ItemStack("gel", 4));
+        inventory.Hotbar.SetFavorite(0, true);
+
+        Assert.True(afterStack > initial);
+        Assert.Equal(afterStack + 1, inventory.Hotbar.Version);
+    }
+
     private static ItemRegistry CreateItems()
     {
         return ItemRegistry.Create(new[]

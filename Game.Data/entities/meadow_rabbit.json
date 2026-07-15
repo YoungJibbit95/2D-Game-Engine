@@ -1,0 +1,43 @@
+{
+  "id": "meadow_rabbit",
+  "displayName": "Meadow Rabbit",
+  "texture": "entities/critters/rabbit",
+  "maxHealth": 7,
+  "width": 12,
+  "height": 10,
+  "faction": "friendly",
+  "movementMode": "ground",
+  "tags": ["critter", "rabbit", "meadow", "surface", "diurnal", "meadow_wildlife"],
+  "contactDamage": 0,
+  "contactKnockback": 0,
+  "attackDamage": 0,
+  "lootTable": "meadow_rabbit_forage",
+  "despawn": {
+    "mode": "whenIdle",
+    "spawnProtectionSeconds": 6,
+    "damageProtectionSeconds": 12
+  },
+  "ai": {
+    "kind": "critter",
+    "detectionRange": 112,
+    "loseTargetRange": 160,
+    "moveSpeed": 48,
+    "fleeSpeed": 108,
+    "patrolRadius": 112,
+    "returnHomeDistance": 160,
+    "flockRadius": 72,
+    "flockWeight": 0.18,
+    "minFlockSize": 2,
+    "perceptionMemorySeconds": 3.0,
+    "jumpSpeed": 255,
+    "decisionInterval": 0.75,
+    "idleChance": 0.28,
+    "activityPeriod": "day",
+    "dayMoveSpeedMultiplier": 1.0,
+    "nightMoveSpeedMultiplier": 0.45,
+    "perchWhenInactive": false,
+    "requiresLineOfSight": true,
+    "avoidLedges": true,
+    "avoidLiquid": true
+  }
+}

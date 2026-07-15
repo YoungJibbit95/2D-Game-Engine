@@ -1,0 +1,63 @@
+{
+  "id": "wildlife_migration",
+  "displayName": "Wildlife Migration",
+  "chancePerWindow": 0.18,
+  "minDurationTicks": 960,
+  "maxDurationTicks": 1680,
+  "cooldownTicks": 4800,
+  "intensity": 0.72,
+  "allowedBiomeIds": ["forest", "meadow", "amber_grove"],
+  "modifiers": {
+    "spawnWeightMultiplier": 1.3,
+    "skyLightMultiplier": 1.0,
+    "ambientLightAdd": 0.02,
+    "weatherIntensityMultiplier": 0.82,
+    "lootQuantityMultiplier": 1.0,
+    "rareLootChanceMultiplier": 1.0,
+    "presentationIntensity": 0.78
+  },
+  "phases": [
+    {
+      "id": "gathering",
+      "startProgress": 0.0,
+      "endProgress": 0.25,
+      "modifiers": {
+        "spawnWeightMultiplier": 0.9,
+        "skyLightMultiplier": 1.0,
+        "ambientLightAdd": 0.0,
+        "weatherIntensityMultiplier": 1.0,
+        "lootQuantityMultiplier": 1.0,
+        "rareLootChanceMultiplier": 1.0,
+        "presentationIntensity": 0.35
+      }
+    },
+    {
+      "id": "migration",
+      "startProgress": 0.25,
+      "endProgress": 0.82,
+      "modifiers": {
+        "spawnWeightMultiplier": 1.55,
+        "skyLightMultiplier": 1.0,
+        "ambientLightAdd": 0.02,
+        "weatherIntensityMultiplier": 0.75,
+        "lootQuantityMultiplier": 1.0,
+        "rareLootChanceMultiplier": 1.0,
+        "presentationIntensity": 1.0
+      }
+    },
+    {
+      "id": "dispersal",
+      "startProgress": 0.82,
+      "endProgress": 1.0,
+      "modifiers": {
+        "spawnWeightMultiplier": 0.85,
+        "skyLightMultiplier": 1.0,
+        "ambientLightAdd": 0.0,
+        "weatherIntensityMultiplier": 1.0,
+        "lootQuantityMultiplier": 1.0,
+        "rareLootChanceMultiplier": 1.0,
+        "presentationIntensity": 0.3
+      }
+    }
+  ]
+}

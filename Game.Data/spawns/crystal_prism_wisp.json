@@ -1,0 +1,20 @@
+{
+  "id": "crystal_prism_wisp",
+  "entityId": "prism_wisp",
+  "biomeId": "crystal_depths",
+  "time": "any",
+  "habitats": ["underground", "cavern", "openAir"],
+  "minTileY": 92,
+  "maxTileY": 159,
+  "chance": 0.18,
+  "weight": 1.25,
+  "worldEventWeights": { "crystal_surge": 2.2, "crystal_resonance": 1.7 },
+  "maxActive": 5,
+  "populationGroup": "crystal-hostiles",
+  "maxActiveInGroup": 8,
+  "populationRegionSizeTiles": 80,
+  "maxActiveInRegion": 3,
+  "maxActiveInHabitat": 5,
+  "maxActiveInLocalArea": 2,
+  "cooldownSeconds": 6.8
+}

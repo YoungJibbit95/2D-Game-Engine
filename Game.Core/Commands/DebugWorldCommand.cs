@@ -2,21 +2,49 @@ using Game.Core.Diagnostics;
 
 namespace Game.Core.Commands;
 
-public sealed class DebugWorldCommand : IConsoleCommand
+public sealed class DebugWorldCommand : TypedConsoleCommand
 {
     private readonly EngineDebugSnapshotBuilder _snapshots = new();
 
-    public string Name => "debug";
-
-    public string Description => "Prints engine debug information.";
-
-    public IReadOnlyList<string> Aliases { get; } = new[] { "dbg" };
-
-    public CommandResult Execute(CommandContext context, IReadOnlyList<string> arguments)
+    public DebugWorldCommand()
+        : base(new CommandSpecification(
+            "debug",
+            "Prints world information or requests a debug view change.",
+            new[]
+            {
+                new CommandArgumentSpecification(
+                    "view",
+                    CommandArgumentType.Choice,
+                    choices: new[] { "world", "overlay", "collisions", "ai", "streaming" },
+                    description: "Debug view or world summary."),
+                new CommandArgumentSpecification(
+                    "value",
+                    CommandArgumentType.Boolean,
+                    false,
+                    "Optional on, off, or toggle state.")
+            },
+            aliases: new[] { "dbg" },
+            examples: new[] { "/debug world", "/debug collisions on" }))
     {
-        if (arguments.Count == 0 || !string.Equals(arguments[0], "world", StringComparison.OrdinalIgnoreCase))
+    }
+
+    protected override CommandResult Execute(CommandContext context, CommandArguments typedArguments)
+    {
+        var view = typedArguments.GetString("view");
+        if (!string.Equals(view, "world", StringComparison.OrdinalIgnoreCase))
         {
-            return CommandResult.Failure("Usage: /debug world");
+            var debugView = Enum.Parse<Game.Core.DeveloperTools.DebugView>(view, ignoreCase: true);
+            var toggle = DeveloperCommandParsing.ParseToggle(typedArguments.GetOptionalString("value"));
+            return CommandResult.Request(
+                "debug_view_requested",
+                $"Requested {debugView} debug view: {toggle}.",
+                new Game.Core.DeveloperTools.SetDebugViewIntent(debugView, toggle));
+        }
+
+
+        if (typedArguments.Has("value"))
+        {
+            return CommandResult.Failure("too_many_arguments", "/debug world does not accept a toggle value.");
         }
 
         if (context.World is null)

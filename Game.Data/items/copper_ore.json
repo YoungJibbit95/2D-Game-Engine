@@ -1,6 +1,11 @@
 {
   "id": "copper_ore",
   "displayName": "Copper Ore",
+  "description": "Soft metal ore used for dependable starter equipment.",
+  "rarity": "Common",
+  "value": 5,
+  "category": "Material",
+  "sortPriority": 40,
   "type": "Material",
   "texture": "items/copper_ore",
   "maxStack": 999

@@ -8,6 +8,7 @@ using Game.Core.Physics;
 using Game.Core.Saving;
 using Game.Core.World;
 using Game.Core.World.TileEntities;
+using Game.Core.Time;
 using System.Numerics;
 using Xunit;
 
@@ -34,7 +35,9 @@ public sealed class GameSaveCoordinatorTests : IDisposable
         farmPlot.IsTilled = true;
         farmPlot.IsWatered = true;
         farmPlot.Crop = new CropInstance("parsnip", plantedDay: 2, daysUntilHarvest: 3);
-        request = request with { TileEntities = tileEntities, FarmPlots = farmPlots };
+        var worldTime = new WorldTime(dayLengthSeconds: 300);
+        worldTime.Update(385);
+        request = request with { TileEntities = tileEntities, FarmPlots = farmPlots, WorldTime = worldTime };
         request.World.SetTile(3, 3, KnownTileIds.Dirt);
         var events = new GameEventBus();
         GameSavedEvent? savedEvent = null;
@@ -62,6 +65,7 @@ public sealed class GameSaveCoordinatorTests : IDisposable
         Assert.True(result.EntitiesSaved);
         Assert.True(result.TileEntitiesSaved);
         Assert.True(result.FarmPlotsSaved);
+        Assert.True(result.SimulationStateSaved);
         Assert.Equal(1, result.RuntimeEntitiesSaved);
         Assert.Equal(1, result.TileEntityCount);
         Assert.Equal(1, result.FarmPlotCount);
@@ -71,6 +75,7 @@ public sealed class GameSaveCoordinatorTests : IDisposable
         Assert.True(File.Exists(Path.Combine(_root, "entities.json")));
         Assert.True(File.Exists(Path.Combine(_root, "tile_entities.json")));
         Assert.True(File.Exists(Path.Combine(_root, "farm_plots.json")));
+        Assert.True(File.Exists(Path.Combine(_root, "simulation.json")));
         Assert.NotEmpty(Directory.EnumerateFiles(Path.Combine(_root, "regions"), "*.region"));
         Assert.All(request.World.Chunks.Values, chunk => Assert.False(chunk.IsDirty));
         Assert.NotNull(savedEvent);
@@ -93,6 +98,10 @@ public sealed class GameSaveCoordinatorTests : IDisposable
         Assert.True(loadedPlot.IsWatered);
         Assert.NotNull(loadedPlot.Crop);
         Assert.Equal("parsnip", loadedPlot.Crop!.CropId);
+        var loadedTime = new SimulationSaveService().Load(Path.Combine(_root, "simulation.json"));
+        Assert.Equal(2, loadedTime.Day);
+        Assert.Equal(85, loadedTime.TimeOfDaySeconds);
+        Assert.Equal(300, loadedTime.DayLengthSeconds);
     }
 
     [Fact]
@@ -133,6 +142,57 @@ public sealed class GameSaveCoordinatorTests : IDisposable
         Assert.Equal(4, data.SelectedHotbarSlot);
         Assert.Equal(PlayerInventory.HotbarSlotCount + PlayerInventory.MainSlotCount, data.InventorySlots.Count);
         Assert.Contains(new ItemStack("gel", 8), data.InventorySlots);
+    }
+
+    [Fact]
+    public void PlayerSaveVersionThree_RoundTripsFavoriteSlotState()
+    {
+        var request = CreateRequest();
+        request.Inventory.AddItem(new ItemStack("gel", 8));
+        Assert.True(request.Inventory.Hotbar.SetFavorite(0, true));
+        var service = new PlayerSaveService();
+        var path = Path.Combine(_root, "favorite-player.json");
+
+        var data = service.CreateSaveData(request.Player, request.Inventory, "favorite", "Collector");
+        service.Save(data, path);
+        var loadedData = service.Load(path);
+        var loadedInventory = service.ToPlayerInventory(loadedData, _items);
+
+        Assert.Equal(PlayerSaveData.CurrentFormatVersion, loadedData.FormatVersion);
+        Assert.True(loadedInventory.Hotbar.Slots[0].IsFavorite);
+        Assert.Equal(new ItemStack("gel", 8), loadedInventory.Hotbar.Slots[0].Stack);
+        Assert.Equal(loadedData.InventorySlots.Count, loadedData.InventorySlotStates.Count);
+    }
+
+    [Fact]
+    public void PlayerSaveVersionTwo_LoadsLegacyStacksAsUnfavorited()
+    {
+        var path = Path.Combine(_root, "legacy-player.json");
+        Directory.CreateDirectory(_root);
+        File.WriteAllText(
+            path,
+            """
+            {
+              "FormatVersion": 2,
+              "PlayerId": "legacy",
+              "DisplayName": "Legacy",
+              "PositionX": 0,
+              "PositionY": 0,
+              "Health": 100,
+              "MaxHealth": 100,
+              "Mana": 0,
+              "SelectedHotbarSlot": 0,
+              "InventorySlots": [
+                { "ItemId": "gel", "Count": 3 }
+              ]
+            }
+            """);
+        var service = new PlayerSaveService();
+
+        var inventory = service.ToPlayerInventory(service.Load(path), _items);
+
+        Assert.Equal(new ItemStack("gel", 3), inventory.Hotbar.Slots[0].Stack);
+        Assert.False(inventory.Hotbar.Slots[0].IsFavorite);
     }
 
     public void Dispose()

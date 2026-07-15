@@ -1,0 +1,60 @@
+{
+  "id": "mushroom_cave",
+  "displayName": "Mushroom Cave",
+  "surfaceTile": "dirt",
+  "undergroundTile": "stone",
+  "isRegionalBiome": false,
+  "selectionWeight": 3,
+  "climate": {
+    "temperature": 0.48,
+    "humidity": 0.92
+  },
+  "terrain": {
+    "elevationMultiplier": 1.0,
+    "soilDepthMultiplier": 1.2,
+    "caveDensityMultiplier": 1.25,
+    "featureDensityMultiplier": 1.45
+  },
+  "weather": {
+    "clearWeight": 0,
+    "rainWeight": 0,
+    "stormWeight": 0,
+    "fogWeight": 1,
+    "minDurationTicks": 3600,
+    "maxDurationTicks": 7200,
+    "transitionDurationTicks": 180
+  },
+  "ambient": {
+    "surfaceSoundscapeId": "mushroom_cave",
+    "caveSoundscapeId": "mushroom_cave",
+    "baseLight": 0.58,
+    "baseVisibility": 0.78
+  },
+  "lighting": {
+    "colorGradeId": "mushroom_bioluminescence",
+    "skyLightMultiplier": 0.0,
+    "emissiveLightMultiplier": 1.35,
+    "fogDensity": 0.34
+  },
+  "spawning": {
+    "caveTableId": "underground_bat",
+    "densityMultiplier": 1.15,
+    "habitatTags": ["underground", "cavern", "fungal"]
+  },
+  "resources": {
+    "oreDensityMultiplier": 0.7,
+    "vegetationDensityMultiplier": 1.6,
+    "forageDensityMultiplier": 1.8,
+    "resourceTableIds": ["glow_mushrooms", "fungal_forage"]
+  },
+  "presentation": {
+    "backgroundSpriteId": "world/backgrounds/wave04/mushroom_parallax_layer",
+    "ambientParticleSpriteId": "particles/cave_dust",
+    "ambientCritterSpriteId": "entities/critters/cave_glowbug",
+    "biomeIconSpriteId": "ui/biomes/cave",
+    "ambientParticleDensity": 0.48,
+    "caveReverb": 0.64,
+    "surfaceReflectionStrength": 0.18,
+    "windResponse": 0.12
+  }
+}

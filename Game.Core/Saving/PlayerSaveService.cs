@@ -71,6 +71,10 @@ public sealed class PlayerSaveService
                 .Concat(inventory.Main.Slots)
                 .Select(slot => slot.Stack)
                 .ToArray(),
+            InventorySlotStates = inventory.Hotbar.Slots
+                .Concat(inventory.Main.Slots)
+                .Select(slot => slot.GetState())
+                .ToArray(),
             EquipmentLoadout = equipmentLoadout is null
                 ? null
                 : new EquipmentLoadoutSaveData
@@ -262,10 +266,11 @@ public sealed class PlayerSaveService
         ArgumentNullException.ThrowIfNull(data);
         ArgumentNullException.ThrowIfNull(itemDefinitions);
 
-        var inventory = new InventoryModel(data.InventorySlots.Count, itemDefinitions);
-        for (var index = 0; index < data.InventorySlots.Count; index++)
+        var states = ResolveInventoryStates(data);
+        var inventory = new InventoryModel(states.Count, itemDefinitions);
+        for (var index = 0; index < states.Count; index++)
         {
-            inventory.Slots[index].SetStack(data.InventorySlots[index]);
+            inventory.Slots[index].SetState(states[index]);
         }
 
         return inventory;
@@ -278,21 +283,34 @@ public sealed class PlayerSaveService
 
         var hotbar = new InventoryModel(PlayerInventory.HotbarSlotCount, itemDefinitions);
         var main = new InventoryModel(PlayerInventory.MainSlotCount, itemDefinitions);
+        var states = ResolveInventoryStates(data);
 
-        for (var index = 0; index < Math.Min(PlayerInventory.HotbarSlotCount, data.InventorySlots.Count); index++)
+        for (var index = 0; index < Math.Min(PlayerInventory.HotbarSlotCount, states.Count); index++)
         {
-            hotbar.Slots[index].SetStack(data.InventorySlots[index]);
+            hotbar.Slots[index].SetState(states[index]);
         }
 
         var mainSourceStart = PlayerInventory.HotbarSlotCount;
-        for (var index = 0; index < PlayerInventory.MainSlotCount && mainSourceStart + index < data.InventorySlots.Count; index++)
+        for (var index = 0; index < PlayerInventory.MainSlotCount && mainSourceStart + index < states.Count; index++)
         {
-            main.Slots[index].SetStack(data.InventorySlots[mainSourceStart + index]);
+            main.Slots[index].SetState(states[mainSourceStart + index]);
         }
 
         var inventory = new PlayerInventory(hotbar, main, itemDefinitions);
         inventory.SelectHotbarSlot(Math.Clamp(data.SelectedHotbarSlot, 0, PlayerInventory.HotbarSlotCount - 1));
         return inventory;
+    }
+
+    private static IReadOnlyList<InventorySlotState> ResolveInventoryStates(PlayerSaveData data)
+    {
+        if (data.InventorySlotStates is { Count: > 0 })
+        {
+            return data.InventorySlotStates;
+        }
+
+        return data.InventorySlots
+            .Select(stack => new InventorySlotState(stack, false))
+            .ToArray();
     }
 
     private static void AddWarning(

@@ -1,0 +1,13 @@
+{
+  "id": "mushroom_grotto",
+  "templateId": "mushroom_grotto_cluster",
+  "placement": "cave",
+  "chancePerRegion": 0.52,
+  "minSpacingRegions": 1,
+  "widthTiles": 12,
+  "heightTiles": 7,
+  "minTileY": 68,
+  "maxTileY": 112,
+  "allowedBiomeIds": ["mushroom_cave"],
+  "allowedLayerIds": ["mushroom_caves"]
+}

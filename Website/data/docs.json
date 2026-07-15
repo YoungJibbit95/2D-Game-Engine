@@ -1,0 +1,411 @@
+{
+  "categories": ["Start", "Architecture", "World", "Gameplay", "Rendering", "Content", "UI", "Persistence", "Tools", "Quality"],
+  "articles": [
+    {
+      "id": "getting-started",
+      "category": "Start",
+      "status": "verified",
+      "title": "Getting Started",
+      "shortTitle": "Quickstart",
+      "summary": "YjsE laeuft als gepinnte .NET-8-Solution in Rider, Visual Studio oder ueber die CLI.",
+      "paragraphs": [
+        "Oeffne YjsE.sln. global.json pinnt SDK 8.0.420 und die Projekte verwenden C# 12. Game.Client ist das ausfuehrbare MonoGame-Projekt; Game.Core bleibt renderer-neutral.",
+        "Game.Data ist austauschbarer Sample-Content. Ein eigenes Spiel kann ein separates yjse.game.json und einen eigenen Content-Root bereitstellen, ohne die Engine-Regeln in den Client zu kopieren."
+      ],
+      "api": [
+        { "label": "PowerShell", "code": "dotnet restore YjsE.sln --locked-mode\ndotnet build YjsE.sln -c Debug --no-restore\ndotnet test Game.Tests/Game.Tests.csproj -c Debug --no-build\ndotnet run --project Game.Client/Game.Client.csproj" }
+      ],
+      "tags": [".NET 8", "Rider", "MonoGame", "locked restore"],
+      "links": [{ "label": "Projektgrenzen", "target": "architecture" }, { "label": "Reference Game", "target": "reference-game" }]
+    },
+    {
+      "id": "reference-game",
+      "category": "Start",
+      "status": "partial",
+      "title": "Reference Game",
+      "shortTitle": "Reference Game",
+      "summary": "Die Terraria-artige Sandbox ist die primaere Integrationsflaeche, aber nicht die Engine selbst.",
+      "paragraphs": [
+        "Der Sideview-Pfad verbindet unendliche Chunk-Welt, Mining, Building, Inventar, Crafting, Mana, Combat, Entity-AI, Wetter und Saves. Seine Aufgabe ist es, Engine-Vertraege unter echtem Gameplay zu belasten.",
+        "Farming-, Topdown-, Dialogue- und Shop-Module bleiben kompilier- und testbar. Sie werden nicht parallel zu vollstaendigen Spielen ausgebaut, solange der Sandbox-Pfad die aktiven Engine-Gates traegt."
+      ],
+      "bullets": ["Sandbox bleibt primaerer Pfad", "Game-Content bleibt austauschbar", "Keine zweite Client-Simulation", "Engine-Features entstehen im Core"],
+      "callouts": [{ "kind": "note", "title": "Produktgrenze", "text": "Ein spaeteres Game-Repository soll YjsE referenzieren. Game-spezifische Inhalte gehoeren dann nicht in das Engine-Paket." }],
+      "tags": ["sandbox", "sideview", "game project", "separation"]
+    },
+    {
+      "id": "architecture",
+      "category": "Architecture",
+      "status": "verified",
+      "title": "Project Boundaries",
+      "shortTitle": "Boundaries",
+      "summary": "Core besitzt Regeln, Client besitzt Geraeteadapter und Darstellung, Data besitzt ersetzbaren Content.",
+      "paragraphs": [
+        "Game.Core referenziert keine MonoGame-Typen. Dort liegen autoritative Simulation, Gameplay-Regeln, Content-Vertraege, Persistenz, Runtime-Services und renderer-neutrale UI-Modelle.",
+        "Game.Client pollt Input, ruft genau eine GameSimulation auf und rendert immutable Snapshots. Tilemap, Lighting und Streaming duerfen die autoritative Welt lesen, aber Draw darf weder Welt generieren noch synchron dekodieren oder speichern."
+      ],
+      "bullets": ["Game.Core: authoritative rules", "Game.Client: host + adapters", "Game.Data: sample content pack", "Game.Tests: contracts + regressions"],
+      "api": [{ "label": "Ownership flow", "code": "InputSnapshot -> PlayerCommand -> GameSimulation.FixedUpdate\n                -> GameFrameSnapshot -> Client renderers\n\nGame.Data JSON -> typed registries -> LoadedGameSession" }],
+      "tags": ["Game.Core", "Game.Client", "ownership", "snapshot"],
+      "links": [{ "label": "Fixed tick", "target": "game-loop" }, { "label": "Content pipeline", "target": "content" }]
+    },
+    {
+      "id": "game-loop",
+      "category": "Architecture",
+      "status": "verified",
+      "title": "Authoritative Fixed Tick",
+      "shortTitle": "Fixed Tick",
+      "summary": "Eine GameSimulation ordnet Gameplay-Phasen bei 60 Hz; Rendering darf unabhaengig davon laufen.",
+      "paragraphs": [
+        "FixedUpdateRunner akkumuliert reale Zeit und fuehrt kontrollierte Simulationsschritte aus. VSync und der konfigurierbare Render-Limiter von 30 bis 360 FPS oder unlimited veraendern die autoritative Tickrate nicht.",
+        "GameSimulation besitzt die Phasenreihenfolge fuer Commands, Movement, World, Item Use, Interaction, AI, Combat, Pickup, Spawn, Respawn, Farming, Living World, Liquids, Lighting und Snapshot-Bau."
+      ],
+      "api": [{ "label": "Core runtime", "code": "GameSimulationTickResult FixedUpdate(\n    PlayerCommand command,\n    float deltaSeconds,\n    PlayerItemUseRequest itemUseRequest = default);" }],
+      "tags": ["GameSimulation", "60 Hz", "FixedUpdateRunner", "frame-rate independent"],
+      "links": [{ "label": "Phase-Telemetrie", "target": "phase-telemetry" }]
+    },
+    {
+      "id": "world",
+      "category": "World",
+      "status": "verified",
+      "title": "Infinite Chunk World",
+      "shortTitle": "Chunk World",
+      "summary": "Die Welt ist horizontal unendlich, vertikal begrenzt und ueber negative wie positive Chunk-Koordinaten adressierbar.",
+      "paragraphs": [
+        "TilePos und ChunkPos verwenden floor-basierte Koordinatenumrechnung. Extreme Werte, NaN und Infinity werden an Client-Grenzen abgefangen; int-Overflow darf weder Streaming noch Debug-Analyse zerlegen.",
+        "ChunkStreamingService verarbeitet immutable Requests, cancellable Load/Generate/Decode-Jobs und ein begrenztes Main-Thread-Apply-Budget. Draw fordert keine Chunks an. Wave 05 ergaenzt die numerischen Tile-IDs 12 bis 15 fuer Amberstone, Amberwood, Mangrove Root und Marsh Moss."
+      ],
+      "bullets": ["32 x 32 Tiles pro Chunk", "Dirty mesh + light flags", "Passierbare, abbaubare Mangrove Root", "Negative-X-Save/Load"],
+      "api": [{ "label": "Coordinates", "code": "TilePos tile = CoordinateUtils.WorldToTile(pixelX, pixelY);\nChunkPos chunk = CoordinateUtils.TileToChunk(tile);\nTilePos local = CoordinateUtils.LocalTileInChunk(tile);" }],
+      "tags": ["World", "Chunk", "negative X", "streaming"],
+      "links": [{ "label": "Strukturen", "target": "structure-materialization" }, { "label": "Living World", "target": "living-world" }]
+    },
+    {
+      "id": "structure-materialization",
+      "category": "World",
+      "status": "verified",
+      "title": "Structure Materialization",
+      "shortTitle": "Structures",
+      "summary": "Datengetriebene Row/Legend-Templates werden deterministisch ueber Chunk-Grenzen in die unendliche Welt materialisiert.",
+      "paragraphs": [
+        "StructurePlanDefinition beschreibt Breite, Hoehe, Zeichenzeilen, Legend-Mapping und ein transparentes Symbol. Der Region Planner positioniert PlannedStructure-Instanzen; die Chunk-Generation fragt nur den relevanten Footprint ab.",
+        "Explizite Air-Zellen koennen Terrain ausraeumen, transparente Zellen lassen vorhandenes Terrain unangetastet. Amber Workshop und Marsh Lantern Grove verwenden die echten Wave-05-Tiles und sind auf amber_grove beziehungsweise twilight_marsh begrenzt."
+      ],
+      "api": [{ "label": "Game.Core.World.Generation", "code": "bool StructureTemplateMaterializer.TryResolveTile(\n    PlannedStructure structure,\n    long tileX,\n    int tileY,\n    int originTileY,\n    out string tileId);" }],
+      "callouts": [{ "kind": "note", "title": "Chunk-Grenzen", "text": "Das Template bleibt eine globale Struktur. Jeder generierte Chunk materialisiert nur seinen Ausschnitt, wodurch negative und positive X-Pfade identisch bleiben." }],
+      "tags": ["StructurePlanDefinition", "legend", "cross-chunk", "deterministic"]
+    },
+    {
+      "id": "living-world",
+      "category": "World",
+      "status": "verified",
+      "title": "Living World Presentation",
+      "shortTitle": "Living World",
+      "summary": "Region, vertikale Schicht, Wetter und World Event liefern gemeinsam Simulation, Modifiers und Presentation-IDs.",
+      "paragraphs": [
+        "LivingWorldRuntime loest anhand von Position, Zeit und Seed eine BiomeRuntimeProfileSnapshot aus. Der Frame-Snapshot transportiert Wetter, Lichtmultiplikatoren, Ambient Soundscape und eine LivingWorldPresentationFrameSnapshot.",
+        "Amber Grove kombiniert warme Hoehen, Amberstone, trockeneren Nebel, Amber Beetle und Canopy Owl. Twilight Marsh kombiniert flacheres feuchtes Terrain, Marsh Moss, passierbare Mangrovenwurzeln, Marsh Frog und Prism Wisp.",
+        "Biome JSON liefert Background-, Particle-, Critter-, Icon- und Elite-IDs sowie Wind, Reverb und Reflection Strength. Der Client konsumiert den Snapshot, ohne Biome-Regeln neu zu berechnen.",
+        "Der generische --scene-biome-Smoke normalisiert datengetriebene Content-IDs, ist nur im Playing-Smoke aktiv und weist unsichere IDs ab. Amber Grove und Twilight Marsh laufen damit durch denselben Pfad statt durch eine fest codierte Biome-Liste."
+      ],
+      "bullets": ["Amber Grove + Resin Hollows", "Twilight Marsh + Lantern Bog", "Weather + soundscape + lighting", "Safe generic scene-biome smoke"],
+      "api": [{ "label": "Generic biome scene smoke", "code": "dotnet run --project Game.Client/Game.Client.csproj -c Release -- --smoke --start-state playing --scene-biome amber_grove" }],
+      "tags": ["LivingWorldRuntime", "amber_grove", "twilight_marsh", "BiomePresentationProfile"],
+      "links": [{ "label": "World Events", "target": "world-events" }, { "label": "Verteiltes Spawning", "target": "distributed-spawning" }]
+    },
+    {
+      "id": "world-events",
+      "category": "World",
+      "status": "verified",
+      "title": "World Events and Journal",
+      "shortTitle": "World Events",
+      "summary": "Fuenf JSON-Events durchlaufen deterministische Phasen und modifizieren Weltpraesentation sowie Gameplay-Gewichte.",
+      "paragraphs": [
+        "WorldEventDefinition beschreibt Biome-, Wetter-, Nacht- und Underground-Bedingungen, Dauer, Cooldown, Intensitaet und geordnete Phasen. Amberfall, Lantern Tide, Firefly Bloom, Crystal Surge und Wildlife Migration besitzen jeweils drei Phasen.",
+        "DeterministicWorldEventExecutor komponiert Root- und Phasen-Modifier fuer Spawns, Sky/Ambient Light, Wetter, Loot, Rare Loot, Partikel, Color Grade und Soundscape. Erfolgreiche Mine/Build/Melee/Shoot/Cast/Consume/Farm-Aktionen werden ueber eine monotone Sequenz exakt einmal ausgewertet.",
+        "world-events.json speichert aktive Phase, Cooldowns, begrenztes Journal und letzte Action-Sequenz atomar mit Backup-Recovery, Legacy-Default und Future-Version-Check. Rare- und Quantity-Modifier laufen einmal durch alle autoritativen Loot-Pfade."
+      ],
+      "api": [{ "label": "Game.Core.WorldEvents", "code": "WorldEventExecutionResult result = executor.Advance(\n    previousSnapshot,\n    new WorldEventExecutionContext(tick, region, biomeId, subBiomeId,\n        weatherId, weatherIntensity, isNight, underground, daylight, focusTile));\n\njournal.Append(result);" }],
+      "callouts": [{ "kind": "note", "title": "Daten statt Sonderfaelle", "text": "GameContentLoader merged Base- und Mod-Definitionen in WorldEventDefinitionRegistry; ContentReferenceValidator prueft Biome-, Spawn- und Particle-Verweise." }],
+      "tags": ["WorldEventDefinition", "DeterministicWorldEventExecutor", "phases", "journal"]
+    },
+    {
+      "id": "distributed-spawning",
+      "category": "World",
+      "status": "verified",
+      "title": "Distributed Spawning",
+      "shortTitle": "Spawning",
+      "summary": "Player und Kameras erzeugen Aktivitaetsquellen; sektorbasierte Ringe verteilen Spawns ausserhalb sichtbarer Flaechen.",
+      "paragraphs": [
+        "SpawnScheduler akzeptiert mehrere SpawnActivitySource-Werte. Jede Quelle traegt CenterTile, VisibleTileBounds und SpawnEnvironment; Kandidaten rotieren deterministisch durch Quellen und Sektoren.",
+        "Placement prueft geladene Chunks, Boden, Luft, Fluessigkeit und Kollision. Biome, Layer, Tageszeit, Wetter, WorldEventWeights und Habitat gewichten Regeln; lokale, regionale und globale Caps verhindern Spawn-Ballungen. Engagierte oder geschuetzte Entities werden nicht aggressiv despawned."
+      ],
+      "api": [{ "label": "Game.Core.Spawning", "code": "SpawnActivitySource.ForPlayer(id, centerTile, visibleBounds, environment);\nSpawnActivitySource.ForCamera(id, centerTile, visibleBounds, environment);\n\nSpawnSchedulerResult result = scheduler.Update(\n    world, entities, content, biomeMap, time, activitySources, dt, options);" }],
+      "callouts": [{ "kind": "note", "title": "Skalierung", "text": "Die aktuellen Vertraege enthalten 200-Entity-Spawn- und AI-Soaks; der zusammengefuehrte Stand ist in den bestaetigten Debug- und Release-Suites enthalten." }],
+      "tags": ["SpawnActivitySource", "sector ring", "caps", "off-screen"]
+    },
+    {
+      "id": "rng-streams",
+      "category": "Architecture",
+      "status": "verified",
+      "title": "Named RNG Streams",
+      "shortTitle": "RNG Streams",
+      "summary": "Session-eigene Xoshiro-Streams isolieren Combat, Spawning, Effekte und Farming deterministisch.",
+      "paragraphs": [
+        "SessionRandomRegistry leitet benannte Streams aus einem Seed ab. Ein zusaetzlicher Zufallszug in einem System verschiebt dadurch nicht die Ergebnisse eines anderen Systems.",
+        "random-state.json speichert Stream-Zustaende atomar mit Backup-Recovery. Save-mid-trace-Fortsetzung und SimulationStateHasher decken Replay- und Persistenzvertraege ab."
+      ],
+      "api": [{ "label": "Deterministic stream", "code": "DeterministicRandomStream combat = session.Random.GetOrCreate(\"combat\");\nDeterministicRandomStream spawning = session.Random.GetOrCreate(\"spawning\");" }],
+      "tags": ["Xoshiro", "determinism", "save resume", "state hash"]
+    },
+    {
+      "id": "gameplay",
+      "category": "Gameplay",
+      "status": "verified",
+      "title": "Interaction and Gameplay",
+      "shortTitle": "Gameplay",
+      "summary": "Mining, Building, Items, Inventory und Crafting laufen als Core-Regeln in der autoritativen Simulation.",
+      "paragraphs": [
+        "PlayerInputController uebersetzt Geraetezustand in PlayerCommand und PlayerItemUseRequest. Reichweite, Mining-Fortschritt, Werkzeugstaerke, Platzierungsblocker und Inventarverbrauch werden im Core entschieden. Abgebaute Tiles markieren ihre Lichtregion, damit kein alter Schatten stehen bleibt.",
+        "Inventar-Transaktionen behandeln Merge, Split, Swap, Favorites, Trash, Cursor-Return, Sortierung und Quick-Move atomar. Crafting verwendet Batch-Plans, Stationen, Query/Filter/Sort und typed Completion/Failure Events."
+      ],
+      "bullets": ["1.6x default mining speed", "Item pickup magnetism", "Atomic inventory transactions", "Batch crafting + recipe search"],
+      "tags": ["MiningSystem", "BuildingSystem", "Inventory", "CraftingSystem"],
+      "links": [{ "label": "Building Transactions", "target": "building-transactions" }, { "label": "Combat", "target": "combat" }]
+    },
+    {
+      "id": "building-transactions",
+      "category": "Gameplay",
+      "status": "verified",
+      "title": "Transactional Building",
+      "shortTitle": "Building",
+      "summary": "Prepare/Commit verhindert Itemverlust, stale Placements und halb angewendete Weltmutationen.",
+      "paragraphs": [
+        "BuildingPlacementValidator prueft Ziel, Loaded Chunk, Reichweite, Actor-Kollision, Liquid, Item/Tile-Definition und PlacementSupport. PreparePlacement bindet erwarteten Tile- und Inventarzustand in einen BuildingPlacementPlan.",
+        "CommitPlacement validiert Welt und Inventar erneut, entfernt genau ein Item und setzt danach das Tile. Schlaegt TrySetTile fehl, wird das Item zurueckgerollt. Nur ein erfolgreicher Commit publiziert TilePlacedEvent. PlayerItemUseSystem verwendet diesen Pfad aktiv."
+      ],
+      "api": [{ "label": "Game.Core.Interaction", "code": "BuildingPlacementPrepareResult prepared = building.PreparePlacement(\n    world, inventory, items, tiles, request);\n\nBuildingPlacementCommitResult committed = prepared.Success\n    ? building.CommitPlacement(prepared.Plan!, events)\n    : default;" }],
+      "bullets": ["World + inventory revalidation", "Rollback on failed tile write", "Placement support rules", "Typed failure reasons"],
+      "tags": ["BuildingPlacementTransactionService", "prepare commit", "rollback", "PlayerItemUseSystem"]
+    },
+    {
+      "id": "combat",
+      "category": "Gameplay",
+      "status": "implemented-unverified",
+      "title": "Guard, Parry and Projectiles",
+      "shortTitle": "Combat",
+      "summary": "Combat besitzt Attack-Phasen, Sweep-Hit-Shapes, richtungsabhaengige Guard-Stamina, Parry und Projectile-Lifecycle.",
+      "paragraphs": [
+        "AttackDefinition und AttackRuntimeState bilden Startup, Active, Recovery und Cooldown ab. MeleeSweepHitShape prueft Arc, Reichweite und Facing, ohne Client-Hitboxen zur autoritativen Wahrheit zu machen.",
+        "GuardRuntimeState verarbeitet Hold/Release, Ausrichtung, Stamina-Regeneration, Guard Break und Parry-Fenster. CombatDamageResolver liefert typed Events fuer Damage, Block, Parry und Break. ProjectileRuntimeState trennt Definition, Owner, Lifetime, Pierce und Collision Result."
+      ],
+      "api": [
+        { "label": "Guard runtime", "code": "var guard = new GuardRuntimeState(new GuardDefinition());\nguard.ApplyCommand(new GuardCommand(isHeld, facing), deltaSeconds);\n\nCombatDamageResolution resolution = CombatDamageResolver.Resolve(\n    request, guard, targetFacing);" },
+        { "label": "Projectile runtime", "code": "ProjectileRuntimeStepResult step = projectile.Update(\n    deltaSeconds, tileCollision, entityCollision);" }
+      ],
+      "callouts": [{ "kind": "note", "title": "Client-Rolle", "text": "Effekt-Sprites und Animationen visualisieren Combat Events. Treffer, Guard-Kosten und Schaden bleiben Core-Entscheidungen." }],
+      "tags": ["GuardRuntimeState", "parry", "projectile", "MeleeSweepHitShape"]
+    },
+    {
+      "id": "entities",
+      "category": "Gameplay",
+      "status": "verified",
+      "title": "Entities, AI and Loot",
+      "shortTitle": "Entities + AI",
+      "summary": "Friendly und Hostile Entities teilen Faction-, Sensing-, Steering-, Habitat- und Loot-Vertraege.",
+      "paragraphs": [
+        "CritterAiBehavior kann Wander, Flock, Perch und Flee waehlen. HostileAiBehavior nutzt Chase, Investigate, Attack und ReturnHome mit Perception Memory und Tagesprofilen.",
+        "EnemyEntity fuehrt AI-Zustand, Ziel, Despawn-Policy und Damage-Lifecycle. Wave 05 aktiviert Marsh Frog, Canopy Owl, Amber Beetle und Prism Wisp mit eigenen Movement-, Habitat-, Spawn- und Loot-Vertraegen. Genau-einmal Death/Loot verwendet benannte RNG-Streams."
+      ],
+      "bullets": ["Marsh Frog + Canopy Owl", "Amber Beetle + Prism Wisp", "Perception memory", "Deterministic loot lifecycle"],
+      "tags": ["IAiBehavior", "CritterAiBehavior", "HostileAiBehavior", "LootTable"]
+    },
+    {
+      "id": "animation",
+      "category": "Gameplay",
+      "status": "verified",
+      "title": "Layered Character Animation",
+      "shortTitle": "Animation",
+      "summary": "Source rectangles, State Layers und Character-Rig-Profile kombinieren Body, Hair, Clothes, Armor und Equipment ohne Texturduplikate.",
+      "paragraphs": [
+        "AnimationClipPlayer sampelt Frames und Events aus einem PNG-Strip. LayeredAnimationStateMachine wertet priorisierte States aus, baut eine immutable Pose und stellt Events ueber einen Cursor bereit.",
+        "CharacterRigProfile beschreibt geordnete Sprite-Layer. CharacterSpriteLayerPoseBuilder verbindet Rig und Animation Pose; LegacyAnimationAdapter und PlayerAnimationSnapshotAdapter halten bestehende CharacterAnimationState-Aufrufer kompatibel.",
+        "RuntimeEntityVisualProfileCatalog konvertiert die zentral geladenen Entity-Profile einmal und bereitet State-Frames, Motion Styles, Elite Overrides und typisierte Fallbacks vor. Ein 200-Entity-Steady-State-Test bleibt bei 0 B Allocation."
+      ],
+      "api": [{ "label": "Game.Core.Animation", "code": "var machine = new LayeredAnimationStateMachine(definition);\nmachine.SetParameter(\"speed\", horizontalSpeed);\nmachine.Update(deltaSeconds);\nLayeredAnimationPose pose = machine.Sample();\nLayeredAnimationEventOccurrence[] events = machine.Events.ConsumeAll();" }],
+      "callouts": [{ "kind": "note", "title": "Texture ownership", "text": "Frames eines Animationsstreifens verwenden Source Rectangles. Pro Frame darf keine neue GPU-Textur entstehen." }],
+      "tags": ["LayeredAnimationStateMachine", "CharacterRigProfile", "source rectangle", "events"]
+    },
+    {
+      "id": "rendering",
+      "category": "Rendering",
+      "status": "implemented-unverified",
+      "title": "Presentation Pipeline",
+      "shortTitle": "Pipeline",
+      "summary": "Tilemap, Entities, Lighting, Atmosphaere, Reflections, Partikel und UI werden als budgetierte Client-Paesse geplant.",
+      "paragraphs": [
+        "PresentationSettingsAdapter uebersetzt RenderingSettings in ein PresentationQualityProfile. PresentationPassPlanner waehlt eine feste, begrenzte Passliste; Disabled/Low/Medium/High reduzieren Ray Steps, Blur, Lights und Reflection Surfaces kontrolliert.",
+        "Pixel-Sprites bleiben point-sampled. Light Map und Post-Passes koennen linear skaliert werden, damit Licht weich wirkt, ohne Sprite-Kanten zu verwischen. Mining invalidiert die betroffene Light Region; die naechste budgetierte Recalculation entfernt den Schatten des zerstoerten Blocks."
+      ],
+      "api": [{ "label": "Game.Client.Rendering.Effects", "code": "PresentationQualityProfile profile = PresentationSettingsAdapter.Resolve(settings);\nSpan<PresentationPassDescriptor> passes = stackalloc PresentationPassDescriptor[\n    PresentationPassPlanner.MaximumPassCount];\nPresentationPassPlan plan = PresentationPassPlanner.Build(profile, request, passes);" }],
+      "bullets": ["Bounded pass planner", "Quality + viewport downgrade", "No disk IO in Draw", "Telemetry per presentation stage"],
+      "tags": ["PresentationPassPlanner", "quality tier", "pixel rendering", "post process"],
+      "links": [{ "label": "2D-Licht und Reflections", "target": "ray-lighting" }, { "label": "Texture Budgets", "target": "texture-groups" }]
+    },
+    {
+      "id": "ray-lighting",
+      "category": "Rendering",
+      "status": "implemented-unverified",
+      "title": "2D Ray-Cast Lighting",
+      "shortTitle": "2D Lighting",
+      "summary": "Tile-aware CPU-Ray-Casts formen Sonnen- und Quellschatten; Penumbra, Bloom und Surface Reflections bleiben budgetiert.",
+      "paragraphs": [
+        "TileRayCastShadowMaskBuilder arbeitet nur auf dem sichtbaren Weltfenster und schreibt wiederverwendbare Work Buffers. Sonnenfarbe und -richtung folgen der Tageszeit; Hoehlen verwenden ihr authored Biome Base Light unabhaengig vom Oberflaechen-Daylight, damit leuchtende Cave-Biome lesbar bleiben.",
+        "Core unterscheidet Open, Unknown und Occluded Sky. Ungeladene Chunks lassen weder Sonnen- noch Point-Light durchsickern; Load/Unload invalidiert Abhaengigkeiten und sichtbare Dirty-Regionen werden deterministisch zuerst verarbeitet.",
+        "LightingRenderer kombiniert autoritative Tile-Light-Werte mit sichtbaren Light Sources, Shadow Mask und Qualitaetsprofil. WaterReflectionSurfacePlanner findet begrenzte sichtbare Fluessigkeitssegmente fuer eine screen-space-nahe Spiegelung."
+      ],
+      "api": [{ "label": "Presentation passes", "code": "CpuTileRayCastSunShadow\nPenumbraHorizontal -> PenumbraVertical\nEmissiveBloomHorizontal -> EmissiveBloomVertical\nWaterReflection\nAtmosphereComposite" }],
+      "callouts": [{ "kind": "warning", "title": "Kein Hardware-Raytracing", "text": "YjsE nutzt 2D tile-aware Ray-Casts und begrenztes Raymarching im Presentation-Stack. Es gibt keine DXR-/RTX-Raytracing-Pipeline und keine physikalisch korrekten Vollszenenreflexionen." }],
+      "tags": ["TileRayCastShadowMaskBuilder", "soft shadow", "torch bloom", "WaterReflectionSurfacePlanner"]
+    },
+    {
+      "id": "texture-groups",
+      "category": "Rendering",
+      "status": "implemented-unverified",
+      "title": "Texture Residency and Budgets",
+      "shortTitle": "Texture Budgets",
+      "summary": "Ein PNG besitzt eine GPU-Ressource; Frame Descriptors teilen sie ueber Source Rectangles.",
+      "paragraphs": [
+        "ClientTextureRegistry gruppiert Ressourcen in UI, World, Entities, Backgrounds und Effects. Preload, Leases, Pinning, decoded-byte Budgets und LRU Eviction verhindern unkontrolliertes Wachstum.",
+        "Draw darf nur residente Texturen abfragen. Fehlende Ressourcen verwenden einen gemeinsamen Fallback; Loading und Allocation Telemetry werden ausserhalb des Render-Hotpaths erfasst."
+      ],
+      "bullets": ["One PNG = one texture", "Alias-shared leases", "Five residency groups", "Exact-once disposal"],
+      "tags": ["ClientTextureRegistry", "TextureResource", "lease", "LRU"]
+    },
+    {
+      "id": "content",
+      "category": "Content",
+      "status": "verified",
+      "title": "Content and Asset Contracts",
+      "shortTitle": "Content",
+      "summary": "JSON-Registries laden Tiles, Items, Recipes, Entities, Biome, Loot, Projectiles, Regionen, Strukturen, World Events und Sprites.",
+      "paragraphs": [
+        "GameProjectContentLoader liest das Project Manifest und laedt Base Content vor Mods. GameContentLoader merged World Events und andere Definitionen nach ID mit Pack-Ownership; typed Registries bleiben die einzige Runtime-Sicht.",
+        "ContentReferenceValidator prueft Tile-Drops, Item-Actions, Recipes, Loot, Biome-Spawns, Event-Weights, Entities, Strukturen, regionale Biome und Sprite-IDs. Wave 05 umfasst 24 manifestierte Assets mit 122 Frames; Website/data/assets.json weist eine bytegenaue Auswahl aus."
+      ],
+      "api": [{ "label": "Content layout", "code": "Game.Data/\n  assets/*.sprites.json\n  tiles/*.json       items/*.json\n  recipes/*.json     entities/*.json\n  biomes/*.json      loot/*.json\n  world-events/*.json\n  worldgen/*.region.json\n  structures/*.json" }],
+      "tags": ["GameContentDatabase", "ContentReferenceValidator", "mods", "Wave 05"]
+    },
+    {
+      "id": "ui",
+      "category": "UI",
+      "status": "implemented-unverified",
+      "title": "UI Interaction Model",
+      "shortTitle": "Interaction",
+      "summary": "Release-inside Hit-Testing, Pointer Capture und fokussierbare Controls liefern Maus-, Keyboard- und Gamepad-Paritaet.",
+      "paragraphs": [
+        "UiInteraction verfolgt Hover, Pressed, Capture und Focus. Ein Click gilt nur, wenn Press und Release zum selben Control gehoeren. Slider verwenden Pointer Drag; Dropdown, Segment, Toggle, Scroll und Tooltip besitzen eigene Interaktionsvertraege.",
+        "D-Pad und Stick verwenden kontrolliertes Repeat, A/B loesen Accept/Back aus und Shoulder Buttons wechseln Tabs. Core-Modelle wie UiNumericRange und UiGridNavigator bleiben MonoGame-frei."
+      ],
+      "api": [{ "label": "Client UI", "code": "UiControlState state = interaction.ResolveControl(\n    controlId, bounds, input, enabled);\n\nif (state.Clicked) ApplyAction();\nif (state.Dragging) ApplySlider(state.PointerPosition.X);" }],
+      "tags": ["UiInteraction", "pointer capture", "slider", "gamepad"]
+    },
+    {
+      "id": "ui-renderer",
+      "category": "UI",
+      "status": "implemented-unverified",
+      "title": "UI Theme and Renderer",
+      "shortTitle": "Theme + Renderer",
+      "summary": "Settings-gesteuerte Palette, Typografie, Spacing, Radien, Gradients, Glow und Blur-Spec besitzen deterministische Pixel-Fallbacks.",
+      "paragraphs": [
+        "UiTheme.Resolve und ResolveContract lesen UiSettings, RenderingSettings und AccessibilitySettings. UiThemeContract liefert Typography, Spacing, Panel/Button/Tooltip Surface Specs und Backdrop Spec.",
+        "DrawRoundedRectangle, DrawRoundedBorder und DrawButton rendern echte Rundungen mit dem 1x1-Pixel. GradientSteps, GlowSpread und BlurRadius werden per Quality Tier reduziert. Wenn kein Effect-Backed Blur aktiv ist, zeichnet DrawBackdrop einen deterministischen Tint-Fallback."
+      ],
+      "api": [{ "label": "Game.Client.UI", "code": "UiPalette palette = UiTheme.Resolve(settings);\nUiThemeContract contract = UiTheme.ResolveContract(settings);\n\nUiTheme.DrawPanel(context, bounds, palette, 0.96f, settings: settings);\nUiTheme.DrawButton(context, bounds, palette, selected, hovered,\n    enabled, pressed, focused, settings);" }],
+      "bullets": ["CornerRadiusPixels 0-16", "Gradient quality tiers", "Glow + shadow budgets", "Contrast + reduced flash"],
+      "tags": ["UiThemeContract", "rounded rectangle", "gradient", "backdrop blur"]
+    },
+    {
+      "id": "saving",
+      "category": "Persistence",
+      "status": "verified",
+      "title": "Save, Load and Recovery",
+      "shortTitle": "Persistence",
+      "summary": "Welt, Player, Simulation und RNG verwenden getrennte versionierte Services mit Kompatibilitaetsvertraegen.",
+      "paragraphs": [
+        "World Metadata und Chunk-Payloads sind von Player-, simulation.json- und random-state.json-Dateien getrennt. Dirty Chunks werden vor Unload gespeichert; Background Jobs tragen Session Generation Tokens.",
+        "Player Saves migrieren alte Formate additiv. Save-Format-Aenderungen brauchen Migration und Compatibility Tests; direkter Region Overwrite braucht vor Einsatz einen recovery-safe Plan."
+      ],
+      "bullets": ["Player format migrations", "Atomic sidecars + backup", "Negative-X chunks", "Autosave coordinator"],
+      "tags": ["WorldSaveService", "PlayerSaveService", "SimulationSaveService", "recovery"]
+    },
+    {
+      "id": "tools",
+      "category": "Tools",
+      "status": "verified",
+      "title": "Developer Console and Debugging",
+      "shortTitle": "Developer Tools",
+      "summary": "Typed Commands, Autocomplete, Runtime-Snapshots und Client-Smokes beschleunigen reproduzierbare Iteration.",
+      "paragraphs": [
+        "CommandRegistry beschreibt Namen, Aliase, Argumente, Vorschlaege und Hilfe. CommandDispatcher validiert und liefert Ergebnisse oder Requests, die Client beziehungsweise Simulation ausfuehren.",
+        "Die geoeffnete Konsole besitzt Completion-Auswahl, getrennte History-/Output-Navigation, Severity Styling und kompakte Layouts. F3-Diagnostik zeigt Position, Chunks, Entities, Lighting, Streaming und optional Phase-Telemetrie."
+      ],
+      "api": [{ "label": "Console examples", "code": "/help spawn\n/give torch 99\n/spawn forest_boar 3\n/time night\n/tp -2048 96\n/chunk status\n/save" }],
+      "tags": ["CommandRegistry", "autocomplete", "F3", "client smoke"]
+    },
+    {
+      "id": "phase-telemetry",
+      "category": "Quality",
+      "status": "implemented-unverified",
+      "title": "Simulation Phase Telemetry",
+      "shortTitle": "Phase Telemetry",
+      "summary": "Optionales, vorallokiertes Timing und Allocation Tracking macht jede autoritative Tick-Phase messbar.",
+      "paragraphs": [
+        "SimulationPhaseTelemetry besitzt feste Arrays pro GameSimulationPhase. Measure liefert bei deaktiviertem Profiler einen leeren Scope; nur der aktivierte Debug-Pfad liest Stopwatch und GC.GetAllocatedBytesForCurrentThread.",
+        "CaptureSnapshot liefert Last, Total, Samples, AverageMilliseconds und AverageAllocatedBytes. SimulationPhaseOverlay cached lesbare Zeilen ausserhalb von Draw und kann nach Zeit oder Allocation sortieren."
+      ],
+      "api": [{ "label": "Game.Core.Runtime", "code": "simulation.PhaseTelemetry.SetEnabled(true);\nusing (simulation.PhaseTelemetry.Measure(GameSimulationPhase.EntityAi))\n{\n    UpdateEntityAi();\n}\nSimulationPhaseTelemetrySnapshot snapshot =\n    simulation.PhaseTelemetry.CaptureSnapshot();" }],
+      "callouts": [{ "kind": "warning", "title": "Messmodus", "text": "Die exakte Phasenmessung ist ein Debug-/Profiling-Feature. Sie bleibt standardmaessig deaktiviert, damit der normale Tick keine Messkosten traegt." }],
+      "tags": ["SimulationPhaseTelemetry", "allocation", "Stopwatch", "overlay"],
+      "links": [{ "label": "Test- und Performance-Gates", "target": "tests" }]
+    },
+    {
+      "id": "runtime-resilience",
+      "category": "Quality",
+      "status": "verified",
+      "title": "Bounded Feedback, Replay and Streaming",
+      "shortTitle": "Runtime Resilience",
+      "summary": "Feste Command-Ringe, versionierte Input-Replays und budgetierte Streaming-Retries halten Diagnose und Praesentation kontrollierbar.",
+      "paragraphs": [
+        "GameplayFeedbackRouter uebersetzt autoritative Mining-, Building-, Combat-, Drop-, Pickup-, Crafting-, Status- und World-Event-Ereignisse in feste Visual- und Audio-Ringe. Der Client leert sie in wiederverwendete Arrays; Overflow und Drain sind telemetriert.",
+        "ReplayCaptureSession zeichnet Tick, Sequenz, Fixed Delta, Player Command, optionalen Item-Use und periodische State Hashes auf. Version, Reihenfolge, Numerik und JSON-Groesse werden validiert; ReplayComparer meldet den ersten konkreten Unterschied samt letztem passenden Checkpoint.",
+        "ChunkStreamingService klassifiziert Retryable, Cancelled, Stale und Permanent Failures. Exponentieller Update-Backoff, terminale Exhaustion sowie Operation-, Zeit- und Byte-Budgets verhindern Spin, Starvation und ungebremste Main-Thread-Arbeit."
+      ],
+      "api": [
+        { "label": "Replay capture", "code": "simulation.StartReplayCapture(new ReplayCaptureOptions\n{\n    FrameCapacity = 8192,\n    CheckpointIntervalTicks = 120\n});\nReplayRecordingSnapshot? snapshot = simulation.StopReplayCapture();" },
+        { "label": "Streaming budgets", "code": "new ChunkStreamingOptions\n{\n    MaxApplyTimePerUpdate = TimeSpan.FromMilliseconds(4),\n    MaxApplyDecodedBytesPerUpdate = 512 * 1024,\n    RetryPolicy = new ChunkStreamingRetryPolicy { MaxAttempts = 3 }\n};" }
+      ],
+      "bullets": ["Bounded visual/audio commands", "First-divergence replay reports", "Retry/backoff classification", "Operation/time/byte apply budgets"],
+      "tags": ["GameplayFeedbackRouter", "ReplayCaptureSession", "ChunkStreamingService", "determinism"]
+    },
+    {
+      "id": "tests",
+      "category": "Quality",
+      "status": "partial",
+      "title": "Validation and Performance Gates",
+      "shortTitle": "Validation",
+      "summary": "Debug und Release bestehen im aktuellen Checkout jeweils mit 995/995 Tests; der aktuelle Implementierungsscope und die Performance-Gates sind gruen.",
+      "paragraphs": [
+        "verified bedeutet lokal oder gehostet entsprechend der dokumentierten Evidence bestanden. implemented-unverified bedeutet Code plus fokussierte Vertraege ohne konvergierten Gesamt-Gate. partial beschreibt bewusst unvollstaendige End-to-End-Aktivierung.",
+        "World-Event-Persistenz, bounded Feedback, Replay Capture, phased Combat, retry-budgeted Streaming, Runtime-Entity-Animation, Wave 05, Building Transactions und Cave-Restlicht sind in den aktuellen Debug- und Release-Suites enthalten. Beide Konfigurationen bestehen mit 995/995 Tests.",
+        "Der Client-Smoke akzeptiert mit --scene-biome generische normalisierte Biome-IDs und weist unsichere Eingaben ab. Ein oeffentliches Download-Artefakt ist trotzdem nicht hinterlegt; lokaler Gate-Erfolg und veroeffentlichte Binaries bleiben getrennte Aussagen."
+      ],
+      "api": [
+        { "label": "Repository gates", "code": "dotnet format style YjsE.sln --verify-no-changes --no-restore --severity warn\ndotnet test Game.Tests/Game.Tests.csproj -c Debug\ndotnet test Game.Tests/Game.Tests.csproj -c Release\npython Game.Data/tools/audit_sprite_assets.py --strict\nnode Website/tools/validate-site.mjs" },
+        { "label": "Generic regional-biome smoke", "code": "dotnet run --project Game.Client/Game.Client.csproj -c Release -- --smoke --start-state playing --scene-biome twilight_marsh" }
+      ],
+      "bullets": ["Debug + Release suite", "Published client smokes", "Strict sprite audit", "Quick + calibration benchmarks"],
+      "tags": ["verified", "implemented-unverified", "benchmarks", "smoke tests"]
+    }
+  ]
+}

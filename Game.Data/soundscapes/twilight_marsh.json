@@ -1,0 +1,21 @@
+{
+  "id": "twilight_marsh",
+  "dayMusicLoopId": "music/twilight_marsh_day",
+  "nightMusicLoopId": "music/twilight_marsh_night",
+  "surfaceAmbientLoopId": "ambient/marsh_water",
+  "rainLoopId": "ambient/marsh_rain",
+  "stormLoopId": "ambient/marsh_storm",
+  "fogLoopId": "ambient/marsh_fog",
+  "rainStartStingerId": "stingers/rain_begin",
+  "musicVolume": 0.68,
+  "ambientVolume": 0.78,
+  "weatherVolume": 0.82,
+  "crossfadeSeconds": 2.4,
+  "worldEvents": {
+    "lantern_tide": {
+      "loopId": "ambient/lantern_tide",
+      "startStingerId": "stingers/lantern_tide_begin",
+      "volume": 0.84
+    }
+  }
+}

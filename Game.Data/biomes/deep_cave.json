@@ -1,0 +1,61 @@
+{
+  "id": "deep_cave",
+  "displayName": "Deep Cave",
+  "surfaceTile": "stone",
+  "undergroundTile": "stone",
+  "isRegionalBiome": false,
+  "selectionWeight": 5,
+  "climate": {
+    "temperature": 0.3,
+    "humidity": 0.46
+  },
+  "terrain": {
+    "elevationMultiplier": 1.0,
+    "soilDepthMultiplier": 0.5,
+    "caveDensityMultiplier": 1.55,
+    "featureDensityMultiplier": 0.72
+  },
+  "weather": {
+    "clearWeight": 1,
+    "rainWeight": 0,
+    "stormWeight": 0,
+    "fogWeight": 0,
+    "minDurationTicks": 5400,
+    "maxDurationTicks": 9000,
+    "transitionDurationTicks": 120
+  },
+  "ambient": {
+    "surfaceSoundscapeId": "deep_cave",
+    "caveSoundscapeId": "deep_cave",
+    "baseLight": 0.16,
+    "baseVisibility": 0.62
+  },
+  "lighting": {
+    "colorGradeId": "deep_cave_cool",
+    "skyLightMultiplier": 0.0,
+    "emissiveLightMultiplier": 1.1,
+    "fogDensity": 0.24
+  },
+  "spawning": {
+    "caveTableId": "deep_cave_spider",
+    "densityMultiplier": 1.3,
+    "habitatTags": ["underground", "deep", "hostile"]
+  },
+  "resources": {
+    "oreDensityMultiplier": 1.45,
+    "vegetationDensityMultiplier": 0.12,
+    "forageDensityMultiplier": 0.2,
+    "resourceTableIds": ["deep_ores", "cave_stone"]
+  },
+  "presentation": {
+    "backgroundSpriteId": "world/backgrounds/wave04/cave_parallax_layer",
+    "ambientParticleSpriteId": "particles/cave_dust",
+    "ambientCritterSpriteId": "entities/critters/cave_glowbug",
+    "biomeIconSpriteId": "ui/biomes/cave",
+    "eliteSpriteId": "entities/enemies/cave_spider_elite",
+    "ambientParticleDensity": 0.24,
+    "caveReverb": 0.78,
+    "surfaceReflectionStrength": 0.08,
+    "windResponse": 0.16
+  }
+}

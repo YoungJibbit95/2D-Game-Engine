@@ -9,6 +9,7 @@ public enum CharacterAnimationState
     Attack,
     Mine,
     UseItem,
+    Block,
     Hurt,
     Dead
 }

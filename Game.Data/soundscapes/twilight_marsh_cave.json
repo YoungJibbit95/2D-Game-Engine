@@ -1,0 +1,8 @@
+{
+  "id": "twilight_marsh_cave",
+  "undergroundMusicLoopId": "music/marsh_depths",
+  "undergroundAmbientLoopId": "ambient/marsh_drips",
+  "musicVolume": 0.58,
+  "ambientVolume": 0.8,
+  "crossfadeSeconds": 2.6
+}

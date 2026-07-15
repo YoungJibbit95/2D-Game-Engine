@@ -5,6 +5,8 @@
   "globalRequirements": [
     "Export a PNG at the exact requested width and height.",
     "Use transparent background unless the brief explicitly says tileable terrain fill.",
+    "Use binary alpha only: every pixel alpha value must be 0 or 255.",
+    "Keep all four corner pixels transparent for standalone sprites and world objects.",
     "Keep sprite centered and aligned to the pixel grid.",
     "Preserve the sprite id and output path exactly."
   ],
@@ -28,7 +30,7 @@
     },
     {
       "spriteId": "tiles/dirt",
-      "outputPath": "sprites/world/tiles/dirt.png",
+      "outputPath": "sprites/world/tiles/dirt_autotile.png",
       "width": 256,
       "height": 16,
       "subject": "16-frame dirt terrain autotile strip",
@@ -54,7 +56,7 @@
     },
     {
       "spriteId": "tiles/grass",
-      "outputPath": "sprites/world/tiles/grass.png",
+      "outputPath": "sprites/world/tiles/grass_autotile.png",
       "width": 256,
       "height": 16,
       "subject": "16-frame grass-over-dirt terrain autotile strip",
@@ -80,7 +82,7 @@
     },
     {
       "spriteId": "tiles/stone",
-      "outputPath": "sprites/world/tiles/stone.png",
+      "outputPath": "sprites/world/tiles/stone_autotile.png",
       "width": 256,
       "height": 16,
       "subject": "16-frame stone terrain autotile strip",
@@ -211,20 +213,21 @@
     {
       "spriteId": "tiles/workbench",
       "outputPath": "sprites/world/objects/workbench.png",
-      "width": 32,
-      "height": 16,
+      "width": 64,
+      "height": 32,
       "subject": "wooden workbench world object",
       "prompt": "Small wooden crafting workbench, side view, two-tile wide, plank top, sturdy legs, tiny tool marks.",
       "requirements": [
-        "Use a 32x16 canvas.",
+        "Use a 64x32 canvas.",
         "Transparent background.",
         "Grounded at bottom of canvas."
       ],
       "palette": [
-        "#5c351f",
-        "#85512d",
-        "#b87943",
-        "#d49a5b"
+        "#1b1826",
+        "#352319",
+        "#5a3825",
+        "#8b5a34",
+        "#c58b52"
       ],
       "tags": [
         "world-object",
@@ -397,20 +400,25 @@
     {
       "spriteId": "items/copper_pickaxe",
       "outputPath": "sprites/tools/copper_pickaxe.png",
-      "width": 16,
-      "height": 16,
+      "width": 32,
+      "height": 32,
       "subject": "copper pickaxe tool icon",
       "prompt": "Diagonal copper pickaxe with wooden handle and copper head, readable tool silhouette.",
       "requirements": [
         "Transparent background.",
-        "Fits within 16x16.",
+        "Fits within 32x32 with two pixels of transparent padding.",
         "Handle from lower-left to upper-right."
       ],
       "palette": [
-        "#5c351f",
-        "#b26335",
-        "#d98c4c",
-        "#e9b96e"
+        "#1b1826",
+        "#352319",
+        "#5a3825",
+        "#8b5a34",
+        "#c58b52",
+        "#5b2b22",
+        "#8f4531",
+        "#c56d3e",
+        "#f0a35b"
       ],
       "tags": [
         "item",
@@ -471,8 +479,8 @@
     {
       "spriteId": "items/copper_sword",
       "outputPath": "sprites/weapons/copper_sword.png",
-      "width": 16,
-      "height": 16,
+      "width": 32,
+      "height": 32,
       "subject": "copper sword weapon icon",
       "prompt": "Diagonal copper short sword with warm metal blade, small guard, wooden grip.",
       "requirements": [
@@ -480,10 +488,15 @@
         "Blade should be copper-orange, not steel."
       ],
       "palette": [
-        "#5c351f",
-        "#9b542e",
-        "#d98c4c",
-        "#f0bc73"
+        "#1b1826",
+        "#352319",
+        "#5a3825",
+        "#8b5a34",
+        "#c58b52",
+        "#5b2b22",
+        "#8f4531",
+        "#c56d3e",
+        "#f0a35b"
       ],
       "tags": [
         "item",
@@ -664,19 +677,20 @@
     {
       "spriteId": "items/workbench",
       "outputPath": "sprites/items/stations/workbench.png",
-      "width": 16,
-      "height": 16,
+      "width": 32,
+      "height": 32,
       "subject": "workbench inventory icon",
-      "prompt": "Tiny wooden workbench item icon with plank top and legs, compressed to fit 16x16.",
+      "prompt": "Detailed wooden workbench item icon with plank top and legs, readable at native 32x32 scale.",
       "requirements": [
         "Transparent background.",
         "Must match the world object design."
       ],
       "palette": [
-        "#5c351f",
-        "#85512d",
-        "#b87943",
-        "#d49a5b"
+        "#1b1826",
+        "#352319",
+        "#5a3825",
+        "#8b5a34",
+        "#c58b52"
       ],
       "tags": [
         "item",
@@ -710,19 +724,25 @@
     {
       "spriteId": "items/healing_potion",
       "outputPath": "sprites/items/consumables/healing_potion.png",
-      "width": 16,
-      "height": 16,
+      "width": 32,
+      "height": 32,
       "subject": "healing potion consumable icon",
       "prompt": "Small glass potion bottle with red liquid, cork top, bright highlight.",
       "requirements": [
         "Transparent background.",
-        "Bottle silhouette must be readable at 16x16."
+        "Bottle silhouette must be readable when the 32x32 source is rendered into an inventory slot."
       ],
       "palette": [
-        "#5c351f",
-        "#a82f3a",
-        "#e45462",
-        "#b8e1f1"
+        "#1b1826",
+        "#4a4555",
+        "#aaa2b0",
+        "#f4e9d8",
+        "#352319",
+        "#c58b52",
+        "#5b1f32",
+        "#a52b46",
+        "#e5484d",
+        "#ff8a67"
       ],
       "tags": [
         "item",
@@ -911,7 +931,7 @@
     },
     {
       "spriteId": "projectiles/poison_arrow",
-      "outputPath": "sprites/projectiles/poison_arrow.png",
+      "outputPath": "sprites/items/ammo/poison_arrow.png",
       "width": 16,
       "height": 16,
       "subject": "poison arrow projectile",
@@ -1576,7 +1596,7 @@
     },
     {
       "spriteId": "world/backgrounds/forest_parallax_layer_v2",
-      "outputPath": "sprites/world/backgrounds/forest_parallax_layer_v2.png",
+      "outputPath": "sprites/world/backgrounds/forest_parallax_layer.png",
       "width": 512,
       "height": 128,
       "subject": "forest parallax background layer v2",
@@ -1596,7 +1616,7 @@
     },
     {
       "spriteId": "world/backgrounds/cave_parallax_layer_v2",
-      "outputPath": "sprites/world/backgrounds/cave_parallax_layer_v2.png",
+      "outputPath": "sprites/world/backgrounds/cave_parallax_layer.png",
       "width": 512,
       "height": 128,
       "subject": "cave parallax background layer v2",
@@ -2135,14 +2155,26 @@
     {
       "spriteId": "items/mana_potion",
       "outputPath": "sprites/items/consumables/mana_potion.png",
-      "width": 16,
-      "height": 16,
+      "width": 32,
+      "height": 32,
       "subject": "mana potion icon",
       "prompt": "Small bottle with blue mana liquid and cork, transparent background.",
       "requirements": [
         "Export exact PNG dimensions.",
         "No text, labels, borders, watermarks, or guide marks.",
         "Use crisp hard-edged pixel art aligned to the pixel grid."
+      ],
+      "palette": [
+        "#1b1826",
+        "#4a4555",
+        "#aaa2b0",
+        "#f4e9d8",
+        "#352319",
+        "#c58b52",
+        "#243b78",
+        "#355cb5",
+        "#4b91de",
+        "#91d7ff"
       ],
       "tags": [
         "item",
@@ -2327,14 +2359,29 @@
     {
       "spriteId": "ui/inventory_tab",
       "outputPath": "sprites/ui/inventory_tab.png",
-      "width": 16,
-      "height": 16,
+      "width": 32,
+      "height": 32,
       "subject": "inventory tab icon",
-      "prompt": "16x16 transparent pixel-art UI icon for inventory tab icon; readable in a compact HUD, no text.",
+      "prompt": "32x32 transparent pixel-art UI icon for an inventory tab; readable when scaled into a compact HUD, no text.",
       "requirements": [
         "Export exact PNG dimensions.",
         "No text, labels, borders, watermarks, or guide marks.",
         "Use crisp hard-edged pixel art aligned to the pixel grid."
+      ],
+      "palette": [
+        "#1b1826",
+        "#2a2635",
+        "#4a4555",
+        "#716a7b",
+        "#aaa2b0",
+        "#f4e9d8",
+        "#352319",
+        "#5a3825",
+        "#8b5a34",
+        "#c58b52",
+        "#1f5c62",
+        "#3d8d84",
+        "#72c3ae"
       ],
       "tags": [
         "ui",
@@ -2344,14 +2391,26 @@
     {
       "spriteId": "ui/crafting_hammer",
       "outputPath": "sprites/ui/crafting_hammer.png",
-      "width": 16,
-      "height": 16,
+      "width": 32,
+      "height": 32,
       "subject": "crafting hammer icon",
-      "prompt": "16x16 transparent pixel-art UI icon for crafting hammer icon; readable in a compact HUD, no text.",
+      "prompt": "32x32 transparent pixel-art UI icon of a crafting hammer; readable when scaled into a compact HUD, no text.",
       "requirements": [
         "Export exact PNG dimensions.",
         "No text, labels, borders, watermarks, or guide marks.",
         "Use crisp hard-edged pixel art aligned to the pixel grid."
+      ],
+      "palette": [
+        "#1b1826",
+        "#352319",
+        "#5a3825",
+        "#8b5a34",
+        "#c58b52",
+        "#5b2b22",
+        "#8f4531",
+        "#c56d3e",
+        "#f0a35b",
+        "#f4e9d8"
       ],
       "tags": [
         "ui",
@@ -2395,10 +2454,10 @@
     {
       "spriteId": "items/spark_wand",
       "outputPath": "sprites/weapons/spark_wand.png",
-      "width": 16,
-      "height": 16,
+      "width": 32,
+      "height": 32,
       "subject": "spark wand weapon icon",
-      "prompt": "16x16 transparent pixel-art icon of a small spark wand with wooden handle and bright arcane tip.",
+      "prompt": "32x32 transparent pixel-art icon of a small spark wand with wooden handle and bright arcane tip.",
       "tags": [
         "item",
         "weapon",
@@ -2406,10 +2465,21 @@
         "wand"
       ],
       "requirements": [
-        "Export exactly 16x16 PNG.",
+        "Export exactly 32x32 PNG.",
         "Transparent background.",
         "Crisp hard-edged pixel art, no anti-aliasing, no text, no labels, no watermark.",
         "Keep the silhouette readable in inventory or projectile rendering."
+      ],
+      "palette": [
+        "#1b1826",
+        "#352319",
+        "#5a3825",
+        "#8b5a34",
+        "#c58b52",
+        "#58412a",
+        "#b97732",
+        "#f0c35a",
+        "#fff1a6"
       ]
     },
     {
@@ -2531,6 +2601,104 @@
         "parallax",
         "tileable"
       ]
+    },
+    {
+      "spriteId": "entities/critters/squirrel",
+      "outputPath": "sprites/entities/critters/squirrel.png",
+      "width": 64,
+      "height": 16,
+      "subject": "four-frame forest squirrel critter sheet",
+      "prompt": "Deterministic side-view red-brown squirrel with a large readable tail: idle, tail twitch, run compression, run extension.",
+      "requirements": [
+        "Export exactly 64x16 with four 16x16 frames in one horizontal row.",
+        "Keep a shared ground pivot at (8,15), binary alpha, transparent corners, and a dark one-pixel silhouette.",
+        "Use only the yjse-pixel-v1 palette and preserve readability at native scale."
+      ],
+      "tags": ["entity", "critter", "forest", "animated", "wave-02"]
+    },
+    {
+      "spriteId": "entities/critters/firefly",
+      "outputPath": "sprites/entities/critters/firefly.png",
+      "width": 64,
+      "height": 16,
+      "subject": "four-frame flying firefly critter sheet",
+      "prompt": "Deterministic side-view firefly with teal wings and contained gold abdomen light across four wing and glow phases.",
+      "requirements": [
+        "Export exactly 64x16 with four 16x16 frames in one horizontal row.",
+        "Keep a shared center pivot at (8,8), binary alpha, transparent corners, and no soft outer glow.",
+        "Use only the yjse-pixel-v1 palette and preserve readability at native scale."
+      ],
+      "tags": ["entity", "critter", "forest", "light", "animated", "wave-02"]
+    },
+    {
+      "spriteId": "entities/enemies/forest_boar",
+      "outputPath": "sprites/entities/enemies/forest_boar.png",
+      "width": 128,
+      "height": 32,
+      "subject": "four-frame forest boar enemy sheet",
+      "prompt": "Deterministic stocky forest boar with readable mane and tusk: idle, pawing windup, charge, attack.",
+      "requirements": [
+        "Export exactly 128x32 with four 32x32 frames in one horizontal row.",
+        "Keep every hoof line on the shared ground pivot at (16,31), with binary alpha and a dark one-pixel silhouette.",
+        "Use only the yjse-pixel-v1 palette; no cast shadow or background."
+      ],
+      "tags": ["entity", "enemy", "forest", "animated", "wave-02"]
+    },
+    {
+      "spriteId": "entities/enemies/cave_spider",
+      "outputPath": "sprites/entities/enemies/cave_spider.png",
+      "width": 128,
+      "height": 32,
+      "subject": "four-frame cave spider enemy sheet",
+      "prompt": "Deterministic broad cave spider with clustered paired legs, teal abdomen marking, bright eyes, and an attack frame with visible fangs.",
+      "requirements": [
+        "Export exactly 128x32 with four 32x32 frames in one horizontal row.",
+        "Keep a shared visual pivot at (16,28), binary alpha, transparent corners, and a dark one-pixel silhouette.",
+        "Use only the yjse-pixel-v1 palette; no cast shadow or background."
+      ],
+      "tags": ["entity", "enemy", "cave", "animated", "wave-02"]
+    },
+    {
+      "spriteId": "world/backgrounds/meadow_parallax_layer",
+      "outputPath": "sprites/world/backgrounds/meadow_parallax_layer.png",
+      "width": 512,
+      "height": 128,
+      "subject": "meadow parallax background layer",
+      "prompt": "Deterministic bright meadow layer with low rolling hills, sparse trees, grass bands, and tiny non-interactive flowers.",
+      "requirements": [
+        "Export exactly 512x128 as an opaque horizontally seamless PNG.",
+        "Left and right edge columns must match exactly.",
+        "Keep local contrast below entities and terrain; include no interactable-looking objects."
+      ],
+      "tags": ["world", "background", "meadow", "parallax", "tileable", "wave-02"]
+    },
+    {
+      "spriteId": "world/backgrounds/mushroom_cave_parallax_layer",
+      "outputPath": "sprites/world/backgrounds/mushroom_cave_parallax_layer.png",
+      "width": 512,
+      "height": 128,
+      "subject": "mushroom cave parallax background layer",
+      "prompt": "Deterministic violet mushroom cave with recessed pillars, floor silhouettes, and softly colored background mushrooms.",
+      "requirements": [
+        "Export exactly 512x128 as an opaque horizontally seamless PNG.",
+        "Left and right edge columns must match exactly.",
+        "Background mushrooms must remain decor silhouettes and not resemble pickups or interactables."
+      ],
+      "tags": ["world", "background", "mushroom-cave", "parallax", "tileable", "wave-02"]
+    },
+    {
+      "spriteId": "world/backgrounds/crystal_depths_parallax_layer",
+      "outputPath": "sprites/world/backgrounds/crystal_depths_parallax_layer.png",
+      "width": 512,
+      "height": 128,
+      "subject": "crystal depths parallax background layer",
+      "prompt": "Deterministic deep blue crystal cavern with distant columns and sparse low-contrast cyan crystal clusters.",
+      "requirements": [
+        "Export exactly 512x128 as an opaque horizontally seamless PNG.",
+        "Left and right edge columns must match exactly.",
+        "Keep crystal highlights below ore and interaction contrast; include no chest, door, NPC, or pickup silhouettes."
+      ],
+      "tags": ["world", "background", "crystal-depths", "parallax", "tileable", "wave-02"]
     }
   ],
   "assetConventions": {

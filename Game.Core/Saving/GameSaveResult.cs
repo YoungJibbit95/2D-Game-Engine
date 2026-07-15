@@ -16,6 +16,12 @@ public sealed record GameSaveResult(
     int FarmPlotCount = 0,
     bool FarmPlotsSaved = false)
 {
+    public bool SimulationStateSaved { get; init; }
+
+    public bool RandomStateSaved { get; init; }
+
+    public bool WorldEventStateSaved { get; init; }
+
     public static GameSaveResult NotSaved(string saveDirectory, GameSaveReason reason, DateTimeOffset now)
     {
         return new GameSaveResult(

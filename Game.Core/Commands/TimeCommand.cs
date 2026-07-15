@@ -2,24 +2,44 @@ using System.Globalization;
 
 namespace Game.Core.Commands;
 
-public sealed class TimeCommand : IConsoleCommand
+public sealed class TimeCommand : TypedConsoleCommand
 {
-    public string Name => "time";
-
-    public string Description => "Changes the world time.";
-
-    public IReadOnlyList<string> Aliases { get; } = Array.Empty<string>();
-
-    public CommandResult Execute(CommandContext context, IReadOnlyList<string> arguments)
+    public TimeCommand()
+        : base(new CommandSpecification(
+            "time",
+            "Reads or changes the world time.",
+            new[]
+            {
+                new CommandArgumentSpecification(
+                    "action",
+                    CommandArgumentType.Choice,
+                    false,
+                    "Time action.",
+                    new[] { "status", "day", "noon", "night", "midnight", "set" }),
+                new CommandArgumentSpecification("normalizedTime", CommandArgumentType.Number, false, "Normalized day time.")
+            },
+            examples: new[] { "/time", "/time day", "/time set 0.5" }))
     {
+    }
+
+    protected override CommandResult Execute(CommandContext context, CommandArguments typedArguments)
+    {
+        var arguments = typedArguments.Raw;
         if (context.WorldTime is null)
         {
             return CommandResult.Failure("World time is required for /time.");
         }
 
+        if (arguments.Count >= 2 && !arguments[0].Equals("set", StringComparison.OrdinalIgnoreCase))
+        {
+            return CommandResult.Failure("too_many_arguments", $"/time {arguments[0]} does not accept normalizedTime.");
+        }
+
         if (arguments.Count == 0)
         {
-            return CommandResult.Failure("Usage: /time <day|night|set> [normalizedTime]");
+            return CommandResult.Success(
+                "time_status",
+                $"Day {context.WorldTime.Day}, time {context.WorldTime.NormalizedTimeOfDay:0.###} ({(context.WorldTime.IsNight ? "night" : "day")}).");
         }
 
         switch (arguments[0].ToLowerInvariant())
@@ -32,6 +52,10 @@ public sealed class TimeCommand : IConsoleCommand
             case "midnight":
                 context.WorldTime.SetNight();
                 return CommandResult.Success("Time set to night.");
+            case "status":
+                return CommandResult.Success(
+                    "time_status",
+                    $"Day {context.WorldTime.Day}, time {context.WorldTime.NormalizedTimeOfDay:0.###} ({(context.WorldTime.IsNight ? "night" : "day")}).");
             case "set":
                 return SetTime(context, arguments);
             default:

@@ -1,0 +1,9 @@
+{
+  "id": "thornblade",
+  "result": { "itemId": "thornblade", "count": 1 },
+  "ingredients": [
+    { "itemId": "amberstone_block", "count": 10 },
+    { "itemId": "wood", "count": 3 }
+  ],
+  "station": "anvil"
+}

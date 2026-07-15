@@ -17,6 +17,16 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="..\Game.Data\**\*.*" Link="Game.Data\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <Content
+      Include="..\Game.Data\**\*.*"
+      Exclude="..\Game.Data\asset_briefs\**\*;..\Game.Data\art_direction\**\*"
+      Link="Game.Data\%(RecursiveDir)%(Filename)%(Extension)"
+      CopyToOutputDirectory="PreserveNewest"
+      CopyToPublishDirectory="PreserveNewest" />
+    <Content
+      Include="..\yjse.game.json"
+      Link="yjse.game.json"
+      CopyToOutputDirectory="PreserveNewest"
+      CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>

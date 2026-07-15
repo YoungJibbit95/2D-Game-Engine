@@ -1,0 +1,17 @@
+{
+  "id": "prism_axe",
+  "displayName": "Prism Axe",
+  "description": "A refractive axe that bites cleanly through ancient roots.",
+  "rarity": "Rare",
+  "value": 440,
+  "category": "Tool",
+  "sortPriority": 71,
+  "type": "ToolAxe",
+  "texture": "items/wave05/prism_axe",
+  "maxStack": 1,
+  "useTime": 0.24,
+  "toolPower": 75,
+  "damage": 13,
+  "knockback": 2.5,
+  "tags": ["tool", "axe", "prism", "wave05"]
+}

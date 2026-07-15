@@ -16,6 +16,100 @@ public sealed class ProjectileEntityTests
 
         Assert.Equal(new Vector2(0, 320), projectile.Velocity);
         Assert.Equal(7, projectile.OwnerEntityId);
+        Assert.Same(definition, projectile.Definition);
+        Assert.Same(projectile.RuntimeState.Definition, projectile.Definition);
+    }
+
+    [Fact]
+    public void Factory_PreservesAdvancedDefinitionOnExistingProjectileEntityPath()
+    {
+        var definition = CreateDefinition() with
+        {
+            DragPerSecond = 0.5f,
+            HomingRange = 200,
+            HomingTurnRateRadiansPerSecond = 2,
+            BounceCount = 3,
+            TileCollisionBehavior = ProjectileTileCollisionBehavior.Bounce
+        };
+
+        var projectile = new ProjectileFactory().Create(
+            definition,
+            Vector2.Zero,
+            Vector2.UnitX,
+            ownerEntityId: 4,
+            damageOverride: 9,
+            damageTypeOverride: Game.Core.Combat.DamageType.Magic,
+            ownerFaction: Game.Core.Entities.EntityFaction.Friendly);
+
+        Assert.Equal(9, projectile.Damage);
+        Assert.Equal(0.5f, projectile.Definition.DragPerSecond);
+        Assert.Equal(3, projectile.RemainingBounces);
+        Assert.Equal(ProjectileTileCollisionBehavior.Bounce, projectile.Definition.TileCollisionBehavior);
+    }
+
+    [Fact]
+    public void Entity_AdvanceRuntimeSynchronizesExistingPositionAndVelocityProperties()
+    {
+        var projectile = new ProjectileFactory().Create(
+            CreateDefinition() with { DragPerSecond = MathF.Log(2) },
+            Vector2.Zero,
+            Vector2.UnitX);
+
+        projectile.AdvanceRuntime(1);
+
+        Assert.Equal(projectile.RuntimeState.Position, projectile.Position);
+        Assert.Equal(160, projectile.Velocity.X, precision: 3);
+        Assert.Equal(160, projectile.Position.X, precision: 3);
+    }
+
+    [Fact]
+    public void Entity_UpdateConsumesLatchedHomingTargetsExactlyOnce()
+    {
+        var world = new World(16, 16, WorldMetadata.CreateDefault(seed: 1));
+        var projectile = new ProjectileFactory().Create(
+            CreateDefinition() with
+            {
+                HomingRange = 200,
+                HomingTurnRateRadiansPerSecond = MathF.PI
+            },
+            Vector2.Zero,
+            Vector2.UnitX,
+            ownerEntityId: 1);
+        projectile.SetHomingTargetsForNextUpdate(new[]
+        {
+            new ProjectileHomingTarget(
+                2,
+                Game.Core.Entities.EntityFaction.Hostile,
+                new Vector2(100, -100))
+        });
+
+        projectile.Update(world, 0.25f);
+        var velocityAfterHoming = projectile.Velocity;
+        projectile.Update(world, 0.25f);
+
+        Assert.True(velocityAfterHoming.Y < 0);
+        Assert.Equal(velocityAfterHoming, projectile.Velocity);
+    }
+
+    [Fact]
+    public void LegacyConstructor_UsesSameRuntimeStateAndPreservesPublicContract()
+    {
+        var projectile = new ProjectileEntity(
+            "legacy-arrow",
+            new Vector2(3, 4),
+            new Vector2(50, 0),
+            damage: 7,
+            gravity: 0.2f,
+            pierce: 1,
+            lifetime: 5,
+            ownerEntityId: 12,
+            age: 1.5f);
+
+        Assert.Equal("legacy-arrow", projectile.ProjectileId);
+        Assert.Equal(7, projectile.Damage);
+        Assert.Equal(1, projectile.Pierce);
+        Assert.Equal(1.5f, projectile.Age);
+        Assert.Equal(projectile.Position, projectile.RuntimeState.Position);
     }
 
     [Fact]
@@ -39,6 +133,28 @@ public sealed class ProjectileEntityTests
         projectile.Update(world, 0.5f);
 
         Assert.False(projectile.IsActive);
+    }
+
+    [Fact]
+    public void Update_ExistingEntityPathUsesConfiguredTileBounce()
+    {
+        var world = new World(16, 16, WorldMetadata.CreateDefault(seed: 1));
+        world.SetTile(1, 0, KnownTileIds.Stone);
+        var projectile = new ProjectileFactory().Create(
+            CreateDefinition() with
+            {
+                Speed = 40,
+                BounceCount = 1,
+                TileCollisionBehavior = ProjectileTileCollisionBehavior.Bounce
+            },
+            Vector2.Zero,
+            Vector2.UnitX);
+
+        projectile.Update(world, 0.5f);
+
+        Assert.True(projectile.IsActive);
+        Assert.True(projectile.Velocity.X < 0);
+        Assert.Equal(0, projectile.RemainingBounces);
     }
 
     private static ProjectileDefinition CreateDefinition()

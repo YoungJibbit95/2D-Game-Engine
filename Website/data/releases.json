@@ -1,0 +1,80 @@
+{
+  "downloads": [
+    {
+      "platform": "Reference Game - Windows x64",
+      "detail": "Lokaler Development-Build mit Wave-05-Biomen, World Events und transaktionalem Building.",
+      "requirements": ["Windows 10/11", "x64", ".NET 8", "MonoGame DX"],
+      "published": false,
+      "href": null,
+      "label": "Noch nicht publiziert",
+      "status": "Es existiert noch kein versioniertes Download-Artefakt."
+    },
+    {
+      "platform": "YjsE Engine - Source",
+      "detail": "C#-Solution, renderer-neutraler Core, MonoGame-Client und datengetriebener Sample-Content.",
+      "requirements": [".NET SDK 8.0.420", "Rider / VS", "Git"],
+      "published": false,
+      "href": null,
+      "label": "Repository-Zugang noetig",
+      "status": "Eine eigenstaendige Engine-Paketierung ist noch geplant."
+    }
+  ],
+  "notes": [
+    {
+      "date": "2026-07-15",
+      "title": "Runtime Resilience und Phased Combat",
+      "items": [
+        "Feste Visual-/Audio-Command-Ringe fuer Mining, Building, Combat, Loot, Pickup, Crafting, Status und World Events",
+        "Versionierte Replay-Frames mit Fixed Delta, Item-Use, Checkpoint-Hashes, JSON-Limit und First-Divergence-Bericht",
+        "Tick-native Attack-Sequencer fuer Startup, Active, Recovery, Cooldown, Combos, Cancels und mehrere Swept Shapes",
+        "Streaming-Retry/Backoff mit Fehlerklassifizierung sowie Operation-, Zeit- und Byte-Apply-Budgets",
+        "Persistente Maus-Slider fuer Streaming-Parallelitaet, Apply-Queue/Budgets und Retry-Policy",
+        "Debug und Release jeweils 995/995; sieben isolierte Frame-60 Client-Smokes bestanden"
+      ]
+    },
+    {
+      "date": "2026-07-14",
+      "title": "Wave 05 Living World und transaktionales Building",
+      "items": [
+        "Amber Grove und Twilight Marsh mit eigenem Terrain, Wetter, Licht, Spawns, Soundscape und Strukturen",
+        "24 manifestierte Wave-05-Assets mit 122 Source-Rectangle-Frames",
+        "Fuenf datengetriebene World Events mit je drei Phasen, Modifiern, Cooldowns und Journal",
+        "Vier neue AI-Akteure, zehn Items, sieben Rezepte sowie Loot- und Spawn-Vertraege",
+        "Prepare/Commit-Building im aktiven Item-Use-Pfad und Light-Dirtiness nach Mining",
+        "Debug und Release jeweils 870/870; Release-Publish-Gate gruen",
+        "Generischer sicher validierter --scene-biome-Smoke fuer datengetriebene Biome",
+        "Lokale Surface-Query, begrenztes Collision-Preload und authored Cave-Restlicht fuer lesbare entfernte QA-Szenen"
+      ]
+    },
+    {
+      "date": "2026-07-14",
+      "title": "Presentation, Interaction und Living World",
+      "items": [
+        "Release-inside UI-Hit-Testing, Pointer Capture, Slider-Drag und Gamepad-Fallback",
+        "Tile-aware 2D-Lichtplanung, weiche Schatten, Bloom und begrenzte Wasserreflexionen",
+        "Guard/Parry/Projectile-Vertraege und mehrschichtige Character-Animation",
+        "Verteilte Spawn-Aktivitaeten, Creature Memory und 200-Entity-Soak-Vertraege"
+      ]
+    },
+    {
+      "date": "2026-07-14",
+      "title": "Engine Wiki und Download-Wahrheit",
+      "items": [
+        "Getrennte Engine- und Reference-Game-Produktdarstellung",
+        "Durchsuchbares 22-Kapitel-Wiki mit Capability-Badges und Deep Links",
+        "Bytegenaue Provenance-Pruefung fuer Website-Kopien realer Game.Data-Assets",
+        "Deaktivierte Downloads bis reale, versionierte Artefakte existieren"
+      ]
+    },
+    {
+      "date": "2026-07-12",
+      "title": "Engine-first Runtime-Fundament",
+      "items": [
+        "Eine autoritative GameSimulation mit immutable Frame-Snapshots",
+        "Background-Chunk-Streaming und unendliche negative/positive X-Koordinaten",
+        "Inventar-, Crafting-, Save- und Content-Transaktionen",
+        "Named RNG Streams, Texture Residency Groups und Client-State-Smokes"
+      ]
+    }
+  ]
+}

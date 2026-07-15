@@ -40,15 +40,20 @@ public sealed class SpatialGrid<T>
         var entry = new Entry(item, bounds);
         _entries.Add(item, entry);
 
-        foreach (var cell in GetCells(bounds))
+        GetCellBounds(bounds, out var minX, out var minY, out var maxX, out var maxY);
+        for (var y = minY; y <= maxY; y++)
         {
-            if (!_cells.TryGetValue(cell, out var bucket))
+            for (var x = minX; x <= maxX; x++)
             {
-                bucket = new List<Entry>();
-                _cells.Add(cell, bucket);
-            }
+                var cell = new CellPos(x, y);
+                if (!_cells.TryGetValue(cell, out var bucket))
+                {
+                    bucket = new List<Entry>();
+                    _cells.Add(cell, bucket);
+                }
 
-            bucket.Add(entry);
+                bucket.Add(entry);
+            }
         }
     }
 
@@ -59,17 +64,22 @@ public sealed class SpatialGrid<T>
             return false;
         }
 
-        foreach (var cell in GetCells(entry.Bounds))
+        GetCellBounds(entry.Bounds, out var minX, out var minY, out var maxX, out var maxY);
+        for (var y = minY; y <= maxY; y++)
         {
-            if (!_cells.TryGetValue(cell, out var bucket))
+            for (var x = minX; x <= maxX; x++)
             {
-                continue;
-            }
+                var cell = new CellPos(x, y);
+                if (!_cells.TryGetValue(cell, out var bucket))
+                {
+                    continue;
+                }
 
-            bucket.Remove(entry);
-            if (bucket.Count == 0)
-            {
-                _cells.Remove(cell);
+                bucket.Remove(entry);
+                if (bucket.Count == 0)
+                {
+                    _cells.Remove(cell);
+                }
             }
         }
 
@@ -84,43 +94,48 @@ public sealed class SpatialGrid<T>
         }
 
         var result = new List<T>();
-        var seen = new HashSet<T>();
-
-        foreach (var cell in GetCells(area))
-        {
-            if (!_cells.TryGetValue(cell, out var bucket))
-            {
-                continue;
-            }
-
-            foreach (var entry in bucket)
-            {
-                if (!entry.Bounds.Intersects(area) || !seen.Add(entry.Item))
-                {
-                    continue;
-                }
-
-                result.Add(entry.Item);
-            }
-        }
-
+        QueryInto(area, result, new HashSet<T>());
         return result;
     }
 
-    private IEnumerable<CellPos> GetCells(RectI bounds)
+    public void QueryInto(RectI area, List<T> result, HashSet<T> seen)
     {
-        var minX = FloorDiv(bounds.Left, CellSize);
-        var maxX = FloorDiv(bounds.Right - 1, CellSize);
-        var minY = FloorDiv(bounds.Top, CellSize);
-        var maxY = FloorDiv(bounds.Bottom - 1, CellSize);
+        ArgumentNullException.ThrowIfNull(result);
+        ArgumentNullException.ThrowIfNull(seen);
+        result.Clear();
+        seen.Clear();
+        if (area.IsEmpty)
+        {
+            return;
+        }
 
+        GetCellBounds(area, out var minX, out var minY, out var maxX, out var maxY);
         for (var y = minY; y <= maxY; y++)
         {
             for (var x = minX; x <= maxX; x++)
             {
-                yield return new CellPos(x, y);
+                if (!_cells.TryGetValue(new CellPos(x, y), out var bucket))
+                {
+                    continue;
+                }
+
+                foreach (var entry in bucket)
+                {
+                    if (entry.Bounds.Intersects(area) && seen.Add(entry.Item))
+                    {
+                        result.Add(entry.Item);
+                    }
+                }
             }
         }
+    }
+
+    private void GetCellBounds(RectI bounds, out int minX, out int minY, out int maxX, out int maxY)
+    {
+        minX = FloorDiv(bounds.Left, CellSize);
+        maxX = FloorDiv(bounds.Right - 1, CellSize);
+        minY = FloorDiv(bounds.Top, CellSize);
+        maxY = FloorDiv(bounds.Bottom - 1, CellSize);
     }
 
     private static int FloorDiv(int value, int divisor)

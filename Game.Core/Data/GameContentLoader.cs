@@ -1,4 +1,5 @@
 using Game.Core.Animations;
+using Game.Core.Animation;
 using Game.Core.Assets;
 using Game.Core.Characters;
 using Game.Core.Biomes;
@@ -17,6 +18,7 @@ using Game.Core.Spawning;
 using Game.Core.Startup;
 using Game.Core.Tiles;
 using Game.Core.World.Generation;
+using Game.Core.WorldEvents;
 using System.Text.Json;
 
 namespace Game.Core.Data;
@@ -34,6 +36,8 @@ public sealed class GameContentLoader
     private readonly StatusEffectDefinitionJsonLoader _statusEffectLoader;
     private readonly SpriteAssetJsonLoader _spriteAssetLoader;
     private readonly WorldGenerationProfileJsonLoader _worldGenerationProfileLoader;
+    private readonly RegionalGenerationProfileJsonLoader _regionalGenerationProfileLoader;
+    private readonly StructurePlanDefinitionJsonLoader _structurePlanLoader;
     private readonly CropDefinitionJsonLoader _cropLoader;
     private readonly MapDefinitionJsonLoader _mapLoader;
     private readonly DialogueDefinitionJsonLoader _dialogueLoader;
@@ -41,6 +45,7 @@ public sealed class GameContentLoader
     private readonly GameStartupDefinitionJsonLoader _startupLoader;
     private readonly SpriteAnimationJsonLoader _animationLoader;
     private readonly CharacterDefinitionJsonLoader _characterLoader;
+    private readonly WorldEventDefinitionJsonLoader _worldEventLoader;
 
     public GameContentLoader()
         : this(
@@ -91,6 +96,8 @@ public sealed class GameContentLoader
         _statusEffectLoader = statusEffectLoader;
         _spriteAssetLoader = spriteAssetLoader;
         _worldGenerationProfileLoader = worldGenerationProfileLoader ?? new WorldGenerationProfileJsonLoader();
+        _regionalGenerationProfileLoader = new RegionalGenerationProfileJsonLoader();
+        _structurePlanLoader = new StructurePlanDefinitionJsonLoader();
         _cropLoader = cropLoader ?? new CropDefinitionJsonLoader();
         _mapLoader = mapLoader ?? new MapDefinitionJsonLoader();
         _dialogueLoader = dialogueLoader ?? new DialogueDefinitionJsonLoader();
@@ -98,6 +105,7 @@ public sealed class GameContentLoader
         _startupLoader = startupLoader ?? new GameStartupDefinitionJsonLoader();
         _animationLoader = animationLoader ?? new SpriteAnimationJsonLoader();
         _characterLoader = characterLoader ?? new CharacterDefinitionJsonLoader();
+        _worldEventLoader = new WorldEventDefinitionJsonLoader();
     }
 
     public GameContentDatabase LoadFromRoot(string contentRoot)
@@ -128,6 +136,25 @@ public sealed class GameContentLoader
         }
 
         var database = builder.Build();
+        var runtimeAnimations = new AnimationContentJsonLoader().LoadWithMods(
+            contentRoot,
+            modsRoot,
+            database.SpriteAssets);
+        database = database with { RuntimeAnimations = runtimeAnimations.Registry };
+        foreach (var diagnostic in runtimeAnimations.Diagnostics)
+        {
+            report.AddIssue(
+                diagnostic.Severity switch
+                {
+                    AnimationContentDiagnosticSeverity.Error => ContentIssueSeverity.Error,
+                    AnimationContentDiagnosticSeverity.Warning => ContentIssueSeverity.Warning,
+                    _ => ContentIssueSeverity.Info
+                },
+                "animation-runtime",
+                "animation-runtime",
+                diagnostic.Code,
+                diagnostic.Message);
+        }
         new ContentReferenceValidator().Validate(database, report);
         return new GameContentLoadResult(database, report);
     }
@@ -135,6 +162,7 @@ public sealed class GameContentLoader
     private ContentDefinitionSet LoadDefinitionSet(string root)
     {
         return new ContentDefinitionSet(
+            Path.GetFullPath(root),
             _tileLoader.LoadDefinitionsFromDirectory(Path.Combine(root, "tiles")),
             _itemLoader.LoadDefinitionsFromDirectory(Path.Combine(root, "items")),
             _recipeLoader.LoadDefinitionsFromDirectory(Path.Combine(root, "recipes")),
@@ -146,13 +174,16 @@ public sealed class GameContentLoader
             _statusEffectLoader.LoadDefinitionsFromDirectory(Path.Combine(root, "effects")),
             _spriteAssetLoader.LoadDefinitionsFromDirectory(Path.Combine(root, "assets")),
             _worldGenerationProfileLoader.LoadProfilesFromDirectory(Path.Combine(root, "worldgen")),
+            _regionalGenerationProfileLoader.LoadProfilesFromDirectory(Path.Combine(root, "worldgen")),
+            _structurePlanLoader.LoadDefinitionsFromDirectory(Path.Combine(root, "structures")),
             _cropLoader.LoadDefinitionsFromDirectory(Path.Combine(root, "crops")),
             _mapLoader.LoadDefinitionsFromDirectory(Path.Combine(root, "maps")),
             _dialogueLoader.LoadDefinitionsFromDirectory(Path.Combine(root, "dialogue")),
             _shopLoader.LoadDefinitionsFromDirectory(Path.Combine(root, "shops")),
             _startupLoader.LoadDefinitionsFromDirectory(Path.Combine(root, "startup")),
             _animationLoader.LoadClipsFromDirectory(Path.Combine(root, "animations")),
-            _characterLoader.LoadDefinitionsFromDirectory(Path.Combine(root, "characters")));
+            _characterLoader.LoadDefinitionsFromDirectory(Path.Combine(root, "characters")),
+            _worldEventLoader.LoadRegistryFromDirectory(Path.Combine(root, "world-events")).Definitions);
     }
 
     private static ContentPackManifest LoadManifest(string modDirectory)
@@ -174,6 +205,7 @@ public sealed class GameContentLoader
     }
 
     private sealed record ContentDefinitionSet(
+        string SourceRoot,
         IReadOnlyList<TileDefinition> Tiles,
         IReadOnlyList<ItemDefinition> Items,
         IReadOnlyList<RecipeDefinition> Recipes,
@@ -185,13 +217,16 @@ public sealed class GameContentLoader
         IReadOnlyList<StatusEffectDefinition> StatusEffects,
         IReadOnlyList<SpriteAssetDefinition> SpriteAssets,
         IReadOnlyList<WorldGenerationProfile> WorldGenerationProfiles,
+        IReadOnlyList<RegionalGenerationProfile> RegionalGenerationProfiles,
+        IReadOnlyList<StructurePlanDefinition> StructurePlans,
         IReadOnlyList<CropDefinition> Crops,
         IReadOnlyList<MapDefinition> Maps,
         IReadOnlyList<DialogueDefinition> Dialogues,
         IReadOnlyList<ShopDefinition> Shops,
         IReadOnlyList<GameStartupDefinition> GameStartups,
         IReadOnlyList<SpriteAnimationClip> Animations,
-        IReadOnlyList<CharacterDefinition> Characters);
+        IReadOnlyList<CharacterDefinition> Characters,
+        IReadOnlyList<WorldEventDefinition> WorldEvents);
 
     private sealed class ContentDatabaseBuilder
     {
@@ -208,6 +243,8 @@ public sealed class GameContentLoader
         private readonly Dictionary<string, Packed<StatusEffectDefinition>> _statusEffects = new(StringComparer.OrdinalIgnoreCase);
         private readonly Dictionary<string, Packed<SpriteAssetDefinition>> _spriteAssets = new(StringComparer.OrdinalIgnoreCase);
         private readonly Dictionary<string, Packed<WorldGenerationProfile>> _worldGenerationProfiles = new(StringComparer.OrdinalIgnoreCase);
+        private readonly Dictionary<string, Packed<RegionalGenerationProfile>> _regionalGenerationProfiles = new(StringComparer.OrdinalIgnoreCase);
+        private readonly Dictionary<string, Packed<StructurePlanDefinition>> _structurePlans = new(StringComparer.OrdinalIgnoreCase);
         private readonly Dictionary<string, Packed<CropDefinition>> _crops = new(StringComparer.OrdinalIgnoreCase);
         private readonly Dictionary<string, Packed<MapDefinition>> _maps = new(StringComparer.OrdinalIgnoreCase);
         private readonly Dictionary<string, Packed<DialogueDefinition>> _dialogues = new(StringComparer.OrdinalIgnoreCase);
@@ -215,6 +252,7 @@ public sealed class GameContentLoader
         private readonly Dictionary<string, Packed<GameStartupDefinition>> _gameStartups = new(StringComparer.OrdinalIgnoreCase);
         private readonly Dictionary<string, Packed<SpriteAnimationClip>> _animations = new(StringComparer.OrdinalIgnoreCase);
         private readonly Dictionary<string, Packed<CharacterDefinition>> _characters = new(StringComparer.OrdinalIgnoreCase);
+        private readonly Dictionary<string, Packed<WorldEventDefinition>> _worldEvents = new(StringComparer.OrdinalIgnoreCase);
 
         public ContentDatabaseBuilder(ContentLoadReport report)
         {
@@ -236,8 +274,20 @@ public sealed class GameContentLoader
             MergeById(_entities, definitions.Entities, entity => entity.Id, "entity", packId);
             MergeById(_spawnRules, definitions.SpawnRules, rule => rule.Id, "spawn", packId);
             MergeById(_statusEffects, definitions.StatusEffects, effect => effect.Id, "effect", packId);
-            MergeById(_spriteAssets, definitions.SpriteAssets, sprite => sprite.Id, "sprite", packId);
+            MergeById(
+                _spriteAssets,
+                definitions.SpriteAssets.Select(sprite => sprite with { SourceRoot = definitions.SourceRoot }),
+                sprite => sprite.Id,
+                "sprite",
+                packId);
             MergeById(_worldGenerationProfiles, definitions.WorldGenerationProfiles, profile => profile.Id, "worldgen", packId);
+            MergeById(
+                _regionalGenerationProfiles,
+                definitions.RegionalGenerationProfiles,
+                profile => profile.Id,
+                "regional-worldgen",
+                packId);
+            MergeById(_structurePlans, definitions.StructurePlans, definition => definition.Id, "structure-plan", packId);
             MergeById(_crops, definitions.Crops, crop => crop.Id, "crop", packId);
             MergeById(_maps, definitions.Maps, map => map.Id, "map", packId);
             MergeById(_dialogues, definitions.Dialogues, dialogue => dialogue.Id, "dialogue", packId);
@@ -245,6 +295,7 @@ public sealed class GameContentLoader
             MergeById(_gameStartups, definitions.GameStartups, startup => startup.Id, "startup", packId);
             MergeById(_animations, definitions.Animations, animation => animation.Id, "animation", packId);
             MergeById(_characters, definitions.Characters, character => character.Id, "character", packId);
+            MergeById(_worldEvents, definitions.WorldEvents, worldEvent => worldEvent.Id, "world-event", packId);
         }
 
         public GameContentDatabase Build()
@@ -262,13 +313,19 @@ public sealed class GameContentLoader
                 StatusEffects = StatusEffectRegistry.Create(_statusEffects.Values.Select(value => value.Definition)),
                 SpriteAssets = SpriteAssetRegistry.Create(_spriteAssets.Values.Select(value => value.Definition)),
                 WorldGenerationProfiles = WorldGenerationProfileRegistry.Create(_worldGenerationProfiles.Values.Select(value => value.Definition)),
+                RegionalGenerationProfiles = RegionalGenerationProfileRegistry.Create(
+                    _regionalGenerationProfiles.Values.Select(value => value.Definition)),
+                StructurePlans = StructurePlanDefinitionRegistry.Create(
+                    _structurePlans.Values.Select(value => value.Definition)),
                 Crops = CropRegistry.Create(_crops.Values.Select(value => value.Definition)),
                 Maps = MapRegistry.Create(_maps.Values.Select(value => value.Definition)),
                 Dialogues = DialogueRegistry.Create(_dialogues.Values.Select(value => value.Definition)),
                 Shops = ShopRegistry.Create(_shops.Values.Select(value => value.Definition)),
                 GameStartups = GameStartupRegistry.Create(_gameStartups.Values.Select(value => value.Definition)),
                 Animations = SpriteAnimationRegistry.Create(_animations.Values.Select(value => value.Definition)),
-                Characters = CharacterDefinitionRegistry.Create(_characters.Values.Select(value => value.Definition))
+                Characters = CharacterDefinitionRegistry.Create(_characters.Values.Select(value => value.Definition)),
+                WorldEvents = WorldEventDefinitionRegistry.Create(
+                    _worldEvents.Values.Select(value => value.Definition))
             };
         }
 

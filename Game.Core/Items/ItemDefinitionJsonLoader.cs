@@ -71,7 +71,21 @@ public sealed class ItemDefinitionJsonLoader
 
         public string? DisplayName { get; init; }
 
+        public string? Description { get; init; }
+
         public ItemType Type { get; init; }
+
+        public ItemRarity Rarity { get; init; }
+
+        public int Value { get; init; }
+
+        public ItemCategory Category { get; init; } = ItemCategory.Automatic;
+
+        public int SortPriority { get; init; }
+
+        public bool CanFavorite { get; init; } = true;
+
+        public bool CanTrash { get; init; } = true;
 
         public string? TexturePath { get; init; }
 
@@ -139,7 +153,14 @@ public sealed class ItemDefinitionJsonLoader
             {
                 Id = Id ?? string.Empty,
                 DisplayName = DisplayName ?? string.Empty,
+                Description = Description?.Trim() ?? string.Empty,
                 Type = Type,
+                Rarity = Rarity,
+                Value = Value,
+                Category = Category,
+                SortPriority = SortPriority,
+                CanFavorite = CanFavorite,
+                CanTrash = CanTrash,
                 TexturePath = TexturePath ?? Texture ?? string.Empty,
                 MaxStack = MaxStack,
                 UseTime = UseTime,

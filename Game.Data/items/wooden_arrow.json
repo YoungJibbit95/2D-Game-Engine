@@ -1,6 +1,11 @@
 {
   "id": "wooden_arrow",
   "displayName": "Wooden Arrow",
+  "description": "Simple ammunition for bows; cheap, light and reliable.",
+  "rarity": "Common",
+  "value": 1,
+  "category": "Ammo",
+  "sortPriority": 10,
   "type": "Ammo",
   "texture": "items/wooden_arrow",
   "maxStack": 999,

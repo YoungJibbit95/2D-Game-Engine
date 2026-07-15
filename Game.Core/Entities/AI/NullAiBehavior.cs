@@ -8,7 +8,17 @@ public sealed class NullAiBehavior : IAiBehavior
     {
     }
 
-    public void Update(EnemyEntity entity, World.World world, float deltaSeconds)
+    public AiState CurrentState => AiState.Idle;
+
+    public int? TargetEntityId => null;
+
+    public void Update(EnemyEntity entity, AiUpdateContext context, float deltaSeconds)
     {
+    }
+
+    public bool TryConsumeAttackIntent(out AiAttackIntent intent)
+    {
+        intent = default;
+        return false;
     }
 }

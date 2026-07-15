@@ -1,6 +1,11 @@
 {
   "id": "spark_wand",
   "displayName": "Spark Wand",
+  "description": "Channels mana into quick bolts of unstable arcane light.",
+  "rarity": "Rare",
+  "value": 140,
+  "category": "Weapon",
+  "sortPriority": 60,
   "type": "WeaponMagic",
   "texture": "items/spark_wand",
   "maxStack": 1,

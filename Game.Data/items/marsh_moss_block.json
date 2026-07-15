@@ -1,0 +1,16 @@
+{
+  "id": "marsh_moss_block",
+  "displayName": "Marsh Moss Block",
+  "description": "Water-darkened soil covered in dense marsh moss.",
+  "rarity": "Common",
+  "value": 2,
+  "category": "Block",
+  "sortPriority": 33,
+  "type": "PlaceableTile",
+  "texture": "world/wave05/marsh_moss_autotile",
+  "maxStack": 999,
+  "useTime": 0.08,
+  "placesTile": "marsh_moss",
+  "placementSupport": "AdjacentSolid",
+  "tags": ["block", "soil", "moss", "placeable"]
+}

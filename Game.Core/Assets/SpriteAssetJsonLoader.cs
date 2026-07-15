@@ -86,6 +86,18 @@ public sealed class SpriteAssetJsonLoader
 
         public string? AtlasId { get; init; }
 
+        public string? SourceAliasOf { get; init; }
+
+        public int? OriginX { get; init; }
+
+        public int? OriginY { get; init; }
+
+        public string? RenderLayer { get; init; }
+
+        public string? License { get; init; }
+
+        public string? Provenance { get; init; }
+
         public List<SpriteFrameDefinition> Frames { get; init; } = new();
 
         public string[] Tags { get; init; } = Array.Empty<string>();
@@ -101,9 +113,20 @@ public sealed class SpriteAssetJsonLoader
                 Height = Height,
                 PixelsPerUnit = PixelsPerUnit,
                 AtlasId = AtlasId,
+                SourceAliasOf = NormalizeOptional(SourceAliasOf),
+                OriginX = OriginX,
+                OriginY = OriginY,
+                RenderLayer = NormalizeOptional(RenderLayer),
+                License = NormalizeOptional(License),
+                Provenance = NormalizeOptional(Provenance),
                 Frames = Frames.ToArray(),
                 Tags = DefinitionTags.Normalize(Tags)
             };
+        }
+
+        private static string? NormalizeOptional(string? value)
+        {
+            return string.IsNullOrWhiteSpace(value) ? null : value.Trim();
         }
     }
 }

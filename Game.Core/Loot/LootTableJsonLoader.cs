@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Game.Core.Loot;
 
@@ -8,7 +9,8 @@ public sealed class LootTableJsonLoader
     {
         PropertyNameCaseInsensitive = true,
         ReadCommentHandling = JsonCommentHandling.Skip,
-        AllowTrailingCommas = true
+        AllowTrailingCommas = true,
+        Converters = { new JsonStringEnumConverter() }
     };
 
     public LootTableRegistry LoadRegistryFromDirectory(string directoryPath)

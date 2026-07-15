@@ -71,4 +71,19 @@ public sealed class CoordinateUtilsTests
             },
             chunks);
     }
+
+    [Fact]
+    public void ExtremeCoordinatesUseSaturatingConversionsInsteadOfWrapping()
+    {
+        Assert.Equal(int.MaxValue, CoordinateUtils.WorldToTile(float.PositiveInfinity, 0).X);
+        Assert.Equal(int.MinValue, CoordinateUtils.WorldToTile(float.NegativeInfinity, 0).X);
+        Assert.Equal(0, CoordinateUtils.WorldToTile(float.NaN, 0).X);
+
+        var maximumBounds = CoordinateUtils.ChunkTileBounds(new ChunkPos(int.MaxValue, 0));
+        var minimumBounds = CoordinateUtils.ChunkTileBounds(new ChunkPos(int.MinValue, 0));
+        Assert.Equal(int.MaxValue, maximumBounds.Right);
+        Assert.Equal(int.MinValue, minimumBounds.Left);
+        Assert.True(maximumBounds.Width > 0);
+        Assert.True(minimumBounds.Width > 0);
+    }
 }

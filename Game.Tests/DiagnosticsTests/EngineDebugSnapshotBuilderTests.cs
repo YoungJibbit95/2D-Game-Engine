@@ -1,3 +1,4 @@
+using Game.Core;
 using Game.Core.Diagnostics;
 using Game.Core.Entities;
 using Game.Core.Physics;
@@ -32,4 +33,21 @@ public sealed class EngineDebugSnapshotBuilderTests
         Assert.True(snapshot.IsNight);
         Assert.Equal(1, snapshot.EntityCountsByType["PlayerEntity"]);
     }
-}
+
+    [Fact]
+    public void Build_AnalyzesLoadedNegativeChunksWithoutFiniteWidthIndexing()
+    {
+        var world = new World(
+            GameConstants.ChunkSize,
+            64,
+            WorldMetadata.CreateDefault(seed: 42),
+            isHorizontallyInfinite: true);
+        world.SetTile(-40, 7, KnownTileIds.Stone);
+
+        var snapshot = new EngineDebugSnapshotBuilder().Build(world, new EntityManager());
+
+        Assert.Equal(1, snapshot.LoadedChunkCount);
+        Assert.Equal(1, snapshot.SolidTileCount);
+        Assert.Equal(7, snapshot.MinSurfaceY);
+        Assert.Equal(7, snapshot.MaxSurfaceY);
+    }}

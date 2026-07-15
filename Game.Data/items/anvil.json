@@ -1,0 +1,16 @@
+{
+  "id": "anvil",
+  "displayName": "Iron Anvil",
+  "description": "A heavy smithing station for forged weapons and equipment.",
+  "rarity": "Uncommon",
+  "value": 90,
+  "category": "Block",
+  "sortPriority": 120,
+  "type": "PlaceableTile",
+  "texture": "world/objects/anvil",
+  "maxStack": 99,
+  "useTime": 0.2,
+  "placesTile": "anvil",
+  "placementSupport": "OnSolidGround",
+  "tags": ["item", "placeable", "station", "smithing", "furniture"]
+}

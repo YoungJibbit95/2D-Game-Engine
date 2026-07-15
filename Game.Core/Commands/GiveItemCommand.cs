@@ -2,15 +2,32 @@ using Game.Core.Inventory;
 
 namespace Game.Core.Commands;
 
-public sealed class GiveItemCommand : IConsoleCommand
+public sealed class GiveItemCommand : TypedConsoleCommand
 {
-    public string Name => "give";
+    public GiveItemCommand()
+        : base(new CommandSpecification(
+            "give",
+            "Adds an item stack to the player inventory.",
+            new[]
+            {
+                new CommandArgumentSpecification(
+                    "itemId",
+                    CommandArgumentType.Identifier,
+                    description: "Registered item id.",
+                    suggestionSource: CommandSuggestionSource.Items),
+                new CommandArgumentSpecification(
+                    "count",
+                    CommandArgumentType.Integer,
+                    isRequired: false,
+                    description: "Number of items to add.",
+                    minimum: 1)
+            },
+            aliases: new[] { "item" },
+            examples: new[] { "/give gel", "/give gel 25" }))
+    {
+    }
 
-    public string Description => "Adds an item stack to the player inventory.";
-
-    public IReadOnlyList<string> Aliases { get; } = new[] { "item" };
-
-    public CommandResult Execute(CommandContext context, IReadOnlyList<string> arguments)
+    protected override CommandResult Execute(CommandContext context, CommandArguments arguments)
     {
         if (context.Content is null)
         {
@@ -22,22 +39,13 @@ public sealed class GiveItemCommand : IConsoleCommand
             return CommandResult.Failure("Player inventory is required for /give.");
         }
 
-        if (arguments.Count == 0)
-        {
-            return CommandResult.Failure("Usage: /give <itemId> [count]");
-        }
-
-        var itemId = arguments[0];
+        var itemId = arguments.GetString("itemId");
         if (!context.Content.Items.TryGetById(itemId, out _))
         {
             return CommandResult.Failure($"Unknown item '{itemId}'.");
         }
 
-        var count = 1;
-        if (arguments.Count >= 2 && (!int.TryParse(arguments[1], out count) || count <= 0))
-        {
-            return CommandResult.Failure("Item count must be a positive integer.");
-        }
+        var count = arguments.Has("count") ? arguments.GetInt32("count") : 1;
 
         var stack = new ItemStack(itemId, count);
         if (context.PlayerLoadoutInventory is not null)

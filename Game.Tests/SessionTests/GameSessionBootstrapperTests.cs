@@ -1,6 +1,7 @@
 using Game.Core.Inventory;
 using Game.Core.Characters;
 using Game.Core.Equipment;
+using Game.Core.Diagnostics;
 using Game.Core.Saving;
 using Game.Core.Sessions;
 using Game.Core.Settings;
@@ -34,6 +35,10 @@ public sealed class GameSessionBootstrapperTests : IDisposable
         Assert.Equal(new ItemStack("dirt_block", 10), result.Session.Inventory.Hotbar.Slots[1].Stack);
         Assert.Same(result.Session.Inventory, result.StarterInventory?.Inventory);
         Assert.False(result.Session.LoadedFromSave);
+        Assert.Equal(0.5, result.Session.WorldTime.NormalizedTimeOfDay, precision: 3);
+        Assert.False(result.Session.WorldTime.IsNight);
+        AssertSessionIdentity(result.Session);
+        result.Session.Dispose();
     }
 
     [Fact]
@@ -48,27 +53,42 @@ public sealed class GameSessionBootstrapperTests : IDisposable
             Seed: 444,
             WorldName: "Saved World",
             CreateFiniteSettings()));
+        AssertSessionIdentity(created.Session);
 
         created.Session.Inventory.Hotbar.Slots[0].SetStack(new ItemStack("dirt_block", 3));
         var equipment = Assert.IsType<EquipmentLoadout>(created.Session.EquipmentLoadout);
         Assert.True(equipment.TryEquip(new ItemStack("copper_helmet", 1), created.Session.Content.Items, EquipmentSlotType.Head).Success);
         created.Session.Player.StatusEffects.Apply(created.Session.Content.StatusEffects.GetById("poisoned"), 3.5f);
+        created.Session.WorldTime.Update(1_500);
         var appearance = new CharacterAppearance
         {
             HairStyleId = "ponytail",
             HairColor = "#112233",
             ShirtColor = "#445566"
         };
+        var savedWorldEventState = created.Session.Simulation.LivingWorld.CaptureWorldEventState();
         new GameSaveCoordinator().Save(
             new GameSaveRequest(created.Session.World, created.Session.Player, created.Session.Inventory, created.Session.Entities)
             {
                 TileEntities = created.Session.TileEntities,
                 FarmPlots = created.Session.FarmPlots,
                 EquipmentLoadout = equipment,
-                CharacterAppearance = appearance
+                CharacterAppearance = appearance,
+                WorldTime = created.Session.WorldTime,
+                RandomStreams = created.Session.RandomStreams,
+                WorldEventState = savedWorldEventState
             },
             saveDirectory,
             new GameSaveCoordinatorOptions { WorldSaveMode = WorldSaveMode.AllChunks });
+        var savedStateHash = SimulationStateHasher.Compute(
+            created.Session.World,
+            created.Session.Player,
+            created.Session.Inventory,
+            created.Session.Entities,
+            created.Session.WorldTime,
+            created.Session.FarmPlots,
+            created.Session.EquipmentLoadout,
+            created.Session.RandomStreams);
 
         var loaded = bootstrapper.LoadOrCreate(new GameSessionBootstrapRequest(
             _root,
@@ -89,7 +109,62 @@ public sealed class GameSessionBootstrapperTests : IDisposable
         var restoredEffect = Assert.Single(loaded.Session.Player.StatusEffects.ActiveEffects);
         Assert.Equal("poisoned", restoredEffect.Definition.Id);
         Assert.Equal(3.5f, restoredEffect.RemainingSeconds, precision: 3);
+        Assert.True(loaded.Session.WorldTime.Day > 1);
+        Assert.Equal(created.Session.WorldTime.Day, loaded.Session.WorldTime.Day);
+        Assert.Equal(created.Session.WorldTime.TimeOfDaySeconds, loaded.Session.WorldTime.TimeOfDaySeconds);
         Assert.Empty(loaded.Session.PlayerLoadWarnings ?? Array.Empty<PlayerLoadWarning>());
+        AssertSessionIdentity(loaded.Session);
+        Assert.NotSame(created.Session.World, loaded.Session.World);
+        Assert.NotSame(created.Session.Player, loaded.Session.Player);
+        Assert.NotSame(created.Session.Inventory, loaded.Session.Inventory);
+        Assert.NotSame(created.Session.Entities, loaded.Session.Entities);
+        Assert.NotSame(created.Session.Simulation, loaded.Session.Simulation);
+        Assert.Same(loaded.Session.EquipmentLoadout, loaded.Session.Simulation.EquipmentLoadout);
+        var resumedWorldEventState = loaded.Session.Simulation.LivingWorld.CaptureWorldEventState();
+        Assert.NotNull(savedWorldEventState);
+        Assert.NotNull(resumedWorldEventState);
+        Assert.True(
+            resumedWorldEventState!.Runtime.LastAdvancedTick >=
+            savedWorldEventState!.Runtime.LastAdvancedTick);
+        Assert.Equal(
+            savedWorldEventState.LastProcessedPlayerActionSequence,
+            resumedWorldEventState.LastProcessedPlayerActionSequence);
+        Assert.Equal(
+            savedWorldEventState.Runtime.Cooldowns.ToArray(),
+            resumedWorldEventState.Runtime.Cooldowns.ToArray());
+        Assert.Equal(
+            savedWorldEventState.Journal.Entries.ToArray(),
+            resumedWorldEventState.Journal.Entries.Take(savedWorldEventState.Journal.Entries.Count).ToArray());
+        var resumedStateHash = SimulationStateHasher.Compute(
+            loaded.Session.World,
+            loaded.Session.Player,
+            loaded.Session.Inventory,
+            loaded.Session.Entities,
+            loaded.Session.WorldTime,
+            loaded.Session.FarmPlots,
+            loaded.Session.EquipmentLoadout,
+            loaded.Session.RandomStreams);
+        Assert.Equal(savedStateHash, resumedStateHash);
+
+        created.Session.Dispose();
+        loaded.Session.Dispose();
+    }
+
+    [Fact]
+    public void LoadedGameSession_DisposeOwnsSimulationLifecycle()
+    {
+        WriteProject();
+        var session = new GameSessionBootstrapper().LoadOrCreate(new GameSessionBootstrapRequest(
+            _root,
+            Path.Combine(_root, "Saves", "world_dispose"),
+            Seed: 5,
+            WorldName: "Dispose World",
+            CreateFiniteSettings())).Session;
+
+        session.Dispose();
+        session.Dispose();
+
+        Assert.Throws<ObjectDisposedException>(() => session.Simulation.Tick(Game.Core.Entities.PlayerCommand.None, 0.016f));
     }
 
     public void Dispose()
@@ -110,6 +185,19 @@ public sealed class GameSessionBootstrapperTests : IDisposable
                 WorldProfileId = "missing_settings_profile"
             }
         };
+    }
+
+    private static void AssertSessionIdentity(LoadedGameSession session)
+    {
+        Assert.Same(session.Content, session.Simulation.Content);
+        Assert.Same(session.World, session.Simulation.World);
+        Assert.Same(session.Player, session.Simulation.Player);
+        Assert.Same(session.Inventory, session.Simulation.PlayerInventory);
+        Assert.Same(session.Entities, session.Simulation.Entities);
+        Assert.Same(session.Events, session.Simulation.Events);
+        Assert.Same(session.WorldTime, session.Simulation.Time);
+        Assert.Same(session.FarmPlots, session.Simulation.FarmPlots);
+        Assert.Same(session.EquipmentLoadout, session.Simulation.EquipmentLoadout);
     }
 
     private void WriteProject()

@@ -1,6 +1,11 @@
 {
   "id": "iron_pickaxe",
   "displayName": "Iron Pickaxe",
+  "description": "A stronger mining tool for dense rock and deeper deposits.",
+  "rarity": "Uncommon",
+  "value": 85,
+  "category": "Tool",
+  "sortPriority": 20,
   "type": "ToolPickaxe",
   "texture": "items/iron_pickaxe",
   "maxStack": 1,

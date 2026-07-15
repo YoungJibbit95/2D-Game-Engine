@@ -1,0 +1,10 @@
+{
+  "id": "sunsteel_pickaxe",
+  "result": { "itemId": "sunsteel_pickaxe", "count": 1 },
+  "ingredients": [
+    { "itemId": "amberstone_block", "count": 12 },
+    { "itemId": "iron_ore", "count": 4 },
+    { "itemId": "wood", "count": 3 }
+  ],
+  "station": "anvil"
+}

@@ -1,0 +1,21 @@
+{
+  "id": "thornblade",
+  "displayName": "Thornblade",
+  "description": "A balanced grove blade with a long defensive reach.",
+  "rarity": "Rare",
+  "value": 480,
+  "category": "Weapon",
+  "sortPriority": 72,
+  "type": "WeaponMelee",
+  "texture": "items/wave05/thornblade",
+  "maxStack": 1,
+  "useTime": 0.26,
+  "damage": 18,
+  "knockback": 3.1,
+  "attackShape": {
+    "kind": "Cone",
+    "range": 52,
+    "angleRadians": 1.833
+  },
+  "tags": ["weapon", "melee", "grove", "wave05"]
+}

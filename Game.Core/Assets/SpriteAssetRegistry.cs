@@ -20,6 +20,8 @@ public sealed class SpriteAssetRegistry
         {
             AddValidated(Fallback);
         }
+
+        ValidateSourceAliases();
     }
 
     public SpriteAssetDefinition Fallback { get; }
@@ -57,11 +59,58 @@ public sealed class SpriteAssetRegistry
         _byId.Add(definition.Id, definition);
     }
 
+    private void ValidateSourceAliases()
+    {
+        foreach (var definition in _byId.Values)
+        {
+            if (string.IsNullOrWhiteSpace(definition.SourceAliasOf))
+            {
+                continue;
+            }
+
+            if (!_byId.TryGetValue(definition.SourceAliasOf, out var canonical))
+            {
+                throw new RegistryValidationException(
+                    $"Sprite asset '{definition.Id}' aliases missing source asset '{definition.SourceAliasOf}'.");
+            }
+
+            if (ReferenceEquals(definition, canonical) ||
+                string.Equals(definition.Id, canonical.Id, StringComparison.OrdinalIgnoreCase))
+            {
+                throw new RegistryValidationException($"Sprite asset '{definition.Id}' cannot alias itself.");
+            }
+
+            var aliasPath = definition.Path.Replace('\\', '/');
+            var canonicalPath = canonical.Path.Replace('\\', '/');
+            if (!string.Equals(aliasPath, canonicalPath, StringComparison.OrdinalIgnoreCase) ||
+                definition.Width != canonical.Width ||
+                definition.Height != canonical.Height)
+            {
+                throw new RegistryValidationException(
+                    $"Sprite asset '{definition.Id}' must share path and dimensions with aliased source '{canonical.Id}'.");
+            }
+        }
+    }
+
     private static void Validate(SpriteAssetDefinition definition)
     {
         ArgumentNullException.ThrowIfNull(definition);
         RequireText(definition.Id, nameof(definition.Id));
         RequireText(definition.Path, nameof(definition.Path));
+
+        var normalizedPath = definition.Path.Replace('\\', '/');
+        if (Path.IsPathRooted(definition.Path) ||
+            normalizedPath.Split('/', StringSplitOptions.RemoveEmptyEntries).Contains("..", StringComparer.Ordinal))
+        {
+            throw new RegistryValidationException(
+                $"Sprite asset '{definition.Id}' must use a relative path contained by its source root.");
+        }
+
+        if (!string.IsNullOrWhiteSpace(definition.SourceRoot) && !Path.IsPathFullyQualified(definition.SourceRoot))
+        {
+            throw new RegistryValidationException(
+                $"Sprite asset '{definition.Id}' source root must be an absolute resolved path.");
+        }
 
         if (definition.Width <= 0 || definition.Height <= 0)
         {
@@ -71,6 +120,17 @@ public sealed class SpriteAssetRegistry
         if (definition.PixelsPerUnit <= 0)
         {
             throw new RegistryValidationException($"Sprite asset '{definition.Id}' must have a positive pixels-per-unit value.");
+        }
+
+        if (definition.OriginX.HasValue != definition.OriginY.HasValue)
+        {
+            throw new RegistryValidationException($"Sprite asset '{definition.Id}' must declare both origin coordinates or neither.");
+        }
+
+        if (definition.OriginX is { } originX && definition.OriginY is { } originY &&
+            (originX < 0 || originX > definition.Width || originY < 0 || originY > definition.Height))
+        {
+            throw new RegistryValidationException($"Sprite asset '{definition.Id}' declares an origin outside its sprite bounds.");
         }
 
         foreach (var frame in definition.Frames)

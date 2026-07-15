@@ -30,7 +30,8 @@ public sealed class GameSettingsServiceTests
                 Width = 1920,
                 Height = 1080,
                 Fullscreen = true,
-                VSync = false
+                VSync = false,
+                FrameRateLimit = 144
             },
             Rendering = new RenderingSettings
             {
@@ -46,7 +47,17 @@ public sealed class GameSettingsServiceTests
                 LiquidOpacity = 0.65f,
                 LightingBlendStrength = 0.85f,
                 MaxChunkRenderCacheEntries = 1024,
-                EntityInterpolation = false
+                EntityInterpolation = false,
+                LightingQuality = 3,
+                ShadowQuality = 3,
+                ReflectionQuality = 2,
+                UiEffectQuality = 3,
+                CaveAmbientLight = 0.22f,
+                TorchBloomStrength = 0.72f,
+                ShadowSoftness = 0.64f,
+                ReflectionStrength = 0.4f,
+                RaymarchStepBudget = 48,
+                BlurRadiusPixels = 8
             },
             Ui = new UiSettings
             {
@@ -57,7 +68,13 @@ public sealed class GameSettingsServiceTests
                 AnimationSpeed = 1.5f,
                 ReducedMotion = true,
                 CompactLists = true,
-                ShowControlHints = false
+                ShowControlHints = false,
+                CornerRadiusPixels = 8,
+                BackdropBlurStrength = 0.6f,
+                GlowStrength = 0.45f,
+                TextScale = 1.2f,
+                HighContrastPanels = true,
+                LargeCursor = true
             },
             Audio = new AudioSettings
             {
@@ -80,7 +97,12 @@ public sealed class GameSettingsServiceTests
                 UseLineOfSightForCombat = false,
                 RespawnDelaySeconds = 4.5f,
                 CameraLookAheadPixels = 64f,
-                ScreenShakeMultiplier = 0.5f
+                ScreenShakeMultiplier = 0.5f,
+                EntitySimulationRadiusPixels = 2400f,
+                SpawnMinimumDistancePixels = 640f,
+                SpawnMaximumDistancePixels = 1800f,
+                SpawnOutsideViewportOnly = true,
+                HoldToBlock = false
             },
             World = new WorldSettings
             {
@@ -109,6 +131,16 @@ public sealed class GameSettingsServiceTests
             {
                 ShowDebugOverlay = false,
                 ShowGrid = true
+            },
+            Accessibility = new AccessibilitySettings
+            {
+                ScreenFlashReduction = true,
+                DisableCameraShake = true,
+                HoldActionsBecomeToggle = true,
+                HighContrastInteractionOutline = true,
+                ColorBlindFriendlyIndicators = true,
+                InterfaceContrast = 1.35f,
+                TooltipDelaySeconds = 0.1f
             }
         };
 
@@ -147,6 +179,43 @@ public sealed class GameSettingsServiceTests
             Gameplay = new GameplaySettings { CameraZoom = 12 },
             World = new WorldSettings { WorldProfileId = "", ChunkLoadMargin = 5, ChunkUnloadMargin = 2 },
             Input = new InputSettings { MouseSensitivity = 0 }
+        };
+
+        Assert.Throws<InvalidDataException>(() => service.Save(path, settings));
+    }
+
+    [Fact]
+    public void Save_RejectsInvalidPresentationAndSpawnBudgets()
+    {
+        var path = CreateTempPath();
+        var service = new GameSettingsService();
+        var settings = GameSettings.CreateDefault() with
+        {
+            Rendering = new RenderingSettings { RaymarchStepBudget = 256, ReflectionQuality = 5 },
+            Ui = new UiSettings { CornerRadiusPixels = 42 },
+            Gameplay = new GameplaySettings
+            {
+                EntitySimulationRadiusPixels = 1024f,
+                SpawnMinimumDistancePixels = 900f,
+                SpawnMaximumDistancePixels = 1200f
+            },
+            Accessibility = new AccessibilitySettings { TooltipDelaySeconds = 5f }
+        };
+
+        Assert.Throws<InvalidDataException>(() => service.Save(path, settings));
+    }
+
+    [Theory]
+    [InlineData(1)]
+    [InlineData(29)]
+    [InlineData(361)]
+    public void Save_RejectsUnsupportedFrameRateLimit(int limit)
+    {
+        var path = CreateTempPath();
+        var service = new GameSettingsService();
+        var settings = GameSettings.CreateDefault() with
+        {
+            Video = new VideoSettings { FrameRateLimit = limit }
         };
 
         Assert.Throws<InvalidDataException>(() => service.Save(path, settings));

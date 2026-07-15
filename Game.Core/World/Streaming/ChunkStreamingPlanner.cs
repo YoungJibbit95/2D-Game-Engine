@@ -4,22 +4,67 @@ public sealed class ChunkStreamingPlanner
 {
     public ChunkStreamingPlan Plan(World world, RectI visibleTileArea, ChunkStreamingOptions? options = null)
     {
+        return CreateRequestSnapshot(world, visibleTileArea, 0, 0, options).ToPlan();
+    }
+
+    public ChunkStreamingRequestSnapshot CreateRequestSnapshot(
+        World world,
+        RectI visibleTileArea,
+        long worldSessionGeneration,
+        long requestSequence,
+        ChunkStreamingOptions? options = null)
+    {
         ArgumentNullException.ThrowIfNull(world);
 
         var resolvedOptions = options ?? new ChunkStreamingOptions();
         ValidateOptions(resolvedOptions);
 
-        var loaded = world.Chunks.Keys.ToHashSet();
-        var required = EnumerateChunksForArea(world, visibleTileArea, resolvedOptions.LoadMarginChunks).ToHashSet();
-        var retain = EnumerateChunksForArea(world, visibleTileArea, resolvedOptions.UnloadMarginChunks).ToHashSet();
+        var required = new HashSet<ChunkPos>();
+        foreach (var position in EnumerateChunksForArea(world, visibleTileArea, resolvedOptions.LoadMarginChunks))
+        {
+            required.Add(position);
+        }
 
-        var toLoad = required.Where(chunk => !loaded.Contains(chunk)).ToHashSet();
-        var toUnload = loaded
-            .Where(chunk => !retain.Contains(chunk))
-            .Where(chunk => CanUnload(world, chunk, resolvedOptions))
-            .ToHashSet();
+        var retain = new HashSet<ChunkPos>();
+        foreach (var position in EnumerateChunksForArea(world, visibleTileArea, resolvedOptions.UnloadMarginChunks))
+        {
+            retain.Add(position);
+        }
 
-        return new ChunkStreamingPlan(required, toLoad, toUnload);
+        var centerChunk = CoordinateUtils.TileToChunk(
+            visibleTileArea.Left + Math.Max(0, visibleTileArea.Width - 1) / 2,
+            visibleTileArea.Top + Math.Max(0, visibleTileArea.Height - 1) / 2);
+        var toLoad = new List<ChunkPos>(required.Count);
+        foreach (var position in required)
+        {
+            if (!world.TryGetChunk(position, out _))
+            {
+                toLoad.Add(position);
+            }
+        }
+
+        SortByDistance(toLoad, centerChunk, descending: false);
+
+        var toUnload = new List<ChunkPos>();
+        foreach (var position in world.Chunks.Keys)
+        {
+            if (!retain.Contains(position) && CanUnload(world, position, resolvedOptions))
+            {
+                toUnload.Add(position);
+            }
+        }
+
+        SortByDistance(toUnload, centerChunk, descending: true);
+
+        return new ChunkStreamingRequestSnapshot(
+            worldSessionGeneration,
+            requestSequence,
+            visibleTileArea,
+            centerChunk,
+            required,
+            retain,
+            toLoad,
+            toUnload);
     }
 
     public int ApplyUnloadPlan(World world, ChunkStreamingPlan plan)
@@ -55,18 +100,20 @@ public sealed class ChunkStreamingPlanner
         var maxChunk = CoordinateUtils.TileToChunk(maxTileX, maxTileY);
         var worldMaxChunkY = CoordinateUtils.TileToChunk(0, world.HeightTiles - 1).Y;
 
-        var startX = world.IsHorizontallyInfinite ? minChunk.X - marginChunks : Math.Max(0, minChunk.X - marginChunks);
-        var startY = Math.Max(0, minChunk.Y - marginChunks);
+        var startX = world.IsHorizontallyInfinite
+            ? SaturatingAdd(minChunk.X, -marginChunks)
+            : Math.Max(0, SaturatingAdd(minChunk.X, -marginChunks));
+        var startY = Math.Max(0, SaturatingAdd(minChunk.Y, -marginChunks));
         var endX = world.IsHorizontallyInfinite
-            ? maxChunk.X + marginChunks
-            : Math.Min(CoordinateUtils.TileToChunk(world.WidthTiles - 1, world.HeightTiles - 1).X, maxChunk.X + marginChunks);
-        var endY = Math.Min(worldMaxChunkY, maxChunk.Y + marginChunks);
+            ? SaturatingAdd(maxChunk.X, marginChunks)
+            : Math.Min(CoordinateUtils.TileToChunk(world.WidthTiles - 1, world.HeightTiles - 1).X, SaturatingAdd(maxChunk.X, marginChunks));
+        var endY = Math.Min(worldMaxChunkY, SaturatingAdd(maxChunk.Y, marginChunks));
 
-        for (var y = startY; y <= endY; y++)
+        for (var y = (long)startY; y <= endY; y++)
         {
-            for (var x = startX; x <= endX; x++)
+            for (var x = (long)startX; x <= endX; x++)
             {
-                yield return new ChunkPos(x, y);
+                yield return new ChunkPos((int)x, (int)y);
             }
         }
     }
@@ -81,7 +128,7 @@ public sealed class ChunkStreamingPlanner
         return !world.TryGetChunk(position, out var chunk) || chunk is null || !chunk.IsDirty;
     }
 
-    private static void ValidateOptions(ChunkStreamingOptions options)
+    public static void ValidateOptions(ChunkStreamingOptions options)
     {
         if (options.LoadMarginChunks < 0)
         {
@@ -97,5 +144,87 @@ public sealed class ChunkStreamingPlanner
         {
             throw new ArgumentOutOfRangeException(nameof(options), "Chunk operation budget must be at least one.");
         }
+
+        if (options.MaxConcurrentLoadJobs < 1)
+        {
+            throw new ArgumentOutOfRangeException(nameof(options), "Concurrent load job limit must be at least one.");
+        }
+
+        if (options.MaxConcurrentSaveJobs < 1)
+        {
+            throw new ArgumentOutOfRangeException(nameof(options), "Concurrent save job limit must be at least one.");
+        }
+
+        if (options.MaxApplyQueueLength < 1)
+        {
+            throw new ArgumentOutOfRangeException(nameof(options), "Apply queue limit must be at least one.");
+        }
+
+        if (options.MaxApplyTimePerUpdate <= TimeSpan.Zero)
+        {
+            throw new ArgumentOutOfRangeException(nameof(options), "Apply time budget must be positive.");
+        }
+
+        if (options.MaxApplyDecodedBytesPerUpdate < 1)
+        {
+            throw new ArgumentOutOfRangeException(nameof(options), "Apply decoded-byte budget must be at least one byte.");
+        }
+
+        ArgumentNullException.ThrowIfNull(options.RetryPolicy);
+        options.RetryPolicy.Validate();
+    }
+
+    private static void SortByDistance(List<ChunkPos> positions, ChunkPos center, bool descending)
+    {
+        for (var index = 1; index < positions.Count; index++)
+        {
+            var value = positions[index];
+            var insertionIndex = index;
+            while (insertionIndex > 0 && Compare(positions[insertionIndex - 1], value, center, descending) > 0)
+            {
+                positions[insertionIndex] = positions[insertionIndex - 1];
+                insertionIndex--;
+            }
+
+            positions[insertionIndex] = value;
+        }
+    }
+
+    private static int Compare(ChunkPos first, ChunkPos second, ChunkPos center, bool descending)
+    {
+        var distanceComparison = DistanceSquared(first, center).CompareTo(DistanceSquared(second, center));
+        if (descending)
+        {
+            distanceComparison = -distanceComparison;
+        }
+
+        if (distanceComparison != 0)
+        {
+            return distanceComparison;
+        }
+
+        var yComparison = first.Y.CompareTo(second.Y);
+        return yComparison != 0 ? yComparison : first.X.CompareTo(second.X);
+    }
+
+    private static ulong DistanceSquared(ChunkPos first, ChunkPos second)
+    {
+        var x = (long)first.X - second.X;
+        var y = (long)first.Y - second.Y;
+        var absoluteX = AbsoluteAsUnsigned(x);
+        var absoluteY = AbsoluteAsUnsigned(y);
+        var squaredX = absoluteX * absoluteX;
+        var squaredY = absoluteY * absoluteY;
+        return ulong.MaxValue - squaredX < squaredY ? ulong.MaxValue : squaredX + squaredY;
+    }
+
+    private static ulong AbsoluteAsUnsigned(long value)
+    {
+        return value < 0 ? (ulong)(-(value + 1)) + 1 : (ulong)value;
+    }
+
+    private static int SaturatingAdd(int value, int offset)
+    {
+        return (int)Math.Clamp((long)value + offset, int.MinValue, int.MaxValue);
     }
 }

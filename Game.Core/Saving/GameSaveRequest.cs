@@ -4,6 +4,9 @@ using Game.Core.Equipment;
 using Game.Core.Farming;
 using Game.Core.Inventory;
 using Game.Core.World.TileEntities;
+using Game.Core.Time;
+using Game.Core.Randomness;
+using Game.Core.WorldEvents;
 
 namespace Game.Core.Saving;
 
@@ -20,4 +23,10 @@ public sealed record GameSaveRequest(
     public EquipmentLoadout? EquipmentLoadout { get; init; }
 
     public CharacterAppearance? CharacterAppearance { get; init; }
+
+    public WorldTime? WorldTime { get; init; }
+
+    public SessionRandomRegistry? RandomStreams { get; init; }
+
+    public WorldEventRuntimeStateSnapshot? WorldEventState { get; init; }
 }

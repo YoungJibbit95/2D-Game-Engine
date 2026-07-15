@@ -1,5 +1,6 @@
 using Game.Core.Utilities;
 using Game.Core.World;
+using Game.Core.Entities.AI;
 using GameWorld = Game.Core.World.World;
 
 namespace Game.Core.Entities;
@@ -42,9 +43,29 @@ public sealed class EntityManager
 
     public void UpdateAll(GameWorld world, float deltaSeconds)
     {
+        UpdateAll(world, deltaSeconds, player: null);
+    }
+
+    public void UpdateAll(GameWorld world, float deltaSeconds, PlayerEntity? player)
+    {
+        UpdateAll(world, deltaSeconds, player, isNight: false, tickNumber: 0);
+    }
+
+    public void UpdateAll(
+        GameWorld world,
+        float deltaSeconds,
+        PlayerEntity? player,
+        bool isNight,
+        long tickNumber)
+    {
+        var aiContext = new AiUpdateContext(world, _entities, player, isNight, tickNumber);
         foreach (var entity in _entities)
         {
-            if (entity.IsActive)
+            if (entity is EnemyEntity { IsActive: true } actor)
+            {
+                actor.Update(aiContext, deltaSeconds);
+            }
+            else if (entity.IsActive)
             {
                 entity.Update(world, deltaSeconds);
             }
@@ -57,6 +78,11 @@ public sealed class EntityManager
     public IReadOnlyList<Entity> Query(RectI area)
     {
         return _spatialGrid.Query(area);
+    }
+
+    public void QueryInto(RectI area, List<Entity> result, HashSet<Entity> seen)
+    {
+        _spatialGrid.QueryInto(area, result, seen);
     }
 
     private void RebuildSpatialIndex()
