@@ -24,6 +24,7 @@ public sealed class EntityManager
     private readonly List<ProjectileHomingTarget> _projectileTargets = new(32);
     private readonly PhysicsWorld _physicsWorld;
     private readonly TileCollisionSettings _physicsCollisionSettings;
+    private readonly EntityAiDecisionScheduler _aiDecisionScheduler;
     private PhysicsBody[] _physicsBodies = Array.Empty<PhysicsBody>();
     private IEntityPhysicsParticipant[] _physicsParticipants = Array.Empty<IEntityPhysicsParticipant>();
     private PhysicsMoveResult[] _physicsResults = Array.Empty<PhysicsMoveResult>();
@@ -45,11 +46,16 @@ public sealed class EntityManager
 
     public PhysicsStepTelemetry PhysicsTelemetryLastUpdate { get; private set; }
 
+    public EntityAiSchedulingTelemetry AiSchedulingTelemetryLastUpdate { get; private set; }
+
+    public EntityAiSchedulingOptions AiSchedulingOptions => _aiDecisionScheduler.Options;
+
     public EntityManager(
         int spatialCellSize = GameConstants.PixelsPerChunk,
         TileCollisionResolver? physicsCollisionResolver = null,
         int maximumPhysicsBodies = EntityPhysicsRuntime.DefaultMaximumBodies,
-        int maximumPhysicsBodyPairs = EntityPhysicsRuntime.DefaultMaximumBodyPairs)
+        int maximumPhysicsBodyPairs = EntityPhysicsRuntime.DefaultMaximumBodyPairs,
+        EntityAiSchedulingOptions? aiSchedulingOptions = null)
     {
         if (maximumPhysicsBodyPairs <= 0)
         {
@@ -66,6 +72,7 @@ public sealed class EntityManager
             EntityPhysicsRuntime.CreateBroadphaseSettings(
                 maximumPhysicsBodies,
                 maximumPhysicsBodyPairs));
+        _aiDecisionScheduler = new EntityAiDecisionScheduler(maximumPhysicsBodies, aiSchedulingOptions);
     }
 
     public IReadOnlyList<Entity> Entities => _entities;
@@ -123,6 +130,11 @@ public sealed class EntityManager
         {
             _entitiesById.Add(entity.Id, entity);
             _entities.Add(entity);
+            if (entity is EnemyEntity addedActor)
+            {
+                addedActor.ResetAiSchedulingState();
+            }
+
             if (entity is ProjectileEntity projectile && IsHomingCapable(projectile))
             {
                 _homingProjectileEntityCount++;
@@ -158,6 +170,10 @@ public sealed class EntityManager
         {
             _physicsEntityCount--;
         }
+        if (entity is EnemyEntity removedActor)
+        {
+            removedActor.ResetAiSchedulingState();
+        }
     }
 
     public void UpdateAll(GameWorld world, float deltaSeconds)
@@ -178,6 +194,7 @@ public sealed class EntityManager
         long tickNumber)
     {
         var aiContext = new AiUpdateContext(world, _entities, player, isNight, tickNumber, this);
+        var aiSchedule = _aiDecisionScheduler.Schedule(_entities, player, tickNumber);
         var homingProjectileCount = CountActiveHomingProjectiles();
         var homingQueryBudget = Math.Min(homingProjectileCount, MaximumHomingQueriesPerUpdate);
         var firstHomingOrdinal = homingProjectileCount == 0
@@ -194,7 +211,10 @@ public sealed class EntityManager
             var entity = _entities[index];
             if (entity is EnemyEntity { IsActive: true } actor)
             {
-                if (actor.PreparePhysicsUpdate(aiContext, deltaSeconds))
+                if (actor.PreparePhysicsUpdate(
+                        aiContext,
+                        deltaSeconds,
+                        aiSchedule))
                 {
                     QueuePhysicsBody(actor, ref physicsBodyCount);
                 }
@@ -225,6 +245,10 @@ public sealed class EntityManager
             }
         }
 
+        AiSchedulingTelemetryLastUpdate = aiSchedule.Telemetry with
+        {
+            PhysicsBodiesSubmitted = physicsBodyCount
+        };
         StepEntityPhysics(world, deltaSeconds, physicsBodyCount);
 
         for (var index = _entities.Count - 1; index >= 0; index--)
@@ -336,6 +360,10 @@ public sealed class EntityManager
         if (entity is IEntityPhysicsParticipant)
         {
             _physicsEntityCount--;
+        }
+        if (entity is EnemyEntity removedActor)
+        {
+            removedActor.ResetAiSchedulingState();
         }
     }
 

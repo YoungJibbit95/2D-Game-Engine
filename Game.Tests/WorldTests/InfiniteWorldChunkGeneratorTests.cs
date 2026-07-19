@@ -176,6 +176,47 @@ public sealed class InfiniteWorldChunkGeneratorTests
                   world.GetTile(x + 1, surfaceY - 1).TileId == KnownTileIds.Wood));
     }
 
+    [Theory]
+    [InlineData(12)]
+    [InlineData(73_331)]
+    [InlineData(-912_445)]
+    public void TreeCenterSelection_IsDeterministicAndKeepsV3SilhouettesDistinct(int seed)
+    {
+        var profile = WorldGenerationProfile.Small with
+        {
+            WidthTiles = 128,
+            TreeAttempts = 128,
+            TreeAttemptChance = 1f
+        };
+        var first = new InfiniteWorldChunkGenerator();
+        var replay = new InfiniteWorldChunkGenerator();
+        var firstCenters = new List<int>();
+        var replayCenters = new List<int>();
+
+        for (var tileX = -512; tileX <= 512; tileX++)
+        {
+            if (first.ShouldGrowTreeAt(profile, seed, tileX, region: null))
+            {
+                firstCenters.Add(tileX);
+            }
+
+            if (replay.ShouldGrowTreeAt(profile, seed, tileX, region: null))
+            {
+                replayCenters.Add(tileX);
+            }
+        }
+
+        Assert.NotEmpty(firstCenters);
+        Assert.Equal(firstCenters, replayCenters);
+        for (var index = 1; index < firstCenters.Count; index++)
+        {
+            Assert.True(
+                firstCenters[index] - firstCenters[index - 1] >
+                    InfiniteWorldChunkGenerator.TreeCenterExclusionRadius,
+                $"Tree centers {firstCenters[index - 1]} and {firstCenters[index]} violate the V3 exclusion radius.");
+        }
+    }
+
     [Fact]
     public void EnsureChunk_GeneratesDeterministicUndergroundWaterPockets()
     {

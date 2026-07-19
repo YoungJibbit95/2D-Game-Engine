@@ -1,48 +1,80 @@
-# YjsE Website
+# YjsE Product Site
 
-Static, dependency-free product site for the YjsE engine and its Terraria-like reference game.
+The website is a statically deployable Svelte 5 and Vite multi-page app. It has two product surfaces:
 
-## Surfaces
+- `index.html`: concise game, engine, validation and download information.
+- `docs.html`: searchable, filterable engine development wiki.
 
-- `index.html`: concise game/engine information, honest download states, real in-project artwork and development notes.
-- `docs.html`: searchable development wiki with category filters, deep links and capability-status badges.
-- `data/status.json`: current product and validation summary.
-- `data/releases.json`: downloads and development notes. Unpublished artifacts must use `published: false` and `href: null`.
-- `data/docs.json`: wiki navigation and article content.
-- `data/assets.json`: provenance map for website copies of real `Game.Data` PNG assets.
+The browser receives compiled Svelte bundles only. There is no CDN runtime, remote font, analytics SDK or server dependency.
 
-The site has no CDN or package-manager runtime dependency. System fonts and local assets keep offline previews deterministic.
+## Structure
 
-## Local preview
-
-From the repository root:
-
-```powershell
-python -m http.server 4173 --directory Website
+```text
+Website/
+|- src/
+|  |- HomeApp.svelte
+|  |- DocsApp.svelte
+|  |- lib/components/
+|  `- styles/app.css
+|- static/
+|  |- assets/       # byte-exact selected Game.Data copies
+|  |- data/         # status, releases, wiki and provenance
+|  `- downloads/    # versioned artifacts only
+|- tools/
+|- index.html
+|- docs.html
+`- vite.config.js
 ```
 
-Open `http://localhost:4173/`. A server is required because the pages load JSON through `fetch`.
+`vite.config.js` emits both HTML entry points and uses a relative base so the result can be hosted from a repository subpath. Everything under `static/` is copied to `dist/` unchanged.
+
+## Local development
+
+```powershell
+cd Website
+npm ci
+npm run dev
+```
+
+Vite prints the local URL. Product and docs changes hot-reload without rebuilding the C# projects.
+
+## Production gate
+
+```powershell
+cd Website
+npm run validate
+```
+
+The gate runs `svelte-check`, creates the optimized multi-page build, and validates:
+
+- status, download, wiki and capability schemas;
+- Svelte accessibility and interaction contracts;
+- portable local bundle references;
+- exact static-data copying into `dist/`;
+- PNG headers and dimensions;
+- byte-exact provenance against `Game.Data`;
+- Wave 05 manifest coverage.
+
+Preview the production output with:
+
+```powershell
+npm run preview
+```
 
 ## Milestone update contract
 
-After every validated engine/game slice:
+After every validated engine or game slice:
 
-1. Update `data/status.json` using only current checkout evidence.
-2. Add one concise development note to `data/releases.json`.
-3. Update affected API articles in `data/docs.json`; never call tile-aware 2D ray casting hardware raytracing.
-4. If a displayed game asset changes, copy the real source into `assets/` and update `data/assets.json`.
-5. Run the static gate, then inspect home and docs at desktop and mobile sizes.
+1. Update `static/data/status.json` with current checkout evidence.
+2. Add a concise development note to `static/data/releases.json`.
+3. Update affected articles in `static/data/docs.json`.
+4. Copy displayed game assets into `static/assets/` and record their exact `Game.Data` source in `static/data/assets.json`.
+5. Run `./Website/tools/update-site-data.ps1 -Check` from the repository root.
+6. Inspect product and docs pages at desktop and mobile widths.
 
-Do not add a public download URL before a real versioned artifact exists.
+Do not add a public download URL before a real, versioned artifact exists. Unpublished entries keep `published: false` and `href: null`.
 
-```powershell
-./Website/tools/update-site-data.ps1 -Check
-node --check Website/app.js
-```
-
-`validate-site.mjs` verifies JSON contracts, status vocabulary, wiki links, HTML fragments, local references, UTF-8 health, local-only scripts/styles, PNG headers and byte-exact `Game.Data` asset provenance.
-
-To stamp a validated milestone:
+To stamp a milestone and rebuild:
 
 ```powershell
 ./Website/tools/update-site-data.ps1 `

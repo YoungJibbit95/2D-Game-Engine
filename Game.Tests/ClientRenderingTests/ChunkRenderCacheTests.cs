@@ -162,9 +162,48 @@ public sealed class ChunkRenderCacheTests
         var expectedBucket = trunk.VisualVariant + 1;
 
         Assert.Contains(
-            prepared.TileCommands[prepared.TextureBuckets[expectedBucket].StartIndex..
-                prepared.TextureBuckets[expectedBucket].EndIndex],
+            prepared.TileCommands[prepared.TextureBuckets[expectedBucket].StartIndex..prepared.TextureBuckets[expectedBucket].EndIndex],
             command => command.LocalX == trunk.LocalX && command.LocalY == trunk.LocalY);
+    }
+
+    [Fact]
+    public void Rebuild_UsesTransformedFoliageMaskForTextureBucket()
+    {
+        var world = CreateWorld();
+        var cache = new ChunkRenderCache();
+        var textureBuckets = new int[KnownTileIds.MarshLeaves + 1][];
+        textureBuckets[KnownTileIds.OakLeaves] = Enumerable.Range(1, 16).ToArray();
+        cache.ConfigureTextureBuckets(textureBuckets, textureBucketCount: 17);
+        var tiles = TileRegistry.Create(
+        [
+            new TileDefinition
+            {
+                NumericId = KnownTileIds.OakLeaves,
+                Id = "oak_leaves",
+                DisplayName = "Oak Leaves",
+                TexturePath = "tiles/oak_leaves",
+                MergeGroup = "tree-canopy"
+            }
+        ]);
+        var tileX = Enumerable.Range(2, 24).First(
+            x => TreeTileVisualSelector.ResolveTransform(world, x, 10, KnownTileIds.OakLeaves) ==
+                TileVisualTransform.FlipHorizontal);
+        world.SetTile(tileX, 10, KnownTileIds.OakLeaves);
+        world.SetTile(tileX - 1, 10, KnownTileIds.OakLeaves);
+        var chunk = world.GetOrCreateChunk(new ChunkPos(0, 0));
+
+        _ = cache.GetOrBuild(world, tiles, chunk);
+        Assert.True(cache.TryGetPrepared(chunk.Position, out var prepared));
+        var command = Assert.Single(prepared.TileCommands, tile => tile.LocalX == tileX && tile.LocalY == 10);
+        Assert.Equal(TileVisualTransform.FlipHorizontal, command.VisualTransform);
+        Assert.Equal(AutoTileMask.Left, command.AutoTileMask);
+        var sourceMask = TreeTileVisualSelector.ResolveSourceMask(command.AutoTileMask, command.VisualTransform);
+        Assert.Equal(AutoTileMask.Right, sourceMask);
+        var expectedBucket = (int)sourceMask + 1;
+
+        Assert.Contains(
+            prepared.TileCommands[prepared.TextureBuckets[expectedBucket].StartIndex..prepared.TextureBuckets[expectedBucket].EndIndex],
+            tile => tile.LocalX == command.LocalX && tile.LocalY == command.LocalY);
     }
 
     private static int[] CreateMaskBuckets(int bucketIndex)

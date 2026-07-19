@@ -63,7 +63,7 @@ Epic 0 is locally validated but remains `partial` until the tracked workflow has
 - Added deterministic regional generation, biome-weather and world-event foundations for future active-world integration.
 - Added crash reports plus CI-capable `WorldSelect` and `Playing` client smoke start states. Both state paths pass locally; the Singleplayer transition no longer reproduces the reported immediate crash.
 - Resolved the captured far-travel crash in `WorldAnalyzer`/`EngineDebugSnapshotBuilder`: debug analysis now runs in Update, scans loaded negative-X chunks without finite-width indexing and performs no world scan or allocation-heavy analysis in Draw.
-- Added `Website/`: a short game/download page, searchable data-driven engine wiki, honest disabled download states and a milestone update/validation script.
+- Added `Website/`, then migrated it to a statically deployable Svelte 5/Vite multi-page app: a modern game/engine/download product surface, searchable 26-article wiki, honest disabled download states, local Lucide icons and milestone build/validation tooling. Static JSON and byte-exact Game.Data copies remain the presentation inputs.
 - Completed Debug and Release builds with 0 warnings/errors and 613/613 tests in each configuration. Strict sprite audit reports 0 hard issues; both state smokes preload 132 resources and 702 frames.
 - Added `LivingWorldRuntime` to the authoritative phase order and immutable frame snapshot. Resolved horizontal regions plus vertical biome/cave layers now drive weather, ambient soundscape metadata, lighting multipliers, spawn biome IDs, resources, parallax and pixel atmosphere.
 - Separated normal `*.json` world profiles from `*.region.json`; added regional-profile and structure-plan registries with mod override semantics. The active infinite generator and background streaming share the same data-driven planner.
@@ -233,7 +233,7 @@ Epic 0 is locally validated but remains `partial` until the tracked workflow has
 | High-refresh frame budget | V5 1080p stays 99.80% within 120 Hz and 99.22% within 144 Hz; V5 1440p stays 98.83%/97.27%. Exact every-frame 165 Hz remains explicitly unclaimed |
 | Presentation scheduler micro-gate | 200,000 frames/600,000 cadence decisions: 16.431 ms total, 27.4 ns per decision and 0 B; 10,000 telemetry captures remain 0 B |
 | Presentation admission micro-gate | 1,000 budgeted schedules remain 0 B; optional work is deferred while initial/explicit/starved work is forced and telemetered |
-| Website validation | static gate passes after status synchronization; download remains honestly disabled until a release artifact exists |
+| Website validation | `svelte-check` passes with 0 diagnostics; optimized two-entry Vite build and source/bundle/data/provenance gate pass with 26 docs, 8 built references, 41 PNGs and 30 byte-exact copies; download remains disabled until a release artifact exists |
 | BenchmarkDotNet dry smokes | phase telemetry on/off, cold/warm streaming and two-source 200-entity spawning executed successfully |
 | Lighting BenchmarkDotNet dry | 4 chunks: 15.62 ms/40 B; 12 chunks: 28.50 ms/40 B; allocation dropped by more than 99.98% from the recorded baseline |
 | `git diff --check` | passed; only Git's existing LF-to-CRLF notices were printed |
@@ -345,7 +345,7 @@ Raw local artifacts remain under ignored `artifacts/`, including `renderer-upgra
 
 - No local build or test failure remains: Debug and Release both pass 1381/1381. Hosted Windows/Linux graphics, casing and runner behavior remain unverified until this revision completes its first hosted run.
 - Full-solution `dotnet format --verify-no-changes` still reports pre-existing mixed newline/charset debt across the dirty tree; the current parallax implementation/test scope passes the same gate after repo-format normalization.
-- Website static validation and desktop/mobile browser QA pass locally. Hosting and real artifact downloads remain unavailable.
+- Svelte website source checks, optimized build and static/provenance validation pass locally. The previous static site had desktop/mobile browser QA; the current Svelte snapshot still needs hosted or permitted browser capture. Hosting and real artifact downloads remain unavailable.
 - Hosted CI is `implemented-unverified`; no commit/push was authorized, so no hosted run exists.
 - Background streaming correctness, retry/backoff, terminal classification, operation/time/byte budgets, the long planner trace and cold/warm settle distributions are locally verified; labelled region-read/generate/apply/save distributions and hosted behavior remain unverified.
 - The authoritative simulation path is locally verified and its snapshot allocation is roughly halved, but it still allocates per tick and has no previous-frame interpolation contract.
@@ -391,7 +391,7 @@ Add one-way platform and sloped-tile shape contracts plus continuous fast body-b
 - `Game.Data/sprites/world/backgrounds/**`
 - `Game.Data/world-events/**`
 - `Game.Data/soundscapes/**`
-- `Website/data/**`
+- `Website/static/data/**`
 - `Game.Tests/DeterminismTests/**`
 - `Docs/Development/CAPABILITY_MATRIX.md`
 - `Docs/Development/PERFORMANCE_BUDGETS.md`

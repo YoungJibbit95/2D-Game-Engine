@@ -1,0 +1,236 @@
+{
+  "version": 2,
+  "generator": "deterministic Pillow pixel primitives",
+  "sourceBrief": "asset_briefs/loose_foliage_v2_briefs.json",
+  "visualDirectionReference": "art_direction/generated_sources/tree_v3_concept_source.png",
+  "referenceUse": "Composition reference only: separated crown pads, visible branch air, and species silhouette. Runtime pixels are original deterministic native-size output and are not sampled or resized from the reference.",
+  "preview": "art_direction/loose_foliage_v2_contact_sheet.png",
+  "designIntent": "Sparse original side-view foliage; two-to-four irregular lobes per frame, narrow declared bridges, large transparent air pockets, no full-square interior mask.",
+  "assets": [
+    {
+      "spriteId": "tiles/loose_oak_leaves_v2a_autotile",
+      "path": "Assets/LooseFoliageV2/loose_oak_leaves_v2a_autotile.png",
+      "sha256": "90ff736cc3225317e75028ea3498f8cf7ff87b000f998f647c09d65226ce2325",
+      "dimensions": [
+        256,
+        16
+      ],
+      "frames": 16,
+      "frameSize": [
+        16,
+        16
+      ],
+      "variant": "a",
+      "alpha": "binary",
+      "generator": "art_direction/tools/generate_loose_foliage_v2.py",
+      "license": "YjsE-Project-Owned",
+      "design": "round oak clusters with occasional pointed leaf tips",
+      "palette": [
+        "#1c3922",
+        "#316230",
+        "#528f44",
+        "#8eb754"
+      ]
+    },
+    {
+      "spriteId": "tiles/loose_oak_leaves_v2b_autotile",
+      "path": "Assets/LooseFoliageV2/loose_oak_leaves_v2b_autotile.png",
+      "sha256": "2aeb97049bd247b6f3cf309b330f57c0108186eac180b7b0f20f5b302ade6ddd",
+      "dimensions": [
+        256,
+        16
+      ],
+      "frames": 16,
+      "frameSize": [
+        16,
+        16
+      ],
+      "variant": "b",
+      "alpha": "binary",
+      "generator": "art_direction/tools/generate_loose_foliage_v2.py",
+      "license": "YjsE-Project-Owned",
+      "design": "round oak clusters with occasional pointed leaf tips",
+      "palette": [
+        "#1c3922",
+        "#316230",
+        "#528f44",
+        "#8eb754"
+      ]
+    },
+    {
+      "spriteId": "tiles/loose_oak_leaves_v2c_autotile",
+      "path": "Assets/LooseFoliageV2/loose_oak_leaves_v2c_autotile.png",
+      "sha256": "eda6e57914c0999ed9799f70f64ecec91427a0219bc6cdf5537d1237d7a02991",
+      "dimensions": [
+        256,
+        16
+      ],
+      "frames": 16,
+      "frameSize": [
+        16,
+        16
+      ],
+      "variant": "c",
+      "alpha": "binary",
+      "generator": "art_direction/tools/generate_loose_foliage_v2.py",
+      "license": "YjsE-Project-Owned",
+      "design": "round oak clusters with occasional pointed leaf tips",
+      "palette": [
+        "#1c3922",
+        "#316230",
+        "#528f44",
+        "#8eb754"
+      ]
+    },
+    {
+      "spriteId": "tiles/loose_autumn_leaves_v2a_autotile",
+      "path": "Assets/LooseFoliageV2/loose_autumn_leaves_v2a_autotile.png",
+      "sha256": "fdc9422a66361289b956f96bba6b9a8fd8561c47854a41611cab9dd7bdeb4b34",
+      "dimensions": [
+        256,
+        16
+      ],
+      "frames": 16,
+      "frameSize": [
+        16,
+        16
+      ],
+      "variant": "a",
+      "alpha": "binary",
+      "generator": "art_direction/tools/generate_loose_foliage_v2.py",
+      "license": "YjsE-Project-Owned",
+      "design": "asymmetric amber clusters with bright sunward tips",
+      "palette": [
+        "#4e2a19",
+        "#8e411f",
+        "#cf6d28",
+        "#f6ab3c"
+      ]
+    },
+    {
+      "spriteId": "tiles/loose_autumn_leaves_v2b_autotile",
+      "path": "Assets/LooseFoliageV2/loose_autumn_leaves_v2b_autotile.png",
+      "sha256": "06786f687e79d54abb42382c84bc96d32cb71de3c6d9a25f9ae5dba65c726353",
+      "dimensions": [
+        256,
+        16
+      ],
+      "frames": 16,
+      "frameSize": [
+        16,
+        16
+      ],
+      "variant": "b",
+      "alpha": "binary",
+      "generator": "art_direction/tools/generate_loose_foliage_v2.py",
+      "license": "YjsE-Project-Owned",
+      "design": "asymmetric amber clusters with bright sunward tips",
+      "palette": [
+        "#4e2a19",
+        "#8e411f",
+        "#cf6d28",
+        "#f6ab3c"
+      ]
+    },
+    {
+      "spriteId": "tiles/loose_autumn_leaves_v2c_autotile",
+      "path": "Assets/LooseFoliageV2/loose_autumn_leaves_v2c_autotile.png",
+      "sha256": "03387641441dd1f27f9ada6bcfd2ded87914e8487d8c2041d8473ee0b6285da3",
+      "dimensions": [
+        256,
+        16
+      ],
+      "frames": 16,
+      "frameSize": [
+        16,
+        16
+      ],
+      "variant": "c",
+      "alpha": "binary",
+      "generator": "art_direction/tools/generate_loose_foliage_v2.py",
+      "license": "YjsE-Project-Owned",
+      "design": "asymmetric amber clusters with bright sunward tips",
+      "palette": [
+        "#4e2a19",
+        "#8e411f",
+        "#cf6d28",
+        "#f6ab3c"
+      ]
+    },
+    {
+      "spriteId": "tiles/loose_marsh_leaves_v2a_autotile",
+      "path": "Assets/LooseFoliageV2/loose_marsh_leaves_v2a_autotile.png",
+      "sha256": "e7becac32495d886912357ba6fe8742d4ce11a0d89bc82995c1e53d5ff08cad6",
+      "dimensions": [
+        256,
+        16
+      ],
+      "frames": 16,
+      "frameSize": [
+        16,
+        16
+      ],
+      "variant": "a",
+      "alpha": "binary",
+      "generator": "art_direction/tools/generate_loose_foliage_v2.py",
+      "license": "YjsE-Project-Owned",
+      "design": "narrow teal-green clusters with slightly hanging lower tips",
+      "palette": [
+        "#13332e",
+        "#225445",
+        "#3b7c59",
+        "#719f60"
+      ]
+    },
+    {
+      "spriteId": "tiles/loose_marsh_leaves_v2b_autotile",
+      "path": "Assets/LooseFoliageV2/loose_marsh_leaves_v2b_autotile.png",
+      "sha256": "8336502073fb490687d0adea9e0f4aae06922a2dc371b8b71749e0e2f78a6498",
+      "dimensions": [
+        256,
+        16
+      ],
+      "frames": 16,
+      "frameSize": [
+        16,
+        16
+      ],
+      "variant": "b",
+      "alpha": "binary",
+      "generator": "art_direction/tools/generate_loose_foliage_v2.py",
+      "license": "YjsE-Project-Owned",
+      "design": "narrow teal-green clusters with slightly hanging lower tips",
+      "palette": [
+        "#13332e",
+        "#225445",
+        "#3b7c59",
+        "#719f60"
+      ]
+    },
+    {
+      "spriteId": "tiles/loose_marsh_leaves_v2c_autotile",
+      "path": "Assets/LooseFoliageV2/loose_marsh_leaves_v2c_autotile.png",
+      "sha256": "5f95af2944af6159e8d20382e8c1d8ccba486478d9e373b2476c900bde74d544",
+      "dimensions": [
+        256,
+        16
+      ],
+      "frames": 16,
+      "frameSize": [
+        16,
+        16
+      ],
+      "variant": "c",
+      "alpha": "binary",
+      "generator": "art_direction/tools/generate_loose_foliage_v2.py",
+      "license": "YjsE-Project-Owned",
+      "design": "narrow teal-green clusters with slightly hanging lower tips",
+      "palette": [
+        "#13332e",
+        "#225445",
+        "#3b7c59",
+        "#719f60"
+      ]
+    }
+  ]
+}

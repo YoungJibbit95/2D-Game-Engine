@@ -6,7 +6,7 @@ param(
 
 $ErrorActionPreference = "Stop"
 $websiteRoot = Split-Path -Parent $PSScriptRoot
-$statusPath = Join-Path $websiteRoot "data/status.json"
+$statusPath = Join-Path $websiteRoot "static/data/status.json"
 
 if (-not $Check) {
     $status = Get-Content -Raw -Encoding utf8 -LiteralPath $statusPath | ConvertFrom-Json
@@ -25,7 +25,16 @@ if (-not $Check) {
         [System.Text.UTF8Encoding]::new($false))
 }
 
-node (Join-Path $PSScriptRoot "validate-site.mjs")
+Push-Location $websiteRoot
+try {
+    npm run build
+    if ($LASTEXITCODE -ne 0) {
+        throw "Website build failed with exit code $LASTEXITCODE."
+    }
+    node (Join-Path $PSScriptRoot "validate-site.mjs")
+} finally {
+    Pop-Location
+}
 if ($LASTEXITCODE -ne 0) {
     throw "Website validation failed with exit code $LASTEXITCODE."
 }

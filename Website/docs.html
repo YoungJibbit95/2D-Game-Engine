@@ -1,55 +1,19 @@
 <!doctype html>
 <html lang="de">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="color-scheme" content="light dark">
-  <meta name="theme-color" content="#111823">
-  <meta name="description" content="YjsE Development Wiki: Architektur, Welt, Rendering, Gameplay, Content, Tools und validierte Runtime-Vertraege.">
-  <title>YjsE Engine Docs</title>
-  <link rel="icon" href="assets/wave04/ui/armor.png" type="image/png">
-  <link rel="stylesheet" href="styles.css">
-  <script src="app.js" defer></script>
-</head>
-<body data-page="docs">
-  <a class="skip-link" href="#docs-main">Zum Inhalt</a>
-  <header class="site-header docs-header" id="site-header">
-    <a class="brand" href="index.html" aria-label="YjsE Startseite"><span class="brand-mark" aria-hidden="true"><span></span><span></span><span></span></span><span class="brand-copy"><strong>YjsE</strong><small>Engine Docs</small></span></a>
-    <div class="docs-search-wrap" role="search">
-      <span class="search-icon" aria-hidden="true"></span><label class="sr-only" for="docs-search">Dokumentation durchsuchen</label>
-      <input id="docs-search" type="search" placeholder="APIs, Systeme, Begriffe ..." autocomplete="off" aria-controls="docs-content" aria-describedby="search-hint"><kbd>/</kbd>
-      <span class="sr-only" id="search-hint">Mit Schraegstrich Suche fokussieren</span>
-    </div>
-    <div class="header-actions"><a class="header-status" href="index.html#download"><span class="signal-dot" aria-hidden="true"></span><span>Build Status</span></a><button class="docs-menu-button icon-button" id="sidebar-toggle" type="button" aria-controls="docs-sidebar" aria-expanded="false" title="Kapitel oeffnen"><span class="menu-icon" aria-hidden="true"></span><span class="sr-only">Kapitel</span></button></div>
-  </header>
-
-  <div class="docs-mobile-bar"><button class="mobile-section-button" id="mobile-section-button" type="button" aria-controls="docs-sidebar" aria-expanded="false"><span class="menu-icon" aria-hidden="true"></span><span id="mobile-current-section">Engine Docs</span></button><a href="index.html">Game Site</a></div>
-
-  <div class="docs-shell">
-    <aside class="docs-sidebar" id="docs-sidebar" aria-label="Dokumentationsnavigation">
-      <div class="sidebar-status"><span class="signal-dot"></span><div><strong id="sidebar-version">Development snapshot</strong><span id="sidebar-updated">lokaler Stand</span></div></div>
-      <nav id="docs-navigation"></nav>
-      <div class="sidebar-footer"><a href="index.html">&#8592; Startseite</a><a href="index.html#status">Capability Status</a></div>
-    </aside>
-
-    <main class="docs-main" id="docs-main">
-      <section class="docs-hero" aria-labelledby="docs-title">
-        <div><p class="section-kicker">Development Wiki</p><h1 id="docs-title">Engine-Vertraege statt Marketing.</h1><p>Aktuelle APIs, Ownership-Grenzen, Capability-Status und praktische Einstiegspfade aus dem laufenden YjsE-Checkout.</p><div class="docs-hero-actions"><a class="button button-primary" href="#getting-started">Quickstart</a><a class="button button-quiet-light" href="#architecture">Architektur</a></div></div>
-        <div class="docs-hero-visual" aria-label="Wave-04-UI- und Player-Assets"><div class="rig-preview" aria-hidden="true"><img src="assets/wave04/player/body-actions.png" alt=""><img src="assets/wave04/player/clothes-actions.png" alt=""><img src="assets/wave04/player/armor-actions.png" alt=""><img src="assets/wave04/player/hair-actions.png" alt=""></div><div class="hero-icon-row"><img src="assets/wave04/ui/block.png" alt=""><img src="assets/wave04/ui/weather.png" alt=""><img src="assets/wave04/ui/armor.png" alt=""></div></div>
-      </section>
-
-      <section class="docs-controls" aria-label="Dokumentation filtern">
-        <div class="docs-filter-row" id="docs-filters"></div>
-        <div class="docs-result-meta"><p class="search-result-note" id="search-result-note" aria-live="polite"></p><button class="clear-filter" id="reset-search" type="button" hidden>Filter loeschen</button></div>
-      </section>
-
-      <div class="docs-content" id="docs-content"></div>
-      <div class="docs-empty" id="docs-empty" hidden><span class="empty-pixel" aria-hidden="true"></span><strong>Keine passenden Kapitel.</strong><p>Probiere einen API-Namen, eine Kategorie oder setze die Filter zurueck.</p><button class="button button-dark" id="empty-reset-search" type="button">Alles anzeigen</button></div>
-    </main>
-
-    <aside class="docs-toc" aria-label="Auf dieser Seite"><strong>In diesem Wiki</strong><nav id="docs-toc"></nav><a class="toc-top" href="#docs-main">Nach oben &#8593;</a></aside>
-  </div>
-  <button class="sidebar-scrim" id="sidebar-scrim" type="button" aria-label="Navigation schliessen" hidden></button>
-  <div class="toast" id="site-toast" role="status" aria-live="polite" hidden></div>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="theme-color" content="#0a0f16" />
+    <meta
+      name="description"
+      content="YjsE Engine Docs: Architektur, World Runtime, Rendering, Gameplay und validierte Entwicklungsvertraege."
+    />
+    <link rel="icon" href="./assets/wave04/ui/armor.png" type="image/png" />
+    <title>YjsE | Engine Docs</title>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script type="module" src="/src/docs.js"></script>
+  </body>
 </html>

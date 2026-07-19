@@ -1,5 +1,6 @@
 using Game.Core.World;
 using Game.Core.Settings;
+using Game.Client.Rendering.Graph;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -7,8 +8,26 @@ namespace Game.Client.Rendering.Effects;
 
 public sealed class ScreenSpaceEffectsRenderer : IDisposable
 {
+    private static readonly RenderPassId SceneCapturePass = new(0);
+    private static readonly RenderPassId BlurDownsamplePass = new(1);
+    private static readonly RenderPassId BlurIterationPass = new(2);
+    private static readonly RenderPassId CompositePass = new(3);
+    private static readonly RenderResourceId SceneColorResource = new(0);
+    private static readonly RenderResourceId BlurPingResource = new(1);
+    private static readonly RenderResourceId BlurPongResource = new(2);
+    private static readonly RenderResourceId CompositeOutputResource = new(3);
+
     private readonly PresentationPassDescriptor[] _passes =
         new PresentationPassDescriptor[PresentationPassPlanner.MaximumPassCount];
+    private readonly RenderPassGraph _transientTargetGraph = new(
+        maximumPasses: 4,
+        maximumResources: 4,
+        maximumResourceUsages: 9);
+    private readonly TransientRenderTargetPool _transientTargetPool = new(
+        maximumLogicalResources: 3,
+        maximumPhysicalTargets: 3);
+    private readonly TransientRenderTargetBinding[] _transientTargetBindings = new TransientRenderTargetBinding[3];
+    private readonly RenderResourceId[] _transientTargetOutputs = [CompositeOutputResource];
     private RenderTarget2D? _sceneColor;
     private RenderTarget2D? _blurPing;
     private RenderTarget2D? _blurPong;
@@ -21,6 +40,35 @@ public sealed class ScreenSpaceEffectsRenderer : IDisposable
     private bool _sceneCaptureRequired;
     private bool _hasCapturedScene;
     private bool _hasPreparedBlur;
+    private bool _disposed;
+
+    public ScreenSpaceEffectsRenderer()
+    {
+        _transientTargetGraph.DeclareResource(SceneColorResource, RenderResourceFlags.Transient);
+        _transientTargetGraph.DeclareResource(BlurPingResource, RenderResourceFlags.Transient);
+        _transientTargetGraph.DeclareResource(BlurPongResource, RenderResourceFlags.Transient);
+        _transientTargetGraph.DeclareResource(CompositeOutputResource, RenderResourceFlags.None);
+        _transientTargetGraph.DeclarePass(
+            SceneCapturePass,
+            RenderPassPhase.Opaque,
+            [],
+            [SceneColorResource]);
+        _transientTargetGraph.DeclarePass(
+            BlurDownsamplePass,
+            RenderPassPhase.PostProcess,
+            [SceneColorResource],
+            [BlurPingResource]);
+        _transientTargetGraph.DeclarePass(
+            BlurIterationPass,
+            RenderPassPhase.PostProcess,
+            [BlurPingResource],
+            [BlurPongResource]);
+        _transientTargetGraph.DeclarePass(
+            CompositePass,
+            RenderPassPhase.Composite,
+            [SceneColorResource, BlurPongResource],
+            [CompositeOutputResource]);
+    }
 
     public bool ResourcesPrepared => _sceneColor is not null;
 
@@ -35,6 +83,9 @@ public sealed class ScreenSpaceEffectsRenderer : IDisposable
     public WaterReflectionPlanTelemetry LastTelemetry { get; private set; }
 
     public BackdropBlurPlan LastBackdropBlurPlan { get; private set; }
+
+    public TransientRenderTargetPoolTelemetry TransientTargetTelemetry =>
+        _transientTargetPool.Telemetry;
 
     public ReadOnlySpan<WaterReflectionSurface> Surfaces => _surfaces.AsSpan(0, SurfaceCount);
 
@@ -57,6 +108,7 @@ public sealed class ScreenSpaceEffectsRenderer : IDisposable
         Rectangle viewport,
         in PresentationQualityProfile profile)
     {
+        ObjectDisposedException.ThrowIf(_disposed, this);
         ArgumentNullException.ThrowIfNull(graphicsDevice);
         var viewportArea = Math.Max(0L, (long)viewport.Width * viewport.Height);
         if (profile.Tier == PresentationQualityTier.Disabled ||
@@ -76,25 +128,47 @@ public sealed class ScreenSpaceEffectsRenderer : IDisposable
             return;
         }
 
-        ReleaseResources();
-        _quality = profile;
-        _viewport = viewport;
-        _sceneColor = new RenderTarget2D(
-            graphicsDevice,
-            viewport.Width,
-            viewport.Height,
-            mipMap: false,
-            SurfaceFormat.Color,
-            DepthFormat.None,
-            preferredMultiSampleCount: 0,
-            RenderTargetUsage.DiscardContents);
         var blurResources = BackdropBlurPlanner.Build(profile.Tier, viewport, radiusPixels: 8);
-        if (blurResources.IsEnabled)
+        if (!blurResources.IsEnabled)
         {
-            _blurPing = CreateTransientTarget(graphicsDevice, blurResources.TargetSize);
-            _blurPong = CreateTransientTarget(graphicsDevice, blurResources.TargetSize);
+            throw new InvalidOperationException(
+                "The active screen-space quality profile requires a valid blur target plan.");
         }
 
+        var sceneDescriptor = new TransientRenderTargetDescriptor(viewport.Width, viewport.Height);
+        var blurDescriptor = new TransientRenderTargetDescriptor(
+            blurResources.TargetSize.X,
+            blurResources.TargetSize.Y);
+        _transientTargetBindings[0] = new TransientRenderTargetBinding(
+            SceneColorResource,
+            sceneDescriptor);
+        _transientTargetBindings[1] = new TransientRenderTargetBinding(
+            BlurPingResource,
+            blurDescriptor);
+        _transientTargetBindings[2] = new TransientRenderTargetBinding(
+            BlurPongResource,
+            blurDescriptor);
+        var plan = _transientTargetGraph.Compile(_transientTargetOutputs);
+        EndActiveCapture();
+        ResetFrameState();
+        try
+        {
+            var lease = _transientTargetPool.Prepare(graphicsDevice, plan, _transientTargetBindings);
+            var sceneColor = _transientTargetPool.Acquire(SceneColorResource, lease, passIndex: 0);
+            var blurPing = _transientTargetPool.Acquire(BlurPingResource, lease, passIndex: 1);
+            var blurPong = _transientTargetPool.Acquire(BlurPongResource, lease, passIndex: 2);
+            _sceneColor = sceneColor;
+            _blurPing = blurPing;
+            _blurPong = blurPong;
+        }
+        catch
+        {
+            ReleaseResources();
+            throw;
+        }
+
+        _quality = profile;
+        _viewport = viewport;
         _surfaces = new WaterReflectionSurface[profile.Budget.MaxReflectionSurfaces];
     }
 
@@ -396,7 +470,14 @@ public sealed class ScreenSpaceEffectsRenderer : IDisposable
 
     public void Dispose()
     {
+        if (_disposed)
+        {
+            return;
+        }
+
         ReleaseResources();
+        _transientTargetPool.Dispose();
+        _disposed = true;
         GC.SuppressFinalize(this);
     }
 
@@ -551,38 +632,33 @@ public sealed class ScreenSpaceEffectsRenderer : IDisposable
             Color.White * 0.25f);
     }
 
-    private static RenderTarget2D CreateTransientTarget(GraphicsDevice graphicsDevice, Point size)
-    {
-        return new RenderTarget2D(
-            graphicsDevice,
-            size.X,
-            size.Y,
-            mipMap: false,
-            SurfaceFormat.Color,
-            DepthFormat.None,
-            preferredMultiSampleCount: 0,
-            RenderTargetUsage.DiscardContents);
-    }
-
     private void ReleaseResources()
     {
-        if (_captureActive && _sceneColor is not null)
+        EndActiveCapture();
+        _transientTargetPool.Release();
+        _sceneColor = null;
+        _blurPing = null;
+        _blurPong = null;
+        _surfaces = Array.Empty<WaterReflectionSurface>();
+        ResetFrameState();
+    }
+
+    private void EndActiveCapture()
+    {
+        if (_captureActive && _sceneColor is { IsDisposed: false })
         {
             _sceneColor.GraphicsDevice.SetRenderTarget(null);
         }
 
-        _sceneColor?.Dispose();
-        _blurPing?.Dispose();
-        _blurPong?.Dispose();
-        _sceneColor = null;
-        _blurPing = null;
-        _blurPong = null;
+        _captureActive = false;
+    }
+
+    private void ResetFrameState()
+    {
         _preparedBlur = null;
-        _surfaces = Array.Empty<WaterReflectionSurface>();
         SurfaceCount = 0;
         LastPassPlan = default;
         LastTelemetry = default;
-        _captureActive = false;
         _sceneCaptureRequired = false;
         _hasCapturedScene = false;
         _hasPreparedBlur = false;

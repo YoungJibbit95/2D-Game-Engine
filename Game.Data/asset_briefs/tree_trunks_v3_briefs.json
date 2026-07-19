@@ -1,0 +1,39 @@
+{
+  "version": 2,
+  "scope": "tree_trunks_v3",
+  "globalStyle": "Original YjsE native pixel-art tree limbs with transparent organic silhouettes, curved growth, tapered terminals, and deliberate top-left light.",
+  "sourceConcept": "art_direction/generated_sources/tree_v3_concept_source.png",
+  "generator": "art_direction/tools/generate_tree_trunks_v3.py",
+  "briefs": [
+    {
+      "spriteId": "tiles/oak_trunk_v3_autotile",
+      "outputPath": "Assets/TreeTrunksV3/world/tiles/oak_trunk_v3_autotile.png",
+      "width": 256,
+      "height": 16,
+      "subject": "Organic Forest Oak Limbs",
+      "prompt": "Create an original sixteen-mask oak trunk sheet whose transparent frames connect as a softly curved trunk and readable tapered branches instead of right-angle pipes or opaque wooden squares.",
+      "requirements": ["Sixteen 16x16 cardinal masks 0-15", "Binary alpha", "Stable four-to-six-pixel seam sockets", "Curved native-pixel strokes with tapered terminal frames", "No rectangular bars, loops, full-frame fill, or raster scaling", "Clear top-left bark glints"],
+      "tags": ["production", "runtime-active", "tree", "trunk", "forest"]
+    },
+    {
+      "spriteId": "tiles/living_wood_v3_autotile",
+      "outputPath": "Assets/TreeTrunksV3/world/tiles/living_wood_v3_autotile.png",
+      "width": 256,
+      "height": 16,
+      "subject": "Organic Amber Living-Wood Limbs",
+      "prompt": "Create an original sixteen-mask warm living-wood sheet whose transparent frames connect as softly twisting, tapered limbs instead of right-angle pipes or opaque wooden squares.",
+      "requirements": ["Sixteen 16x16 cardinal masks 0-15", "Binary alpha", "Stable four-to-six-pixel seam sockets", "Curved native-pixel strokes with tapered terminal frames", "No rectangular bars, loops, full-frame fill, or raster scaling", "Clear top-left bark glints"],
+      "tags": ["production", "runtime-active", "tree", "trunk", "amber-grove"]
+    },
+    {
+      "spriteId": "tiles/mangrove_trunk_v3_autotile",
+      "outputPath": "Assets/TreeTrunksV3/world/tiles/mangrove_trunk_v3_autotile.png",
+      "width": 256,
+      "height": 16,
+      "subject": "Organic Marsh Mangrove Limbs",
+      "prompt": "Create an original sixteen-mask mangrove sheet whose transparent frames connect as crooked, softly curved and tapered limbs and roots instead of right-angle pipes or opaque wooden squares.",
+      "requirements": ["Sixteen 16x16 cardinal masks 0-15", "Binary alpha", "Stable four-to-six-pixel seam sockets", "Curved native-pixel strokes with tapered terminal frames", "No rectangular bars, loops, full-frame fill, or raster scaling", "Clear top-left bark glints"],
+      "tags": ["production", "runtime-active", "tree", "trunk", "twilight-marsh"]
+    }
+  ]
+}

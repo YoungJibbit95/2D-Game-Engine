@@ -19,6 +19,37 @@ env:
   NUGET_XMLDOC_MODE: skip
 
 jobs:
+  website:
+    name: Svelte product site
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Install Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: Website/package-lock.json
+
+      - name: Install website dependencies
+        working-directory: Website
+        run: npm ci
+
+      - name: Check, build and validate website
+        working-directory: Website
+        run: npm run validate
+
+      - name: Upload static website
+        uses: actions/upload-artifact@v7
+        with:
+          name: yjse-product-site
+          path: Website/dist/
+          if-no-files-found: error
+
   validate:
     name: ${{ matrix.os }} / ${{ matrix.configuration }}
     runs-on: ${{ matrix.os }}

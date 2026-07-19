@@ -165,7 +165,8 @@ public sealed class ChunkRenderCache
                     ? AutoTileMask.None
                     : _autoTiles.ComputeAutoTileMask(world, tiles, tileX, tileY);
                 var visualVariant = TreeTileVisualSelector.Resolve(world, tileX, tileY, tile.TileId);
-                commands.Add(new ChunkRenderCommand(localX, localY, tile, mask, visualVariant));
+                var visualTransform = TreeTileVisualSelector.ResolveTransform(world, tileX, tileY, tile.TileId);
+                commands.Add(new ChunkRenderCommand(localX, localY, tile, mask, visualVariant, visualTransform));
             }
         }
 
@@ -236,7 +237,8 @@ public sealed class ChunkRenderCache
         }
 
         var variantOffset = Math.Min(command.VisualVariant, buckets.Length / 16 - 1) * 16;
-        return buckets[variantOffset + ((int)command.AutoTileMask & 15)];
+        var sourceMask = TreeTileVisualSelector.ResolveSourceMask(command.AutoTileMask, command.VisualTransform);
+        return buckets[variantOffset + ((int)sourceMask & 15)];
     }
 
     private int RemoveTrimCandidates(int count)

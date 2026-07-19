@@ -2,6 +2,8 @@ namespace Game.Core.World.Generation;
 
 public sealed class InfiniteWorldChunkGenerator
 {
+    internal const int TreeCenterExclusionRadius = TreeSilhouettePlanner.MaximumHalfWidth;
+
     private readonly Func<int, INoiseService> _noiseFactory;
     private readonly WorldRegionPlanner? _regionalPlanner;
     private readonly int _generationVersion;
@@ -451,7 +453,7 @@ public sealed class InfiniteWorldChunkGenerator
         return null;
     }
 
-    private static bool ShouldGrowTreeAt(
+    internal bool ShouldGrowTreeAt(
         WorldGenerationProfile profile,
         int seed,
         int tileX,
@@ -462,31 +464,55 @@ public sealed class InfiniteWorldChunkGenerator
             return false;
         }
 
-        var density = Math.Clamp(
-            profile.TreeAttempts * Math.Clamp(profile.TreeAttemptChance, 0f, 1f) / Math.Max(1f, profile.WidthTiles),
-            0f,
-            0.2f);
-        density = Math.Clamp(density * (region?.Biome.Terrain.FeatureDensityMultiplier ?? 1f), 0f, 0.3f);
+        var density = ResolveTreeDensity(profile, region);
 
         if (StableUnit(seed ^ unchecked((int)0x51D7348F), tileX) >= density)
         {
             return false;
         }
 
-        for (var offset = -2; offset <= 2; offset++)
+        var priority = unchecked((uint)StableHash(seed ^ unchecked((int)0x71E2A9D5), tileX));
+        for (var offset = -TreeCenterExclusionRadius; offset <= TreeCenterExclusionRadius; offset++)
         {
             if (offset == 0)
             {
                 continue;
             }
 
-            if (StableUnit(seed ^ unchecked((int)0x71E2A9D5), SaturateToInt((long)tileX + offset)) < density * 0.45f)
+            var neighborX = SaturateToInt((long)tileX + offset);
+            if (neighborX == tileX)
+            {
+                continue;
+            }
+
+            var neighborRegion = region is not null && region.ContainsTileX(neighborX)
+                ? region
+                : _regionalPlanner?.PlanAtTileX(neighborX);
+            var neighborDensity = ResolveTreeDensity(profile, neighborRegion);
+            if (StableUnit(seed ^ unchecked((int)0x51D7348F), neighborX) >= neighborDensity)
+            {
+                continue;
+            }
+
+            var neighborPriority = unchecked((uint)StableHash(
+                seed ^ unchecked((int)0x71E2A9D5),
+                neighborX));
+            if (neighborPriority < priority || (neighborPriority == priority && neighborX < tileX))
             {
                 return false;
             }
         }
 
         return true;
+    }
+
+    private static float ResolveTreeDensity(WorldGenerationProfile profile, WorldRegionPlan? region)
+    {
+        var density = Math.Clamp(
+            profile.TreeAttempts * Math.Clamp(profile.TreeAttemptChance, 0f, 1f) / Math.Max(1f, profile.WidthTiles),
+            0f,
+            0.2f);
+        return Math.Clamp(density * (region?.Biome.Terrain.FeatureDensityMultiplier ?? 1f), 0f, 0.3f);
     }
 
     private static int ComputeTreeHeight(WorldGenerationProfile profile, int seed, int tileX)

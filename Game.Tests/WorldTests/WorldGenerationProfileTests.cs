@@ -6,6 +6,16 @@ namespace Game.Tests.WorldTests;
 public sealed class WorldGenerationProfileTests
 {
     [Fact]
+    public void RepositoryDefaults_UseReadableProductionTreeHeights()
+    {
+        Assert.Equal((7, 10), (WorldGenerationProfile.Small.TreeMinHeight, WorldGenerationProfile.Small.TreeMaxHeight));
+        Assert.Equal((8, 11), (WorldGenerationProfile.Medium.TreeMinHeight, WorldGenerationProfile.Medium.TreeMaxHeight));
+        Assert.Equal((8, 12), (WorldGenerationProfile.Large.TreeMinHeight, WorldGenerationProfile.Large.TreeMaxHeight));
+        Assert.Equal((7, 10), (WorldGenerationProfile.ForDimensions(160, 96).TreeMinHeight,
+            WorldGenerationProfile.ForDimensions(160, 96).TreeMaxHeight));
+    }
+
+    [Fact]
     public void GenerateDetailed_UsesProfileDimensions()
     {
         var profile = WorldGenerationProfile.Small with
