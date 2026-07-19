@@ -14,7 +14,7 @@
       "requirements": [
         "Export exactly sixteen 16x16 frames in top-right-bottom-left mask order 0-15.",
         "Use binary alpha only and preserve transparent exposed corners and boundaries.",
-        "Connect matching sides through a stable five-pixel leaf bridge.",
+        "Connect matching sides through at least a stable five-pixel leaf bridge and suppress dark outlines on declared connections so interior tiles read as one canopy mass.",
         "Use the forest green palette without raster scaling, filtering or third-party source material."
       ],
       "tags": ["production", "runtime-active", "foliage", "autotile", "oak"]
@@ -29,7 +29,7 @@
       "requirements": [
         "Export exactly sixteen 16x16 frames in top-right-bottom-left mask order 0-15.",
         "Use binary alpha only and preserve transparent exposed corners and boundaries.",
-        "Connect matching sides through a stable five-pixel leaf bridge.",
+        "Connect matching sides through at least a stable five-pixel leaf bridge and suppress dark outlines on declared connections so interior tiles read as one canopy mass.",
         "Use the Amber Grove orange-gold palette without raster scaling, filtering or third-party source material."
       ],
       "tags": ["production", "runtime-active", "foliage", "autotile", "autumn"]
@@ -44,7 +44,7 @@
       "requirements": [
         "Export exactly sixteen 16x16 frames in top-right-bottom-left mask order 0-15.",
         "Use binary alpha only and preserve transparent exposed corners and boundaries.",
-        "Connect matching sides through a stable five-pixel leaf bridge.",
+        "Connect matching sides through at least a stable five-pixel leaf bridge and suppress dark outlines on declared connections so interior tiles read as one canopy mass.",
         "Use the Twilight Marsh teal palette without raster scaling, filtering or third-party source material."
       ],
       "tags": ["production", "runtime-active", "foliage", "autotile", "marsh"]
