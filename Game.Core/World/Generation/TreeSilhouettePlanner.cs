@@ -9,8 +9,8 @@ internal enum TreeSilhouetteCell
 
 internal static class TreeSilhouettePlanner
 {
-    public const int MaximumHalfWidth = 7;
-    public const int TopPadding = 4;
+    public const int MaximumHalfWidth = 6;
+    public const int TopPadding = 3;
     public const int VariationCount = 12;
 
     public static TreeSilhouetteCell Classify(
@@ -36,7 +36,7 @@ internal static class TreeSilhouettePlanner
             return TreeSilhouetteCell.Trunk;
         }
 
-        return IsLeaf(dx, dyFromTop, normalizedVariation)
+        return IsLeaf(dx, dyFromTop, height, normalizedVariation)
             ? TreeSilhouetteCell.Leaves
             : TreeSilhouetteCell.Empty;
     }
@@ -55,70 +55,122 @@ internal static class TreeSilhouettePlanner
 
     private static bool IsTrunk(int dx, int dyFromTop, int height, int variation)
     {
-        if (dx == 0 && dyFromTop >= 0 && dyFromTop < height)
+        if (dyFromTop < 0 || dyFromTop >= height)
         {
-            return true;
-        }
-
-        if (height >= 5 && dyFromTop == height - 1 && Math.Abs(dx) == 1)
-        {
-            return true;
+            return false;
         }
 
         var primaryDirection = (variation & 1) == 0 ? -1 : 1;
-        var upperStart = Math.Min(height - 2, 2 + ((variation >> 1) & 1));
-        if (height >= 5 && IsBranch(dx, dyFromTop, upperStart, primaryDirection, 3 + (variation % 3 == 0 ? 1 : 0)))
+        if (dx == 0)
         {
             return true;
         }
 
-        var middleStart = Math.Min(height - 2, 4 + ((variation >> 2) & 1));
-        if (height >= 7 && IsBranch(dx, dyFromTop, middleStart, -primaryDirection, 2 + ((variation + 1) % 3)))
+        // A single root spur plants the one-cell centerline without widening the
+        // whole trunk into a pillar.
+        if (height >= 9 && dyFromTop == height - 1 && dx == -primaryDirection)
         {
             return true;
         }
 
-        var lowerStart = Math.Min(height - 2, 6 + (variation & 1));
-        return height >= 9 &&
-               IsBranch(dx, dyFromTop, lowerStart, variation % 4 < 2 ? -1 : 1, 2);
+        // Two long, vertically staggered stair branches form the readable crown
+        // skeleton. Each rise has an orthogonal elbow, so the apparent diagonal is
+        // still one connected autotile path and never closes into a U-shaped loop.
+        var upperStart = Math.Min(height - 2, 3 + ((variation >> 1) & 1));
+        if (IsBranch(
+                dx,
+                dyFromTop,
+                upperStart,
+                primaryDirection,
+                length: 4))
+        {
+            return true;
+        }
+
+        var middleLength = SecondaryBranchLength(variation);
+        var middleStart = Math.Min(height - 2, 5 + ((variation >> 2) & 1));
+        if (IsBranch(
+                dx,
+                dyFromTop,
+                middleStart,
+                -primaryDirection,
+                middleLength))
+        {
+            return true;
+        }
+
+        // Some silhouettes carry one low accent crown. Its short branch remains
+        // well below the main pads, preserving a band of visible sky between them.
+        return HasAccentCrown(variation) &&
+            height >= 9 &&
+            IsBranch(
+                dx,
+                dyFromTop,
+                height - 1,
+                primaryDirection,
+                length: 3);
     }
 
-    private static bool IsLeaf(int dx, int dyFromTop, int variation)
+    private static bool IsLeaf(int dx, int dyFromTop, int height, int variation)
     {
-        if (dyFromTop is < -4 or > 6)
+        if (dyFromTop < -TopPadding || dyFromTop > height - 2)
         {
             return false;
         }
 
         var primaryDirection = (variation & 1) == 0 ? -1 : 1;
-        var crownShift = (variation % 3) - 1;
-        var crownTop = -2 - ((variation / 3) & 1);
-        var primaryX = primaryDirection * (3 + ((variation >> 2) & 1));
-        var secondaryX = -primaryDirection * (3 + ((variation >> 1) & 1));
-        var inCrown = InRoundedCluster(dx - crownShift, dyFromTop - crownTop, 3, 2);
-        var inCore = InRoundedCluster(dx, dyFromTop - 1, 3 + (variation % 4 == 0 ? 1 : 0), 2);
-        var inPrimary = InRoundedCluster(dx - primaryX, dyFromTop - (variation % 2), 3, 2);
-        var inSecondary = InRoundedCluster(dx - secondaryX, dyFromTop - (2 + ((variation >> 2) & 1)), 3, 2);
-        var hasLowCrown = variation % 3 != 1;
-        var lowerX = primaryDirection * (1 + ((variation >> 1) & 1));
-        var inLower = hasLowCrown && InRoundedCluster(dx - lowerX, dyFromTop - 4, 2, 2);
-        if (!(inCrown || inCore || inPrimary || inSecondary || inLower))
+        var upperStart = Math.Min(height - 2, 3 + ((variation >> 1) & 1));
+        const int primaryLength = 4;
+        var primaryTipY = BranchY(upperStart, primaryLength);
+        var secondaryLength = SecondaryBranchLength(variation);
+        var middleStart = Math.Min(height - 2, 5 + ((variation >> 2) & 1));
+        var secondaryTipY = BranchY(middleStart, secondaryLength);
+
+        // V4 uses three clearly separated, asymmetric crown pads. Each pad is four
+        // tiles wide and three high at its silhouette bounds, with deterministic
+        // bites around the perimeter instead of square or diamond leaf blobs.
+        // The bottom row sits directly above its branch tip so every pad is attached.
+        var topCenterX = -primaryDirection;
+        if (InLooseCrownPad(
+                dx - topCenterX,
+                dyFromTop + 1,
+                variation: variation,
+                salt: 1))
+        {
+            return true;
+        }
+
+        var primaryCenterX = primaryDirection * primaryLength;
+        if (InLooseCrownPad(
+                dx - primaryCenterX,
+                dyFromTop - (primaryTipY - 1),
+                variation: variation,
+                salt: 4,
+                clippedMiddleSide: -primaryDirection))
+        {
+            return true;
+        }
+
+        var secondaryCenterX = -primaryDirection * secondaryLength;
+        if (InLooseCrownPad(
+                dx - secondaryCenterX,
+                dyFromTop - (secondaryTipY - 1),
+                variation: variation,
+                salt: 8))
+        {
+            return true;
+        }
+
+        if (!HasAccentCrown(variation) || height < 9)
         {
             return false;
         }
 
-        // Deterministic openings preserve readable negative space between the overlapping crowns.
-        // The crown core remains filled so branches never look detached from the trunk.
-        if (Math.Abs(dx) > 1 && dyFromTop >= -1)
-        {
-            var opening = PositiveMod((dx * 17) + (dyFromTop * 31) + (variation * 13), 9);
-            if (opening == 0)
-            {
-                return false;
-            }
-        }
-
-        return true;
+        var accentTipY = BranchY(height - 1, step: 3);
+        return InAccentCrownPad(
+            dx - (primaryDirection * 3),
+            dyFromTop - (accentTipY - 1),
+            variation);
     }
 
     private static bool IsBranch(int dx, int dyFromTop, int startY, int direction, int length)
@@ -134,20 +186,73 @@ internal static class TreeSilhouettePlanner
             return false;
         }
 
-        var branchY = startY - (step / 2);
-        return dyFromTop == branchY || (step > 1 && (step & 1) == 0 && dyFromTop == branchY + 1);
+        var branchY = BranchY(startY, step);
+        if (dyFromTop == branchY)
+        {
+            return true;
+        }
+
+        // A single vertical elbow at each rise keeps the diagonal branch connected
+        // for autotiling without restoring the old two-row rectangular limbs.
+        return step > 1 &&
+            branchY != BranchY(startY, step - 1) &&
+            dyFromTop == BranchY(startY, step - 1);
     }
 
-    private static bool InRoundedCluster(int dx, int dy, int radiusX, int radiusY)
+    private static bool InLooseCrownPad(
+        int dx,
+        int dy,
+        int variation,
+        int salt,
+        int clippedMiddleSide = 0)
     {
-        if (Math.Abs(dx) > radiusX || Math.Abs(dy) > radiusY)
+        if (dy is < -2 or > 0 || Math.Abs(dx) > 2)
         {
             return false;
         }
 
-        var normalizedX = dx * dx * radiusY * radiusY;
-        var normalizedY = dy * dy * radiusX * radiusX;
-        return normalizedX + normalizedY <= radiusX * radiusX * radiusY * radiusY;
+        if (dy == 0)
+        {
+            return Math.Abs(dx) <= 1;
+        }
+
+        if (dy == -1)
+        {
+            var clippedSide = clippedMiddleSide != 0
+                ? clippedMiddleSide
+                : (((variation + salt) & 1) == 0 ? -1 : 1);
+            return dx != clippedSide * 2;
+        }
+
+        // The two-cell top cap shifts between variations, keeping a broad crown
+        // reading while avoiding a repeated three-by-five stamp.
+        var clippedTopSide = ((variation + salt * 3) & 1) == 0 ? -1 : 1;
+        return Math.Abs(dx) <= 1 && dx != clippedTopSide;
+    }
+
+    private static bool InAccentCrownPad(int dx, int dy, int variation)
+    {
+        if (dy is < -1 or > 0 || Math.Abs(dx) > 1)
+        {
+            return false;
+        }
+
+        return dy == -1 || dx != (((variation >> 1) & 1) == 0 ? -1 : 1);
+    }
+
+    private static int SecondaryBranchLength(int variation)
+    {
+        return 3 + ((variation >> 3) & 1);
+    }
+
+    private static bool HasAccentCrown(int variation)
+    {
+        return variation % 3 != 1;
+    }
+
+    private static int BranchY(int startY, int step)
+    {
+        return startY - (step / 2);
     }
 
     private static int PositiveMod(int value, int divisor)

@@ -6,14 +6,16 @@ namespace Game.Tests.WorldTests;
 public sealed class WorldGenerationProfileJsonLoaderTests
 {
     [Theory]
-    [InlineData("small.json", 4, 3, 10)]
-    [InlineData("medium.json", 8, 5, 20)]
-    [InlineData("large.json", 14, 8, 34)]
+    [InlineData("small.json", 4, 3, 10, 7, 10)]
+    [InlineData("medium.json", 8, 5, 20, 8, 11)]
+    [InlineData("large.json", 14, 8, 34, 8, 12)]
     public void LoadProfileFromFile_LoadsTunedDataProfiles(
         string fileName,
         int cavernRooms,
         int surfaceLakes,
-        int cavePools)
+        int cavePools,
+        int treeMinHeight,
+        int treeMaxHeight)
     {
         var dataDirectory = Path.GetFullPath(Path.Combine(
             AppContext.BaseDirectory,
@@ -29,6 +31,8 @@ public sealed class WorldGenerationProfileJsonLoaderTests
         Assert.Equal(cavernRooms, profile.CavernRoomCount);
         Assert.Equal(surfaceLakes, profile.SurfaceLakeAttempts);
         Assert.Equal(cavePools, profile.CavePoolAttempts);
+        Assert.Equal(treeMinHeight, profile.TreeMinHeight);
+        Assert.Equal(treeMaxHeight, profile.TreeMaxHeight);
         Assert.NotEqual((ushort)0, profile.DirtWallId);
         Assert.NotEqual((ushort)0, profile.StoneWallId);
     }

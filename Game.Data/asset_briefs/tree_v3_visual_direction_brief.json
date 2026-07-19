@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "scope": "tree_v3_visual_direction",
+  "assetType": "non-runtime concept source",
+  "outputPath": "art_direction/generated_sources/tree_v3_concept_source.png",
+  "width": 1254,
+  "height": 1254,
+  "useCase": "stylized-concept",
+  "prompt": "Create an original side-view pixel-art concept board of nine foreground tree silhouettes: three temperate forest oaks, three amber autumn trees and three twilight marsh or mangrove trees. Every tree has a narrow tapered and bent trunk, a clear main fork, readable side branches, irregular roots and multiple separated small leaf clusters attached to branch ends. Crowns are asymmetric and airy with large negative spaces. Avoid rectangular canopy walls, filled rectangles, checkerboard outlines, repeated circles, speckled carpet texture, giant mushroom shapes, symmetrical crowns, massive solid trunks, antialiasing, blur, gradients, text, logos and watermarks.",
+  "runtimeContract": [
+    "This file is art-direction reference only and is never loaded by the game.",
+    "Runtime tree cells remain deterministic 16x16 tiles generated directly at final size.",
+    "The concept may guide silhouette proportions but must not be raster-scaled into runtime assets."
+  ]
+}

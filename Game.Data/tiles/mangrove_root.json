@@ -2,7 +2,7 @@
   "id": "mangrove_root",
   "numericId": 14,
   "displayName": "Mangrove Root",
-  "texture": "world/wave05/mangrove_root_autotile",
+  "texture": "tiles/mangrove_trunk_v3_autotile",
   "solid": false,
   "blocksLight": false,
   "hardness": 1.4,

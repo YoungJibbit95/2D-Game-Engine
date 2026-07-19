@@ -22,6 +22,17 @@
   "notes": [
     {
       "date": "2026-07-19",
+      "title": "Svelte Product Site und Engine Wiki",
+      "items": [
+        "Product Page und Engine Docs laufen als statisch deploybare Svelte-5/Vite-Multipage-App",
+        "Neue moderne Produktoberflaeche mit Runtime-Telemetrie, Engine/Game-Trennung, Biome-Showcase und ehrlichen Downloadzustaenden",
+        "Reaktives 26-Kapitel-Wiki mit Suche, Kategorien, Capability-Status, Deep Links, Mobile Sidebar und Code-Copy",
+        "Keine CDN-Runtime oder Remote-Fonts; gemeinsamer Runtime-Chunk 21.54 kB gzip, Product Page 7.55 kB und Docs 4.75 kB",
+        "Svelte-Check, optimierter Build, CI-Job und statische Daten-/PNG-/Provenienzpruefung sind aktiv"
+      ]
+    },
+    {
+      "date": "2026-07-19",
       "title": "V5 Panorama, Entity Reliability und High-Refresh Closure",
       "items": [
         "Vier native 1536x384 Forest-, Amber-, Marsh- und Crystal-Panoramen mit Brief, Provenienz, Seam-Audit und Runtime-Bindings",

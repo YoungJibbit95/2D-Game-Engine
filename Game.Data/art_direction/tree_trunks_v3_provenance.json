@@ -1,0 +1,62 @@
+{
+  "version": 2,
+  "generator": "deterministic native-pixel cubic strokes",
+  "sourceBrief": "asset_briefs/tree_trunks_v3_briefs.json",
+  "sourceConcept": "art_direction/generated_sources/tree_v3_concept_source.png",
+  "preview": "art_direction/tree_trunks_v3_contact_sheet.png",
+  "qaContracts": {
+    "frameSize": [
+      16,
+      16
+    ],
+    "sheetSize": [
+      256,
+      16
+    ],
+    "alpha": "binary",
+    "topology": "one four-connected component per frame",
+    "socketWidthPixels": [
+      4,
+      6
+    ],
+    "maximumOpaquePixelsPerFrame": 150
+  },
+  "assets": [
+    {
+      "spriteId": "tiles/oak_trunk_v3_autotile",
+      "path": "Assets/TreeTrunksV3/world/tiles/oak_trunk_v3_autotile.png",
+      "sha256": "329627969a73625d4137929aefa6197b6de8f30e0b4096c2b9576098eca350bd",
+      "dimensions": [
+        256,
+        16
+      ],
+      "alpha": "binary",
+      "generator": "art_direction/tools/generate_tree_trunks_v3.py",
+      "license": "YjsE-Project-Owned"
+    },
+    {
+      "spriteId": "tiles/living_wood_v3_autotile",
+      "path": "Assets/TreeTrunksV3/world/tiles/living_wood_v3_autotile.png",
+      "sha256": "4a9ab38365236f72cf669c0d8c0db2e6c880d797d182c9a1794bb80d37833ad3",
+      "dimensions": [
+        256,
+        16
+      ],
+      "alpha": "binary",
+      "generator": "art_direction/tools/generate_tree_trunks_v3.py",
+      "license": "YjsE-Project-Owned"
+    },
+    {
+      "spriteId": "tiles/mangrove_trunk_v3_autotile",
+      "path": "Assets/TreeTrunksV3/world/tiles/mangrove_trunk_v3_autotile.png",
+      "sha256": "5b824cfdf91cd6e2f56235a5f8854bae94ca6b8f3d8f60d8de522f762e42656b",
+      "dimensions": [
+        256,
+        16
+      ],
+      "alpha": "binary",
+      "generator": "art_direction/tools/generate_tree_trunks_v3.py",
+      "license": "YjsE-Project-Owned"
+    }
+  ]
+}

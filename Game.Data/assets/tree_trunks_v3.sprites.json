@@ -1,0 +1,460 @@
+{
+  "sprites": [
+    {
+      "id": "tiles/oak_trunk_v3_autotile",
+      "path": "Assets/TreeTrunksV3/world/tiles/oak_trunk_v3_autotile.png",
+      "category": "Tile",
+      "width": 256,
+      "height": 16,
+      "atlasId": "tiles",
+      "license": "YjsE-Project-Owned",
+      "provenance": "tree_trunks_v3_provenance.json; deterministic Pillow pixel primitives",
+      "frames": [
+        {
+          "id": "mask_0",
+          "x": 0,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 0
+        },
+        {
+          "id": "mask_1",
+          "x": 16,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 1
+        },
+        {
+          "id": "mask_2",
+          "x": 32,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 2
+        },
+        {
+          "id": "mask_3",
+          "x": 48,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 3
+        },
+        {
+          "id": "mask_4",
+          "x": 64,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 4
+        },
+        {
+          "id": "mask_5",
+          "x": 80,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 5
+        },
+        {
+          "id": "mask_6",
+          "x": 96,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 6
+        },
+        {
+          "id": "mask_7",
+          "x": 112,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 7
+        },
+        {
+          "id": "mask_8",
+          "x": 128,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 8
+        },
+        {
+          "id": "mask_9",
+          "x": 144,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 9
+        },
+        {
+          "id": "mask_10",
+          "x": 160,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 10
+        },
+        {
+          "id": "mask_11",
+          "x": 176,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 11
+        },
+        {
+          "id": "mask_12",
+          "x": 192,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 12
+        },
+        {
+          "id": "mask_13",
+          "x": 208,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 13
+        },
+        {
+          "id": "mask_14",
+          "x": 224,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 14
+        },
+        {
+          "id": "mask_15",
+          "x": 240,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 15
+        }
+      ],
+      "tags": [
+        "world",
+        "tile",
+        "autotile",
+        "tree",
+        "trunk",
+        "binary-alpha",
+        "runtime-active",
+        "version-3",
+        "forest",
+        "oak"
+      ]
+    },
+    {
+      "id": "tiles/living_wood_v3_autotile",
+      "path": "Assets/TreeTrunksV3/world/tiles/living_wood_v3_autotile.png",
+      "category": "Tile",
+      "width": 256,
+      "height": 16,
+      "atlasId": "tiles",
+      "license": "YjsE-Project-Owned",
+      "provenance": "tree_trunks_v3_provenance.json; deterministic Pillow pixel primitives",
+      "frames": [
+        {
+          "id": "mask_0",
+          "x": 0,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 0
+        },
+        {
+          "id": "mask_1",
+          "x": 16,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 1
+        },
+        {
+          "id": "mask_2",
+          "x": 32,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 2
+        },
+        {
+          "id": "mask_3",
+          "x": 48,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 3
+        },
+        {
+          "id": "mask_4",
+          "x": 64,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 4
+        },
+        {
+          "id": "mask_5",
+          "x": 80,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 5
+        },
+        {
+          "id": "mask_6",
+          "x": 96,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 6
+        },
+        {
+          "id": "mask_7",
+          "x": 112,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 7
+        },
+        {
+          "id": "mask_8",
+          "x": 128,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 8
+        },
+        {
+          "id": "mask_9",
+          "x": 144,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 9
+        },
+        {
+          "id": "mask_10",
+          "x": 160,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 10
+        },
+        {
+          "id": "mask_11",
+          "x": 176,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 11
+        },
+        {
+          "id": "mask_12",
+          "x": 192,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 12
+        },
+        {
+          "id": "mask_13",
+          "x": 208,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 13
+        },
+        {
+          "id": "mask_14",
+          "x": 224,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 14
+        },
+        {
+          "id": "mask_15",
+          "x": 240,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 15
+        }
+      ],
+      "tags": [
+        "world",
+        "tile",
+        "autotile",
+        "tree",
+        "trunk",
+        "binary-alpha",
+        "runtime-active",
+        "version-3",
+        "amber-grove",
+        "living-wood"
+      ]
+    },
+    {
+      "id": "tiles/mangrove_trunk_v3_autotile",
+      "path": "Assets/TreeTrunksV3/world/tiles/mangrove_trunk_v3_autotile.png",
+      "category": "Tile",
+      "width": 256,
+      "height": 16,
+      "atlasId": "tiles",
+      "license": "YjsE-Project-Owned",
+      "provenance": "tree_trunks_v3_provenance.json; deterministic Pillow pixel primitives",
+      "frames": [
+        {
+          "id": "mask_0",
+          "x": 0,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 0
+        },
+        {
+          "id": "mask_1",
+          "x": 16,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 1
+        },
+        {
+          "id": "mask_2",
+          "x": 32,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 2
+        },
+        {
+          "id": "mask_3",
+          "x": 48,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 3
+        },
+        {
+          "id": "mask_4",
+          "x": 64,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 4
+        },
+        {
+          "id": "mask_5",
+          "x": 80,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 5
+        },
+        {
+          "id": "mask_6",
+          "x": 96,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 6
+        },
+        {
+          "id": "mask_7",
+          "x": 112,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 7
+        },
+        {
+          "id": "mask_8",
+          "x": 128,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 8
+        },
+        {
+          "id": "mask_9",
+          "x": 144,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 9
+        },
+        {
+          "id": "mask_10",
+          "x": 160,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 10
+        },
+        {
+          "id": "mask_11",
+          "x": 176,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 11
+        },
+        {
+          "id": "mask_12",
+          "x": 192,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 12
+        },
+        {
+          "id": "mask_13",
+          "x": 208,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 13
+        },
+        {
+          "id": "mask_14",
+          "x": 224,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 14
+        },
+        {
+          "id": "mask_15",
+          "x": 240,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "autoTileMask": 15
+        }
+      ],
+      "tags": [
+        "world",
+        "tile",
+        "autotile",
+        "tree",
+        "trunk",
+        "binary-alpha",
+        "runtime-active",
+        "version-3",
+        "twilight-marsh",
+        "mangrove"
+      ]
+    }
+  ]
+}

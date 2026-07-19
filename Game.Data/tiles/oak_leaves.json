@@ -2,7 +2,7 @@
   "id": "oak_leaves",
   "numericId": 17,
   "displayName": "Loose Oak Leaves",
-  "texture": "tiles/loose_oak_leaves_v1_autotile",
+  "texture": "tiles/loose_oak_leaves_v2a_autotile",
   "solid": false,
   "blocksLight": false,
   "hardness": 0.2,

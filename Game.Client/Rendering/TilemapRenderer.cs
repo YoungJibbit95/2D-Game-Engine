@@ -26,6 +26,24 @@ public sealed class TilemapRenderer : IDisposable
         "tiles/pine_leaves_tree_autotile",
         "tiles/birch_leaves_autotile"
     ];
+    private static readonly string[] OakCanopyVariants =
+    [
+        "tiles/loose_oak_leaves_v2a_autotile",
+        "tiles/loose_oak_leaves_v2b_autotile",
+        "tiles/loose_oak_leaves_v2c_autotile"
+    ];
+    private static readonly string[] AutumnCanopyVariants =
+    [
+        "tiles/loose_autumn_leaves_v2a_autotile",
+        "tiles/loose_autumn_leaves_v2b_autotile",
+        "tiles/loose_autumn_leaves_v2c_autotile"
+    ];
+    private static readonly string[] MarshCanopyVariants =
+    [
+        "tiles/loose_marsh_leaves_v2a_autotile",
+        "tiles/loose_marsh_leaves_v2b_autotile",
+        "tiles/loose_marsh_leaves_v2c_autotile"
+    ];
 
     private static readonly TileRegistry EmptyTiles = TileRegistry.Create(Array.Empty<TileDefinition>());
     private readonly ChunkRenderCache _cache = new();
@@ -401,7 +419,13 @@ public sealed class TilemapRenderer : IDisposable
 
             var destination = new Rectangle(left, top, Math.Max(1, right - left), Math.Max(1, bottom - top));
 
-            DrawTile(context, destination, command.Tile, command.AutoTileMask, command.VisualVariant);
+            DrawTile(
+                context,
+                destination,
+                command.Tile,
+                command.AutoTileMask,
+                command.VisualVariant,
+                command.VisualTransform);
             tileCommands++;
         }
     }
@@ -435,19 +459,27 @@ public sealed class TilemapRenderer : IDisposable
         Rectangle destination,
         TileInstance tile,
         AutoTileMask autoTileMask,
-        byte visualVariant)
+        byte visualVariant,
+        TileVisualTransform visualTransform)
     {
         var frames = tile.TileId < _tileSprites.Length ? _tileSprites[tile.TileId] : null;
+        var sourceMask = TreeTileVisualSelector.ResolveSourceMask(autoTileMask, visualTransform);
         var frameIndex = frames is null
             ? 0
-            : Math.Min(visualVariant, frames.Length / 16 - 1) * 16 + ((int)autoTileMask & 15);
+            : Math.Min(visualVariant, frames.Length / 16 - 1) * 16 + ((int)sourceMask & 15);
         if (frames is not null && frames[frameIndex] is { } preparedSprite)
         {
             context.SpriteBatch.Draw(
                 preparedSprite.Texture,
                 destination,
                 preparedSprite.Source,
-                Color.White);
+                Color.White,
+                0f,
+                Vector2.Zero,
+                (visualTransform & TileVisualTransform.FlipHorizontal) != 0
+                    ? SpriteEffects.FlipHorizontally
+                    : SpriteEffects.None,
+                0f);
             return;
         }
 
@@ -508,12 +540,15 @@ public sealed class TilemapRenderer : IDisposable
         };
     }
 
-    private static string[]? ResolveTreeVariantSpriteIds(ushort tileId)
+    internal static string[]? ResolveTreeVariantSpriteIds(ushort tileId)
     {
         return tileId switch
         {
             KnownTileIds.Wood => LegacyTrunkVariants,
             KnownTileIds.Leaves => LegacyCanopyVariants,
+            KnownTileIds.OakLeaves => OakCanopyVariants,
+            KnownTileIds.AutumnLeaves => AutumnCanopyVariants,
+            KnownTileIds.MarshLeaves => MarshCanopyVariants,
             _ => null
         };
     }

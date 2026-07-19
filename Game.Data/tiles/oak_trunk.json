@@ -2,7 +2,7 @@
   "id": "oak_trunk",
   "numericId": 16,
   "displayName": "Oak Trunk",
-  "texture": "tiles/oak_trunk_autotile",
+  "texture": "tiles/oak_trunk_v3_autotile",
   "solid": false,
   "blocksLight": true,
   "hardness": 1.2,

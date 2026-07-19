@@ -2,7 +2,7 @@
   "id": "living_wood",
   "numericId": 18,
   "displayName": "Living Amber Wood",
-  "texture": "tiles/living_wood_autotile",
+  "texture": "tiles/living_wood_v3_autotile",
   "solid": false,
   "blocksLight": true,
   "hardness": 1.35,

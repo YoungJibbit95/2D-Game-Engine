@@ -118,9 +118,9 @@ public sealed record WorldGenerationProfile
 
     public float TreeAttemptChance { get; init; } = 0.55f;
 
-    public int TreeMinHeight { get; init; } = 4;
+    public int TreeMinHeight { get; init; } = 7;
 
-    public int TreeMaxHeight { get; init; } = 7;
+    public int TreeMaxHeight { get; init; } = 10;
 
     public IReadOnlyList<OreGenerationDefinition> Ores { get; init; } = Array.Empty<OreGenerationDefinition>();
 
@@ -147,6 +147,8 @@ public sealed record WorldGenerationProfile
         CopperVeinCount = 30,
         IronVeinCount = 20,
         TreeAttempts = 44,
+        TreeMinHeight = 7,
+        TreeMaxHeight = 10,
         WaterPocketAttempts = 18,
         SurfaceLakeAttempts = 3,
         CavePoolAttempts = 10,
@@ -213,8 +215,8 @@ public sealed record WorldGenerationProfile
         IronVeinCount = 40,
         TreeAttempts = 78,
         TreeAttemptChance = 0.58f,
-        TreeMinHeight = 4,
-        TreeMaxHeight = 8,
+        TreeMinHeight = 8,
+        TreeMaxHeight = 11,
         WaterPocketAttempts = 34,
         WaterMinDepthOffset = 14,
         WaterMinRadiusX = 4,
@@ -292,8 +294,8 @@ public sealed record WorldGenerationProfile
         IronVeinCount = 70,
         TreeAttempts = 120,
         TreeAttemptChance = 0.6f,
-        TreeMinHeight = 4,
-        TreeMaxHeight = 9,
+        TreeMinHeight = 8,
+        TreeMaxHeight = 12,
         WaterPocketAttempts = 58,
         WaterMinDepthOffset = 16,
         WaterMinRadiusX = 4,

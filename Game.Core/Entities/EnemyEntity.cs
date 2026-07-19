@@ -17,6 +17,9 @@ public sealed class EnemyEntity : Entity, IEntityPhysicsParticipant
     private readonly TileCollisionResolver _standaloneCollisionResolver;
     private readonly IAiBehavior _aiBehavior;
     private PhysicsWorld? _standalonePhysicsWorld;
+    private double _deferredAiSeconds;
+    private long _scheduledAiEpoch;
+    private long _lastAiDecisionStep = -1;
 
     public EnemyEntity(
         string definitionId,
@@ -233,17 +236,64 @@ public sealed class EnemyEntity : Entity, IEntityPhysicsParticipant
 
     internal bool PreparePhysicsUpdate(AiUpdateContext context, float deltaSeconds)
     {
-        _despawnProtectionRemaining = Math.Max(0, _despawnProtectionRemaining - Math.Max(0, deltaSeconds));
-        StatusEffects.Update(deltaSeconds, Health);
-        Health.Update(deltaSeconds);
-        if (Health.IsDead)
+        if (!PrepareAuthoritativeState(deltaSeconds))
         {
-            IsActive = false;
             return false;
         }
 
         _aiBehavior.Update(this, context, deltaSeconds);
         return true;
+    }
+
+    internal bool PreparePhysicsUpdate(
+        AiUpdateContext context,
+        float deltaSeconds,
+        in EntityAiSchedule schedule)
+    {
+        if (!PrepareAuthoritativeState(deltaSeconds))
+        {
+            return false;
+        }
+
+        var elapsed = Math.Max(0f, deltaSeconds);
+        if (_scheduledAiEpoch == schedule.Epoch)
+        {
+            var decisionDelta = Math.Min(float.MaxValue, elapsed + _deferredAiSeconds);
+            _deferredAiSeconds = 0d;
+            _aiBehavior.Update(this, context, (float)decisionDelta);
+            _lastAiDecisionStep = schedule.DecisionStep;
+        }
+        else
+        {
+            _deferredAiSeconds += elapsed;
+            // Behavior state and the body's current velocity are the cached intent. Do not
+            // reapply an older velocity here: physics contacts and external impulses remain
+            // authoritative on every skipped decision tick.
+        }
+
+        return true;
+    }
+
+    internal void ScheduleAiDecision(long epoch)
+    {
+        _scheduledAiEpoch = epoch;
+    }
+
+    internal int GetAiDecisionAge(long decisionStep)
+    {
+        if (_lastAiDecisionStep < 0)
+        {
+            return int.MaxValue;
+        }
+
+        return (int)Math.Min(int.MaxValue, Math.Max(0, decisionStep - _lastAiDecisionStep));
+    }
+
+    internal void ResetAiSchedulingState()
+    {
+        _deferredAiSeconds = 0d;
+        _scheduledAiEpoch = 0;
+        _lastAiDecisionStep = -1;
     }
 
     void IEntityPhysicsParticipant.SynchronizePhysicsState()
@@ -254,6 +304,20 @@ public sealed class EnemyEntity : Entity, IEntityPhysicsParticipant
     internal void SynchronizePhysicsState()
     {
         Position = Body.Position;
+    }
+
+    private bool PrepareAuthoritativeState(float deltaSeconds)
+    {
+        _despawnProtectionRemaining = Math.Max(0, _despawnProtectionRemaining - Math.Max(0, deltaSeconds));
+        StatusEffects.Update(deltaSeconds, Health);
+        Health.Update(deltaSeconds);
+        if (!Health.IsDead)
+        {
+            return true;
+        }
+
+        IsActive = false;
+        return false;
     }
 
     private PhysicsWorld GetStandalonePhysicsWorld()

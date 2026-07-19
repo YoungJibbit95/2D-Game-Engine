@@ -1,0 +1,218 @@
+{
+  "version": 2,
+  "scope": "loose_foliage_v2",
+  "globalStyle": "Original YjsE side-view pixel foliage with three deterministic variants per species, separated crown pads, visible negative space, binary alpha, and native 16x16 source frames.",
+  "generator": "art_direction/tools/generate_loose_foliage_v2.py",
+  "visualDirectionReference": "art_direction/generated_sources/tree_v3_concept_source.png",
+  "referenceUse": "Composition direction only. Runtime sheets are deterministic native-size pixel output, not cropped, sampled, traced, or scaled from the reference.",
+  "variantContract": "Variants A/B/C deliberately move crown mass and negative space while sharing exact cardinal seam sockets, allowing stable atlas-packed runtime selection without extra draw calls.",
+  "briefs": [
+    {
+      "spriteId": "tiles/loose_oak_leaves_v2a_autotile",
+      "outputPath": "Assets/LooseFoliageV2/loose_oak_leaves_v2a_autotile.png",
+      "width": 256,
+      "height": 16,
+      "subject": "Loose Oak Crown Pads V2A",
+      "prompt": "Author an original oak 16-mask foliage variant with two to four irregular leaf clumps, left-weighted crown mass and upper open pocket, large transparent gaps, and narrow organic joins.",
+      "requirements": [
+        "Export exactly sixteen native 16x16 frames in top-right-bottom-left mask order 0-15.",
+        "Keep every frame sparse; even mask 15 must preserve transparent corners and internal air instead of filling the tile square.",
+        "Cross declared sides only through compatible sockets shared by all variants: x 6-8 for top-bottom joins and y 8-9 for left-right joins; shade sockets without a dark seam.",
+        "Use only binary alpha and the forest oak green palette; do not raster-scale or derive runtime pixels from the visual-direction reference."
+      ],
+      "tags": [
+        "production",
+        "runtime-active",
+        "foliage",
+        "autotile",
+        "oak",
+        "version-2",
+        "variant-a"
+      ]
+    },
+    {
+      "spriteId": "tiles/loose_oak_leaves_v2b_autotile",
+      "outputPath": "Assets/LooseFoliageV2/loose_oak_leaves_v2b_autotile.png",
+      "width": 256,
+      "height": 16,
+      "subject": "Loose Oak Crown Pads V2B",
+      "prompt": "Author an original oak 16-mask foliage variant with two to four irregular leaf clumps, right-weighted crown mass and lower open pocket, large transparent gaps, and narrow organic joins.",
+      "requirements": [
+        "Export exactly sixteen native 16x16 frames in top-right-bottom-left mask order 0-15.",
+        "Keep every frame sparse; even mask 15 must preserve transparent corners and internal air instead of filling the tile square.",
+        "Cross declared sides only through compatible sockets shared by all variants: x 6-8 for top-bottom joins and y 8-9 for left-right joins; shade sockets without a dark seam.",
+        "Use only binary alpha and the forest oak green palette; do not raster-scale or derive runtime pixels from the visual-direction reference."
+      ],
+      "tags": [
+        "production",
+        "runtime-active",
+        "foliage",
+        "autotile",
+        "oak",
+        "version-2",
+        "variant-b"
+      ]
+    },
+    {
+      "spriteId": "tiles/loose_oak_leaves_v2c_autotile",
+      "outputPath": "Assets/LooseFoliageV2/loose_oak_leaves_v2c_autotile.png",
+      "width": 256,
+      "height": 16,
+      "subject": "Loose Oak Crown Pads V2C",
+      "prompt": "Author an original oak 16-mask foliage variant with two to four irregular leaf clumps, low central mass with split corner negative space, large transparent gaps, and narrow organic joins.",
+      "requirements": [
+        "Export exactly sixteen native 16x16 frames in top-right-bottom-left mask order 0-15.",
+        "Keep every frame sparse; even mask 15 must preserve transparent corners and internal air instead of filling the tile square.",
+        "Cross declared sides only through compatible sockets shared by all variants: x 6-8 for top-bottom joins and y 8-9 for left-right joins; shade sockets without a dark seam.",
+        "Use only binary alpha and the forest oak green palette; do not raster-scale or derive runtime pixels from the visual-direction reference."
+      ],
+      "tags": [
+        "production",
+        "runtime-active",
+        "foliage",
+        "autotile",
+        "oak",
+        "version-2",
+        "variant-c"
+      ]
+    },
+    {
+      "spriteId": "tiles/loose_autumn_leaves_v2a_autotile",
+      "outputPath": "Assets/LooseFoliageV2/loose_autumn_leaves_v2a_autotile.png",
+      "width": 256,
+      "height": 16,
+      "subject": "Loose Autumn Crown Pads V2A",
+      "prompt": "Author an original autumn 16-mask foliage variant with two to four irregular leaf clumps, left-weighted crown mass and upper open pocket, large transparent gaps, and narrow organic joins.",
+      "requirements": [
+        "Export exactly sixteen native 16x16 frames in top-right-bottom-left mask order 0-15.",
+        "Keep every frame sparse; even mask 15 must preserve transparent corners and internal air instead of filling the tile square.",
+        "Cross declared sides only through compatible sockets shared by all variants: x 6-8 for top-bottom joins and y 8-9 for left-right joins; shade sockets without a dark seam.",
+        "Use only binary alpha and the Amber Grove orange-gold palette; do not raster-scale or derive runtime pixels from the visual-direction reference."
+      ],
+      "tags": [
+        "production",
+        "runtime-active",
+        "foliage",
+        "autotile",
+        "autumn",
+        "version-2",
+        "variant-a"
+      ]
+    },
+    {
+      "spriteId": "tiles/loose_autumn_leaves_v2b_autotile",
+      "outputPath": "Assets/LooseFoliageV2/loose_autumn_leaves_v2b_autotile.png",
+      "width": 256,
+      "height": 16,
+      "subject": "Loose Autumn Crown Pads V2B",
+      "prompt": "Author an original autumn 16-mask foliage variant with two to four irregular leaf clumps, right-weighted crown mass and lower open pocket, large transparent gaps, and narrow organic joins.",
+      "requirements": [
+        "Export exactly sixteen native 16x16 frames in top-right-bottom-left mask order 0-15.",
+        "Keep every frame sparse; even mask 15 must preserve transparent corners and internal air instead of filling the tile square.",
+        "Cross declared sides only through compatible sockets shared by all variants: x 6-8 for top-bottom joins and y 8-9 for left-right joins; shade sockets without a dark seam.",
+        "Use only binary alpha and the Amber Grove orange-gold palette; do not raster-scale or derive runtime pixels from the visual-direction reference."
+      ],
+      "tags": [
+        "production",
+        "runtime-active",
+        "foliage",
+        "autotile",
+        "autumn",
+        "version-2",
+        "variant-b"
+      ]
+    },
+    {
+      "spriteId": "tiles/loose_autumn_leaves_v2c_autotile",
+      "outputPath": "Assets/LooseFoliageV2/loose_autumn_leaves_v2c_autotile.png",
+      "width": 256,
+      "height": 16,
+      "subject": "Loose Autumn Crown Pads V2C",
+      "prompt": "Author an original autumn 16-mask foliage variant with two to four irregular leaf clumps, low central mass with split corner negative space, large transparent gaps, and narrow organic joins.",
+      "requirements": [
+        "Export exactly sixteen native 16x16 frames in top-right-bottom-left mask order 0-15.",
+        "Keep every frame sparse; even mask 15 must preserve transparent corners and internal air instead of filling the tile square.",
+        "Cross declared sides only through compatible sockets shared by all variants: x 6-8 for top-bottom joins and y 8-9 for left-right joins; shade sockets without a dark seam.",
+        "Use only binary alpha and the Amber Grove orange-gold palette; do not raster-scale or derive runtime pixels from the visual-direction reference."
+      ],
+      "tags": [
+        "production",
+        "runtime-active",
+        "foliage",
+        "autotile",
+        "autumn",
+        "version-2",
+        "variant-c"
+      ]
+    },
+    {
+      "spriteId": "tiles/loose_marsh_leaves_v2a_autotile",
+      "outputPath": "Assets/LooseFoliageV2/loose_marsh_leaves_v2a_autotile.png",
+      "width": 256,
+      "height": 16,
+      "subject": "Loose Marsh Crown Pads V2A",
+      "prompt": "Author an original marsh 16-mask foliage variant with two to four irregular leaf clumps, left-weighted crown mass and upper open pocket, large transparent gaps, and narrow organic joins.",
+      "requirements": [
+        "Export exactly sixteen native 16x16 frames in top-right-bottom-left mask order 0-15.",
+        "Keep every frame sparse; even mask 15 must preserve transparent corners and internal air instead of filling the tile square.",
+        "Cross declared sides only through compatible sockets shared by all variants: x 6-8 for top-bottom joins and y 8-9 for left-right joins; shade sockets without a dark seam.",
+        "Use only binary alpha and the Twilight Marsh teal-green palette; do not raster-scale or derive runtime pixels from the visual-direction reference."
+      ],
+      "tags": [
+        "production",
+        "runtime-active",
+        "foliage",
+        "autotile",
+        "marsh",
+        "version-2",
+        "variant-a"
+      ]
+    },
+    {
+      "spriteId": "tiles/loose_marsh_leaves_v2b_autotile",
+      "outputPath": "Assets/LooseFoliageV2/loose_marsh_leaves_v2b_autotile.png",
+      "width": 256,
+      "height": 16,
+      "subject": "Loose Marsh Crown Pads V2B",
+      "prompt": "Author an original marsh 16-mask foliage variant with two to four irregular leaf clumps, right-weighted crown mass and lower open pocket, large transparent gaps, and narrow organic joins.",
+      "requirements": [
+        "Export exactly sixteen native 16x16 frames in top-right-bottom-left mask order 0-15.",
+        "Keep every frame sparse; even mask 15 must preserve transparent corners and internal air instead of filling the tile square.",
+        "Cross declared sides only through compatible sockets shared by all variants: x 6-8 for top-bottom joins and y 8-9 for left-right joins; shade sockets without a dark seam.",
+        "Use only binary alpha and the Twilight Marsh teal-green palette; do not raster-scale or derive runtime pixels from the visual-direction reference."
+      ],
+      "tags": [
+        "production",
+        "runtime-active",
+        "foliage",
+        "autotile",
+        "marsh",
+        "version-2",
+        "variant-b"
+      ]
+    },
+    {
+      "spriteId": "tiles/loose_marsh_leaves_v2c_autotile",
+      "outputPath": "Assets/LooseFoliageV2/loose_marsh_leaves_v2c_autotile.png",
+      "width": 256,
+      "height": 16,
+      "subject": "Loose Marsh Crown Pads V2C",
+      "prompt": "Author an original marsh 16-mask foliage variant with two to four irregular leaf clumps, low central mass with split corner negative space, large transparent gaps, and narrow organic joins.",
+      "requirements": [
+        "Export exactly sixteen native 16x16 frames in top-right-bottom-left mask order 0-15.",
+        "Keep every frame sparse; even mask 15 must preserve transparent corners and internal air instead of filling the tile square.",
+        "Cross declared sides only through compatible sockets shared by all variants: x 6-8 for top-bottom joins and y 8-9 for left-right joins; shade sockets without a dark seam.",
+        "Use only binary alpha and the Twilight Marsh teal-green palette; do not raster-scale or derive runtime pixels from the visual-direction reference."
+      ],
+      "tags": [
+        "production",
+        "runtime-active",
+        "foliage",
+        "autotile",
+        "marsh",
+        "version-2",
+        "variant-c"
+      ]
+    }
+  ]
+}

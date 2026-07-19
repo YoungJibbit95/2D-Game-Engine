@@ -33,7 +33,8 @@ public enum PhysicsContactFlags : byte
     RightWall = 1 << 3,
     WorkBudgetExhausted = 1 << 4,
     InitialOverlapRecovered = 1 << 5,
-    InitialOverlapUnresolved = 1 << 6
+    InitialOverlapUnresolved = 1 << 6,
+    ContinuousMotionBlocked = 1 << 7
 }
 
 public readonly record struct PhysicsMaterial(
@@ -75,6 +76,9 @@ public readonly record struct PhysicsMoveResult(
 
     public bool WorkBudgetExhausted =>
         (ContactFlags & PhysicsContactFlags.WorkBudgetExhausted) != PhysicsContactFlags.None;
+
+    public bool IsContinuousMotionBlocked =>
+        (ContactFlags & PhysicsContactFlags.ContinuousMotionBlocked) != PhysicsContactFlags.None;
 }
 
 public readonly record struct TileCollisionSettings(
@@ -118,6 +122,71 @@ public readonly record struct PhysicsBodyContact(
     float Penetration,
     float NormalImpulse,
     float TangentImpulse);
+
+public readonly record struct PhysicsContinuousBodyContact(
+    PhysicsBodyContact Contact,
+    float TimeOfImpactSeconds)
+{
+    public int BodyAIndex => Contact.BodyAIndex;
+
+    public int BodyBIndex => Contact.BodyBIndex;
+
+    public Vector2 Point => Contact.Point;
+
+    public Vector2 Normal => Contact.Normal;
+
+    public float Penetration => Contact.Penetration;
+
+    public float NormalImpulse => Contact.NormalImpulse;
+
+    public float TangentImpulse => Contact.TangentImpulse;
+}
+
+/// <summary>
+/// Opaque caller-owned scratch slot used by the continuous collision solver.
+/// Its contents are transient and are not part of the public contact contract.
+/// </summary>
+public struct PhysicsContinuousContactCandidate
+{
+    internal PhysicsBodyContact Contact;
+    internal float TimeOfImpactSeconds;
+    internal int CandidatePairIndex;
+    internal int BodyARevision;
+    internal int BodyBRevision;
+}
+
+public struct PhysicsBodySweepState
+{
+    public Vector2 StartPosition { get; internal set; }
+
+    public Vector2 PredictedVelocity { get; internal set; }
+
+    public float TimeAdvancedSeconds { get; internal set; }
+
+    internal Vector2 RequestedDisplacement;
+    internal PhysicsContactFlags ContactFlags;
+    internal int ContactsFound;
+    internal int ContactsWritten;
+    internal int TilesTested;
+    internal int Substeps;
+    internal int Revision;
+    internal bool ContinuousMotionBlocked;
+}
+
+public readonly record struct PhysicsContinuousCollisionSettings(int MaximumToiPasses)
+{
+    public static PhysicsContinuousCollisionSettings Default { get; } = new(4);
+
+    public PhysicsContinuousCollisionSettings Validate()
+    {
+        if (MaximumToiPasses <= 0 || MaximumToiPasses > 32)
+        {
+            throw new ArgumentOutOfRangeException(nameof(MaximumToiPasses));
+        }
+
+        return this;
+    }
+}
 
 public readonly record struct PhysicsBroadphaseSettings(
     int MaximumBodies,

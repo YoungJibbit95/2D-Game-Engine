@@ -1,3 +1,4 @@
+using Game.Core.Tiles;
 using Game.Core.World;
 
 namespace Game.Client.Rendering;
@@ -11,7 +12,7 @@ internal static class TreeTileVisualSelector
     public static byte Resolve(World world, int tileX, int tileY, ushort tileId)
     {
         ArgumentNullException.ThrowIfNull(world);
-        if (!IsTemperateTreeTile(tileId))
+        if (!TryResolveMaterialPair(tileId, out var trunkTileId, out var canopyTileId))
         {
             return 0;
         }
@@ -19,7 +20,7 @@ internal static class TreeTileVisualSelector
         var bestAnchorX = tileX;
         var bestWoodCount = 0;
         var bestDistance = int.MaxValue;
-        var foundLeaves = IsTemperateCanopy(tileId);
+        var foundLeaves = tileId == canopyTileId;
         var minimumY = Math.Max(0, tileY - VerticalSearchRadius);
         var maximumY = Math.Min(world.HeightTiles - 1, tileY + VerticalSearchRadius);
         for (var offsetX = -HorizontalSearchRadius; offsetX <= HorizontalSearchRadius; offsetX++)
@@ -29,8 +30,8 @@ internal static class TreeTileVisualSelector
             for (var scanY = minimumY; scanY <= maximumY; scanY++)
             {
                 var candidate = world.GetTile(candidateX, scanY).TileId;
-                woodCount += IsTemperateTrunk(candidate) ? 1 : 0;
-                foundLeaves |= IsTemperateCanopy(candidate);
+                woodCount += candidate == trunkTileId ? 1 : 0;
+                foundLeaves |= candidate == canopyTileId;
             }
 
             var distance = Math.Abs(offsetX);
@@ -54,6 +55,54 @@ internal static class TreeTileVisualSelector
         return (byte)(StableHash(world.Metadata.Seed, bestAnchorX) % VariantCount);
     }
 
+    /// <summary>
+    /// Breaks up repeated foliage stamps without adding texture resources or draw calls.
+    /// The transform is cached with the chunk command and remains stable for a world seed.
+    /// Trunks intentionally keep their authored orientation and lighting direction.
+    /// </summary>
+    public static TileVisualTransform ResolveTransform(
+        World world,
+        int tileX,
+        int tileY,
+        ushort tileId)
+    {
+        ArgumentNullException.ThrowIfNull(world);
+        if (!KnownTileIds.IsFoliage(tileId))
+        {
+            return TileVisualTransform.None;
+        }
+
+        var hash = StableHash(world.Metadata.Seed, tileX);
+        hash ^= StableHash(unchecked((int)hash), tileY);
+        hash ^= (uint)tileId * 0x9E3779B9u;
+        return (hash & 1u) == 0u
+            ? TileVisualTransform.None
+            : TileVisualTransform.FlipHorizontal;
+    }
+
+    public static AutoTileMask ResolveSourceMask(
+        AutoTileMask destinationMask,
+        TileVisualTransform transform)
+    {
+        if ((transform & TileVisualTransform.FlipHorizontal) == 0)
+        {
+            return destinationMask;
+        }
+
+        var sourceMask = destinationMask & ~(AutoTileMask.Left | AutoTileMask.Right);
+        if ((destinationMask & AutoTileMask.Left) != 0)
+        {
+            sourceMask |= AutoTileMask.Right;
+        }
+
+        if ((destinationMask & AutoTileMask.Right) != 0)
+        {
+            sourceMask |= AutoTileMask.Left;
+        }
+
+        return sourceMask;
+    }
+
     private static uint StableHash(int seed, int anchorX)
     {
         unchecked
@@ -68,19 +117,38 @@ internal static class TreeTileVisualSelector
         }
     }
 
-    private static bool IsTemperateTreeTile(ushort tileId)
+    private static bool TryResolveMaterialPair(
+        ushort tileId,
+        out ushort trunkTileId,
+        out ushort canopyTileId)
     {
-        return IsTemperateTrunk(tileId) || IsTemperateCanopy(tileId);
-    }
-
-    private static bool IsTemperateTrunk(ushort tileId)
-    {
-        return tileId == KnownTileIds.Wood;
-    }
-
-    private static bool IsTemperateCanopy(ushort tileId)
-    {
-        return tileId == KnownTileIds.Leaves;
+        switch (tileId)
+        {
+            case KnownTileIds.Wood:
+            case KnownTileIds.Leaves:
+                trunkTileId = KnownTileIds.Wood;
+                canopyTileId = KnownTileIds.Leaves;
+                return true;
+            case KnownTileIds.OakTrunk:
+            case KnownTileIds.OakLeaves:
+                trunkTileId = KnownTileIds.OakTrunk;
+                canopyTileId = KnownTileIds.OakLeaves;
+                return true;
+            case KnownTileIds.LivingWood:
+            case KnownTileIds.AutumnLeaves:
+                trunkTileId = KnownTileIds.LivingWood;
+                canopyTileId = KnownTileIds.AutumnLeaves;
+                return true;
+            case KnownTileIds.MangroveRoot:
+            case KnownTileIds.MarshLeaves:
+                trunkTileId = KnownTileIds.MangroveRoot;
+                canopyTileId = KnownTileIds.MarshLeaves;
+                return true;
+            default:
+                trunkTileId = KnownTileIds.Air;
+                canopyTileId = KnownTileIds.Air;
+                return false;
+        }
     }
 
     private static int SaturateToInt(long value)
