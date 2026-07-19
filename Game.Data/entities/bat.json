@@ -5,6 +5,34 @@
   "maxHealth": 14,
   "width": 14,
   "height": 10,
+  "faction": "hostile",
+  "movementMode": "flying",
+  "tags": ["enemy", "bat", "cave", "cave_hostiles"],
   "contactDamage": 8,
-  "contactKnockback": 150
+  "contactKnockback": 150,
+  "attackDamage": 9,
+  "attackKnockback": 170,
+  "despawn": {
+    "mode": "whenIdle",
+    "spawnProtectionSeconds": 8,
+    "damageProtectionSeconds": 12
+  },
+  "ai": {
+    "kind": "hostile",
+    "detectionRange": 152,
+    "loseTargetRange": 240,
+    "moveSpeed": 62,
+    "fleeSpeed": 112,
+    "patrolRadius": 160,
+    "returnHomeDistance": 224,
+    "attackRange": 20,
+    "attackCooldown": 0.9,
+    "perceptionMemorySeconds": 3.2,
+    "decisionInterval": 0.8,
+    "activityPeriod": "any",
+    "perchWhenInactive": false,
+    "requiresLineOfSight": true,
+    "avoidLedges": false,
+    "avoidLiquid": true
+  }
 }

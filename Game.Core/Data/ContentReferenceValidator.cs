@@ -3,6 +3,7 @@ using Game.Core.Items;
 using Game.Core.Effects;
 using Game.Core.Maps;
 using Game.Core.Startup;
+using Game.Core.Combat;
 
 namespace Game.Core.Data;
 
@@ -21,6 +22,7 @@ public sealed class ContentReferenceValidator
         ValidateProjectiles(database, report);
         ValidateEntities(database, report);
         ValidateSpawnRules(database, report);
+        ValidateEncounters(database, report);
         ValidateCrops(database, report);
         ValidateMaps(database, report);
         ValidateShops(database, report);
@@ -29,6 +31,7 @@ public sealed class ContentReferenceValidator
         ValidateCharacters(database, report);
         ValidateWorldGenerationProfiles(database, report);
         ValidateWorldEvents(database, report);
+        ValidateAttackSequences(database, report);
         ValidateSpriteReferences(database, report);
     }
 
@@ -80,6 +83,32 @@ public sealed class ContentReferenceValidator
         if (!string.IsNullOrWhiteSpace(action.AmmoItemId) && !database.Items.TryGetById(action.AmmoItemId, out _))
         {
             AddMissingReference(report, "item", itemId, "ammo item", action.AmmoItemId);
+        }
+
+        if (!string.IsNullOrWhiteSpace(action.AttackSequenceId) &&
+            !database.AttackSequences.TryGetById(action.AttackSequenceId, out _))
+        {
+            AddMissingReference(report, "item", itemId, "attack sequence", action.AttackSequenceId);
+        }
+    }
+
+    private static void ValidateAttackSequences(GameContentDatabase database, ContentLoadReport report)
+    {
+        foreach (var sequence in database.AttackSequences.Definitions)
+        {
+            foreach (var step in sequence.Steps)
+            {
+                var ammoItemId = step.Cost.AmmoItemId;
+                if (!string.IsNullOrWhiteSpace(ammoItemId) && !database.Items.TryGetById(ammoItemId, out _))
+                {
+                    AddMissingReference(
+                        report,
+                        "attack-sequence",
+                        sequence.Id,
+                        $"ammo item for step '{step.Id}'",
+                        ammoItemId);
+                }
+            }
         }
     }
 
@@ -139,6 +168,29 @@ public sealed class ContentReferenceValidator
             if (!database.Tiles.TryGetById(biome.UndergroundTile, out _))
             {
                 AddMissingReference(report, "biome", biome.Id, "underground tile", biome.UndergroundTile);
+            }
+
+            if (!string.IsNullOrWhiteSpace(biome.TreeType))
+            {
+                if (!database.Tiles.TryGetById(biome.TreeMaterial.TrunkTile, out _))
+                {
+                    AddMissingReference(
+                        report,
+                        "biome",
+                        biome.Id,
+                        $"tree type '{biome.TreeType}' trunk tile",
+                        biome.TreeMaterial.TrunkTile);
+                }
+
+                if (!database.Tiles.TryGetById(biome.TreeMaterial.CanopyTile, out _))
+                {
+                    AddMissingReference(
+                        report,
+                        "biome",
+                        biome.Id,
+                        $"tree type '{biome.TreeType}' canopy tile",
+                        biome.TreeMaterial.CanopyTile);
+                }
             }
 
             ValidateOptionalSpawnRule(database, report, biome.Id, "enemy spawn table", biome.EnemySpawnTable);
@@ -216,6 +268,55 @@ public sealed class ContentReferenceValidator
                 }
             }
         }
+    }
+
+    private static void ValidateEncounters(GameContentDatabase database, ContentLoadReport report)
+    {
+        foreach (var encounter in database.Encounters.Definitions)
+        {
+            foreach (var biomeId in encounter.BiomeIds)
+            {
+                if (!database.Biomes.TryGetById(biomeId, out _))
+                {
+                    AddMissingReference(report, "encounter", encounter.Id, "biome", biomeId);
+                }
+            }
+
+            foreach (var role in encounter.Roles)
+            {
+                if (!database.SpawnRules.TryGetById(role.SpawnRuleId, out var spawnRule))
+                {
+                    AddMissingReference(report, "encounter", encounter.Id, $"spawn rule for role '{role.Id}'", role.SpawnRuleId);
+                    continue;
+                }
+
+                if (!database.Entities.TryGetById(spawnRule.EntityId, out var entity))
+                {
+                    continue;
+                }
+
+                if (!HasActiveAiRule(entity))
+                {
+                    report.AddIssue(
+                        ContentIssueSeverity.Error,
+                        "validation",
+                        "encounter",
+                        encounter.Id,
+                        $"Role '{role.Id}' spawn rule '{spawnRule.Id}' references entity '{entity.Id}' without an active AI rule.");
+                }
+            }
+        }
+    }
+
+    private static bool HasActiveAiRule(Game.Core.Entities.EntityDefinition entity)
+    {
+        if (entity.Ai is { Kind: not Game.Core.Entities.AI.AiBehaviorKind.None })
+        {
+            return true;
+        }
+
+        return entity.AiBehavior?.ToLowerInvariant() is
+            "slime" or "critter" or "wander" or "flee" or "hostile" or "patrol" or "chase";
     }
 
     private static void ValidateCrops(GameContentDatabase database, ContentLoadReport report)

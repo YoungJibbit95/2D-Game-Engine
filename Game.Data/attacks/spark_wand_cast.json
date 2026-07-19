@@ -1,0 +1,20 @@
+{
+  "id": "weapon.spark_wand.cast",
+  "inputBufferTicks": 3,
+  "commandCapacity": 8,
+  "eventCapacity": 24,
+  "steps": [
+    {
+      "id": "focus-and-cast",
+      "timeline": {
+        "startupTicks": 5,
+        "activeTicks": 2,
+        "recoveryTicks": 8,
+        "cooldownTicks": 3
+      },
+      "cost": {
+        "mana": 6
+      }
+    }
+  ]
+}

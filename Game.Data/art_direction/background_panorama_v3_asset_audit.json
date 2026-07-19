@@ -1,0 +1,72 @@
+{
+  "schemaVersion": 1,
+  "scope": "background_panorama_v3_imagegen",
+  "auditedOn": "2026-07-15",
+  "auditTool": "art_direction/tools/audit_sprites.py v2.0.0",
+  "manifest": "assets/sprites.json",
+  "style": "art_direction/yjse_pixel_style.json",
+  "fullReport": "artifacts/background-panorama-v3-asset-audit.json",
+  "fullManifestGate": {
+    "manifestEntries": 182,
+    "uniqueManifestPaths": 176,
+    "pngFilesOnDisk": 176,
+    "missingFileCount": 0,
+    "dimensionMismatchCount": 0,
+    "hardIssueAssetCount": 0,
+    "hardIssueCount": 0
+  },
+  "assets": [
+    {
+      "spriteId": "world/backgrounds/forest_parallax_layer_v3",
+      "path": "sprites/world/backgrounds/forest_parallax_layer_v3.png",
+      "declaredDimensions": [
+        512,
+        128
+      ],
+      "actualDimensions": [
+        512,
+        128
+      ],
+      "mode": "RGBA",
+      "alphaExtrema": [
+        255,
+        255
+      ],
+      "opaquePixelCount": 65536,
+      "uniqueOpaqueColors": 44,
+      "outOfStyleOpaquePixels": 0,
+      "stylePaletteComplianceRatio": 1.0,
+      "horizontalSeamColumnsEqual": true,
+      "readabilityScore": 100,
+      "qualityTier": "pass",
+      "issues": [],
+      "hardIssues": []
+    },
+    {
+      "spriteId": "world/backgrounds/cave_parallax_layer_v3",
+      "path": "sprites/world/backgrounds/cave_parallax_layer_v3.png",
+      "declaredDimensions": [
+        512,
+        128
+      ],
+      "actualDimensions": [
+        512,
+        128
+      ],
+      "mode": "RGBA",
+      "alphaExtrema": [
+        255,
+        255
+      ],
+      "opaquePixelCount": 65536,
+      "uniqueOpaqueColors": 29,
+      "outOfStyleOpaquePixels": 0,
+      "stylePaletteComplianceRatio": 1.0,
+      "horizontalSeamColumnsEqual": true,
+      "readabilityScore": 100,
+      "qualityTier": "pass",
+      "issues": [],
+      "hardIssues": []
+    }
+  ]
+}

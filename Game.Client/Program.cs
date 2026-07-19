@@ -65,12 +65,14 @@ public static class Program
     {
         result.WriteJsonForScreenshot();
         Log.Information(
-            "Client smoke {Result}: frame={Frame} nonBlack={NonBlack} colors={Colors} resources={Resources} frames={Frames}",
+            "Client smoke {Result}: frame={Frame} nonBlack={NonBlack} colors={Colors} resources={Resources} frames={Frames} entities={Entities} visible={VisibleEntities}",
             result.Passed ? "passed" : "failed",
             result.CapturedFrame,
             result.NonBlackPixels,
             result.DistinctColors,
             result.TextureResourceCount,
-            result.TextureFrameCount);
+            result.TextureFrameCount,
+            result.Gameplay.TotalActiveEntities,
+            result.Gameplay.VisibleEntities);
     }
 }

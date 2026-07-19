@@ -1,0 +1,135 @@
+{
+  "schemaVersion": 1,
+  "sliceId": "tree_visual_variants_v2",
+  "manifest": "assets/sprites.json",
+  "assetCount": 6,
+  "passed": true,
+  "assets": [
+    {
+      "spriteId": "tiles/oak_trunk_autotile",
+      "path": "sprites/world/tiles/oak_trunk_autotile.png",
+      "sha256": "f53be342137184173240a951105a4970bd893a1cb0b0205ad57139d9a488ee61",
+      "dimensions": [
+        256,
+        16
+      ],
+      "alphaValues": [
+        255
+      ],
+      "checks": {
+        "fileExists": true,
+        "dimensionsExact": true,
+        "manifestEntryPresent": true,
+        "manifestPathMatches": true,
+        "manifestDimensionsMatch": true,
+        "sixteenExactFrames": true
+      },
+      "passed": true
+    },
+    {
+      "spriteId": "tiles/oak_leaves_autotile",
+      "path": "sprites/world/tiles/oak_leaves_autotile.png",
+      "sha256": "e706859424e132723fe7af413f646fdf3c5250a7cf70d516f9ae84dc658907e8",
+      "dimensions": [
+        256,
+        16
+      ],
+      "alphaValues": [
+        255
+      ],
+      "checks": {
+        "fileExists": true,
+        "dimensionsExact": true,
+        "manifestEntryPresent": true,
+        "manifestPathMatches": true,
+        "manifestDimensionsMatch": true,
+        "sixteenExactFrames": true
+      },
+      "passed": true
+    },
+    {
+      "spriteId": "tiles/pine_trunk_autotile",
+      "path": "sprites/world/tiles/pine_trunk_autotile.png",
+      "sha256": "28fcfe8ce4a3594bda8ed8cb3064c6e063cc9406327ea611e899edda0f2fb0e5",
+      "dimensions": [
+        256,
+        16
+      ],
+      "alphaValues": [
+        255
+      ],
+      "checks": {
+        "fileExists": true,
+        "dimensionsExact": true,
+        "manifestEntryPresent": true,
+        "manifestPathMatches": true,
+        "manifestDimensionsMatch": true,
+        "sixteenExactFrames": true
+      },
+      "passed": true
+    },
+    {
+      "spriteId": "tiles/pine_leaves_tree_autotile",
+      "path": "sprites/world/tiles/pine_leaves_tree_autotile.png",
+      "sha256": "093fc25fc75e2d3d97005e9edba295663cb66ec90127f04637baec41730636ee",
+      "dimensions": [
+        256,
+        16
+      ],
+      "alphaValues": [
+        255
+      ],
+      "checks": {
+        "fileExists": true,
+        "dimensionsExact": true,
+        "manifestEntryPresent": true,
+        "manifestPathMatches": true,
+        "manifestDimensionsMatch": true,
+        "sixteenExactFrames": true
+      },
+      "passed": true
+    },
+    {
+      "spriteId": "tiles/birch_trunk_autotile",
+      "path": "sprites/world/tiles/birch_trunk_autotile.png",
+      "sha256": "3aa2c78c731a2f961ccf8eab553731ee8c9c57c59461fa5e9f097f621e141ff9",
+      "dimensions": [
+        256,
+        16
+      ],
+      "alphaValues": [
+        255
+      ],
+      "checks": {
+        "fileExists": true,
+        "dimensionsExact": true,
+        "manifestEntryPresent": true,
+        "manifestPathMatches": true,
+        "manifestDimensionsMatch": true,
+        "sixteenExactFrames": true
+      },
+      "passed": true
+    },
+    {
+      "spriteId": "tiles/birch_leaves_autotile",
+      "path": "sprites/world/tiles/birch_leaves_autotile.png",
+      "sha256": "79c792d843fa3085536b60b03aef5f5bb93cc7456e60c63aa4c471862e94e225",
+      "dimensions": [
+        256,
+        16
+      ],
+      "alphaValues": [
+        255
+      ],
+      "checks": {
+        "fileExists": true,
+        "dimensionsExact": true,
+        "manifestEntryPresent": true,
+        "manifestPathMatches": true,
+        "manifestDimensionsMatch": true,
+        "sixteenExactFrames": true
+      },
+      "passed": true
+    }
+  ]
+}

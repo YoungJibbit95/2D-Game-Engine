@@ -12,6 +12,8 @@ namespace Game.Client.UI;
 
 public sealed class GameplayFeedbackOverlay
 {
+    private readonly ActiveStatusEffect[] _visibleStatusEffects =
+        new ActiveStatusEffect[StatusEffectDockPlanner.MaximumCandidateCount];
     private MiningResult? _mining;
     private float _cooldownRemaining;
     private float _cooldownDuration;
@@ -83,20 +85,31 @@ public sealed class GameplayFeedbackOverlay
         PlayerEntity? player,
         GameSettings settings)
     {
-        DrawMiningProgress(context, camera, settings);
-        DrawCooldown(context, settings);
-        DrawMessage(context, settings);
-        DrawStatusEffects(context, player, settings);
+        var palette = UiTheme.Resolve(settings);
+        var plannedStatusCount = player is null
+            ? 0
+            : StatusEffectDockPlanner.Build(player.StatusEffects, _visibleStatusEffects);
+        var statusCount = Math.Min(
+            plannedStatusCount,
+            PixelGameplayFeedbackLayoutPlanner.MaximumVisibleStatusEffects);
+        var layout = PixelGameplayFeedbackLayoutPlanner.Resolve(context.ViewportBounds, statusCount);
+        DrawMiningProgress(context, camera, palette, settings);
+        DrawCooldown(context, palette, settings, layout.CooldownTrack);
+        DrawMessage(context, palette, settings, layout.MessagePanel);
+        DrawStatusEffects(context, palette, settings, layout, statusCount);
     }
 
-    private void DrawMiningProgress(RenderContext context, Camera2D camera, GameSettings settings)
+    private void DrawMiningProgress(
+        RenderContext context,
+        Camera2D camera,
+        UiPalette palette,
+        GameSettings settings)
     {
         if (_mining is not { } mining || (!mining.InProgress && !mining.Completed))
         {
             return;
         }
 
-        var palette = UiTheme.Resolve(settings);
         var tileWorld = new Vector2(
             mining.TilePosition.X * GameConstants.TileSize,
             mining.TilePosition.Y * GameConstants.TileSize);
@@ -126,72 +139,143 @@ public sealed class GameplayFeedbackOverlay
         }
     }
 
-    private void DrawCooldown(RenderContext context, GameSettings settings)
+    private void DrawCooldown(
+        RenderContext context,
+        UiPalette palette,
+        GameSettings settings,
+        Rectangle bounds)
     {
-        if (_cooldownRemaining <= 0 || _cooldownDuration <= 0)
+        if (_cooldownRemaining <= 0 || _cooldownDuration <= 0 || bounds.IsEmpty)
         {
             return;
         }
 
-        var palette = UiTheme.Resolve(settings);
-        var width = Math.Min(220, context.ViewportBounds.Width - 32);
-        var bounds = new Rectangle(
-            context.ViewportBounds.Center.X - width / 2,
-            context.ViewportBounds.Bottom - 76,
-            width,
-            8);
         var progress = 1f - _cooldownRemaining / _cooldownDuration;
-        UiTheme.DrawProgressBar(context, bounds, progress, palette);
+        PixelUiPrimitives.DrawMeter(
+            context,
+            bounds,
+            progress,
+            palette,
+            palette.Accent,
+            settings.Ui.HudOpacity,
+            settings,
+            segmented: true,
+            emphasized: progress >= 0.92f);
     }
 
-    private void DrawMessage(RenderContext context, GameSettings settings)
+    private void DrawMessage(
+        RenderContext context,
+        UiPalette palette,
+        GameSettings settings,
+        Rectangle bounds)
     {
-        if (string.IsNullOrWhiteSpace(_message) || _messageRemaining <= 0)
+        if (string.IsNullOrWhiteSpace(_message) || _messageRemaining <= 0 || bounds.IsEmpty)
         {
             return;
         }
 
-        var palette = UiTheme.Resolve(settings);
-        var width = Math.Min(360, context.ViewportBounds.Width - 32);
-        var bounds = new Rectangle(
-            context.ViewportBounds.Center.X - width / 2,
-            context.ViewportBounds.Bottom - 112,
-            width,
-            28);
-        context.SpriteBatch.Draw(context.Pixel, bounds, UiTheme.WithAlpha(palette.Backdrop, 0.78f));
-        UiTheme.DrawBorder(context, bounds, UiTheme.WithAlpha(palette.Warning, 0.82f), 1);
-        context.DebugText.Draw(new Vector2(bounds.X + 10, bounds.Y + 8), _message, palette.Warning, 1);
+        PixelUiPrimitives.DrawGlassSurface(
+            context,
+            bounds,
+            palette,
+            settings.Ui.HudOpacity * 0.9f,
+            settings);
+        var accent = new Rectangle(bounds.X + 4, bounds.Y + 5, 3, Math.Max(0, bounds.Height - 10));
+        UiTheme.DrawRoundedRectangle(context, accent, palette.Warning, 1);
+        context.DebugText.Draw(
+            new Vector2(bounds.X + 13, bounds.Y + Math.Max(4, (bounds.Height - 7) / 2)),
+            _message,
+            palette.Warning,
+            1);
     }
 
-    private static void DrawStatusEffects(RenderContext context, PlayerEntity? player, GameSettings settings)
+    private void DrawStatusEffects(
+        RenderContext context,
+        UiPalette palette,
+        GameSettings settings,
+        in PixelGameplayFeedbackLayout layout,
+        int count)
     {
-        if (player is null || player.StatusEffects.ActiveEffects.Count == 0)
+        if (count <= 0 || layout.StatusDock.IsEmpty)
         {
             return;
         }
 
-        var palette = UiTheme.Resolve(settings);
-        var effects = player.StatusEffects.ActiveEffects
-            .OrderBy(effect => effect.Definition.Kind)
-            .ThenBy(effect => effect.Definition.Id, StringComparer.OrdinalIgnoreCase)
-            .Take(10)
-            .ToArray();
-        var x = context.ViewportBounds.Right - 40;
-        var y = 136;
-        foreach (var effect in effects)
+        PixelUiPrimitives.DrawGlassSurface(
+            context,
+            layout.StatusDock,
+            palette,
+            settings.Ui.HudOpacity * 0.8f,
+            settings);
+        for (var index = 0; index < count; index++)
         {
-            var bounds = new Rectangle(x, y, 28, 28);
+            var effect = _visibleStatusEffects[index];
+            var bounds = layout.StatusSlot(index);
             var color = effect.Definition.Kind == StatusEffectKind.Debuff
-                ? new Color(176, 68, 76)
-                : new Color(72, 146, 103);
-            context.SpriteBatch.Draw(context.Pixel, bounds, UiTheme.WithAlpha(color, 0.92f));
-            UiTheme.DrawBorder(context, bounds, UiTheme.WithAlpha(palette.Text, 0.72f), 1);
-            var initial = string.IsNullOrWhiteSpace(effect.Definition.DisplayName)
-                ? "?"
-                : effect.Definition.DisplayName[..1].ToUpperInvariant();
-            context.DebugText.Draw(new Vector2(bounds.X + 10, bounds.Y + 6), initial, palette.Text, 2);
-            context.DebugText.Draw(new Vector2(bounds.X - 2, bounds.Bottom + 2), $"{effect.RemainingSeconds:0.0}s", palette.TextMuted, 1);
-            x -= 36;
+                ? palette.Danger
+                : new Color(72, 171, 118);
+            var urgent = effect.Definition.Kind == StatusEffectKind.Debuff && effect.RemainingSeconds <= 3f;
+            UiTheme.DrawRoundedRectangle(
+                context,
+                bounds,
+                UiTheme.WithAlpha(palette.SurfaceRaised, settings.Ui.HudOpacity * 0.94f),
+                5);
+            UiTheme.DrawRoundedBorder(
+                context,
+                bounds,
+                UiTheme.WithAlpha(urgent ? palette.Warning : color, urgent ? 1f : 0.86f),
+                5,
+                urgent ? 2 : 1);
+
+            var icon = new Rectangle(bounds.X + 6, bounds.Y + 5, Math.Max(6, bounds.Width - 12), Math.Max(6, bounds.Height - 12));
+            UiTheme.DrawRoundedRectangle(context, icon, UiTheme.WithAlpha(color, 0.24f), 3);
+            DrawStatusRune(context, icon, effect.Definition.Id, color);
+
+            var duration = Math.Max(0.001f, effect.Definition.DurationSeconds);
+            var remaining = Math.Clamp(effect.RemainingSeconds / duration, 0f, 1f);
+            var track = new Rectangle(bounds.X + 4, bounds.Bottom - 4, Math.Max(0, bounds.Width - 8), 2);
+            context.SpriteBatch.Draw(context.Pixel, track, UiTheme.WithAlpha(palette.Backdrop, 0.86f));
+            var fillWidth = (int)MathF.Round(track.Width * remaining);
+            if (fillWidth > 0)
+            {
+                context.SpriteBatch.Draw(
+                    context.Pixel,
+                    new Rectangle(track.X, track.Y, fillWidth, track.Height),
+                    urgent ? palette.Warning : color);
+            }
+        }
+    }
+
+    private static void DrawStatusRune(
+        RenderContext context,
+        Rectangle bounds,
+        string id,
+        Color color)
+    {
+        var hash = 2166136261u;
+        for (var index = 0; index < id.Length; index++)
+        {
+            hash = (hash ^ char.ToUpperInvariant(id[index])) * 16777619u;
+        }
+
+        var cell = Math.Max(1, Math.Min(bounds.Width, bounds.Height) / 4);
+        var originX = bounds.Center.X - cell * 3 / 2;
+        var originY = bounds.Center.Y - cell * 3 / 2;
+        for (var row = 0; row < 3; row++)
+        {
+            for (var column = 0; column < 3; column++)
+            {
+                var bit = row * 3 + column;
+                if (((hash >> bit) & 1u) == 0u && bit != 4)
+                {
+                    continue;
+                }
+
+                context.SpriteBatch.Draw(
+                    context.Pixel,
+                    new Rectangle(originX + column * cell, originY + row * cell, cell, cell),
+                    color);
+            }
         }
     }
 

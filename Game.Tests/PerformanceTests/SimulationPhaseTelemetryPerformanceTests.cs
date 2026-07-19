@@ -4,6 +4,7 @@ using Xunit;
 
 namespace Game.Tests.PerformanceTests;
 
+[Collection(LongSessionPerformanceCollection.Name)]
 public sealed class SimulationPhaseTelemetryPerformanceTests
 {
     [Fact]

@@ -13,6 +13,44 @@ namespace Game.Tests.EntityTests;
 public sealed class LivingWorldAiScaleTests
 {
     [Fact]
+    public void GroundEntity_StopsAtUnloadedChunkBoundary()
+    {
+        var world = new World(
+            GameConstants.ChunkSize,
+            64,
+            WorldMetadata.CreateDefault(17),
+            isHorizontallyInfinite: true);
+        for (var tileX = 0; tileX < GameConstants.ChunkSize; tileX++)
+        {
+            world.SetTile(tileX, 5, KnownTileIds.Dirt);
+        }
+
+        var definition = new EntityDefinition
+        {
+            Id = "boundary-walker",
+            DisplayName = "Boundary Walker",
+            TexturePath = "entities/boundary-walker",
+            MaxHealth = 10,
+            Width = 12,
+            Height = 10,
+            MovementMode = EntityMovementMode.Ground,
+            Ai = new AiProfileDefinition { Kind = AiBehaviorKind.None }
+        };
+        var actor = new EntityFactory(new TileCollisionResolver()).CreateEnemy(
+            definition,
+            new Vector2(GameConstants.PixelsPerChunk - 20, 70));
+        actor.Body.Velocity = new Vector2(240, 0);
+
+        actor.Update(world, 0.1f);
+
+        Assert.Equal(GameConstants.PixelsPerChunk - actor.Body.Size.X, actor.Body.Position.X);
+        Assert.Equal(0, actor.Body.Velocity.X);
+        Assert.True(world.TryGetChunk(
+            CoordinateUtils.TileToChunk(CoordinateUtils.WorldToTile(actor.Body.Center.X, actor.Body.Center.Y)),
+            out _));
+    }
+
+    [Fact]
     public void FriendlyFlock_PerchesOutsideActivityPeriodAndPublishesTelemetry()
     {
         var world = CreateGroundWorld();

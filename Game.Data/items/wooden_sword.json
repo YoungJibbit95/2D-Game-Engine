@@ -18,5 +18,11 @@
     "width": 36,
     "height": 24
   },
+  "actions": [
+    {
+      "kind": "Melee",
+      "attackSequence": "weapon.wooden_sword.combo"
+    }
+  ],
   "tags": ["weapon", "melee", "starter", "wood"]
 }

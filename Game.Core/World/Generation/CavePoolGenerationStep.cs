@@ -68,6 +68,7 @@ public sealed class CavePoolGenerationStep : IWorldGenerationStep
     private static List<PoolCandidate> FindFloorCandidates(WorldGenerationContext context, int maxDepth)
     {
         var world = context.World;
+        var tiles = context.Tiles;
         var candidates = new List<PoolCandidate>();
         var depthOffset = Math.Max(0, context.Profile.CavePoolMinDepthOffset);
         var searchDistance = Math.Max(4, maxDepth * 3);
@@ -77,12 +78,12 @@ public sealed class CavePoolGenerationStep : IWorldGenerationStep
             var minY = Math.Clamp(context.SurfaceHeights[x] + depthOffset, 1, world.HeightTiles - 2);
             for (var y = minY; y < world.HeightTiles - 2; y++)
             {
-                if (!world.GetTile(x, y).IsAir)
+                if (!tiles.GetTile(x, y).IsAir)
                 {
                     continue;
                 }
 
-                var floorY = FindFloor(world, x, y, searchDistance);
+                var floorY = FindFloor(tiles, x, y, searchDistance);
                 if (floorY > y + 1 && floorY < world.HeightTiles - 1)
                 {
                     candidates.Add(new PoolCandidate(x, floorY));
@@ -94,12 +95,13 @@ public sealed class CavePoolGenerationStep : IWorldGenerationStep
         return candidates;
     }
 
-    private static int FindFloor(World world, int x, int startY, int maxDistance)
+    private static int FindFloor(WorldGenerationWorkspace tiles, int x, int startY, int maxDistance)
     {
+        var world = tiles.World;
         var endY = Math.Min(world.HeightTiles - 1, startY + maxDistance);
         for (var y = startY + 1; y <= endY; y++)
         {
-            if (world.GetTile(x, y).IsSolid)
+            if (tiles.GetTile(x, y).IsSolid)
             {
                 return y;
             }
@@ -111,6 +113,7 @@ public sealed class CavePoolGenerationStep : IWorldGenerationStep
     private static void CarvePool(WorldGenerationContext context, int startX, int endX, int floorY, int maxDepth)
     {
         var world = context.World;
+        var tiles = context.Tiles;
         var exponent = Math.Max(0.1f, context.Profile.CavePoolBasinExponent);
         var irregularity = Math.Clamp(context.Profile.CavePoolBottomIrregularity, 0f, 1f);
         var waterLine = Math.Max(1, floorY - maxDepth);
@@ -124,23 +127,23 @@ public sealed class CavePoolGenerationStep : IWorldGenerationStep
             var noise = context.Noise.GetNoise((x - noiseOffset) * 2.7f, floorY * 2.2f);
             var depthScale = Math.Clamp(basinShape * (1f + noise * irregularity), 0f, 1.25f);
             var columnDepth = Math.Max(1, (int)MathF.Round(maxDepth * depthScale));
-            var localFloorY = FindFloor(world, x, waterLine - 1, maxDepth * 4 + 8);
+            var localFloorY = FindFloor(tiles, x, waterLine - 1, maxDepth * 4 + 8);
             if (localFloorY < 0)
             {
                 continue;
             }
 
             var bottomY = Math.Min(world.HeightTiles - 1, waterLine + columnDepth);
-            if (!world.GetTile(x, bottomY).IsSolid)
+            if (!tiles.GetTile(x, bottomY).IsSolid)
             {
-                WorldGenerationTileMutations.SetNaturalTile(world, x, bottomY, KnownTileIds.Stone);
+                WorldGenerationTileMutations.SetNaturalTile(tiles, x, bottomY, KnownTileIds.Stone);
             }
 
             for (var y = waterLine; y < bottomY; y++)
             {
                 if (world.IsInBounds(x, y) && y > context.SurfaceHeights[x] + 2)
                 {
-                    WorldGenerationTileMutations.SetLiquid(world, x, y);
+                    WorldGenerationTileMutations.SetLiquid(tiles, x, y);
                 }
             }
         }

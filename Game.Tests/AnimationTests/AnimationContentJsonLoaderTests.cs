@@ -10,7 +10,7 @@ namespace Game.Tests.AnimationTests;
 public sealed class AnimationContentJsonLoaderTests
 {
     [Fact]
-    public void LoadFromRoot_LoadsWave04RuntimeProfilesInDeterministicOrder()
+    public void LoadFromRoot_LoadsActiveWave06RuntimeProfilesInDeterministicOrder()
     {
         var contentRoot = LocateGameDataRoot();
         var result = new AnimationContentJsonLoader().LoadFromRoot(contentRoot, LoadSpriteAssets(contentRoot));
@@ -25,15 +25,18 @@ public sealed class AnimationContentJsonLoaderTests
             result.Registry.Entities.Select(profile => profile.Id).Order(StringComparer.Ordinal),
             result.Registry.Entities.Select(profile => profile.Id));
 
-        var character = result.Registry.GetCharacter("player.wave04");
-        Assert.Equal("player.character-v1.wave04", character.Rig.Id);
-        Assert.Equal("player.wave04.states", character.StateMachine.Id);
+        var character = result.Registry.GetCharacter("player.wave06");
+        Assert.Equal("player.character-v2.wave06", character.Rig.Id);
+        Assert.Equal("player.wave06.states", character.StateMachine.Id);
         Assert.Equal(
             new[] { "body", "clothes", "hair", "armor", "equipment" },
             character.Rig.Layers.Select(layer => layer.Id));
+        Assert.All(
+            character.Rig.Layers,
+            layer => Assert.Equal(new System.Numerics.Vector2(12f, 40f), layer.Pivot));
         Assert.Equal(8, character.StateMachine.Definition.Layers.Single().States.Count);
         Assert.Equal(14, result.Registry.Entities.Count);
-        Assert.Equal(8, result.Registry.Clips.Count);
+        Assert.Equal(16, result.Registry.Clips.Count);
     }
 
     [Fact]
@@ -43,7 +46,7 @@ public sealed class AnimationContentJsonLoaderTests
         var profile = new AnimationContentJsonLoader()
             .LoadFromRoot(contentRoot, LoadSpriteAssets(contentRoot))
             .Registry
-            .GetCharacter("player.wave04");
+            .GetCharacter("player.wave06");
         var machine = profile.CreateStateMachine();
 
         Assert.True(machine.TryGetCurrentState("base", out var initial));
@@ -72,8 +75,8 @@ public sealed class AnimationContentJsonLoaderTests
         Assert.Equal(20, machine.FixedTick);
 
         var appearance = profile.SpriteBindings.CreateAppearance();
-        Assert.Equal("entities/player/character_v1_wave04/body", appearance.Body.SpriteId);
-        Assert.Equal("entities/player/character_v1_wave04/equipment", appearance.Tool.SpriteId);
+        Assert.Equal("entities/player/character_v2_wave06/body", appearance.Body.SpriteId);
+        Assert.Equal("entities/player/character_v2_wave06/equipment", appearance.Tool.SpriteId);
         Assert.False(appearance.Armor.Visible);
     }
 
@@ -84,7 +87,7 @@ public sealed class AnimationContentJsonLoaderTests
         var profile = new AnimationContentJsonLoader()
             .LoadFromRoot(contentRoot, LoadSpriteAssets(contentRoot))
             .Registry
-            .GetCharacter("player.wave04");
+            .GetCharacter("player.wave06");
         var machine = profile.CreateStateMachine();
         machine.AdvanceFixedTick(new AnimationUpdateContext(CharacterFacingDirection.Right));
 
@@ -99,14 +102,47 @@ public sealed class AnimationContentJsonLoaderTests
         Assert.Equal(
             new[]
             {
-                "entities/player/character_v1_wave04/body",
-                "entities/player/character_v1_wave04/clothes",
-                "entities/player/character_v1_wave04/hair",
-                "entities/player/character_v1_wave04/equipment"
+                "entities/player/character_v2_wave06/body",
+                "entities/player/character_v2_wave06/clothes",
+                "entities/player/character_v2_wave06/hair",
+                "entities/player/character_v2_wave06/equipment"
             },
             commands.Select(command => command.SpriteId));
         Assert.All(commands, command => Assert.Equal(0, command.SpriteFrameIndex));
+        Assert.All(commands, command => Assert.Equal(new Microsoft.Xna.Framework.Vector2(12f, 40f), command.Origin));
         Assert.Equal(1, machine.FixedTick);
+    }
+
+    [Fact]
+    public void Wave06LayerSheetsShareNativeFrameRegistrationAndBaseline()
+    {
+        var contentRoot = LocateGameDataRoot();
+        var sprites = LoadSpriteAssets(contentRoot);
+        var layerIds = new[] { "body", "clothes", "hair", "armor", "equipment" };
+
+        foreach (var layerId in layerIds)
+        {
+            var sprite = sprites.GetById($"entities/player/character_v2_wave06/{layerId}");
+
+            Assert.Equal(384, sprite.Width);
+            Assert.Equal(40, sprite.Height);
+            Assert.Equal(12, sprite.OriginX);
+            Assert.Equal(40, sprite.OriginY);
+            Assert.Equal(16, sprite.Frames.Count);
+            Assert.Collection(
+                sprite.Frames,
+                Enumerable.Range(0, 16)
+                    .Select<int, Action<SpriteFrameDefinition>>(frame => definition =>
+                    {
+                        Assert.Equal(frame * 24, definition.X);
+                        Assert.Equal(0, definition.Y);
+                        Assert.Equal(24, definition.Width);
+                        Assert.Equal(40, definition.Height);
+                        Assert.Equal(12, definition.OriginX);
+                        Assert.Equal(40, definition.OriginY);
+                    })
+                    .ToArray());
+        }
     }
 
     [Fact]
@@ -186,7 +222,7 @@ public sealed class AnimationContentJsonLoaderTests
         try
         {
             CopyRuntimeDocuments(contentRoot, tempRoot, characterTransform: json => json.Replace(
-                "entities/player/character_v1_wave04/hair",
+                "entities/player/character_v2_wave06/hair",
                 "entities/critters/rabbit",
                 StringComparison.Ordinal));
 
@@ -293,10 +329,15 @@ public sealed class AnimationContentJsonLoaderTests
         var characterDirectory = Directory.CreateDirectory(Path.Combine(destinationRoot, "characters"));
         var animationJson = File.ReadAllText(
             Path.Combine(contentRoot, "animations", "wave04_runtime_profiles.json"));
+        var wave06AnimationJson = File.ReadAllText(
+            Path.Combine(contentRoot, "animations", "wave06_character_runtime_profiles.json"));
         var characterJson = File.ReadAllText(Path.Combine(contentRoot, "characters", "player.json"));
         File.WriteAllText(
             Path.Combine(animationDirectory.FullName, "wave04_runtime_profiles.json"),
             animationTransform?.Invoke(animationJson) ?? animationJson);
+        File.WriteAllText(
+            Path.Combine(animationDirectory.FullName, "wave06_character_runtime_profiles.json"),
+            animationTransform?.Invoke(wave06AnimationJson) ?? wave06AnimationJson);
         File.WriteAllText(
             Path.Combine(characterDirectory.FullName, "player.json"),
             characterTransform?.Invoke(characterJson) ?? characterJson);

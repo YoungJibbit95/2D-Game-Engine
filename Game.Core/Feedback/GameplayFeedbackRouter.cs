@@ -1,6 +1,8 @@
 using Game.Core.Actions;
 using Game.Core.Audio;
+using Game.Core.Combat;
 using Game.Core.Events;
+using Game.Core.Projectiles;
 using Game.Core.World;
 using System.Numerics;
 
@@ -77,6 +79,114 @@ public sealed class GameplayFeedbackRouter : IDisposable
         _miningBuckets.Clear();
     }
 
+    public void RouteCombatEvents(IReadOnlyList<ICombatEvent> events)
+    {
+        ArgumentNullException.ThrowIfNull(events);
+        for (var index = 0; index < events.Count; index++)
+        {
+            RouteCombatEvent(events[index]);
+        }
+    }
+
+    public void RouteCombatEvent(ICombatEvent combatEvent)
+    {
+        ArgumentNullException.ThrowIfNull(combatEvent);
+        switch (combatEvent)
+        {
+            case CombatParriedEvent parried:
+                OnCombatParried(parried);
+                break;
+            case CombatBlockedEvent blocked:
+                OnCombatBlocked(blocked);
+                break;
+            case GuardBrokenCombatEvent broken:
+                OnGuardBroken(broken);
+                break;
+        }
+    }
+
+    public void RouteCombatEvent(in CombatParriedEvent combatEvent)
+    {
+        OnCombatParried(combatEvent);
+    }
+
+    public void RouteCombatEvent(in CombatBlockedEvent combatEvent)
+    {
+        OnCombatBlocked(combatEvent);
+    }
+
+    public void RouteCombatEvent(in GuardBrokenCombatEvent combatEvent)
+    {
+        OnGuardBroken(combatEvent);
+    }
+
+    public void RouteProjectileMotion(string projectileId, in ProjectileMotionResult result)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(projectileId);
+        if (result.Expired && result.TerminationReason == ProjectileTerminationReason.LifetimeExpired)
+        {
+            Enqueue(new GameplayFeedbackCue(
+                GameplayFeedbackCueKind.ProjectileExpired,
+                result.Position,
+                0.55f,
+                ContentId: projectileId));
+        }
+    }
+
+    public void RouteProjectileTileCollision(string projectileId, in ProjectileTileCollisionResult result)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(projectileId);
+        switch (result.Decision)
+        {
+            case ProjectileTileCollisionDecision.Bounced:
+                Enqueue(new GameplayFeedbackCue(
+                    GameplayFeedbackCueKind.ProjectileBounced,
+                    result.Position,
+                    Math.Clamp(0.55f + result.Velocity.Length() / 480f, 0.55f, 1.35f),
+                    result.RemainingBounces,
+                    projectileId));
+                break;
+            case ProjectileTileCollisionDecision.Destroyed:
+                Enqueue(new GameplayFeedbackCue(
+                    GameplayFeedbackCueKind.ProjectileDestroyed,
+                    result.Position,
+                    0.85f,
+                    ContentId: projectileId));
+                break;
+        }
+    }
+
+    public void RouteProjectileEntityCollision(
+        string projectileId,
+        int targetEntityId,
+        in ProjectileEntityCollisionResult result)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(projectileId);
+        if (targetEntityId < 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(targetEntityId));
+        }
+
+        switch (result.Decision)
+        {
+            case ProjectileEntityCollisionDecision.Hit:
+                EnqueueAtEntity(
+                    GameplayFeedbackCueKind.ProjectilePierced,
+                    targetEntityId,
+                    result.RemainingPierces,
+                    projectileId,
+                    0.8f);
+                break;
+            case ProjectileEntityCollisionDecision.HitAndStopped:
+                EnqueueAtEntity(
+                    GameplayFeedbackCueKind.ProjectileDestroyed,
+                    targetEntityId,
+                    contentId: projectileId,
+                    intensity: 0.9f);
+                break;
+        }
+    }
+
     public void Dispose()
     {
         if (_disposed)
@@ -109,6 +219,9 @@ public sealed class GameplayFeedbackRouter : IDisposable
             EnqueueAtEntity(GameplayFeedbackCueKind.MeleeHit, gameEvent.TargetEntityId, gameEvent.Damage)));
         _subscriptions.Add(events.Subscribe<ProjectileHitEvent>(gameEvent =>
             EnqueueAtEntity(GameplayFeedbackCueKind.ProjectileHit, gameEvent.TargetEntityId, gameEvent.Damage)));
+        _subscriptions.Add(events.Subscribe<CombatParriedEvent>(OnCombatParried));
+        _subscriptions.Add(events.Subscribe<CombatBlockedEvent>(OnCombatBlocked));
+        _subscriptions.Add(events.Subscribe<GuardBrokenCombatEvent>(OnGuardBroken));
         _subscriptions.Add(events.Subscribe<EntityDiedEvent>(gameEvent =>
             EnqueueAtEntity(GameplayFeedbackCueKind.EntityDeath, gameEvent.EntityId, contentId: gameEvent.DefinitionId)));
         _subscriptions.Add(events.Subscribe<ItemPickedUpEvent>(OnItemPickedUp));
@@ -150,7 +263,15 @@ public sealed class GameplayFeedbackRouter : IDisposable
         }));
         _subscriptions.Add(events.Subscribe<PlayerItemUseCompletedEvent>(gameEvent =>
         {
-            if (gameEvent.Kind == PlayerItemUseKind.Consume &&
+            if (gameEvent.Reason == GameplayActionSuccessReason.ProjectileSpawned)
+            {
+                Enqueue(new GameplayFeedbackCue(
+                    GameplayFeedbackCueKind.ProjectileLaunched,
+                    gameEvent.TargetWorldPosition,
+                    0.7f,
+                    ContentId: gameEvent.ItemId));
+            }
+            else if (gameEvent.Kind == PlayerItemUseKind.Consume &&
                 gameEvent.HealthRestored + gameEvent.ManaRestored + gameEvent.StatusEffectsApplied > 0)
             {
                 Enqueue(new GameplayFeedbackCue(
@@ -171,6 +292,31 @@ public sealed class GameplayFeedbackRouter : IDisposable
             TileCenter(gameEvent.Position),
             0.35f,
             ContentId: gameEvent.TileId.ToString()));
+    }
+
+    private void OnCombatParried(CombatParriedEvent gameEvent)
+    {
+        EnqueueAtEntity(
+            GameplayFeedbackCueKind.CombatParried,
+            gameEvent.TargetEntityId,
+            intensity: 1.35f);
+    }
+
+    private void OnCombatBlocked(CombatBlockedEvent gameEvent)
+    {
+        EnqueueAtEntity(
+            GameplayFeedbackCueKind.CombatBlocked,
+            gameEvent.TargetEntityId,
+            gameEvent.DamageApplied,
+            intensity: Math.Clamp(0.7f + gameEvent.GuardStaminaSpent / 40f, 0.7f, 1.35f));
+    }
+
+    private void OnGuardBroken(GuardBrokenCombatEvent gameEvent)
+    {
+        EnqueueAtEntity(
+            GameplayFeedbackCueKind.GuardBroken,
+            gameEvent.TargetEntityId,
+            intensity: Math.Clamp(1.2f + gameEvent.BreakDurationSeconds * 0.25f, 1.2f, 1.75f));
     }
 
     private void OnMiningProgress(MiningProgressEvent gameEvent)
@@ -239,12 +385,13 @@ public sealed class GameplayFeedbackRouter : IDisposable
         GameplayFeedbackCueKind kind,
         int entityId,
         int amount = 0,
-        string? contentId = null)
+        string? contentId = null,
+        float intensity = 1f)
     {
         var position = _entityPositionResolver?.Invoke(entityId);
         if (position.HasValue)
         {
-            Enqueue(new GameplayFeedbackCue(kind, position.Value, 1f, amount, contentId));
+            Enqueue(new GameplayFeedbackCue(kind, position.Value, intensity, amount, contentId));
         }
     }
 
@@ -282,6 +429,14 @@ public sealed class GameplayFeedbackRouter : IDisposable
             GameplayFeedbackCueKind.StatusEffectApplied => "gameplay.status.applied",
             GameplayFeedbackCueKind.WorldEventActivated => "gameplay.world-event.activated",
             GameplayFeedbackCueKind.ActionBlocked => "gameplay.action.blocked",
+            GameplayFeedbackCueKind.CombatBlocked => "gameplay.combat.blocked",
+            GameplayFeedbackCueKind.CombatParried => "gameplay.combat.parried",
+            GameplayFeedbackCueKind.GuardBroken => "gameplay.combat.guard-broken",
+            GameplayFeedbackCueKind.ProjectileLaunched => "gameplay.projectile.launched",
+            GameplayFeedbackCueKind.ProjectileBounced => "gameplay.projectile.bounced",
+            GameplayFeedbackCueKind.ProjectilePierced => "gameplay.projectile.pierced",
+            GameplayFeedbackCueKind.ProjectileExpired => "gameplay.projectile.expired",
+            GameplayFeedbackCueKind.ProjectileDestroyed => "gameplay.projectile.destroyed",
             _ => null
         };
         if (audioId is null)
@@ -293,7 +448,9 @@ public sealed class GameplayFeedbackRouter : IDisposable
         var important = cue.Kind is GameplayFeedbackCueKind.WorldEventActivated or
             GameplayFeedbackCueKind.RareItemPickup or
             GameplayFeedbackCueKind.RareLootDropped or
-            GameplayFeedbackCueKind.EntityDeath;
+            GameplayFeedbackCueKind.EntityDeath or
+            GameplayFeedbackCueKind.CombatParried or
+            GameplayFeedbackCueKind.GuardBroken;
         var volume = Math.Clamp(0.45f + cue.Intensity * 0.25f, 0.25f, 1f);
         audio = new GameplayAudioCue(
             cue.Kind,
@@ -301,7 +458,7 @@ public sealed class GameplayFeedbackRouter : IDisposable
             AudioBus.Sfx,
             cue.WorldPosition,
             volume,
-            Pitch: cue.Kind == GameplayFeedbackCueKind.ActionBlocked ? -0.15f : 0f,
+            Pitch: ResolvePitch(cue.Kind),
             Priority: important ? 90 : 55,
             CooldownSeconds: ResolveCooldown(cue.Kind),
             IsSpatial: cue.Kind != GameplayFeedbackCueKind.WorldEventActivated,
@@ -318,6 +475,26 @@ public sealed class GameplayFeedbackRouter : IDisposable
             GameplayFeedbackCueKind.ItemPickup => 0.03f,
             GameplayFeedbackCueKind.RareItemPickup or GameplayFeedbackCueKind.LootDropped or
                 GameplayFeedbackCueKind.RareLootDropped => 0.025f,
+            GameplayFeedbackCueKind.CombatBlocked => 0.08f,
+            GameplayFeedbackCueKind.CombatParried => 0.06f,
+            GameplayFeedbackCueKind.GuardBroken => 0.2f,
+            GameplayFeedbackCueKind.ProjectileLaunched or GameplayFeedbackCueKind.ProjectilePierced => 0.03f,
+            GameplayFeedbackCueKind.ProjectileBounced or GameplayFeedbackCueKind.ProjectileDestroyed => 0.04f,
+            GameplayFeedbackCueKind.ProjectileExpired => 0.08f,
+            _ => 0f
+        };
+    }
+
+    private static float ResolvePitch(GameplayFeedbackCueKind kind)
+    {
+        return kind switch
+        {
+            GameplayFeedbackCueKind.ActionBlocked => -0.15f,
+            GameplayFeedbackCueKind.CombatBlocked => -0.05f,
+            GameplayFeedbackCueKind.CombatParried => 0.16f,
+            GameplayFeedbackCueKind.GuardBroken => -0.22f,
+            GameplayFeedbackCueKind.ProjectileBounced => 0.1f,
+            GameplayFeedbackCueKind.ProjectileExpired => -0.1f,
             _ => 0f
         };
     }

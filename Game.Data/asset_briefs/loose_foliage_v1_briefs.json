@@ -1,0 +1,53 @@
+{
+  "version": 1,
+  "scope": "loose_foliage_v1",
+  "globalStyle": "YjsE yjse-pixel-v1 loose side-view foliage with binary alpha and broad readable clusters.",
+  "generator": "art_direction/tools/generate_loose_foliage_v1.py",
+  "briefs": [
+    {
+      "spriteId": "tiles/loose_oak_leaves_v1_autotile",
+      "outputPath": "Assets/LooseFoliageV1/loose_oak_leaves_v1_autotile.png",
+      "width": 256,
+      "height": 16,
+      "subject": "Loose Oak Leaf Canopy",
+      "prompt": "Create an original loose oak-leaf 16-mask YjsE autotile sheet with large readable clusters and transparent exposed air gaps.",
+      "requirements": [
+        "Export exactly sixteen 16x16 frames in top-right-bottom-left mask order 0-15.",
+        "Use binary alpha only and preserve transparent exposed corners and boundaries.",
+        "Connect matching sides through a stable five-pixel leaf bridge.",
+        "Use the forest green palette without raster scaling, filtering or third-party source material."
+      ],
+      "tags": ["production", "runtime-active", "foliage", "autotile", "oak"]
+    },
+    {
+      "spriteId": "tiles/loose_autumn_leaves_v1_autotile",
+      "outputPath": "Assets/LooseFoliageV1/loose_autumn_leaves_v1_autotile.png",
+      "width": 256,
+      "height": 16,
+      "subject": "Loose Autumn Leaf Canopy",
+      "prompt": "Create an original loose autumn-leaf 16-mask YjsE autotile sheet with large readable clusters and transparent exposed air gaps.",
+      "requirements": [
+        "Export exactly sixteen 16x16 frames in top-right-bottom-left mask order 0-15.",
+        "Use binary alpha only and preserve transparent exposed corners and boundaries.",
+        "Connect matching sides through a stable five-pixel leaf bridge.",
+        "Use the Amber Grove orange-gold palette without raster scaling, filtering or third-party source material."
+      ],
+      "tags": ["production", "runtime-active", "foliage", "autotile", "autumn"]
+    },
+    {
+      "spriteId": "tiles/loose_marsh_leaves_v1_autotile",
+      "outputPath": "Assets/LooseFoliageV1/loose_marsh_leaves_v1_autotile.png",
+      "width": 256,
+      "height": 16,
+      "subject": "Loose Marsh Leaf Canopy",
+      "prompt": "Create an original loose marsh-leaf 16-mask YjsE autotile sheet with large readable clusters and transparent exposed air gaps.",
+      "requirements": [
+        "Export exactly sixteen 16x16 frames in top-right-bottom-left mask order 0-15.",
+        "Use binary alpha only and preserve transparent exposed corners and boundaries.",
+        "Connect matching sides through a stable five-pixel leaf bridge.",
+        "Use the Twilight Marsh teal palette without raster scaling, filtering or third-party source material."
+      ],
+      "tags": ["production", "runtime-active", "foliage", "autotile", "marsh"]
+    }
+  ]
+}

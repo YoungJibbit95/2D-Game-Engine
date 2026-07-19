@@ -587,7 +587,7 @@ public sealed class GameContentLoaderTests : IDisposable
         Assert.Contains(startup.StarterItems, item => item.ItemId == "copper_pickaxe");
         Assert.True(result.Database.Animations.TryGetById("player.walk", out _));
         Assert.NotNull(result.Database.RuntimeAnimations);
-        Assert.True(result.Database.RuntimeAnimations.TryGetCharacter("player.wave04", out var runtimePlayer));
+        Assert.True(result.Database.RuntimeAnimations.TryGetCharacter("player.wave06", out var runtimePlayer));
         Assert.Equal(5, runtimePlayer.Rig.Layers.Count);
         Assert.Equal(14, result.Database.RuntimeAnimations.Entities.Count);
         Assert.True(result.Database.Characters.TryGetById("player", out var player));
@@ -596,8 +596,17 @@ public sealed class GameContentLoaderTests : IDisposable
         Assert.Equal(3, fireflyBloom.Phases.Count);
         Assert.True(result.Database.WorldEvents.TryGetById("crystal_surge", out _));
         Assert.True(result.Database.Biomes.TryGetById("amber_grove", out var amberGrove));
-        Assert.Equal("world/backgrounds/wave05/amber_grove", amberGrove.Presentation.BackgroundSpriteId);
+        Assert.Equal("world/backgrounds/amber_grove_parallax_layer_v5", amberGrove.Presentation.BackgroundSpriteId);
         Assert.True(result.Database.Biomes.TryGetById("twilight_marsh", out _));
+        Assert.Equal("world/tiles/polish_v1/forest_grass_loam_autotile", result.Database.Tiles.GetById("grass").TexturePath);
+        Assert.Equal("world/tiles/polish_v1/forest_loam_autotile", result.Database.Tiles.GetById("dirt").TexturePath);
+        Assert.Equal("world/tiles/polish_v1/layered_stone_autotile", result.Database.Tiles.GetById("stone").TexturePath);
+        Assert.Equal("world/tiles/polish_v1/amberstone_autotile", result.Database.Tiles.GetById("amberstone").TexturePath);
+        Assert.Equal("world/tiles/polish_v1/marsh_moss_autotile", result.Database.Tiles.GetById("marsh_moss").TexturePath);
+        Assert.Equal("world/tiles/polish_v1/amberwood_plank_autotile", result.Database.Tiles.GetById("amberwood_plank").TexturePath);
+        Assert.Equal("world/tiles/polish_v1/amberstone_autotile", result.Database.Items.GetById("amberstone_block").TexturePath);
+        Assert.Equal("world/tiles/polish_v1/marsh_moss_autotile", result.Database.Items.GetById("marsh_moss_block").TexturePath);
+        Assert.Equal("world/tiles/polish_v1/amberwood_plank_autotile", result.Database.Items.GetById("amberwood_plank_block").TexturePath);
         Assert.False(result.Database.Tiles.GetById("mangrove_root").Solid);
         Assert.Equal(70, result.Database.Items.GetById("sunsteel_pickaxe").ToolPower);
         Assert.Equal("anvil", result.Database.Recipes.GetById("mirror_shield").Station);

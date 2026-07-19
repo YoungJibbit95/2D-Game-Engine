@@ -7,4 +7,5 @@ public readonly record struct ChunkRenderCommand(
     int LocalX,
     int LocalY,
     TileInstance Tile,
-    AutoTileMask AutoTileMask);
+    AutoTileMask AutoTileMask,
+    byte VisualVariant = 0);

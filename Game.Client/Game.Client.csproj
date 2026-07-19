@@ -5,6 +5,11 @@
     <RootNamespace>Game.Client</RootNamespace>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+    <Optimize>true</Optimize>
+    <DebugType>portable</DebugType>
+  </PropertyGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\Game.Core\Game.Core.csproj" />
   </ItemGroup>

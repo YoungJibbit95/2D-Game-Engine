@@ -2,7 +2,11 @@ namespace Game.Core.Saving;
 
 public sealed record WorldSaveMetadata
 {
-    public int FormatVersion { get; init; } = 2;
+    public int FormatVersion { get; init; } = 3;
+
+    public int GenerationVersion { get; init; } = Game.Core.World.Generation.WorldGenerationVersions.Legacy;
+
+    public string GenerationProfileId { get; init; } = string.Empty;
 
     public required string Name { get; init; }
 

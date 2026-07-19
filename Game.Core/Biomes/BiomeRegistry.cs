@@ -1,4 +1,4 @@
-﻿using Game.Core.Data;
+using Game.Core.Data;
 
 namespace Game.Core.Biomes;
 
@@ -55,6 +55,11 @@ public sealed class BiomeRegistry
         RequireText(definition.DisplayName, nameof(definition.DisplayName));
         RequireText(definition.SurfaceTile, nameof(definition.SurfaceTile));
         RequireText(definition.UndergroundTile, nameof(definition.UndergroundTile));
+        if (!string.IsNullOrWhiteSpace(definition.TreeType))
+        {
+            RequireText(definition.TreeMaterial.TrunkTile, nameof(definition.TreeMaterial.TrunkTile));
+            RequireText(definition.TreeMaterial.CanopyTile, nameof(definition.TreeMaterial.CanopyTile));
+        }
 
         if (definition.SelectionWeight <= 0)
         {

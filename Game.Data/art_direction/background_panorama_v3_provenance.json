@@ -1,0 +1,87 @@
+{
+  "schemaVersion": 1,
+  "waveId": "background_panorama_v3_imagegen",
+  "generatedOn": "2026-07-15",
+  "styleContract": "art_direction/yjse_pixel_style.json",
+  "briefPath": "asset_briefs/production_background_panorama_v3_briefs.json",
+  "toolPath": "built-in image_gen (imagegen skill default mode)",
+  "postProcessing": {
+    "crop": "Centered 4:1 crop from each 1983x793 generated source using box [0, 149, 1983, 644].",
+    "logicalRaster": [
+      256,
+      64
+    ],
+    "deliveryRaster": [
+      512,
+      128
+    ],
+    "resampling": "Nearest-neighbor source-to-logical resize and nearest-neighbor 2x delivery resize.",
+    "palette": "No-dither quantization to colors declared by yjse-pixel-v1.",
+    "seam": "Half-width horizontal offset at logical x=128, 72-logical-pixel palette-quantized transition over the source boundary, and byte-identical outer columns.",
+    "alpha": "Forced opaque RGBA alpha value 255."
+  },
+  "assets": [
+    {
+      "spriteId": "world/backgrounds/forest_parallax_layer_v3",
+      "path": "sprites/world/backgrounds/forest_parallax_layer_v3.png",
+      "sha256": "78c063776aad56f11784d1e0aa715b573e5ad9c91f34cca177e8b3653427c8ae",
+      "dimensions": [
+        512,
+        128
+      ],
+      "sourcePromptId": "background_panorama_v3_forest_imagegen",
+      "generatedSourceId": "019f65ca-97ba-79b3-b04c-9bb8bdee8245/exec-6511e021-2750-4374-9f5c-69acc110066d.png",
+      "generatedSourceSha256": "0b216b1c4304fc0350bc160c3454c08bc363a7aab559fb4e19e4ab372986203b",
+      "generatedSourceDimensions": [
+        1983,
+        793
+      ],
+      "cropBox": [
+        0,
+        149,
+        1983,
+        644
+      ],
+      "uniqueColorCount": 44,
+      "paletteMismatchCount": 0,
+      "alphaValues": [
+        255
+      ],
+      "horizontalSeamColumnsEqual": true,
+      "license": "YjsE-Project-Owned",
+      "runtimeIdTarget": "world/backgrounds/forest_parallax_layer_v3",
+      "runtimeConsumer": "Main sprite manifest preload; existing forest IDs remain unchanged."
+    },
+    {
+      "spriteId": "world/backgrounds/cave_parallax_layer_v3",
+      "path": "sprites/world/backgrounds/cave_parallax_layer_v3.png",
+      "sha256": "e2ad770682d74bbf410dd3cb9de2a438978e7db5f54b0240e2b269577fa3a3a7",
+      "dimensions": [
+        512,
+        128
+      ],
+      "sourcePromptId": "background_panorama_v3_cave_imagegen",
+      "generatedSourceId": "019f65ca-97ba-79b3-b04c-9bb8bdee8245/exec-b0468045-0671-414a-a803-334f9e0c9028.png",
+      "generatedSourceSha256": "4944d3f4e2566a8dc6840dc5bb20a6f680efea768451de62caf74fe25cc9be50",
+      "generatedSourceDimensions": [
+        1983,
+        793
+      ],
+      "cropBox": [
+        0,
+        149,
+        1983,
+        644
+      ],
+      "uniqueColorCount": 29,
+      "paletteMismatchCount": 0,
+      "alphaValues": [
+        255
+      ],
+      "horizontalSeamColumnsEqual": true,
+      "license": "YjsE-Project-Owned",
+      "runtimeIdTarget": "world/backgrounds/cave_parallax_layer_v3",
+      "runtimeConsumer": "Main sprite manifest preload; existing cave IDs remain unchanged."
+    }
+  ]
+}

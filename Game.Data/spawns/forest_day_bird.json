@@ -3,8 +3,8 @@
   "entityId": "bird",
   "biomeId": "forest",
   "requiresNight": false,
+  "habitats": ["surface"],
   "minTileY": 0,
-  "maxTileY": 96,
   "chance": 0.12,
   "maxActive": 4
 }

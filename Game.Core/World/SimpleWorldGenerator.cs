@@ -19,6 +19,7 @@ public sealed class SimpleWorldGenerator
     public World Generate(int widthTiles, int heightTiles, int seed)
     {
         var world = new World(widthTiles, heightTiles, WorldMetadata.CreateDefault(seed));
+        var tiles = new WorldGenerationWorkspace(world);
         var noise = _noiseFactory(seed);
 
         var baseSurfaceY = Math.Clamp(heightTiles / 3, 4, heightTiles - 8);
@@ -39,13 +40,13 @@ public sealed class SimpleWorldGenerator
                         ? KnownTileIds.Dirt
                         : KnownTileIds.Stone;
 
-                world.SetTile(x, y, TileInstance.FromTileId(tileId, TileFlags.IsNatural));
+                tiles.SetTile(x, y, TileInstance.FromTileId(tileId, TileFlags.IsNatural));
             }
         }
 
         var spawnTile = new Generation.SpawnPointFinder().FindSurfaceSpawn(world);
         world.SetMetadata(world.Metadata with { SpawnTile = spawnTile });
-        ClearGenerationDirtyFlags(world);
+        world.ClearAllDirtyFlags();
         return world;
     }
 
@@ -62,11 +63,4 @@ public sealed class SimpleWorldGenerator
         }
     }
 
-    private static void ClearGenerationDirtyFlags(World world)
-    {
-        foreach (var chunk in world.Chunks.Values)
-        {
-            chunk.ClearDirtyFlags();
-        }
-    }
 }

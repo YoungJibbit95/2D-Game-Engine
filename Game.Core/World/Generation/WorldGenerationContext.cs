@@ -11,6 +11,7 @@ public sealed class WorldGenerationContext
         Random = random;
         Noise = noise;
         Profile = profile ?? WorldGenerationProfile.ForDimensions(world.WidthTiles, world.HeightTiles);
+        Tiles = new WorldGenerationWorkspace(world);
         SurfaceHeights = new int[world.WidthTiles];
         Biomes = new BiomeMap("forest");
     }
@@ -24,6 +25,8 @@ public sealed class WorldGenerationContext
     public INoiseService Noise { get; }
 
     public WorldGenerationProfile Profile { get; }
+
+    public WorldGenerationWorkspace Tiles { get; }
 
     public int[] SurfaceHeights { get; }
 

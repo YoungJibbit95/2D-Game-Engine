@@ -1,4 +1,4 @@
-﻿namespace Game.Core.Biomes;
+namespace Game.Core.Biomes;
 
 public sealed record BiomeDefinition
 {
@@ -11,6 +11,8 @@ public sealed record BiomeDefinition
     public required string UndergroundTile { get; init; }
 
     public string? TreeType { get; init; }
+
+    public BiomeTreeMaterialProfile TreeMaterial { get; init; } = new();
 
     public string? EnemySpawnTable { get; init; }
 
@@ -35,6 +37,13 @@ public sealed record BiomeDefinition
     public BiomePresentationProfile Presentation { get; init; } = new();
 
     public IReadOnlyList<SubBiomeDefinition> SubBiomes { get; init; } = Array.Empty<SubBiomeDefinition>();
+}
+
+public sealed record BiomeTreeMaterialProfile
+{
+    public string TrunkTile { get; init; } = "wood";
+
+    public string CanopyTile { get; init; } = "leaves";
 }
 
 public sealed record BiomeClimateProfile

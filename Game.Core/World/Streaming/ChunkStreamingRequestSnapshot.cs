@@ -7,29 +7,17 @@ public sealed record ChunkStreamingRequestSnapshot(
     long RequestSequence,
     RectI VisibleTileArea,
     ChunkPos CenterChunk,
-    IReadOnlySet<ChunkPos> RequiredChunks,
-    IReadOnlySet<ChunkPos> RetainedChunks,
+    ChunkWindowSet RequiredChunks,
+    ChunkWindowSet RetainedChunks,
     IReadOnlyList<ChunkPos> ChunksToLoad,
     IReadOnlyList<ChunkPos> ChunksToUnload)
 {
     public ChunkStreamingPlan ToPlan()
     {
-        var loads = new HashSet<ChunkPos>();
-        foreach (var position in ChunksToLoad)
-        {
-            loads.Add(position);
-        }
-
-        var unloads = new HashSet<ChunkPos>();
-        foreach (var position in ChunksToUnload)
-        {
-            unloads.Add(position);
-        }
-
         return new ChunkStreamingPlan(
             RequiredChunks,
-            loads,
-            unloads);
+            new ChunkPositionListSet(ChunksToLoad),
+            new ChunkPositionListSet(ChunksToUnload));
     }
 }
 

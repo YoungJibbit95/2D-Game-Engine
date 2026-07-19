@@ -2,9 +2,9 @@ namespace Game.Core.World.Generation;
 
 internal static class WorldGenerationTileMutations
 {
-    public static void SetLiquid(World world, int x, int y, byte amount = byte.MaxValue)
+    public static void SetLiquid(WorldGenerationWorkspace tiles, int x, int y, byte amount = byte.MaxValue)
     {
-        var current = world.GetTile(x, y);
+        var current = tiles.GetTile(x, y);
         var liquid = TileInstance.Liquid(amount);
         liquid.WallId = current.WallId;
         if (liquid.WallId != 0)
@@ -12,12 +12,12 @@ internal static class WorldGenerationTileMutations
             liquid.Flags |= TileFlags.HasWall;
         }
 
-        world.SetTile(x, y, liquid);
+        tiles.SetTile(x, y, liquid);
     }
 
-    public static void SetWall(World world, int x, int y, ushort wallId)
+    public static void SetWall(WorldGenerationWorkspace tiles, int x, int y, ushort wallId)
     {
-        var tile = world.GetTile(x, y);
+        var tile = tiles.GetTile(x, y);
         tile.WallId = wallId;
         if (wallId == 0)
         {
@@ -28,12 +28,12 @@ internal static class WorldGenerationTileMutations
             tile.Flags |= TileFlags.HasWall;
         }
 
-        world.SetTile(x, y, tile);
+        tiles.SetTile(x, y, tile);
     }
 
-    public static void SetNaturalTile(World world, int x, int y, ushort tileId)
+    public static void SetNaturalTile(WorldGenerationWorkspace tiles, int x, int y, ushort tileId)
     {
-        var current = world.GetTile(x, y);
+        var current = tiles.GetTile(x, y);
         var tile = TileInstance.FromTileId(tileId, TileFlags.IsNatural);
         tile.WallId = current.WallId;
         if (tile.WallId != 0)
@@ -41,6 +41,6 @@ internal static class WorldGenerationTileMutations
             tile.Flags |= TileFlags.HasWall;
         }
 
-        world.SetTile(x, y, tile);
+        tiles.SetTile(x, y, tile);
     }
 }

@@ -1,0 +1,313 @@
+{
+  "version": 1,
+  "scope": "background_depth_v6",
+  "globalStyle": "Project-owned authored panorama color with binary-alpha, seam-safe depth extraction and point sampling.",
+  "globalRequirements": [
+    "Keep exact declared dimensions and horizontal wrapping.",
+    "Use only alpha 0 or 255 so strict pixel-art sampling remains deterministic.",
+    "Dissolve authored sky pixels gradually so stacked Mid/Near planes have no rectangular top cutoff.",
+    "Keep Far, Mid and Near runtime textures independent and source-rectangle based."
+  ],
+  "briefs": [
+    {
+      "spriteId": "world/backgrounds/depth_v6/forest_far",
+      "outputPath": "Assets/BackgroundDepthV6/forest_far.png",
+      "width": 1536,
+      "height": 384,
+      "subject": "forest far",
+      "prompt": "Remove the authored sky from this project-owned panorama and retain a seam-safe binary-alpha mountain/canopy silhouette.",
+      "requirements": [
+        "Preserve the source panorama palette and horizontal seam.",
+        "Keep alpha binary and remove the hard rectangular sky edge.",
+        "Activate through runtime ID world/backgrounds/depth_v6/forest_far."
+      ],
+      "tags": [
+        "world",
+        "background",
+        "parallax",
+        "depth-plane",
+        "far",
+        "forest",
+        "binary-alpha",
+        "runtime-active",
+        "version-6"
+      ],
+      "runtimeIdTarget": "world/backgrounds/depth_v6/forest_far"
+    },
+    {
+      "spriteId": "world/backgrounds/depth_v6/forest_mid",
+      "outputPath": "Assets/BackgroundDepthV6/forest_mid.png",
+      "width": 1024,
+      "height": 256,
+      "subject": "forest mid",
+      "prompt": "Derive one seam-safe pixel-art depth plane from the declared project-owned panorama with a stable binary dissolve into transparent sky.",
+      "requirements": [
+        "Preserve the source panorama palette and horizontal seam.",
+        "Keep alpha binary and remove the hard rectangular sky edge.",
+        "Activate through runtime ID world/backgrounds/depth_v6/forest_mid."
+      ],
+      "tags": [
+        "world",
+        "background",
+        "parallax",
+        "depth-plane",
+        "mid",
+        "forest",
+        "binary-alpha",
+        "runtime-active",
+        "version-6"
+      ],
+      "runtimeIdTarget": "world/backgrounds/depth_v6/forest_mid"
+    },
+    {
+      "spriteId": "world/backgrounds/depth_v6/forest_near",
+      "outputPath": "Assets/BackgroundDepthV6/forest_near.png",
+      "width": 512,
+      "height": 128,
+      "subject": "forest near",
+      "prompt": "Derive one seam-safe pixel-art depth plane from the declared project-owned panorama with a stable binary dissolve into transparent sky.",
+      "requirements": [
+        "Preserve the source panorama palette and horizontal seam.",
+        "Keep alpha binary and remove the hard rectangular sky edge.",
+        "Activate through runtime ID world/backgrounds/depth_v6/forest_near."
+      ],
+      "tags": [
+        "world",
+        "background",
+        "parallax",
+        "depth-plane",
+        "near",
+        "forest",
+        "binary-alpha",
+        "runtime-active",
+        "version-6"
+      ],
+      "runtimeIdTarget": "world/backgrounds/depth_v6/forest_near"
+    },
+    {
+      "spriteId": "world/backgrounds/depth_v6/amber_far",
+      "outputPath": "Assets/BackgroundDepthV6/amber_far.png",
+      "width": 1536,
+      "height": 384,
+      "subject": "amber far",
+      "prompt": "Remove the authored sky from this project-owned panorama and retain a seam-safe binary-alpha mountain/canopy silhouette.",
+      "requirements": [
+        "Preserve the source panorama palette and horizontal seam.",
+        "Keep alpha binary and remove the hard rectangular sky edge.",
+        "Activate through runtime ID world/backgrounds/depth_v6/amber_far."
+      ],
+      "tags": [
+        "world",
+        "background",
+        "parallax",
+        "depth-plane",
+        "far",
+        "amber",
+        "binary-alpha",
+        "runtime-active",
+        "version-6"
+      ],
+      "runtimeIdTarget": "world/backgrounds/depth_v6/amber_far"
+    },
+    {
+      "spriteId": "world/backgrounds/depth_v6/amber_mid",
+      "outputPath": "Assets/BackgroundDepthV6/amber_mid.png",
+      "width": 1024,
+      "height": 256,
+      "subject": "amber mid",
+      "prompt": "Derive one seam-safe pixel-art depth plane from the declared project-owned panorama with a stable binary dissolve into transparent sky.",
+      "requirements": [
+        "Preserve the source panorama palette and horizontal seam.",
+        "Keep alpha binary and remove the hard rectangular sky edge.",
+        "Activate through runtime ID world/backgrounds/depth_v6/amber_mid."
+      ],
+      "tags": [
+        "world",
+        "background",
+        "parallax",
+        "depth-plane",
+        "mid",
+        "amber",
+        "binary-alpha",
+        "runtime-active",
+        "version-6"
+      ],
+      "runtimeIdTarget": "world/backgrounds/depth_v6/amber_mid"
+    },
+    {
+      "spriteId": "world/backgrounds/depth_v6/amber_near",
+      "outputPath": "Assets/BackgroundDepthV6/amber_near.png",
+      "width": 512,
+      "height": 128,
+      "subject": "amber near",
+      "prompt": "Derive one seam-safe pixel-art depth plane from the declared project-owned panorama with a stable binary dissolve into transparent sky.",
+      "requirements": [
+        "Preserve the source panorama palette and horizontal seam.",
+        "Keep alpha binary and remove the hard rectangular sky edge.",
+        "Activate through runtime ID world/backgrounds/depth_v6/amber_near."
+      ],
+      "tags": [
+        "world",
+        "background",
+        "parallax",
+        "depth-plane",
+        "near",
+        "amber",
+        "binary-alpha",
+        "runtime-active",
+        "version-6"
+      ],
+      "runtimeIdTarget": "world/backgrounds/depth_v6/amber_near"
+    },
+    {
+      "spriteId": "world/backgrounds/depth_v6/twilight_far",
+      "outputPath": "Assets/BackgroundDepthV6/twilight_far.png",
+      "width": 1536,
+      "height": 384,
+      "subject": "twilight far",
+      "prompt": "Remove the authored sky from this project-owned panorama and retain a seam-safe binary-alpha mountain/canopy silhouette.",
+      "requirements": [
+        "Preserve the source panorama palette and horizontal seam.",
+        "Keep alpha binary and remove the hard rectangular sky edge.",
+        "Activate through runtime ID world/backgrounds/depth_v6/twilight_far."
+      ],
+      "tags": [
+        "world",
+        "background",
+        "parallax",
+        "depth-plane",
+        "far",
+        "twilight",
+        "binary-alpha",
+        "runtime-active",
+        "version-6"
+      ],
+      "runtimeIdTarget": "world/backgrounds/depth_v6/twilight_far"
+    },
+    {
+      "spriteId": "world/backgrounds/depth_v6/twilight_mid",
+      "outputPath": "Assets/BackgroundDepthV6/twilight_mid.png",
+      "width": 1024,
+      "height": 256,
+      "subject": "twilight mid",
+      "prompt": "Derive one seam-safe pixel-art depth plane from the declared project-owned panorama with a stable binary dissolve into transparent sky.",
+      "requirements": [
+        "Preserve the source panorama palette and horizontal seam.",
+        "Keep alpha binary and remove the hard rectangular sky edge.",
+        "Activate through runtime ID world/backgrounds/depth_v6/twilight_mid."
+      ],
+      "tags": [
+        "world",
+        "background",
+        "parallax",
+        "depth-plane",
+        "mid",
+        "twilight",
+        "binary-alpha",
+        "runtime-active",
+        "version-6"
+      ],
+      "runtimeIdTarget": "world/backgrounds/depth_v6/twilight_mid"
+    },
+    {
+      "spriteId": "world/backgrounds/depth_v6/twilight_near",
+      "outputPath": "Assets/BackgroundDepthV6/twilight_near.png",
+      "width": 512,
+      "height": 128,
+      "subject": "twilight near",
+      "prompt": "Derive one seam-safe pixel-art depth plane from the declared project-owned panorama with a stable binary dissolve into transparent sky.",
+      "requirements": [
+        "Preserve the source panorama palette and horizontal seam.",
+        "Keep alpha binary and remove the hard rectangular sky edge.",
+        "Activate through runtime ID world/backgrounds/depth_v6/twilight_near."
+      ],
+      "tags": [
+        "world",
+        "background",
+        "parallax",
+        "depth-plane",
+        "near",
+        "twilight",
+        "binary-alpha",
+        "runtime-active",
+        "version-6"
+      ],
+      "runtimeIdTarget": "world/backgrounds/depth_v6/twilight_near"
+    },
+    {
+      "spriteId": "world/backgrounds/depth_v6/crystal_far",
+      "outputPath": "Assets/BackgroundDepthV6/crystal_far.png",
+      "width": 1536,
+      "height": 384,
+      "subject": "crystal far",
+      "prompt": "Remove the authored sky from this project-owned panorama and retain a seam-safe binary-alpha mountain/canopy silhouette.",
+      "requirements": [
+        "Preserve the source panorama palette and horizontal seam.",
+        "Keep alpha binary and remove the hard rectangular sky edge.",
+        "Activate through runtime ID world/backgrounds/depth_v6/crystal_far."
+      ],
+      "tags": [
+        "world",
+        "background",
+        "parallax",
+        "depth-plane",
+        "far",
+        "crystal",
+        "binary-alpha",
+        "runtime-active",
+        "version-6"
+      ],
+      "runtimeIdTarget": "world/backgrounds/depth_v6/crystal_far"
+    },
+    {
+      "spriteId": "world/backgrounds/depth_v6/crystal_mid",
+      "outputPath": "Assets/BackgroundDepthV6/crystal_mid.png",
+      "width": 1024,
+      "height": 256,
+      "subject": "crystal mid",
+      "prompt": "Derive one seam-safe pixel-art depth plane from the declared project-owned panorama with a stable binary dissolve into transparent sky.",
+      "requirements": [
+        "Preserve the source panorama palette and horizontal seam.",
+        "Keep alpha binary and remove the hard rectangular sky edge.",
+        "Activate through runtime ID world/backgrounds/depth_v6/crystal_mid."
+      ],
+      "tags": [
+        "world",
+        "background",
+        "parallax",
+        "depth-plane",
+        "mid",
+        "crystal",
+        "binary-alpha",
+        "runtime-active",
+        "version-6"
+      ],
+      "runtimeIdTarget": "world/backgrounds/depth_v6/crystal_mid"
+    },
+    {
+      "spriteId": "world/backgrounds/depth_v6/crystal_near",
+      "outputPath": "Assets/BackgroundDepthV6/crystal_near.png",
+      "width": 512,
+      "height": 128,
+      "subject": "crystal near",
+      "prompt": "Derive one seam-safe pixel-art depth plane from the declared project-owned panorama with a stable binary dissolve into transparent sky.",
+      "requirements": [
+        "Preserve the source panorama palette and horizontal seam.",
+        "Keep alpha binary and remove the hard rectangular sky edge.",
+        "Activate through runtime ID world/backgrounds/depth_v6/crystal_near."
+      ],
+      "tags": [
+        "world",
+        "background",
+        "parallax",
+        "depth-plane",
+        "near",
+        "crystal",
+        "binary-alpha",
+        "runtime-active",
+        "version-6"
+      ],
+      "runtimeIdTarget": "world/backgrounds/depth_v6/crystal_near"
+    }
+  ]
+}

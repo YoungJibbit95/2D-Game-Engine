@@ -3,6 +3,7 @@ using Game.Core.Inventory;
 using Game.Core.Items;
 using Game.Core.Settings;
 using Game.Core.Runtime;
+using Game.Core.Combat;
 using Microsoft.Xna.Framework;
 
 namespace Game.Client.UI;
@@ -10,8 +11,15 @@ namespace Game.Client.UI;
 public sealed class HudOverlay
 {
     private const int HotbarSlots = 10;
-    private const int SlotSize = 42;
-    private const int SlotGap = 4;
+    private static readonly string[] HotbarLabels = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"];
+    private int _cachedHealth = int.MinValue;
+    private int _cachedMaxHealth = int.MinValue;
+    private int _cachedMana = int.MinValue;
+    private int _cachedMaxMana = int.MinValue;
+    private int _cachedCombo = int.MinValue;
+    private string _healthLabel = "0/0";
+    private string _manaLabel = "0/0";
+    private string _comboLabel = "COMBO 1";
 
     public void Draw(
         RenderContext context,
@@ -22,10 +30,54 @@ public sealed class HudOverlay
     {
         ArgumentNullException.ThrowIfNull(snapshot);
         var palette = UiTheme.Resolve(settings);
-        DrawHotbar(context, snapshot.Player, items, textures, palette, settings.Ui.HudOpacity);
-        DrawHealthBar(context, snapshot.Hud.Health, snapshot.Hud.MaxHealth, palette, settings.Ui.HudOpacity);
-        DrawManaBar(context, textures, snapshot.Hud.Mana, snapshot.Hud.MaxMana, palette, settings.Ui.HudOpacity);
-        DrawGuardStaminaBar(context, GuardBarPresentation.Create(snapshot.Player), palette, settings);
+        var layout = PixelHudLayoutPlanner.Resolve(context.ViewportBounds, HotbarSlots);
+        UpdateCachedLabels(snapshot);
+
+        PixelUiPrimitives.DrawGlassSurface(
+            context,
+            layout.ResourcePanel,
+            palette,
+            settings.Ui.HudOpacity * 0.94f,
+            settings);
+        context.DebugText.Draw(
+            new Vector2(layout.ResourcePanel.X + 10, layout.ResourcePanel.Y + 9),
+            "VITALS",
+            palette.Accent,
+            1);
+
+        DrawHotbar(context, snapshot.Player, items, textures, palette, settings, layout);
+        DrawHealthBar(context, snapshot.Hud.Health, snapshot.Hud.MaxHealth, palette, settings, layout.HealthMeter, _healthLabel);
+        DrawManaBar(context, textures, snapshot.Hud.Mana, snapshot.Hud.MaxMana, palette, settings, layout.ManaMeter, _manaLabel);
+        DrawGuardStaminaBar(context, GuardBarPresentation.Create(snapshot.Player), palette, settings, layout.GuardMeter);
+        DrawAttackRhythm(context, AttackHudPresentation.Create(snapshot.Attack), palette, settings, layout.AttackMeter, _comboLabel);
+    }
+
+    private void UpdateCachedLabels(GameFrameSnapshot snapshot)
+    {
+        if (_cachedHealth != snapshot.Hud.Health || _cachedMaxHealth != snapshot.Hud.MaxHealth)
+        {
+            _cachedHealth = snapshot.Hud.Health;
+            _cachedMaxHealth = snapshot.Hud.MaxHealth;
+            _healthLabel = string.Create(
+                System.Globalization.CultureInfo.InvariantCulture,
+                $"{_cachedHealth}/{_cachedMaxHealth}");
+        }
+
+        if (_cachedMana != snapshot.Hud.Mana || _cachedMaxMana != snapshot.Hud.MaxMana)
+        {
+            _cachedMana = snapshot.Hud.Mana;
+            _cachedMaxMana = snapshot.Hud.MaxMana;
+            _manaLabel = string.Create(
+                System.Globalization.CultureInfo.InvariantCulture,
+                $"{_cachedMana}/{_cachedMaxMana}");
+        }
+
+        var combo = Math.Max(1, snapshot.Attack.ComboIndex + 1);
+        if (_cachedCombo != combo)
+        {
+            _cachedCombo = combo;
+            _comboLabel = string.Create(System.Globalization.CultureInfo.InvariantCulture, $"COMBO {combo}");
+        }
     }
 
     private static void DrawHotbar(
@@ -34,22 +86,24 @@ public sealed class HudOverlay
         IItemDefinitionProvider? items,
         ClientTextureRegistry? textures,
         UiPalette palette,
-        float opacity)
+        GameSettings settings,
+        PixelHudLayout layout)
     {
-        var totalWidth = HotbarSlots * SlotSize + (HotbarSlots - 1) * SlotGap;
-        var startX = (context.ViewportBounds.Width - totalWidth) / 2;
-        var y = context.ViewportBounds.Height - SlotSize - 18;
+        var opacity = settings.Ui.HudOpacity;
+        PixelUiPrimitives.DrawGlassSurface(context, layout.HotbarDock, palette, opacity * 0.88f, settings);
         var selectedSlot = player.SelectedHotbarSlot;
 
         for (var slot = 0; slot < HotbarSlots; slot++)
         {
-            var x = startX + slot * (SlotSize + SlotGap);
-            var bounds = new Rectangle(x, y, SlotSize, SlotSize);
+            var bounds = layout.HotbarSlot(slot);
             var selected = slot == selectedSlot;
             UiTheme.DrawSlot(context, bounds, palette, selected, hovered: false, opacity);
 
-            var label = slot == 9 ? "0" : (slot + 1).ToString(System.Globalization.CultureInfo.InvariantCulture);
-            context.DebugText.Draw(new Vector2(x + 4, y + 4), label, selected ? palette.Text : palette.TextMuted, 1);
+            context.DebugText.Draw(
+                new Vector2(bounds.X + 4, bounds.Y + 4),
+                HotbarLabels[slot],
+                selected ? palette.Text : palette.TextMuted,
+                1);
 
             if (items is not null && slot < player.Hotbar.Count)
             {
@@ -66,101 +120,174 @@ public sealed class HudOverlay
         }
     }
 
-    private static void DrawHealthBar(RenderContext context, int health, int maxHealth, UiPalette palette, float opacity)
+    private static void DrawHealthBar(
+        RenderContext context,
+        int health,
+        int maxHealth,
+        UiPalette palette,
+        GameSettings settings,
+        Rectangle bounds,
+        string valueLabel)
     {
-        var width = 190;
-        var height = 16;
-        var x = context.ViewportBounds.Width - width - 18;
-        var y = 18;
-        var bounds = new Rectangle(x, y, width, height);
-        var fillWidth = maxHealth <= 0 ? 0 : (int)MathF.Round(width * MathHelper.Clamp(health / (float)maxHealth, 0, 1));
-
-        context.SpriteBatch.Draw(context.Pixel, bounds, UiTheme.WithAlpha(palette.Surface, opacity));
-        context.SpriteBatch.Draw(context.Pixel, new Rectangle(x, y, fillWidth, height), UiTheme.WithAlpha(palette.Danger, 0.94f));
-        UiTheme.DrawBorder(context, bounds, UiTheme.WithAlpha(palette.Warning, 0.9f), 1);
-        context.DebugText.Draw(new Vector2(bounds.X + 6, bounds.Y + 4), $"{health}/{maxHealth}", palette.Text, 1);
+        var normalized = maxHealth <= 0 ? 0f : MathHelper.Clamp(health / (float)maxHealth, 0f, 1f);
+        PixelUiPrimitives.DrawMeter(
+            context,
+            bounds,
+            normalized,
+            palette,
+            palette.Danger,
+            settings.Ui.HudOpacity,
+            settings,
+            segmented: true,
+            emphasized: normalized <= 0.25f);
+        DrawMeterText(context, bounds, "HP", valueLabel, palette);
     }
 
-    private static void DrawManaBar(RenderContext context, ClientTextureRegistry? textures, int mana, int maxMana, UiPalette palette, float opacity)
+    private static void DrawManaBar(
+        RenderContext context,
+        ClientTextureRegistry? textures,
+        int mana,
+        int maxMana,
+        UiPalette palette,
+        GameSettings settings,
+        Rectangle bounds,
+        string valueLabel)
     {
-        var width = 190;
-        var height = 14;
-        var x = context.ViewportBounds.Width - width - 18;
-        var y = 42;
-        var bounds = new Rectangle(x, y, width, height);
-        var fillWidth = maxMana <= 0 ? 0 : (int)MathF.Round(width * MathHelper.Clamp(mana / (float)maxMana, 0, 1));
-
-        context.SpriteBatch.Draw(context.Pixel, bounds, UiTheme.WithAlpha(palette.Surface, opacity));
-        context.SpriteBatch.Draw(context.Pixel, new Rectangle(x, y, fillWidth, height), UiTheme.WithAlpha(new Color(74, 132, 226), 0.94f));
-        UiTheme.DrawBorder(context, bounds, UiTheme.WithAlpha(new Color(128, 184, 255), 0.9f), 1);
-        context.DebugText.Draw(new Vector2(bounds.X + 6, bounds.Y + 3), $"{mana}/{maxMana}", palette.Text, 1);
-
-        if (textures is null)
-        {
-            return;
-        }
-
-        var starSize = 14;
-        var starCount = Math.Min(10, Math.Max(0, (int)MathF.Ceiling(maxMana / 20f)));
-        for (var i = 0; i < starCount; i++)
-        {
-            var starBounds = new Rectangle(x + i * (starSize + 3), y + height + 5, starSize, starSize);
-            var alpha = mana >= (i + 1) * 20 ? 1f : 0.32f;
-            if (!ItemIconRenderer.TryDrawSprite(context, textures, "ui/mana_star", starBounds, alpha))
-            {
-                context.SpriteBatch.Draw(context.Pixel, starBounds, UiTheme.WithAlpha(new Color(84, 139, 232), alpha * 0.85f));
-                UiTheme.DrawBorder(context, starBounds, UiTheme.WithAlpha(palette.AccentSoft, alpha), 1);
-            }
-        }
+        var normalized = maxMana <= 0 ? 0f : MathHelper.Clamp(mana / (float)maxMana, 0f, 1f);
+        PixelUiPrimitives.DrawMeter(
+            context,
+            bounds,
+            normalized,
+            palette,
+            new Color(76, 131, 238),
+            settings.Ui.HudOpacity,
+            settings,
+            segmented: true);
+        var manaIcon = new Rectangle(bounds.X + 4, bounds.Center.Y - 5, 10, 10);
+        var drewManaIcon = textures is not null &&
+            ItemIconRenderer.TryDrawSprite(context, textures, "ui/mana_star", manaIcon, normalized <= 0f ? 0.42f : 0.96f);
+        DrawMeterText(context, bounds, drewManaIcon ? string.Empty : "MP", valueLabel, palette);
     }
 
     private static void DrawGuardStaminaBar(
         RenderContext context,
         GuardBarPresentation guard,
         UiPalette palette,
-        GameSettings settings)
+        GameSettings settings,
+        Rectangle bounds)
     {
         if (!guard.IsVisible)
         {
             return;
         }
 
-        const int width = 190;
-        const int height = 12;
-        var bounds = new Rectangle(context.ViewportBounds.Width - width - 18, 82, width, height);
-        var labelWidth = 48;
-        var track = new Rectangle(bounds.X + labelWidth, bounds.Y + 1, bounds.Width - labelWidth, bounds.Height - 2);
-        var radius = Math.Min(4, UiTheme.ResolveContract(settings).Button.CornerRadius);
-        var background = settings.Ui.HighContrastPanels ? palette.Backdrop : palette.Surface;
         var fillColor = guard.IsBroken
             ? palette.Danger
             : guard.IsGuarding
                 ? palette.Warning
                 : palette.AccentSoft;
-        var borderColor = guard.IsBroken ? palette.Danger : guard.IsGuarding ? palette.Warning : palette.Accent;
+        PixelUiPrimitives.DrawMeter(
+            context,
+            bounds,
+            guard.NormalizedStamina,
+            palette,
+            fillColor,
+            settings.Ui.HudOpacity,
+            settings,
+            emphasized: guard.IsBroken || guard.IsGuarding);
+        context.DebugText.Draw(
+            new Vector2(bounds.X + 6, bounds.Y + 3),
+            guard.IsBroken ? "BREAK" : "GUARD",
+            guard.IsBroken ? palette.Text : palette.TextMuted,
+            1);
+    }
 
-        UiTheme.DrawRoundedRectangle(context, track, UiTheme.WithAlpha(background, settings.Ui.HudOpacity), radius);
-        var fillWidth = (int)MathF.Round(track.Width * guard.NormalizedStamina);
-        if (fillWidth > 0)
+    private static void DrawAttackRhythm(
+        RenderContext context,
+        AttackHudPresentation attack,
+        UiPalette palette,
+        GameSettings settings,
+        Rectangle bounds,
+        string comboLabel)
+    {
+        if (!attack.IsVisible)
         {
-            UiTheme.DrawRoundedRectangle(
-                context,
-                new Rectangle(track.X, track.Y, fillWidth, track.Height),
-                UiTheme.WithAlpha(fillColor, guard.IsGuarding || guard.IsBroken ? 0.96f : 0.72f),
-                Math.Min(radius, fillWidth / 2));
+            return;
         }
 
-        UiTheme.DrawRoundedBorder(
-            context,
-            track,
-            UiTheme.WithAlpha(borderColor, 0.94f),
-            radius,
-            settings.Accessibility.HighContrastInteractionOutline ? 2 : 1);
+        var phaseColor = attack.Phase switch
+        {
+            AttackRuntimePhase.Startup => palette.Warning,
+            AttackRuntimePhase.Active => palette.Accent,
+            AttackRuntimePhase.Recovery => palette.AccentSoft,
+            _ => palette.TextMuted
+        };
+        PixelUiPrimitives.DrawStatusChip(context, bounds, palette, phaseColor, settings.Ui.HudOpacity, settings);
         context.DebugText.Draw(
-            new Vector2(bounds.X, bounds.Y + 3),
-            guard.IsBroken ? "BREAK" : "GUARD",
-            guard.IsBroken ? palette.Danger : palette.TextMuted,
+            new Vector2(bounds.X + 7, bounds.Y + 5),
+            attack.PhaseLabel,
+            phaseColor,
             1);
+        var comboWidth = comboLabel.Length * 6;
+        context.DebugText.Draw(
+            new Vector2(Math.Max(bounds.X + 55, bounds.Right - comboWidth - 7), bounds.Y + 5),
+            comboLabel,
+            palette.TextMuted,
+            1);
+
+        if (attack.HasQueuedCombo || attack.HasBufferedInput)
+        {
+            var pulse = new Rectangle(bounds.Right - 18, bounds.Y + 5, 10, 8);
+            UiTheme.DrawRoundedRectangle(context, pulse, UiTheme.WithAlpha(palette.Warning, 0.96f), 3);
+        }
+    }
+
+    private static void DrawMeterText(
+        RenderContext context,
+        Rectangle bounds,
+        string label,
+        string value,
+        UiPalette palette)
+    {
+        context.DebugText.Draw(new Vector2(bounds.X + 6, bounds.Y + Math.Max(2, (bounds.Height - 7) / 2)), label, palette.Text, 1);
+        var valueWidth = value.Length * 6;
+        context.DebugText.Draw(
+            new Vector2(Math.Max(bounds.X + 28, bounds.Right - valueWidth - 6), bounds.Y + Math.Max(2, (bounds.Height - 7) / 2)),
+            value,
+            palette.Text,
+            1);
+    }
+}
+
+public readonly record struct AttackHudPresentation(
+    bool IsVisible,
+    AttackRuntimePhase Phase,
+    string PhaseLabel,
+    int ComboNumber,
+    bool HasQueuedCombo,
+    bool HasBufferedInput)
+{
+    public static AttackHudPresentation Create(in AttackRuntimeFrameSnapshot attack)
+    {
+        if (!attack.HasSequence || attack.Phase == AttackRuntimePhase.Idle)
+        {
+            return default;
+        }
+
+        return new AttackHudPresentation(
+            true,
+            attack.Phase,
+            attack.Phase switch
+            {
+                AttackRuntimePhase.Startup => "STARTUP",
+                AttackRuntimePhase.Active => "ACTIVE",
+                AttackRuntimePhase.Recovery => "RECOVERY",
+                AttackRuntimePhase.Cooldown => "COOLDOWN",
+                _ => "READY"
+            },
+            Math.Max(1, attack.ComboIndex + 1),
+            attack.HasQueuedCombo,
+            attack.HasBufferedInput);
     }
 }
 

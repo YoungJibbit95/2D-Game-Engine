@@ -51,10 +51,7 @@ public sealed class Camera2D
 
     public IEnumerable<ChunkPos> GetVisibleChunks()
     {
-        var minTile = CoordinateUtils.WorldToTile(VisibleWorldRect.Left, VisibleWorldRect.Top);
-        var maxTile = CoordinateUtils.WorldToTile(VisibleWorldRect.Right, VisibleWorldRect.Bottom);
-        var minChunk = CoordinateUtils.TileToChunk(minTile);
-        var maxChunk = CoordinateUtils.TileToChunk(maxTile);
+        GetVisibleChunkBounds(out var minChunk, out var maxChunk);
 
         for (var cy = minChunk.Y; cy <= maxChunk.Y; cy++)
         {
@@ -63,5 +60,13 @@ public sealed class Camera2D
                 yield return new ChunkPos(cx, cy);
             }
         }
+    }
+
+    public void GetVisibleChunkBounds(out ChunkPos minimum, out ChunkPos maximum)
+    {
+        var minTile = CoordinateUtils.WorldToTile(VisibleWorldRect.Left, VisibleWorldRect.Top);
+        var maxTile = CoordinateUtils.WorldToTile(VisibleWorldRect.Right, VisibleWorldRect.Bottom);
+        minimum = CoordinateUtils.TileToChunk(minTile);
+        maximum = CoordinateUtils.TileToChunk(maxTile);
     }
 }

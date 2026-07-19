@@ -304,6 +304,52 @@ public sealed class GameSimulationTests
     }
 
     [Fact]
+    public void Tick_SnapshotStorageSharesOnlyUnchangedImmutableSegments()
+    {
+        var content = CreateContent();
+        var inventory = new PlayerInventory(content.Items);
+        inventory.Hotbar.Slots[0].SetStack(new ItemStack("gel", 3));
+        var plots = new FarmPlotManager();
+        var plot = plots.GetOrCreatePlot(new TilePos(2, 2));
+        plot.IsTilled = true;
+        var entities = new EntityManager();
+        var entity = new SnapshotProbeEntity(new Vector2(48, 32));
+        entities.Add(entity);
+        using var simulation = new GameSimulation(
+            content,
+            new World(16, 16, WorldMetadata.CreateDefault(seed: 1)),
+            new BiomeMap("forest"),
+            new PlayerEntity(new Vector2(32, 32), new TileCollisionResolver()),
+            inventory,
+            entities,
+            spawnOptions: new SpawnSchedulerOptions { MaxTotalActiveEnemies = 0 },
+            farmPlots: plots);
+
+        var first = simulation.LatestSnapshot;
+        var unchanged = simulation.Tick(PlayerCommand.None, 1f / 60f).Snapshot;
+
+        Assert.Same(first.Player.Hotbar, unchanged.Player.Hotbar);
+        Assert.Same(first.Entities, unchanged.Entities);
+        Assert.Same(first.FarmPlots, unchanged.FarmPlots);
+
+        var firstPosition = first.Entities[0].Position;
+        inventory.Hotbar.Slots[0].SetStack(new ItemStack("gel", 7));
+        plot.IsWatered = true;
+        entity.MoveTo(new Vector2(80, 32));
+        var changed = simulation.Tick(PlayerCommand.None, 1f / 60f).Snapshot;
+
+        Assert.NotSame(first.Player.Hotbar, changed.Player.Hotbar);
+        Assert.NotSame(first.Entities, changed.Entities);
+        Assert.NotSame(first.FarmPlots, changed.FarmPlots);
+        Assert.Equal(new ItemStack("gel", 3), first.Player.Hotbar[0].Stack);
+        Assert.False(first.FarmPlots[0].IsWatered);
+        Assert.Equal(firstPosition, first.Entities[0].Position);
+        Assert.Equal(new ItemStack("gel", 7), changed.Player.Hotbar[0].Stack);
+        Assert.True(changed.FarmPlots[0].IsWatered);
+        Assert.Equal(new Vector2(80, 32), changed.Entities[0].Position);
+    }
+
+    [Fact]
     public void Tick_AdvancesFarmPlotsAtEveryDayBoundary()
     {
         var content = CreateContent();
@@ -479,6 +525,25 @@ public sealed class GameSimulationTests
     }
 
     [Fact]
+    public void ConfigureOptions_RejectsUnboundedLightingWorkBudget()
+    {
+        var content = CreateContent();
+        using var simulation = new GameSimulation(
+            content,
+            new World(16, 16, WorldMetadata.CreateDefault(seed: 1)),
+            new BiomeMap("forest"),
+            new PlayerEntity(new Vector2(32, 32), new TileCollisionResolver()),
+            new PlayerInventory(content.Items),
+            new EntityManager(),
+            spawnOptions: new SpawnSchedulerOptions { MaxTotalActiveEnemies = 0 });
+
+        Assert.Throws<ArgumentOutOfRangeException>(() => simulation.ConfigureOptions(
+            simulation.Options with { MaxLightingChunksPerTick = 0 }));
+        Assert.Throws<ArgumentOutOfRangeException>(() => simulation.ConfigureOptions(
+            simulation.Options with { MaxLightingChunksPerTick = 9 }));
+    }
+
+    [Fact]
     public void Tick_RenderSnapshotExcludesInactiveEntities()
     {
         var content = CreateContent();
@@ -567,6 +632,39 @@ public sealed class GameSimulationTests
         Assert.Equal(1, result.EntityAttacks.IntentsConsumed);
         Assert.Equal(1, result.EntityAttacks.HitsApplied);
         Assert.Equal(93, player.Health);
+    }
+
+    [Fact]
+    public void Tick_EntitySnapshotPreservesFactionAiTargetAndDetailedTelemetry()
+    {
+        var content = CreateContent();
+        var entities = new EntityManager();
+        var behavior = new SnapshotTelemetryBehavior();
+        var actor = new EnemyEntity(
+            "telemetry_probe",
+            new Vector2(64, 48),
+            new Vector2(16, 18),
+            new HealthComponent(25),
+            behavior,
+            new TileCollisionResolver(),
+            contactDamage: 0,
+            faction: EntityFaction.Friendly);
+        entities.Add(actor);
+        using var simulation = new GameSimulation(
+            content,
+            new World(16, 16, WorldMetadata.CreateDefault(seed: 1)),
+            new BiomeMap("forest"),
+            new PlayerEntity(new Vector2(200, 32), new TileCollisionResolver()),
+            new PlayerInventory(content.Items),
+            entities,
+            spawnOptions: new SpawnSchedulerOptions { MaxTotalActiveEnemies = 0 });
+
+        var snapshot = Assert.Single(simulation.Tick(PlayerCommand.None, 1f / 60f).Snapshot.Entities);
+
+        Assert.Equal(EntityFaction.Friendly, snapshot.Faction);
+        Assert.Equal(AiState.Chase, snapshot.AiState);
+        Assert.Equal(42, snapshot.AiTargetEntityId);
+        Assert.Equal(behavior.Telemetry, snapshot.AiTelemetry);
     }
 
     [Fact]
@@ -771,6 +869,55 @@ public sealed class GameSimulationTests
             intent = pending;
             _pending = null;
             return true;
+        }
+    }
+
+    private sealed class SnapshotProbeEntity : Entity
+    {
+        public SnapshotProbeEntity(Vector2 position)
+        {
+            Position = position;
+        }
+
+        public override RectI Bounds => new((int)Position.X, (int)Position.Y, 12, 12);
+
+        public void MoveTo(Vector2 position)
+        {
+            Position = position;
+        }
+
+        public override void Update(World world, float deltaSeconds)
+        {
+        }
+    }
+
+    private sealed class SnapshotTelemetryBehavior : IAiBehavior
+    {
+        public AiState CurrentState => AiState.Chase;
+
+        public int? TargetEntityId => 42;
+
+        public AiTelemetrySnapshot Telemetry { get; } = new(
+            AiState.Chase,
+            42,
+            new Vector2(11, 12),
+            new Vector2(21, 22),
+            3.5f,
+            true,
+            false,
+            7,
+            101,
+            23,
+            5);
+
+        public void Update(EnemyEntity entity, AiUpdateContext context, float deltaSeconds)
+        {
+        }
+
+        public bool TryConsumeAttackIntent(out AiAttackIntent intent)
+        {
+            intent = default;
+            return false;
         }
     }
 }

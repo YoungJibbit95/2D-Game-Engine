@@ -8,6 +8,8 @@ public sealed class FarmPlotManager
 
     public IReadOnlyCollection<FarmPlot> Plots => _plots.Values;
 
+    internal Dictionary<TilePos, FarmPlot>.ValueCollection PlotValues => _plots.Values;
+
     public bool TryGetPlot(TilePos position, out FarmPlot plot)
     {
         return _plots.TryGetValue(position, out plot!);

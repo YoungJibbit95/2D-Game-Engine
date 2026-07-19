@@ -5,7 +5,6 @@
   "time": "any",
   "habitats": ["surface", "waterEdge"],
   "minTileY": 0,
-  "maxTileY": 108,
   "chance": 0.38,
   "weight": 1.4,
   "weatherWeights": { "rain": 1.8, "fog": 1.35 },

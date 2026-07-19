@@ -2,7 +2,7 @@
   "id": "leaves",
   "numericId": 7,
   "displayName": "Leaves",
-  "texture": "tiles/leaves_autotile",
+  "texture": "tiles/oak_leaves_autotile",
   "solid": true,
   "blocksLight": false,
   "hardness": 0.2,

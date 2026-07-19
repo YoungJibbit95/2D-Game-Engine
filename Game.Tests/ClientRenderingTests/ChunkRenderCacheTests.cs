@@ -67,14 +67,122 @@ public sealed class ChunkRenderCacheTests
         Assert.True(built.Rebuilt);
         Assert.False(hit.Rebuilt);
         Assert.Same(built.Commands, hit.Commands);
+        Assert.False(cache.NeedsBuild(chunk));
+        Assert.True(cache.TryGet(chunk.Position, out var prepared));
+        Assert.Same(built.Commands, prepared);
         Assert.Equal(1, cache.CachedChunkCount);
 
         chunk.MarkDirty(needsMeshRebuild: true, needsLightUpdate: false);
+        Assert.True(cache.NeedsBuild(chunk));
         var rebuilt = cache.GetOrBuild(world, _tiles, chunk);
 
         Assert.True(rebuilt.Rebuilt);
         Assert.NotSame(hit.Commands, rebuilt.Commands);
         Assert.Equal(1, cache.CachedChunkCount);
+    }
+
+    [Fact]
+    public void Rebuild_PreparesTextureBucketsAndSeparateLiquidCommands()
+    {
+        var world = CreateWorld();
+        var cache = new ChunkRenderCache();
+        var textureBuckets = new int[4][];
+        textureBuckets[1] = CreateMaskBuckets(1);
+        textureBuckets[2] = CreateMaskBuckets(2);
+        cache.ConfigureTextureBuckets(textureBuckets, textureBucketCount: 3);
+
+        world.SetTile(0, 0, tileId: 1);
+        world.SetTile(1, 0, tileId: 2);
+        var wetTile = TileInstance.FromTileId(1);
+        wetTile.LiquidAmount = 192;
+        wetTile.Flags |= TileFlags.HasLiquid;
+        world.SetTile(2, 0, wetTile);
+        var chunk = world.GetOrCreateChunk(new ChunkPos(0, 0));
+
+        cache.GetOrBuild(world, _tiles, chunk);
+
+        Assert.True(cache.TryGetPrepared(chunk.Position, out var prepared));
+        Assert.Equal(3, prepared.TileCommands.Length);
+        Assert.Equal(3, prepared.TextureBuckets.Length);
+        Assert.Equal(0, prepared.TextureBuckets[0].Count);
+        Assert.Equal(2, prepared.TextureBuckets[1].Count);
+        Assert.Equal(1, prepared.TextureBuckets[2].Count);
+        Assert.All(
+            prepared.TileCommands[prepared.TextureBuckets[1].StartIndex..prepared.TextureBuckets[1].EndIndex],
+            command => Assert.Equal((ushort)1, command.Tile.TileId));
+        Assert.All(
+            prepared.TileCommands[prepared.TextureBuckets[2].StartIndex..prepared.TextureBuckets[2].EndIndex],
+            command => Assert.Equal((ushort)2, command.Tile.TileId));
+        var liquid = Assert.Single(prepared.LiquidCommands);
+        Assert.Equal(2, liquid.LocalX);
+        Assert.Equal(0, liquid.LocalY);
+        Assert.True(liquid.Tile.HasLiquid);
+    }
+
+    [Fact]
+    public void PreparedCacheHit_DoesNotAllocate()
+    {
+        var world = CreateWorld();
+        var cache = new ChunkRenderCache();
+        var chunk = world.GetOrCreateChunk(new ChunkPos(0, 0));
+        world.SetTile(0, 0, tileId: 1);
+        cache.GetOrBuild(world, _tiles, chunk);
+        Assert.True(cache.TryGetPrepared(chunk.Position, out _));
+
+        var before = GC.GetAllocatedBytesForCurrentThread();
+        for (var iteration = 0; iteration < 1_000; iteration++)
+        {
+            _ = cache.TryGetPrepared(chunk.Position, out _);
+        }
+
+        Assert.Equal(0, GC.GetAllocatedBytesForCurrentThread() - before);
+    }
+
+    [Fact]
+    public void Rebuild_UsesVisualVariantOffsetForTreeTextureBuckets()
+    {
+        var world = CreateWorld();
+        var cache = new ChunkRenderCache();
+        var textureBuckets = new int[8][];
+        textureBuckets[KnownTileIds.Wood] = CreateVariantBuckets(1, 2, 3);
+        textureBuckets[KnownTileIds.Leaves] = CreateVariantBuckets(1, 2, 3);
+        cache.ConfigureTextureBuckets(textureBuckets, textureBucketCount: 4);
+        for (var y = 6; y <= 15; y++)
+        {
+            world.SetTile(12, y, KnownTileIds.Wood);
+        }
+
+        world.SetTile(11, 6, KnownTileIds.Leaves);
+        world.SetTile(13, 6, KnownTileIds.Leaves);
+        var chunk = world.GetOrCreateChunk(new ChunkPos(0, 0));
+
+        var result = cache.GetOrBuild(world, _tiles, chunk);
+        var trunk = Assert.Single(result.Commands, command => command.LocalX == 12 && command.LocalY == 10);
+        Assert.True(cache.TryGetPrepared(chunk.Position, out var prepared));
+        var expectedBucket = trunk.VisualVariant + 1;
+
+        Assert.Contains(
+            prepared.TileCommands[prepared.TextureBuckets[expectedBucket].StartIndex..
+                prepared.TextureBuckets[expectedBucket].EndIndex],
+            command => command.LocalX == trunk.LocalX && command.LocalY == trunk.LocalY);
+    }
+
+    private static int[] CreateMaskBuckets(int bucketIndex)
+    {
+        var buckets = new int[16];
+        Array.Fill(buckets, bucketIndex);
+        return buckets;
+    }
+
+    private static int[] CreateVariantBuckets(params int[] bucketIndices)
+    {
+        var buckets = new int[bucketIndices.Length * 16];
+        for (var variant = 0; variant < bucketIndices.Length; variant++)
+        {
+            Array.Fill(buckets, bucketIndices[variant], variant * 16, 16);
+        }
+
+        return buckets;
     }
 
     private static World CreateWorld()

@@ -90,6 +90,87 @@ public sealed class MeleeAttackSystem
             lootContext);
     }
 
+    public MeleeAttackResult AttackSweep(
+        PlayerEntity player,
+        EntityManager entities,
+        ItemDefinition item,
+        in MeleeSweepHitShape shape,
+        AttackSequencer sequencer,
+        AttackEventBuffer attackEvents,
+        GameEventBus? events = null,
+        StatusEffectRegistry? statusEffectRegistry = null)
+    {
+        ArgumentNullException.ThrowIfNull(player);
+        ArgumentNullException.ThrowIfNull(entities);
+        ArgumentNullException.ThrowIfNull(item);
+        ArgumentNullException.ThrowIfNull(sequencer);
+        ArgumentNullException.ThrowIfNull(attackEvents);
+        if (player.HealthComponent.IsDead || !CanUseAsMelee(item) || item.Damage <= 0)
+        {
+            return MeleeAttackResult.BlockedResult(
+                player.HealthComponent.IsDead
+                    ? GameplayActionFailureReason.ActorUnavailable
+                    : GameplayActionFailureReason.InvalidItem);
+        }
+
+        var hits = 0;
+        var enemyDeaths = 0;
+        var effectsApplied = 0;
+        var entityCount = entities.Entities.Count;
+        for (var index = 0; index < entityCount; index++)
+        {
+            if (entities.Entities[index] is not EnemyEntity { IsActive: true } enemy ||
+                enemy.Health.IsDead ||
+                !shape.Intersects(enemy.Bounds) ||
+                !sequencer.TryRegisterHit(enemy.Id, attackEvents).Accepted)
+            {
+                continue;
+            }
+
+            hits++;
+            var direction = enemy.Body.Center - player.Body.Center;
+            if (direction == Vector2.Zero)
+            {
+                direction = Vector2.UnitX;
+            }
+
+            var scaledDamage = Math.Max(1, (int)MathF.Round(item.Damage * player.Stats.MeleeDamageMultiplier));
+            var applied = enemy.ApplyDamage(new DamageInfo(
+                scaledDamage,
+                DamageType.Melee,
+                player.Id,
+                direction,
+                item.Knockback));
+            events?.Publish(new MeleeHitEvent(player.Id, enemy.Id, scaledDamage));
+            if (applied && statusEffectRegistry is not null && item.OnHitEffects.Count > 0)
+            {
+                var effectResult = _statusEffects.ApplyDetailed(
+                    enemy.StatusEffects,
+                    statusEffectRegistry,
+                    item.OnHitEffects);
+                effectsApplied += effectResult.AppliedCount;
+                PublishStatusEffects(
+                    events,
+                    enemy.Id,
+                    StatusEffectSourceKind.Item,
+                    item.Id,
+                    effectResult);
+            }
+
+            if (applied && enemy.Health.IsDead)
+            {
+                enemyDeaths++;
+            }
+        }
+
+        return new MeleeAttackResult(
+            true,
+            hits,
+            enemyDeaths,
+            0,
+            effectsApplied);
+    }
+
     private MeleeAttackResult AttackInternal(
         PlayerEntity player,
         EntityManager entities,

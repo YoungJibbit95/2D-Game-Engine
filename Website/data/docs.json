@@ -57,7 +57,7 @@
       "shortTitle": "Fixed Tick",
       "summary": "Eine GameSimulation ordnet Gameplay-Phasen bei 60 Hz; Rendering darf unabhaengig davon laufen.",
       "paragraphs": [
-        "FixedUpdateRunner akkumuliert reale Zeit und fuehrt kontrollierte Simulationsschritte aus. VSync und der konfigurierbare Render-Limiter von 30 bis 360 FPS oder unlimited veraendern die autoritative Tickrate nicht.",
+        "FixedUpdateRunner akkumuliert reale Zeit und fuehrt kontrollierte Simulationsschritte aus. VSync und der konfigurierbare Render-Limiter von 30 bis 360 FPS oder unlimited veraendern die autoritative Tickrate nicht. Ein anschliessender LateUpdate-Pass bereitet Lighting, Atmosphaere und Reflections genau einmal pro Client-Frame vor, auch wenn mehrere Fixed Steps nachgeholt werden.",
         "GameSimulation besitzt die Phasenreihenfolge fuer Commands, Movement, World, Item Use, Interaction, AI, Combat, Pickup, Spawn, Respawn, Farming, Living World, Liquids, Lighting und Snapshot-Bau."
       ],
       "api": [{ "label": "Core runtime", "code": "GameSimulationTickResult FixedUpdate(\n    PlayerCommand command,\n    float deltaSeconds,\n    PlayerItemUseRequest itemUseRequest = default);" }],
@@ -135,13 +135,14 @@
       "status": "verified",
       "title": "Distributed Spawning",
       "shortTitle": "Spawning",
-      "summary": "Player und Kameras erzeugen Aktivitaetsquellen; sektorbasierte Ringe verteilen Spawns ausserhalb sichtbarer Flaechen.",
+      "summary": "Player und Kameras erzeugen Aktivitaetsquellen; ein geladenes Offscreen-Ingress-Band bringt Tiere und Gegner aus der Welt in die sichtbare Spielflaeche.",
       "paragraphs": [
-        "SpawnScheduler akzeptiert mehrere SpawnActivitySource-Werte. Jede Quelle traegt CenterTile, VisibleTileBounds und SpawnEnvironment; Kandidaten rotieren deterministisch durch Quellen und Sektoren.",
-        "Placement prueft geladene Chunks, Boden, Luft, Fluessigkeit und Kollision. Biome, Layer, Tageszeit, Wetter, WorldEventWeights und Habitat gewichten Regeln; lokale, regionale und globale Caps verhindern Spawn-Ballungen. Engagierte oder geschuetzte Entities werden nicht aggressiv despawned."
+        "SpawnScheduler akzeptiert mehrere SpawnActivitySource-Werte. Drei von vier Versuchen liegen in einem schmalen Offscreen-Band am Viewport, ein Versuch nutzt den weiteren radialen Ring; Quellen und Sektoren rotieren deterministisch.",
+        "Placement sucht nur geladene Body- und Ground-Chunks, prueft lokale Surface Height, Open Sky, Boden, Luft, Fluessigkeit und Kollision. Biome, Layer, Tageszeit, Wetter, WorldEventWeights und Habitat gewichten Regeln; lokale, regionale und globale Caps verhindern Spawn-Ballungen.",
+        "Bird, Rabbit, Bat und Cave Worm besitzen aktive Friendly-/Hostile-AI-, Movement-, Tag- und Despawn-Profile. Ein 90-Sekunden-Vertrag beweist Spawn ausserhalb des Viewports und spaeteren Eintritt in sichtbare Reichweite."
       ],
       "api": [{ "label": "Game.Core.Spawning", "code": "SpawnActivitySource.ForPlayer(id, centerTile, visibleBounds, environment);\nSpawnActivitySource.ForCamera(id, centerTile, visibleBounds, environment);\n\nSpawnSchedulerResult result = scheduler.Update(\n    world, entities, content, biomeMap, time, activitySources, dt, options);" }],
-      "callouts": [{ "kind": "note", "title": "Skalierung", "text": "Die aktuellen Vertraege enthalten 200-Entity-Spawn- und AI-Soaks; der zusammengefuehrte Stand ist in den bestaetigten Debug- und Release-Suites enthalten." }],
+      "callouts": [{ "kind": "note", "title": "Skalierung", "text": "Die Vertraege enthalten eine 90-Sekunden-Living-World-Integration sowie 200-Entity-Spawn- und AI-Soaks; final-tree Langzeitverteilungen bleiben der naechste Performance-Schritt." }],
       "tags": ["SpawnActivitySource", "sector ring", "caps", "off-screen"]
     },
     {
@@ -191,12 +192,13 @@
     {
       "id": "combat",
       "category": "Gameplay",
-      "status": "implemented-unverified",
+      "status": "verified",
       "title": "Guard, Parry and Projectiles",
       "shortTitle": "Combat",
       "summary": "Combat besitzt Attack-Phasen, Sweep-Hit-Shapes, richtungsabhaengige Guard-Stamina, Parry und Projectile-Lifecycle.",
       "paragraphs": [
-        "AttackDefinition und AttackRuntimeState bilden Startup, Active, Recovery und Cooldown ab. MeleeSweepHitShape prueft Arc, Reichweite und Facing, ohne Client-Hitboxen zur autoritativen Wahrheit zu machen.",
+        "AttackDefinition und AttackRuntimeState bilden Startup, Active, Recovery und Cooldown ab. MeleeSweepHitShape prueft Arc, Reichweite und Facing, ohne Client-Hitboxen zur autoritativen Wahrheit zu machen. Schwert, Bogen und Spark Wand referenzieren authored Attack-Sequenzen aus Game.Data.",
+        "PlayerAttackSequenceRuntime akzeptiert Starts autoritativ, belastet Mana, Munition und Stamina atomar und erzeugt Sweeps oder Projektile nur in aktiven Fenstern. GameFrameSnapshot liefert Attack-ID, Phase, Combo-Schritt und Feedback fuer Animation und HUD.",
         "GuardRuntimeState verarbeitet Hold/Release, Ausrichtung, Stamina-Regeneration, Guard Break und Parry-Fenster. CombatDamageResolver liefert typed Events fuer Damage, Block, Parry und Break. ProjectileRuntimeState trennt Definition, Owner, Lifetime, Pierce und Collision Result."
       ],
       "api": [
@@ -239,39 +241,40 @@
     {
       "id": "rendering",
       "category": "Rendering",
-      "status": "implemented-unverified",
+      "status": "verified",
       "title": "Presentation Pipeline",
       "shortTitle": "Pipeline",
       "summary": "Tilemap, Entities, Lighting, Atmosphaere, Reflections, Partikel und UI werden als budgetierte Client-Paesse geplant.",
       "paragraphs": [
-        "PresentationSettingsAdapter uebersetzt RenderingSettings in ein PresentationQualityProfile. PresentationPassPlanner waehlt eine feste, begrenzte Passliste; Disabled/Low/Medium/High reduzieren Ray Steps, Blur, Lights und Reflection Surfaces kontrolliert.",
-        "Pixel-Sprites bleiben point-sampled. Light Map und Post-Passes koennen linear skaliert werden, damit Licht weich wirkt, ohne Sprite-Kanten zu verwischen. Mining invalidiert die betroffene Light Region; die naechste budgetierte Recalculation entfernt den Schatten des zerstoerten Blocks."
+        "PresentationSettingsAdapter uebersetzt RenderingSettings in ein PresentationQualityProfile. PresentationPassPlanner waehlt eine feste, begrenzte Passliste; Disabled/Low/Medium/High reduzieren Ray Steps, Blur, Lights und Reflection Surfaces kontrolliert. ParallaxCompositionPlanner erzeugt deterministische biome-, tiefen- und nachtbezogene Varianten, Spiegelungen, Stagger und Landmarken.",
+        "Pixel-Sprites bleiben point-sampled. Light Map und Post-Passes koennen linear skaliert werden, damit Licht weich wirkt, ohne Sprite-Kanten zu verwischen. Mining invalidiert die betroffene Light Region; die naechste budgetierte Recalculation entfernt den Schatten des zerstoerten Blocks.",
+        "PresentationWorkScheduler taktet Lighting, Reflections, Atmosphere und Scene Capture getrennt. Nicht faellige Frames verwenden vorbereitete Captures weiter; sichtbare Chunk Commands werden vor Draw budgetiert vorbereitet. FrameTimeTelemetryWindow exportiert Durchschnitt, p95, p99 und Budget-Ueberschreitungen ohne steady-state Allocation."
       ],
       "api": [{ "label": "Game.Client.Rendering.Effects", "code": "PresentationQualityProfile profile = PresentationSettingsAdapter.Resolve(settings);\nSpan<PresentationPassDescriptor> passes = stackalloc PresentationPassDescriptor[\n    PresentationPassPlanner.MaximumPassCount];\nPresentationPassPlan plan = PresentationPassPlanner.Build(profile, request, passes);" }],
-      "bullets": ["Bounded pass planner", "Quality + viewport downgrade", "No disk IO in Draw", "Telemetry per presentation stage"],
+      "bullets": ["Bounded pass planner", "Independent pass cadence", "Reusable scene capture", "No disk IO in Draw", "Average/p95/p99 telemetry"],
       "tags": ["PresentationPassPlanner", "quality tier", "pixel rendering", "post process"],
       "links": [{ "label": "2D-Licht und Reflections", "target": "ray-lighting" }, { "label": "Texture Budgets", "target": "texture-groups" }]
     },
     {
       "id": "ray-lighting",
       "category": "Rendering",
-      "status": "implemented-unverified",
+      "status": "verified",
       "title": "2D Ray-Cast Lighting",
       "shortTitle": "2D Lighting",
-      "summary": "Tile-aware CPU-Ray-Casts formen Sonnen- und Quellschatten; Penumbra, Bloom und Surface Reflections bleiben budgetiert.",
+      "summary": "Ein linearer tile-aware Sun-Shadow-Sweep und lokale Point Rays formen weiche Schatten innerhalb fester CPU- und Upload-Budgets.",
       "paragraphs": [
-        "TileRayCastShadowMaskBuilder arbeitet nur auf dem sichtbaren Weltfenster und schreibt wiederverwendbare Work Buffers. Sonnenfarbe und -richtung folgen der Tageszeit; Hoehlen verwenden ihr authored Biome Base Light unabhaengig vom Oberflaechen-Daylight, damit leuchtende Cave-Biome lesbar bleiben.",
+        "TileRayCastShadowMaskBuilder arbeitet nur auf dem sichtbaren Weltfenster und schreibt wiederverwendbare Work Buffers. Die Welt wird einmal pro Maskenpixel gelesen; AO und Point Rays verwenden danach lokale Arrays, waehrend gerichtete Sonnenschatten in einem linearen Sweep entstehen. Die 104x58-Medium-Maske fuer 1920x1080 misst im lokalen Release-Gate 2.542 ms durchschnittlich bei 0 B Allocation.",
         "Core unterscheidet Open, Unknown und Occluded Sky. Ungeladene Chunks lassen weder Sonnen- noch Point-Light durchsickern; Load/Unload invalidiert Abhaengigkeiten und sichtbare Dirty-Regionen werden deterministisch zuerst verarbeitet.",
-        "LightingRenderer kombiniert autoritative Tile-Light-Werte mit sichtbaren Light Sources, Shadow Mask und Qualitaetsprofil. WaterReflectionSurfacePlanner findet begrenzte sichtbare Fluessigkeitssegmente fuer eine screen-space-nahe Spiegelung."
+        "Oberflaechenatmosphaere und authored Cave-Restlicht sind getrennt: offener Himmel bleibt hell, begrabene Solids werden nicht vom Tageslicht gebleicht und Richtungsokklusion verschwindet nicht am Ray-Limit. LightingRenderer rotiert drei GPU-Texturen und ueberspringt Color-/Bloom-Encoding und Upload, wenn keine sichtbare Punktlichtquelle existiert."
       ],
-      "api": [{ "label": "Presentation passes", "code": "CpuTileRayCastSunShadow\nPenumbraHorizontal -> PenumbraVertical\nEmissiveBloomHorizontal -> EmissiveBloomVertical\nWaterReflection\nAtmosphereComposite" }],
+      "api": [{ "label": "Presentation passes", "code": "FixedUpdate x N -> LateUpdate x 1\nPackedTileSamples -> DirectionalSunSweep\nLocalAO + PointLightRays\nPenumbraHorizontal -> PenumbraVertical\nConditionalColorAndBloomUpload\nAtmosphereComposite" }],
       "callouts": [{ "kind": "warning", "title": "Kein Hardware-Raytracing", "text": "YjsE nutzt 2D tile-aware Ray-Casts und begrenztes Raymarching im Presentation-Stack. Es gibt keine DXR-/RTX-Raytracing-Pipeline und keine physikalisch korrekten Vollszenenreflexionen." }],
       "tags": ["TileRayCastShadowMaskBuilder", "soft shadow", "torch bloom", "WaterReflectionSurfacePlanner"]
     },
     {
       "id": "texture-groups",
       "category": "Rendering",
-      "status": "implemented-unverified",
+      "status": "verified",
       "title": "Texture Residency and Budgets",
       "shortTitle": "Texture Budgets",
       "summary": "Ein PNG besitzt eine GPU-Ressource; Frame Descriptors teilen sie ueber Source Rectangles.",
@@ -291,7 +294,7 @@
       "summary": "JSON-Registries laden Tiles, Items, Recipes, Entities, Biome, Loot, Projectiles, Regionen, Strukturen, World Events und Sprites.",
       "paragraphs": [
         "GameProjectContentLoader liest das Project Manifest und laedt Base Content vor Mods. GameContentLoader merged World Events und andere Definitionen nach ID mit Pack-Ownership; typed Registries bleiben die einzige Runtime-Sicht.",
-        "ContentReferenceValidator prueft Tile-Drops, Item-Actions, Recipes, Loot, Biome-Spawns, Event-Weights, Entities, Strukturen, regionale Biome und Sprite-IDs. Wave 05 umfasst 24 manifestierte Assets mit 122 Frames; Website/data/assets.json weist eine bytegenaue Auswahl aus."
+        "ContentReferenceValidator prueft Tile-Drops, Item-Actions, Recipes, Loot, Biome-Spawns, Event-Weights, Entities, Strukturen, regionale Biome und Sprite-IDs. Der strikte Hauptaudit umfasst 190 Manifest-Eintraege/184 PNGs ohne harte Fehler; die vier V5-Panoramen besitzen Brief, Provenienz, native 1536x384-Dimensionen, 256-Farbgrenze und einen fehlerfreien horizontalen Seam."
       ],
       "api": [{ "label": "Content layout", "code": "Game.Data/\n  assets/*.sprites.json\n  tiles/*.json       items/*.json\n  recipes/*.json     entities/*.json\n  biomes/*.json      loot/*.json\n  world-events/*.json\n  worldgen/*.region.json\n  structures/*.json" }],
       "tags": ["GameContentDatabase", "ContentReferenceValidator", "mods", "Wave 05"]
@@ -299,13 +302,14 @@
     {
       "id": "ui",
       "category": "UI",
-      "status": "implemented-unverified",
+      "status": "verified",
       "title": "UI Interaction Model",
       "shortTitle": "Interaction",
       "summary": "Release-inside Hit-Testing, Pointer Capture und fokussierbare Controls liefern Maus-, Keyboard- und Gamepad-Paritaet.",
       "paragraphs": [
         "UiInteraction verfolgt Hover, Pressed, Capture und Focus. Ein Click gilt nur, wenn Press und Release zum selben Control gehoeren. Slider verwenden Pointer Drag; Dropdown, Segment, Toggle, Scroll und Tooltip besitzen eigene Interaktionsvertraege.",
-        "D-Pad und Stick verwenden kontrolliertes Repeat, A/B loesen Accept/Back aus und Shoulder Buttons wechseln Tabs. Core-Modelle wie UiNumericRange und UiGridNavigator bleiben MonoGame-frei."
+        "D-Pad und Stick verwenden kontrolliertes Repeat, A/B loesen Accept/Back aus und Shoulder Buttons wechseln Tabs. Core-Modelle wie UiNumericRange und UiGridNavigator bleiben MonoGame-frei.",
+        "PixelUiPrimitives ergaenzt direkte Slider, Toggle, Stepper, Segmente, Icon Commands und Tooltips. Deterministische Hover-, Focus- und Press-Animationen geben der UI Web-App-Ergonomie, waehrend abgestufte Pixelkanten und feste Raster den Game-Art-Look erhalten."
       ],
       "api": [{ "label": "Client UI", "code": "UiControlState state = interaction.ResolveControl(\n    controlId, bounds, input, enabled);\n\nif (state.Clicked) ApplyAction();\nif (state.Dragging) ApplySlider(state.PointerPosition.X);" }],
       "tags": ["UiInteraction", "pointer capture", "slider", "gamepad"]
@@ -313,13 +317,14 @@
     {
       "id": "ui-renderer",
       "category": "UI",
-      "status": "implemented-unverified",
+      "status": "verified",
       "title": "UI Theme and Renderer",
       "shortTitle": "Theme + Renderer",
       "summary": "Settings-gesteuerte Palette, Typografie, Spacing, Radien, Gradients, Glow und Blur-Spec besitzen deterministische Pixel-Fallbacks.",
       "paragraphs": [
         "UiTheme.Resolve und ResolveContract lesen UiSettings, RenderingSettings und AccessibilitySettings. UiThemeContract liefert Typography, Spacing, Panel/Button/Tooltip Surface Specs und Backdrop Spec.",
-        "DrawRoundedRectangle, DrawRoundedBorder und DrawButton rendern echte Rundungen mit dem 1x1-Pixel. GradientSteps, GlowSpread und BlurRadius werden per Quality Tier reduziert. Wenn kein Effect-Backed Blur aktiv ist, zeichnet DrawBackdrop einen deterministischen Tint-Fallback."
+        "DrawRoundedRectangle, DrawRoundedBorder und DrawButton rendern echte Rundungen mit dem 1x1-Pixel. GradientSteps, GlowSpread und BlurRadius werden per Quality Tier reduziert. Wenn kein Effect-Backed Blur aktiv ist, zeichnet DrawBackdrop einen deterministischen Tint-Fallback.",
+        "Pause und Settings kombinieren layered Panels, Icon Commands und direkte Cadence-Presets fuer Eco, Balanced, Fast und Custom. Dadurch sind Frame-Limit und Render-Pass-Raten per Maus sofort verstaendlich, statt Werte ueber viele Klicks durchzuschalten."
       ],
       "api": [{ "label": "Game.Client.UI", "code": "UiPalette palette = UiTheme.Resolve(settings);\nUiThemeContract contract = UiTheme.ResolveContract(settings);\n\nUiTheme.DrawPanel(context, bounds, palette, 0.96f, settings: settings);\nUiTheme.DrawButton(context, bounds, palette, selected, hovered,\n    enabled, pressed, focused, settings);" }],
       "bullets": ["CornerRadiusPixels 0-16", "Gradient quality tiers", "Glow + shadow budgets", "Contrast + reduced flash"],
@@ -394,10 +399,10 @@
       "status": "partial",
       "title": "Validation and Performance Gates",
       "shortTitle": "Validation",
-      "summary": "Debug und Release bestehen im aktuellen Checkout jeweils mit 995/995 Tests; der aktuelle Implementierungsscope und die Performance-Gates sind gruen.",
+      "summary": "Debug und Release bestehen im aktuellen Checkout jeweils mit 1191/1191 Tests; der aktuelle Implementierungsscope und die Performance-Gates sind gruen.",
       "paragraphs": [
         "verified bedeutet lokal oder gehostet entsprechend der dokumentierten Evidence bestanden. implemented-unverified bedeutet Code plus fokussierte Vertraege ohne konvergierten Gesamt-Gate. partial beschreibt bewusst unvollstaendige End-to-End-Aktivierung.",
-        "World-Event-Persistenz, bounded Feedback, Replay Capture, phased Combat, retry-budgeted Streaming, Runtime-Entity-Animation, Wave 05, Building Transactions und Cave-Restlicht sind in den aktuellen Debug- und Release-Suites enthalten. Beide Konfigurationen bestehen mit 995/995 Tests.",
+        "World-Event-Persistenz, bounded Feedback, Replay Capture, authored Item Combat, retry-budgeted Streaming, Runtime-Entity-Animation, deterministischer Spawn-Warmstart, V5-Panoramen, moderne Pixel Controls, Building Transactions und lokales Cave-Restlicht sind in den aktuellen Debug- und Release-Suites enthalten. Beide Konfigurationen bestehen mit 1191/1191 Tests.",
         "Der Client-Smoke akzeptiert mit --scene-biome generische normalisierte Biome-IDs und weist unsichere Eingaben ab. Ein oeffentliches Download-Artefakt ist trotzdem nicht hinterlegt; lokaler Gate-Erfolg und veroeffentlichte Binaries bleiben getrennte Aussagen."
       ],
       "api": [

@@ -24,7 +24,8 @@ public sealed class EntityVisualPipeline
     public EntityVisualPipeline(
         EntityVisualProfileCatalog? profiles = null,
         int maximumTrackedEntities = 512,
-        int maximumDrawCommands = 2_048)
+        int maximumDrawCommands = 2_048,
+        int maximumSubmissionBuckets = 2_048)
     {
         if (maximumTrackedEntities <= 0)
         {
@@ -35,7 +36,7 @@ public sealed class EntityVisualPipeline
         var trackCapacity = RoundUpToPowerOfTwo(maximumTrackedEntities);
         _tracks = new EntityVisualTrack[trackCapacity];
         _trackMask = trackCapacity - 1;
-        _commands = new EntityVisualCommandBuffer(maximumDrawCommands);
+        _commands = new EntityVisualCommandBuffer(maximumDrawCommands, maximumSubmissionBuckets);
     }
 
     public EntityVisualCommandBuffer CommandBuffer => _commands;
@@ -115,6 +116,7 @@ public sealed class EntityVisualPipeline
             AppendCommands(pose);
         }
 
+        var submission = _commands.BuildSubmissionPlan();
         var telemetry = new EntityVisualTelemetry(
             entities.Count,
             visibleCount,
@@ -122,7 +124,10 @@ public sealed class EntityVisualPipeline
             inactiveCount,
             _commands.Count,
             commandOverflow,
-            trackOverflow);
+            trackOverflow)
+        {
+            Submission = submission
+        };
         _commands.Telemetry = telemetry;
         return telemetry;
     }

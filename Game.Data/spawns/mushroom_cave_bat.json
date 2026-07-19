@@ -1,0 +1,20 @@
+{
+  "id": "mushroom_cave_bat",
+  "entityId": "bat",
+  "biomeId": "mushroom_cave",
+  "time": "any",
+  "habitats": ["underground", "cavern", "openAir"],
+  "minTileY": 80,
+  "maxTileY": 352,
+  "chance": 0.28,
+  "weight": 1.15,
+  "maxActive": 7,
+  "populationGroup": "mushroom-hostiles",
+  "maxActiveInGroup": 10,
+  "populationRegionSizeTiles": 80,
+  "maxActiveInRegion": 4,
+  "maxActiveInHabitat": 7,
+  "localPopulationRadiusTiles": 40,
+  "maxActiveInLocalArea": 4,
+  "cooldownSeconds": 3.4
+}

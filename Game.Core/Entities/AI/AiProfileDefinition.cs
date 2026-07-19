@@ -104,6 +104,12 @@ public sealed record AiProfileDefinition
             throw new RegistryValidationException($"Entity '{entityId}' AI minimum flock size must be positive.");
         }
 
+        if (profile.FlockRadius > 0 && profile.FlockWeight > 0 && profile.MinFlockSize < 2)
+        {
+            throw new RegistryValidationException(
+                $"Entity '{entityId}' AI minimum flock size must include at least one ally.");
+        }
+
         if (!float.IsFinite(profile.AttackCooldown) ||
             !float.IsFinite(profile.DecisionInterval) ||
             !float.IsFinite(profile.PerceptionMemorySeconds) ||

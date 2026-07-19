@@ -1,0 +1,20 @@
+{
+  "id": "crystal_depths_cave_spider",
+  "entityId": "cave_spider",
+  "biomeId": "crystal_depths",
+  "time": "any",
+  "habitats": ["underground", "cavern"],
+  "minTileY": 92,
+  "maxTileY": 352,
+  "chance": 0.2,
+  "weight": 0.95,
+  "maxActive": 6,
+  "populationGroup": "crystal-hostiles",
+  "maxActiveInGroup": 12,
+  "populationRegionSizeTiles": 80,
+  "maxActiveInRegion": 4,
+  "maxActiveInHabitat": 7,
+  "localPopulationRadiusTiles": 36,
+  "maxActiveInLocalArea": 3,
+  "cooldownSeconds": 4.5
+}

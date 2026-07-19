@@ -1,0 +1,46 @@
+{
+  "version": 1,
+  "preview": "art_direction/wave_06_character_preview.png",
+  "previewDimensions": [
+    1536,
+    1120
+  ],
+  "rows": [
+    "composite",
+    "composite_with_armor",
+    "body",
+    "clothes",
+    "hair",
+    "armor",
+    "equipment"
+  ],
+  "frameOrder": [
+    "idle_0",
+    "idle_1",
+    "run_0",
+    "run_1",
+    "run_2",
+    "run_3",
+    "run_4",
+    "run_5",
+    "jump",
+    "fall",
+    "tool_0",
+    "tool_1",
+    "tool_2",
+    "block",
+    "hurt_0",
+    "hurt_1"
+  ],
+  "nativeFrameDimensions": [
+    24,
+    40
+  ],
+  "integerPreviewScale": 4,
+  "nativeScaleReadable": true,
+  "targetPresentation": [
+    "native",
+    "1080p integer point sampling",
+    "1440p integer point sampling"
+  ]
+}

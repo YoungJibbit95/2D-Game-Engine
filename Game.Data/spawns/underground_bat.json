@@ -2,6 +2,7 @@
   "id": "underground_bat",
   "entityId": "bat",
   "biomeId": "forest",
+  "habitats": ["underground", "cavern", "openAir"],
   "minTileY": 85,
   "maxTileY": 260,
   "chance": 0.22,

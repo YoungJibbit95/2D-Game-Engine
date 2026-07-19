@@ -17,8 +17,6 @@ public sealed class StructureGenerationStep : IWorldGenerationStep
             ['W'] = KnownTileIds.Wood
         });
 
-    private readonly StructurePlacer _placer = new();
-
     public string Name => "structures";
 
     public int Order => 35;
@@ -34,6 +32,51 @@ public sealed class StructureGenerationStep : IWorldGenerationStep
         var targetX = Math.Clamp(world.WidthTiles / 4 + Math.Abs(context.Seed % 13), 4, world.WidthTiles - SurfaceShelter.Width - 4);
         var surfaceY = context.SurfaceHeights[targetX];
         var origin = new TilePos(targetX, Math.Max(1, surfaceY - SurfaceShelter.Height));
-        _placer.TryPlace(world, origin, SurfaceShelter, StructurePlacementMode.ReplaceAirOnly);
+        TryPlace(context.Tiles, origin, SurfaceShelter, StructurePlacementMode.ReplaceAirOnly);
+    }
+
+    private static bool TryPlace(
+        WorldGenerationWorkspace tiles,
+        TilePos origin,
+        StructureTemplate template,
+        StructurePlacementMode mode)
+    {
+        if (origin.Y < 0 || origin.Y + template.Height > tiles.World.HeightTiles ||
+            origin.X < 0 || origin.X + template.Width > tiles.World.WidthTiles)
+        {
+            return false;
+        }
+
+        if (mode != StructurePlacementMode.ReplaceAny)
+        {
+            for (var y = 0; y < template.Height; y++)
+            {
+                for (var x = 0; x < template.Width; x++)
+                {
+                    if (template.GetTile(x, y) is not null &&
+                        !tiles.GetTile(origin.X + x, origin.Y + y).IsAir)
+                    {
+                        return false;
+                    }
+                }
+            }
+        }
+
+        for (var y = 0; y < template.Height; y++)
+        {
+            for (var x = 0; x < template.Width; x++)
+            {
+                var tileId = template.GetTile(x, y);
+                if (tileId is not null)
+                {
+                    tiles.SetTile(
+                        origin.X + x,
+                        origin.Y + y,
+                        TileInstance.FromTileId(tileId.Value, TileFlags.IsNatural));
+                }
+            }
+        }
+
+        return true;
     }
 }

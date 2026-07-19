@@ -37,12 +37,24 @@ public readonly record struct UiSurfaceSpec(
 
 public readonly record struct UiBackdropSpec(int BlurRadius, float Saturation, float TintOpacity);
 
+public readonly record struct UiControlTokens(
+    int MinimumHeight,
+    int CompactHeight,
+    int Gap,
+    int LayerInset,
+    int SliderTrackHeight,
+    int SliderThumbWidth,
+    int ToggleWidth,
+    int IconBoxSize,
+    int FocusRingOffset);
+
 public readonly record struct UiThemeContract(
     UiTypographyTokens Typography,
     UiSpacingTokens Spacing,
     UiSurfaceSpec Panel,
     UiSurfaceSpec Button,
     UiSurfaceSpec Tooltip,
+    UiControlTokens Controls,
     UiBackdropSpec Backdrop);
 
 public static class UiTheme
@@ -114,6 +126,16 @@ public static class UiTheme
                 GlowSpread: Math.Min(1, glowSpread),
                 GlowOpacity: 0.32f * glowStrength * qualityFactor,
                 GradientSteps: Math.Max(1, gradientSteps / 2)),
+            new UiControlTokens(
+                MinimumHeight: Math.Clamp((int)MathF.Round(28f * Math.Clamp(textScale, 0.85f, 1.25f)), 24, 34),
+                CompactHeight: Math.Clamp((int)MathF.Round(24f * Math.Clamp(textScale, 0.85f, 1.2f)), 21, 29),
+                Gap: 4,
+                LayerInset: 2,
+                SliderTrackHeight: quality == 0 ? 6 : 8,
+                SliderThumbWidth: ui.LargeCursor ? 13 : 9,
+                ToggleWidth: ui.LargeCursor ? 80 : 72,
+                IconBoxSize: ui.LargeCursor ? 24 : 22,
+                FocusRingOffset: accessibility.HighContrastInteractionOutline ? 3 : 2),
             new UiBackdropSpec(
                 BlurRadius: effectiveBlurRadius,
                 Saturation: Math.Clamp(0.82f + (accessibility.InterfaceContrast - 1f) * 0.12f, 0.72f, 0.96f),
@@ -201,7 +223,19 @@ public static class UiTheme
 
     public static Color WithAlpha(Color color, float alpha)
     {
-        return new Color(color.R, color.G, color.B, (byte)Math.Clamp((int)MathF.Round(alpha * 255f), 0, 255));
+        var clamped = Math.Clamp(alpha, 0f, 1f);
+        return new Color(
+            (byte)Math.Clamp((int)MathF.Round(color.R * clamped), 0, 255),
+            (byte)Math.Clamp((int)MathF.Round(color.G * clamped), 0, 255),
+            (byte)Math.Clamp((int)MathF.Round(color.B * clamped), 0, 255),
+            (byte)Math.Clamp((int)MathF.Round(255f * clamped), 0, 255));
+    }
+
+    public static float ContrastRatio(Color foreground, Color background)
+    {
+        var lighter = Math.Max(RelativeLuminance(foreground), RelativeLuminance(background));
+        var darker = Math.Min(RelativeLuminance(foreground), RelativeLuminance(background));
+        return (lighter + 0.05f) / (darker + 0.05f);
     }
 
     public static void DrawBackdrop(RenderContext context, UiPalette palette, float opacity, GameSettings? settings = null)
@@ -568,5 +602,18 @@ public static class UiTheme
         }
 
         return new Color(Channel(color.R, contrast), Channel(color.G, contrast), Channel(color.B, contrast), color.A);
+    }
+
+    private static float RelativeLuminance(Color color)
+    {
+        static float Channel(byte value)
+        {
+            var normalized = value / 255f;
+            return normalized <= 0.04045f
+                ? normalized / 12.92f
+                : MathF.Pow((normalized + 0.055f) / 1.055f, 2.4f);
+        }
+
+        return Channel(color.R) * 0.2126f + Channel(color.G) * 0.7152f + Channel(color.B) * 0.0722f;
     }
 }

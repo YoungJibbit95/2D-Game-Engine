@@ -52,24 +52,20 @@ public sealed class EntityVisualDrawCommandExecutor : IDisposable
         ArgumentNullException.ThrowIfNull(textures);
         ArgumentNullException.ThrowIfNull(commandBuffer);
         var zoom = camera?.Zoom ?? 1f;
+        var submission = commandBuffer.SubmissionPlan;
+        if (submission.Telemetry.IsComplete && submission.Count == commandBuffer.Count)
+        {
+            for (var index = 0; index < submission.Count; index++)
+            {
+                DrawCommand(context, textures, commandBuffer[submission[index]], camera, zoom);
+            }
+
+            return;
+        }
+
         for (var index = 0; index < commandBuffer.Count; index++)
         {
-            var command = commandBuffer[index];
-            var position = camera is null
-                ? ToXna(command.Position)
-                : camera.WorldToScreen(ToXna(command.Position), context.ViewportBounds);
-            switch (command.Kind)
-            {
-                case EntityVisualDrawCommandKind.ShadowEllipse:
-                    DrawShadow(context.SpriteBatch, context.Pixel, command, position, zoom);
-                    break;
-                case EntityVisualDrawCommandKind.Outline:
-                    DrawOutline(context.SpriteBatch, textures, command, position, zoom);
-                    break;
-                default:
-                    DrawSprite(context.SpriteBatch, textures, command, position, zoom);
-                    break;
-            }
+            DrawCommand(context, textures, commandBuffer[index], camera, zoom);
         }
     }
 
@@ -77,6 +73,30 @@ public sealed class EntityVisualDrawCommandExecutor : IDisposable
     {
         _shadowTexture?.Dispose();
         _shadowTexture = null;
+    }
+
+    private void DrawCommand(
+        RenderContext context,
+        ClientTextureRegistry textures,
+        in EntityVisualDrawCommand command,
+        Camera2D? camera,
+        float zoom)
+    {
+        var position = camera is null
+            ? ToXna(command.Position)
+            : camera.WorldToScreen(ToXna(command.Position), context.ViewportBounds);
+        switch (command.Kind)
+        {
+            case EntityVisualDrawCommandKind.ShadowEllipse:
+                DrawShadow(context.SpriteBatch, context.Pixel, command, position, zoom);
+                break;
+            case EntityVisualDrawCommandKind.Outline:
+                DrawOutline(context.SpriteBatch, textures, command, position, zoom);
+                break;
+            default:
+                DrawSprite(context.SpriteBatch, textures, command, position, zoom);
+                break;
+        }
     }
 
     private void DrawShadow(

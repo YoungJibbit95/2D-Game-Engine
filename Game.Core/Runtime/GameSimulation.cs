@@ -31,7 +31,8 @@ namespace Game.Core.Runtime;
 public sealed class GameSimulation : IDisposable
 {
     private static readonly FarmDailyTickResult NoFarming = new(0, 0, 0, 0);
-    private static readonly ImmutableSnapshotList<GameSimulationPhase> TickPhases = new(
+    private static readonly ImmutableSnapshotList<GameSimulationPhase> TickPhases =
+        ImmutableSnapshotList<GameSimulationPhase>.FromOwned(
     [
         GameSimulationPhase.PlayerCommand,
         GameSimulationPhase.WorldTimeAndFarming,
@@ -74,6 +75,17 @@ public sealed class GameSimulation : IDisposable
     private readonly Random _farmingRandom;
     private readonly DeterministicRandomStream _deathKeys;
     private readonly SimulationPhaseTelemetry _phaseTelemetry = new();
+    private readonly CombatQueryWorkspace _combatQueryWorkspace = new(initialCandidateCapacity: 64);
+    private readonly EntityQueryWorkspace _pickupMagnetQueryWorkspace = new(initialCapacity: 32);
+    private ImmutableSnapshotList<InventorySlotFrameSnapshot> _cachedHotbarSnapshot =
+        ImmutableSnapshotList<InventorySlotFrameSnapshot>.Empty;
+    private readonly EntityFrameSnapshotBuilder _entitySnapshotBuilder = new();
+    private ImmutableSnapshotList<FarmPlotFrameSnapshot> _cachedFarmPlotSnapshots =
+        ImmutableSnapshotList<FarmPlotFrameSnapshot>.Empty;
+    private long _cachedHotbarVersion = long.MinValue;
+    private long _cachedMainInventoryVersion = long.MinValue;
+    private int _cachedOccupiedInventorySlots;
+    private int _cachedTotalInventoryItems;
     private GameSimulationOptions _options;
     private bool _disposed;
     private byte _lastSunlight;
@@ -137,7 +149,8 @@ public sealed class GameSimulation : IDisposable
         _pickup = pickup ?? new ItemPickupSystem();
         _spawnScheduler = spawnScheduler ?? new SpawnScheduler(
             RandomStreams.GetStream("spawning.candidates"),
-            RandomStreams.GetStream("spawning.rules"));
+            RandomStreams.GetStream("spawning.rules"),
+            RandomStreams.GetStream("spawning.encounters"));
         _spawnOptions = spawnOptions ?? SpawnSchedulerOptions.Default;
         _respawn = respawn ?? new PlayerRespawnSystem();
         _worldSimulation = worldSimulation ?? new WorldSimulationScheduler();
@@ -370,8 +383,8 @@ public sealed class GameSimulation : IDisposable
         using (_phaseTelemetry.Measure(GameSimulationPhase.PlayerItemUse))
         {
             _itemUse.Update(deltaSeconds);
-            itemUse = !Player.HealthComponent.IsDead && itemUseRequest.IsActive
-                ? _itemUse.UseSelectedItem(
+            itemUse = !Player.HealthComponent.IsDead
+                ? _itemUse.TickSelectedItem(
                     World,
                     Content,
                     Player,
@@ -379,7 +392,10 @@ public sealed class GameSimulation : IDisposable
                     Entities,
                     itemUseRequest.TargetTile,
                     itemUseRequest.TargetWorldPosition,
+                    itemUseRequest.IsActive,
+                    unchecked((ulong)_tickNumber),
                     deltaSeconds,
+                    PlayerGuard,
                     Events,
                     FarmPlots,
                     CurrentSeason,
@@ -405,7 +421,12 @@ public sealed class GameSimulation : IDisposable
         ContactDamageResult contactDamage;
         using (_phaseTelemetry.Measure(GameSimulationPhase.Combat))
         {
-            combat = _combat.ResolveProjectileHits(Entities, Content, Events, eventLootContext);
+            combat = _combat.ResolveProjectileHits(
+                Entities,
+                Content,
+                Events,
+                eventLootContext,
+                _combatQueryWorkspace);
             contactDamage = Player.HealthComponent.IsDead
                 ? ContactDamageResult.None
                 : _combat.ResolvePlayerDamage(
@@ -414,7 +435,8 @@ public sealed class GameSimulation : IDisposable
                     Content,
                     PlayerGuard,
                     _combatDamageResolver,
-                    events: Events);
+                    events: Events,
+                    workspace: _combatQueryWorkspace);
         }
 
         EntityLifecycleResolution entityLifecycle;
@@ -510,7 +532,8 @@ public sealed class GameSimulation : IDisposable
                 sunlight,
                 ResolveVisibleTileBounds(
                     CoordinateUtils.WorldToTile(Player.Body.Center.X, Player.Body.Center.Y),
-                    _options));
+                    _options),
+                maxChunks: _options.MaxLightingChunksPerTick);
         }
 
         using (_phaseTelemetry.Measure(GameSimulationPhase.FrameSnapshot))
@@ -626,20 +649,7 @@ public sealed class GameSimulation : IDisposable
         SpawnSchedulerResult spawning,
         LivingWorldFrameSnapshot livingWorld)
     {
-        var hotbar = new InventorySlotFrameSnapshot[PlayerInventory.Hotbar.Slots.Count];
-        var occupiedInventorySlots = 0;
-        var totalInventoryItems = 0;
-        for (var index = 0; index < PlayerInventory.Hotbar.Slots.Count; index++)
-        {
-            var slot = PlayerInventory.Hotbar.Slots[index];
-            hotbar[index] = new InventorySlotFrameSnapshot(slot.Stack, slot.IsFavorite);
-            AccumulateInventorySlot(slot, ref occupiedInventorySlots, ref totalInventoryItems);
-        }
-
-        foreach (var slot in PlayerInventory.Main.Slots)
-        {
-            AccumulateInventorySlot(slot, ref occupiedInventorySlots, ref totalInventoryItems);
-        }
+        var hotbar = CaptureHotbarSnapshot(out var occupiedInventorySlots, out var totalInventoryItems);
 
         var player = new PlayerFrameSnapshot(
             Player.Body.Position,
@@ -657,21 +667,106 @@ public sealed class GameSimulation : IDisposable
             PlayerGuard.Stamina,
             PlayerGuard.Definition.MaxStamina,
             PlayerInventory.SelectedHotbarSlot,
-            new ImmutableSnapshotList<InventorySlotFrameSnapshot>(hotbar));
+            hotbar);
 
-        var entitySnapshots = new List<EntityFrameSnapshot>(Entities.Entities.Count);
-        var activeEnemies = 0;
-        var droppedItems = 0;
-        var projectiles = 0;
-        foreach (var entity in Entities.Entities)
+        var entitySnapshots = CaptureEntitySnapshots(out var activeEnemies, out var droppedItems, out var projectiles);
+
+        var worldTime = new WorldTimeFrameSnapshot(
+            Time.Day,
+            Time.TimeOfDaySeconds,
+            Time.DayLengthSeconds,
+            Time.NormalizedTimeOfDay,
+            Time.IsNight);
+        var farmPlots = CaptureFarmPlotSnapshots();
+
+        var hud = new HudFrameSnapshot(
+            Player.Health,
+            Player.MaxHealth,
+            Player.Mana,
+            Player.MaxMana,
+            PlayerInventory.SelectedHotbarSlot,
+            entitySnapshots.Count,
+            activeEnemies,
+            droppedItems,
+            projectiles,
+            occupiedInventorySlots,
+            totalInventoryItems,
+            farmPlots.Count,
+            pickedUpItems,
+            spawning.Spawned,
+            combat.EnemyDeaths + entityLifecycle.DeathsProcessed);
+
+        return new GameFrameSnapshot(
+            tickNumber,
+            player,
+            worldTime,
+            livingWorld,
+            entitySnapshots,
+            farmPlots,
+            hud)
         {
-            if (!entity.IsActive)
+            Attack = _itemUse.LatestAttackSnapshot
+        };
+    }
+
+    private ImmutableSnapshotList<InventorySlotFrameSnapshot> CaptureHotbarSnapshot(
+        out int occupiedInventorySlots,
+        out int totalInventoryItems)
+    {
+        var hotbarVersion = PlayerInventory.Hotbar.Version;
+        var mainVersion = PlayerInventory.Main.Version;
+        if (hotbarVersion != _cachedHotbarVersion || mainVersion != _cachedMainInventoryVersion)
+        {
+            var hotbarSlots = PlayerInventory.Hotbar.Slots;
+            var hotbar = new InventorySlotFrameSnapshot[hotbarSlots.Count];
+            occupiedInventorySlots = 0;
+            totalInventoryItems = 0;
+            for (var index = 0; index < hotbarSlots.Count; index++)
+            {
+                var slot = hotbarSlots[index];
+                hotbar[index] = new InventorySlotFrameSnapshot(slot.Stack, slot.IsFavorite);
+                AccumulateInventorySlot(slot, ref occupiedInventorySlots, ref totalInventoryItems);
+            }
+
+            var mainSlots = PlayerInventory.Main.Slots;
+            for (var index = 0; index < mainSlots.Count; index++)
+            {
+                AccumulateInventorySlot(mainSlots[index], ref occupiedInventorySlots, ref totalInventoryItems);
+            }
+
+            _cachedHotbarSnapshot = ImmutableSnapshotList<InventorySlotFrameSnapshot>.FromOwned(hotbar);
+            _cachedHotbarVersion = hotbarVersion;
+            _cachedMainInventoryVersion = mainVersion;
+            _cachedOccupiedInventorySlots = occupiedInventorySlots;
+            _cachedTotalInventoryItems = totalInventoryItems;
+            return _cachedHotbarSnapshot;
+        }
+
+        occupiedInventorySlots = _cachedOccupiedInventorySlots;
+        totalInventoryItems = _cachedTotalInventoryItems;
+        return _cachedHotbarSnapshot;
+    }
+
+    private ImmutableSnapshotList<EntityFrameSnapshot> CaptureEntitySnapshots(
+        out int activeEnemies,
+        out int droppedItems,
+        out int projectiles)
+    {
+        var entities = Entities.Entities;
+        _entitySnapshotBuilder.Begin(entities.Count);
+        activeEnemies = 0;
+        droppedItems = 0;
+        projectiles = 0;
+        for (var index = 0; index < entities.Count; index++)
+        {
+            if (!entities[index].IsActive)
             {
                 continue;
             }
 
-            var snapshot = CaptureEntity(entity);
-            entitySnapshots.Add(snapshot);
+            var snapshot = CaptureEntity(entities[index]);
+            _entitySnapshotBuilder.Add(snapshot);
+
             switch (snapshot.Kind)
             {
                 case EntityFrameKind.Enemy:
@@ -686,51 +781,57 @@ public sealed class GameSimulation : IDisposable
             }
         }
 
-        var worldTime = new WorldTimeFrameSnapshot(
-            Time.Day,
-            Time.TimeOfDaySeconds,
-            Time.DayLengthSeconds,
-            Time.NormalizedTimeOfDay,
-            Time.IsNight);
-        var farmPlots = new List<FarmPlotFrameSnapshot>(FarmPlots.Plots.Count);
-        foreach (var plot in FarmPlots.Plots)
+        return _entitySnapshotBuilder.Complete();
+    }
+
+    private ImmutableSnapshotList<FarmPlotFrameSnapshot> CaptureFarmPlotSnapshots()
+    {
+        var plots = FarmPlots.PlotValues;
+        var matchesPrevious = plots.Count == _cachedFarmPlotSnapshots.Count;
+        var index = 0;
+        foreach (var plot in plots)
         {
-            farmPlots.Add(new FarmPlotFrameSnapshot(
-                plot.Position,
-                plot.IsTilled,
-                plot.IsWatered,
-                plot.Crop?.CropId,
-                plot.Crop?.PlantedDay ?? 0,
-                plot.Crop?.DaysUntilHarvest ?? 0,
-                plot.Crop?.HarvestCount ?? 0,
-                plot.Crop?.IsMature ?? false));
+            if (matchesPrevious && CaptureFarmPlot(plot) != _cachedFarmPlotSnapshots[index])
+            {
+                matchesPrevious = false;
+            }
+
+            index++;
         }
 
-        var hud = new HudFrameSnapshot(
-            Player.Health,
-            Player.MaxHealth,
-            Player.Mana,
-            Player.MaxMana,
-            PlayerInventory.SelectedHotbarSlot,
-            entitySnapshots.Count,
-            activeEnemies,
-            droppedItems,
-            projectiles,
-            occupiedInventorySlots,
-            totalInventoryItems,
-            FarmPlots.Plots.Count,
-            pickedUpItems,
-            spawning.Spawned,
-            combat.EnemyDeaths + entityLifecycle.DeathsProcessed);
+        if (matchesPrevious)
+        {
+            return _cachedFarmPlotSnapshots;
+        }
 
-        return new GameFrameSnapshot(
-            tickNumber,
-            player,
-            worldTime,
-            livingWorld,
-            new ImmutableSnapshotList<EntityFrameSnapshot>(entitySnapshots),
-            new ImmutableSnapshotList<FarmPlotFrameSnapshot>(farmPlots),
-            hud);
+        if (plots.Count == 0)
+        {
+            _cachedFarmPlotSnapshots = ImmutableSnapshotList<FarmPlotFrameSnapshot>.Empty;
+            return _cachedFarmPlotSnapshots;
+        }
+
+        var snapshots = new FarmPlotFrameSnapshot[plots.Count];
+        index = 0;
+        foreach (var plot in plots)
+        {
+            snapshots[index++] = CaptureFarmPlot(plot);
+        }
+
+        _cachedFarmPlotSnapshots = ImmutableSnapshotList<FarmPlotFrameSnapshot>.FromOwned(snapshots);
+        return _cachedFarmPlotSnapshots;
+    }
+
+    private static FarmPlotFrameSnapshot CaptureFarmPlot(FarmPlot plot)
+    {
+        return new FarmPlotFrameSnapshot(
+            plot.Position,
+            plot.IsTilled,
+            plot.IsWatered,
+            plot.Crop?.CropId,
+            plot.Crop?.PlantedDay ?? 0,
+            plot.Crop?.DaysUntilHarvest ?? 0,
+            plot.Crop?.HarvestCount ?? 0,
+            plot.Crop?.IsMature ?? false);
     }
 
     private LivingWorldFrameSnapshot CaptureLivingWorld()
@@ -881,9 +982,12 @@ public sealed class GameSimulation : IDisposable
         }
 
         var playerCenter = Player.Body.Center;
-        foreach (var entity in Entities.Query(Player.Bounds.Inflate((int)MathF.Ceiling(magnetRadius))))
+        Entities.QueryInto(
+            Player.Bounds.Inflate((int)MathF.Ceiling(magnetRadius)),
+            _pickupMagnetQueryWorkspace);
+        for (var index = 0; index < _pickupMagnetQueryWorkspace.Count; index++)
         {
-            if (entity is not DroppedItemEntity { IsActive: true } droppedItem)
+            if (_pickupMagnetQueryWorkspace[index] is not DroppedItemEntity { IsActive: true } droppedItem)
             {
                 continue;
             }
@@ -1005,6 +1109,7 @@ public sealed class GameSimulation : IDisposable
         }
 
         if (options.MaxActiveEnemies < -1 ||
+            options.MaxLightingChunksPerTick is < 1 or > 8 ||
             !float.IsFinite(options.EnemySpawnRateMultiplier) ||
             options.EnemySpawnRateMultiplier < 0 ||
             options.SpawnMinimumDistanceTiles < 0 ||

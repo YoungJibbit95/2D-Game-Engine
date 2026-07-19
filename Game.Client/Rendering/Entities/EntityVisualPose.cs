@@ -70,5 +70,9 @@ public readonly record struct EntityVisualTelemetry(
     int CommandOverflowEntities,
     int TrackOverflowEntities)
 {
+    public EntityVisualSubmissionTelemetry Submission { get; init; }
+
     public bool WasBudgetClamped => CommandOverflowEntities > 0 || TrackOverflowEntities > 0;
+
+    public bool UsedSubmissionFallback => Submission.WasCapacityExceeded;
 }

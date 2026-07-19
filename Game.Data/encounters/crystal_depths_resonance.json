@@ -1,0 +1,20 @@
+{
+  "id": "crystal_depths_resonance",
+  "biomeIds": ["crystal_depths"],
+  "verticalLayerIds": ["underground", "cavern"],
+  "time": "any",
+  "weight": 1.0,
+  "minDistanceTiles": 18,
+  "maxDistanceTiles": 40,
+  "cooldownSeconds": 8.0,
+  "maxActiveGlobal": 14,
+  "populationRegionSizeTiles": 80,
+  "maxActiveInRegion": 6,
+  "minRoleSelections": 2,
+  "maxRoleSelections": 3,
+  "roles": [
+    { "id": "wisps", "spawnRuleId": "crystal_prism_wisp", "weight": 1.25, "minCount": 1, "maxCount": 2 },
+    { "id": "scouts", "spawnRuleId": "crystal_depths_bat_scout", "weight": 1.0, "minCount": 1, "maxCount": 2 },
+    { "id": "stalkers", "spawnRuleId": "crystal_depths_cave_spider", "weight": 0.85, "minCount": 1, "maxCount": 2 }
+  ]
+}

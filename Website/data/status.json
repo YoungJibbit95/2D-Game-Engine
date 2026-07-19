@@ -1,7 +1,7 @@
 {
     "version":  "Development snapshot",
-    "updated":  "2026-07-15",
-    "summary":  "Bounded gameplay feedback, deterministic replay capture, phased combat runtime and retry-budgeted streaming are integrated.",
+    "updated":  "2026-07-19",
+    "summary":  "Der V5-Client haelt 99,80 Prozent der 1080p- und 98,83 Prozent der 1440p-Frames im 120-Hz-Budget; volle Biome-Panoramen, deterministische Offscreen-Spawns und optimierte Engine-Snapshots sind aktiv.",
     "metrics":  [
                     {
                         "value":  "24 / 122",
@@ -16,7 +16,7 @@
                         "label":  "World events / phases"
                     },
                     {
-                        "value":  "995 / 995",
+                        "value":  "1381 / 1381",
                         "label":  "Debug + Release suites"
                     }
                 ],
@@ -42,8 +42,38 @@
                          "status":  "verified"
                      },
                      {
+                         "title":  "High-Refresh Presentation",
+                         "text":  "MMCSS-Scheduling, Waitable-Timer, VSync-Policy und getrennte Presentation-Raten halten V5 Forest bei 6,061 ms in 1080p und 6,078 ms in 1440p; 99,80 beziehungsweise 98,83 Prozent treffen 120 Hz.",
+                         "status":  "verified"
+                     },
+                     {
+                         "title":  "Authored Item Combat",
+                         "text":  "Schwert, Bogen und Spark Wand verwenden datengetriebene Attack-Sequenzen, atomare Ressourcen-Kosten, aktive Hit-Fenster und autoritative Phase-/Combo-Snapshots.",
+                         "status":  "verified"
+                     },
+                     {
+                         "title":  "Modern Pixel Controls",
+                         "text":  "Layered Surfaces, echte Slider, Toggle, Stepper, Segments, Tooltips und deterministische Hover-/Focus-/Press-Animation verbinden Web-App-Ergonomie mit Pixel-Art-Kanten.",
+                         "status":  "verified"
+                     },
+                     {
                          "title":  "Lesbares Cave Lighting",
-                         "text":  "Open-, Unknown- und Occluded-Sky-States verhindern Lichtlecks an Streaming-Grenzen; sichtbare Regionen werden zuerst aktualisiert und Hoehlenschaechte behalten weichen Restlichteinfall.",
+                         "text":  "Lokale Oberflaechenhoehe, getrenntes Cave-Restlicht, begrenzte Sonnenokklusion und dreifach rotierende GPU-Masken verhindern globale Dunkelheit und alte Schatten. Die 104x58-CPU-Maske bleibt mit 2,542 ms und 0 B im Budget.",
+                         "status":  "verified"
+                     },
+                     {
+                         "title":  "Lebende Offscreen-Spawns",
+                         "text":  "Friendly und Hostile Actors entstehen in geladenen Offscreen-Baendern, pruefen lokalen Boden und Himmel und bewegen sich mit aktiver AI in sichtbare Reichweite.",
+                         "status":  "verified"
+                     },
+                     {
+                         "title":  "Biome Panorama V5",
+                         "text":  "Vier native Forest-, Amber-, Marsh- und Crystal-Szenen sind seam-safe, rollenbewusst und fuellen den kompletten Viewport ohne Legacy-Doppellayer oder harte Unterkante.",
+                         "status":  "verified"
+                     },
+                     {
+                         "title":  "Scalable Core Workspaces",
+                         "text":  "Movement, Physics, aktive Fluessigkeiten, Combat-Queries und finite Worldgeneration verwenden feste oder caller-owned Workspaces mit gemessenen CPU- und Allocation-Gates.",
                          "status":  "verified"
                      }
                  ]

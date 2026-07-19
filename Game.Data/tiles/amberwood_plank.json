@@ -2,7 +2,7 @@
   "id": "amberwood_plank",
   "numericId": 13,
   "displayName": "Amberwood Plank",
-  "texture": "world/wave05/amberwood_plank_autotile",
+  "texture": "world/tiles/polish_v1/amberwood_plank_autotile",
   "solid": true,
   "blocksLight": true,
   "hardness": 1.6,

@@ -16,6 +16,7 @@ public sealed class GameSettingsServiceTests
         Assert.True(File.Exists(path));
         Assert.Equal(1280, settings.Video.Width);
         Assert.True(settings.Video.VSync);
+        Assert.True(settings.Video.LowLatencyFramePacing);
     }
 
     [Fact]
@@ -31,6 +32,7 @@ public sealed class GameSettingsServiceTests
                 Height = 1080,
                 Fullscreen = true,
                 VSync = false,
+                LowLatencyFramePacing = false,
                 FrameRateLimit = 144
             },
             Rendering = new RenderingSettings
@@ -216,6 +218,22 @@ public sealed class GameSettingsServiceTests
         var settings = GameSettings.CreateDefault() with
         {
             Video = new VideoSettings { FrameRateLimit = limit }
+        };
+
+        Assert.Throws<InvalidDataException>(() => service.Save(path, settings));
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(9)]
+    [InlineData(241)]
+    public void Save_RejectsUnsupportedPresentationUpdateRates(int rate)
+    {
+        var path = CreateTempPath();
+        var service = new GameSettingsService();
+        var settings = GameSettings.CreateDefault() with
+        {
+            Rendering = new RenderingSettings { LightingUpdateRateHz = rate }
         };
 
         Assert.Throws<InvalidDataException>(() => service.Save(path, settings));

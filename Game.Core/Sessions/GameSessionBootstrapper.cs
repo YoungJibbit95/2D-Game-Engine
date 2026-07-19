@@ -66,12 +66,19 @@ public sealed class GameSessionBootstrapper
         var profile = ResolveWorldProfile(content, projectContent.Manifest, startup, request.Settings);
 
         if (request.LoadExistingSave &&
-            TryLoadExistingSession(request, projectContent, content, startup, profile, out var loadedSession))
+            TryLoadExistingSession(
+                request,
+                projectContent,
+                content,
+                startup,
+                profile,
+                out var loadedSession,
+                out var loadedProfile))
         {
             return new GameSessionBootstrapResult(
                 loadedSession,
                 projectContent,
-                profile,
+                loadedProfile,
                 startup,
                 StarterInventory: null,
                 LoadedExistingSave: true,
@@ -147,9 +154,11 @@ public sealed class GameSessionBootstrapper
         GameContentDatabase content,
         GameStartupDefinition? startup,
         WorldGenerationProfile profile,
-        out LoadedGameSession session)
+        out LoadedGameSession session,
+        out WorldGenerationProfile effectiveProfile)
     {
         session = null!;
+        effectiveProfile = profile;
         if (!_loadCoordinator.CanLoad(request.SaveDirectory))
         {
             return false;
@@ -157,8 +166,9 @@ public sealed class GameSessionBootstrapper
 
         var events = new GameEventBus();
         var loaded = _loadCoordinator.Load(request.SaveDirectory, content, events: events);
+        effectiveProfile = ResolvePersistedWorldProfile(content, loaded.World, profile);
         var worldTime = loaded.WorldTime;
-        var livingWorld = CreateLivingWorldRuntime(loaded.World.Metadata.Seed, profile, content);
+        var livingWorld = CreateLivingWorldRuntime(loaded.World.Metadata.Seed, effectiveProfile, content);
         if (loaded.WorldEventState is not null)
         {
             livingWorld.RestoreWorldEvents(loaded.WorldEventState);
@@ -169,9 +179,10 @@ public sealed class GameSessionBootstrapper
                     loaded.World.Metadata.Seed,
                     livingWorld.Profile,
                     content.Biomes,
-                    content.StructurePlans.Definitions.ToArray()))
+                    content.StructurePlans.Definitions.ToArray()),
+                generationVersion: loaded.World.Metadata.GenerationVersion)
             : null;
-        ConfigureSurfaceResolver(livingWorld, loaded.World, profile, infiniteGenerator);
+        ConfigureSurfaceResolver(livingWorld, loaded.World, effectiveProfile, infiniteGenerator);
         var simulation = new GameSimulation(
             content,
             loaded.World,
@@ -194,7 +205,7 @@ public sealed class GameSessionBootstrapper
             events,
             worldTime,
             simulation,
-            loaded.World.IsHorizontallyInfinite ? profile : null,
+            loaded.World.IsHorizontallyInfinite ? effectiveProfile : null,
             request.SaveDirectory,
             loaded.TileEntities,
             loaded.FarmPlots,
@@ -208,6 +219,18 @@ public sealed class GameSessionBootstrapper
             playerLoadWarnings: loaded.PlayerWarnings,
             infiniteChunkGenerator: infiniteGenerator);
         return true;
+    }
+
+    private static WorldGenerationProfile ResolvePersistedWorldProfile(
+        GameContentDatabase content,
+        GameWorld world,
+        WorldGenerationProfile fallback)
+    {
+        var profileId = world.Metadata.GenerationProfileId;
+        return !string.IsNullOrWhiteSpace(profileId) &&
+            content.WorldGenerationProfiles.TryGetById(profileId, out var persisted)
+                ? persisted
+                : fallback;
     }
 
     private static GameStartupDefinition? ResolveStartup(GameContentDatabase content, GameProjectManifest manifest)

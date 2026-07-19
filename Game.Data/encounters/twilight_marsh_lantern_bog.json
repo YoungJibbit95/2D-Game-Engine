@@ -1,0 +1,19 @@
+{
+  "id": "twilight_marsh_lantern_bog",
+  "biomeIds": ["twilight_marsh"],
+  "verticalLayerIds": ["surface"],
+  "time": "any",
+  "weight": 1.0,
+  "minDistanceTiles": 20,
+  "maxDistanceTiles": 43,
+  "cooldownSeconds": 5.5,
+  "maxActiveGlobal": 16,
+  "populationRegionSizeTiles": 80,
+  "maxActiveInRegion": 7,
+  "minRoleSelections": 2,
+  "maxRoleSelections": 2,
+  "roles": [
+    { "id": "frogs", "spawnRuleId": "twilight_marsh_frog", "weight": 1.5, "minCount": 2, "maxCount": 3 },
+    { "id": "bog_lights", "spawnRuleId": "twilight_marsh_firefly", "weight": 1.0, "minCount": 1, "maxCount": 3 }
+  ]
+}

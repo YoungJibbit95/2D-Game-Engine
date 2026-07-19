@@ -3,6 +3,7 @@ using Game.Core.Animation;
 using Game.Core.Assets;
 using Game.Core.Characters;
 using Game.Core.Biomes;
+using Game.Core.Combat;
 using Game.Core.Crafting;
 using Game.Core.Dialogue;
 using Game.Core.Effects;
@@ -62,4 +63,10 @@ public sealed record GameContentDatabase(
 
     public WorldEventDefinitionRegistry WorldEvents { get; init; } =
         WorldEventDefinitionRegistry.Create(Array.Empty<WorldEventDefinition>());
+
+    public AttackSequenceRegistry AttackSequences { get; init; } =
+        AttackSequenceRegistry.Create(Array.Empty<AttackSequenceDefinition>());
+
+    public EncounterDefinitionRegistry Encounters { get; init; } =
+        EncounterDefinitionRegistry.Create(Array.Empty<EncounterDefinition>());
 }

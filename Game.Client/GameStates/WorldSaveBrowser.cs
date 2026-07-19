@@ -14,11 +14,28 @@ public sealed record WorldSaveEntry(
     bool IsHorizontallyInfinite,
     string DirectoryPath)
 {
-    public string SizeLabel => IsHorizontallyInfinite
+    public string DisplayName { get; } = WorldMenuText.Ellipsize(Name, 28);
+
+    public string CompactDisplayName { get; } = WorldMenuText.Ellipsize(Name, 20);
+
+    public string SizeLabel { get; } = IsHorizontallyInfinite
         ? $"INF X {HeightTiles}"
         : $"{WidthTiles} X {HeightTiles}";
 
-    public string CreatedLabel => CreatedAtUtc.ToLocalTime().ToString("yyyyMMdd HHmm", CultureInfo.InvariantCulture);
+    public string SeedLabel { get; } = $"SEED {Seed}";
+
+    public string CreatedLabel { get; } = CreatedAtUtc
+        .ToLocalTime()
+        .ToString("dd MMM yyyy", CultureInfo.InvariantCulture)
+        .ToUpperInvariant();
+
+    public string CompactMetadataLabel { get; } = IsHorizontallyInfinite
+        ? $"INF X {HeightTiles}   SEED {Seed}"
+        : $"{WidthTiles} X {HeightTiles}   SEED {Seed}";
+
+    public string MetadataLabel { get; } = IsHorizontallyInfinite
+        ? $"INF X {HeightTiles}   SEED {Seed}   {CreatedAtUtc.ToLocalTime().ToString("dd MMM yyyy", CultureInfo.InvariantCulture).ToUpperInvariant()}"
+        : $"{WidthTiles} X {HeightTiles}   SEED {Seed}   {CreatedAtUtc.ToLocalTime().ToString("dd MMM yyyy", CultureInfo.InvariantCulture).ToUpperInvariant()}";
 }
 
 public sealed class WorldSaveBrowser

@@ -14,6 +14,8 @@ public sealed record GameSimulationOptions
 
     public bool EnablePhaseTelemetry { get; init; }
 
+    public int MaxLightingChunksPerTick { get; init; } = 1;
+
     public int MaxActiveEnemies { get; init; } = -1;
 
     public float EnemySpawnRateMultiplier { get; init; } = 1f;

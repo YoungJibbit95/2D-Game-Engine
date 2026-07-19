@@ -1,0 +1,248 @@
+{
+  "version": 1,
+  "waveId": "wave_06_character_production",
+  "generatedAt": "2026-07-19",
+  "source": "art_direction/generated_sources/wave_06_character_source.png",
+  "sourceSha256": "5ec1b5d76410460bb1741717aeedf2b6f1df40558f9e799144da193e9f11bee1",
+  "sourceDimensions": [
+    1983,
+    793
+  ],
+  "sourceTool": "built-in image_gen (imagegen skill default mode)",
+  "sourceReference": "art_direction/generated_sources/wave_04_character_source.png",
+  "sourcePrompt": "Use case: stylized-concept\nAsset type: production source board for deterministic conversion into a more detailed 24x40 side-view pixel-art character layer atlas\nPrimary request: Refine Image 1 into one coherent original human sandbox adventurer with substantially richer anatomy, facial readability, hair volume, cloth folds, boots, gloves, copper-and-steel armor plates, belt hardware, pickaxe and shield silhouettes. Keep the same strict 16-column action sequence: idle A, idle B, six distinct run phases, jump, fall, three tool-use phases, defensive block, hurt recoil A, hurt recoil B.\nInput image: Image 1 is the prior repository-owned character source and fixes identity, teal/copper material language, action ordering, side-view orientation, and layer concept.\nScene/backdrop: perfectly flat solid #FF00FF chroma-key field, no floor, no shadows, no gradient, no texture.\nStyle/medium: original crisp high-detail pixel art for a 2D side-view sandbox game; classic handcrafted sprite discipline and readable Terraria-like scale without copying any Terraria character, palette, pose, clothing, or asset; hard clusters, two-step material highlights, restrained one-pixel near-black contours at intended target scale, no painterly softness.\nComposition/framing: orthographic side view facing right, aligned baseline, generous even spacing; five text-free horizontal rows corresponding to composite figure, head/hair, clothing/body gear, armor, held equipment; consistent body registration and pivots in every column.\nColor palette: restrained project palette, warm skin, dark navy outline, teal cloth, copper orange, muted steel blue, dark brown leather, small amber hit accents.\nConstraints: preserve exactly one character identity and exactly 16 readable action columns; every pose must remain readable when reconstructed at 24x40; retain clear separability of body, hair, clothes, armor, and equipment; opaque hard-edged pixel shapes only; no text, letters, numbers, labels, watermark, anti-aliasing, drop shadow, perspective, blur, glow, semi-transparent pixels, extra characters, scenery, UI chrome, duplicated filler poses, or #FF00FF inside the subject.",
+  "deterministicFinalResolution": true,
+  "legacyRuntimeSheetsRead": false,
+  "records": [
+    {
+      "spriteId": "entities/player/character_v2_wave06/body",
+      "path": "Assets/Wave06Character/player_body_actions.png",
+      "sha256": "75547625c036b367d9f80a3041a0ec15c32a8e31313059404e07c1608870c926",
+      "dimensions": [
+        384,
+        40
+      ],
+      "frameDimensions": [
+        24,
+        40
+      ],
+      "frameCount": 16,
+      "frameOrder": [
+        "idle_0",
+        "idle_1",
+        "run_0",
+        "run_1",
+        "run_2",
+        "run_3",
+        "run_4",
+        "run_5",
+        "jump",
+        "fall",
+        "tool_0",
+        "tool_1",
+        "tool_2",
+        "block",
+        "hurt_0",
+        "hurt_1"
+      ],
+      "pivot": [
+        12,
+        40
+      ],
+      "alphaValues": [
+        0,
+        255
+      ],
+      "generator": "Game.Data/art_direction/tools/generate_wave_06_character.py",
+      "method": "deterministic Pillow primitives drawn directly at final 24x40 frame resolution",
+      "generatedSourceSha256": "5ec1b5d76410460bb1741717aeedf2b6f1df40558f9e799144da193e9f11bee1",
+      "sourceUsage": "art-direction, pose and palette reference only; no source or Wave 04 runtime pixels are resized into output",
+      "license": "YjsE-Project-Owned",
+      "runtimeConsumer": "Wave04PlayerCharacterRenderer configured with player.wave06 content profile"
+    },
+    {
+      "spriteId": "entities/player/character_v2_wave06/clothes",
+      "path": "Assets/Wave06Character/player_clothes_actions.png",
+      "sha256": "e21d1769f634dd3d4f88c19ba23267f8da1a41c067524accdf086888755c34c4",
+      "dimensions": [
+        384,
+        40
+      ],
+      "frameDimensions": [
+        24,
+        40
+      ],
+      "frameCount": 16,
+      "frameOrder": [
+        "idle_0",
+        "idle_1",
+        "run_0",
+        "run_1",
+        "run_2",
+        "run_3",
+        "run_4",
+        "run_5",
+        "jump",
+        "fall",
+        "tool_0",
+        "tool_1",
+        "tool_2",
+        "block",
+        "hurt_0",
+        "hurt_1"
+      ],
+      "pivot": [
+        12,
+        40
+      ],
+      "alphaValues": [
+        0,
+        255
+      ],
+      "generator": "Game.Data/art_direction/tools/generate_wave_06_character.py",
+      "method": "deterministic Pillow primitives drawn directly at final 24x40 frame resolution",
+      "generatedSourceSha256": "5ec1b5d76410460bb1741717aeedf2b6f1df40558f9e799144da193e9f11bee1",
+      "sourceUsage": "art-direction, pose and palette reference only; no source or Wave 04 runtime pixels are resized into output",
+      "license": "YjsE-Project-Owned",
+      "runtimeConsumer": "Wave04PlayerCharacterRenderer configured with player.wave06 content profile"
+    },
+    {
+      "spriteId": "entities/player/character_v2_wave06/hair",
+      "path": "Assets/Wave06Character/player_hair_actions.png",
+      "sha256": "230f279aae7c4c3bf795b067f4ec19dbc6e6f3690a58bd4dea1acc2ef25440a5",
+      "dimensions": [
+        384,
+        40
+      ],
+      "frameDimensions": [
+        24,
+        40
+      ],
+      "frameCount": 16,
+      "frameOrder": [
+        "idle_0",
+        "idle_1",
+        "run_0",
+        "run_1",
+        "run_2",
+        "run_3",
+        "run_4",
+        "run_5",
+        "jump",
+        "fall",
+        "tool_0",
+        "tool_1",
+        "tool_2",
+        "block",
+        "hurt_0",
+        "hurt_1"
+      ],
+      "pivot": [
+        12,
+        40
+      ],
+      "alphaValues": [
+        0,
+        255
+      ],
+      "generator": "Game.Data/art_direction/tools/generate_wave_06_character.py",
+      "method": "deterministic Pillow primitives drawn directly at final 24x40 frame resolution",
+      "generatedSourceSha256": "5ec1b5d76410460bb1741717aeedf2b6f1df40558f9e799144da193e9f11bee1",
+      "sourceUsage": "art-direction, pose and palette reference only; no source or Wave 04 runtime pixels are resized into output",
+      "license": "YjsE-Project-Owned",
+      "runtimeConsumer": "Wave04PlayerCharacterRenderer configured with player.wave06 content profile"
+    },
+    {
+      "spriteId": "entities/player/character_v2_wave06/armor",
+      "path": "Assets/Wave06Character/player_armor_actions.png",
+      "sha256": "4d7c2f3b5287780c365ada9e70ab9b28de9b5ed57a3778de0933b15b1affef7c",
+      "dimensions": [
+        384,
+        40
+      ],
+      "frameDimensions": [
+        24,
+        40
+      ],
+      "frameCount": 16,
+      "frameOrder": [
+        "idle_0",
+        "idle_1",
+        "run_0",
+        "run_1",
+        "run_2",
+        "run_3",
+        "run_4",
+        "run_5",
+        "jump",
+        "fall",
+        "tool_0",
+        "tool_1",
+        "tool_2",
+        "block",
+        "hurt_0",
+        "hurt_1"
+      ],
+      "pivot": [
+        12,
+        40
+      ],
+      "alphaValues": [
+        0,
+        255
+      ],
+      "generator": "Game.Data/art_direction/tools/generate_wave_06_character.py",
+      "method": "deterministic Pillow primitives drawn directly at final 24x40 frame resolution",
+      "generatedSourceSha256": "5ec1b5d76410460bb1741717aeedf2b6f1df40558f9e799144da193e9f11bee1",
+      "sourceUsage": "art-direction, pose and palette reference only; no source or Wave 04 runtime pixels are resized into output",
+      "license": "YjsE-Project-Owned",
+      "runtimeConsumer": "Wave04PlayerCharacterRenderer configured with player.wave06 content profile"
+    },
+    {
+      "spriteId": "entities/player/character_v2_wave06/equipment",
+      "path": "Assets/Wave06Character/player_equipment_actions.png",
+      "sha256": "c0019581f459c9b1c26b98efbb5531fa96c9b407aaa549576f3d8f4d803fa7a9",
+      "dimensions": [
+        384,
+        40
+      ],
+      "frameDimensions": [
+        24,
+        40
+      ],
+      "frameCount": 16,
+      "frameOrder": [
+        "idle_0",
+        "idle_1",
+        "run_0",
+        "run_1",
+        "run_2",
+        "run_3",
+        "run_4",
+        "run_5",
+        "jump",
+        "fall",
+        "tool_0",
+        "tool_1",
+        "tool_2",
+        "block",
+        "hurt_0",
+        "hurt_1"
+      ],
+      "pivot": [
+        12,
+        40
+      ],
+      "alphaValues": [
+        0,
+        255
+      ],
+      "generator": "Game.Data/art_direction/tools/generate_wave_06_character.py",
+      "method": "deterministic Pillow primitives drawn directly at final 24x40 frame resolution",
+      "generatedSourceSha256": "5ec1b5d76410460bb1741717aeedf2b6f1df40558f9e799144da193e9f11bee1",
+      "sourceUsage": "art-direction, pose and palette reference only; no source or Wave 04 runtime pixels are resized into output",
+      "license": "YjsE-Project-Owned",
+      "runtimeConsumer": "Wave04PlayerCharacterRenderer configured with player.wave06 content profile"
+    }
+  ]
+}

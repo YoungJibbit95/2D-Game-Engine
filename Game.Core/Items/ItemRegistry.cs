@@ -115,6 +115,19 @@ public sealed class ItemRegistry : IItemDefinitionProvider
 
     private static void ValidateAction(ItemDefinition item, ItemActionDefinition action)
     {
+        if (action.AttackSequenceId is not null && string.IsNullOrWhiteSpace(action.AttackSequenceId))
+        {
+            throw new RegistryValidationException(
+                $"Item '{item.Id}' has an empty attack sequence id.");
+        }
+
+        if (!string.IsNullOrWhiteSpace(action.AttackSequenceId) &&
+            action.Kind is not (ItemActionKind.Melee or ItemActionKind.Shoot or ItemActionKind.Cast))
+        {
+            throw new RegistryValidationException(
+                $"Item '{item.Id}' uses an attack sequence on a non-combat action.");
+        }
+
         if (action.Kind is ItemActionKind.Shoot or ItemActionKind.Cast && string.IsNullOrWhiteSpace(action.ProjectileId))
         {
             throw new RegistryValidationException($"Item '{item.Id}' has a projectile action without a projectile id.");

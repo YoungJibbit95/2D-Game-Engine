@@ -31,7 +31,7 @@ public sealed class CaveGenerationStep : IWorldGenerationStep
 
             for (var step = 0; step < stepsPerWalk; step++)
             {
-                CarveCircle(world, x, y, radius);
+                CarveCircle(context, x, y, radius);
                 x = Math.Clamp(x + context.Random.Next(-1, 2), 2, world.WidthTiles - 3);
                 y = Math.Clamp(y + context.Random.Next(-1, 2), context.SurfaceHeights[x] + clampDepthOffset, world.HeightTiles - 3);
 
@@ -43,13 +43,14 @@ public sealed class CaveGenerationStep : IWorldGenerationStep
         }
     }
 
-    private static void CarveCircle(World world, int centerX, int centerY, int radius)
+    private static void CarveCircle(WorldGenerationContext context, int centerX, int centerY, int radius)
     {
+        var tiles = context.Tiles;
         for (var y = centerY - radius; y <= centerY + radius; y++)
         {
             for (var x = centerX - radius; x <= centerX + radius; x++)
             {
-                if (!world.IsInBounds(x, y))
+                if (!tiles.IsInBounds(x, y))
                 {
                     continue;
                 }
@@ -58,7 +59,7 @@ public sealed class CaveGenerationStep : IWorldGenerationStep
                 var dy = y - centerY;
                 if (dx * dx + dy * dy <= radius * radius)
                 {
-                    world.RemoveTile(x, y);
+                    tiles.RemoveTile(x, y);
                 }
             }
         }

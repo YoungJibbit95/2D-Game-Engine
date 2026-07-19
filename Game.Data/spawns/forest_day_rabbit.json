@@ -3,8 +3,8 @@
   "entityId": "rabbit",
   "biomeId": "forest",
   "requiresNight": false,
+  "habitats": ["surface"],
   "minTileY": 0,
-  "maxTileY": 96,
   "chance": 0.18,
   "maxActive": 5
 }

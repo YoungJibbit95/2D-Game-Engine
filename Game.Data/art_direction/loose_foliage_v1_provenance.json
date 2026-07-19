@@ -1,0 +1,62 @@
+{
+  "version": 1,
+  "generator": "deterministic Pillow pixel primitives",
+  "sourceBrief": "asset_briefs/loose_foliage_v1_briefs.json",
+  "preview": "art_direction/loose_foliage_v1_contact_sheet.png",
+  "assets": [
+    {
+      "spriteId": "tiles/loose_oak_leaves_v1_autotile",
+      "path": "Assets/LooseFoliageV1/loose_oak_leaves_v1_autotile.png",
+      "sha256": "4cc6297607d18064f75aab800658a2880f6cc3891a860a2304902b65188c0882",
+      "dimensions": [
+        256,
+        16
+      ],
+      "alpha": "binary",
+      "generator": "art_direction/tools/generate_loose_foliage_v1.py",
+      "license": "YjsE-Project-Owned",
+      "palette": [
+        "#19321e",
+        "#2f602e",
+        "#508f42",
+        "#89b552"
+      ]
+    },
+    {
+      "spriteId": "tiles/loose_autumn_leaves_v1_autotile",
+      "path": "Assets/LooseFoliageV1/loose_autumn_leaves_v1_autotile.png",
+      "sha256": "71e11eb9fe4641677ffad6480eba6cc514dbf5f6ed9dd41a117603c812a73ef6",
+      "dimensions": [
+        256,
+        16
+      ],
+      "alpha": "binary",
+      "generator": "art_direction/tools/generate_loose_foliage_v1.py",
+      "license": "YjsE-Project-Owned",
+      "palette": [
+        "#442418",
+        "#893d1d",
+        "#cd6a26",
+        "#f4a539"
+      ]
+    },
+    {
+      "spriteId": "tiles/loose_marsh_leaves_v1_autotile",
+      "path": "Assets/LooseFoliageV1/loose_marsh_leaves_v1_autotile.png",
+      "sha256": "02e7e5ede7b504d683495140782fff6fc5eab381136b55dcb12d6481cbdce88f",
+      "dimensions": [
+        256,
+        16
+      ],
+      "alpha": "binary",
+      "generator": "art_direction/tools/generate_loose_foliage_v1.py",
+      "license": "YjsE-Project-Owned",
+      "palette": [
+        "#122f2b",
+        "#215342",
+        "#397c57",
+        "#709e5d"
+      ]
+    }
+  ]
+}

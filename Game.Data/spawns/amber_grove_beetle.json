@@ -5,7 +5,6 @@
   "time": "day",
   "habitats": ["surface"],
   "minTileY": 0,
-  "maxTileY": 112,
   "chance": 0.2,
   "dayWeight": 1.35,
   "worldEventWeights": { "amberfall": 1.8 },

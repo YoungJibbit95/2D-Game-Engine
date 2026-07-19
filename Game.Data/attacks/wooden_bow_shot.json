@@ -1,0 +1,21 @@
+{
+  "id": "weapon.wooden_bow.shot",
+  "inputBufferTicks": 3,
+  "commandCapacity": 8,
+  "eventCapacity": 24,
+  "steps": [
+    {
+      "id": "draw-and-release",
+      "timeline": {
+        "startupTicks": 7,
+        "activeTicks": 1,
+        "recoveryTicks": 10,
+        "cooldownTicks": 4
+      },
+      "cost": {
+        "ammo": 1,
+        "ammoItemId": "wooden_arrow"
+      }
+    }
+  ]
+}

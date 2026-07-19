@@ -9,6 +9,7 @@ public sealed class CaveWallCleanupStep : IWorldGenerationStep
     public void Apply(WorldGenerationContext context)
     {
         var world = context.World;
+        var tiles = context.Tiles;
         var passes = Math.Max(0, context.Profile.CaveWallCleanupPasses);
         var minWallNeighbors = Math.Clamp(context.Profile.CaveWallCleanupMinNeighbors, 0, 8);
         var openNeighborThreshold = Math.Clamp(context.Profile.CaveWallCoreOpenNeighborThreshold, 0, 8);
@@ -25,13 +26,13 @@ public sealed class CaveWallCleanupStep : IWorldGenerationStep
 
                 for (var y = startY; y < world.HeightTiles; y++)
                 {
-                    var tile = world.GetTile(x, y);
+                    var tile = tiles.GetTile(x, y);
                     if (tile.IsSolid || tile.WallId == 0)
                     {
                         continue;
                     }
 
-                    CountNeighbors(world, x, y, out var wallNeighbors, out var openNeighbors);
+                    CountNeighbors(tiles, x, y, out var wallNeighbors, out var openNeighbors);
                     if (wallNeighbors < minWallNeighbors || openNeighbors >= openNeighborThreshold)
                     {
                         toClear.Add(new TilePos(x, y));
@@ -46,12 +47,17 @@ public sealed class CaveWallCleanupStep : IWorldGenerationStep
 
             foreach (var position in toClear)
             {
-                WorldGenerationTileMutations.SetWall(world, position.X, position.Y, 0);
+                WorldGenerationTileMutations.SetWall(tiles, position.X, position.Y, 0);
             }
         }
     }
 
-    private static void CountNeighbors(World world, int centerX, int centerY, out int wallNeighbors, out int openNeighbors)
+    private static void CountNeighbors(
+        WorldGenerationWorkspace tiles,
+        int centerX,
+        int centerY,
+        out int wallNeighbors,
+        out int openNeighbors)
     {
         wallNeighbors = 0;
         openNeighbors = 0;
@@ -60,12 +66,12 @@ public sealed class CaveWallCleanupStep : IWorldGenerationStep
         {
             for (var offsetX = -1; offsetX <= 1; offsetX++)
             {
-                if ((offsetX == 0 && offsetY == 0) || !world.IsInBounds(centerX + offsetX, centerY + offsetY))
+                if ((offsetX == 0 && offsetY == 0) || !tiles.IsInBounds(centerX + offsetX, centerY + offsetY))
                 {
                     continue;
                 }
 
-                var neighbor = world.GetTile(centerX + offsetX, centerY + offsetY);
+                var neighbor = tiles.GetTile(centerX + offsetX, centerY + offsetY);
                 if (neighbor.WallId != 0)
                 {
                     wallNeighbors++;

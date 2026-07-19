@@ -7,7 +7,7 @@
   "category": "Block",
   "sortPriority": 31,
   "type": "PlaceableTile",
-  "texture": "world/wave05/amberwood_plank_autotile",
+  "texture": "world/tiles/polish_v1/amberwood_plank_autotile",
   "maxStack": 999,
   "useTime": 0.08,
   "placesTile": "amberwood_plank",

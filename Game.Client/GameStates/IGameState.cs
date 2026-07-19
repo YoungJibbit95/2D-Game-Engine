@@ -15,5 +15,9 @@ public interface IGameState : IDisposable
 
     void Update(double deltaSeconds);
 
+    void LateUpdate(double deltaSeconds)
+    {
+    }
+
     void Draw(RenderContext context);
 }

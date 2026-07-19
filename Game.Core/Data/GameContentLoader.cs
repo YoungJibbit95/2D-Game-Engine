@@ -3,6 +3,7 @@ using Game.Core.Animation;
 using Game.Core.Assets;
 using Game.Core.Characters;
 using Game.Core.Biomes;
+using Game.Core.Combat;
 using Game.Core.Crafting;
 using Game.Core.Dialogue;
 using Game.Core.Effects;
@@ -33,6 +34,7 @@ public sealed class GameContentLoader
     private readonly ProjectileDefinitionJsonLoader _projectileLoader;
     private readonly EntityDefinitionJsonLoader _entityLoader;
     private readonly SpawnRuleJsonLoader _spawnRuleLoader;
+    private readonly EncounterDefinitionJsonLoader _encounterLoader = new();
     private readonly StatusEffectDefinitionJsonLoader _statusEffectLoader;
     private readonly SpriteAssetJsonLoader _spriteAssetLoader;
     private readonly WorldGenerationProfileJsonLoader _worldGenerationProfileLoader;
@@ -46,6 +48,7 @@ public sealed class GameContentLoader
     private readonly SpriteAnimationJsonLoader _animationLoader;
     private readonly CharacterDefinitionJsonLoader _characterLoader;
     private readonly WorldEventDefinitionJsonLoader _worldEventLoader;
+    private readonly AttackSequenceDefinitionJsonLoader _attackSequenceLoader;
 
     public GameContentLoader()
         : this(
@@ -106,6 +109,7 @@ public sealed class GameContentLoader
         _animationLoader = animationLoader ?? new SpriteAnimationJsonLoader();
         _characterLoader = characterLoader ?? new CharacterDefinitionJsonLoader();
         _worldEventLoader = new WorldEventDefinitionJsonLoader();
+        _attackSequenceLoader = new AttackSequenceDefinitionJsonLoader();
     }
 
     public GameContentDatabase LoadFromRoot(string contentRoot)
@@ -171,6 +175,7 @@ public sealed class GameContentLoader
             _projectileLoader.LoadDefinitionsFromDirectory(Path.Combine(root, "projectiles")),
             _entityLoader.LoadDefinitionsFromDirectory(Path.Combine(root, "entities")),
             _spawnRuleLoader.LoadDefinitionsFromDirectory(Path.Combine(root, "spawns")),
+            _encounterLoader.LoadDefinitionsFromDirectory(Path.Combine(root, "encounters")),
             _statusEffectLoader.LoadDefinitionsFromDirectory(Path.Combine(root, "effects")),
             _spriteAssetLoader.LoadDefinitionsFromDirectory(Path.Combine(root, "assets")),
             _worldGenerationProfileLoader.LoadProfilesFromDirectory(Path.Combine(root, "worldgen")),
@@ -183,7 +188,8 @@ public sealed class GameContentLoader
             _startupLoader.LoadDefinitionsFromDirectory(Path.Combine(root, "startup")),
             _animationLoader.LoadClipsFromDirectory(Path.Combine(root, "animations")),
             _characterLoader.LoadDefinitionsFromDirectory(Path.Combine(root, "characters")),
-            _worldEventLoader.LoadRegistryFromDirectory(Path.Combine(root, "world-events")).Definitions);
+            _worldEventLoader.LoadRegistryFromDirectory(Path.Combine(root, "world-events")).Definitions,
+            _attackSequenceLoader.LoadDefinitionsFromDirectory(Path.Combine(root, "attacks")));
     }
 
     private static ContentPackManifest LoadManifest(string modDirectory)
@@ -214,6 +220,7 @@ public sealed class GameContentLoader
         IReadOnlyList<ProjectileDefinition> Projectiles,
         IReadOnlyList<EntityDefinition> Entities,
         IReadOnlyList<SpawnRuleDefinition> SpawnRules,
+        IReadOnlyList<EncounterDefinition> Encounters,
         IReadOnlyList<StatusEffectDefinition> StatusEffects,
         IReadOnlyList<SpriteAssetDefinition> SpriteAssets,
         IReadOnlyList<WorldGenerationProfile> WorldGenerationProfiles,
@@ -226,7 +233,8 @@ public sealed class GameContentLoader
         IReadOnlyList<GameStartupDefinition> GameStartups,
         IReadOnlyList<SpriteAnimationClip> Animations,
         IReadOnlyList<CharacterDefinition> Characters,
-        IReadOnlyList<WorldEventDefinition> WorldEvents);
+        IReadOnlyList<WorldEventDefinition> WorldEvents,
+        IReadOnlyList<AttackSequenceDefinition> AttackSequences);
 
     private sealed class ContentDatabaseBuilder
     {
@@ -240,6 +248,7 @@ public sealed class GameContentLoader
         private readonly Dictionary<string, Packed<ProjectileDefinition>> _projectiles = new(StringComparer.OrdinalIgnoreCase);
         private readonly Dictionary<string, Packed<EntityDefinition>> _entities = new(StringComparer.OrdinalIgnoreCase);
         private readonly Dictionary<string, Packed<SpawnRuleDefinition>> _spawnRules = new(StringComparer.OrdinalIgnoreCase);
+        private readonly Dictionary<string, Packed<EncounterDefinition>> _encounters = new(StringComparer.OrdinalIgnoreCase);
         private readonly Dictionary<string, Packed<StatusEffectDefinition>> _statusEffects = new(StringComparer.OrdinalIgnoreCase);
         private readonly Dictionary<string, Packed<SpriteAssetDefinition>> _spriteAssets = new(StringComparer.OrdinalIgnoreCase);
         private readonly Dictionary<string, Packed<WorldGenerationProfile>> _worldGenerationProfiles = new(StringComparer.OrdinalIgnoreCase);
@@ -253,6 +262,7 @@ public sealed class GameContentLoader
         private readonly Dictionary<string, Packed<SpriteAnimationClip>> _animations = new(StringComparer.OrdinalIgnoreCase);
         private readonly Dictionary<string, Packed<CharacterDefinition>> _characters = new(StringComparer.OrdinalIgnoreCase);
         private readonly Dictionary<string, Packed<WorldEventDefinition>> _worldEvents = new(StringComparer.OrdinalIgnoreCase);
+        private readonly Dictionary<string, Packed<AttackSequenceDefinition>> _attackSequences = new(StringComparer.OrdinalIgnoreCase);
 
         public ContentDatabaseBuilder(ContentLoadReport report)
         {
@@ -273,6 +283,7 @@ public sealed class GameContentLoader
             MergeById(_projectiles, definitions.Projectiles, projectile => projectile.Id, "projectile", packId);
             MergeById(_entities, definitions.Entities, entity => entity.Id, "entity", packId);
             MergeById(_spawnRules, definitions.SpawnRules, rule => rule.Id, "spawn", packId);
+            MergeById(_encounters, definitions.Encounters, encounter => encounter.Id, "encounter", packId);
             MergeById(_statusEffects, definitions.StatusEffects, effect => effect.Id, "effect", packId);
             MergeById(
                 _spriteAssets,
@@ -296,6 +307,12 @@ public sealed class GameContentLoader
             MergeById(_animations, definitions.Animations, animation => animation.Id, "animation", packId);
             MergeById(_characters, definitions.Characters, character => character.Id, "character", packId);
             MergeById(_worldEvents, definitions.WorldEvents, worldEvent => worldEvent.Id, "world-event", packId);
+            MergeById(
+                _attackSequences,
+                definitions.AttackSequences,
+                attackSequence => attackSequence.Id,
+                "attack-sequence",
+                packId);
         }
 
         public GameContentDatabase Build()
@@ -325,7 +342,11 @@ public sealed class GameContentLoader
                 Animations = SpriteAnimationRegistry.Create(_animations.Values.Select(value => value.Definition)),
                 Characters = CharacterDefinitionRegistry.Create(_characters.Values.Select(value => value.Definition)),
                 WorldEvents = WorldEventDefinitionRegistry.Create(
-                    _worldEvents.Values.Select(value => value.Definition))
+                    _worldEvents.Values.Select(value => value.Definition)),
+                AttackSequences = AttackSequenceRegistry.Create(
+                    _attackSequences.Values.Select(value => value.Definition)),
+                Encounters = EncounterDefinitionRegistry.Create(
+                    _encounters.Values.Select(value => value.Definition))
             };
         }
 

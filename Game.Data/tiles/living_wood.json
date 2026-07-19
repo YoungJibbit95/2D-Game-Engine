@@ -1,0 +1,13 @@
+{
+  "id": "living_wood",
+  "numericId": 18,
+  "displayName": "Living Amber Wood",
+  "texture": "tiles/living_wood_autotile",
+  "solid": false,
+  "blocksLight": true,
+  "hardness": 1.35,
+  "miningPowerRequired": 0,
+  "dropItem": "wood",
+  "mergeGroup": "tree-trunk",
+  "tags": ["wood", "tree", "pass-through", "amber-grove", "natural", "mineable"]
+}

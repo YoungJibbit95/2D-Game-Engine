@@ -2,7 +2,7 @@
   "id": "grass",
   "numericId": 2,
   "displayName": "Grass Block",
-  "texture": "tiles/grass_autotile",
+  "texture": "world/tiles/polish_v1/forest_grass_loam_autotile",
   "solid": true,
   "blocksLight": true,
   "hardness": 1.0,

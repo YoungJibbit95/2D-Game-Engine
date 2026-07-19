@@ -8,8 +8,6 @@ public sealed class OreGenerationStep : IWorldGenerationStep
 
     public void Apply(WorldGenerationContext context)
     {
-        var world = context.World;
-
         foreach (var ore in GetOreDefinitions(context.Profile))
         {
             if (!ore.CanGenerate)
@@ -17,7 +15,7 @@ public sealed class OreGenerationStep : IWorldGenerationStep
                 continue;
             }
 
-            PlaceOre(world, context, ore);
+            PlaceOre(context, ore);
         }
     }
 
@@ -47,8 +45,9 @@ public sealed class OreGenerationStep : IWorldGenerationStep
         };
     }
 
-    private static void PlaceOre(World world, WorldGenerationContext context, OreGenerationDefinition ore)
+    private static void PlaceOre(WorldGenerationContext context, OreGenerationDefinition ore)
     {
+        var world = context.World;
         var radius = Math.Max(1, ore.Radius);
         var minDepthOffset = Math.Max(0, ore.MinDepthOffset);
         var minLength = Math.Max(1, Math.Min(ore.MinLength, ore.MaxLength));
@@ -74,7 +73,7 @@ public sealed class OreGenerationStep : IWorldGenerationStep
 
             for (var step = 0; step < length; step++)
             {
-                PlaceOreBlob(world, x, y, ore, radius);
+                PlaceOreBlob(context, x, y, ore, radius);
                 x = Math.Clamp(x + context.Random.Next(-1, 2), 1, world.WidthTiles - 2);
                 var nextMinY = Math.Min(world.HeightTiles - 3, context.SurfaceHeights[x] + minDepthOffset);
                 var nextMaxY = ore.MaxDepthOffset > 0
@@ -85,13 +84,19 @@ public sealed class OreGenerationStep : IWorldGenerationStep
         }
     }
 
-    private static void PlaceOreBlob(World world, int centerX, int centerY, OreGenerationDefinition ore, int radius)
+    private static void PlaceOreBlob(
+        WorldGenerationContext context,
+        int centerX,
+        int centerY,
+        OreGenerationDefinition ore,
+        int radius)
     {
+        var tiles = context.Tiles;
         for (var y = centerY - radius; y <= centerY + radius; y++)
         {
             for (var x = centerX - radius; x <= centerX + radius; x++)
             {
-                if (!world.IsInBounds(x, y) || world.GetTile(x, y).TileId != ore.ReplaceTileId)
+                if (!tiles.IsInBounds(x, y) || tiles.GetTile(x, y).TileId != ore.ReplaceTileId)
                 {
                     continue;
                 }
@@ -100,7 +105,7 @@ public sealed class OreGenerationStep : IWorldGenerationStep
                 var dy = y - centerY;
                 if (dx * dx + dy * dy <= radius * radius)
                 {
-                    world.SetTile(x, y, TileInstance.FromTileId(ore.TileId, TileFlags.IsNatural));
+                    tiles.SetTile(x, y, TileInstance.FromTileId(ore.TileId, TileFlags.IsNatural));
                 }
             }
         }

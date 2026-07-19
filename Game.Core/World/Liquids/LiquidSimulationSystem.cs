@@ -1,137 +1,367 @@
 namespace Game.Core.World.Liquids;
 
+/// <summary>
+/// Deterministic, budgeted active-cell liquid simulation. Region overloads are
+/// retained as compatibility adapters and incrementally seed the system-owned
+/// workspace instead of scanning an unbounded region in one step.
+/// </summary>
 public sealed class LiquidSimulationSystem
 {
-    private readonly HashSet<TilePos> _changedTiles = new();
+    private readonly LiquidSimulationWorkspace _workspace;
 
-    public LiquidSimulationResult Step(World world, RectI tileRegion, LiquidSimulationOptions? options = null)
+    public LiquidSimulationSystem()
+        : this(new LiquidSimulationWorkspace())
+    {
+    }
+
+    public LiquidSimulationSystem(LiquidSimulationWorkspace workspace)
+    {
+        ArgumentNullException.ThrowIfNull(workspace);
+        _workspace = workspace;
+    }
+
+    public int PendingActiveCellCount => _workspace.PendingActiveCellCount;
+
+    public int PendingSeedRegionCount => _workspace.PendingSeedRegionCount;
+
+    public bool HasPendingWork => _workspace.HasPendingWork;
+
+    public bool Activate(TilePos position)
+    {
+        return _workspace.Activate(position);
+    }
+
+    public bool ActivateRegion(RectI region)
+    {
+        return _workspace.ActivateRegion(region);
+    }
+
+    public void Reset()
+    {
+        _workspace.Reset();
+    }
+
+    public LiquidSimulationResult Step(
+        World world,
+        RectI tileRegion,
+        LiquidSimulationOptions? options = null)
     {
         ArgumentNullException.ThrowIfNull(world);
+        _workspace.Bind(world);
 
-        if (tileRegion.IsEmpty)
+        if (!tileRegion.IsEmpty)
         {
-            return LiquidSimulationResult.None;
-        }
-
-        options ??= LiquidSimulationOptions.Default;
-
-        var clampedRegion = world.ClampRegionToBounds(tileRegion);
-        var minX = clampedRegion.Left;
-        var maxX = clampedRegion.Right - 1;
-        var minY = clampedRegion.Top;
-        var maxY = clampedRegion.Bottom - 1;
-
-        if (minX > maxX || minY > maxY)
-        {
-            return LiquidSimulationResult.None;
-        }
-
-        var changedTiles = 0;
-        var movedLiquid = 0;
-        _changedTiles.Clear();
-
-        for (var y = maxY; y >= minY; y--)
-        {
-            for (var x = minX; x <= maxX; x++)
+            var clamped = world.ClampRegionToBounds(tileRegion);
+            if (!clamped.IsEmpty)
             {
-                if (!world.GetTile(x, y).HasLiquid)
-                {
-                    continue;
-                }
-
-                movedLiquid += TryFlowDown(world, x, y, options, ref changedTiles);
-                movedLiquid += TryFlowSideways(world, x, y, options, ref changedTiles);
+                _workspace.ActivateRegion(clamped);
             }
         }
 
-        var result = new LiquidSimulationResult(changedTiles, movedLiquid, BuildChangedRegions());
-        _changedTiles.Clear();
-        return result;
+        return StepCore(world, _workspace, options ?? LiquidSimulationOptions.Default);
     }
 
-    public LiquidSimulationResult Step(World world, IEnumerable<RectI> tileRegions, LiquidSimulationOptions? options = null)
+    public LiquidSimulationResult Step(
+        World world,
+        IEnumerable<RectI> tileRegions,
+        LiquidSimulationOptions? options = null)
     {
+        ArgumentNullException.ThrowIfNull(world);
         ArgumentNullException.ThrowIfNull(tileRegions);
+        _workspace.Bind(world);
 
-        var total = LiquidSimulationResult.None;
         foreach (var region in tileRegions)
         {
-            total = total.Add(Step(world, region, options));
+            if (region.IsEmpty)
+            {
+                continue;
+            }
+
+            var clamped = world.ClampRegionToBounds(region);
+            if (!clamped.IsEmpty)
+            {
+                _workspace.ActivateRegion(clamped);
+            }
         }
 
-        return total;
+        return StepCore(world, _workspace, options ?? LiquidSimulationOptions.Default);
     }
 
-    private int TryFlowDown(World world, int x, int y, LiquidSimulationOptions options, ref int changedTiles)
-    {
-        var belowY = y + 1;
-        if (!world.IsInBounds(x, belowY))
-        {
-            return 0;
-        }
-
-        return Transfer(world, x, y, x, belowY, options.MaxLiquid, options, ref changedTiles);
-    }
-
-    private int TryFlowSideways(World world, int x, int y, LiquidSimulationOptions options, ref int changedTiles)
-    {
-        var source = world.GetTile(x, y);
-        if (!source.HasLiquid)
-        {
-            return 0;
-        }
-
-        var moved = 0;
-        var firstDirection = ((x + y) & 1) == 0 ? -1 : 1;
-        moved += TryBalanceSide(world, x, y, firstDirection, options, ref changedTiles);
-        moved += TryBalanceSide(world, x, y, -firstDirection, options, ref changedTiles);
-        return moved;
-    }
-
-    private int TryBalanceSide(
+    public LiquidSimulationResult Step(
         World world,
-        int x,
-        int y,
+        LiquidSimulationOptions? options = null)
+    {
+        ArgumentNullException.ThrowIfNull(world);
+        _workspace.Bind(world);
+        return StepCore(world, _workspace, options ?? LiquidSimulationOptions.Default);
+    }
+
+    public LiquidSimulationResult Step(
+        World world,
+        LiquidSimulationWorkspace workspace,
+        LiquidSimulationOptions? options = null)
+    {
+        ArgumentNullException.ThrowIfNull(world);
+        ArgumentNullException.ThrowIfNull(workspace);
+        workspace.Bind(world);
+        return StepCore(world, workspace, options ?? LiquidSimulationOptions.Default);
+    }
+
+    private static LiquidSimulationResult StepCore(
+        World world,
+        LiquidSimulationWorkspace workspace,
+        LiquidSimulationOptions options)
+    {
+        ValidateOptions(options);
+        workspace.BeginStep();
+
+        var activeAtStart = workspace.PendingActiveCellCount;
+        var seedTilesChecked = 0;
+        var seededCells = 0;
+        SeedActiveCells(
+            world,
+            workspace,
+            options.MaxSeedTileChecksPerStep,
+            ref seedTilesChecked,
+            ref seededCells);
+
+        var cellsAvailableThisStep = workspace.PendingActiveCellCount;
+        var cellLimit = Math.Min(options.MaxCellsPerStep, cellsAvailableThisStep);
+        var processedCells = 0;
+        var transferOperations = 0;
+        var successfulTransfers = 0;
+        var movedLiquid = 0;
+
+        while (processedCells < cellLimit && workspace.PendingActiveCellCount > 0)
+        {
+            if (transferOperations >= options.MaxTransferOperationsPerStep)
+            {
+                break;
+            }
+
+            var position = workspace.DequeueActive();
+            processedCells++;
+            ProcessCell(
+                world,
+                workspace,
+                position,
+                options,
+                ref transferOperations,
+                ref successfulTransfers,
+                ref movedLiquid);
+        }
+
+        var dropped = workspace.ConsumeDroppedCounts();
+        var changedRegions = workspace.BuildChangedRegions();
+        if (dropped.Activations > 0)
+        {
+            for (var index = 0; index < changedRegions.Count; index++)
+            {
+                workspace.ActivateRegion(changedRegions[index]);
+            }
+        }
+
+        var recoveryDrops = workspace.ConsumeDroppedCounts();
+        dropped = (
+            dropped.Activations + recoveryDrops.Activations,
+            dropped.Regions + recoveryDrops.Regions);
+        var pendingActive = workspace.PendingActiveCellCount;
+        var pendingRegions = workspace.PendingSeedRegionCount;
+        var transferBudgetExhausted =
+            transferOperations >= options.MaxTransferOperationsPerStep &&
+            pendingActive > 0;
+        var cellBudgetExhausted =
+            processedCells >= options.MaxCellsPerStep &&
+            pendingActive > 0;
+        var seedBudgetExhausted =
+            seedTilesChecked >= options.MaxSeedTileChecksPerStep &&
+            pendingRegions > 0;
+
+        return new LiquidSimulationResult(
+            workspace.ChangedTileCount,
+            movedLiquid,
+            changedRegions)
+        {
+            ActiveCellsAtStart = activeAtStart,
+            SeedTilesChecked = seedTilesChecked,
+            SeededCells = seededCells,
+            ProcessedCells = processedCells,
+            TransferOperations = transferOperations,
+            SuccessfulTransfers = successfulTransfers,
+            PendingActiveCells = pendingActive,
+            PendingSeedRegions = pendingRegions,
+            DroppedActivations = dropped.Activations,
+            DroppedSeedRegions = dropped.Regions,
+            CellBudgetExhausted = cellBudgetExhausted,
+            TransferBudgetExhausted = transferBudgetExhausted,
+            SeedBudgetExhausted = seedBudgetExhausted
+        };
+    }
+
+    private static void SeedActiveCells(
+        World world,
+        LiquidSimulationWorkspace workspace,
+        int scanBudget,
+        ref int scannedTiles,
+        ref int seededCells)
+    {
+        while (scannedTiles < scanBudget && workspace.PendingSeedRegionCount > 0)
+        {
+            var cursor = workspace.DequeueSeedRegion();
+            var complete = false;
+            while (scannedTiles < scanBudget)
+            {
+                scannedTiles++;
+                if (world.TryGetTile(cursor.X, cursor.Y, out var tile) && tile.HasLiquid)
+                {
+                    seededCells += workspace.Activate(new TilePos(cursor.X, cursor.Y)) ? 1 : 0;
+                }
+
+                if (!cursor.MoveNext())
+                {
+                    complete = true;
+                    break;
+                }
+            }
+
+            if (complete)
+            {
+                workspace.CompleteSeedRegion(cursor.Region);
+            }
+            else
+            {
+                workspace.RequeueSeedRegion(cursor);
+            }
+        }
+    }
+
+    private static void ProcessCell(
+        World world,
+        LiquidSimulationWorkspace workspace,
+        TilePos position,
+        LiquidSimulationOptions options,
+        ref int transferOperations,
+        ref int successfulTransfers,
+        ref int movedLiquid)
+    {
+        if (!world.TryGetTile(position.X, position.Y, out var source) || !source.HasLiquid)
+        {
+            return;
+        }
+
+        if (!TryConsumeTransferBudget(options, ref transferOperations))
+        {
+            workspace.Activate(position);
+            return;
+        }
+
+        var moved = TryTransfer(
+            world,
+            workspace,
+            position,
+            new TilePos(position.X, position.Y + 1),
+            options.MaxLiquid,
+            options);
+        RecordTransfer(moved, ref successfulTransfers, ref movedLiquid);
+
+        if (!world.TryGetTile(position.X, position.Y, out source) || !source.HasLiquid)
+        {
+            return;
+        }
+
+        var firstDirection = ((position.X ^ position.Y) & 1) == 0 ? -1 : 1;
+        if (!TryBalanceSide(
+                world,
+                workspace,
+                position,
+                firstDirection,
+                options,
+                ref transferOperations,
+                ref successfulTransfers,
+                ref movedLiquid))
+        {
+            workspace.Activate(position);
+            return;
+        }
+
+        if (!TryBalanceSide(
+                world,
+                workspace,
+                position,
+                -firstDirection,
+                options,
+                ref transferOperations,
+                ref successfulTransfers,
+                ref movedLiquid))
+        {
+            workspace.Activate(position);
+        }
+    }
+
+    private static bool TryBalanceSide(
+        World world,
+        LiquidSimulationWorkspace workspace,
+        TilePos sourcePosition,
         int direction,
         LiquidSimulationOptions options,
-        ref int changedTiles)
+        ref int transferOperations,
+        ref int successfulTransfers,
+        ref int movedLiquid)
     {
-        var targetX = x + direction;
-        if (!world.IsInBounds(targetX, y))
+        if (!TryConsumeTransferBudget(options, ref transferOperations))
         {
-            return 0;
+            return false;
         }
 
-        var source = world.GetTile(x, y);
-        var target = world.GetTile(targetX, y);
-        if (!CanContainLiquid(target))
+        if (!world.TryGetTile(sourcePosition.X, sourcePosition.Y, out var source))
         {
-            return 0;
+            return true;
+        }
+
+        if ((direction < 0 && sourcePosition.X == int.MinValue) ||
+            (direction > 0 && sourcePosition.X == int.MaxValue))
+        {
+            return true;
+        }
+
+        var targetPosition = new TilePos(sourcePosition.X + direction, sourcePosition.Y);
+        if (!world.TryGetTile(targetPosition.X, targetPosition.Y, out var target) ||
+            !CanContainLiquid(target))
+        {
+            return true;
         }
 
         var difference = source.LiquidAmount - target.LiquidAmount;
         if (difference <= options.MinimumHorizontalDifference)
         {
-            return 0;
+            return true;
         }
 
         var requested = Math.Min(options.MaxHorizontalFlow, difference / 2);
-        return Transfer(world, x, y, targetX, y, requested, options, ref changedTiles);
+        var moved = TryTransfer(
+            world,
+            workspace,
+            sourcePosition,
+            targetPosition,
+            requested,
+            options);
+        RecordTransfer(moved, ref successfulTransfers, ref movedLiquid);
+        return true;
     }
 
-    private int Transfer(
+    private static int TryTransfer(
         World world,
-        int sourceX,
-        int sourceY,
-        int targetX,
-        int targetY,
+        LiquidSimulationWorkspace workspace,
+        TilePos sourcePosition,
+        TilePos targetPosition,
         int requestedAmount,
-        LiquidSimulationOptions options,
-        ref int changedTiles)
+        LiquidSimulationOptions options)
     {
-        var source = world.GetTile(sourceX, sourceY);
-        var target = world.GetTile(targetX, targetY);
-        if (!source.HasLiquid || !CanContainLiquid(target) || requestedAmount <= 0)
+        if (requestedAmount <= 0 ||
+            !world.TryGetTile(sourcePosition.X, sourcePosition.Y, out var source) ||
+            !world.TryGetTile(targetPosition.X, targetPosition.Y, out var target) ||
+            !source.HasLiquid ||
+            !CanContainLiquid(target))
         {
             return 0;
         }
@@ -143,10 +373,128 @@ public sealed class LiquidSimulationSystem
             return 0;
         }
 
-        world.SetTile(sourceX, sourceY, WithLiquid(source, source.LiquidAmount - moved));
-        world.SetTile(targetX, targetY, WithLiquid(target, target.LiquidAmount + moved));
-        changedTiles += MarkChanged(new TilePos(sourceX, sourceY), new TilePos(targetX, targetY));
+        WriteLoadedTile(world, sourcePosition, WithLiquid(source, source.LiquidAmount - moved));
+        WriteLoadedTile(world, targetPosition, WithLiquid(target, target.LiquidAmount + moved));
+        workspace.MarkChanged(sourcePosition);
+        workspace.MarkChanged(targetPosition);
+        ActivateAffected(workspace, sourcePosition, targetPosition);
         return moved;
+    }
+
+    private static void ActivateAffected(
+        LiquidSimulationWorkspace workspace,
+        TilePos source,
+        TilePos target)
+    {
+        // Bottom-up activation prevents freshly moved liquid from cascading
+        // through several vertical cells in one simulation step.
+        ActivateVertical(workspace, target.X, target.Y, offset: 1);
+        ActivateHorizontal(workspace, target.X, target.Y, direction: -1);
+        ActivateHorizontal(workspace, target.X, target.Y, direction: 1);
+        workspace.Activate(target);
+        workspace.Activate(source);
+        ActivateVertical(workspace, source.X, source.Y, offset: -1);
+        ActivateHorizontal(workspace, source.X, source.Y, direction: -1);
+        ActivateHorizontal(workspace, source.X, source.Y, direction: 1);
+    }
+
+    private static void ActivateHorizontal(
+        LiquidSimulationWorkspace workspace,
+        int x,
+        int y,
+        int direction)
+    {
+        if ((direction < 0 && x == int.MinValue) ||
+            (direction > 0 && x == int.MaxValue))
+        {
+            return;
+        }
+
+        workspace.Activate(new TilePos(x + direction, y));
+    }
+
+    private static void ActivateVertical(
+        LiquidSimulationWorkspace workspace,
+        int x,
+        int y,
+        int offset)
+    {
+        if ((offset < 0 && y == int.MinValue) ||
+            (offset > 0 && y == int.MaxValue))
+        {
+            return;
+        }
+
+        workspace.Activate(new TilePos(x, y + offset));
+    }
+
+    private static void WriteLoadedTile(World world, TilePos position, TileInstance tile)
+    {
+        var chunkPosition = CoordinateUtils.TileToChunk(position);
+        if (!world.TryGetChunk(chunkPosition, out var chunk) || chunk is null)
+        {
+            return;
+        }
+
+        var local = CoordinateUtils.LocalTileInChunk(position);
+        chunk.SetTile(local.X, local.Y, tile);
+        MarkBoundaryNeighborsDirty(world, chunkPosition, local);
+    }
+
+    private static void MarkBoundaryNeighborsDirty(World world, ChunkPos chunkPosition, TilePos local)
+    {
+        if (local.X == 0)
+        {
+            MarkChunkDirty(world, new ChunkPos(chunkPosition.X - 1, chunkPosition.Y));
+        }
+        else if (local.X == GameConstants.ChunkSize - 1)
+        {
+            MarkChunkDirty(world, new ChunkPos(chunkPosition.X + 1, chunkPosition.Y));
+        }
+
+        if (local.Y == 0)
+        {
+            MarkChunkDirty(world, new ChunkPos(chunkPosition.X, chunkPosition.Y - 1));
+        }
+        else if (local.Y == GameConstants.ChunkSize - 1)
+        {
+            MarkChunkDirty(world, new ChunkPos(chunkPosition.X, chunkPosition.Y + 1));
+        }
+    }
+
+    private static void MarkChunkDirty(World world, ChunkPos position)
+    {
+        if (world.TryGetChunk(position, out var chunk) && chunk is not null)
+        {
+            chunk.MarkDirty(needsMeshRebuild: true, needsLightUpdate: true);
+        }
+    }
+
+    private static bool TryConsumeTransferBudget(
+        LiquidSimulationOptions options,
+        ref int transferOperations)
+    {
+        if (transferOperations >= options.MaxTransferOperationsPerStep)
+        {
+            return false;
+        }
+
+        transferOperations++;
+        return true;
+    }
+
+    private static void RecordTransfer(
+        int moved,
+        ref int successfulTransfers,
+        ref int movedLiquid)
+    {
+        if (moved <= 0)
+        {
+            return;
+        }
+
+        successfulTransfers++;
+        movedLiquid += moved;
     }
 
     private static bool CanContainLiquid(TileInstance tile)
@@ -171,35 +519,27 @@ public sealed class LiquidSimulationSystem
         return tile;
     }
 
-    private int MarkChanged(TilePos source, TilePos target)
+    private static void ValidateOptions(LiquidSimulationOptions options)
     {
-        var added = 0;
-        if (_changedTiles.Add(source))
+        if (options.MaxCellsPerStep <= 0)
         {
-            added++;
+            throw new ArgumentOutOfRangeException(
+                nameof(options),
+                "MaxCellsPerStep must be positive.");
         }
 
-        if (_changedTiles.Add(target))
+        if (options.MaxTransferOperationsPerStep <= 0)
         {
-            added++;
+            throw new ArgumentOutOfRangeException(
+                nameof(options),
+                "MaxTransferOperationsPerStep must be positive.");
         }
 
-        return added;
-    }
-
-    private IReadOnlyList<RectI> BuildChangedRegions()
-    {
-        if (_changedTiles.Count == 0)
+        if (options.MaxSeedTileChecksPerStep <= 0)
         {
-            return Array.Empty<RectI>();
+            throw new ArgumentOutOfRangeException(
+                nameof(options),
+                "MaxSeedTileChecksPerStep must be positive.");
         }
-
-        var tracker = new DirtyRegionTracker();
-        foreach (var position in _changedTiles)
-        {
-            tracker.AddTile(position, padding: 1);
-        }
-
-        return tracker.DrainMerged();
     }
 }

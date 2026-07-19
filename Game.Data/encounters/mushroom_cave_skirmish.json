@@ -1,0 +1,19 @@
+{
+  "id": "mushroom_cave_skirmish",
+  "biomeIds": ["mushroom_cave"],
+  "verticalLayerIds": ["mushroom_caves"],
+  "time": "any",
+  "weight": 1.0,
+  "minDistanceTiles": 18,
+  "maxDistanceTiles": 40,
+  "cooldownSeconds": 7.0,
+  "maxActiveGlobal": 14,
+  "populationRegionSizeTiles": 80,
+  "maxActiveInRegion": 6,
+  "minRoleSelections": 2,
+  "maxRoleSelections": 2,
+  "roles": [
+    { "id": "bats", "spawnRuleId": "mushroom_cave_bat", "weight": 1.2, "minCount": 1, "maxCount": 2 },
+    { "id": "spiders", "spawnRuleId": "mushroom_cave_spider", "weight": 1.0, "minCount": 1, "maxCount": 2 }
+  ]
+}

@@ -19,17 +19,8 @@ public sealed class ChunkStreamingPlanner
         var resolvedOptions = options ?? new ChunkStreamingOptions();
         ValidateOptions(resolvedOptions);
 
-        var required = new HashSet<ChunkPos>();
-        foreach (var position in EnumerateChunksForArea(world, visibleTileArea, resolvedOptions.LoadMarginChunks))
-        {
-            required.Add(position);
-        }
-
-        var retain = new HashSet<ChunkPos>();
-        foreach (var position in EnumerateChunksForArea(world, visibleTileArea, resolvedOptions.UnloadMarginChunks))
-        {
-            retain.Add(position);
-        }
+        var required = CreateChunkWindow(world, visibleTileArea, resolvedOptions.LoadMarginChunks);
+        var retain = CreateChunkWindow(world, visibleTileArea, resolvedOptions.UnloadMarginChunks);
 
         var centerChunk = CoordinateUtils.TileToChunk(
             visibleTileArea.Left + Math.Max(0, visibleTileArea.Width - 1) / 2,
@@ -84,11 +75,11 @@ public sealed class ChunkStreamingPlanner
         return unloaded;
     }
 
-    private static IEnumerable<ChunkPos> EnumerateChunksForArea(World world, RectI area, int marginChunks)
+    private static ChunkWindowSet CreateChunkWindow(World world, RectI area, int marginChunks)
     {
         if (area.IsEmpty)
         {
-            yield break;
+            return new ChunkWindowSet(0, 0, -1, -1);
         }
 
         var minTileX = world.IsHorizontallyInfinite ? area.Left : Math.Clamp(area.Left, 0, world.WidthTiles - 1);
@@ -109,13 +100,7 @@ public sealed class ChunkStreamingPlanner
             : Math.Min(CoordinateUtils.TileToChunk(world.WidthTiles - 1, world.HeightTiles - 1).X, SaturatingAdd(maxChunk.X, marginChunks));
         var endY = Math.Min(worldMaxChunkY, SaturatingAdd(maxChunk.Y, marginChunks));
 
-        for (var y = (long)startY; y <= endY; y++)
-        {
-            for (var x = (long)startX; x <= endX; x++)
-            {
-                yield return new ChunkPos((int)x, (int)y);
-            }
-        }
+        return new ChunkWindowSet(startX, startY, endX, endY);
     }
 
     private static bool CanUnload(World world, ChunkPos position, ChunkStreamingOptions options)

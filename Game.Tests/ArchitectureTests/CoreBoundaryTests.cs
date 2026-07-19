@@ -62,6 +62,34 @@ public sealed class CoreBoundaryTests
     }
 
     [Fact]
+    public void PhysicsNamespace_DoesNotOwnCharacterOrMovementControllers()
+    {
+        var violations = typeof(GameConstants).Assembly
+            .GetTypes()
+            .Where(type => string.Equals(type.Namespace, "Game.Core.Physics", StringComparison.Ordinal))
+            .Where(type => type.Name.Contains("CharacterController", StringComparison.Ordinal) ||
+                           type.Name.Contains("MovementController", StringComparison.Ordinal))
+            .Select(type => type.FullName)
+            .ToArray();
+
+        Assert.True(violations.Length == 0, string.Join(Environment.NewLine, violations));
+    }
+
+    [Fact]
+    public void PhysicsSourceFolder_DoesNotContainCharacterControllers()
+    {
+        var physicsRoot = Path.Combine(FindRepositoryRoot(), "Game.Core", "Physics");
+        var violations = Directory
+            .EnumerateFiles(physicsRoot, "*.cs", SearchOption.AllDirectories)
+            .Where(file => Path.GetFileName(file).Contains("CharacterController", StringComparison.Ordinal) ||
+                           Path.GetFileName(file).Contains("MovementController", StringComparison.Ordinal))
+            .Select(file => Path.GetRelativePath(physicsRoot, file))
+            .ToArray();
+
+        Assert.True(violations.Length == 0, string.Join(Environment.NewLine, violations));
+    }
+
+    [Fact]
     public void PlayingState_DelegatesAuthoritativeFixedTickToGameSimulation()
     {
         var source = File.ReadAllText(Path.Combine(

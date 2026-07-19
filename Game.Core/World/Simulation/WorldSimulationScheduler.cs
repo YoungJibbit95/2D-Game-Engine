@@ -7,8 +7,10 @@ public sealed class WorldSimulationScheduler
     private readonly DirtyRegionTracker _liquidRegions = new();
     private readonly DirtyRegionTracker _renderRegions = new();
     private readonly DirtyRegionTracker _lightRegions = new();
+    private readonly List<RectI> _drainedLiquidRegions = new();
     private float _liquidAccumulator;
     private bool _seededExistingLiquids;
+    private World? _boundWorld;
 
     public int PendingLiquidRegionCount => _liquidRegions.Count;
 
@@ -54,36 +56,19 @@ public sealed class WorldSimulationScheduler
     public void SeedExistingLiquids(World world, int padding = 1)
     {
         ArgumentNullException.ThrowIfNull(world);
+        BindWorld(world);
 
         if (world.IsHorizontallyInfinite)
         {
             foreach (var chunk in world.Chunks.Values)
             {
                 var bounds = world.ClampRegionToBounds(CoordinateUtils.ChunkTileBounds(chunk.Position));
-                for (var y = bounds.Top; y < bounds.Bottom; y++)
-                {
-                    for (var x = bounds.Left; x < bounds.Right; x++)
-                    {
-                        if (world.GetTile(x, y).HasLiquid)
-                        {
-                            MarkLiquidTile(new TilePos(x, y), padding);
-                        }
-                    }
-                }
+                MarkLiquidRegion(bounds, padding);
             }
         }
         else
         {
-            for (var y = 0; y < world.HeightTiles; y++)
-            {
-                for (var x = 0; x < world.WidthTiles; x++)
-                {
-                    if (world.GetTile(x, y).HasLiquid)
-                    {
-                        MarkLiquidTile(new TilePos(x, y), padding);
-                    }
-                }
-            }
+            MarkLiquidRegion(new RectI(0, 0, world.WidthTiles, world.HeightTiles), padding);
         }
 
         _seededExistingLiquids = true;
@@ -97,6 +82,7 @@ public sealed class WorldSimulationScheduler
     {
         ArgumentNullException.ThrowIfNull(world);
         ArgumentNullException.ThrowIfNull(liquids);
+        BindWorld(world);
         options ??= WorldSimulationOptions.Default;
 
         if (options.SeedExistingLiquids && !_seededExistingLiquids)
@@ -111,20 +97,23 @@ public sealed class WorldSimulationScheduler
 
         var liquid = LiquidSimulationResult.None;
         var processedLiquidRegions = 0;
-        if (ShouldStepLiquids(options))
+        if (ShouldStepLiquids(options, liquids))
         {
             _liquidAccumulator = Math.Max(0, _liquidAccumulator - options.LiquidStepIntervalSeconds);
             var regions = DrainLiquidRegions(world, options.LiquidRegionPaddingTiles);
             processedLiquidRegions = regions.Count;
 
-            if (regions.Count > 0)
+            liquid = regions.Count > 0
+                ? liquids.Step(world, regions, options.LiquidOptions)
+                : liquids.Step(world, options.LiquidOptions);
+            if (liquid.ChangedRegions.Count > 0)
             {
-                liquid = liquids.Step(world, regions, options.LiquidOptions);
-                if (liquid.ChangedRegions.Count > 0)
+                for (var index = 0; index < liquid.ChangedRegions.Count; index++)
                 {
-                    _liquidRegions.AddRange(liquid.ChangedRegions.Select(region => region.Inflate(options.LiquidRegionPaddingTiles)));
-                    _renderRegions.AddRange(liquid.ChangedRegions);
-                    _lightRegions.AddRange(liquid.ChangedRegions);
+                    var region = liquid.ChangedRegions[index];
+                    _liquidRegions.Add(region.Inflate(options.LiquidRegionPaddingTiles));
+                    _renderRegions.Add(region);
+                    _lightRegions.Add(region);
                 }
             }
         }
@@ -144,24 +133,50 @@ public sealed class WorldSimulationScheduler
         _lightRegions.Clear();
         _liquidAccumulator = 0;
         _seededExistingLiquids = false;
+        _boundWorld = null;
     }
 
-    private bool ShouldStepLiquids(WorldSimulationOptions options)
+    private bool ShouldStepLiquids(WorldSimulationOptions options, LiquidSimulationSystem liquids)
     {
+        var hasWork = _liquidRegions.Count > 0 || liquids.HasPendingWork;
         if (options.LiquidStepIntervalSeconds <= 0)
         {
-            return _liquidRegions.Count > 0;
+            return hasWork;
         }
 
-        return _liquidAccumulator >= options.LiquidStepIntervalSeconds && _liquidRegions.Count > 0;
+        return _liquidAccumulator >= options.LiquidStepIntervalSeconds && hasWork;
     }
 
     private IReadOnlyList<RectI> DrainLiquidRegions(World world, int padding)
     {
-        return _liquidRegions
-            .DrainMerged()
-            .Select(region => world.ClampRegionToBounds(region.Inflate(padding)))
-            .Where(region => !region.IsEmpty)
-            .ToArray();
+        _drainedLiquidRegions.Clear();
+        var merged = _liquidRegions.DrainMerged();
+        for (var index = 0; index < merged.Count; index++)
+        {
+            var clamped = world.ClampRegionToBounds(merged[index].Inflate(padding));
+            if (!clamped.IsEmpty)
+            {
+                _drainedLiquidRegions.Add(clamped);
+            }
+        }
+
+        return _drainedLiquidRegions;
+    }
+
+    private void BindWorld(World world)
+    {
+        if (_boundWorld is null)
+        {
+            _boundWorld = world;
+            return;
+        }
+
+        if (ReferenceEquals(_boundWorld, world))
+        {
+            return;
+        }
+
+        Clear();
+        _boundWorld = world;
     }
 }

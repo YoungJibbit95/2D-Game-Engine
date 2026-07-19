@@ -3,11 +3,12 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace Game.Client.Rendering;
 
-public sealed class DebugTextRenderer
+public sealed class DebugTextRenderer : IDisposable
 {
     private const int GlyphWidth = 5;
     private const int GlyphHeight = 7;
     private const int GlyphSpacing = 1;
+    private const int AtlasCharacterCount = 128;
 
     private static readonly IReadOnlyDictionary<char, string[]> Glyphs = new Dictionary<char, string[]>
     {
@@ -404,12 +405,13 @@ public sealed class DebugTextRenderer
     };
 
     private readonly SpriteBatch _spriteBatch;
-    private readonly Texture2D _pixel;
+    private readonly Texture2D _glyphAtlas;
 
     public DebugTextRenderer(SpriteBatch spriteBatch, Texture2D pixel)
     {
-        _spriteBatch = spriteBatch;
-        _pixel = pixel;
+        _spriteBatch = spriteBatch ?? throw new ArgumentNullException(nameof(spriteBatch));
+        ArgumentNullException.ThrowIfNull(pixel);
+        _glyphAtlas = CreateGlyphAtlas(pixel.GraphicsDevice);
     }
 
     public void Draw(Vector2 position, string text, Color color, int scale = 1)
@@ -425,37 +427,56 @@ public sealed class DebugTextRenderer
         foreach (var rawCharacter in text)
         {
             var character = char.ToUpperInvariant(rawCharacter);
-            if (!Glyphs.TryGetValue(character, out var glyph))
+            if (character >= AtlasCharacterCount || !Glyphs.ContainsKey(character))
             {
                 cursorX += (GlyphWidth + GlyphSpacing) * scale;
                 continue;
             }
 
-            DrawGlyph(cursorX, cursorY, glyph, color, scale);
+            var source = new Rectangle(character * GlyphWidth, 0, GlyphWidth, GlyphHeight);
+            var destination = new Rectangle(
+                cursorX,
+                cursorY,
+                GlyphWidth * scale,
+                GlyphHeight * scale);
+            _spriteBatch.Draw(_glyphAtlas, destination, source, color);
             cursorX += (GlyphWidth + GlyphSpacing) * scale;
         }
     }
 
-    private void DrawGlyph(int x, int y, string[] glyph, Color color, int scale)
+    public void Dispose()
     {
-        for (var row = 0; row < GlyphHeight; row++)
+        _glyphAtlas.Dispose();
+        GC.SuppressFinalize(this);
+    }
+
+    private static Texture2D CreateGlyphAtlas(GraphicsDevice graphicsDevice)
+    {
+        var width = AtlasCharacterCount * GlyphWidth;
+        var pixels = new Color[width * GlyphHeight];
+        foreach (var (character, glyph) in Glyphs)
         {
-            var pattern = glyph[row];
-            for (var column = 0; column < GlyphWidth; column++)
+            if (character >= AtlasCharacterCount)
             {
-                if (pattern[column] == ' ')
+                continue;
+            }
+
+            var glyphOffsetX = character * GlyphWidth;
+            for (var row = 0; row < GlyphHeight; row++)
+            {
+                var pattern = glyph[row];
+                for (var column = 0; column < GlyphWidth; column++)
                 {
-                    continue;
+                    if (pattern[column] != ' ')
+                    {
+                        pixels[row * width + glyphOffsetX + column] = Color.White;
+                    }
                 }
-
-                var destination = new Rectangle(
-                    x + column * scale,
-                    y + row * scale,
-                    scale,
-                    scale);
-
-                _spriteBatch.Draw(_pixel, destination, color);
             }
         }
+
+        var atlas = new Texture2D(graphicsDevice, width, GlyphHeight, false, SurfaceFormat.Color);
+        atlas.SetData(pixels);
+        return atlas;
     }
 }

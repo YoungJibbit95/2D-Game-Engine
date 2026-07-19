@@ -1,6 +1,7 @@
 using Game.Client.Rendering.Effects;
 using Game.Client.Rendering.Lighting;
 using Game.Core;
+using Game.Core.Diagnostics;
 using Game.Core.Runtime;
 using Game.Core.Settings;
 using Game.Core.World;
@@ -16,9 +17,20 @@ public sealed class LightingRenderer : IDisposable
     private Texture2D? _shadowMap;
     private Texture2D? _coloredLightMap;
     private Texture2D? _bloomMap;
+    private Texture2D? _reflectionMap;
+    private Texture2D? _shadowUploadMap;
+    private Texture2D? _coloredLightUploadMap;
+    private Texture2D? _bloomUploadMap;
+    private Texture2D? _reflectionUploadMap;
+    private Texture2D? _shadowSpareMap;
+    private Texture2D? _coloredLightSpareMap;
+    private Texture2D? _bloomSpareMap;
+    private Texture2D? _reflectionSpareMap;
     private Color[] _shadowPixels = Array.Empty<Color>();
     private Color[] _coloredLightPixels = Array.Empty<Color>();
     private Color[] _bloomPixels = Array.Empty<Color>();
+    private Color[] _reflectionPixels = Array.Empty<Color>();
+    private WaterReflectionSurface[] _reflectionSurfaces = Array.Empty<WaterReflectionSurface>();
     private float[] _shadowValues = Array.Empty<float>();
     private float[] _lightRed = Array.Empty<float>();
     private float[] _lightGreen = Array.Empty<float>();
@@ -29,7 +41,15 @@ public sealed class LightingRenderer : IDisposable
     private Rectangle _resourceViewport;
     private Rectangle _preparedViewport;
     private bool _hasPreparedFrame;
+    private bool _hasColoredLight;
+    private bool _hasBloom;
+    private bool _hasReflection;
     private bool _wasConfigured;
+    private float _reflectionStrength;
+    private TextureUploadContentTracker _shadowContent;
+    private TextureUploadContentTracker _coloredLightContent;
+    private TextureUploadContentTracker _bloomContent;
+    private TextureUploadContentTracker _reflectionContent;
 
     public bool ResourcesPrepared => _shadowMap is not null;
 
@@ -38,6 +58,18 @@ public sealed class LightingRenderer : IDisposable
     public PresentationPassPlan LastPassPlan { get; private set; }
 
     public LightingBuildTelemetry LastTelemetry { get; private set; }
+
+    public LightingReflectionTelemetry LastReflectionTelemetry { get; private set; }
+
+    public WaterReflectionPlanTelemetry LastReflectionSurfaceTelemetry { get; private set; }
+
+    public int LastTextureUploadCount { get; private set; }
+
+    public int LastTextureUploadSkippedCount { get; private set; }
+
+    public long TotalTextureUploadCount { get; private set; }
+
+    public long TotalTextureUploadSkippedCount { get; private set; }
 
     public ReadOnlySpan<PresentationPassDescriptor> LastPasses =>
         _passes.AsSpan(0, LastPassPlan.PassCount);
@@ -49,7 +81,10 @@ public sealed class LightingRenderer : IDisposable
         PresentationBudget? budget = null)
     {
         ArgumentNullException.ThrowIfNull(graphicsDevice);
-        var profile = PresentationQualityProfile.Create(quality, viewport, budget);
+        var profile = PresentationQualityProfile.Create(quality, viewport, budget) with
+        {
+            EnableReflections = false
+        };
         PrepareResources(graphicsDevice, viewport, profile);
     }
 
@@ -58,8 +93,24 @@ public sealed class LightingRenderer : IDisposable
         Rectangle viewport,
         RenderingSettings settings)
     {
-        var profile = PresentationSettingsAdapter.Create(settings, viewport).Lighting;
+        var configuration = PresentationSettingsAdapter.Create(settings, viewport);
+        var profile = configuration.Lighting with
+        {
+            EnableReflections = configuration.Reflections.EnableReflections,
+            Budget = configuration.Lighting.Budget with
+            {
+                MaxReflectionSurfaces = Math.Min(
+                    configuration.Lighting.Budget.MaxReflectionSurfaces,
+                    configuration.Reflections.Budget.MaxReflectionSurfaces),
+                MaxReflectionStripsPerSurface = Math.Min(
+                    configuration.Lighting.Budget.MaxReflectionStripsPerSurface,
+                    configuration.Reflections.Budget.MaxReflectionStripsPerSurface)
+            }
+        };
         PrepareResources(graphicsDevice, viewport, profile);
+        _reflectionStrength = configuration.Reflections.EnableReflections
+            ? configuration.ReflectionStrength
+            : 0f;
         return profile;
     }
 
@@ -69,6 +120,7 @@ public sealed class LightingRenderer : IDisposable
         in PresentationQualityProfile profile)
     {
         ArgumentNullException.ThrowIfNull(graphicsDevice);
+        _reflectionStrength = 0f;
         _wasConfigured = true;
         if (profile.Tier == PresentationQualityTier.Disabled)
         {
@@ -91,11 +143,25 @@ public sealed class LightingRenderer : IDisposable
         _shadowMap = new Texture2D(graphicsDevice, width, height, false, SurfaceFormat.Color);
         _coloredLightMap = new Texture2D(graphicsDevice, width, height, false, SurfaceFormat.Color);
         _bloomMap = new Texture2D(graphicsDevice, width, height, false, SurfaceFormat.Color);
+        _shadowUploadMap = new Texture2D(graphicsDevice, width, height, false, SurfaceFormat.Color);
+        _coloredLightUploadMap = new Texture2D(graphicsDevice, width, height, false, SurfaceFormat.Color);
+        _bloomUploadMap = new Texture2D(graphicsDevice, width, height, false, SurfaceFormat.Color);
+        _shadowSpareMap = new Texture2D(graphicsDevice, width, height, false, SurfaceFormat.Color);
+        _coloredLightSpareMap = new Texture2D(graphicsDevice, width, height, false, SurfaceFormat.Color);
+        _bloomSpareMap = new Texture2D(graphicsDevice, width, height, false, SurfaceFormat.Color);
+        if (profile.EnableReflections && profile.Budget.MaxReflectionSurfaces > 0)
+        {
+            _reflectionMap = new Texture2D(graphicsDevice, width, height, false, SurfaceFormat.Color);
+            _reflectionUploadMap = new Texture2D(graphicsDevice, width, height, false, SurfaceFormat.Color);
+            _reflectionSpareMap = new Texture2D(graphicsDevice, width, height, false, SurfaceFormat.Color);
+            _reflectionSurfaces = new WaterReflectionSurface[profile.Budget.MaxReflectionSurfaces];
+        }
 
         var count = profile.MaskPixelCount;
         _shadowPixels = new Color[count];
         _coloredLightPixels = new Color[count];
         _bloomPixels = new Color[count];
+        _reflectionPixels = profile.EnableReflections ? new Color[count] : Array.Empty<Color>();
         _shadowValues = new float[count];
         _lightRed = new float[count];
         _lightGreen = new float[count];
@@ -109,7 +175,8 @@ public sealed class LightingRenderer : IDisposable
         Camera2D camera,
         Rectangle viewport,
         in LightingFrameParameters frame,
-        ReadOnlySpan<ScreenSpaceLight> pointLights)
+        ReadOnlySpan<ScreenSpaceLight> pointLights,
+        PerformanceProfiler? performance = null)
     {
         ArgumentNullException.ThrowIfNull(world);
         ArgumentNullException.ThrowIfNull(camera);
@@ -118,6 +185,8 @@ public sealed class LightingRenderer : IDisposable
             _hasPreparedFrame = false;
             LastPassPlan = default;
             LastTelemetry = default;
+            LastReflectionTelemetry = default;
+            LastReflectionSurfaceTelemetry = default;
             return LastTelemetry;
         }
 
@@ -127,48 +196,204 @@ public sealed class LightingRenderer : IDisposable
                 "Lighting resources do not match the requested viewport. Call PrepareResources before PrepareFrame.");
         }
 
-        LastTelemetry = TileRayCastShadowMaskBuilder.Build(
-            world,
-            camera.VisibleWorldRect,
-            _quality,
-            frame,
-            pointLights,
-            _shadowValues,
-            _lightRed,
-            _lightGreen,
-            _lightBlue,
-            _bloomValues,
-            _scratch);
+        using (performance?.Measure("Presentation.LightingMaskCpu", 1.25) ?? default)
+        {
+            LastTelemetry = TileRayCastShadowMaskBuilder.Build(
+                world,
+                camera.VisibleWorldRect,
+                _quality,
+                frame,
+                pointLights,
+                _shadowValues,
+                _lightRed,
+                _lightGreen,
+                _lightBlue,
+                _bloomValues,
+                _scratch);
+        }
 
+        var hasReflection = false;
+        if (_quality.EnableReflections &&
+            _reflectionStrength > 0.001f &&
+            _reflectionPixels.Length >= _quality.MaskPixelCount)
+        {
+            using (performance?.Measure("Presentation.LightingReflectionRadianceCpu", 0.35) ?? default)
+            {
+                LastReflectionSurfaceTelemetry = WaterReflectionSurfacePlanner.Build(
+                    world,
+                    camera,
+                    viewport,
+                    _quality,
+                    _reflectionSurfaces);
+                LastReflectionTelemetry = ReflectionRadianceMapBuilder.Build(
+                    viewport,
+                    _quality,
+                    frame,
+                    _reflectionSurfaces.AsSpan(0, LastReflectionSurfaceTelemetry.SurfaceCount),
+                    _lightRed,
+                    _lightGreen,
+                    _lightBlue,
+                    _shadowValues,
+                    _reflectionStrength,
+                    _reflectionPixels);
+            }
+
+            hasReflection = LastReflectionTelemetry.PixelsShaded > 0;
+        }
+        else
+        {
+            LastReflectionTelemetry = default;
+            LastReflectionSurfaceTelemetry = default;
+        }
+
+        var caveBlend = float.IsFinite(frame.CaveBlend) ? Math.Clamp(frame.CaveBlend, 0f, 1f) : 0f;
         var caveTint = Color.Lerp(
             new Color(3, 7, 12),
             new Color(10, 4, 18),
-            float.IsFinite(frame.CaveBlend) ? Math.Clamp(frame.CaveBlend, 0f, 1f) : 0f);
-        for (var index = 0; index < _quality.MaskPixelCount; index++)
+            caveBlend);
+        var skyIllumination = TileRayCastShadowMaskBuilder.ResolveSkyIllumination(frame.NormalizedTimeOfDay);
+        var surfaceTint = Color.Lerp(new Color(8, 12, 22), new Color(18, 20, 24), skyIllumination);
+        var shadowTint = Color.Lerp(surfaceTint, caveTint, caveBlend);
+        var hasColoredLight = false;
+        var hasBloom = false;
+        var encodeEmissive = LastTelemetry.PointLightsUsed > 0;
+        using (performance?.Measure("Presentation.LightingColorEncode", 0.5) ?? default)
         {
-            _shadowPixels[index] = Premultiply(caveTint, _shadowValues[index]);
-            _coloredLightPixels[index] = new Color(
-                _lightRed[index],
-                _lightGreen[index],
-                _lightBlue[index],
-                1f);
+            for (var index = 0; index < _quality.MaskPixelCount; index++)
+            {
+                _shadowPixels[index] = Premultiply(shadowTint, _shadowValues[index]);
+                if (!encodeEmissive)
+                {
+                    continue;
+                }
 
-            var bloom = _bloomValues[index];
-            _bloomPixels[index] = new Color(
-                Math.Clamp(bloom, 0f, 1f),
-                Math.Clamp(bloom * 0.72f, 0f, 1f),
-                Math.Clamp(bloom * 0.42f, 0f, 1f),
-                1f);
+                _coloredLightPixels[index] = new Color(
+                    _lightRed[index],
+                    _lightGreen[index],
+                    _lightBlue[index],
+                    1f);
+                hasColoredLight |= _lightRed[index] > 0.001f ||
+                    _lightGreen[index] > 0.001f ||
+                    _lightBlue[index] > 0.001f;
+
+                var bloom = _bloomValues[index];
+                _bloomPixels[index] = new Color(
+                    Math.Clamp(bloom, 0f, 1f),
+                    Math.Clamp(bloom * 0.72f, 0f, 1f),
+                    Math.Clamp(bloom * 0.42f, 0f, 1f),
+                    1f);
+                hasBloom |= bloom > 0.001f;
+            }
         }
 
-        _shadowMap!.SetData(_shadowPixels);
-        _coloredLightMap!.SetData(_coloredLightPixels);
-        _bloomMap!.SetData(_bloomPixels);
+        hasBloom &= _quality.EnableBloom;
+        ulong shadowHash;
+        ulong coloredLightHash = 0;
+        ulong bloomHash = 0;
+        ulong reflectionHash = 0;
+        using (performance?.Measure("Presentation.LightingUploadHash", 0.1) ?? default)
+        {
+            shadowHash = LightingTextureContentHash.Compute(
+                _shadowPixels.AsSpan(0, _quality.MaskPixelCount));
+            if (hasColoredLight)
+            {
+                coloredLightHash = LightingTextureContentHash.Compute(
+                    _coloredLightPixels.AsSpan(0, _quality.MaskPixelCount));
+            }
+
+            if (hasBloom)
+            {
+                bloomHash = LightingTextureContentHash.Compute(
+                    _bloomPixels.AsSpan(0, _quality.MaskPixelCount));
+            }
+
+            if (hasReflection)
+            {
+                reflectionHash = LightingTextureContentHash.Compute(
+                    _reflectionPixels.AsSpan(0, _quality.MaskPixelCount));
+            }
+        }
+
+        var uploadShadow = _shadowContent.IsChanged(shadowHash);
+        var uploadColoredLight = hasColoredLight &&
+            (!_hasColoredLight || _coloredLightContent.IsChanged(coloredLightHash));
+        var uploadBloom = hasBloom &&
+            (!_hasBloom || _bloomContent.IsChanged(bloomHash));
+        var uploadReflection = hasReflection &&
+            (!_hasReflection || _reflectionContent.IsChanged(reflectionHash));
+        LastTextureUploadCount = 0;
+        var uploadCandidateCount = 1 +
+            (hasColoredLight ? 1 : 0) +
+            (hasBloom ? 1 : 0) +
+            (hasReflection ? 1 : 0);
+        using (performance?.Measure("Presentation.LightingGpuUpload", 0.5) ?? default)
+        {
+            if (uploadShadow)
+            {
+                _shadowUploadMap!.SetData(_shadowPixels);
+                _shadowContent.Commit(shadowHash);
+                LastTextureUploadCount++;
+            }
+
+            if (uploadColoredLight)
+            {
+                _coloredLightUploadMap!.SetData(_coloredLightPixels);
+                _coloredLightContent.Commit(coloredLightHash);
+                LastTextureUploadCount++;
+            }
+
+            if (uploadBloom)
+            {
+                _bloomUploadMap!.SetData(_bloomPixels);
+                _bloomContent.Commit(bloomHash);
+                LastTextureUploadCount++;
+            }
+
+            if (uploadReflection)
+            {
+                _reflectionUploadMap!.SetData(_reflectionPixels);
+                _reflectionContent.Commit(reflectionHash);
+                LastTextureUploadCount++;
+            }
+        }
+
+        if (uploadShadow)
+        {
+            Rotate(ref _shadowMap, ref _shadowUploadMap, ref _shadowSpareMap);
+        }
+
+        if (uploadColoredLight)
+        {
+            Rotate(ref _coloredLightMap, ref _coloredLightUploadMap, ref _coloredLightSpareMap);
+        }
+
+        if (uploadBloom)
+        {
+            Rotate(ref _bloomMap, ref _bloomUploadMap, ref _bloomSpareMap);
+        }
+
+        if (uploadReflection)
+        {
+            Rotate(ref _reflectionMap, ref _reflectionUploadMap, ref _reflectionSpareMap);
+        }
+
+        LastTextureUploadSkippedCount = uploadCandidateCount - LastTextureUploadCount;
+        TotalTextureUploadCount += LastTextureUploadCount;
+        TotalTextureUploadSkippedCount += LastTextureUploadSkippedCount;
+
+        _hasColoredLight = hasColoredLight;
+        _hasBloom = hasBloom;
+        _hasReflection = hasReflection;
         _preparedViewport = viewport;
         _hasPreparedFrame = true;
 
-        var features = PresentationFeature.Lighting | PresentationFeature.AmbientOcclusion;
-        if (frame.BloomStrength > 0.001f)
+        var features = PresentationFeature.Lighting;
+        if (_quality.AmbientOcclusionRadius > 0)
+        {
+            features |= PresentationFeature.AmbientOcclusion;
+        }
+
+        if (hasBloom)
         {
             features |= PresentationFeature.Bloom;
         }
@@ -193,7 +418,8 @@ public sealed class LightingRenderer : IDisposable
         in LivingWorldFrameSnapshot livingWorld,
         RenderingSettings settings,
         long frameIndex,
-        ReadOnlySpan<ScreenSpaceLight> pointLights)
+        ReadOnlySpan<ScreenSpaceLight> pointLights,
+        PerformanceProfiler? performance = null)
     {
         var frame = PresentationSettingsAdapter.CreateLightingFrame(
             settings,
@@ -202,7 +428,7 @@ public sealed class LightingRenderer : IDisposable
             time,
             livingWorld,
             frameIndex);
-        return PrepareFrame(world, camera, viewport, frame, pointLights);
+        return PrepareFrame(world, camera, viewport, frame, pointLights, performance);
     }
 
     public void Draw(RenderContext context, World world, Camera2D camera, float blendStrength = 1f)
@@ -280,17 +506,30 @@ public sealed class LightingRenderer : IDisposable
         context.SpriteBatch.Draw(_shadowMap!, _preparedViewport, Color.White * blendStrength);
         context.SpriteBatch.End();
 
-        context.SpriteBatch.Begin(
-            blendState: BlendState.Additive,
-            samplerState: SamplerState.LinearClamp,
-            rasterizerState: RasterizerState.CullNone);
-        context.SpriteBatch.Draw(_coloredLightMap!, _preparedViewport, Color.White * blendStrength);
-        if (_quality.EnableBloom)
+        if (_hasColoredLight || _hasBloom || _hasReflection)
         {
-            context.SpriteBatch.Draw(_bloomMap!, _preparedViewport, Color.White * blendStrength);
+            context.SpriteBatch.Begin(
+                blendState: BlendState.Additive,
+                samplerState: SamplerState.LinearClamp,
+                rasterizerState: RasterizerState.CullNone);
+            if (_hasColoredLight)
+            {
+                context.SpriteBatch.Draw(_coloredLightMap!, _preparedViewport, Color.White * blendStrength);
+            }
+
+            if (_hasBloom)
+            {
+                context.SpriteBatch.Draw(_bloomMap!, _preparedViewport, Color.White * blendStrength);
+            }
+
+            if (_hasReflection && _reflectionMap is not null)
+            {
+                context.SpriteBatch.Draw(_reflectionMap, _preparedViewport, Color.White * blendStrength);
+            }
+
+            context.SpriteBatch.End();
         }
 
-        context.SpriteBatch.End();
         context.SpriteBatch.Begin(
             blendState: BlendState.AlphaBlend,
             samplerState: SamplerState.PointClamp,
@@ -322,6 +561,12 @@ public sealed class LightingRenderer : IDisposable
         in PresentationQualityProfile profile)
     {
         return _shadowMap is { IsDisposed: false } &&
+            _shadowUploadMap is { IsDisposed: false } &&
+            _shadowSpareMap is { IsDisposed: false } &&
+            (!_quality.EnableReflections ||
+             _reflectionMap is { IsDisposed: false } &&
+             _reflectionUploadMap is { IsDisposed: false } &&
+             _reflectionSpareMap is { IsDisposed: false }) &&
             ReferenceEquals(_shadowMap.GraphicsDevice, graphicsDevice) &&
             _resourceViewport == viewport &&
             _quality == profile;
@@ -332,12 +577,32 @@ public sealed class LightingRenderer : IDisposable
         _shadowMap?.Dispose();
         _coloredLightMap?.Dispose();
         _bloomMap?.Dispose();
+        _reflectionMap?.Dispose();
+        _shadowUploadMap?.Dispose();
+        _coloredLightUploadMap?.Dispose();
+        _bloomUploadMap?.Dispose();
+        _reflectionUploadMap?.Dispose();
+        _shadowSpareMap?.Dispose();
+        _coloredLightSpareMap?.Dispose();
+        _bloomSpareMap?.Dispose();
+        _reflectionSpareMap?.Dispose();
         _shadowMap = null;
         _coloredLightMap = null;
         _bloomMap = null;
+        _reflectionMap = null;
+        _shadowUploadMap = null;
+        _coloredLightUploadMap = null;
+        _bloomUploadMap = null;
+        _reflectionUploadMap = null;
+        _shadowSpareMap = null;
+        _coloredLightSpareMap = null;
+        _bloomSpareMap = null;
+        _reflectionSpareMap = null;
         _shadowPixels = Array.Empty<Color>();
         _coloredLightPixels = Array.Empty<Color>();
         _bloomPixels = Array.Empty<Color>();
+        _reflectionPixels = Array.Empty<Color>();
+        _reflectionSurfaces = Array.Empty<WaterReflectionSurface>();
         _shadowValues = Array.Empty<float>();
         _lightRed = Array.Empty<float>();
         _lightGreen = Array.Empty<float>();
@@ -345,8 +610,29 @@ public sealed class LightingRenderer : IDisposable
         _bloomValues = Array.Empty<float>();
         _scratch = Array.Empty<float>();
         _hasPreparedFrame = false;
+        _hasColoredLight = false;
+        _hasBloom = false;
+        _hasReflection = false;
+        LastTextureUploadCount = 0;
+        LastTextureUploadSkippedCount = 0;
+        TotalTextureUploadCount = 0;
+        TotalTextureUploadSkippedCount = 0;
+        _shadowContent.Reset();
+        _coloredLightContent.Reset();
+        _bloomContent.Reset();
+        _reflectionContent.Reset();
         LastPassPlan = default;
         LastTelemetry = default;
+        LastReflectionTelemetry = default;
+        LastReflectionSurfaceTelemetry = default;
+    }
+
+    private static void Rotate(ref Texture2D? front, ref Texture2D? upload, ref Texture2D? spare)
+    {
+        var previousFront = front;
+        front = upload;
+        upload = spare;
+        spare = previousFront;
     }
 
     private static Color Premultiply(Color tint, float alpha)

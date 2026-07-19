@@ -1,0 +1,13 @@
+{
+  "id": "autumn_leaves",
+  "numericId": 19,
+  "displayName": "Loose Autumn Leaves",
+  "texture": "tiles/loose_autumn_leaves_v1_autotile",
+  "solid": false,
+  "blocksLight": false,
+  "hardness": 0.2,
+  "miningPowerRequired": 0,
+  "dropItem": null,
+  "mergeGroup": "tree-canopy",
+  "tags": ["leaves", "tree", "pass-through", "amber-grove", "natural", "mineable"]
+}

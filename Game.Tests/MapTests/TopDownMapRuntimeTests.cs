@@ -1,6 +1,7 @@
 using System.Numerics;
 using Game.Core.Events;
 using Game.Core.Maps;
+using Game.Core.Movement;
 using Game.Core.Physics;
 using Game.Core.World;
 using Xunit;

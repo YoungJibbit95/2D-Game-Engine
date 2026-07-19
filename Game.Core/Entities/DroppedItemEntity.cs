@@ -6,13 +6,13 @@ using GameWorld = Game.Core.World.World;
 
 namespace Game.Core.Entities;
 
-public sealed class DroppedItemEntity : Entity
+public sealed class DroppedItemEntity : Entity, IEntityPhysicsParticipant
 {
-    private const float Gravity = 850f;
     private const float MaxFallSpeed = 420f;
     private const float GroundDrag = 900f;
 
-    private readonly TileCollisionResolver _collisionResolver;
+    private readonly TileCollisionResolver _standaloneCollisionResolver;
+    private PhysicsWorld? _standalonePhysicsWorld;
 
     public DroppedItemEntity(ItemStack stack, Vector2 position, TileCollisionResolver collisionResolver)
     {
@@ -21,12 +21,18 @@ public sealed class DroppedItemEntity : Entity
             throw new ArgumentException("Dropped item stack must not be empty.", nameof(stack));
         }
 
+        ArgumentNullException.ThrowIfNull(collisionResolver);
         Stack = stack;
-        _collisionResolver = collisionResolver;
+        _standaloneCollisionResolver = collisionResolver;
+        CollisionSettings = collisionResolver.Settings;
         Body = new PhysicsBody
         {
             Position = position,
-            Size = new Vector2(10, 10)
+            Size = new Vector2(10, 10),
+            BodyType = PhysicsBodyType.Dynamic,
+            CollisionLayer = PhysicsCollisionLayer.Item,
+            GravityScale = EntityPhysicsRuntime.DroppedItemGravityScale,
+            MaximumAbsoluteVelocity = new Vector2(float.PositiveInfinity, MaxFallSpeed)
         };
         Position = position;
     }
@@ -34,6 +40,10 @@ public sealed class DroppedItemEntity : Entity
     public ItemStack Stack { get; private set; }
 
     public PhysicsBody Body { get; }
+
+    TileCollisionSettings IEntityPhysicsParticipant.CollisionSettings => CollisionSettings;
+
+    internal TileCollisionSettings CollisionSettings { get; }
 
     public override RectI Bounds => Body.Bounds;
 
@@ -48,12 +58,37 @@ public sealed class DroppedItemEntity : Entity
 
     public override void Update(GameWorld world, float deltaSeconds)
     {
+        PreparePhysicsUpdate(deltaSeconds);
+        GetStandalonePhysicsWorld().StepBody(
+            world,
+            Body,
+            deltaSeconds,
+            Span<PhysicsContact>.Empty);
+        SynchronizePhysicsState();
+    }
+
+    internal void PreparePhysicsUpdate(float deltaSeconds)
+    {
         Body.Velocity = new Vector2(
             MoveToward(Body.Velocity.X, 0, GroundDrag * deltaSeconds),
-            Math.Min(Body.Velocity.Y + Gravity * deltaSeconds, MaxFallSpeed));
+            Body.Velocity.Y);
+    }
 
-        _collisionResolver.Move(world, Body, deltaSeconds);
+    void IEntityPhysicsParticipant.SynchronizePhysicsState()
+    {
+        SynchronizePhysicsState();
+    }
+
+    internal void SynchronizePhysicsState()
+    {
         Position = Body.Position;
+    }
+
+    private PhysicsWorld GetStandalonePhysicsWorld()
+    {
+        return _standalonePhysicsWorld ??= new PhysicsWorld(
+            _standaloneCollisionResolver,
+            EntityPhysicsRuntime.CreateSettings(EntityPhysicsRuntime.DefaultMaximumBodies));
     }
 
     private static float MoveToward(float current, float target, float maxDelta)

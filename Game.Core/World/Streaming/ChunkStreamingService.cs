@@ -450,7 +450,7 @@ public sealed class ChunkStreamingService
 
             if (string.IsNullOrWhiteSpace(worldDirectory))
             {
-                update.SkippedDirtyUnloadPositions.Add(position);
+                update.RecordSkippedDirtyUnload(position);
                 events?.Publish(new ChunkUnloadSkippedEvent(position, "dirty_without_save_directory"));
                 continue;
             }
@@ -851,12 +851,12 @@ public sealed class ChunkStreamingService
         _appliedDecodedBytes += result.DecodedBytes;
         if (result.LoadedFromSave)
         {
-            update.LoadedPositions.Add(position);
+            update.RecordLoaded(position);
             events?.Publish(new ChunkLoadedEvent(position, LoadedFromSave: true));
         }
         else
         {
-            update.GeneratedPositions.Add(position);
+            update.RecordGenerated(position);
             events?.Publish(new ChunkGeneratedEvent(position));
         }
     }
@@ -882,7 +882,7 @@ public sealed class ChunkStreamingService
         if (world.UnloadChunk(position, requireClean: true))
         {
             _unloadOperations++;
-            update.UnloadedPositions.Add(position);
+            update.RecordUnloaded(position);
             events?.Publish(new ChunkUnloadedEvent(position));
         }
     }
@@ -906,7 +906,7 @@ public sealed class ChunkStreamingService
             return;
         }
 
-        update.SavedPositions.Add(position);
+        update.RecordSaved(position);
         events?.Publish(new ChunkSavedEvent(position, SavedBeforeUnload: true));
 
         if (!world.TryGetChunk(position, out var chunk) ||
@@ -920,7 +920,7 @@ public sealed class ChunkStreamingService
         if (world.UnloadChunk(position, requireClean: true))
         {
             _unloadOperations++;
-            update.UnloadedPositions.Add(position);
+            update.RecordUnloaded(position);
             events?.Publish(new ChunkUnloadedEvent(position));
         }
     }
@@ -1331,15 +1331,51 @@ public sealed class ChunkStreamingService
 
     private sealed class UpdateAccumulator
     {
-        public List<ChunkPos> LoadedPositions { get; } = new();
+        private List<ChunkPos>? _loadedPositions;
+        private List<ChunkPos>? _generatedPositions;
+        private List<ChunkPos>? _savedPositions;
+        private List<ChunkPos>? _unloadedPositions;
+        private List<ChunkPos>? _skippedDirtyUnloadPositions;
 
-        public List<ChunkPos> GeneratedPositions { get; } = new();
+        public IReadOnlyList<ChunkPos> LoadedPositions =>
+            _loadedPositions is null ? Array.Empty<ChunkPos>() : _loadedPositions;
 
-        public List<ChunkPos> SavedPositions { get; } = new();
+        public IReadOnlyList<ChunkPos> GeneratedPositions =>
+            _generatedPositions is null ? Array.Empty<ChunkPos>() : _generatedPositions;
 
-        public List<ChunkPos> UnloadedPositions { get; } = new();
+        public IReadOnlyList<ChunkPos> SavedPositions =>
+            _savedPositions is null ? Array.Empty<ChunkPos>() : _savedPositions;
 
-        public List<ChunkPos> SkippedDirtyUnloadPositions { get; } = new();
+        public IReadOnlyList<ChunkPos> UnloadedPositions =>
+            _unloadedPositions is null ? Array.Empty<ChunkPos>() : _unloadedPositions;
+
+        public IReadOnlyList<ChunkPos> SkippedDirtyUnloadPositions =>
+            _skippedDirtyUnloadPositions is null ? Array.Empty<ChunkPos>() : _skippedDirtyUnloadPositions;
+
+        public void RecordLoaded(ChunkPos position)
+        {
+            (_loadedPositions ??= new List<ChunkPos>()).Add(position);
+        }
+
+        public void RecordGenerated(ChunkPos position)
+        {
+            (_generatedPositions ??= new List<ChunkPos>()).Add(position);
+        }
+
+        public void RecordSaved(ChunkPos position)
+        {
+            (_savedPositions ??= new List<ChunkPos>()).Add(position);
+        }
+
+        public void RecordUnloaded(ChunkPos position)
+        {
+            (_unloadedPositions ??= new List<ChunkPos>()).Add(position);
+        }
+
+        public void RecordSkippedDirtyUnload(ChunkPos position)
+        {
+            (_skippedDirtyUnloadPositions ??= new List<ChunkPos>()).Add(position);
+        }
 
         public int ApplyItemsProcessed { get; set; }
 

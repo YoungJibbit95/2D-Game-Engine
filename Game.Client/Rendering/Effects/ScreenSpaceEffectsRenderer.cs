@@ -10,22 +10,31 @@ public sealed class ScreenSpaceEffectsRenderer : IDisposable
     private readonly PresentationPassDescriptor[] _passes =
         new PresentationPassDescriptor[PresentationPassPlanner.MaximumPassCount];
     private RenderTarget2D? _sceneColor;
+    private RenderTarget2D? _blurPing;
+    private RenderTarget2D? _blurPong;
+    private Texture2D? _preparedBlur;
     private WaterReflectionSurface[] _surfaces = Array.Empty<WaterReflectionSurface>();
     private PresentationQualityProfile _quality;
     private Rectangle _viewport;
     private long _frameIndex;
     private bool _captureActive;
     private bool _sceneCaptureRequired;
+    private bool _hasCapturedScene;
+    private bool _hasPreparedBlur;
 
     public bool ResourcesPrepared => _sceneColor is not null;
 
     public bool ShouldCaptureScene => ResourcesPrepared && (SurfaceCount > 0 || _sceneCaptureRequired);
+
+    public bool HasCapturedScene => ResourcesPrepared && _hasCapturedScene;
 
     public int SurfaceCount { get; private set; }
 
     public PresentationPassPlan LastPassPlan { get; private set; }
 
     public WaterReflectionPlanTelemetry LastTelemetry { get; private set; }
+
+    public BackdropBlurPlan LastBackdropBlurPlan { get; private set; }
 
     public ReadOnlySpan<WaterReflectionSurface> Surfaces => _surfaces.AsSpan(0, SurfaceCount);
 
@@ -79,6 +88,13 @@ public sealed class ScreenSpaceEffectsRenderer : IDisposable
             DepthFormat.None,
             preferredMultiSampleCount: 0,
             RenderTargetUsage.DiscardContents);
+        var blurResources = BackdropBlurPlanner.Build(profile.Tier, viewport, radiusPixels: 8);
+        if (blurResources.IsEnabled)
+        {
+            _blurPing = CreateTransientTarget(graphicsDevice, blurResources.TargetSize);
+            _blurPong = CreateTransientTarget(graphicsDevice, blurResources.TargetSize);
+        }
+
         _surfaces = new WaterReflectionSurface[profile.Budget.MaxReflectionSurfaces];
     }
 
@@ -127,6 +143,18 @@ public sealed class ScreenSpaceEffectsRenderer : IDisposable
         long frameIndex,
         float reflectionStrength)
     {
+        var palette = WaterPresentationPaletteCatalog.ClearWater;
+        return PrepareFrame(world, camera, viewport, frameIndex, reflectionStrength, palette);
+    }
+
+    public WaterReflectionPlanTelemetry PrepareFrame(
+        World world,
+        Camera2D camera,
+        Rectangle viewport,
+        long frameIndex,
+        float reflectionStrength,
+        in WaterPresentationPalette palette)
+    {
         ArgumentNullException.ThrowIfNull(world);
         ArgumentNullException.ThrowIfNull(camera);
         reflectionStrength = Math.Clamp(reflectionStrength, 0f, 1f);
@@ -159,6 +187,7 @@ public sealed class ScreenSpaceEffectsRenderer : IDisposable
                 camera,
                 viewport,
                 _quality,
+                palette,
                 _surfaces)
             : default;
         SurfaceCount = LastTelemetry.SurfaceCount;
@@ -190,9 +219,27 @@ public sealed class ScreenSpaceEffectsRenderer : IDisposable
             settings.ScreenSpaceReflections ? settings.ReflectionStrength : 0f);
     }
 
-    public bool BeginSceneCapture(RenderContext context, Color clearColor)
+    public WaterReflectionPlanTelemetry PrepareFrame(
+        World world,
+        Camera2D camera,
+        Rectangle viewport,
+        long frameIndex,
+        RenderingSettings settings,
+        in WaterPresentationPalette palette)
     {
-        if (!ShouldCaptureScene || context.ViewportBounds != _viewport)
+        ArgumentNullException.ThrowIfNull(settings);
+        return PrepareFrame(
+            world,
+            camera,
+            viewport,
+            frameIndex,
+            settings.ScreenSpaceReflections ? settings.ReflectionStrength : 0f,
+            palette);
+    }
+
+    public bool BeginSceneCapture(RenderContext context, Color clearColor, bool captureThisFrame = true)
+    {
+        if (!captureThisFrame || !ShouldCaptureScene || context.ViewportBounds != _viewport)
         {
             return false;
         }
@@ -213,7 +260,10 @@ public sealed class ScreenSpaceEffectsRenderer : IDisposable
         return true;
     }
 
-    public void EndSceneCaptureAndComposite(RenderContext context, float reflectionStrength)
+    public void EndSceneCaptureAndComposite(
+        RenderContext context,
+        float reflectionStrength,
+        int backdropBlurRadiusPixels = 0)
     {
         if (!_captureActive || _sceneColor is null)
         {
@@ -222,7 +272,18 @@ public sealed class ScreenSpaceEffectsRenderer : IDisposable
 
         reflectionStrength = Math.Clamp(reflectionStrength, 0f, 1f);
         context.SpriteBatch.End();
-        context.GraphicsDevice.SetRenderTarget(null);
+        if (_sceneCaptureRequired && backdropBlurRadiusPixels > 0)
+        {
+            PrepareBackdropBlur(context, backdropBlurRadiusPixels);
+        }
+        else
+        {
+            context.GraphicsDevice.SetRenderTarget(null);
+            _hasPreparedBlur = false;
+            _preparedBlur = null;
+            LastBackdropBlurPlan = default;
+        }
+
         context.SpriteBatch.Begin(
             blendState: BlendState.AlphaBlend,
             samplerState: SamplerState.PointClamp,
@@ -248,7 +309,37 @@ public sealed class ScreenSpaceEffectsRenderer : IDisposable
             blendState: BlendState.AlphaBlend,
             samplerState: SamplerState.PointClamp,
             rasterizerState: RasterizerState.CullNone);
+        _hasCapturedScene = true;
         _captureActive = false;
+    }
+
+    public void DrawReusedSceneEffects(RenderContext context, float reflectionStrength)
+    {
+        if (!_hasCapturedScene || _sceneColor is null || SurfaceCount == 0)
+        {
+            return;
+        }
+
+        reflectionStrength = Math.Clamp(reflectionStrength, 0f, 1f);
+        context.SpriteBatch.End();
+        context.SpriteBatch.Begin(
+            blendState: BlendState.AlphaBlend,
+            samplerState: SamplerState.LinearClamp,
+            rasterizerState: RasterizerState.CullNone);
+        DrawReflections(context, _sceneColor, reflectionStrength);
+        context.SpriteBatch.End();
+
+        context.SpriteBatch.Begin(
+            blendState: BlendState.Additive,
+            samplerState: SamplerState.PointClamp,
+            rasterizerState: RasterizerState.CullNone);
+        DrawWetHighlights(context, reflectionStrength);
+        context.SpriteBatch.End();
+
+        context.SpriteBatch.Begin(
+            blendState: BlendState.AlphaBlend,
+            samplerState: SamplerState.PointClamp,
+            rasterizerState: RasterizerState.CullNone);
     }
 
     public void DrawPreparedSurfaceHighlights(RenderContext context, float reflectionStrength)
@@ -264,6 +355,23 @@ public sealed class ScreenSpaceEffectsRenderer : IDisposable
         }
 
         strength = Math.Clamp(strength, 0f, 1f);
+        if (_hasPreparedBlur && _preparedBlur is not null)
+        {
+            var opacity = Math.Clamp(strength * 0.72f, 0.08f, 0.72f);
+            context.SpriteBatch.End();
+            context.SpriteBatch.Begin(
+                blendState: BlendState.AlphaBlend,
+                samplerState: SamplerState.LinearClamp,
+                rasterizerState: RasterizerState.CullNone);
+            context.SpriteBatch.Draw(_preparedBlur, _viewport, Color.White * opacity);
+            context.SpriteBatch.End();
+            context.SpriteBatch.Begin(
+                blendState: BlendState.AlphaBlend,
+                samplerState: SamplerState.PointClamp,
+                rasterizerState: RasterizerState.CullNone);
+            return;
+        }
+
         var radius = Math.Clamp(radiusPixels, 1, 12);
         var tap = Math.Clamp(strength * 0.12f, 0.02f, 0.12f);
         context.SpriteBatch.End();
@@ -339,7 +447,7 @@ public sealed class ScreenSpaceEffectsRenderer : IDisposable
                     sceneColor,
                     destination,
                     source,
-                    new Color(surface.Tint, alpha),
+                    surface.Tint * alpha,
                     0f,
                     Vector2.Zero,
                     SpriteEffects.FlipVertically,
@@ -366,7 +474,7 @@ public sealed class ScreenSpaceEffectsRenderer : IDisposable
                     surface.ScreenBounds.Y,
                     surface.ScreenBounds.Width,
                     Math.Min(2, surface.ScreenBounds.Height)),
-                new Color(surface.Tint, alpha));
+                surface.Tint * alpha);
         }
     }
 
@@ -375,7 +483,85 @@ public sealed class ScreenSpaceEffectsRenderer : IDisposable
         context.SpriteBatch.Draw(
             _sceneColor!,
             new Rectangle(_viewport.X + offsetX, _viewport.Y + offsetY, _viewport.Width, _viewport.Height),
-            new Color(Color.White, opacity));
+            Color.White * opacity);
+    }
+
+    private void PrepareBackdropBlur(RenderContext context, int radiusPixels)
+    {
+        var plan = BackdropBlurPlanner.Build(_quality.Tier, _viewport, radiusPixels);
+        if (!plan.IsEnabled || _sceneColor is null || _blurPing is null || _blurPong is null)
+        {
+            context.GraphicsDevice.SetRenderTarget(null);
+            _hasPreparedBlur = false;
+            _preparedBlur = null;
+            LastBackdropBlurPlan = default;
+            return;
+        }
+
+        var targetBounds = new Rectangle(0, 0, plan.TargetSize.X, plan.TargetSize.Y);
+        context.GraphicsDevice.SetRenderTarget(_blurPing);
+        context.GraphicsDevice.Clear(Color.Transparent);
+        context.SpriteBatch.Begin(
+            blendState: BlendState.Opaque,
+            samplerState: SamplerState.LinearClamp,
+            rasterizerState: RasterizerState.CullNone);
+        context.SpriteBatch.Draw(_sceneColor, targetBounds, Color.White);
+        context.SpriteBatch.End();
+
+        Texture2D source = _blurPing;
+        RenderTarget2D destination = _blurPong;
+        for (var iteration = 0; iteration < plan.Iterations; iteration++)
+        {
+            context.GraphicsDevice.SetRenderTarget(destination);
+            context.GraphicsDevice.Clear(Color.Transparent);
+            context.SpriteBatch.Begin(
+                blendState: BlendState.Additive,
+                samplerState: SamplerState.LinearClamp,
+                rasterizerState: RasterizerState.CullNone);
+            DrawKawaseTap(context, source, targetBounds, -plan.RadiusPerIteration, -plan.RadiusPerIteration);
+            DrawKawaseTap(context, source, targetBounds, plan.RadiusPerIteration, -plan.RadiusPerIteration);
+            DrawKawaseTap(context, source, targetBounds, -plan.RadiusPerIteration, plan.RadiusPerIteration);
+            DrawKawaseTap(context, source, targetBounds, plan.RadiusPerIteration, plan.RadiusPerIteration);
+            context.SpriteBatch.End();
+
+            source = destination;
+            destination = ReferenceEquals(destination, _blurPong) ? _blurPing : _blurPong;
+        }
+
+        context.GraphicsDevice.SetRenderTarget(null);
+        _preparedBlur = source;
+        _hasPreparedBlur = true;
+        LastBackdropBlurPlan = plan;
+    }
+
+    private static void DrawKawaseTap(
+        RenderContext context,
+        Texture2D source,
+        Rectangle targetBounds,
+        int offsetX,
+        int offsetY)
+    {
+        context.SpriteBatch.Draw(
+            source,
+            new Rectangle(
+                targetBounds.X + offsetX,
+                targetBounds.Y + offsetY,
+                targetBounds.Width,
+                targetBounds.Height),
+            Color.White * 0.25f);
+    }
+
+    private static RenderTarget2D CreateTransientTarget(GraphicsDevice graphicsDevice, Point size)
+    {
+        return new RenderTarget2D(
+            graphicsDevice,
+            size.X,
+            size.Y,
+            mipMap: false,
+            SurfaceFormat.Color,
+            DepthFormat.None,
+            preferredMultiSampleCount: 0,
+            RenderTargetUsage.DiscardContents);
     }
 
     private void ReleaseResources()
@@ -386,13 +572,21 @@ public sealed class ScreenSpaceEffectsRenderer : IDisposable
         }
 
         _sceneColor?.Dispose();
+        _blurPing?.Dispose();
+        _blurPong?.Dispose();
         _sceneColor = null;
+        _blurPing = null;
+        _blurPong = null;
+        _preparedBlur = null;
         _surfaces = Array.Empty<WaterReflectionSurface>();
         SurfaceCount = 0;
         LastPassPlan = default;
         LastTelemetry = default;
         _captureActive = false;
         _sceneCaptureRequired = false;
+        _hasCapturedScene = false;
+        _hasPreparedBlur = false;
+        LastBackdropBlurPlan = default;
     }
 
     private static int DivideRoundUp(int value, int divisor)

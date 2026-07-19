@@ -53,8 +53,11 @@ public sealed class CritterAiBehavior : IAiBehavior
         _activePeriod = IsActivePeriod(context.IsNight);
         _targetVisible = false;
         _nearbyAllies = 0;
+        var nearbyEntities = context.QueryNeighborhood(
+            entity.Body.Center,
+            Math.Max(_profile.DetectionRange, _profile.FlockRadius));
 
-        if (TryResolveThreat(entity, context, out var threatPosition))
+        if (TryResolveThreat(entity, context, nearbyEntities, out var threatPosition))
         {
             SetState(AiState.Flee);
             Flee(entity, threatPosition, context);
@@ -100,7 +103,7 @@ public sealed class CritterAiBehavior : IAiBehavior
             ? (_decisions.NextUnit(entity.Id) - 0.5f) * 0.45f
             : 0;
         var direction = new Vector2(_wanderDirection, vertical);
-        if (TryResolveFlock(entity, context, out var flockDirection))
+        if (TryResolveFlock(entity, nearbyEntities, out var flockDirection))
         {
             SetState(AiState.Flock);
             direction = Vector2.Lerp(direction, flockDirection, Math.Clamp(_profile.FlockWeight, 0f, 1f));
@@ -123,9 +126,13 @@ public sealed class CritterAiBehavior : IAiBehavior
         return false;
     }
 
-    private bool TryResolveThreat(EnemyEntity entity, AiUpdateContext context, out Vector2 position)
+    private bool TryResolveThreat(
+        EnemyEntity entity,
+        AiUpdateContext context,
+        IReadOnlyList<Entity> nearbyEntities,
+        out Vector2 position)
     {
-        var visible = _distance.FindNearestHostile(entity, context.Entities, _profile.DetectionRange);
+        var visible = _distance.FindNearestHostile(entity, nearbyEntities, _profile.DetectionRange);
         if (visible is not null && CanSense(entity, visible, context))
         {
             _memory.Observe(visible, _profile.PerceptionMemorySeconds);
@@ -147,7 +154,7 @@ public sealed class CritterAiBehavior : IAiBehavior
 
     private bool TryResolveFlock(
         EnemyEntity entity,
-        AiUpdateContext context,
+        IReadOnlyList<Entity> nearbyEntities,
         out Vector2 direction)
     {
         direction = default;
@@ -158,9 +165,9 @@ public sealed class CritterAiBehavior : IAiBehavior
 
         var radiusSquared = _profile.FlockRadius * _profile.FlockRadius;
         var center = Vector2.Zero;
-        for (var index = 0; index < context.Entities.Count; index++)
+        for (var index = 0; index < nearbyEntities.Count; index++)
         {
-            if (context.Entities[index] is not EnemyEntity { IsActive: true } ally ||
+            if (nearbyEntities[index] is not EnemyEntity { IsActive: true } ally ||
                 ally.Id == entity.Id ||
                 ally.Faction != entity.Faction ||
                 !string.Equals(ally.DefinitionId, entity.DefinitionId, StringComparison.OrdinalIgnoreCase) ||
@@ -173,7 +180,7 @@ public sealed class CritterAiBehavior : IAiBehavior
             _nearbyAllies++;
         }
 
-        if (_nearbyAllies + 1 < _profile.MinFlockSize)
+        if (_nearbyAllies == 0 || _nearbyAllies + 1 < _profile.MinFlockSize)
         {
             return false;
         }

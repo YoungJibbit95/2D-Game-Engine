@@ -89,4 +89,6 @@ public readonly record struct LightingBuildTelemetry(
     int PointLightsUsed,
     long RaysCast,
     long OccluderSamples,
-    bool WasBudgetClamped);
+    bool WasBudgetClamped,
+    int PointShadowSamples = 0,
+    long MaximumPointShadowRays = 0);

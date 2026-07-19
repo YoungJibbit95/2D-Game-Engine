@@ -1,0 +1,13 @@
+{
+  "id": "marsh_leaves",
+  "numericId": 20,
+  "displayName": "Loose Marsh Foliage",
+  "texture": "tiles/loose_marsh_leaves_v1_autotile",
+  "solid": false,
+  "blocksLight": false,
+  "hardness": 0.22,
+  "miningPowerRequired": 0,
+  "dropItem": null,
+  "mergeGroup": "tree-canopy",
+  "tags": ["leaves", "tree", "pass-through", "twilight-marsh", "natural", "mineable"]
+}

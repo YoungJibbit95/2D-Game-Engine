@@ -1,0 +1,301 @@
+{
+  "version": 1,
+  "scope": "background_depth_v6",
+  "generatedAt": "2026-07-19",
+  "generator": "Game.Data/art_direction/tools/generate_background_depth_planes_v6.py",
+  "generatorSha256": "a740a5b8fc79fddf9a33e90ec367a39468882acb670580498cc0bd95523f781f",
+  "sourceBrief": "asset_briefs/background_depth_v6_briefs.json",
+  "manifest": "assets/background_depth_v6.sprites.json",
+  "preview": "art_direction/background_depth_v6_contact_sheet.png",
+  "previewSha256": "399a22ed0958573ab92a01bf8f00f8a62044bcb1fa2028d676c7a9320e751f1d",
+  "records": [
+    {
+      "spriteId": "world/backgrounds/depth_v6/forest_far",
+      "path": "Assets/BackgroundDepthV6/forest_far.png",
+      "source": "sprites/world/backgrounds/forest_parallax_layer_v5.png",
+      "sourceSha256": "7272c164ba699166ecc1e10144ac532eae156e66482effee201d77c7a4f2e6b1",
+      "sha256": "73e209facddc7dc61226de3871be55a2298b4933561ef1dcb2b49ee796d7803f",
+      "dimensions": [
+        1536,
+        384
+      ],
+      "fadeRatios": [
+        0.0,
+        0.58
+      ],
+      "alphaValues": [
+        0,
+        255
+      ],
+      "horizontalSeamColumnsEqual": true,
+      "method": "row-luminance sky removal with a smoothstep-decreasing binary silhouette threshold",
+      "generator": "Game.Data/art_direction/tools/generate_background_depth_planes_v6.py",
+      "license": "YjsE-Project-Owned",
+      "runtimeIdTarget": "world/backgrounds/depth_v6/forest_far"
+    },
+    {
+      "spriteId": "world/backgrounds/depth_v6/forest_mid",
+      "path": "Assets/BackgroundDepthV6/forest_mid.png",
+      "source": "sprites/world/backgrounds/forest_parallax_layer_v4.png",
+      "sourceSha256": "9de0ddf92892e5cd2409963890cfcc14250378fdf3c78c127614a760400441d3",
+      "sha256": "1c0451adeefbfd6e5597a6bb547876f734a81708747ef22f3148209fd750d369",
+      "dimensions": [
+        1024,
+        256
+      ],
+      "fadeRatios": [
+        0.0,
+        0.78
+      ],
+      "alphaValues": [
+        0,
+        255
+      ],
+      "horizontalSeamColumnsEqual": true,
+      "method": "nearest-neighbor size normalization plus smoothstep-shaped stable-noise binary-alpha dissolve",
+      "generator": "Game.Data/art_direction/tools/generate_background_depth_planes_v6.py",
+      "license": "YjsE-Project-Owned",
+      "runtimeIdTarget": "world/backgrounds/depth_v6/forest_mid"
+    },
+    {
+      "spriteId": "world/backgrounds/depth_v6/forest_near",
+      "path": "Assets/BackgroundDepthV6/forest_near.png",
+      "source": "sprites/world/backgrounds/forest_parallax_layer_v3.png",
+      "sourceSha256": "78c063776aad56f11784d1e0aa715b573e5ad9c91f34cca177e8b3653427c8ae",
+      "sha256": "6238dbcd303715f4a279386d986a1cd14fbe25c130b01f98063df8ef3576649c",
+      "dimensions": [
+        512,
+        128
+      ],
+      "fadeRatios": [
+        0.0,
+        0.68
+      ],
+      "alphaValues": [
+        0,
+        255
+      ],
+      "horizontalSeamColumnsEqual": true,
+      "method": "nearest-neighbor size normalization plus smoothstep-shaped stable-noise binary-alpha dissolve",
+      "generator": "Game.Data/art_direction/tools/generate_background_depth_planes_v6.py",
+      "license": "YjsE-Project-Owned",
+      "runtimeIdTarget": "world/backgrounds/depth_v6/forest_near"
+    },
+    {
+      "spriteId": "world/backgrounds/depth_v6/amber_far",
+      "path": "Assets/BackgroundDepthV6/amber_far.png",
+      "source": "sprites/world/backgrounds/amber_grove_parallax_layer_v5.png",
+      "sourceSha256": "3f3292e235b3cdfe0106cf682161f16a950aad218d145777c484a60430720571",
+      "sha256": "96e3250e972b7ef9a143d9e3068c89850f7ee72f8f113f08229cc509d7fc53e6",
+      "dimensions": [
+        1536,
+        384
+      ],
+      "fadeRatios": [
+        0.0,
+        0.58
+      ],
+      "alphaValues": [
+        0,
+        255
+      ],
+      "horizontalSeamColumnsEqual": true,
+      "method": "row-luminance sky removal with a smoothstep-decreasing binary silhouette threshold",
+      "generator": "Game.Data/art_direction/tools/generate_background_depth_planes_v6.py",
+      "license": "YjsE-Project-Owned",
+      "runtimeIdTarget": "world/backgrounds/depth_v6/amber_far"
+    },
+    {
+      "spriteId": "world/backgrounds/depth_v6/amber_mid",
+      "path": "Assets/BackgroundDepthV6/amber_mid.png",
+      "source": "sprites/world/backgrounds/amber_grove_parallax_layer_v4.png",
+      "sourceSha256": "b7a8a98cc9f4375ef5100e2ec2861a649f24d91a257b7b87a0261aa5a482f564",
+      "sha256": "5b353720db0aca8272c84907624061417152172ea8dda647542349adc32b5b31",
+      "dimensions": [
+        1024,
+        256
+      ],
+      "fadeRatios": [
+        0.0,
+        0.78
+      ],
+      "alphaValues": [
+        0,
+        255
+      ],
+      "horizontalSeamColumnsEqual": true,
+      "method": "nearest-neighbor size normalization plus smoothstep-shaped stable-noise binary-alpha dissolve",
+      "generator": "Game.Data/art_direction/tools/generate_background_depth_planes_v6.py",
+      "license": "YjsE-Project-Owned",
+      "runtimeIdTarget": "world/backgrounds/depth_v6/amber_mid"
+    },
+    {
+      "spriteId": "world/backgrounds/depth_v6/amber_near",
+      "path": "Assets/BackgroundDepthV6/amber_near.png",
+      "source": "sprites/world/backgrounds/magical_grove_parallax_layer.png",
+      "sourceSha256": "8aeddffaa971f7b680c829325743257038a98bb554c27017855c9698c631603a",
+      "sha256": "22691499fc400f1a3eba7f981401e2ec43ab460b29703b1ccaa49a3412f1bd63",
+      "dimensions": [
+        512,
+        128
+      ],
+      "fadeRatios": [
+        0.0,
+        0.68
+      ],
+      "alphaValues": [
+        0,
+        255
+      ],
+      "horizontalSeamColumnsEqual": false,
+      "method": "nearest-neighbor size normalization plus smoothstep-shaped stable-noise binary-alpha dissolve",
+      "generator": "Game.Data/art_direction/tools/generate_background_depth_planes_v6.py",
+      "license": "YjsE-Project-Owned",
+      "runtimeIdTarget": "world/backgrounds/depth_v6/amber_near"
+    },
+    {
+      "spriteId": "world/backgrounds/depth_v6/twilight_far",
+      "path": "Assets/BackgroundDepthV6/twilight_far.png",
+      "source": "sprites/world/backgrounds/twilight_marsh_parallax_layer_v5.png",
+      "sourceSha256": "89dcc5b56610e5c18fc85b8afa0a6888ccf6e585edc6d4d0b5cd658addaab991",
+      "sha256": "9e3be29007d07656041ea89eda55af1d3306dac2d7f74a3ed5b6ad703189554d",
+      "dimensions": [
+        1536,
+        384
+      ],
+      "fadeRatios": [
+        0.0,
+        0.58
+      ],
+      "alphaValues": [
+        0,
+        255
+      ],
+      "horizontalSeamColumnsEqual": true,
+      "method": "row-luminance sky removal with a smoothstep-decreasing binary silhouette threshold",
+      "generator": "Game.Data/art_direction/tools/generate_background_depth_planes_v6.py",
+      "license": "YjsE-Project-Owned",
+      "runtimeIdTarget": "world/backgrounds/depth_v6/twilight_far"
+    },
+    {
+      "spriteId": "world/backgrounds/depth_v6/twilight_mid",
+      "path": "Assets/BackgroundDepthV6/twilight_mid.png",
+      "source": "sprites/world/backgrounds/twilight_marsh_parallax_layer_v4.png",
+      "sourceSha256": "5ce565e05d93b882f4d4e438fd37a807332e5673bd43928cb590f7d2d3a2d1c6",
+      "sha256": "9da51d4bf335658947cdc3bd978191a7a62debc483626e5caf79b5f8b5f34533",
+      "dimensions": [
+        1024,
+        256
+      ],
+      "fadeRatios": [
+        0.0,
+        0.78
+      ],
+      "alphaValues": [
+        0,
+        255
+      ],
+      "horizontalSeamColumnsEqual": true,
+      "method": "nearest-neighbor size normalization plus smoothstep-shaped stable-noise binary-alpha dissolve",
+      "generator": "Game.Data/art_direction/tools/generate_background_depth_planes_v6.py",
+      "license": "YjsE-Project-Owned",
+      "runtimeIdTarget": "world/backgrounds/depth_v6/twilight_mid"
+    },
+    {
+      "spriteId": "world/backgrounds/depth_v6/twilight_near",
+      "path": "Assets/BackgroundDepthV6/twilight_near.png",
+      "source": "sprites/world/backgrounds/twilight_marsh_parallax_layer_v4.png",
+      "sourceSha256": "5ce565e05d93b882f4d4e438fd37a807332e5673bd43928cb590f7d2d3a2d1c6",
+      "sha256": "e1cbe0fc5fe8df5bdd2180b74d5200b1e57306d8dfb3235c85e0f9fa748421db",
+      "dimensions": [
+        512,
+        128
+      ],
+      "fadeRatios": [
+        0.0,
+        0.68
+      ],
+      "alphaValues": [
+        0,
+        255
+      ],
+      "horizontalSeamColumnsEqual": true,
+      "method": "nearest-neighbor size normalization plus smoothstep-shaped stable-noise binary-alpha dissolve",
+      "generator": "Game.Data/art_direction/tools/generate_background_depth_planes_v6.py",
+      "license": "YjsE-Project-Owned",
+      "runtimeIdTarget": "world/backgrounds/depth_v6/twilight_near"
+    },
+    {
+      "spriteId": "world/backgrounds/depth_v6/crystal_far",
+      "path": "Assets/BackgroundDepthV6/crystal_far.png",
+      "source": "sprites/world/backgrounds/crystal_depths_parallax_layer_v5.png",
+      "sourceSha256": "3003f6044df43f5a7ccab41f08d7b656c5628ee8df40b024fed1603f893de13e",
+      "sha256": "ef401bb4cde3f33a2c36b4c1522d23750cfa0e8f64875fe65cc5cd4d79060dc8",
+      "dimensions": [
+        1536,
+        384
+      ],
+      "fadeRatios": [
+        0.0,
+        0.58
+      ],
+      "alphaValues": [
+        0,
+        255
+      ],
+      "horizontalSeamColumnsEqual": true,
+      "method": "row-luminance sky removal with a smoothstep-decreasing binary silhouette threshold",
+      "generator": "Game.Data/art_direction/tools/generate_background_depth_planes_v6.py",
+      "license": "YjsE-Project-Owned",
+      "runtimeIdTarget": "world/backgrounds/depth_v6/crystal_far"
+    },
+    {
+      "spriteId": "world/backgrounds/depth_v6/crystal_mid",
+      "path": "Assets/BackgroundDepthV6/crystal_mid.png",
+      "source": "sprites/world/backgrounds/crystal_depths_parallax_layer_v4.png",
+      "sourceSha256": "4c1d57f87a4e78dfdcb9044813d101950888d5e6fb86b5b5f33ab078b0255258",
+      "sha256": "f6416a06948a9b35e70ba5eb14653802db79fddf4e867895443c1ccd6eef80d1",
+      "dimensions": [
+        1024,
+        256
+      ],
+      "fadeRatios": [
+        0.0,
+        0.78
+      ],
+      "alphaValues": [
+        0,
+        255
+      ],
+      "horizontalSeamColumnsEqual": true,
+      "method": "nearest-neighbor size normalization plus smoothstep-shaped stable-noise binary-alpha dissolve",
+      "generator": "Game.Data/art_direction/tools/generate_background_depth_planes_v6.py",
+      "license": "YjsE-Project-Owned",
+      "runtimeIdTarget": "world/backgrounds/depth_v6/crystal_mid"
+    },
+    {
+      "spriteId": "world/backgrounds/depth_v6/crystal_near",
+      "path": "Assets/BackgroundDepthV6/crystal_near.png",
+      "source": "sprites/world/backgrounds/wave04/crystal_depths_parallax_layer.png",
+      "sourceSha256": "b7f7af389ed51c3ca60e37ef7b7fee15c78a2768dc9da952e231c376e68c65d5",
+      "sha256": "790c99317a45dcf19111b6a5122404b3c2c1f511ca9a032ac32698dab6b6c046",
+      "dimensions": [
+        512,
+        128
+      ],
+      "fadeRatios": [
+        0.0,
+        0.68
+      ],
+      "alphaValues": [
+        0,
+        255
+      ],
+      "horizontalSeamColumnsEqual": true,
+      "method": "nearest-neighbor size normalization plus smoothstep-shaped stable-noise binary-alpha dissolve",
+      "generator": "Game.Data/art_direction/tools/generate_background_depth_planes_v6.py",
+      "license": "YjsE-Project-Owned",
+      "runtimeIdTarget": "world/backgrounds/depth_v6/crystal_near"
+    }
+  ]
+}

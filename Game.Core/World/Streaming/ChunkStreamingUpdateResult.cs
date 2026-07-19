@@ -48,9 +48,9 @@ public sealed record ChunkStreamingUpdateResult(
 
     public static ChunkStreamingUpdateResult Empty { get; } = new(
         new ChunkStreamingPlan(
-            new HashSet<ChunkPos>(),
-            new HashSet<ChunkPos>(),
-            new HashSet<ChunkPos>()),
+            new ChunkWindowSet(0, 0, -1, -1),
+            new ChunkPositionListSet(Array.Empty<ChunkPos>()),
+            new ChunkPositionListSet(Array.Empty<ChunkPos>())),
         0,
         0,
         0,

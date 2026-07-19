@@ -61,6 +61,9 @@ public sealed class LivingWorldRuntimeTests
         Assert.False(highTerrainSurface.IsUnderground);
         Assert.True(highTerrainUnderground.IsUnderground);
         Assert.True(lowTerrainUnderground.IsUnderground);
+        Assert.Equal(82, highTerrainSurface.SurfaceTileY);
+        Assert.Equal(82, highTerrainUnderground.SurfaceTileY);
+        Assert.Equal(44, lowTerrainUnderground.SurfaceTileY);
     }
 
     [Fact]
