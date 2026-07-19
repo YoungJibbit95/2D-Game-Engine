@@ -54,7 +54,10 @@ public sealed class AdvancedWorldGenerator
 
     private WorldGenerationResult GenerateDetailed(int widthTiles, int heightTiles, int seed, WorldGenerationProfile profile)
     {
-        var world = new World(widthTiles, heightTiles, WorldMetadata.CreateDefault(seed));
+        var world = new World(
+            widthTiles,
+            heightTiles,
+            WorldMetadata.CreateDefault(seed) with { GenerationProfileId = profile.Id });
         var context = new WorldGenerationContext(world, seed, new Random(seed), _noiseFactory(seed), profile);
 
         foreach (var step in _steps)

@@ -7,7 +7,7 @@
   "category": "Block",
   "sortPriority": 30,
   "type": "PlaceableTile",
-  "texture": "world/wave05/amberstone_autotile",
+  "texture": "world/tiles/polish_v1/amberstone_autotile",
   "maxStack": 999,
   "useTime": 0.08,
   "placesTile": "amberstone",

@@ -12,7 +12,27 @@ public sealed record SpawnSchedulerOptions
 
     public int VerticalSearchRadiusTiles { get; init; } = 24;
 
-    public int PlacementSearchRadiusTiles { get; init; } = 12;
+    public int PlacementSearchRadiusTiles { get; init; } = 24;
+
+    public bool EnablePopulationWarmStart { get; init; } = true;
+
+    public int WarmStartTargetPopulation { get; init; } = 2;
+
+    public int WarmStartAttemptCycles { get; init; } = 6;
+
+    public float WarmStartIntervalSeconds { get; init; } = 0.5f;
+
+    public bool PreferViewportIngress { get; init; } = true;
+
+    public int ViewportIngressBandTiles { get; init; } = 8;
+
+    public int ViewportIngressAttemptCycle { get; init; } = 4;
+
+    public int ViewportIngressAttemptsPerCycle { get; init; } = 3;
+
+    public float ViewportIngressSpeedTilesPerSecond { get; init; } = 8f;
+
+    public float ViewportIngressMaxSeconds { get; init; } = 10f;
 
     public int SectorCount { get; init; } = 12;
 

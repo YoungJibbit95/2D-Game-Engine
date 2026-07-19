@@ -48,7 +48,7 @@
     "resourceTableIds": ["deep_ores", "cave_stone"]
   },
   "presentation": {
-    "backgroundSpriteId": "world/backgrounds/wave04/cave_parallax_layer",
+    "backgroundSpriteId": "world/backgrounds/cave_parallax_layer_v3",
     "ambientParticleSpriteId": "particles/cave_dust",
     "ambientCritterSpriteId": "entities/critters/cave_glowbug",
     "biomeIconSpriteId": "ui/biomes/cave",

@@ -1,0 +1,13 @@
+{
+  "id": "oak_trunk",
+  "numericId": 16,
+  "displayName": "Oak Trunk",
+  "texture": "tiles/oak_trunk_autotile",
+  "solid": false,
+  "blocksLight": true,
+  "hardness": 1.2,
+  "miningPowerRequired": 0,
+  "dropItem": "wood",
+  "mergeGroup": "tree-trunk",
+  "tags": ["wood", "tree", "pass-through", "forest", "natural", "mineable"]
+}

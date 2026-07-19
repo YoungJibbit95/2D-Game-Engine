@@ -10,6 +10,7 @@ using Game.Core.Items;
 using Game.Core.Loot;
 using Game.Core.Physics;
 using Game.Core.Projectiles;
+using Game.Core.Runtime;
 using Game.Core.World;
 using System.Numerics;
 
@@ -25,6 +26,7 @@ public sealed class PlayerItemUseSystem
     private readonly TileCollisionResolver _collisionResolver;
     private readonly ProjectileFactory _projectiles;
     private readonly StatusEffectApplier _statusEffects;
+    private readonly PlayerAttackSequenceRuntime _attackSequences;
     private float _useCooldownRemaining;
     private float _useCooldownDuration;
     private BlockedFeedbackSignature? _lastBlockedFeedback;
@@ -43,12 +45,92 @@ public sealed class PlayerItemUseSystem
         _melee = melee ?? new MeleeAttackSystem(new LootRoller(new Random()), _collisionResolver);
         _projectiles = projectiles ?? new ProjectileFactory();
         _statusEffects = statusEffects ?? new StatusEffectApplier();
+        _attackSequences = new PlayerAttackSequenceRuntime(_melee, _projectiles);
     }
+
+    public AttackRuntimeFrameSnapshot LatestAttackSnapshot => _attackSequences.LatestSnapshot;
 
     public void Update(float deltaSeconds)
     {
         _useCooldownRemaining = Math.Max(0, _useCooldownRemaining - Math.Max(0, deltaSeconds));
         _melee.Update(deltaSeconds);
+    }
+
+    public PlayerItemUseResult TickSelectedItem(
+        World.World world,
+        GameContentDatabase content,
+        PlayerEntity player,
+        PlayerInventory inventory,
+        EntityManager entities,
+        TilePos targetTile,
+        Vector2 targetWorldPosition,
+        bool requestActive,
+        ulong tick,
+        float deltaSeconds,
+        GuardRuntimeState? guard = null,
+        GameEventBus? events = null,
+        FarmPlotManager? farmPlots = null,
+        FarmSeason farmSeason = FarmSeason.Any,
+        int currentDay = 1,
+        Random? farmingRandom = null,
+        LootKillContext? lootContext = null)
+    {
+        ArgumentNullException.ThrowIfNull(world);
+        ArgumentNullException.ThrowIfNull(content);
+        ArgumentNullException.ThrowIfNull(player);
+        ArgumentNullException.ThrowIfNull(inventory);
+        ArgumentNullException.ThrowIfNull(entities);
+
+        ItemDefinition? item = null;
+        ItemActionDefinition? action = null;
+        var selected = inventory.SelectedStack;
+        if (requestActive && !selected.IsEmpty && content.Items.TryGetById(selected.ItemId, out item))
+        {
+            action = ItemActionResolver.GetPrimaryAction(item);
+        }
+
+        var usesAttackSequence = !string.IsNullOrWhiteSpace(action?.AttackSequenceId);
+        if (!_attackSequences.IsBusy && !usesAttackSequence)
+        {
+            return requestActive
+                ? UseSelectedItem(
+                    world,
+                    content,
+                    player,
+                    inventory,
+                    entities,
+                    targetTile,
+                    targetWorldPosition,
+                    deltaSeconds,
+                    events,
+                    farmPlots,
+                    farmSeason,
+                    currentDay,
+                    farmingRandom,
+                    lootContext)
+                : PlayerItemUseResult.None;
+        }
+
+        var result = _attackSequences.Tick(
+            content,
+            player,
+            inventory,
+            entities,
+            item,
+            action,
+            requestActive,
+            targetWorldPosition,
+            tick,
+            guard,
+            events);
+        PublishFeedback(
+            events,
+            player,
+            selected.IsEmpty ? null : selected.ItemId,
+            targetTile,
+            targetWorldPosition,
+            result);
+        return result;
     }
 
     public PlayerItemUseResult UseSelectedItem(

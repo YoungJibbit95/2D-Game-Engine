@@ -1,3 +1,4 @@
+using System.Numerics;
 using GameWorld = Game.Core.World.World;
 
 namespace Game.Core.Entities.AI;
@@ -7,7 +8,8 @@ public readonly record struct AiUpdateContext(
     IReadOnlyList<Entity> Entities,
     PlayerEntity? Player = null,
     bool IsNight = false,
-    long TickNumber = 0)
+    long TickNumber = 0,
+    EntityManager? Manager = null)
 {
     public static AiUpdateContext WithoutEntities(GameWorld world)
     {
@@ -22,7 +24,12 @@ public readonly record struct AiUpdateContext(
             return player;
         }
 
-        for (var index = 0; index < Entities.Count; index++)
+        if (Manager?.FindActiveEntity(id) is { } indexed)
+        {
+            return indexed;
+        }
+
+        for (var index = 0; Manager is null && index < Entities.Count; index++)
         {
             if (Entities[index].Id == id && Entities[index].IsActive)
             {
@@ -31,5 +38,10 @@ public readonly record struct AiUpdateContext(
         }
 
         return null;
+    }
+
+    internal IReadOnlyList<Entity> QueryNeighborhood(Vector2 center, float radius)
+    {
+        return Manager is null ? Entities : Manager.QueryAiNeighborhood(center, Math.Max(0, radius));
     }
 }

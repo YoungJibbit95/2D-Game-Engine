@@ -21,6 +21,48 @@
   ],
   "notes": [
     {
+      "date": "2026-07-19",
+      "title": "V5 Panorama, Entity Reliability und High-Refresh Closure",
+      "items": [
+        "Vier native 1536x384 Forest-, Amber-, Marsh- und Crystal-Panoramen mit Brief, Provenienz, Seam-Audit und Runtime-Bindings",
+        "Rollenbewusste Surface/Cave-Auswahl, keine Legacy-Doppellayer und komplette Viewport-Abdeckung statt harter Hintergrund-Unterkante",
+        "V5 Forest: 6.061 ms in 1080p und 6.078 ms in 1440p; 99.80 beziehungsweise 98.83 Prozent im 120-Hz-Budget",
+        "Tilemap Draw mit vorbereiteten Texture Buckets: 0.338 ms in 1080p, 0.430 ms in 1440p und 0 B",
+        "500 AI-Akteure: 2.887 ms p99 und 0.5 B pro Tick; Spawn-Cap-Wartung 0.236 ms p99 und 0 B",
+        "Zwei identische 18.000-Tick-Traces mit Hash 0x41CBB2B829F7EB8F, 117 Spawns, 83 Despawns und Cap 32",
+        "PhysicsWorld: 1.000 Bodies bei 0.559 ms, aktive Fluessigkeiten bei 0.258 ms p99 und 500 Combat-Queries bei 1.287 ms p99, jeweils 0 B",
+        "Finite 256x128-Worldgeneration: 0.884 ms und 1,252,488 B nach chunk-lokaler Workspace-Migration",
+        "Debug und Release jeweils 1381/1381; 190 Manifest-Eintraege, 184 PNGs und 0 harte Assetfehler"
+      ]
+    },
+    {
+      "date": "2026-07-15",
+      "title": "Runtime Stability, Living Spawns und Panorama V3",
+      "items": [
+        "Zwei 1920x1080 V3-Traversals: 6.166 bis 6.231 ms Durchschnitt und ueber 97 Prozent der Frames im 120-Hz-Budget",
+        "MMCSS-Game-Thread, High-Resolution Waitable Timer und explizite Low-Latency-VSync-Policy bei weiterhin autoritativer 60-Hz-Simulation",
+        "Chunk-Command-Rebuilds laufen budgetiert vor Draw; Lighting verarbeitet standardmaessig maximal einen Dirty Chunk pro Tick",
+        "Offscreen-Spawn-Ingress mit geladenem Boden/Himmel und 90-Sekunden-Vertrag fuer sichtbare Friendly/Hostile AI",
+        "Dreifach rotierende Lichtmasken, getrenntes Oberflaechen-/Cave-Restlicht und kein veralteter Schatten nach Tile-Aenderungen",
+        "Zwei generierte seam-safe 512x128 Forest/Cave-Panoramen mit lokalen Horizonten, Varianten und Landmarken",
+        "Datengetriebene Schwert-, Bogen- und Magie-Sequenzen mit atomaren Ressourcen-Kosten und aktiven Hit-Fenstern",
+        "Moderne Pixel/Web-Controls mit Slider, Toggle, Stepper, Segmenten, Tooltips, Animationen und Cadence-Presets",
+        "Debug und Release jeweils 1076/1076; strikter 182-ID-Asset-Audit ohne harte Fehler"
+      ]
+    },
+    {
+      "date": "2026-07-15",
+      "title": "Lighting Performance und Lesbarkeit",
+      "items": [
+        "Presentation-LateUpdate verhindert mehrfaches Lighting waehrend Fixed-Step-Catch-up",
+        "Ein Tile-Sample pro Maskenpixel sowie Array-AO, Point Rays und linearer Sun-Shadow-Sweep",
+        "Leere Color-/Bloom-Maps werden nicht mehr hochgeladen; unbeleuchtete Szenen brauchen nur ein Lighting-Upload",
+        "Civil Twilight, wahrnehmungslineare Dunkelheit, sanfteres Cave-AO und breitere Penumbra",
+        "Aktuelle Medium 1920x1080 CPU-Maske: 2.542 ms durchschnittlich und 0 B Allocation",
+        "Amber- und Crystal-Depths-Smokes lesbar; damaliger Checkpoint Debug und Release jeweils 999/999"
+      ]
+    },
+    {
       "date": "2026-07-15",
       "title": "Runtime Resilience und Phased Combat",
       "items": [

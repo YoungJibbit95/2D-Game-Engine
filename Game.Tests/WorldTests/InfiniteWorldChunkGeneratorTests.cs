@@ -134,6 +134,49 @@ public sealed class InfiniteWorldChunkGeneratorTests
     }
 
     [Fact]
+    public void EnsureChunk_GeneratesLayeredTreeCrownsInsteadOfRectangularCanopies()
+    {
+        var profile = WorldGenerationProfile.Small with
+        {
+            WidthTiles = 128,
+            HeightTiles = 128,
+            SurfaceBaseY = 42,
+            SurfaceAmplitude = 0,
+            TreeAttempts = 128,
+            TreeAttemptChance = 1f,
+            TreeMinHeight = 7,
+            TreeMaxHeight = 8,
+            WaterPocketAttempts = 0,
+            Ores = Array.Empty<OreGenerationDefinition>()
+        };
+        var generator = new InfiniteWorldChunkGenerator(_ => new FlatNoiseService());
+        var world = generator.CreateWorld(profile, seed: 12);
+
+        for (var cy = 0; cy <= 2; cy++)
+        {
+            for (var cx = -4; cx <= 4; cx++)
+            {
+                generator.EnsureChunk(world, profile, new ChunkPos(cx, cy));
+            }
+        }
+
+        var surfaceY = profile.SurfaceBaseY;
+        var widths = Enumerable.Range(surfaceY - 12, 9)
+            .Select(y => Enumerable.Range(-128, 256)
+                .Count(x => world.GetTile(x, y).TileId == KnownTileIds.Leaves))
+            .Where(width => width > 0)
+            .ToArray();
+
+        Assert.NotEmpty(widths);
+        Assert.True(widths.Max() > widths.Min());
+        Assert.Contains(
+            Enumerable.Range(-128, 256),
+            x => world.GetTile(x, surfaceY - 1).TileId == KnownTileIds.Wood &&
+                 (world.GetTile(x - 1, surfaceY - 1).TileId == KnownTileIds.Wood ||
+                  world.GetTile(x + 1, surfaceY - 1).TileId == KnownTileIds.Wood));
+    }
+
+    [Fact]
     public void EnsureChunk_GeneratesDeterministicUndergroundWaterPockets()
     {
         var profile = WorldGenerationProfile.Small with

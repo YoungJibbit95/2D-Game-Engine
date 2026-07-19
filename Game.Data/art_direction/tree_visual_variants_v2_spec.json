@@ -1,0 +1,76 @@
+{
+  "schemaVersion": 1,
+  "documentType": "runtime-activation-spec",
+  "sliceId": "tree_visual_variants_v2",
+  "intent": "Activate richer original side-view sandbox trees without copying another game's silhouettes or art.",
+  "runtimeContract": {
+    "authoritativeTiles": [
+      "wood",
+      "leaves",
+      "oak_trunk",
+      "oak_leaves"
+    ],
+    "silhouetteOwner": "Game.Core/World/Generation/TreeSilhouettePlanner.cs",
+    "visualVariantOwner": "Game.Client/Rendering/TreeTileVisualSelector.cs",
+    "variantSelection": "Stable world-seed and detected trunk-anchor hash; no per-frame random selection.",
+    "autotileMasks": "16 frames per atlas, ordered mask 0 through 15 with top=1, right=2, bottom=4, left=8.",
+    "fallback": "Variant zero and the tile definition's configured texture remain valid when a tree anchor or an optional atlas cannot be resolved."
+  },
+  "silhouetteSpecification": {
+    "variationCount": 12,
+    "maximumHalfWidthTiles": 7,
+    "topPaddingTiles": 4,
+    "features": [
+      "cardinally connected stepped branches",
+      "root flare on mature trunks",
+      "overlapping rounded crown clusters",
+      "deterministic negative-space openings",
+      "legacy generation-version compatibility"
+    ]
+  },
+  "assetReuse": [
+    {
+      "spriteId": "tiles/oak_trunk_autotile",
+      "path": "sprites/world/tiles/oak_trunk_autotile.png",
+      "dimensions": [256, 16],
+      "frames": 16
+    },
+    {
+      "spriteId": "tiles/oak_leaves_autotile",
+      "path": "sprites/world/tiles/oak_leaves_autotile.png",
+      "dimensions": [256, 16],
+      "frames": 16
+    },
+    {
+      "spriteId": "tiles/pine_trunk_autotile",
+      "path": "sprites/world/tiles/pine_trunk_autotile.png",
+      "dimensions": [256, 16],
+      "frames": 16
+    },
+    {
+      "spriteId": "tiles/pine_leaves_tree_autotile",
+      "path": "sprites/world/tiles/pine_leaves_tree_autotile.png",
+      "dimensions": [256, 16],
+      "frames": 16
+    },
+    {
+      "spriteId": "tiles/birch_trunk_autotile",
+      "path": "sprites/world/tiles/birch_trunk_autotile.png",
+      "dimensions": [256, 16],
+      "frames": 16
+    },
+    {
+      "spriteId": "tiles/birch_leaves_autotile",
+      "path": "sprites/world/tiles/birch_leaves_autotile.png",
+      "dimensions": [256, 16],
+      "frames": 16
+    }
+  ],
+  "qualityGates": [
+    "All six source atlases remain exactly 256x16 RGBA sprites.",
+    "Every atlas has all 16 exact 16x16 auto-tile mask frames in the sprite manifest.",
+    "All three palettes render through the existing tile atlas and chunk texture buckets.",
+    "Plain wood structures do not receive random tree palettes.",
+    "Preview uses nearest-neighbor scaling only."
+  ]
+}

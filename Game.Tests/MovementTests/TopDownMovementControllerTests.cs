@@ -1,9 +1,10 @@
+using Game.Core.Movement;
 using Game.Core.Physics;
 using Game.Core.World;
 using System.Numerics;
 using Xunit;
 
-namespace Game.Tests.PhysicsTests;
+namespace Game.Tests.MovementTests;
 
 public sealed class TopDownMovementControllerTests
 {
@@ -11,6 +12,7 @@ public sealed class TopDownMovementControllerTests
     public void Move_NormalizesDiagonalMovement()
     {
         var world = new World(8, 8, WorldMetadata.CreateDefault(seed: 1));
+        world.SetTile(0, 0, TileInstance.Air);
         var body = new PhysicsBody { Position = Vector2.Zero, Size = new Vector2(8, 8) };
 
         new TopDownMovementController().Move(
@@ -40,5 +42,22 @@ public sealed class TopDownMovementControllerTests
 
         Assert.Equal(16, body.Position.X);
         Assert.Equal(0, body.Velocity.X);
+    }
+
+    [Fact]
+    public void Move_NonFiniteDirectionDoesNotContaminatePhysicsState()
+    {
+        var world = new World(8, 8, WorldMetadata.CreateDefault(seed: 1));
+        world.SetTile(0, 0, TileInstance.Air);
+        var body = new PhysicsBody { Position = Vector2.Zero, Size = new Vector2(8, 8) };
+
+        new TopDownMovementController().Move(
+            world,
+            body,
+            new Vector2(float.NaN, 1f),
+            deltaSeconds: 1f);
+
+        Assert.Equal(Vector2.Zero, body.Position);
+        Assert.Equal(Vector2.Zero, body.Velocity);
     }
 }

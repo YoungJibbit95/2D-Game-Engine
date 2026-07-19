@@ -6,6 +6,8 @@ using Game.Core.Inventory;
 using Game.Core.Loot;
 using Game.Core.Physics;
 using Game.Core.Projectiles;
+using Game.Core.World;
+using System.Numerics;
 
 namespace Game.Core.Combat;
 
@@ -14,9 +16,7 @@ public sealed class CombatSystem
     private readonly LootRoller _lootRoller;
     private readonly TileCollisionResolver _collisionResolver;
     private readonly StatusEffectApplier _statusEffects;
-    private readonly List<Entity> _queryBuffer = new();
-    private readonly HashSet<Entity> _querySeen = new();
-    private readonly List<DroppedItemEntity> _pendingDrops = new();
+    private readonly CombatQueryWorkspace _compatibilityWorkspace = new();
 
     public CombatSystem(LootRoller lootRoller, TileCollisionResolver collisionResolver, StatusEffectApplier? statusEffects = null)
     {
@@ -29,16 +29,25 @@ public sealed class CombatSystem
         EntityManager entities,
         LootTableRegistry lootTables,
         GameEventBus? events = null,
-        LootKillContext? lootContext = null)
+        LootKillContext? lootContext = null,
+        CombatQueryWorkspace? workspace = null)
     {
-        return ResolveProjectileHits(entities, lootTables, projectiles: null, statusEffects: null, events, lootContext);
+        return ResolveProjectileHits(
+            entities,
+            lootTables,
+            projectiles: null,
+            statusEffects: null,
+            events,
+            lootContext,
+            workspace ?? _compatibilityWorkspace);
     }
 
     public CombatResolutionResult ResolveProjectileHits(
         EntityManager entities,
         GameContentDatabase content,
         GameEventBus? events = null,
-        LootKillContext? lootContext = null)
+        LootKillContext? lootContext = null,
+        CombatQueryWorkspace? workspace = null)
     {
         ArgumentNullException.ThrowIfNull(content);
         return ResolveProjectileHits(
@@ -47,7 +56,8 @@ public sealed class CombatSystem
             content.Projectiles,
             content.StatusEffects,
             events,
-            lootContext);
+            lootContext,
+            workspace ?? _compatibilityWorkspace);
     }
 
     private CombatResolutionResult ResolveProjectileHits(
@@ -56,7 +66,8 @@ public sealed class CombatSystem
         ProjectileRegistry? projectiles,
         StatusEffectRegistry? statusEffects,
         GameEventBus? events,
-        LootKillContext? lootContext)
+        LootKillContext? lootContext,
+        CombatQueryWorkspace workspace)
     {
         ArgumentNullException.ThrowIfNull(entities);
         ArgumentNullException.ThrowIfNull(lootTables);
@@ -65,7 +76,10 @@ public sealed class CombatSystem
         var enemyDeaths = 0;
         var droppedItems = 0;
         var effectsApplied = 0;
-        _pendingDrops.Clear();
+        workspace.BeginResolution();
+        var candidates = workspace.Candidates;
+        var pendingDrops = workspace.PendingDrops;
+        var projectileHitCandidates = workspace.ProjectileHits;
 
         for (var projectileIndex = 0; projectileIndex < entities.Entities.Count; projectileIndex++)
         {
@@ -74,15 +88,29 @@ public sealed class CombatSystem
                 continue;
             }
 
-            entities.QueryInto(projectile.Bounds, _queryBuffer, _querySeen);
-            for (var enemyIndex = 0; enemyIndex < _queryBuffer.Count; enemyIndex++)
+            var sweptBounds = BuildProjectileSweptBounds(projectile);
+            entities.QueryInto(sweptBounds, candidates);
+            workspace.BeginProjectile();
+            for (var enemyIndex = 0; enemyIndex < candidates.Count; enemyIndex++)
             {
-                if (_queryBuffer[enemyIndex] is not EnemyEntity { IsActive: true } enemy)
+                if (candidates[enemyIndex] is not EnemyEntity { IsActive: true } enemy)
                 {
                     continue;
                 }
 
-                if (!projectile.Bounds.Intersects(enemy.Bounds))
+                if (!TryGetProjectileSweepTime(projectile, enemy.Bounds, out var timeOfImpact))
+                {
+                    continue;
+                }
+
+                projectileHitCandidates.Add(new ProjectileHitCandidate(enemy, timeOfImpact));
+            }
+
+            projectileHitCandidates.Sort(ProjectileHitCandidateComparer.Instance);
+            for (var enemyIndex = 0; enemyIndex < projectileHitCandidates.Count; enemyIndex++)
+            {
+                var enemy = projectileHitCandidates[enemyIndex].Enemy;
+                if (!enemy.IsActive)
                 {
                     continue;
                 }
@@ -125,7 +153,7 @@ public sealed class CombatSystem
                     enemy.IsActive = false;
                     enemyDeaths++;
                     events?.Publish(new EntityDiedEvent(enemy.Id, enemy.DefinitionId));
-                    droppedItems += AddLootDrops(enemy, lootTables, _pendingDrops, lootContext);
+                    droppedItems += AddLootDrops(enemy, lootTables, pendingDrops, lootContext);
                 }
 
                 if (!projectile.IsActive)
@@ -135,12 +163,122 @@ public sealed class CombatSystem
             }
         }
 
-        foreach (var drop in _pendingDrops)
+        for (var index = 0; index < pendingDrops.Count; index++)
         {
-            entities.Add(drop);
+            entities.Add(pendingDrops[index]);
         }
 
         return new CombatResolutionResult(projectileHits, enemyDeaths, droppedItems, effectsApplied);
+    }
+
+    private static RectI BuildProjectileSweptBounds(ProjectileEntity projectile)
+    {
+        var current = projectile.Bounds;
+        var previous = BuildProjectileBoundsAt(projectile, projectile.RuntimeState.PreviousPosition);
+        var left = Math.Min(previous.Left, current.Left);
+        var top = Math.Min(previous.Top, current.Top);
+        var right = Math.Max(previous.Right, current.Right);
+        var bottom = Math.Max(previous.Bottom, current.Bottom);
+        return new RectI(
+            left,
+            top,
+            SaturatingLength((long)right - left),
+            SaturatingLength((long)bottom - top));
+    }
+
+    private static RectI BuildProjectileBoundsAt(ProjectileEntity projectile, Vector2 position)
+    {
+        var size = Math.Max(1, (int)MathF.Ceiling(projectile.Definition.CollisionRadius * 2));
+        return new RectI(
+            SaturatingFloor(position.X),
+            SaturatingFloor(position.Y),
+            size,
+            size);
+    }
+
+    private static bool TryGetProjectileSweepTime(
+        ProjectileEntity projectile,
+        RectI target,
+        out double timeOfImpact)
+    {
+        var current = projectile.Bounds;
+        var previous = BuildProjectileBoundsAt(projectile, projectile.RuntimeState.PreviousPosition);
+        if (previous.Intersects(target))
+        {
+            timeOfImpact = 0d;
+            return true;
+        }
+
+        var start = projectile.RuntimeState.PreviousPosition;
+        var movement = projectile.Position - start;
+        if (movement == Vector2.Zero)
+        {
+            timeOfImpact = 0d;
+            return current.Intersects(target);
+        }
+
+        var minimumX = target.Left - (double)previous.Width;
+        var minimumY = target.Top - (double)previous.Height;
+        var maximumX = target.Right;
+        var maximumY = target.Bottom;
+        var entry = 0d;
+        var exit = 1d;
+        var intersects = ClipSweepAxis(start.X, movement.X, minimumX, maximumX, ref entry, ref exit) &&
+                         ClipSweepAxis(start.Y, movement.Y, minimumY, maximumY, ref entry, ref exit) &&
+                         entry <= exit;
+        timeOfImpact = intersects ? Math.Clamp(entry, 0d, 1d) : 0d;
+        return intersects;
+    }
+
+    private static bool ClipSweepAxis(
+        double origin,
+        double movement,
+        double minimum,
+        double maximum,
+        ref double entry,
+        ref double exit)
+    {
+        if (Math.Abs(movement) <= double.Epsilon)
+        {
+            return origin >= minimum && origin <= maximum;
+        }
+
+        var first = (minimum - origin) / movement;
+        var second = (maximum - origin) / movement;
+        if (first > second)
+        {
+            (first, second) = (second, first);
+        }
+
+        entry = Math.Max(entry, first);
+        exit = Math.Min(exit, second);
+        return entry <= exit && exit >= 0d && entry <= 1d;
+    }
+
+    private static int SaturatingFloor(float value)
+    {
+        var floored = Math.Floor(value);
+        return floored <= int.MinValue
+            ? int.MinValue
+            : floored >= int.MaxValue
+                ? int.MaxValue
+                : (int)floored;
+    }
+
+    private static int SaturatingLength(long value)
+    {
+        return (int)Math.Clamp(value, 0, int.MaxValue);
+    }
+
+    private sealed class ProjectileHitCandidateComparer : IComparer<ProjectileHitCandidate>
+    {
+        public static ProjectileHitCandidateComparer Instance { get; } = new();
+
+        public int Compare(ProjectileHitCandidate left, ProjectileHitCandidate right)
+        {
+            var time = left.TimeOfImpact.CompareTo(right.TimeOfImpact);
+            return time != 0 ? time : left.Enemy.Id.CompareTo(right.Enemy.Id);
+        }
     }
 
     public ContactDamageResult ResolveEnemyContactDamage(
@@ -149,7 +287,8 @@ public sealed class CombatSystem
         int damage = 10,
         float invulnerabilitySeconds = 0.65f,
         float knockbackForce = 180f,
-        GameEventBus? events = null)
+        GameEventBus? events = null,
+        CombatQueryWorkspace? workspace = null)
     {
         ArgumentNullException.ThrowIfNull(player);
         ArgumentNullException.ThrowIfNull(entities);
@@ -159,10 +298,11 @@ public sealed class CombatSystem
             return ContactDamageResult.None;
         }
 
-        entities.QueryInto(player.Bounds, _queryBuffer, _querySeen);
-        for (var index = 0; index < _queryBuffer.Count; index++)
+        var candidates = (workspace ?? _compatibilityWorkspace).Candidates;
+        entities.QueryInto(player.Bounds, candidates);
+        for (var index = 0; index < candidates.Count; index++)
         {
-            if (_queryBuffer[index] is not EnemyEntity { IsActive: true } enemy)
+            if (candidates[index] is not EnemyEntity { IsActive: true } enemy)
             {
                 continue;
             }
@@ -201,7 +341,8 @@ public sealed class CombatSystem
         float knockbackForce = 180f,
         DamageMitigationProfile? mitigation = null,
         CombatResolutionPolicy? policy = null,
-        GameEventBus? events = null)
+        GameEventBus? events = null,
+        CombatQueryWorkspace? workspace = null)
     {
         ArgumentNullException.ThrowIfNull(player);
         ArgumentNullException.ThrowIfNull(entities);
@@ -212,10 +353,11 @@ public sealed class CombatSystem
             return ContactDamageResult.None;
         }
 
-        entities.QueryInto(player.Bounds, _queryBuffer, _querySeen);
-        for (var index = 0; index < _queryBuffer.Count; index++)
+        var candidates = (workspace ?? _compatibilityWorkspace).Candidates;
+        entities.QueryInto(player.Bounds, candidates);
+        for (var index = 0; index < candidates.Count; index++)
         {
-            if (_queryBuffer[index] is not EnemyEntity { IsActive: true } enemy ||
+            if (candidates[index] is not EnemyEntity { IsActive: true } enemy ||
                 !enemy.Bounds.Intersects(player.Bounds))
             {
                 continue;
@@ -250,10 +392,17 @@ public sealed class CombatSystem
         EntityManager entities,
         GameContentDatabase content,
         float invulnerabilitySeconds = 0.65f,
-        GameEventBus? events = null)
+        GameEventBus? events = null,
+        CombatQueryWorkspace? workspace = null)
     {
         ArgumentNullException.ThrowIfNull(content);
-        return ResolveEnemyContactDamageInternal(player, entities, content.StatusEffects, invulnerabilitySeconds, events);
+        return ResolveEnemyContactDamageInternal(
+            player,
+            entities,
+            content.StatusEffects,
+            invulnerabilitySeconds,
+            events,
+            workspace ?? _compatibilityWorkspace);
     }
 
     public ContactDamageResult ResolveEnemyContactDamage(
@@ -265,7 +414,8 @@ public sealed class CombatSystem
         float invulnerabilitySeconds = 0.65f,
         DamageMitigationProfile? mitigation = null,
         CombatResolutionPolicy? policy = null,
-        GameEventBus? events = null)
+        GameEventBus? events = null,
+        CombatQueryWorkspace? workspace = null)
     {
         ArgumentNullException.ThrowIfNull(player);
         ArgumentNullException.ThrowIfNull(entities);
@@ -277,10 +427,11 @@ public sealed class CombatSystem
             return ContactDamageResult.None;
         }
 
-        entities.QueryInto(player.Bounds, _queryBuffer, _querySeen);
-        for (var index = 0; index < _queryBuffer.Count; index++)
+        var candidates = (workspace ?? _compatibilityWorkspace).Candidates;
+        entities.QueryInto(player.Bounds, candidates);
+        for (var index = 0; index < candidates.Count; index++)
         {
-            if (_queryBuffer[index] is not EnemyEntity { IsActive: true } enemy ||
+            if (candidates[index] is not EnemyEntity { IsActive: true } enemy ||
                 !enemy.Bounds.Intersects(player.Bounds) ||
                 enemy.ContactDamage <= 0)
             {
@@ -311,7 +462,8 @@ public sealed class CombatSystem
         float invulnerabilitySeconds = 0.65f,
         DamageMitigationProfile? mitigation = null,
         CombatResolutionPolicy? policy = null,
-        GameEventBus? events = null)
+        GameEventBus? events = null,
+        CombatQueryWorkspace? workspace = null)
     {
         ArgumentNullException.ThrowIfNull(player);
         ArgumentNullException.ThrowIfNull(entities);
@@ -323,10 +475,11 @@ public sealed class CombatSystem
             return ContactDamageResult.None;
         }
 
-        entities.QueryInto(player.Bounds, _queryBuffer, _querySeen);
-        for (var index = 0; index < _queryBuffer.Count; index++)
+        var candidates = (workspace ?? _compatibilityWorkspace).Candidates;
+        entities.QueryInto(player.Bounds, candidates);
+        for (var index = 0; index < candidates.Count; index++)
         {
-            if (_queryBuffer[index] is not ProjectileEntity { IsActive: true } projectile ||
+            if (candidates[index] is not ProjectileEntity { IsActive: true } projectile ||
                 !projectile.Bounds.Intersects(player.Bounds))
             {
                 continue;
@@ -348,9 +501,9 @@ public sealed class CombatSystem
             }
         }
 
-        for (var index = 0; index < _queryBuffer.Count; index++)
+        for (var index = 0; index < candidates.Count; index++)
         {
-            if (_queryBuffer[index] is not EnemyEntity { IsActive: true } enemy ||
+            if (candidates[index] is not EnemyEntity { IsActive: true } enemy ||
                 !enemy.Bounds.Intersects(player.Bounds) ||
                 enemy.ContactDamage <= 0)
             {
@@ -381,7 +534,8 @@ public sealed class CombatSystem
         float invulnerabilitySeconds = 0.65f,
         DamageMitigationProfile? mitigation = null,
         CombatResolutionPolicy? policy = null,
-        GameEventBus? events = null)
+        GameEventBus? events = null,
+        CombatQueryWorkspace? workspace = null)
     {
         ArgumentNullException.ThrowIfNull(player);
         ArgumentNullException.ThrowIfNull(entities);
@@ -393,10 +547,11 @@ public sealed class CombatSystem
             return ContactDamageResult.None;
         }
 
-        entities.QueryInto(player.Bounds, _queryBuffer, _querySeen);
-        for (var index = 0; index < _queryBuffer.Count; index++)
+        var candidates = (workspace ?? _compatibilityWorkspace).Candidates;
+        entities.QueryInto(player.Bounds, candidates);
+        for (var index = 0; index < candidates.Count; index++)
         {
-            if (_queryBuffer[index] is not ProjectileEntity { IsActive: true } projectile ||
+            if (candidates[index] is not ProjectileEntity { IsActive: true } projectile ||
                 !projectile.Bounds.Intersects(player.Bounds))
             {
                 continue;
@@ -520,7 +675,8 @@ public sealed class CombatSystem
         EntityManager entities,
         StatusEffectRegistry statusEffects,
         float invulnerabilitySeconds,
-        GameEventBus? events)
+        GameEventBus? events,
+        CombatQueryWorkspace workspace)
     {
         ArgumentNullException.ThrowIfNull(player);
         ArgumentNullException.ThrowIfNull(entities);
@@ -531,10 +687,11 @@ public sealed class CombatSystem
             return ContactDamageResult.None;
         }
 
-        entities.QueryInto(player.Bounds, _queryBuffer, _querySeen);
-        for (var index = 0; index < _queryBuffer.Count; index++)
+        var candidates = workspace.Candidates;
+        entities.QueryInto(player.Bounds, candidates);
+        for (var index = 0; index < candidates.Count; index++)
         {
-            if (_queryBuffer[index] is not EnemyEntity { IsActive: true } enemy)
+            if (candidates[index] is not EnemyEntity { IsActive: true } enemy)
             {
                 continue;
             }
@@ -620,6 +777,7 @@ public sealed class CombatSystem
         }
 
         var actualDamage = Math.Max(0, healthBefore - player.Health);
+        PublishCombatEvents(events, resolution.Events);
         if (actualDamage > 0)
         {
             events?.Publish(new PlayerDamagedEvent(
@@ -639,6 +797,45 @@ public sealed class CombatSystem
         {
             Resolution = resolution
         };
+    }
+
+    private static void PublishCombatEvents(GameEventBus? events, IReadOnlyList<ICombatEvent> combatEvents)
+    {
+        if (events is null)
+        {
+            return;
+        }
+
+        for (var index = 0; index < combatEvents.Count; index++)
+        {
+            switch (combatEvents[index])
+            {
+                case AttackStartedCombatEvent gameEvent:
+                    events.Publish(gameEvent);
+                    break;
+                case AttackPhaseChangedCombatEvent gameEvent:
+                    events.Publish(gameEvent);
+                    break;
+                case AttackComboQueuedCombatEvent gameEvent:
+                    events.Publish(gameEvent);
+                    break;
+                case AttackCompletedCombatEvent gameEvent:
+                    events.Publish(gameEvent);
+                    break;
+                case CombatHitResolvedEvent gameEvent:
+                    events.Publish(gameEvent);
+                    break;
+                case CombatParriedEvent gameEvent:
+                    events.Publish(gameEvent);
+                    break;
+                case CombatBlockedEvent gameEvent:
+                    events.Publish(gameEvent);
+                    break;
+                case GuardBrokenCombatEvent gameEvent:
+                    events.Publish(gameEvent);
+                    break;
+            }
+        }
     }
 
     private static bool CannotReceiveDamage(PlayerEntity player)

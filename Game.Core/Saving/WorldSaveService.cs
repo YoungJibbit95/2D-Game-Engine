@@ -108,7 +108,12 @@ public sealed class WorldSaveService
                 metadata.Name,
                 metadata.Seed,
                 metadata.CreatedAtUtc,
-                new TilePos(metadata.SpawnTileX, metadata.SpawnTileY)),
+                new TilePos(metadata.SpawnTileX, metadata.SpawnTileY))
+            {
+                GenerationVersion = Game.Core.World.Generation.WorldGenerationVersions.Normalize(
+                    metadata.GenerationVersion),
+                GenerationProfileId = metadata.GenerationProfileId ?? string.Empty
+            },
             metadata.IsHorizontallyInfinite);
 
         var storageMode = ResolveStorageMode(metadata);
@@ -170,6 +175,8 @@ public sealed class WorldSaveService
         {
             Name = world.Metadata.Name,
             Seed = world.Metadata.Seed,
+            GenerationVersion = world.Metadata.GenerationVersion,
+            GenerationProfileId = world.Metadata.GenerationProfileId,
             CreatedAtUtc = world.Metadata.CreatedAtUtc,
             WidthTiles = world.WidthTiles,
             HeightTiles = world.HeightTiles,

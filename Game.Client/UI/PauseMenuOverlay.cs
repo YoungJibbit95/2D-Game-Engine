@@ -28,8 +28,10 @@ public sealed class PauseMenuOverlay
     private readonly List<HitZone> _optionHitZones = new();
     private readonly List<ControlHitZone> _controlHitZones = new();
     private readonly List<UiHitRegion> _pointerRegions = new();
+    private readonly List<PixelUiMotionState> _controlMotions = new();
     private readonly UiPointerRouter _pointer = new();
     private readonly UiGamepadNavigator _gamepad = new();
+    private readonly PixelUiMotionState _tooltipMotion = new();
     private int _sectionIndex;
     private int _optionIndex;
     private int _hoveredSectionIndex = -1;
@@ -64,6 +66,7 @@ public sealed class PauseMenuOverlay
         _resumeLabel = resumeLabel;
         Settings = LoadSettings();
         BuildSections();
+        InitializeMotionStates();
     }
 
     public bool IsOpen { get; private set; }
@@ -77,6 +80,7 @@ public sealed class PauseMenuOverlay
         _openDropdownOptionIndex = -1;
         _pointer.Reset();
         _gamepad.Reset();
+        ResetMotionStates();
         _focusVisible = true;
         _status = _title;
         var duration = Settings.Ui.ReducedMotion ? 0.001f : 0.18f;
@@ -106,6 +110,7 @@ public sealed class PauseMenuOverlay
         if (_keyCapture is not null)
         {
             UpdateKeyCapture(input);
+            UpdateMotionStates((float)deltaSeconds);
             return true;
         }
 
@@ -184,6 +189,7 @@ public sealed class PauseMenuOverlay
             _focusVisible = true;
         }
 
+        UpdateMotionStates((float)deltaSeconds);
         return true;
     }
 
@@ -222,7 +228,13 @@ public sealed class PauseMenuOverlay
         DrawOptions(context, panel, palette);
 
         var footer = new Rectangle(panel.X + 18, panel.Bottom - 51, panel.Width - 36, 34);
-        UiTheme.DrawTooltipSurface(context, footer, palette, Settings.Ui.PanelOpacity, Settings);
+        PixelUiPrimitives.DrawTooltip(
+            context,
+            footer,
+            palette,
+            Math.Max(_tooltipMotion.Hover, _tooltipMotion.Focus),
+            Settings.Ui.PanelOpacity,
+            Settings);
         var footerText = _keyCapture is null
             ? TooltipText()
             : $"PRESS A KEY FOR {_keyCapture.Label}   ESC CANCEL";
@@ -298,6 +310,7 @@ public sealed class PauseMenuOverlay
         [
             Choice("RESOLUTION", CurrentResolution, resolutions, SetResolution),
             Toggle("FULLSCREEN", () => Settings.Video.Fullscreen, value => SetVideo(v => v with { Fullscreen = value })),
+            Toggle("LOW LATENCY PACING", () => Settings.Video.LowLatencyFramePacing, value => SetVideo(v => v with { LowLatencyFramePacing = value })),
             Toggle("VSYNC", () => Settings.Video.VSync, value => SetVideo(v => v with { VSync = value })),
             Choice("FRAME LIMIT", CurrentFrameRateLimit, FrameRateChoices, SetFrameRateLimit, UiControlKind.Dropdown),
             Number("UI SCALE", () => Settings.Video.UiScale, 0.5f, 4f, 0.25f, value => SetVideo(v => v with { UiScale = value })),
@@ -358,6 +371,12 @@ public sealed class PauseMenuOverlay
             Number("LIGHTING BLEND", () => Settings.Rendering.LightingBlendStrength, 0f, 1f, 0.05f, value => SetRendering(r => r with { LightingBlendStrength = value })),
             Number("CHUNK CACHE LIMIT", () => Settings.Rendering.MaxChunkRenderCacheEntries, 32, 4096, 32, value => SetRendering(r => r with { MaxChunkRenderCacheEntries = value })),
             Toggle("ENTITY INTERPOLATION", () => Settings.Rendering.EntityInterpolation, value => SetRendering(r => r with { EntityInterpolation = value })),
+            Choice("CADENCE PRESET", () => PresentationCadenceUi.ResolvePreset(Settings.Rendering), PresentationCadenceUi.Presets, SetPresentationCadencePreset, UiControlKind.Segmented),
+            Toggle("ADAPTIVE CADENCE", () => Settings.Rendering.AdaptivePresentationCadence, value => SetRendering(r => r with { AdaptivePresentationCadence = value })),
+            Number("LIGHTING RATE HZ", () => Settings.Rendering.LightingUpdateRateHz, 10, 240, 5, value => SetRendering(r => r with { LightingUpdateRateHz = value })),
+            Number("REFLECTION RATE HZ", () => Settings.Rendering.ReflectionUpdateRateHz, 10, 240, 5, value => SetRendering(r => r with { ReflectionUpdateRateHz = value })),
+            Number("ATMOSPHERE RATE HZ", () => Settings.Rendering.AtmosphereUpdateRateHz, 10, 240, 5, value => SetRendering(r => r with { AtmosphereUpdateRateHz = value })),
+            Number("SCENE CAPTURE RATE HZ", () => Settings.Rendering.SceneCaptureUpdateRateHz, 10, 240, 5, value => SetRendering(r => r with { SceneCaptureUpdateRateHz = value })),
             Choice("UI EFFECT QUALITY", UiEffectQualityLabel, new[] { "OFF", "LOW", "MEDIUM", "HIGH" }, SetUiEffectQuality, UiControlKind.Segmented),
             Number("BLUR RADIUS", () => Settings.Rendering.BlurRadiusPixels, 0, 24, 1, value => SetRendering(r => r with { BlurRadiusPixels = value }))
         ];
@@ -545,7 +564,7 @@ public sealed class PauseMenuOverlay
             if (option is not null)
             {
                 _draggingSliderOptionIndex = sliderHit.OptionIndex;
-                option.SetFromNormalized((input.MousePosition.X - sliderHit.Bounds.X) / (float)Math.Max(1, sliderHit.Bounds.Width));
+                option.SetFromNormalized(PixelUiInteraction.SliderNormalizedAt(sliderHit.Bounds, input.MousePosition.X));
                 _status = $"{option.Label} {option.Value()}";
                 _focusVisible = false;
             }
@@ -700,19 +719,20 @@ public sealed class PauseMenuOverlay
             case UiControlKind.KeyBinding:
             case UiControlKind.Command:
                 var primaryId = ControlRegionId(optionIndex, ControlPart.Primary, -1);
-                UiTheme.DrawButton(
+                PixelUiPrimitives.DrawCommand(
                     context,
                     bounds,
+                    option.Value(),
+                    ResolveCommandIcon(option),
                     palette,
-                    selected,
-                    bounds.Contains(_mousePosition),
-                    pressed: _pointer.IsPressed(primaryId),
-                    settings: Settings);
-                context.DebugText.Draw(
-                    new Vector2(bounds.X + 10, bounds.Y + 8 + (_pointer.IsPressed(primaryId) ? 1 : 0)),
-                    Abbreviate(option.Value(), CharactersThatFit(bounds.Width - 20, _typography.CaptionScale)),
-                    option.Kind == UiControlKind.Command ? palette.Warning : palette.Text,
-                    _typography.CaptionScale);
+                    new PixelUiState(
+                        Hovered: bounds.Contains(_mousePosition),
+                        Pressed: _pointer.IsPressed(primaryId),
+                        Focused: _focusVisible && selected,
+                        Selected: option.Kind == UiControlKind.Command && selected),
+                    _controlMotions[optionIndex],
+                    _typography,
+                    Settings);
                 _controlHitZones.Add(new ControlHitZone(bounds, optionIndex, ControlPart.Primary, -1));
                 break;
         }
@@ -721,48 +741,66 @@ public sealed class PauseMenuOverlay
     private void DrawToggle(RenderContext context, UiPalette palette, Rectangle bounds, MenuOption option, int optionIndex)
     {
         var on = string.Equals(option.Value(), "ON", StringComparison.OrdinalIgnoreCase);
-        var toggle = new Rectangle(bounds.Right - 74, bounds.Y + 1, 72, bounds.Height - 2);
+        var geometry = PixelUiGeometry.Toggle(bounds, UiTheme.ResolveContract(Settings).Controls);
         var regionId = ControlRegionId(optionIndex, ControlPart.Primary, -1);
-        UiTheme.DrawButton(context, toggle, palette, on, toggle.Contains(_mousePosition), pressed: _pointer.IsPressed(regionId), settings: Settings);
-        var knobSize = Math.Max(12, toggle.Height - 8);
-        var knobX = on ? toggle.Right - knobSize - 4 : toggle.X + 4;
-        UiTheme.DrawRoundedRectangle(context, new Rectangle(knobX, toggle.Y + 4, knobSize, knobSize), on ? palette.Warning : palette.TextMuted, 4);
-        context.DebugText.Draw(new Vector2(toggle.X - 37 * _typography.CaptionScale, toggle.Y + 7 + (_pointer.IsPressed(regionId) ? 1 : 0)), on ? "ON" : "OFF", on ? palette.Text : palette.TextMuted, _typography.CaptionScale);
-        _controlHitZones.Add(new ControlHitZone(toggle, optionIndex, ControlPart.Primary, -1));
+        PixelUiPrimitives.DrawToggle(
+            context,
+            bounds,
+            option.Value(),
+            on,
+            palette,
+            new PixelUiState(
+                Hovered: geometry.HitBounds.Contains(_mousePosition),
+                Pressed: _pointer.IsPressed(regionId),
+                Focused: _focusVisible && optionIndex == _optionIndex,
+                Selected: on),
+            _controlMotions[optionIndex],
+            _typography,
+            Settings);
+        _controlHitZones.Add(new ControlHitZone(geometry.HitBounds, optionIndex, ControlPart.Primary, -1));
     }
 
     private void DrawSlider(RenderContext context, UiPalette palette, Rectangle bounds, MenuOption option, int optionIndex)
     {
-        var valueWidth = 68;
-        var track = new Rectangle(bounds.X, bounds.Center.Y - 4, bounds.Width - valueWidth - 10, 8);
         var normalized = option.NormalizedValue();
+        var geometry = PixelUiGeometry.Slider(bounds, normalized, UiTheme.ResolveContract(Settings).Controls);
         var regionId = ControlRegionId(optionIndex, ControlPart.Slider, -1);
-        UiTheme.DrawRoundedRectangle(context, track, UiTheme.WithAlpha(palette.Backdrop, 0.85f), 4);
-        var fill = new Rectangle(track.X, track.Y, (int)MathF.Round(track.Width * normalized), track.Height);
-        UiTheme.DrawRoundedRectangle(context, fill, _pointer.IsPressed(regionId) ? palette.Warning : palette.Accent, 4);
-        UiTheme.DrawRoundedBorder(context, track, palette.SurfaceHover, 4, 1);
-        var thumbX = Math.Clamp(track.X + (int)MathF.Round(track.Width * normalized) - 4, track.X - 1, track.Right - 7);
-        UiTheme.DrawRoundedRectangle(context, new Rectangle(thumbX, track.Y - 4, 9, 16), palette.Warning, 4);
-        context.DebugText.Draw(new Vector2(bounds.Right - valueWidth, bounds.Y + 8), option.Value(), palette.Text, _typography.CaptionScale);
-        _controlHitZones.Add(new ControlHitZone(new Rectangle(track.X, track.Y - 7, track.Width, 22), optionIndex, ControlPart.Slider, -1));
+        PixelUiPrimitives.DrawSlider(
+            context,
+            bounds,
+            option.Value(),
+            normalized,
+            palette,
+            new PixelUiState(
+                Hovered: geometry.HitBounds.Contains(_mousePosition),
+                Pressed: _pointer.IsPressed(regionId),
+                Focused: _focusVisible && optionIndex == _optionIndex),
+            _controlMotions[optionIndex],
+            _typography,
+            Settings);
+        _controlHitZones.Add(new ControlHitZone(geometry.HitBounds, optionIndex, ControlPart.Slider, -1));
     }
 
     private void DrawStepper(RenderContext context, UiPalette palette, Rectangle bounds, MenuOption option, int optionIndex)
     {
-        var buttonWidth = 32;
-        var centerWidth = Math.Min(106, Math.Max(62, bounds.Width - buttonWidth * 2 - 8));
-        var groupX = bounds.Right - centerWidth - buttonWidth * 2 - 8;
-        var decrement = new Rectangle(groupX, bounds.Y, buttonWidth, bounds.Height);
-        var value = new Rectangle(decrement.Right + 4, bounds.Y, centerWidth, bounds.Height);
-        var increment = new Rectangle(value.Right + 4, bounds.Y, buttonWidth, bounds.Height);
-        UiTheme.DrawButton(context, decrement, palette, false, decrement.Contains(_mousePosition), pressed: _pointer.IsPressed(ControlRegionId(optionIndex, ControlPart.Decrement, -1)), settings: Settings);
-        UiTheme.DrawButton(context, value, palette, true, false, settings: Settings);
-        UiTheme.DrawButton(context, increment, palette, false, increment.Contains(_mousePosition), pressed: _pointer.IsPressed(ControlRegionId(optionIndex, ControlPart.Increment, -1)), settings: Settings);
-        context.DebugText.Draw(new Vector2(decrement.X + 12, decrement.Y + 8), "-", palette.Text, _typography.CaptionScale);
-        context.DebugText.Draw(new Vector2(value.X + 8, value.Y + 8), Abbreviate(option.Value(), CharactersThatFit(value.Width - 12, _typography.CaptionScale)), palette.Text, _typography.CaptionScale);
-        context.DebugText.Draw(new Vector2(increment.X + 11, increment.Y + 8), "+", palette.Text, _typography.CaptionScale);
-        _controlHitZones.Add(new ControlHitZone(decrement, optionIndex, ControlPart.Decrement, -1));
-        _controlHitZones.Add(new ControlHitZone(increment, optionIndex, ControlPart.Increment, -1));
+        var geometry = PixelUiGeometry.Stepper(bounds, UiTheme.ResolveContract(Settings).Controls);
+        var decrementId = ControlRegionId(optionIndex, ControlPart.Decrement, -1);
+        var incrementId = ControlRegionId(optionIndex, ControlPart.Increment, -1);
+        PixelUiPrimitives.DrawStepper(
+            context,
+            bounds,
+            Abbreviate(option.Value(), CharactersThatFit(geometry.Value.Width - 12, _typography.CaptionScale)),
+            palette,
+            new PixelUiState(Focused: _focusVisible && optionIndex == _optionIndex),
+            _controlMotions[optionIndex],
+            geometry.Decrement.Contains(_mousePosition),
+            _pointer.IsPressed(decrementId),
+            geometry.Increment.Contains(_mousePosition),
+            _pointer.IsPressed(incrementId),
+            _typography,
+            Settings);
+        _controlHitZones.Add(new ControlHitZone(geometry.Decrement, optionIndex, ControlPart.Decrement, -1));
+        _controlHitZones.Add(new ControlHitZone(geometry.Increment, optionIndex, ControlPart.Increment, -1));
     }
 
     private void DrawSegments(RenderContext context, UiPalette palette, Rectangle bounds, MenuOption option, int optionIndex)
@@ -773,13 +811,25 @@ public sealed class PauseMenuOverlay
             return;
         }
 
-        var segmentWidth = Math.Max(1, bounds.Width / choices.Count);
+        var tokens = UiTheme.ResolveContract(Settings).Controls;
         for (var index = 0; index < choices.Count; index++)
         {
-            var segment = new Rectangle(bounds.X + index * segmentWidth, bounds.Y, index == choices.Count - 1 ? bounds.Right - (bounds.X + index * segmentWidth) : segmentWidth - 2, bounds.Height);
+            var segment = PixelUiGeometry.Segment(bounds, index, choices.Count, tokens);
             var active = string.Equals(choices[index], option.Value(), StringComparison.OrdinalIgnoreCase);
-            UiTheme.DrawButton(context, segment, palette, active, segment.Contains(_mousePosition), pressed: _pointer.IsPressed(ControlRegionId(optionIndex, ControlPart.Choice, index)), settings: Settings);
-            context.DebugText.Draw(new Vector2(segment.X + 7, segment.Y + 8), Abbreviate(choices[index], CharactersThatFit(segment.Width - 10, _typography.CaptionScale)), active ? palette.Text : palette.TextMuted, _typography.CaptionScale);
+            var regionId = ControlRegionId(optionIndex, ControlPart.Choice, index);
+            PixelUiPrimitives.DrawSegment(
+                context,
+                segment,
+                Abbreviate(choices[index], CharactersThatFit(segment.Width - 10, _typography.CaptionScale)),
+                palette,
+                new PixelUiState(
+                    Hovered: segment.Contains(_mousePosition),
+                    Pressed: _pointer.IsPressed(regionId),
+                    Focused: _focusVisible && optionIndex == _optionIndex && active,
+                    Selected: active),
+                _controlMotions[optionIndex],
+                _typography,
+                Settings);
             _controlHitZones.Add(new ControlHitZone(segment, optionIndex, ControlPart.Choice, index));
         }
     }
@@ -912,6 +962,63 @@ public sealed class PauseMenuOverlay
                 ControlRegionId(control.OptionIndex, control.Part, control.ChoiceIndex),
                 control.Bounds));
         }
+    }
+
+    private void InitializeMotionStates()
+    {
+        var maximumOptions = 0;
+        for (var sectionIndex = 0; sectionIndex < _sections.Count; sectionIndex++)
+        {
+            maximumOptions = Math.Max(maximumOptions, _sections[sectionIndex].Options.Count);
+        }
+
+        while (_controlMotions.Count < maximumOptions)
+        {
+            _controlMotions.Add(new PixelUiMotionState());
+        }
+    }
+
+    private void UpdateMotionStates(float deltaSeconds)
+    {
+        var section = _sections[_sectionIndex];
+        var pressedControl = FindControlHit(_pointer.PressedId);
+        var tooltipDelay = Math.Clamp(Settings.Accessibility.TooltipDelaySeconds, 0f, 2f);
+        for (var index = 0; index < _controlMotions.Count; index++)
+        {
+            if (index >= section.Options.Count)
+            {
+                _controlMotions[index].Update(default, deltaSeconds, Settings.Ui.AnimationSpeed, Settings.Ui.ReducedMotion);
+                continue;
+            }
+
+            var option = section.Options[index];
+            var toggleSelected = option.Kind == UiControlKind.Toggle &&
+                string.Equals(option.Value(), "ON", StringComparison.OrdinalIgnoreCase);
+            var state = new PixelUiState(
+                Hovered: index == _hoveredOptionIndex,
+                Pressed: _pointer.IsPressed(OptionRegionId(index)) || pressedControl?.OptionIndex == index,
+                Focused: _focusVisible && index == _optionIndex,
+                Selected: toggleSelected || index == _optionIndex);
+            _controlMotions[index].Update(state, deltaSeconds, Settings.Ui.AnimationSpeed, Settings.Ui.ReducedMotion);
+        }
+
+        var tooltipReady = _focusVisible ||
+            (_hoveredOptionIndex >= 0 && _tooltipHoverSeconds >= tooltipDelay);
+        _tooltipMotion.Update(
+            new PixelUiState(Hovered: tooltipReady, Focused: _focusVisible),
+            deltaSeconds,
+            Settings.Ui.AnimationSpeed,
+            Settings.Ui.ReducedMotion);
+    }
+
+    private void ResetMotionStates()
+    {
+        for (var index = 0; index < _controlMotions.Count; index++)
+        {
+            _controlMotions[index].Reset();
+        }
+
+        _tooltipMotion.Reset();
     }
 
     private static int TabRegionId(int index)
@@ -1228,6 +1335,11 @@ public sealed class PauseMenuOverlay
         Settings = Settings with { Rendering = update(Settings.Rendering) };
     }
 
+    private void SetPresentationCadencePreset(string preset)
+    {
+        SetRendering(rendering => PresentationCadenceUi.ApplyPreset(rendering, preset));
+    }
+
     private void SetUi(Func<UiSettings, UiSettings> update)
     {
         Settings = Settings with { Ui = update(Settings.Ui) };
@@ -1384,6 +1496,12 @@ public sealed class PauseMenuOverlay
             "COLOR GRADE" => "INTENSITY OF THE ACTIVE COLOR-GRADING PASS.",
             "PARTICLE QUALITY" => "DENSITY AND LIFETIME BUDGET FOR GAMEPLAY PARTICLES.",
             "CHUNK CACHE LIMIT" => "MAXIMUM RETAINED CHUNK RENDER CACHE ENTRIES.",
+            "CADENCE PRESET" => "COORDINATED UPDATE RATES FOR LIGHTING, REFLECTIONS, ATMOSPHERE AND SCENE CAPTURE.",
+            "ADAPTIVE CADENCE" => "ALLOW PRESENTATION PASSES TO REDUCE THEIR UPDATE RATE UNDER FRAME PRESSURE.",
+            "LIGHTING RATE HZ" => "MAXIMUM LIGHTING PRESENTATION UPDATES PER SECOND.",
+            "REFLECTION RATE HZ" => "MAXIMUM WATER AND WET-SURFACE REFLECTION UPDATES PER SECOND.",
+            "ATMOSPHERE RATE HZ" => "MAXIMUM ATMOSPHERE AND WEATHER PRESENTATION UPDATES PER SECOND.",
+            "SCENE CAPTURE RATE HZ" => "MAXIMUM BACKDROP AND SCENE-CAPTURE UPDATES PER SECOND.",
             "UI EFFECT QUALITY" => "QUALITY BUDGET FOR UI GRADIENTS, GLOW AND BACKDROP EFFECTS.",
             "BLUR RADIUS" => "MAXIMUM PIXEL RADIUS USED BY BLUR-CAPABLE UI EFFECTS.",
             "THEME" => "COLOR PALETTE USED BY HUDS, MENUS AND OVERLAYS.",
@@ -1420,6 +1538,23 @@ public sealed class PauseMenuOverlay
             _ when label.StartsWith("HOTBAR ", StringComparison.Ordinal) => "KEY USED TO SELECT THIS HOTBAR SLOT.",
             _ => $"CHANGE {label}."
         };
+    }
+
+    private static PixelUiCommandIcon ResolveCommandIcon(MenuOption option)
+    {
+        if (option.Kind == UiControlKind.KeyBinding)
+        {
+            return PixelUiCommandIcon.Keyboard;
+        }
+
+        if (option.Label.Contains("SAVE", StringComparison.Ordinal))
+        {
+            return PixelUiCommandIcon.Save;
+        }
+
+        return option.Label.Contains("RESET", StringComparison.Ordinal)
+            ? PixelUiCommandIcon.Reset
+            : PixelUiCommandIcon.Command;
     }
 
     private static string Abbreviate(string value, int maxLength)

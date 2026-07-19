@@ -1,0 +1,190 @@
+{
+  "version": 1,
+  "scope": "terrain_material_polish_v1",
+  "globalStyle": "YjsE yjse-pixel-v1 side-view terrain with broad clusters, top-left light and binary alpha.",
+  "globalNegativePrompt": "blur, antialiasing, gradients, random pixel noise, copied game art, watermark, text",
+  "sourceConcept": "art_direction/generated_sources/terrain_material_polish_v1_source.png",
+  "sourcePrompt": "Use case: stylized-concept. Asset type: game terrain-material concept board used as art-direction reference for deterministic 16x16 autotile production. Use the existing YjsE Wave 05 pixel-art materials and V5 biome palette as style references. Design six cohesive side-view pixel-art material families: forest grass-over-loam, deep forest loam, layered gray cave stone, glowing amberstone, wet twilight-marsh moss, and gnarled amberwood planks. Use crisp readable 1x clusters, restrained original Terraria-like looseness, top-left lighting, four to six intentional tones, and no antialiasing, blur, gradients or noisy dithering. Present a clean unlabeled 3x2 board where each cell demonstrates connected top, side, inner and bottom edges plus an isolated block. No text, logos, watermark, copied sprites, UI, characters, background scene, perspective cubes, 3D rendering or soft transparency.",
+  "briefs": [
+    {
+      "spriteId": "world/tiles/polish_v1/forest_grass_loam_autotile",
+      "outputPath": "Assets/TerrainPolishV1/world/tiles/forest_grass_loam_autotile.png",
+      "width": 256,
+      "height": 16,
+      "subject": "Forest Grass And Loam",
+      "prompt": "Translate the checked-in terrain concept into an original Forest Grass And Loam 16-mask YjsE autotile sheet.",
+      "requirements": [
+        "Export exactly sixteen 16x16 frames in cardinal mask order 0-15.",
+        "Keep connected sides seamless and emphasize only exposed edges.",
+        "Use binary alpha, nearest-neighbor pixels and broad readable clusters.",
+        "Keep every runtime frame at native density; no source-image raster scaling."
+      ],
+      "palette": [
+        "#1b1826",
+        "#352319",
+        "#5a3825",
+        "#8b5a34",
+        "#263f38",
+        "#35614a",
+        "#7fba68",
+        "#b8d47a"
+      ],
+      "tags": [
+        "production",
+        "runtime-active",
+        "terrain-polish",
+        "autotile",
+        "grass"
+      ]
+    },
+    {
+      "spriteId": "world/tiles/polish_v1/forest_loam_autotile",
+      "outputPath": "Assets/TerrainPolishV1/world/tiles/forest_loam_autotile.png",
+      "width": 256,
+      "height": 16,
+      "subject": "Deep Forest Loam",
+      "prompt": "Translate the checked-in terrain concept into an original Deep Forest Loam 16-mask YjsE autotile sheet.",
+      "requirements": [
+        "Export exactly sixteen 16x16 frames in cardinal mask order 0-15.",
+        "Keep connected sides seamless and emphasize only exposed edges.",
+        "Use binary alpha, nearest-neighbor pixels and broad readable clusters.",
+        "Keep every runtime frame at native density; no source-image raster scaling."
+      ],
+      "palette": [
+        "#1b1826",
+        "#352319",
+        "#5a3825",
+        "#8b5a34",
+        "#c58b52",
+        "#f0a35b"
+      ],
+      "tags": [
+        "production",
+        "runtime-active",
+        "terrain-polish",
+        "autotile",
+        "loam"
+      ]
+    },
+    {
+      "spriteId": "world/tiles/polish_v1/layered_stone_autotile",
+      "outputPath": "Assets/TerrainPolishV1/world/tiles/layered_stone_autotile.png",
+      "width": 256,
+      "height": 16,
+      "subject": "Layered Cave Stone",
+      "prompt": "Translate the checked-in terrain concept into an original Layered Cave Stone 16-mask YjsE autotile sheet.",
+      "requirements": [
+        "Export exactly sixteen 16x16 frames in cardinal mask order 0-15.",
+        "Keep connected sides seamless and emphasize only exposed edges.",
+        "Use binary alpha, nearest-neighbor pixels and broad readable clusters.",
+        "Keep every runtime frame at native density; no source-image raster scaling."
+      ],
+      "palette": [
+        "#1b1826",
+        "#2a2635",
+        "#4a4555",
+        "#716a7b",
+        "#aaa2b0",
+        "#f4e9d8"
+      ],
+      "tags": [
+        "production",
+        "runtime-active",
+        "terrain-polish",
+        "autotile",
+        "stone"
+      ]
+    },
+    {
+      "spriteId": "world/tiles/polish_v1/amberstone_autotile",
+      "outputPath": "Assets/TerrainPolishV1/world/tiles/amberstone_autotile.png",
+      "width": 256,
+      "height": 16,
+      "subject": "Veined Amberstone",
+      "prompt": "Translate the checked-in terrain concept into an original Veined Amberstone 16-mask YjsE autotile sheet.",
+      "requirements": [
+        "Export exactly sixteen 16x16 frames in cardinal mask order 0-15.",
+        "Keep connected sides seamless and emphasize only exposed edges.",
+        "Use binary alpha, nearest-neighbor pixels and broad readable clusters.",
+        "Keep every runtime frame at native density; no source-image raster scaling."
+      ],
+      "palette": [
+        "#1b1826",
+        "#352319",
+        "#58412a",
+        "#8b5a34",
+        "#b97732",
+        "#f0c35a",
+        "#fff1a6"
+      ],
+      "tags": [
+        "production",
+        "runtime-active",
+        "terrain-polish",
+        "autotile",
+        "amber"
+      ]
+    },
+    {
+      "spriteId": "world/tiles/polish_v1/marsh_moss_autotile",
+      "outputPath": "Assets/TerrainPolishV1/world/tiles/marsh_moss_autotile.png",
+      "width": 256,
+      "height": 16,
+      "subject": "Twilight Marsh Moss",
+      "prompt": "Translate the checked-in terrain concept into an original Twilight Marsh Moss 16-mask YjsE autotile sheet.",
+      "requirements": [
+        "Export exactly sixteen 16x16 frames in cardinal mask order 0-15.",
+        "Keep connected sides seamless and emphasize only exposed edges.",
+        "Use binary alpha, nearest-neighbor pixels and broad readable clusters.",
+        "Keep every runtime frame at native density; no source-image raster scaling."
+      ],
+      "palette": [
+        "#1b1826",
+        "#20244f",
+        "#30233d",
+        "#263f38",
+        "#35614a",
+        "#4f8a5b",
+        "#7fba68",
+        "#8b66a1"
+      ],
+      "tags": [
+        "production",
+        "runtime-active",
+        "terrain-polish",
+        "autotile",
+        "moss"
+      ]
+    },
+    {
+      "spriteId": "world/tiles/polish_v1/amberwood_plank_autotile",
+      "outputPath": "Assets/TerrainPolishV1/world/tiles/amberwood_plank_autotile.png",
+      "width": 256,
+      "height": 16,
+      "subject": "Gnarled Amberwood Planks",
+      "prompt": "Translate the checked-in terrain concept into an original Gnarled Amberwood Planks 16-mask YjsE autotile sheet.",
+      "requirements": [
+        "Export exactly sixteen 16x16 frames in cardinal mask order 0-15.",
+        "Keep connected sides seamless and emphasize only exposed edges.",
+        "Use binary alpha, nearest-neighbor pixels and broad readable clusters.",
+        "Keep every runtime frame at native density; no source-image raster scaling."
+      ],
+      "palette": [
+        "#1b1826",
+        "#352319",
+        "#5a3825",
+        "#8b5a34",
+        "#c58b52",
+        "#f0a35b",
+        "#f0c35a"
+      ],
+      "tags": [
+        "production",
+        "runtime-active",
+        "terrain-polish",
+        "autotile",
+        "plank"
+      ]
+    }
+  ]
+}

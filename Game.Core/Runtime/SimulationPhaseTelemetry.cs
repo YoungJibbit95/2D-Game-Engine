@@ -49,7 +49,7 @@ public sealed class SimulationPhaseTelemetry
         return new SimulationPhaseTelemetrySnapshot(
             IsEnabled,
             Stopwatch.Frequency,
-            new ImmutableSnapshotList<SimulationPhaseMeasurement>(measurements));
+            ImmutableSnapshotList<SimulationPhaseMeasurement>.FromOwned(measurements));
     }
 
     public void Reset()

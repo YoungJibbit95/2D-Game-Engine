@@ -1,0 +1,859 @@
+{
+  "sprites": [
+    {
+      "id": "entities/player/character_v2_wave06/body",
+      "path": "Assets/Wave06Character/player_body_actions.png",
+      "category": "Entity",
+      "width": 384,
+      "height": 40,
+      "pixelsPerUnit": 16,
+      "atlasId": "entities",
+      "originX": 12,
+      "originY": 40,
+      "renderLayer": "world.entity.player.00.body",
+      "license": "YjsE-Project-Owned",
+      "provenance": "wave_06_character_production; native final-size deterministic generator; wave_06_character_provenance.json",
+      "tags": [
+        "production",
+        "runtime-active",
+        "wave-06",
+        "entity",
+        "player",
+        "character-v2",
+        "layered",
+        "body",
+        "animated"
+      ],
+      "frames": [
+        {
+          "id": "idle_0",
+          "x": 0,
+          "y": 0,
+          "width": 24,
+          "height": 40,
+          "originX": 12,
+          "originY": 40
+        },
+        {
+          "id": "idle_1",
+          "x": 24,
+          "y": 0,
+          "width": 24,
+          "height": 40,
+          "originX": 12,
+          "originY": 40
+        },
+        {
+          "id": "run_0",
+          "x": 48,
+          "y": 0,
+          "width": 24,
+          "height": 40,
+          "originX": 12,
+          "originY": 40
+        },
+        {
+          "id": "run_1",
+          "x": 72,
+          "y": 0,
+          "width": 24,
+          "height": 40,
+          "originX": 12,
+          "originY": 40
+        },
+        {
+          "id": "run_2",
+          "x": 96,
+          "y": 0,
+          "width": 24,
+          "height": 40,
+          "originX": 12,
+          "originY": 40
+        },
+        {
+          "id": "run_3",
+          "x": 120,
+          "y": 0,
+          "width": 24,
+          "height": 40,
+          "originX": 12,
+          "originY": 40
+        },
+        {
+          "id": "run_4",
+          "x": 144,
+          "y": 0,
+          "width": 24,
+          "height": 40,
+          "originX": 12,
+          "originY": 40
+        },
+        {
+          "id": "run_5",
+          "x": 168,
+          "y": 0,
+          "width": 24,
+          "height": 40,
+          "originX": 12,
+          "originY": 40
+        },
+        {
+          "id": "jump",
+          "x": 192,
+          "y": 0,
+          "width": 24,
+          "height": 40,
+          "originX": 12,
+          "originY": 40
+        },
+        {
+          "id": "fall",
+          "x": 216,
+          "y": 0,
+          "width": 24,
+          "height": 40,
+          "originX": 12,
+          "originY": 40
+        },
+        {
+          "id": "tool_0",
+          "x": 240,
+          "y": 0,
+          "width": 24,
+          "height": 40,
+          "originX": 12,
+          "originY": 40
+        },
+        {
+          "id": "tool_1",
+          "x": 264,
+          "y": 0,
+          "width": 24,
+          "height": 40,
+          "originX": 12,
+          "originY": 40
+        },
+        {
+          "id": "tool_2",
+          "x": 288,
+          "y": 0,
+          "width": 24,
+          "height": 40,
+          "originX": 12,
+          "originY": 40
+        },
+        {
+          "id": "block",
+          "x": 312,
+          "y": 0,
+          "width": 24,
+          "height": 40,
+          "originX": 12,
+          "originY": 40
+        },
+        {
+          "id": "hurt_0",
+          "x": 336,
+          "y": 0,
+          "width": 24,
+          "height": 40,
+          "originX": 12,
+          "originY": 40
+        },
+        {
+          "id": "hurt_1",
+          "x": 360,
+          "y": 0,
+          "width": 24,
+          "height": 40,
+          "originX": 12,
+          "originY": 40
+        }
+      ]
+    },
+    {
+      "id": "entities/player/character_v2_wave06/clothes",
+      "path": "Assets/Wave06Character/player_clothes_actions.png",
+      "category": "Entity",
+      "width": 384,
+      "height": 40,
+      "pixelsPerUnit": 16,
+      "atlasId": "entities",
+      "originX": 12,
+      "originY": 40,
+      "renderLayer": "world.entity.player.01.clothes",
+      "license": "YjsE-Project-Owned",
+      "provenance": "wave_06_character_production; native final-size deterministic generator; wave_06_character_provenance.json",
+      "tags": [
+        "production",
+        "runtime-active",
+        "wave-06",
+        "entity",
+        "player",
+        "character-v2",
+        "layered",
+        "clothes",
+        "animated"
+      ],
+      "frames": [
+        {
+          "id": "idle_0",
+          "x": 0,
+          "y": 0,
+          "width": 24,
+          "height": 40,
+          "originX": 12,
+          "originY": 40
+        },
+        {
+          "id": "idle_1",
+          "x": 24,
+          "y": 0,
+          "width": 24,
+          "height": 40,
+          "originX": 12,
+          "originY": 40
+        },
+        {
+          "id": "run_0",
+          "x": 48,
+          "y": 0,
+          "width": 24,
+          "height": 40,
+          "originX": 12,
+          "originY": 40
+        },
+        {
+          "id": "run_1",
+          "x": 72,
+          "y": 0,
+          "width": 24,
+          "height": 40,
+          "originX": 12,
+          "originY": 40
+        },
+        {
+          "id": "run_2",
+          "x": 96,
+          "y": 0,
+          "width": 24,
+          "height": 40,
+          "originX": 12,
+          "originY": 40
+        },
+        {
+          "id": "run_3",
+          "x": 120,
+          "y": 0,
+          "width": 24,
+          "height": 40,
+          "originX": 12,
+          "originY": 40
+        },
+        {
+          "id": "run_4",
+          "x": 144,
+          "y": 0,
+          "width": 24,
+          "height": 40,
+          "originX": 12,
+          "originY": 40
+        },
+        {
+          "id": "run_5",
+          "x": 168,
+          "y": 0,
+          "width": 24,
+          "height": 40,
+          "originX": 12,
+          "originY": 40
+        },
+        {
+          "id": "jump",
+          "x": 192,
+          "y": 0,
+          "width": 24,
+          "height": 40,
+          "originX": 12,
+          "originY": 40
+        },
+        {
+          "id": "fall",
+          "x": 216,
+          "y": 0,
+          "width": 24,
+          "height": 40,
+          "originX": 12,
+          "originY": 40
+        },
+        {
+          "id": "tool_0",
+          "x": 240,
+          "y": 0,
+          "width": 24,
+          "height": 40,
+          "originX": 12,
+          "originY": 40
+        },
+        {
+          "id": "tool_1",
+          "x": 264,
+          "y": 0,
+          "width": 24,
+          "height": 40,
+          "originX": 12,
+          "originY": 40
+        },
+        {
+          "id": "tool_2",
+          "x": 288,
+          "y": 0,
+          "width": 24,
+          "height": 40,
+          "originX": 12,
+          "originY": 40
+        },
+        {
+          "id": "block",
+          "x": 312,
+          "y": 0,
+          "width": 24,
+          "height": 40,
+          "originX": 12,
+          "originY": 40
+        },
+        {
+          "id": "hurt_0",
+          "x": 336,
+          "y": 0,
+          "width": 24,
+          "height": 40,
+          "originX": 12,
+          "originY": 40
+        },
+        {
+          "id": "hurt_1",
+          "x": 360,
+          "y": 0,
+          "width": 24,
+          "height": 40,
+          "originX": 12,
+          "originY": 40
+        }
+      ]
+    },
+    {
+      "id": "entities/player/character_v2_wave06/hair",
+      "path": "Assets/Wave06Character/player_hair_actions.png",
+      "category": "Entity",
+      "width": 384,
+      "height": 40,
+      "pixelsPerUnit": 16,
+      "atlasId": "entities",
+      "originX": 12,
+      "originY": 40,
+      "renderLayer": "world.entity.player.02.hair",
+      "license": "YjsE-Project-Owned",
+      "provenance": "wave_06_character_production; native final-size deterministic generator; wave_06_character_provenance.json",
+      "tags": [
+        "production",
+        "runtime-active",
+        "wave-06",
+        "entity",
+        "player",
+        "character-v2",
+        "layered",
+        "hair",
+        "animated"
+      ],
+      "frames": [
+        {
+          "id": "idle_0",
+          "x": 0,
+          "y": 0,
+          "width": 24,
+          "height": 40,
+          "originX": 12,
+          "originY": 40
+        },
+        {
+          "id": "idle_1",
+          "x": 24,
+          "y": 0,
+          "width": 24,
+          "height": 40,
+          "originX": 12,
+          "originY": 40
+        },
+        {
+          "id": "run_0",
+          "x": 48,
+          "y": 0,
+          "width": 24,
+          "height": 40,
+          "originX": 12,
+          "originY": 40
+        },
+        {
+          "id": "run_1",
+          "x": 72,
+          "y": 0,
+          "width": 24,
+          "height": 40,
+          "originX": 12,
+          "originY": 40
+        },
+        {
+          "id": "run_2",
+          "x": 96,
+          "y": 0,
+          "width": 24,
+          "height": 40,
+          "originX": 12,
+          "originY": 40
+        },
+        {
+          "id": "run_3",
+          "x": 120,
+          "y": 0,
+          "width": 24,
+          "height": 40,
+          "originX": 12,
+          "originY": 40
+        },
+        {
+          "id": "run_4",
+          "x": 144,
+          "y": 0,
+          "width": 24,
+          "height": 40,
+          "originX": 12,
+          "originY": 40
+        },
+        {
+          "id": "run_5",
+          "x": 168,
+          "y": 0,
+          "width": 24,
+          "height": 40,
+          "originX": 12,
+          "originY": 40
+        },
+        {
+          "id": "jump",
+          "x": 192,
+          "y": 0,
+          "width": 24,
+          "height": 40,
+          "originX": 12,
+          "originY": 40
+        },
+        {
+          "id": "fall",
+          "x": 216,
+          "y": 0,
+          "width": 24,
+          "height": 40,
+          "originX": 12,
+          "originY": 40
+        },
+        {
+          "id": "tool_0",
+          "x": 240,
+          "y": 0,
+          "width": 24,
+          "height": 40,
+          "originX": 12,
+          "originY": 40
+        },
+        {
+          "id": "tool_1",
+          "x": 264,
+          "y": 0,
+          "width": 24,
+          "height": 40,
+          "originX": 12,
+          "originY": 40
+        },
+        {
+          "id": "tool_2",
+          "x": 288,
+          "y": 0,
+          "width": 24,
+          "height": 40,
+          "originX": 12,
+          "originY": 40
+        },
+        {
+          "id": "block",
+          "x": 312,
+          "y": 0,
+          "width": 24,
+          "height": 40,
+          "originX": 12,
+          "originY": 40
+        },
+        {
+          "id": "hurt_0",
+          "x": 336,
+          "y": 0,
+          "width": 24,
+          "height": 40,
+          "originX": 12,
+          "originY": 40
+        },
+        {
+          "id": "hurt_1",
+          "x": 360,
+          "y": 0,
+          "width": 24,
+          "height": 40,
+          "originX": 12,
+          "originY": 40
+        }
+      ]
+    },
+    {
+      "id": "entities/player/character_v2_wave06/armor",
+      "path": "Assets/Wave06Character/player_armor_actions.png",
+      "category": "Entity",
+      "width": 384,
+      "height": 40,
+      "pixelsPerUnit": 16,
+      "atlasId": "entities",
+      "originX": 12,
+      "originY": 40,
+      "renderLayer": "world.entity.player.03.armor",
+      "license": "YjsE-Project-Owned",
+      "provenance": "wave_06_character_production; native final-size deterministic generator; wave_06_character_provenance.json",
+      "tags": [
+        "production",
+        "runtime-active",
+        "wave-06",
+        "entity",
+        "player",
+        "character-v2",
+        "layered",
+        "armor",
+        "animated"
+      ],
+      "frames": [
+        {
+          "id": "idle_0",
+          "x": 0,
+          "y": 0,
+          "width": 24,
+          "height": 40,
+          "originX": 12,
+          "originY": 40
+        },
+        {
+          "id": "idle_1",
+          "x": 24,
+          "y": 0,
+          "width": 24,
+          "height": 40,
+          "originX": 12,
+          "originY": 40
+        },
+        {
+          "id": "run_0",
+          "x": 48,
+          "y": 0,
+          "width": 24,
+          "height": 40,
+          "originX": 12,
+          "originY": 40
+        },
+        {
+          "id": "run_1",
+          "x": 72,
+          "y": 0,
+          "width": 24,
+          "height": 40,
+          "originX": 12,
+          "originY": 40
+        },
+        {
+          "id": "run_2",
+          "x": 96,
+          "y": 0,
+          "width": 24,
+          "height": 40,
+          "originX": 12,
+          "originY": 40
+        },
+        {
+          "id": "run_3",
+          "x": 120,
+          "y": 0,
+          "width": 24,
+          "height": 40,
+          "originX": 12,
+          "originY": 40
+        },
+        {
+          "id": "run_4",
+          "x": 144,
+          "y": 0,
+          "width": 24,
+          "height": 40,
+          "originX": 12,
+          "originY": 40
+        },
+        {
+          "id": "run_5",
+          "x": 168,
+          "y": 0,
+          "width": 24,
+          "height": 40,
+          "originX": 12,
+          "originY": 40
+        },
+        {
+          "id": "jump",
+          "x": 192,
+          "y": 0,
+          "width": 24,
+          "height": 40,
+          "originX": 12,
+          "originY": 40
+        },
+        {
+          "id": "fall",
+          "x": 216,
+          "y": 0,
+          "width": 24,
+          "height": 40,
+          "originX": 12,
+          "originY": 40
+        },
+        {
+          "id": "tool_0",
+          "x": 240,
+          "y": 0,
+          "width": 24,
+          "height": 40,
+          "originX": 12,
+          "originY": 40
+        },
+        {
+          "id": "tool_1",
+          "x": 264,
+          "y": 0,
+          "width": 24,
+          "height": 40,
+          "originX": 12,
+          "originY": 40
+        },
+        {
+          "id": "tool_2",
+          "x": 288,
+          "y": 0,
+          "width": 24,
+          "height": 40,
+          "originX": 12,
+          "originY": 40
+        },
+        {
+          "id": "block",
+          "x": 312,
+          "y": 0,
+          "width": 24,
+          "height": 40,
+          "originX": 12,
+          "originY": 40
+        },
+        {
+          "id": "hurt_0",
+          "x": 336,
+          "y": 0,
+          "width": 24,
+          "height": 40,
+          "originX": 12,
+          "originY": 40
+        },
+        {
+          "id": "hurt_1",
+          "x": 360,
+          "y": 0,
+          "width": 24,
+          "height": 40,
+          "originX": 12,
+          "originY": 40
+        }
+      ]
+    },
+    {
+      "id": "entities/player/character_v2_wave06/equipment",
+      "path": "Assets/Wave06Character/player_equipment_actions.png",
+      "category": "Entity",
+      "width": 384,
+      "height": 40,
+      "pixelsPerUnit": 16,
+      "atlasId": "entities",
+      "originX": 12,
+      "originY": 40,
+      "renderLayer": "world.entity.player.04.equipment",
+      "license": "YjsE-Project-Owned",
+      "provenance": "wave_06_character_production; native final-size deterministic generator; wave_06_character_provenance.json",
+      "tags": [
+        "production",
+        "runtime-active",
+        "wave-06",
+        "entity",
+        "player",
+        "character-v2",
+        "layered",
+        "equipment",
+        "animated"
+      ],
+      "frames": [
+        {
+          "id": "idle_0",
+          "x": 0,
+          "y": 0,
+          "width": 24,
+          "height": 40,
+          "originX": 12,
+          "originY": 40
+        },
+        {
+          "id": "idle_1",
+          "x": 24,
+          "y": 0,
+          "width": 24,
+          "height": 40,
+          "originX": 12,
+          "originY": 40
+        },
+        {
+          "id": "run_0",
+          "x": 48,
+          "y": 0,
+          "width": 24,
+          "height": 40,
+          "originX": 12,
+          "originY": 40
+        },
+        {
+          "id": "run_1",
+          "x": 72,
+          "y": 0,
+          "width": 24,
+          "height": 40,
+          "originX": 12,
+          "originY": 40
+        },
+        {
+          "id": "run_2",
+          "x": 96,
+          "y": 0,
+          "width": 24,
+          "height": 40,
+          "originX": 12,
+          "originY": 40
+        },
+        {
+          "id": "run_3",
+          "x": 120,
+          "y": 0,
+          "width": 24,
+          "height": 40,
+          "originX": 12,
+          "originY": 40
+        },
+        {
+          "id": "run_4",
+          "x": 144,
+          "y": 0,
+          "width": 24,
+          "height": 40,
+          "originX": 12,
+          "originY": 40
+        },
+        {
+          "id": "run_5",
+          "x": 168,
+          "y": 0,
+          "width": 24,
+          "height": 40,
+          "originX": 12,
+          "originY": 40
+        },
+        {
+          "id": "jump",
+          "x": 192,
+          "y": 0,
+          "width": 24,
+          "height": 40,
+          "originX": 12,
+          "originY": 40
+        },
+        {
+          "id": "fall",
+          "x": 216,
+          "y": 0,
+          "width": 24,
+          "height": 40,
+          "originX": 12,
+          "originY": 40
+        },
+        {
+          "id": "tool_0",
+          "x": 240,
+          "y": 0,
+          "width": 24,
+          "height": 40,
+          "originX": 12,
+          "originY": 40
+        },
+        {
+          "id": "tool_1",
+          "x": 264,
+          "y": 0,
+          "width": 24,
+          "height": 40,
+          "originX": 12,
+          "originY": 40
+        },
+        {
+          "id": "tool_2",
+          "x": 288,
+          "y": 0,
+          "width": 24,
+          "height": 40,
+          "originX": 12,
+          "originY": 40
+        },
+        {
+          "id": "block",
+          "x": 312,
+          "y": 0,
+          "width": 24,
+          "height": 40,
+          "originX": 12,
+          "originY": 40
+        },
+        {
+          "id": "hurt_0",
+          "x": 336,
+          "y": 0,
+          "width": 24,
+          "height": 40,
+          "originX": 12,
+          "originY": 40
+        },
+        {
+          "id": "hurt_1",
+          "x": 360,
+          "y": 0,
+          "width": 24,
+          "height": 40,
+          "originX": 12,
+          "originY": 40
+        }
+      ]
+    }
+  ]
+}

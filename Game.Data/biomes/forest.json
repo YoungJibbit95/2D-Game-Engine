@@ -4,6 +4,10 @@
   "surfaceTile": "grass",
   "undergroundTile": "dirt",
   "treeType": "normal_tree",
+  "treeMaterial": {
+    "trunkTile": "oak_trunk",
+    "canopyTile": "oak_leaves"
+  },
   "enemySpawnTable": "forest_day_squirrel",
   "isRegionalBiome": true,
   "selectionWeight": 4,
@@ -52,7 +56,7 @@
     "resourceTableIds": ["forest_timber", "forest_forage"]
   },
   "presentation": {
-    "backgroundSpriteId": "world/backgrounds/wave04/forest_parallax_layer",
+    "backgroundSpriteId": "world/backgrounds/forest_parallax_layer_v5",
     "ambientParticleSpriteId": "particles/forest_leaf_drift",
     "ambientCritterSpriteId": "entities/critters/forest_moth",
     "biomeIconSpriteId": "ui/biomes/forest",

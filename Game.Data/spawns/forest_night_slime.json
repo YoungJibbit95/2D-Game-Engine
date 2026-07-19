@@ -3,8 +3,8 @@
   "entityId": "slime",
   "biomeId": "forest",
   "requiresNight": true,
+  "habitats": ["surface"],
   "minTileY": 0,
-  "maxTileY": 120,
   "chance": 0.65,
   "maxActive": 8
 }

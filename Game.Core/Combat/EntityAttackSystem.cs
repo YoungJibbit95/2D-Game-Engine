@@ -30,7 +30,7 @@ public sealed class EntityAttackSystem
             }
 
             intentsConsumed++;
-            var target = FindTarget(entities.Entities, primaryPlayer, intent.TargetEntityId);
+            var target = FindTarget(entities, primaryPlayer, intent.TargetEntityId);
             if (!IsValidIntent(attacker, target, intent))
             {
                 continue;
@@ -72,22 +72,14 @@ public sealed class EntityAttackSystem
         return new EntityAttackResolution(intentsConsumed, hitsApplied, damageApplied, deaths);
     }
 
-    private static Entity? FindTarget(IReadOnlyList<Entity> entities, PlayerEntity? player, int id)
+    private static Entity? FindTarget(EntityManager entities, PlayerEntity? player, int id)
     {
         if (player is { IsActive: true } && player.Id == id)
         {
             return player;
         }
 
-        for (var index = 0; index < entities.Count; index++)
-        {
-            if (entities[index].Id == id)
-            {
-                return entities[index];
-            }
-        }
-
-        return null;
+        return entities.FindActiveEntity(id);
     }
 
     private static bool IsValidIntent(EnemyEntity attacker, Entity? target, Entities.AI.AiAttackIntent intent)

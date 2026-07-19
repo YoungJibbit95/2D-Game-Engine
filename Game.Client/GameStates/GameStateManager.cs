@@ -1,4 +1,5 @@
 using Game.Client.Rendering;
+using Game.Core.Diagnostics;
 using Game.Core.Settings;
 using Microsoft.Xna.Framework.Content;
 
@@ -11,11 +12,17 @@ public sealed class GameStateManager : IDisposable
     private IGameState? _currentState;
     private ContentManager? _content;
 
-    public GameStateManager(Action? requestExit = null, Action<GameSettings>? applySettings = null)
+    public GameStateManager(
+        Action? requestExit = null,
+        Action<GameSettings>? applySettings = null,
+        PerformanceProfiler? performance = null)
     {
         _requestExit = requestExit ?? (() => { });
         _applySettings = applySettings ?? (_ => { });
+        Performance = performance ?? new PerformanceProfiler();
     }
+
+    public PerformanceProfiler Performance { get; }
 
     public string CurrentStateName => _currentState?.Name ?? "None";
 
@@ -60,6 +67,11 @@ public sealed class GameStateManager : IDisposable
     public void Update(double deltaSeconds)
     {
         _currentState?.Update(deltaSeconds);
+    }
+
+    public void LateUpdate(double deltaSeconds)
+    {
+        _currentState?.LateUpdate(deltaSeconds);
     }
 
     public void Draw(RenderContext context)

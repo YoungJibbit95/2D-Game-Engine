@@ -1,11 +1,14 @@
 using Game.Client.DeveloperTools;
 using Game.Client.Audio;
+using Game.Client.Diagnostics;
 using Game.Client.Input;
 using Game.Client.Rendering;
 using Game.Client.Rendering.Effects;
 using Game.Client.Rendering.Character;
 using Game.Client.Rendering.Entities;
+using Game.Client.Rendering.Graph;
 using Game.Client.Rendering.Lighting;
+using Game.Client.Rendering.Performance;
 using Game.Core.Characters;
 using Game.Client.UI;
 using Game.Core;
@@ -43,7 +46,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace Game.Client.GameStates;
 
-public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCaptureState
+public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCaptureState, IClientGameplaySmokeTelemetryProvider
 {
     private readonly InputManager _input = new();
     private readonly Camera2D _camera = new();
@@ -53,6 +56,12 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
     private readonly ScreenSpaceEffectsRenderer _screenSpaceEffects = new();
     private readonly PixelAtmosphereRenderer _atmosphereRenderer = new();
     private readonly ScreenSpaceLight[] _visibleLights = new ScreenSpaceLight[32];
+    private readonly PresentationWorkScheduler _presentationWork = new(4);
+    private readonly PresentationFrameBudget _presentationFrameBudget = new(6);
+    private readonly PresentationWorkHandle _lightingWork;
+    private readonly PresentationWorkHandle _reflectionWork;
+    private readonly PresentationWorkHandle _atmosphereWork;
+    private readonly PresentationWorkHandle _sceneCaptureWork;
     private readonly TileCollisionResolver _collisionResolver = new();
     private readonly InteractionTargetingSystem _targeting = new();
     private ChunkStreamingService _streaming = new();
@@ -74,6 +83,7 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
     private readonly Wave04PlayerCharacterRenderer _playerCharacterRenderer = new();
     private readonly EntityVisualPipeline _entityVisuals = new();
     private readonly EntityVisualDrawCommandExecutor _entityVisualDrawExecutor = new();
+    private readonly RenderPassGraph _renderGraph = new(16, 16, 64);
     private readonly SoundEffectRegistry _soundEffects = new();
     private readonly AudioManager _audio;
     private readonly PauseMenuOverlay _pauseMenu;
@@ -82,10 +92,13 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
     private EquipmentLoadout _equipmentLoadout = new();
     private readonly LoadedGameSession? _initialSession;
     private readonly bool _openConsoleOnInitialize;
+    private readonly bool _openPauseOnInitialize;
     private readonly string? _forcedBiomeId;
     private readonly bool _suppressDebugOverlays;
+    private readonly bool _scriptedTraversal;
 
     private LoadedGameSession? _session;
+    private Func<int, int>? _backgroundSurfaceHeightResolver;
     private GameSimulation? _simulation;
     private GameFrameSnapshot? _frameSnapshot;
     private World? _world;
@@ -110,28 +123,43 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
     private ClientTextureRegistry? _textures;
     private GraphicsDevice? _graphicsDevice;
     private ChunkStreamingUpdateResult _lastStreaming = ChunkStreamingUpdateResult.Empty;
+    private double _streamingUpdateElapsedSeconds;
+    private ChunkStreamingViewKey _lastStreamingViewKey;
+    private bool _hasStreamingViewKey;
     private GameSaveResult? _lastSave;
     private PlayerCommand _pendingPlayerCommand = PlayerCommand.None;
+    private readonly FixedStepButtonLatch _jumpInputLatch = new();
     private PlayerItemUseRequest _pendingItemUse = PlayerItemUseRequest.Inactive;
     private bool _hasPendingItemUse;
     private bool _pendingItemUseContinuous;
     private bool _playerFacingLeft;
     private bool _guardToggleActive;
     private bool _playerWasDamageFlashing;
+    private ulong _lastAttackVisualInstanceId;
     private SoundscapeController? _soundscape;
+    private PresentationCadenceConfiguration _presentationCadence;
+    private bool _hasPresentationCadence;
+    private bool _captureSceneThisFrame = true;
+    private CompiledRenderGraphPlan _compiledRenderGraph;
+    private bool _renderGraphConfigured;
+    private bool _renderGraphLightingEnabled;
 
     public PlayingState(
         GameStateManager states,
         LoadedGameSession? loadedSession = null,
         bool openConsoleOnInitialize = false,
+        bool openPauseOnInitialize = false,
         string? forcedBiomeId = null,
-        bool suppressDebugOverlays = false)
+        bool suppressDebugOverlays = false,
+        bool scriptedTraversal = false)
     {
         _states = states;
         _initialSession = loadedSession;
         _openConsoleOnInitialize = openConsoleOnInitialize;
+        _openPauseOnInitialize = openPauseOnInitialize;
         _forcedBiomeId = forcedBiomeId;
         _suppressDebugOverlays = suppressDebugOverlays;
+        _scriptedTraversal = scriptedTraversal;
         _entityFactory = new EntityFactory(_collisionResolver);
         _audio = new AudioManager(_soundEffects);
         _pauseMenu = new PauseMenuOverlay(
@@ -141,9 +169,54 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
             exitGame: _states.RequestExit,
             settingsChanged: _states.ApplySettings);
         _craftingOverlay.CraftingResolved += OnCraftingResolved;
+        _lightingWork = _presentationWork.Register(CreatePresentationSchedule(60, 30, 3d));
+        _reflectionWork = _presentationWork.Register(CreatePresentationSchedule(30, 45, 6d));
+        _atmosphereWork = _presentationWork.Register(CreatePresentationSchedule(30, 45, 8d));
+        _sceneCaptureWork = _presentationWork.Register(CreatePresentationSchedule(45, 20, 4d));
     }
 
     public string Name => "Playing";
+
+    public ClientGameplaySmokeTelemetry CaptureGameplaySmokeTelemetry()
+    {
+        if (_frameSnapshot is not { } frame)
+        {
+            return ClientGameplaySmokeTelemetry.NotCaptured;
+        }
+
+        var visible = _camera.VisibleWorldRect;
+        var visibleBounds = new RectI(visible.X, visible.Y, visible.Width, visible.Height);
+        var visibleCount = 0;
+        var visibleEnemies = 0;
+        var contentIds = new List<string>();
+        foreach (var entity in frame.Entities)
+        {
+            if (!entity.IsActive || !entity.Bounds.Intersects(visibleBounds))
+            {
+                continue;
+            }
+
+            visibleCount++;
+            if (entity.Kind == EntityFrameKind.Enemy)
+            {
+                visibleEnemies++;
+            }
+
+            if (!contentIds.Contains(entity.ContentId, StringComparer.OrdinalIgnoreCase))
+            {
+                contentIds.Add(entity.ContentId);
+            }
+        }
+
+        contentIds.Sort(StringComparer.OrdinalIgnoreCase);
+        return new ClientGameplaySmokeTelemetry(
+            true,
+            frame.Hud.ActiveEntities,
+            frame.Hud.ActiveEnemies,
+            visibleCount,
+            visibleEnemies,
+            contentIds.ToArray());
+    }
 
     public bool CapturesKeyboard => _debugConsole.IsOpen || _pauseMenu.IsOpen || _inventoryOverlay.IsOpen || _craftingOverlay.IsOpen || _characterEditorOverlay.IsOpen;
 
@@ -154,13 +227,17 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
         _simulation = session.Simulation;
         _frameSnapshot = _simulation.LatestSnapshot;
         _content = session.Content;
-        if (_content.RuntimeAnimations?.TryGetCharacter("player.wave04", out var playerAnimation) == true)
+        if (_content.RuntimeAnimations?.TryGetCharacter("player.wave06", out var playerAnimation) == true)
         {
             _playerCharacterRenderer.Configure(playerAnimation);
         }
         _entityVisuals.Configure(_content.RuntimeAnimations, TryResolveEntitySpriteId);
         _inventory = session.Inventory;
         _world = session.World;
+        _backgroundSurfaceHeightResolver = session.InfiniteChunkGenerator is { } backgroundGenerator &&
+            session.WorldGenerationProfile is { } backgroundProfile
+                ? backgroundGenerator.CreateSurfaceHeightResolver(backgroundProfile, session.World.Metadata.Seed)
+                : null;
         _player = session.Player;
         _entities = session.Entities;
         _events = session.Events;
@@ -185,8 +262,14 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
         {
             _debugConsole.State.Open();
         }
+        if (_openPauseOnInitialize)
+        {
+            _pauseMenu.Open();
+        }
         _streaming.CancelPendingJobs();
         _streaming = new ChunkStreamingService(generator: session.InfiniteChunkGenerator);
+        _hasStreamingViewKey = false;
+        _streamingUpdateElapsedSeconds = 0d;
 
         _camera.Position = new Vector2(_player.Body.Center.X, _player.Body.Center.Y);
         _camera.Zoom = _pauseMenu.Settings.Gameplay.CameraZoom;
@@ -286,6 +369,7 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
         var graphicsService = content.ServiceProvider.GetService(typeof(IGraphicsDeviceService)) as IGraphicsDeviceService
             ?? throw new InvalidOperationException("MonoGame graphics device service is unavailable.");
         _graphicsDevice = graphicsService.GraphicsDevice;
+        _tilemapRenderer.Dispose();
         _textures?.Dispose();
         var textureContentRoot = _session?.ProjectPaths?.ContentRoot ?? ClientPaths.FindGameDataRoot();
         _textures = new ClientTextureRegistry(
@@ -293,6 +377,7 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
             textureContentRoot,
             _content.SpriteAssets);
         _textures.PreloadAll();
+        _tilemapRenderer.ConfigureContent(_textures, _content.Tiles);
         _entityVisualDrawExecutor.PrepareResources(graphicsService.GraphicsDevice);
         var soundscapeDirectory = Path.Combine(textureContentRoot, "soundscapes");
         var soundscapes = new SoundscapeDefinitionJsonLoader().LoadCatalogFromDirectory(soundscapeDirectory);
@@ -350,9 +435,17 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
 
         var itemUse = _hasPendingItemUse ? _pendingItemUse : PlayerItemUseRequest.Inactive;
         var result = _simulation.Tick(_pendingPlayerCommand, fixedDeltaSeconds, itemUse);
+        if (!_scriptedTraversal)
+        {
+            _jumpInputLatch.ConsumePress();
+            _pendingPlayerCommand = _pendingPlayerCommand with
+            {
+                WantsJump = _jumpInputLatch.IsActiveForFixedStep
+            };
+        }
+
         _frameSnapshot = result.Snapshot;
         _entityVisuals.Prepare(result.Snapshot, _camera.VisibleWorldRect);
-        PreparePresentationFrames(result.Snapshot, settings);
         AudioSettingsAdapter.Apply(_audio, settings.Audio);
         _soundscape?.Update(
             result.Snapshot.LivingWorld,
@@ -363,7 +456,8 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
             result.Snapshot.LivingWorld,
             _camera.VisibleWorldRect,
             result.TickNumber,
-            settings.Rendering.ParticleQuality));
+            settings.Rendering.ParticleQuality,
+            _world));
         if (itemUse.IsActive)
         {
             _gameplayFeedback.Observe(result.ItemUse);
@@ -380,6 +474,91 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
         _particles.Update(fixedDeltaSeconds);
     }
 
+    public void LateUpdate(double deltaSeconds)
+    {
+        if (_frameSnapshot is { } frame)
+        {
+            var settings = _pauseMenu.Settings;
+            if (_world is not null)
+            {
+                using (_states.Performance.Measure("Presentation.ChunkPrepare", 1.0))
+                {
+                    _tilemapRenderer.PrepareVisible(_world, _camera);
+                }
+
+                using (_states.Performance.Measure("Presentation.LiquidPrepare", 0.65))
+                {
+                    var waterPalette = WaterPresentationPaletteCatalog.Resolve(frame.LivingWorld.BiomeId);
+                    _tilemapRenderer.PrepareLiquidPresentation(
+                        _world,
+                        _camera,
+                        _lastViewportBounds,
+                        waterPalette,
+                        settings.Rendering.DrawLiquids ? settings.Rendering.LiquidOpacity : 0f,
+                        frame.TickNumber);
+                }
+            }
+
+            if (!settings.Rendering.AdaptivePresentationCadence)
+            {
+                _captureSceneThisFrame = true;
+                PreparePresentationFrames(frame, settings, true, true, true);
+                return;
+            }
+
+            EnsurePresentationCadence(settings.Rendering);
+            _presentationWork.AdvanceFrame(Math.Max(0d, deltaSeconds));
+            _presentationFrameBudget.Reset(ResolvePresentationFrameBudget(settings.Rendering));
+            var state = new PresentationWorkState(
+                frame.TickNumber,
+                _camera.Position.X,
+                _camera.Position.Y,
+                _camera.Zoom);
+            var prepareLighting = _presentationWork.TrySchedule(
+                _lightingWork,
+                state with { IsEnabled = settings.Rendering.DrawLightingOverlay },
+                EstimateLightingWork(settings.Rendering),
+                _presentationFrameBudget,
+                out _);
+            var prepareReflections = _presentationWork.TrySchedule(
+                _reflectionWork,
+                state with
+                {
+                    IsEnabled = settings.Rendering.ScreenSpaceReflections &&
+                        settings.Rendering.ReflectionQuality > 0 &&
+                        settings.Rendering.ReflectionStrength > 0.001f
+                },
+                EstimateReflectionWork(settings.Rendering),
+                _presentationFrameBudget,
+                out _);
+            var prepareAtmosphere = _presentationWork.TrySchedule(
+                _atmosphereWork,
+                state,
+                2,
+                _presentationFrameBudget,
+                out _);
+            PreparePresentationFrames(
+                frame,
+                settings,
+                prepareLighting,
+                prepareReflections,
+                prepareAtmosphere);
+
+            var requiresBackdrop = RequiresBackdropBlur(settings);
+            _captureSceneThisFrame = _presentationWork.TrySchedule(
+                _sceneCaptureWork,
+                state with
+                {
+                    IsDirty = requiresBackdrop,
+                    IsEnabled = _screenSpaceEffects.ShouldCaptureScene
+                },
+                EstimateSceneCaptureWork(settings.Rendering),
+                _presentationFrameBudget,
+                out _) ||
+                (_screenSpaceEffects.ShouldCaptureScene && !_screenSpaceEffects.HasCapturedScene);
+        }
+    }
+
     public void Update(double deltaSeconds)
     {
         _input.Update();
@@ -387,10 +566,16 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
         var settings = _pauseMenu.Settings;
         EnsurePresentationResources(settings);
         _screenSpaceEffects.SetSceneCaptureRequired(RequiresBackdropBlur(settings));
-        UpdateEngineDebugSnapshot(deltaSeconds, settings);
+        using (_states.Performance.Measure("Client.DebugSnapshot", 0.5))
+        {
+            UpdateEngineDebugSnapshot(deltaSeconds, settings);
+        }
         _camera.Zoom = settings.Gameplay.CameraZoom;
         _camera.Follow(GetCameraTarget(settings), _lastViewportBounds, smoothing: 0.18f);
-        EnsureVisibleChunks();
+        using (_states.Performance.Measure("Client.StreamingUpdate", 1.5))
+        {
+            EnsureVisibleChunks(deltaSeconds);
+        }
 
         if (_pauseMenu.IsOpen)
         {
@@ -458,9 +643,13 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
             return;
         }
 
-        _showGrid = settings.Debug.ShowGrid || _input.IsBindingDown(settings.Input.KeyBindings.DebugToggle);
+        _showGrid = !_suppressDebugOverlays &&
+            settings.Rendering.DrawDebugOverlays &&
+            (settings.Debug.ShowGrid || _input.IsBindingDown(settings.Input.KeyBindings.DebugToggle));
         UpdateHotbarSelection(settings.Input);
-        _pendingPlayerCommand = BuildPlayerCommand(settings);
+        _pendingPlayerCommand = _scriptedTraversal
+            ? BuildScriptedTraversalCommand()
+            : BuildPlayerCommand(settings);
         PrepareItemUseRequest(settings);
         UpdateAutosave((float)deltaSeconds, settings);
         if (_simulation is not null)
@@ -481,50 +670,83 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
         var settings = _pauseMenu.Settings;
         _camera.Zoom = settings.Gameplay.CameraZoom;
         _camera.Recalculate(context.ViewportBounds);
-        var capturedScene = _screenSpaceEffects.BeginSceneCapture(context, Color.Transparent);
+        var capturedScene = _screenSpaceEffects.BeginSceneCapture(
+            context,
+            Color.Transparent,
+            _captureSceneThisFrame);
+
+        EnsureRenderGraph(settings.Rendering.DrawLightingOverlay);
+        var executor = new PlayingRenderGraphExecutor(this, context, frame, settings, capturedScene);
+        _compiledRenderGraph.Execute(ref executor);
+    }
+
+    private void DrawBackgroundPass(RenderContext context, GameFrameSnapshot frame)
+    {
 
         using (context.Performance.Measure("Render.Background", 1.25))
         {
-            _backgroundRenderer.Draw(context, _textures, _camera, _world, frame.WorldTime.IsNight, frame.LivingWorld);
+            _backgroundRenderer.Draw(
+                context,
+                _textures,
+                _camera,
+                _world!,
+                frame.WorldTime.IsNight,
+                frame.LivingWorld,
+                _backgroundSurfaceHeightResolver);
         }
+    }
 
+    private void DrawTilemapPass(RenderContext context, GameSettings settings)
+    {
         _tilemapRenderer.ShowGrid = _showGrid;
         _tilemapRenderer.DrawLiquids = settings.Rendering.DrawLiquids;
         _tilemapRenderer.LiquidOpacity = settings.Rendering.LiquidOpacity;
         _tilemapRenderer.MaxCachedChunks = settings.Rendering.MaxChunkRenderCacheEntries;
-        _tilemapRenderer.Textures = _textures;
-        _tilemapRenderer.TileSpriteResolver = ResolveTileSpriteId;
-        _tilemapRenderer.Tiles = _content?.Tiles;
         using (context.Performance.Measure("Render.Tilemap", 5.5))
         {
-            _tilemapRenderer.Draw(context, _world, _camera);
+            _tilemapRenderer.Draw(context, _world!, _camera);
             DrawFarmPlots(context);
         }
+    }
 
+    private void DrawEntityPass(RenderContext context)
+    {
         using (context.Performance.Measure("Render.Entities", 2.0))
         {
             DrawPlayer(context);
             DrawEntities(context);
         }
+    }
 
+    private void DrawParticlePass(RenderContext context, GameSettings settings)
+    {
         using (context.Performance.Measure("Render.Particles", 1.0))
         {
             _particles.Draw(context, _camera, settings);
         }
+    }
 
-        if (settings.Rendering.DrawLightingOverlay)
+    private void DrawLightingPass(RenderContext context, GameSettings settings)
+    {
+        using (context.Performance.Measure("Render.Lighting", 2.5))
         {
-            using (context.Performance.Measure("Render.Lighting", 2.5))
-            {
-                _lightingRenderer.Draw(context, _world, _camera, settings.Rendering.LightingBlendStrength);
-            }
+            _lightingRenderer.Draw(context, _world!, _camera, settings.Rendering.LightingBlendStrength);
         }
+    }
 
+    private void DrawAtmospherePass(RenderContext context)
+    {
         _atmosphereRenderer.DrawPrepared(context, _camera);
+    }
 
+    private void DrawScreenEffectsPass(RenderContext context, GameSettings settings, bool capturedScene)
+    {
         if (capturedScene)
         {
-            _screenSpaceEffects.EndSceneCaptureAndComposite(context, settings.Rendering.ReflectionStrength);
+            _screenSpaceEffects.EndSceneCaptureAndComposite(
+                context,
+                settings.Rendering.ReflectionStrength,
+                RequiresBackdropBlur(settings) ? settings.Rendering.BlurRadiusPixels : 0);
             if (RequiresBackdropBlur(settings))
             {
                 _screenSpaceEffects.DrawPreparedBackdropBlur(
@@ -533,7 +755,21 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
                     settings.Rendering.BlurRadiusPixels);
             }
         }
+        else
+        {
+            _screenSpaceEffects.DrawReusedSceneEffects(context, settings.Rendering.ReflectionStrength);
+            if (RequiresBackdropBlur(settings) && _screenSpaceEffects.HasCapturedScene)
+            {
+                _screenSpaceEffects.DrawPreparedBackdropBlur(
+                    context,
+                    settings.Ui.BackdropBlurStrength,
+                    settings.Rendering.BlurRadiusPixels);
+            }
+        }
+    }
 
+    private void DrawUiPass(RenderContext context, GameFrameSnapshot frame, GameSettings settings)
+    {
         using (context.Performance.Measure("Render.UI", 2.5))
         {
             var playerStats = ResolvePlayerStats();
@@ -565,14 +801,17 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
 
             _gameplayFeedback.Draw(context, _camera, _player, settings);
         }
+    }
 
+    private void DrawDebugPass(RenderContext context, GameFrameSnapshot frame, GameSettings settings)
+    {
         using (context.Performance.Measure("Render.Debug", 1.5))
         {
             if (!_suppressDebugOverlays && settings.Rendering.DrawDebugOverlays && settings.Debug.ShowDebugOverlay)
             {
                 var worldTimeText = frame.WorldTime.NormalizedTimeOfDay.ToString("0.000", CultureInfo.InvariantCulture);
                 context.DebugText.Draw(new Vector2(12, 58), $"WORLD TIME: {worldTimeText}", Color.LightGray, 2);
-                context.DebugText.Draw(new Vector2(12, 82), $"CHUNKS: {_world.Chunks.Count}", Color.LightGray, 2);
+                context.DebugText.Draw(new Vector2(12, 82), $"CHUNKS: {_world!.Chunks.Count}", Color.LightGray, 2);
                 context.DebugText.Draw(new Vector2(12, 106), $"ENTITIES: {frame.Hud.ActiveEntities}", Color.LightGray, 2);
                 var playerTile = CoordinateUtils.WorldToTile(
                     frame.Player.Bounds.X + frame.Player.Bounds.Width * 0.5f,
@@ -630,6 +869,160 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
         }
     }
 
+    private void EnsureRenderGraph(bool lightingEnabled)
+    {
+        if (_renderGraphConfigured && _renderGraphLightingEnabled == lightingEnabled)
+        {
+            return;
+        }
+
+        _renderGraph.Clear();
+        var lastResource = RenderGraphIds.Background;
+        DeclareTransient(RenderGraphIds.Background);
+        _renderGraph.DeclarePass(
+            RenderGraphIds.BackgroundPass,
+            RenderPassPhase.Prepass,
+            ReadOnlySpan<RenderResourceId>.Empty,
+            [RenderGraphIds.Background]);
+
+        DeclareChainedPass(RenderGraphIds.TilemapPass, RenderPassPhase.Opaque, lastResource, RenderGraphIds.Tilemap);
+        lastResource = RenderGraphIds.Tilemap;
+        DeclareChainedPass(RenderGraphIds.EntityPass, RenderPassPhase.Opaque, lastResource, RenderGraphIds.Entities);
+        lastResource = RenderGraphIds.Entities;
+        DeclareChainedPass(RenderGraphIds.ParticlePass, RenderPassPhase.Transparent, lastResource, RenderGraphIds.Particles);
+        lastResource = RenderGraphIds.Particles;
+        if (lightingEnabled)
+        {
+            DeclareChainedPass(RenderGraphIds.LightingPass, RenderPassPhase.PostProcess, lastResource, RenderGraphIds.Lighting);
+            lastResource = RenderGraphIds.Lighting;
+        }
+
+        DeclareChainedPass(RenderGraphIds.AtmospherePass, RenderPassPhase.Composite, lastResource, RenderGraphIds.Atmosphere);
+        lastResource = RenderGraphIds.Atmosphere;
+        DeclareChainedPass(RenderGraphIds.ScreenEffectsPass, RenderPassPhase.Composite, lastResource, RenderGraphIds.ScreenEffects);
+        lastResource = RenderGraphIds.ScreenEffects;
+        DeclareChainedPass(RenderGraphIds.UiPass, RenderPassPhase.Overlay, lastResource, RenderGraphIds.Ui);
+        lastResource = RenderGraphIds.Ui;
+        DeclareChainedPass(RenderGraphIds.DebugPass, RenderPassPhase.Overlay, lastResource, RenderGraphIds.Presented);
+
+        Span<RenderResourceId> requested = stackalloc RenderResourceId[1];
+        requested[0] = RenderGraphIds.Presented;
+        _compiledRenderGraph = _renderGraph.Compile(requested);
+        _renderGraphConfigured = true;
+        _renderGraphLightingEnabled = lightingEnabled;
+    }
+
+    private void DeclareChainedPass(
+        RenderPassId pass,
+        RenderPassPhase phase,
+        RenderResourceId input,
+        RenderResourceId output)
+    {
+        DeclareTransient(output);
+        Span<RenderResourceId> reads = stackalloc RenderResourceId[1];
+        Span<RenderResourceId> writes = stackalloc RenderResourceId[1];
+        reads[0] = input;
+        writes[0] = output;
+        _renderGraph.DeclarePass(pass, phase, reads, writes);
+    }
+
+    private void DeclareTransient(RenderResourceId resource)
+    {
+        _renderGraph.DeclareResource(resource, RenderResourceFlags.Transient);
+    }
+
+    private void ExecuteRenderPass(
+        RenderPassId pass,
+        RenderContext context,
+        GameFrameSnapshot frame,
+        GameSettings settings,
+        bool capturedScene)
+    {
+        switch (pass.Value)
+        {
+            case 0:
+                DrawBackgroundPass(context, frame);
+                break;
+            case 1:
+                DrawTilemapPass(context, settings);
+                break;
+            case 2:
+                DrawEntityPass(context);
+                break;
+            case 3:
+                DrawParticlePass(context, settings);
+                break;
+            case 4:
+                DrawLightingPass(context, settings);
+                break;
+            case 5:
+                DrawAtmospherePass(context);
+                break;
+            case 6:
+                DrawScreenEffectsPass(context, settings, capturedScene);
+                break;
+            case 7:
+                DrawUiPass(context, frame, settings);
+                break;
+            case 8:
+                DrawDebugPass(context, frame, settings);
+                break;
+            default:
+                throw new InvalidOperationException($"Unknown playing render pass {pass}.");
+        }
+    }
+
+    private readonly struct PlayingRenderGraphExecutor : IRenderPassExecutor
+    {
+        private readonly PlayingState _owner;
+        private readonly RenderContext _context;
+        private readonly GameFrameSnapshot _frame;
+        private readonly GameSettings _settings;
+        private readonly bool _capturedScene;
+
+        public PlayingRenderGraphExecutor(
+            PlayingState owner,
+            RenderContext context,
+            GameFrameSnapshot frame,
+            GameSettings settings,
+            bool capturedScene)
+        {
+            _owner = owner;
+            _context = context;
+            _frame = frame;
+            _settings = settings;
+            _capturedScene = capturedScene;
+        }
+
+        public void Execute(in RenderPassDescriptor pass)
+        {
+            _owner.ExecuteRenderPass(pass.Id, _context, _frame, _settings, _capturedScene);
+        }
+    }
+
+    private static class RenderGraphIds
+    {
+        public static readonly RenderPassId BackgroundPass = new(0);
+        public static readonly RenderPassId TilemapPass = new(1);
+        public static readonly RenderPassId EntityPass = new(2);
+        public static readonly RenderPassId ParticlePass = new(3);
+        public static readonly RenderPassId LightingPass = new(4);
+        public static readonly RenderPassId AtmospherePass = new(5);
+        public static readonly RenderPassId ScreenEffectsPass = new(6);
+        public static readonly RenderPassId UiPass = new(7);
+        public static readonly RenderPassId DebugPass = new(8);
+
+        public static readonly RenderResourceId Background = new(0);
+        public static readonly RenderResourceId Tilemap = new(1);
+        public static readonly RenderResourceId Entities = new(2);
+        public static readonly RenderResourceId Particles = new(3);
+        public static readonly RenderResourceId Lighting = new(4);
+        public static readonly RenderResourceId Atmosphere = new(5);
+        public static readonly RenderResourceId ScreenEffects = new(6);
+        public static readonly RenderResourceId Ui = new(7);
+        public static readonly RenderResourceId Presented = new(8);
+    }
+
     public void Dispose()
     {
         _craftingOverlay.CraftingResolved -= OnCraftingResolved;
@@ -640,6 +1033,7 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
         _session = null;
         _simulation = null;
         _particles.Clear();
+        _tilemapRenderer.Dispose();
         _textures?.Dispose();
         _lightingRenderer.Dispose();
         _screenSpaceEffects.Dispose();
@@ -898,6 +1292,13 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
 
         if (_frameSnapshot is { } frame)
         {
+            if (frame.Attack.AttackInstanceId != 0 &&
+                frame.Attack.AttackInstanceId != _lastAttackVisualInstanceId)
+            {
+                _lastAttackVisualInstanceId = frame.Attack.AttackInstanceId;
+                _playerCharacterRenderer.RequestAction(CharacterAnimationState.Attack);
+            }
+
             var damageFlashing = _player.HealthComponent.InvulnerabilityTimeRemaining > 0;
             if (damageFlashing && !_playerWasDamageFlashing)
             {
@@ -917,6 +1318,10 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
     private PlayerCommand BuildPlayerCommand(GameSettings settings)
     {
         var command = PlayerCommandBuilder.Build(_input, settings.Input.KeyBindings);
+        _jumpInputLatch.Observe(
+            command.WantsJump,
+            _input.IsBindingPressed(settings.Input.KeyBindings.Jump));
+        command = command with { WantsJump = _jumpInputLatch.IsActiveForFixedStep };
         if (_player is null)
         {
             return command;
@@ -937,6 +1342,16 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
         }
 
         return command with { WantsGuard = wantsGuard, GuardFacing = facing };
+    }
+
+    private PlayerCommand BuildScriptedTraversalCommand()
+    {
+        var tick = _frameSnapshot?.TickNumber ?? 0;
+        return new PlayerCommand(
+            MoveAxis: 1f,
+            WantsJump: tick % 90 is 0 or 1,
+            WantsGuard: false,
+            GuardFacing: System.Numerics.Vector2.UnitX);
     }
 
     private bool ResolveToggleGuard(string binding)
@@ -1012,7 +1427,17 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
         _hoverTile = CoordinateUtils.WorldToTile(mouseWorld.X, mouseWorld.Y);
         _interactionTile = ResolveInteractionTarget(mouseWorld, settings.Gameplay.InteractionReachPixels);
 
-        _pendingItemUseContinuous = settings.Gameplay.HoldToMine;
+        var selectedStack = _inventory.SelectedStack;
+        var selectedType = !selectedStack.IsEmpty &&
+            _content.Items.TryGetById(selectedStack.ItemId, out var selectedItem)
+                ? selectedItem.Type
+                : ItemType.Material;
+        _pendingItemUseContinuous = settings.Gameplay.HoldToMine && selectedType is
+            ItemType.ToolPickaxe or
+            ItemType.ToolAxe or
+            ItemType.ToolHoe or
+            ItemType.ToolWateringCan or
+            ItemType.PlaceableTile;
         var useInputActive = _pendingItemUseContinuous
             ? _input.IsBindingDown(settings.Input.KeyBindings.AttackPrimary)
             : _input.IsBindingPressed(settings.Input.KeyBindings.AttackPrimary);
@@ -1029,7 +1454,11 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
             return;
         }
 
-        TriggerPlayerActionAnimation(ResolvePlayerActionState(_inventory.SelectedStack));
+        var actionState = ResolvePlayerActionState(_inventory.SelectedStack);
+        if (actionState != CharacterAnimationState.Attack)
+        {
+            TriggerPlayerActionAnimation(actionState);
+        }
         _pendingItemUse = new PlayerItemUseRequest(
             true,
             targetTile,
@@ -1040,6 +1469,7 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
     private void SuppressGameplayInput()
     {
         _pendingPlayerCommand = PlayerCommand.None;
+        _jumpInputLatch.Reset();
         _pendingItemUse = PlayerItemUseRequest.Inactive;
         _hasPendingItemUse = false;
         _gameplayFeedback.CancelMining();
@@ -1184,9 +1614,13 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
             2);
         var lighting = _lightingRenderer.LastTelemetry;
         var reflections = _screenSpaceEffects.LastTelemetry;
+        var atlas = _tilemapRenderer.AtlasTelemetry;
+        var blur = _screenSpaceEffects.LastBackdropBlurPlan;
+        var graph = _compiledRenderGraph.Telemetry;
+        var presentationBudget = _presentationFrameBudget.CaptureTelemetry();
         context.DebugText.Draw(
             new Vector2(12, 418),
-            $"LIGHT {lighting.Quality} {lighting.MaskSize.X}x{lighting.MaskSize.Y} RAYS:{lighting.RaysCast} OCC:{lighting.OccluderSamples} PTS:{lighting.PointLightsUsed} REFL:{reflections.SurfaceCount}",
+            $"LIGHT {lighting.Quality} {lighting.MaskSize.X}x{lighting.MaskSize.Y} RAYS:{lighting.RaysCast} OCC:{lighting.OccluderSamples} PTS:{lighting.PointLightsUsed} UP:{_lightingRenderer.LastTextureUploadCount} REFL:{reflections.SurfaceCount} ATLAS:{atlas.PageCount}/{atlas.TextureBucketsSaved} BLUR:{blur.TargetSize.X}x{blur.TargetSize.Y} RG:{graph.ExecutedPasses}/{graph.TransientAliasSlots} PB:{presentationBudget.ConsumedUnits}/{presentationBudget.MaximumUnits} D:{presentationBudget.DeferredWorkCount}",
             Color.LightGray,
             2);
         if (_soundscape is not null)
@@ -1238,7 +1672,12 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
              _characterEditorOverlay.IsOpen);
     }
 
-    private void PreparePresentationFrames(GameFrameSnapshot frame, GameSettings settings)
+    private void PreparePresentationFrames(
+        GameFrameSnapshot frame,
+        GameSettings settings,
+        bool prepareLighting,
+        bool prepareReflections,
+        bool prepareAtmosphere)
     {
         if (_world is null || _content is null || _lastViewportBounds.IsEmpty)
         {
@@ -1246,37 +1685,144 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
         }
 
         var lightingQuality = _lightingRenderer.Quality;
-        var lightTelemetry = VisibleLightCollector.CollectTileLights(
-            _world,
-            _content.Tiles,
-            _camera.VisibleWorldRect,
-            lightingQuality,
-            _visibleLights);
-        _lightingRenderer.PrepareFrame(
-            _world,
-            _camera,
-            _lastViewportBounds,
-            frame.WorldTime,
-            frame.LivingWorld,
-            settings.Rendering,
-            frame.TickNumber,
-            _visibleLights.AsSpan(0, lightTelemetry.LightsCollected));
-        _screenSpaceEffects.PrepareFrame(
-            _world,
-            _camera,
-            _lastViewportBounds,
-            frame.TickNumber,
-            settings.Rendering);
-        _atmosphereRenderer.PrepareFrame(
-            _world,
-            _camera,
-            frame.WorldTime,
-            frame.LivingWorld,
-            settings.Rendering,
-            _lastViewportBounds,
-            lightingQuality.Tier,
-            frame.TickNumber);
+        if (prepareLighting)
+        {
+            using (_states.Performance.Measure("Presentation.LightingPrepare", 2.0))
+            {
+                var lightTelemetry = VisibleLightCollector.CollectTileLights(
+                    _world,
+                    _content.Tiles,
+                    _camera.VisibleWorldRect,
+                    lightingQuality,
+                    _visibleLights);
+                _lightingRenderer.PrepareFrame(
+                    _world,
+                    _camera,
+                    _lastViewportBounds,
+                    frame.WorldTime,
+                    frame.LivingWorld,
+                    settings.Rendering,
+                    frame.TickNumber,
+                    _visibleLights.AsSpan(0, lightTelemetry.LightsCollected),
+                    _states.Performance);
+            }
+        }
+
+        if (prepareReflections)
+        {
+            using (_states.Performance.Measure("Presentation.ReflectionPrepare", 1.0))
+            {
+                var waterPalette = WaterPresentationPaletteCatalog.Resolve(frame.LivingWorld.BiomeId);
+                _screenSpaceEffects.PrepareFrame(
+                    _world,
+                    _camera,
+                    _lastViewportBounds,
+                    frame.TickNumber,
+                    settings.Rendering,
+                    waterPalette);
+            }
+        }
+
+        if (prepareAtmosphere)
+        {
+            using (_states.Performance.Measure("Presentation.AtmospherePrepare", 0.75))
+            {
+                _atmosphereRenderer.PrepareFrame(
+                    _world,
+                    _camera,
+                    frame.WorldTime,
+                    frame.LivingWorld,
+                    settings.Rendering,
+                    _lastViewportBounds,
+                    lightingQuality.Tier,
+                    frame.TickNumber);
+            }
+        }
     }
+
+    private void EnsurePresentationCadence(RenderingSettings settings)
+    {
+        var cadence = new PresentationCadenceConfiguration(
+            settings.LightingUpdateRateHz,
+            settings.ReflectionUpdateRateHz,
+            settings.AtmosphereUpdateRateHz,
+            settings.SceneCaptureUpdateRateHz);
+        if (_hasPresentationCadence && cadence == _presentationCadence)
+        {
+            return;
+        }
+
+        _presentationWork.Configure(
+            _lightingWork,
+            CreatePresentationSchedule(cadence.LightingHz, 30, 3d),
+            requestImmediate: true);
+        _presentationWork.Configure(
+            _reflectionWork,
+            CreatePresentationSchedule(cadence.ReflectionHz, 45, 6d),
+            requestImmediate: true);
+        _presentationWork.Configure(
+            _atmosphereWork,
+            CreatePresentationSchedule(cadence.AtmosphereHz, 45, 8d),
+            requestImmediate: true);
+        _presentationWork.Configure(
+            _sceneCaptureWork,
+            CreatePresentationSchedule(cadence.SceneCaptureHz, 20, 4d),
+            requestImmediate: true);
+        _presentationCadence = cadence;
+        _hasPresentationCadence = true;
+    }
+
+    private static PresentationWorkSchedule CreatePresentationSchedule(
+        int targetHz,
+        int maximumDeferredFrames,
+        double cameraTranslationThreshold)
+    {
+        var rate = Math.Clamp(targetHz, 10, 240);
+        return new PresentationWorkSchedule(
+            rate,
+            MaximumStalenessSeconds: Math.Max(0.125d, 3d / rate),
+            maximumDeferredFrames,
+            PresentationWorkTrigger.Revision |
+                PresentationWorkTrigger.CameraTranslation |
+                PresentationWorkTrigger.CameraZoom,
+            MinimumRevisionDelta: 1,
+            CameraTranslationThreshold: cameraTranslationThreshold,
+            CameraZoomThreshold: 0.01d);
+    }
+
+    private static int ResolvePresentationFrameBudget(RenderingSettings settings)
+    {
+        var maximumQuality = Math.Max(
+            Math.Max(settings.LightingQuality, settings.ShadowQuality),
+            Math.Max(settings.ReflectionQuality, settings.UiEffectQuality));
+        return maximumQuality switch
+        {
+            <= 1 => 4,
+            2 => 6,
+            _ => 8
+        };
+    }
+
+    private static int EstimateLightingWork(RenderingSettings settings)
+    {
+        return 2 + Math.Max(settings.LightingQuality, settings.ShadowQuality);
+    }
+
+    private static int EstimateReflectionWork(RenderingSettings settings)
+    {
+        return 2 + Math.Max(0, settings.ReflectionQuality);
+    }
+
+    private static int EstimateSceneCaptureWork(RenderingSettings settings)
+    {
+        return 2 + Math.Max(settings.ReflectionQuality, settings.UiEffectQuality);
+    }
+
+    private readonly record struct PresentationCadenceConfiguration(
+        int LightingHz,
+        int ReflectionHz,
+        int AtmosphereHz,
+        int SceneCaptureHz);
 
     private void DrawStreamingDebugMetrics(RenderContext context)
     {
@@ -1385,7 +1931,7 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
         }
     }
 
-    private void EnsureVisibleChunks()
+    private void EnsureVisibleChunks(double deltaSeconds)
     {
         if (_world is null ||
             !_world.IsHorizontallyInfinite ||
@@ -1401,6 +1947,35 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
         var streamingSaveDirectory = worldSettings.SaveChunksBeforeUnload
             ? _worldSaveDirectory
             : null;
+        var viewKey = new ChunkStreamingViewKey(
+            CoordinateUtils.TileToChunk(minTile),
+            CoordinateUtils.TileToChunk(maxTile),
+            worldSettings,
+            streamingSaveDirectory);
+        var viewChanged = !_hasStreamingViewKey || !_lastStreamingViewKey.Equals(viewKey);
+        var telemetry = _streaming.Telemetry;
+        var hasPendingWork = telemetry.PendingLoadJobs > 0 ||
+            telemetry.PendingSaveJobs > 0 ||
+            telemetry.ApplyQueueLength > 0 ||
+            telemetry.PendingRetryJobs > 0 ||
+            _lastStreaming.DeferredLoadChunks > 0 ||
+            _lastStreaming.DeferredUnloadChunks > 0;
+
+        _streamingUpdateElapsedSeconds += Math.Max(0d, deltaSeconds);
+        if (!viewChanged && !hasPendingWork)
+        {
+            return;
+        }
+
+        const double maximumStreamingUpdateRate = 30d;
+        if (!viewChanged && _streamingUpdateElapsedSeconds < 1d / maximumStreamingUpdateRate)
+        {
+            return;
+        }
+
+        _lastStreamingViewKey = viewKey;
+        _hasStreamingViewKey = true;
+        _streamingUpdateElapsedSeconds = 0d;
         _lastStreaming = _streaming.Update(_world, profile, visibleTiles, streamingSaveDirectory, new ChunkStreamingOptions
         {
             LoadMarginChunks = worldSettings.ChunkLoadMargin,
@@ -1420,6 +1995,12 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
             }
         }, _events);
     }
+
+    private readonly record struct ChunkStreamingViewKey(
+        ChunkPos MinimumVisibleChunk,
+        ChunkPos MaximumVisibleChunk,
+        WorldSettings Settings,
+        string? SaveDirectory);
 
     private PlayerStatBlock ResolvePlayerStats()
     {

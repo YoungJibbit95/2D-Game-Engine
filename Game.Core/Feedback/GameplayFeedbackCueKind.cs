@@ -17,5 +17,13 @@ public enum GameplayFeedbackCueKind
     LootDropped,
     RareLootDropped,
     WorldEventActivated,
-    ActionBlocked
+    ActionBlocked,
+    CombatBlocked,
+    CombatParried,
+    GuardBroken,
+    ProjectileLaunched,
+    ProjectileBounced,
+    ProjectilePierced,
+    ProjectileExpired,
+    ProjectileDestroyed
 }

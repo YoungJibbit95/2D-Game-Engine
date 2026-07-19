@@ -16,7 +16,10 @@ public sealed record GameFrameSnapshot(
     LivingWorldFrameSnapshot LivingWorld,
     ImmutableSnapshotList<EntityFrameSnapshot> Entities,
     ImmutableSnapshotList<FarmPlotFrameSnapshot> FarmPlots,
-    HudFrameSnapshot Hud);
+    HudFrameSnapshot Hud)
+{
+    public AttackRuntimeFrameSnapshot Attack { get; init; } = AttackRuntimeFrameSnapshot.Empty;
+}
 
 public sealed record PlayerFrameSnapshot(
     Vector2 Position,
@@ -81,6 +84,8 @@ public readonly record struct LivingWorldFrameSnapshot(
     float WorldEventIntensity,
     LivingWorldPresentationFrameSnapshot Presentation)
 {
+    public int SurfaceTileY { get; init; }
+
     public string? WorldEventPhaseId { get; init; }
 
     public float WorldEventPhaseProgress { get; init; }

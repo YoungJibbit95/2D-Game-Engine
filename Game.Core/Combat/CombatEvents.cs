@@ -1,8 +1,9 @@
+using Game.Core.Events;
 using System.Numerics;
 
 namespace Game.Core.Combat;
 
-public interface ICombatEvent;
+public interface ICombatEvent : IGameEvent;
 
 public readonly record struct AttackStartedCombatEvent(
     ulong AttackInstanceId,

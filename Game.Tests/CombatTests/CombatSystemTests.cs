@@ -88,6 +88,59 @@ public sealed class CombatSystemTests
     }
 
     [Fact]
+    public void ResolveProjectileHits_SweepsFromPreviousPositionWithoutTunneling()
+    {
+        var entities = new EntityManager(spatialCellSize: 16);
+        var enemy = CreateEnemy(health: 20);
+        enemy.Body.Position = new Vector2(100, 0);
+        var projectile = new ProjectileEntity(
+            "fast-arrow",
+            Vector2.Zero,
+            new Vector2(1_000, 0),
+            damage: 5,
+            gravity: 0,
+            pierce: 0,
+            lifetime: 5);
+        projectile.AdvanceRuntime(0.2f);
+        entities.Add(enemy);
+        entities.Add(projectile);
+
+        var result = CreateCombatSystem().ResolveProjectileHits(entities, CreateLootTables());
+
+        Assert.Equal(1, result.ProjectileHits);
+        Assert.Equal(15, enemy.Health.Current);
+        Assert.False(projectile.IsActive);
+    }
+
+    [Fact]
+    public void ResolveProjectileHits_OrdersSweptCandidatesByTimeOfImpact()
+    {
+        var entities = new EntityManager(spatialCellSize: 256);
+        var farEnemy = CreateEnemy(health: 20);
+        farEnemy.Body.Position = new Vector2(150, 0);
+        var nearEnemy = CreateEnemy(health: 20);
+        nearEnemy.Body.Position = new Vector2(75, 0);
+        var projectile = new ProjectileEntity(
+            "fast-arrow",
+            Vector2.Zero,
+            new Vector2(1_000, 0),
+            damage: 5,
+            gravity: 0,
+            pierce: 0,
+            lifetime: 5);
+        projectile.AdvanceRuntime(0.2f);
+        entities.Add(farEnemy);
+        entities.Add(nearEnemy);
+        entities.Add(projectile);
+
+        var result = CreateCombatSystem().ResolveProjectileHits(entities, CreateLootTables());
+
+        Assert.Equal(1, result.ProjectileHits);
+        Assert.Equal(15, nearEnemy.Health.Current);
+        Assert.Equal(20, farEnemy.Health.Current);
+    }
+
+    [Fact]
     public void ResolveEnemyContactDamage_DamagesPlayerAndPublishesEvent()
     {
         var entities = new EntityManager(spatialCellSize: 16);
@@ -158,13 +211,19 @@ public sealed class CombatSystemTests
         entities.Add(enemy);
         var guard = new GuardRuntimeState(new GuardDefinition());
         Assert.True(guard.TryBeginGuard(enemy.Body.Center - player.Body.Center));
+        var events = new GameEventBus();
+        var parriedEvents = 0;
+        var resolvedEvents = 0;
+        events.Subscribe<CombatParriedEvent>(_ => parriedEvents++);
+        events.Subscribe<CombatHitResolvedEvent>(_ => resolvedEvents++);
 
         var result = CreateCombatSystem().ResolveEnemyContactDamage(
             player,
             entities,
             guard,
             CreateDamageResolver(),
-            damage: 12);
+            damage: 12,
+            events: events);
 
         Assert.Equal(1, result.ContactHits);
         Assert.True(result.Parried);
@@ -173,6 +232,8 @@ public sealed class CombatSystemTests
         Assert.Equal(100, player.Health);
         Assert.NotNull(result.Resolution);
         Assert.Contains(result.Resolution.Value.Events, gameEvent => gameEvent is CombatParriedEvent);
+        Assert.Equal(1, parriedEvents);
+        Assert.Equal(1, resolvedEvents);
     }
 
     [Fact]

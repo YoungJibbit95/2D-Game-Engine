@@ -241,6 +241,7 @@ public sealed class LivingWorldRuntime
                 resolution.Biome.Presentation.SurfaceReflectionStrength,
                 resolution.Biome.Presentation.WindResponse))
         {
+            SurfaceTileY = surfaceTileY,
             WorldEventPhaseId = worldEvent.PhaseId,
             WorldEventPhaseProgress = worldEvent.PhaseProgress,
             WorldEventParticleSpriteId = eventActive ? modified.ParticleSpriteId : null,

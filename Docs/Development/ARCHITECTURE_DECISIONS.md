@@ -1,6 +1,6 @@
 # YjsE Architecture Decisions
 
-Last updated: 2026-07-14
+Last updated: 2026-07-19
 
 Decision status values are limited to `verified`, `implemented-unverified`, `partial`, `planned`, `blocked`, and `deprecated`.
 
@@ -594,3 +594,98 @@ Streaming classifies failures as retryable, cancelled, stale or permanent. Retry
 ### Validation
 
 Thirty-eight focused streaming tests pass in Debug and Release. They cover load/save retries, backoff, exhaustion/reset, classifications, operation/time/byte deferral, oversize progress, cancellation, stale results, negative X and dirty-save ownership.
+
+## ADR-0020: Keep Character Intent Outside The Physics Core
+
+Status: `verified`
+
+### Context
+
+Character and topdown controllers previously lived in `Game.Core.Physics`, while player, enemies and items each mixed intent, gravity and tile resolution. That made Physics a gameplay-policy folder and created a double-integration risk for a future central world step.
+
+### Decision
+
+`Game.Core.Movement` owns renderer-neutral control intent and locomotion tuning. `Game.Core.Physics` owns bodies, mass/forces/impulses, gravity, damping, layers/masks, materials, integration, tile collision, contacts and broadphase. `SideViewCharacterController.ApplyIntent` can change desired velocity or request a jump but cannot advance position, apply gravity or query the world. `PlayerEntity` submits its dynamic body to `PhysicsWorld`; architecture tests reject movement/character controllers in the Physics namespace or source folder.
+
+`PhysicsWorld.Step` consumes caller-owned result/contact spans. Body capacity is a hard configuration contract: overflow or undersized result storage fails before mutation. The engine never hides overload by deferring bodies and slowing their authoritative simulation time. `StepWithBodyCollisions` runs the deterministic sweep-and-prune broadphase, resolves AABB narrowphase contacts, mass/material impulses, friction and tile-safe positional correction through caller-owned pair/contact storage. `EntityManager` owns one fixed-capacity batch for enemies and dropped items; ground enemies/items submit dynamic bodies, flying actors submit kinematic bodies, and gameplay classes consume the returned poses instead of applying a second gravity/collision path.
+
+### Consequences
+
+- Player control and physical integration have one explicit boundary.
+- Static, kinematic and dynamic bodies share one renderer-neutral contract.
+- Player, enemies and dropped items now use explicit PhysicsWorld integration without moving CharacterController policy into Physics. Dynamic/kinematic body pairs use mutual masks and deterministic material impulses. The topdown tile path, one-way platforms, slopes and joints remain separate additions.
+- Moving the public topdown types from `Game.Core.Physics` to `Game.Core.Movement` is a source-level breaking namespace change for external consumers.
+
+### Validation
+
+Focused Debug/Release physics and entity-integration suites cover the architecture boundary, intent-only behavior, forces/impulses, capacity rejection, detailed contacts, high-speed tile sweeps, negative coordinates and 0 B steady paths. The central 500-actor entity update reduced the retained p99 sample from 4.449 ms to a 1.688 ms median across three runs; a 1,000-body Release step measures 0.988 ms and the broadphase 0.331 ms, both at 0 B.
+
+## ADR-0021: Keep Liquids As A Budgeted Active Frontier
+
+Status: `verified`
+
+### Context
+
+Scanning every dirty region on each liquid tick made cost proportional to world area even when only a few cells could move. Initial seeding also bypassed the new simulation budget and could stall the first fixed tick.
+
+### Decision
+
+Each liquid runtime owns a bounded `LiquidSimulationWorkspace` with deduplicated FIFO active cells, incremental seed-region cursors and changed-region telemetry. Active-cell, transfer and seed checks have independent hard per-step budgets. Initial finite worlds enqueue one bounded region and infinite worlds enqueue loaded chunk bounds; tile scanning occurs only inside the liquid step budget. The scheduler continues pending liquid work without new dirty input, rebinds safely on world replacement and consumes changed-region views in the same tick. Capacity loss is telemetered and changed regions are re-enqueued for bounded recovery.
+
+### Consequences
+
+- Steady liquid work scales with active cells instead of total region area.
+- Unloaded neighbors are never materialized by flow and negative/infinite coordinates remain supported.
+- `ChangedRegions` is a workspace-owned tick-local view; long-lived consumers must copy it.
+- Pressure, viscosity/material types, sources/sinks, buoyancy and renderer-facing surface data remain separate additions.
+
+### Validation
+
+Flow, conservation, determinism, fairness, budget, capacity, world-rebind, negative-X and unloaded-boundary contracts pass in both full suites. The final isolated 128-cell Release distribution is 0.021/0.047/0.069 ms p50/p95/p99 and 0 B per step.
+
+## ADR-0022: Materialize Finite Worlds Through Chunk-Local Generation Storage
+
+Status: `verified`
+
+### Context
+
+Finite initial generation used the normal runtime tile-edit path, repeatedly marking/merging dirty regions and materializing temporary edit collections even though no renderer, saver or simulation consumer could observe the half-built world.
+
+### Decision
+
+Finite generation passes write through a bounds-safe `WorldGenerationWorkspace` that caches chunk tile arrays lazily and publishes clean materialized chunks only after generation completes. Terrain, caves/caverns/pools, ore, walls, lakes, structures, trees and shared tile-mutation helpers use the workspace. The contract rejects horizontally infinite worlds; streaming generation and normal runtime edits retain their existing dirty/event ownership.
+
+### Consequences
+
+- Initial generation avoids runtime dirty-region churn without weakening runtime mutation semantics.
+- Custom finite steps remain interoperable and deterministic simple/advanced hashes are unchanged.
+- Infinite/regional generation workspaces and large-world memory curves remain future work.
+
+### Validation
+
+Focused Debug/Release generation scopes pass 49/49, including bounds, chunk cleanliness, custom-step interoperability, infinite rejection and unchanged deterministic hashes. The latest 256x128 quick fixture measures 0.694 ms average, 0.862 ms p95 and 1,252,512 B, down from 28.044 ms and 17,052,112 B.
+
+## ADR-0023: Compile A Bounded Presentation Graph And Reduce Material Churn
+
+Status: `verified`
+
+### Context
+
+The active Playing renderer had an implicit pass order, tile commands grouped by their original source textures, entity shadows interleaved with actors and an eight-tap full-resolution UI blur fallback. This was workable, but it made new render techniques harder to schedule and spent submission/sample budget on state changes that did not improve the image.
+
+### Decision
+
+`PlayingState` declares and compiles a fixed-capacity render graph with stable numeric pass/resource IDs, explicit phases, resource reads/writes, dependency validation, output culling and transient lifetime/alias telemetry. The compiled plan executes through a generic struct executor without delegates, boxing, LINQ or per-frame graph rebuilding. Lighting configuration changes invalidate and recompile the plan outside the steady Draw path.
+
+Tile animation frames are packed once during content configuration into CPU-baked padded atlas pages; Draw consumes source rectangles from the atlas and never performs texture readback, file IO or atlas construction. Entity presentation keeps stable shadow-before-actor semantics while grouping actor material/texture runs through a fixed-capacity submission plan with a lossless overflow fallback. Open-overlay backdrop blur downsamples by quality tier and prepares a bounded Kawase ping-pong chain once per scene capture instead of sampling the full-resolution scene eight times every overlay draw. Fullscreen effects and shader registries use real `Effect` binding plus stable handles rather than ignoring the effect argument or resolving string IDs in the hot path.
+
+### Consequences
+
+- Pass dependencies and invalid graphs fail before rendering, while pass execution remains allocation-free.
+- Tile atlas pages reduce tile texture buckets without changing registry ownership of non-tile resources; a general multi-category atlas and active-biome residency remain future work.
+- Render-graph alias slots are currently planning/telemetry contracts. A physical transient render-target pool still needs to map compatible descriptors onto those slots.
+- MonoGame submission counters remain CPU-side framework evidence; backend GPU timestamps are still unavailable.
+
+### Validation
+
+Graph tests cover cycles, missing producers, phase violations, multiple writers, culling, lifetimes, deterministic aliasing and stale plans. A representative 15-pass Release graph compiles/queries/executes at 33-56 microseconds p50 and 56-78 microseconds p95 with 0 B. Two identical actors reduce estimated texture switches from 4 to 2; a 200-actor alternating fixture reduces them from 400 to 201 at 0 B. The final 1920x1080 Release traversal records 6.061 ms average, 6.061 ms p95, 6.070 ms p99 and 0.574 ms CPU Draw across 600 measured frames, with 0 invalid resources. The prepared High blur plan reduces estimated 1080p sample work from 16,588,800 to 6,220,800 samples per capture (62.5%).

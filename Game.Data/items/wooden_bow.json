@@ -15,9 +15,8 @@
   "actions": [
     {
       "kind": "Shoot",
+      "attackSequence": "weapon.wooden_bow.shot",
       "projectile": "wooden_arrow",
-      "ammo": "wooden_arrow",
-      "ammoCost": 1,
       "projectileSpeedMultiplier": 1.0
     }
   ],

@@ -2,7 +2,7 @@
   "id": "marsh_moss",
   "numericId": 15,
   "displayName": "Marsh Moss",
-  "texture": "world/wave05/marsh_moss_autotile",
+  "texture": "world/tiles/polish_v1/marsh_moss_autotile",
   "solid": true,
   "blocksLight": true,
   "hardness": 1.1,

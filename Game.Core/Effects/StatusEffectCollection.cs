@@ -9,6 +9,22 @@ public sealed class StatusEffectCollection
 
     public IReadOnlyCollection<ActiveStatusEffect> ActiveEffects => _active.Values;
 
+    public int CopyActiveEffectsTo(Span<ActiveStatusEffect> destination)
+    {
+        var count = 0;
+        foreach (var effect in _active.Values)
+        {
+            if (count >= destination.Length)
+            {
+                break;
+            }
+
+            destination[count++] = effect;
+        }
+
+        return count;
+    }
+
     public bool HasEffect(string id)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(id);

@@ -18,6 +18,84 @@ namespace Game.Tests.SpawningTests;
 public sealed class ActivityAreaSpawnTests
 {
     [Fact]
+    public void ViewportIngress_PrefersLoadedBandImmediatelyOutsideVisibleArea()
+    {
+        var world = CreateInfiniteGroundWorld(-128, 128, groundY: 40);
+        var source = SpawnActivitySource.ForPlayer(
+            1,
+            new TilePos(0, 39),
+            RectI.FromInclusiveTileBounds(-30, 22, 30, 48),
+            new SpawnEnvironment("forest", "surface", "Clear", null, 1f));
+        var options = CreateScaleOptions(maxActive: 24) with
+        {
+            AttemptsPerInterval = 96,
+            MinDistanceTiles = 33,
+            MaxDistanceTiles = 94,
+            PlacementSearchRadiusTiles = 24,
+            ViewportIngressBandTiles = 8,
+            ViewportIngressAttemptCycle = 4,
+            ViewportIngressAttemptsPerCycle = 3
+        };
+        var entities = new EntityManager();
+
+        var result = new SpawnScheduler(new Random(991)).Update(
+            world,
+            entities,
+            CreateContent(maxActive: 24),
+            new BiomeMap("forest"),
+            new WorldTime(),
+            new[] { source },
+            0.1f,
+            options);
+
+        var actors = entities.Entities.OfType<EnemyEntity>().ToArray();
+        var nearIngress = actors.Count(actor =>
+        {
+            var tile = CoordinateUtils.WorldToTile(actor.Body.Center.X, actor.Body.Center.Y);
+            var horizontalDistance = Math.Abs(tile.X - source.CenterTile.X);
+            return horizontalDistance >= options.MinDistanceTiles &&
+                   horizontalDistance <= options.MinDistanceTiles + options.ViewportIngressBandTiles + 3;
+        });
+        Assert.True(result.Spawned >= 12, $"spawned={result.Spawned}");
+        Assert.True(nearIngress >= 8, $"nearIngress={nearIngress}, total={actors.Length}");
+        Assert.All(actors, actor =>
+        {
+            var tile = CoordinateUtils.WorldToTile(actor.Body.Center.X, actor.Body.Center.Y);
+            Assert.False(source.VisibleTileBounds.Inflate(options.OnScreenExclusionPaddingTiles).Contains(tile));
+            Assert.True(world.TryGetChunk(CoordinateUtils.TileToChunk(tile), out _));
+        });
+    }
+
+    [Fact]
+    public void LargeWorldSurfaceHabitat_UsesOpenSkyBeyondLegacyHeightCutoff()
+    {
+        var world = new World(
+            GameConstants.ChunkSize,
+            300,
+            WorldMetadata.CreateDefault(441),
+            isHorizontallyInfinite: true);
+        for (var x = -2; x <= 2; x++)
+        {
+            world.SetTile(x, 108, KnownTileIds.Dirt);
+        }
+
+        var result = new SpawnSystem(new Random(7)).TrySpawn(
+            world,
+            new EntityManager(),
+            CreateContent(CreateRule(maxActive: 2) with
+            {
+                Id = "high_surface_squirrel",
+                Habitats = new[] { SpawnHabitat.Surface }
+            }),
+            "forest",
+            new WorldTime(),
+            new TilePos(0, 107));
+
+        Assert.True(result.Spawned);
+        Assert.Equal(SpawnHabitat.Surface, result.Entity?.SpawnHabitat);
+    }
+
+    [Fact]
     public void MultiActivityRing_SpawnsTwoHundredAcrossBothAxesOutsideViewports()
     {
         var world = CreateInfiniteGroundWorld(-240, 240, groundY: 40);

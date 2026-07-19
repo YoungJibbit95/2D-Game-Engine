@@ -1,0 +1,64 @@
+{
+  "id": "weapon.wooden_sword.combo",
+  "inputBufferTicks": 4,
+  "commandCapacity": 8,
+  "eventCapacity": 32,
+  "steps": [
+    {
+      "id": "forehand",
+      "timeline": {
+        "startupTicks": 3,
+        "activeTicks": 4,
+        "recoveryTicks": 6,
+        "comboWindow": {
+          "startTickInclusive": 6,
+          "endTickExclusive": 13
+        }
+      },
+      "nextStepId": "backhand",
+      "cost": {
+        "stamina": 5
+      },
+      "maxTargetsPerSwing": 8,
+      "meleeShapes": [
+        {
+          "id": "forehand.sweep",
+          "activeStartTickInclusive": 0,
+          "activeEndTickExclusive": 4,
+          "sweep": {
+            "reach": 38,
+            "radius": 9,
+            "startAngleRadians": -1.15,
+            "endAngleRadians": 0.75
+          }
+        }
+      ]
+    },
+    {
+      "id": "backhand",
+      "timeline": {
+        "startupTicks": 2,
+        "activeTicks": 4,
+        "recoveryTicks": 7,
+        "cooldownTicks": 3
+      },
+      "cost": {
+        "stamina": 6
+      },
+      "maxTargetsPerSwing": 8,
+      "meleeShapes": [
+        {
+          "id": "backhand.sweep",
+          "activeStartTickInclusive": 0,
+          "activeEndTickExclusive": 4,
+          "sweep": {
+            "reach": 40,
+            "radius": 10,
+            "startAngleRadians": 0.9,
+            "endAngleRadians": -1.0
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -3,6 +3,7 @@ using Xunit;
 
 namespace Game.Tests.PerformanceTests;
 
+[Collection(LongSessionPerformanceCollection.Name)]
 public sealed class ImmutableSnapshotListPerformanceTests
 {
     [Fact]
@@ -41,6 +42,29 @@ public sealed class ImmutableSnapshotListPerformanceTests
 
         var allocated = GC.GetAllocatedBytesForCurrentThread() - allocatedBefore;
         Assert.Equal(0, allocated);
+        Assert.Equal(0, checksum);
+    }
+
+    [Fact]
+    public void TrustedOwnershipFactory_DoesNotDuplicateOwnedArrayStorage()
+    {
+        var owned = Enumerable.Range(1, 64).ToArray();
+        const int iterations = 10_000;
+        var checksum = 0;
+
+        for (var index = 0; index < 2_000; index++)
+        {
+            checksum ^= ImmutableSnapshotList<int>.FromOwned(owned)[0];
+        }
+
+        var allocatedBefore = GC.GetAllocatedBytesForCurrentThread();
+        for (var index = 0; index < iterations; index++)
+        {
+            checksum ^= ImmutableSnapshotList<int>.FromOwned(owned)[0];
+        }
+
+        var allocated = GC.GetAllocatedBytesForCurrentThread() - allocatedBefore;
+        Assert.InRange(allocated, 1, 1_000_000);
         Assert.Equal(0, checksum);
     }
 

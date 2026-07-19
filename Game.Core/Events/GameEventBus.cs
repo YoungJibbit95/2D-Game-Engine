@@ -33,7 +33,10 @@ public sealed class GameEventBus
     public void Publish<TEvent>(TEvent gameEvent)
         where TEvent : IGameEvent
     {
-        ArgumentNullException.ThrowIfNull(gameEvent);
+        if (gameEvent is null)
+        {
+            throw new ArgumentNullException(nameof(gameEvent));
+        }
 
         var anyHandlers = _anyHandlers;
         for (var index = 0; index < anyHandlers.Length; index++)

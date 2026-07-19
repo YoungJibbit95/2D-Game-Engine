@@ -26,7 +26,7 @@ public sealed class ClientSmokeOptionsTests
 
     [Theory]
     [InlineData("0")]
-    [InlineData("121")]
+    [InlineData("3601")]
     [InlineData("invalid")]
     public void Parse_RejectsInvalidFrameCounts(string value)
     {
@@ -48,6 +48,9 @@ public sealed class ClientSmokeOptionsTests
     [InlineData("--timeout-seconds")]
     [InlineData("--start-state")]
     [InlineData("--scene-biome")]
+    [InlineData("--resolution")]
+    [InlineData("--warmup-frames")]
+    [InlineData("--frame-limit")]
     public void Parse_RejectsOptionsWithoutValues(string option)
     {
         Assert.Throws<ArgumentException>(() => ClientSmokeOptions.Parse(["--smoke", option]));
@@ -69,6 +72,23 @@ public sealed class ClientSmokeOptionsTests
         Assert.NotNull(options);
         Assert.Equal(ClientSmokeStartState.Playing, options.StartState);
         Assert.True(options.OpenConsole);
+    }
+
+    [Fact]
+    public void Parse_AllowsOpenedPausePlayingSmoke()
+    {
+        var options = ClientSmokeOptions.Parse(
+            ["--smoke", "--start-state", "playing", "--open-pause"]);
+
+        Assert.NotNull(options);
+        Assert.True(options.OpenPause);
+    }
+
+    [Fact]
+    public void Parse_RejectsOpenedPauseOutsidePlayingSmoke()
+    {
+        Assert.Throws<ArgumentException>(() => ClientSmokeOptions.Parse(
+            ["--smoke", "--start-state", "main-menu", "--open-pause"]));
     }
 
     [Theory]
@@ -103,5 +123,64 @@ public sealed class ClientSmokeOptionsTests
     {
         Assert.Throws<ArgumentException>(() => ClientSmokeOptions.Parse(
             ["--smoke", "--start-state", "main-menu", "--scene-biome", "forest"]));
+    }
+
+    [Fact]
+    public void Parse_AllowsRepresentativeResolutionAndWarmupWindow()
+    {
+        var options = ClientSmokeOptions.Parse(
+            ["--smoke", "--frames", "600", "--warmup-frames", "120", "--resolution", "1920x1080"]);
+
+        Assert.NotNull(options);
+        Assert.Equal(600, options.Frames);
+        Assert.Equal(120, options.WarmupFrames);
+        Assert.Equal(1920, options.Width);
+        Assert.Equal(1080, options.Height);
+    }
+
+    [Fact]
+    public void Parse_AcceptsConfiguredVideoDebugAndTraversalOptions()
+    {
+        var options = Assert.IsType<ClientSmokeOptions>(ClientSmokeOptions.Parse(
+        [
+            "--smoke",
+            "--start-state", "playing",
+            "--use-configured-video",
+            "--include-debug-overlays",
+            "--scripted-traversal"
+        ]));
+
+        Assert.True(options.UseConfiguredVideoSettings);
+        Assert.True(options.IncludeDebugOverlays);
+        Assert.True(options.ScriptedTraversal);
+    }
+
+    [Theory]
+    [InlineData("639x360")]
+    [InlineData("1920-1080")]
+    [InlineData("7681x4320")]
+    public void Parse_RejectsInvalidSmokeResolution(string resolution)
+    {
+        Assert.Throws<ArgumentException>(() =>
+            ClientSmokeOptions.Parse(["--smoke", "--resolution", resolution]));
+    }
+
+    [Fact]
+    public void Parse_RejectsWarmupThatConsumesTheCaptureWindow()
+    {
+        Assert.Throws<ArgumentException>(() => ClientSmokeOptions.Parse(
+            ["--smoke", "--frames", "60", "--warmup-frames", "60"]));
+    }
+
+    [Theory]
+    [InlineData("120", 120)]
+    [InlineData("144", 144)]
+    [InlineData("165", 165)]
+    public void Parse_AllowsHighRefreshPerformanceTargets(string value, int expected)
+    {
+        var options = ClientSmokeOptions.Parse(["--smoke", "--frame-limit", value]);
+
+        Assert.NotNull(options);
+        Assert.Equal(expected, options.FrameRateLimit);
     }
 }

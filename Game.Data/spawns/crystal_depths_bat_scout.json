@@ -1,0 +1,20 @@
+{
+  "id": "crystal_depths_bat_scout",
+  "entityId": "cave_bat_scout",
+  "biomeId": "crystal_depths",
+  "time": "any",
+  "habitats": ["underground", "cavern", "openAir"],
+  "minTileY": 88,
+  "maxTileY": 352,
+  "chance": 0.24,
+  "weight": 1.05,
+  "maxActive": 8,
+  "populationGroup": "crystal-hostiles",
+  "maxActiveInGroup": 12,
+  "populationRegionSizeTiles": 80,
+  "maxActiveInRegion": 4,
+  "maxActiveInHabitat": 8,
+  "localPopulationRadiusTiles": 40,
+  "maxActiveInLocalArea": 4,
+  "cooldownSeconds": 3.2
+}

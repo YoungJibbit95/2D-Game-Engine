@@ -5,6 +5,33 @@
   "maxHealth": 4,
   "width": 10,
   "height": 8,
+  "faction": "friendly",
+  "movementMode": "flying",
+  "tags": ["critter", "bird", "surface", "forest_wildlife"],
   "contactDamage": 0,
-  "contactKnockback": 0
+  "contactKnockback": 0,
+  "despawn": {
+    "mode": "whenIdle",
+    "spawnProtectionSeconds": 5,
+    "damageProtectionSeconds": 10
+  },
+  "ai": {
+    "kind": "critter",
+    "detectionRange": 96,
+    "loseTargetRange": 152,
+    "moveSpeed": 52,
+    "fleeSpeed": 104,
+    "patrolRadius": 144,
+    "returnHomeDistance": 208,
+    "flockRadius": 112,
+    "flockWeight": 0.55,
+    "minFlockSize": 2,
+    "decisionInterval": 0.65,
+    "idleChance": 0.18,
+    "activityPeriod": "day",
+    "perchWhenInactive": true,
+    "requiresLineOfSight": false,
+    "avoidLedges": false,
+    "avoidLiquid": true
+  }
 }

@@ -4,7 +4,7 @@ public sealed class EntityVisualCommandBuffer
 {
     private readonly EntityVisualDrawCommand[] _commands;
 
-    public EntityVisualCommandBuffer(int capacity = 2_048)
+    public EntityVisualCommandBuffer(int capacity = 2_048, int submissionBucketCapacity = 2_048)
     {
         if (capacity <= 0)
         {
@@ -12,6 +12,9 @@ public sealed class EntityVisualCommandBuffer
         }
 
         _commands = new EntityVisualDrawCommand[capacity];
+        SubmissionPlan = new EntityVisualSubmissionPlan(
+            capacity,
+            Math.Min(capacity, submissionBucketCapacity));
     }
 
     public int Capacity => _commands.Length;
@@ -19,6 +22,8 @@ public sealed class EntityVisualCommandBuffer
     public int Count { get; private set; }
 
     public EntityVisualTelemetry Telemetry { get; internal set; }
+
+    public EntityVisualSubmissionPlan SubmissionPlan { get; }
 
     public EntityVisualDrawCommand this[int index] =>
         (uint)index < (uint)Count ? _commands[index] : throw new ArgumentOutOfRangeException(nameof(index));
@@ -29,6 +34,7 @@ public sealed class EntityVisualCommandBuffer
     {
         Count = 0;
         Telemetry = default;
+        SubmissionPlan.Clear();
     }
 
     internal bool TryAppend(in EntityVisualDrawCommand command)
@@ -45,5 +51,10 @@ public sealed class EntityVisualCommandBuffer
     internal bool HasCapacity(int commandCount)
     {
         return commandCount >= 0 && Count <= _commands.Length - commandCount;
+    }
+
+    internal EntityVisualSubmissionTelemetry BuildSubmissionPlan()
+    {
+        return SubmissionPlan.Build(Commands);
     }
 }

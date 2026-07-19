@@ -25,10 +25,10 @@ public sealed class TreeGenerationStep : IWorldGenerationStep
 
     private static void TryPlaceTree(WorldGenerationContext context, int x)
     {
-        var world = context.World;
+        var tiles = context.Tiles;
         var surfaceY = context.SurfaceHeights[x];
 
-        if (surfaceY <= 5 || world.GetTile(x, surfaceY).TileId != KnownTileIds.Grass)
+        if (surfaceY <= 5 || tiles.GetTile(x, surfaceY).TileId != KnownTileIds.Grass)
         {
             return;
         }
@@ -36,39 +36,51 @@ public sealed class TreeGenerationStep : IWorldGenerationStep
         var minHeight = Math.Max(1, Math.Min(context.Profile.TreeMinHeight, context.Profile.TreeMaxHeight));
         var maxHeight = Math.Max(minHeight, Math.Max(context.Profile.TreeMinHeight, context.Profile.TreeMaxHeight));
         var height = context.Random.Next(minHeight, maxHeight + 1);
+        var variation = context.Random.Next();
         for (var y = surfaceY - height; y < surfaceY; y++)
         {
-            if (!world.IsInBounds(x, y) || !world.GetTile(x, y).IsAir)
+            if (!tiles.IsInBounds(x, y) || !tiles.GetTile(x, y).IsAir)
             {
                 return;
             }
         }
 
-        for (var y = surfaceY - height; y < surfaceY; y++)
+        var topY = surfaceY - height;
+        for (var dy = -TreeSilhouettePlanner.TopPadding; dy <= height - 1; dy++)
         {
-            world.SetTile(x, y, TileInstance.FromTileId(KnownTileIds.Wood, TileFlags.IsNatural, isSolid: false));
-        }
-
-        PlaceLeaves(world, x, surfaceY - height);
-    }
-
-    private static void PlaceLeaves(World world, int centerX, int centerY)
-    {
-        for (var y = centerY - 2; y <= centerY + 1; y++)
-        {
-            for (var x = centerX - 2; x <= centerX + 2; x++)
+            for (var dx = -TreeSilhouettePlanner.MaximumHalfWidth;
+                 dx <= TreeSilhouettePlanner.MaximumHalfWidth;
+                 dx++)
             {
-                if (!world.IsInBounds(x, y) || !world.GetTile(x, y).IsAir)
+                var treeX = x + dx;
+                var treeY = topY + dy;
+                if (!tiles.IsInBounds(treeX, treeY))
                 {
                     continue;
                 }
 
-                var dx = Math.Abs(x - centerX);
-                var dy = Math.Abs(y - centerY);
-                if (dx + dy <= 3)
+                var cell = TreeSilhouettePlanner.Classify(
+                    dx,
+                    dy,
+                    height,
+                    variation,
+                    context.World.Metadata.GenerationVersion);
+                if (cell == TreeSilhouetteCell.Empty)
                 {
-                    world.SetTile(x, y, TileInstance.FromTileId(KnownTileIds.Leaves, TileFlags.IsNatural, isSolid: false));
+                    continue;
                 }
+
+                var existing = tiles.GetTile(treeX, treeY);
+                if (!existing.IsAir && !(cell == TreeSilhouetteCell.Trunk && KnownTileIds.IsFoliage(existing.TileId)))
+                {
+                    continue;
+                }
+
+                var tileId = cell == TreeSilhouetteCell.Trunk ? KnownTileIds.Wood : KnownTileIds.Leaves;
+                tiles.SetTile(
+                    treeX,
+                    treeY,
+                    TileInstance.FromTileId(tileId, TileFlags.IsNatural, isSolid: false));
             }
         }
     }

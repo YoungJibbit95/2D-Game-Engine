@@ -56,8 +56,13 @@ public sealed class HostileAiBehavior : IAiBehavior
         _activePeriod = IsActivePeriod(context.IsNight);
         _targetVisible = false;
         _nearbyAllies = 0;
+        var nearbyEntities = context.QueryNeighborhood(
+            entity.Body.Center,
+            Math.Max(_profile.DetectionRange, _profile.FlockRadius));
 
-        var target = _activePeriod ? ResolveTarget(entity, context) : ResolveRememberedTarget(entity, context);
+        var target = _activePeriod
+            ? ResolveTarget(entity, context, nearbyEntities)
+            : ResolveRememberedTarget(entity, context);
         if (target is null)
         {
             if (!_activePeriod)
@@ -68,7 +73,7 @@ public sealed class HostileAiBehavior : IAiBehavior
             {
                 ReturnHome(entity, context);
             }
-            else if (TryResolveFlock(entity, context, out var flockDirection))
+            else if (TryResolveFlock(entity, nearbyEntities, out var flockDirection))
             {
                 SetState(AiState.Flock);
                 _steering.Move(
@@ -156,7 +161,10 @@ public sealed class HostileAiBehavior : IAiBehavior
         return true;
     }
 
-    private PerceivedTarget? ResolveTarget(EnemyEntity entity, AiUpdateContext context)
+    private PerceivedTarget? ResolveTarget(
+        EnemyEntity entity,
+        AiUpdateContext context,
+        IReadOnlyList<Entity> nearbyEntities)
     {
         var remembered = ResolveRememberedTarget(entity, context);
         if (remembered is { IsVisible: true })
@@ -164,7 +172,7 @@ public sealed class HostileAiBehavior : IAiBehavior
             return remembered;
         }
 
-        var candidate = _distance.FindNearestHostile(entity, context.Entities, _profile.DetectionRange);
+        var candidate = _distance.FindNearestHostile(entity, nearbyEntities, _profile.DetectionRange);
         if (context.Player is { IsActive: true } player &&
             entity.GetDispositionToward(player) == EntityDisposition.Hostile &&
             Vector2.DistanceSquared(entity.Body.Center, player.Body.Center) <=
@@ -209,7 +217,7 @@ public sealed class HostileAiBehavior : IAiBehavior
 
     private bool TryResolveFlock(
         EnemyEntity entity,
-        AiUpdateContext context,
+        IReadOnlyList<Entity> nearbyEntities,
         out Vector2 direction)
     {
         direction = default;
@@ -220,9 +228,9 @@ public sealed class HostileAiBehavior : IAiBehavior
 
         var radiusSquared = _profile.FlockRadius * _profile.FlockRadius;
         var center = Vector2.Zero;
-        for (var index = 0; index < context.Entities.Count; index++)
+        for (var index = 0; index < nearbyEntities.Count; index++)
         {
-            if (context.Entities[index] is not EnemyEntity { IsActive: true } ally ||
+            if (nearbyEntities[index] is not EnemyEntity { IsActive: true } ally ||
                 ally.Id == entity.Id ||
                 ally.Faction != entity.Faction ||
                 !string.Equals(ally.DefinitionId, entity.DefinitionId, StringComparison.OrdinalIgnoreCase) ||
@@ -235,7 +243,7 @@ public sealed class HostileAiBehavior : IAiBehavior
             _nearbyAllies++;
         }
 
-        if (_nearbyAllies + 1 < _profile.MinFlockSize)
+        if (_nearbyAllies == 0 || _nearbyAllies + 1 < _profile.MinFlockSize)
         {
             return false;
         }

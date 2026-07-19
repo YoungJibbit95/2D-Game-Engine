@@ -13,14 +13,21 @@ public sealed class ImmutableSnapshotList<T> : IReadOnlyList<T>
         _items = items.ToArray();
     }
 
-    // Core snapshot builders hand off fresh storage that is never retained or mutated.
-    internal ImmutableSnapshotList(IReadOnlyList<T> ownedItems)
+    private ImmutableSnapshotList(IReadOnlyList<T> ownedItems)
     {
         ArgumentNullException.ThrowIfNull(ownedItems);
         _ownedItems = ownedItems;
     }
 
-    public static ImmutableSnapshotList<T> Empty { get; } = new(Array.Empty<T>());
+    public static ImmutableSnapshotList<T> Empty { get; } = FromOwned(Array.Empty<T>());
+
+    // Core snapshot builders hand off fresh storage that is never retained or mutated.
+    // Keeping this path explicit prevents friend assemblies from accidentally selecting
+    // an ownership-taking constructor for mutable arrays or lists.
+    internal static ImmutableSnapshotList<T> FromOwned(IReadOnlyList<T> ownedItems)
+    {
+        return new ImmutableSnapshotList<T>(ownedItems);
+    }
 
     public int Count => _items?.Length ?? _ownedItems!.Count;
 

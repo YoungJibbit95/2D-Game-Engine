@@ -1,5 +1,5 @@
 using System.Numerics;
-using Game.Core.Physics;
+using Game.Core.Movement;
 using Game.Core.World;
 
 namespace Game.Core.Maps;
@@ -24,7 +24,7 @@ public sealed class TopDownMapMovementController
         ArgumentNullException.ThrowIfNull(map);
         ArgumentNullException.ThrowIfNull(body);
 
-        options ??= new TopDownMovementOptions();
+        options ??= TopDownMovementOptions.Default;
         var previous = body.Position;
 
         if (deltaSeconds <= 0)
@@ -33,13 +33,13 @@ public sealed class TopDownMapMovementController
             return BuildResult(map, body, previous, blockedX: false, blockedY: false, runtimeState);
         }
 
-        var movement = ResolveDirection(direction, options);
+        var movement = TopDownMovementMath.ResolveDirection(direction, options);
         if (movement.LengthSquared() > float.Epsilon)
         {
             body.Facing = TopDownFacingExtensions.FromVector(movement, body.Facing);
         }
 
-        body.Velocity = movement * options.MoveSpeedPixelsPerSecond;
+        body.Velocity = movement * TopDownMovementMath.ResolveSpeed(options);
 
         var delta = body.Velocity * deltaSeconds;
         var blockedX = MoveAxis(map, body, delta.X, Axis.X, runtimeState);
@@ -129,28 +129,6 @@ public sealed class TopDownMapMovementController
         }
 
         return null;
-    }
-
-    private static Vector2 ResolveDirection(Vector2 direction, TopDownMovementOptions options)
-    {
-        if (direction.LengthSquared() <= float.Epsilon)
-        {
-            return Vector2.Zero;
-        }
-
-        if (!options.AllowDiagonalMovement)
-        {
-            direction = MathF.Abs(direction.X) >= MathF.Abs(direction.Y)
-                ? new Vector2(MathF.Sign(direction.X), 0)
-                : new Vector2(0, MathF.Sign(direction.Y));
-        }
-
-        if (options.NormalizeDiagonalSpeed && direction.LengthSquared() > 1f)
-        {
-            direction = Vector2.Normalize(direction);
-        }
-
-        return direction;
     }
 
     private enum Axis

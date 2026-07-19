@@ -48,7 +48,7 @@
     "resourceTableIds": ["crystal_nodes", "deep_ores"]
   },
   "presentation": {
-    "backgroundSpriteId": "world/backgrounds/wave04/crystal_parallax_layer",
+    "backgroundSpriteId": "world/backgrounds/crystal_depths_parallax_layer_v5",
     "ambientParticleSpriteId": "particles/cave_dust",
     "ambientCritterSpriteId": "entities/critters/cave_glowbug",
     "biomeIconSpriteId": "ui/biomes/cave",

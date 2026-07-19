@@ -1,6 +1,7 @@
 using Game.Core.Combat;
 using Game.Core.Equipment;
 using Game.Core.Effects;
+using Game.Core.Movement;
 using Game.Core.Physics;
 using Game.Core.World;
 using System.Numerics;
@@ -10,14 +11,11 @@ namespace Game.Core.Entities;
 
 public sealed class PlayerEntity : Entity
 {
-    private const float Acceleration = 2600f;
-    private const float GroundFriction = 1800f;
-    private const float MaxWalkSpeed = 145f;
-    private const float Gravity = 1050f;
-    private const float MaxFallSpeed = 620f;
-    private const float JumpVelocity = -365f;
-
-    private readonly TileCollisionResolver _collisionResolver;
+    private readonly SideViewCharacterController _movementController;
+    private readonly PhysicsWorld _physicsWorld;
+    private readonly PhysicsBody[] _physicsBodies;
+    private readonly PhysicsMoveResult[] _physicsResults = new PhysicsMoveResult[1];
+    private readonly PhysicsContact[] _physicsContacts = new PhysicsContact[4];
 
     private PlayerCommand _command;
 
@@ -29,14 +27,25 @@ public sealed class PlayerEntity : Entity
         int maxMana = 20,
         int? currentMana = null)
     {
-        _collisionResolver = collisionResolver;
         HealthComponent = new HealthComponent(maxHealth, currentHealth);
         ManaComponent = new ManaComponent(maxMana, currentMana);
         Body = new PhysicsBody
         {
             Position = spawnPosition,
-            Size = new Vector2(12, 28)
+            Size = new Vector2(12, 28),
+            BodyType = PhysicsBodyType.Dynamic,
+            CollisionLayer = PhysicsCollisionLayer.Player
         };
+        _movementController = new SideViewCharacterController();
+        _physicsWorld = new PhysicsWorld(
+            collisionResolver,
+            new PhysicsStepSettings(
+                new Vector2(0f, 1050f),
+                1f / 15f,
+                620f,
+                1,
+                _physicsContacts.Length));
+        _physicsBodies = [Body];
         Position = spawnPosition;
     }
 
@@ -83,6 +92,7 @@ public sealed class PlayerEntity : Entity
         Body.Velocity = Vector2.Zero;
         Body.OnGround = false;
         Position = position;
+        _movementController.Reset();
         HealthComponent.RestoreFull();
         ManaComponent.RestoreFull();
         _command = PlayerCommand.None;
@@ -100,56 +110,12 @@ public sealed class PlayerEntity : Entity
         StatusEffects.Update(deltaSeconds, HealthComponent);
         HealthComponent.Update(deltaSeconds);
         ManaComponent.Update(deltaSeconds, regenMultiplier: Stats.ManaRegenMultiplier);
-        ApplyHorizontalMovement(deltaSeconds);
-        ApplyJump();
-        ApplyGravity(deltaSeconds);
-
-        _collisionResolver.Move(world, Body, deltaSeconds);
+        _movementController.ApplyIntent(
+            Body,
+            new SideViewCharacterInput(_command.MoveAxis, _command.WantsJump),
+            deltaSeconds,
+            Stats.MovementSpeedMultiplier);
+        _physicsWorld.Step(world, _physicsBodies, deltaSeconds, _physicsResults, _physicsContacts);
         Position = Body.Position;
-    }
-
-    private void ApplyHorizontalMovement(float deltaSeconds)
-    {
-        var targetSpeed = Math.Clamp(_command.MoveAxis, -1f, 1f) * MaxWalkSpeed * Stats.MovementSpeedMultiplier;
-        var velocity = Body.Velocity;
-
-        if (Math.Abs(targetSpeed) > 0.01f)
-        {
-            velocity.X = MoveToward(velocity.X, targetSpeed, Acceleration * deltaSeconds);
-        }
-        else
-        {
-            velocity.X = MoveToward(velocity.X, 0, GroundFriction * deltaSeconds);
-        }
-
-        Body.Velocity = velocity;
-    }
-
-    private void ApplyJump()
-    {
-        if (!_command.WantsJump || !Body.OnGround)
-        {
-            return;
-        }
-
-        Body.Velocity = new Vector2(Body.Velocity.X, JumpVelocity);
-        Body.OnGround = false;
-    }
-
-    private void ApplyGravity(float deltaSeconds)
-    {
-        Body.Velocity = new Vector2(
-            Body.Velocity.X,
-            Math.Min(Body.Velocity.Y + Gravity * deltaSeconds, MaxFallSpeed));
-    }
-
-    private static float MoveToward(float current, float target, float maxDelta)
-    {
-        if (Math.Abs(target - current) <= maxDelta)
-        {
-            return target;
-        }
-
-        return current + Math.Sign(target - current) * maxDelta;
     }
 }

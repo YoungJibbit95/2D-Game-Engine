@@ -198,6 +198,11 @@ public sealed class ItemDefinitionJsonLoader
     {
         public ItemActionKind Kind { get; init; }
 
+        public string? AttackSequenceId { get; init; }
+
+        [JsonPropertyName("attackSequence")]
+        public string? AttackSequence { get; init; }
+
         public string? ProjectileId { get; init; }
 
         [JsonPropertyName("projectile")]
@@ -219,6 +224,7 @@ public sealed class ItemDefinitionJsonLoader
             return new ItemActionDefinition
             {
                 Kind = Kind,
+                AttackSequenceId = AttackSequenceId ?? AttackSequence,
                 ProjectileId = ProjectileId ?? Projectile,
                 AmmoItemId = AmmoItemId ?? Ammo,
                 AmmoCost = AmmoCost,

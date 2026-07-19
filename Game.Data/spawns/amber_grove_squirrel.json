@@ -1,0 +1,19 @@
+{
+  "id": "amber_grove_squirrel",
+  "entityId": "squirrel",
+  "biomeId": "amber_grove",
+  "time": "day",
+  "habitats": ["surface"],
+  "minTileY": 0,
+  "chance": 0.24,
+  "weight": 1.0,
+  "maxActive": 6,
+  "populationGroup": "grove-wildlife",
+  "maxActiveInGroup": 9,
+  "populationRegionSizeTiles": 80,
+  "maxActiveInRegion": 4,
+  "maxActiveInHabitat": 6,
+  "localPopulationRadiusTiles": 32,
+  "maxActiveInLocalArea": 3,
+  "cooldownSeconds": 4.5
+}

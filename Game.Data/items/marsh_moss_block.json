@@ -7,7 +7,7 @@
   "category": "Block",
   "sortPriority": 33,
   "type": "PlaceableTile",
-  "texture": "world/wave05/marsh_moss_autotile",
+  "texture": "world/tiles/polish_v1/marsh_moss_autotile",
   "maxStack": 999,
   "useTime": 0.08,
   "placesTile": "marsh_moss",

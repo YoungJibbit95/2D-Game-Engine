@@ -1,0 +1,102 @@
+{
+  "schemaVersion": 1,
+  "waveId": "terrain_material_polish_v1",
+  "generatedOn": "2026-07-19",
+  "sourceType": "built-in imagegen art-direction source plus checked-in deterministic pixel generator",
+  "externalDownloads": false,
+  "modelGeneratedSource": true,
+  "source": {
+    "path": "art_direction/generated_sources/terrain_material_polish_v1_source.png",
+    "sha256": "91f1a57d1616868d6a3220f05e7e2a0486d11648a9afaa5828c24076fdf38bd3",
+    "role": "visual design reference only; production pixels are emitted at final size",
+    "prompt": "Use case: stylized-concept. Asset type: game terrain-material concept board used as art-direction reference for deterministic 16x16 autotile production. Use the existing YjsE Wave 05 pixel-art materials and V5 biome palette as style references. Design six cohesive side-view pixel-art material families: forest grass-over-loam, deep forest loam, layered gray cave stone, glowing amberstone, wet twilight-marsh moss, and gnarled amberwood planks. Use crisp readable 1x clusters, restrained original Terraria-like looseness, top-left lighting, four to six intentional tones, and no antialiasing, blur, gradients or noisy dithering. Present a clean unlabeled 3x2 board where each cell demonstrates connected top, side, inner and bottom edges plus an isolated block. No text, logos, watermark, copied sprites, UI, characters, background scene, perspective cubes, 3D rendering or soft transparency."
+  },
+  "generator": {
+    "path": "art_direction/tools/generate_terrain_material_polish_v1.py",
+    "sha256": "016b208b0d653968e592a2f2d8a416bfa4d549dc455f0fbecc619ddb12ffe732",
+    "method": "direct final-size binary-alpha pixel primitives; no raster resize of the concept source"
+  },
+  "manifest": "assets/terrain_material_polish_v1.sprites.json",
+  "brief": "asset_briefs/terrain_material_polish_v1_briefs.json",
+  "preview": "art_direction/terrain_material_polish_v1_preview.png",
+  "assets": [
+    {
+      "spriteId": "world/tiles/polish_v1/forest_grass_loam_autotile",
+      "path": "Assets/TerrainPolishV1/world/tiles/forest_grass_loam_autotile.png",
+      "sha256": "8740a7019471d98dbf99cdcc148949552cab87d8c9ce7c1dac46e20eefa10e7a",
+      "dimensions": [
+        256,
+        16
+      ],
+      "frameCount": 16,
+      "generator": "art_direction/tools/generate_terrain_material_polish_v1.py",
+      "method": "deterministic Pillow pixel primitives at exact final dimensions",
+      "runtimeConsumer": "TileDefinition texture -> TilemapRenderer autotile mask frame"
+    },
+    {
+      "spriteId": "world/tiles/polish_v1/forest_loam_autotile",
+      "path": "Assets/TerrainPolishV1/world/tiles/forest_loam_autotile.png",
+      "sha256": "350815c41620f0dfc6562f162786876f6ddeab715d2000cec8cb4fbc0e599a69",
+      "dimensions": [
+        256,
+        16
+      ],
+      "frameCount": 16,
+      "generator": "art_direction/tools/generate_terrain_material_polish_v1.py",
+      "method": "deterministic Pillow pixel primitives at exact final dimensions",
+      "runtimeConsumer": "TileDefinition texture -> TilemapRenderer autotile mask frame"
+    },
+    {
+      "spriteId": "world/tiles/polish_v1/layered_stone_autotile",
+      "path": "Assets/TerrainPolishV1/world/tiles/layered_stone_autotile.png",
+      "sha256": "7b5b33edf0affba95f47ba110bd084933a0e2e109f390c4349e67cfaf9083548",
+      "dimensions": [
+        256,
+        16
+      ],
+      "frameCount": 16,
+      "generator": "art_direction/tools/generate_terrain_material_polish_v1.py",
+      "method": "deterministic Pillow pixel primitives at exact final dimensions",
+      "runtimeConsumer": "TileDefinition texture -> TilemapRenderer autotile mask frame"
+    },
+    {
+      "spriteId": "world/tiles/polish_v1/amberstone_autotile",
+      "path": "Assets/TerrainPolishV1/world/tiles/amberstone_autotile.png",
+      "sha256": "4a0c375b31a65936ef3df814e27063afb34e2cd712ec489ce28e6603d8af3d62",
+      "dimensions": [
+        256,
+        16
+      ],
+      "frameCount": 16,
+      "generator": "art_direction/tools/generate_terrain_material_polish_v1.py",
+      "method": "deterministic Pillow pixel primitives at exact final dimensions",
+      "runtimeConsumer": "TileDefinition texture -> TilemapRenderer autotile mask frame"
+    },
+    {
+      "spriteId": "world/tiles/polish_v1/marsh_moss_autotile",
+      "path": "Assets/TerrainPolishV1/world/tiles/marsh_moss_autotile.png",
+      "sha256": "4fc4136d98939bd2e740c5e050cc34808d03ea6ef6cff1478b345504a92161b5",
+      "dimensions": [
+        256,
+        16
+      ],
+      "frameCount": 16,
+      "generator": "art_direction/tools/generate_terrain_material_polish_v1.py",
+      "method": "deterministic Pillow pixel primitives at exact final dimensions",
+      "runtimeConsumer": "TileDefinition texture -> TilemapRenderer autotile mask frame"
+    },
+    {
+      "spriteId": "world/tiles/polish_v1/amberwood_plank_autotile",
+      "path": "Assets/TerrainPolishV1/world/tiles/amberwood_plank_autotile.png",
+      "sha256": "f1d4646b8ec7cb4ad43e8e101934e4f37e8675f0fac801aaf318bed0778f2c7f",
+      "dimensions": [
+        256,
+        16
+      ],
+      "frameCount": 16,
+      "generator": "art_direction/tools/generate_terrain_material_polish_v1.py",
+      "method": "deterministic Pillow pixel primitives at exact final dimensions",
+      "runtimeConsumer": "TileDefinition texture -> TilemapRenderer autotile mask frame"
+    }
+  ]
+}

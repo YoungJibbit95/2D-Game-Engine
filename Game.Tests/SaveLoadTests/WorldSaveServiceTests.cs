@@ -1,5 +1,6 @@
 using Game.Core.Saving;
 using Game.Core.World;
+using Game.Core.World.Generation;
 using Xunit;
 
 namespace Game.Tests.SaveLoadTests;
@@ -24,8 +25,36 @@ public sealed class WorldSaveServiceTests : IDisposable
         Assert.Equal(world.HeightTiles, loaded.HeightTiles);
         Assert.Equal(world.Metadata.Seed, loaded.Metadata.Seed);
         Assert.Equal(world.Metadata.SpawnTile, loaded.Metadata.SpawnTile);
+        Assert.Equal(WorldGenerationVersions.Current, loaded.Metadata.GenerationVersion);
         AssertWorldTilesEqual(world, loaded);
         Assert.All(loaded.Chunks.Values, chunk => Assert.False(chunk.IsDirty));
+    }
+
+    [Fact]
+    public void Load_MetadataWithoutGenerationVersionMigratesToLegacyTopology()
+    {
+        Directory.CreateDirectory(_tempDirectory);
+        File.WriteAllText(
+            Path.Combine(_tempDirectory, "metadata.json"),
+            """
+            {
+              "FormatVersion": 2,
+              "Name": "Legacy Infinite World",
+              "Seed": 7719,
+              "CreatedAtUtc": "2026-01-01T00:00:00+00:00",
+              "WidthTiles": 32,
+              "HeightTiles": 160,
+              "IsHorizontallyInfinite": true,
+              "ChunkStorageMode": "LooseFiles",
+              "SpawnTileX": 0,
+              "SpawnTileY": 56
+            }
+            """);
+
+        var loaded = new WorldSaveService().Load(_tempDirectory);
+
+        Assert.Equal(WorldGenerationVersions.Legacy, loaded.Metadata.GenerationVersion);
+        Assert.True(loaded.IsHorizontallyInfinite);
     }
 
     [Fact]

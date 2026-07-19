@@ -27,6 +27,9 @@ public enum AttackInputFailure
     AlreadyBuffered,
     OutsideComboWindow,
     CancelNotAllowed,
+    InsufficientStamina,
+    InsufficientMana,
+    InsufficientAmmo,
     HitWindowClosed,
     DuplicateTarget,
     HitCapacityReached
@@ -416,6 +419,19 @@ public readonly record struct AttackInputCommand(
     ulong Tick,
     ulong Sequence,
     AttackInputKind Kind);
+
+public readonly record struct AttackStartRequest(
+    ulong Tick,
+    ulong InputSequence,
+    string SequenceId,
+    string AttackId,
+    int ComboIndex,
+    AttackResourceCost Cost);
+
+public interface IAttackStartGate
+{
+    AttackInputFailure TryAccept(in AttackStartRequest request);
+}
 
 public readonly record struct AttackRuntimeEvent(
     AttackRuntimeEventKind Kind,

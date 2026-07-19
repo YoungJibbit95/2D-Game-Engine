@@ -4,13 +4,16 @@ public sealed class InfiniteWorldChunkGenerator
 {
     private readonly Func<int, INoiseService> _noiseFactory;
     private readonly WorldRegionPlanner? _regionalPlanner;
+    private readonly int _generationVersion;
 
     public InfiniteWorldChunkGenerator(
         Func<int, INoiseService>? noiseFactory = null,
-        WorldRegionPlanner? regionalPlanner = null)
+        WorldRegionPlanner? regionalPlanner = null,
+        int generationVersion = WorldGenerationVersions.Current)
     {
         _noiseFactory = noiseFactory ?? (seed => new FastNoiseLiteNoiseService(seed));
         _regionalPlanner = regionalPlanner;
+        _generationVersion = WorldGenerationVersions.Normalize(generationVersion);
     }
 
     public World CreateWorld(WorldGenerationProfile profile, int seed, string? name = null)
@@ -20,7 +23,12 @@ public sealed class InfiniteWorldChunkGenerator
         var world = new World(
             widthTiles: GameConstants.ChunkSize,
             heightTiles: profile.HeightTiles,
-            WorldMetadata.CreateDefault(seed) with { Name = name ?? "Infinite World" },
+            WorldMetadata.CreateDefault(seed) with
+            {
+                Name = name ?? "Infinite World",
+                GenerationVersion = _generationVersion,
+                GenerationProfileId = profile.Id
+            },
             isHorizontallyInfinite: true);
 
         var spawnX = 0;
@@ -29,7 +37,8 @@ public sealed class InfiniteWorldChunkGenerator
             _noiseFactory(seed),
             seed,
             spawnX,
-            _regionalPlanner?.PlanAtTileX(spawnX)) - 2);
+            _regionalPlanner?.PlanAtTileX(spawnX),
+            _generationVersion) - 2);
         world.SetMetadata(world.Metadata with { SpawnTile = new TilePos(spawnX, spawnY) });
         return world;
     }
@@ -40,7 +49,7 @@ public sealed class InfiniteWorldChunkGenerator
 
         var chunk = new Chunk(position);
         var tiles = new TileInstance[GameConstants.ChunkSize * GameConstants.ChunkSize];
-        FillTiles(profile, seed, position, tiles);
+        FillTiles(profile, seed, position, tiles, _generationVersion);
         chunk.LoadTiles(tiles);
         return chunk;
     }
@@ -62,7 +71,12 @@ public sealed class InfiniteWorldChunkGenerator
 
         var chunk = world.GetOrCreateChunk(position);
         var tiles = new TileInstance[GameConstants.ChunkSize * GameConstants.ChunkSize];
-        FillTiles(profile, world.Metadata.Seed, position, tiles);
+        FillTiles(
+            profile,
+            world.Metadata.Seed,
+            position,
+            tiles,
+            world.Metadata.GenerationVersion);
         chunk.LoadTiles(tiles);
         return true;
     }
@@ -97,7 +111,8 @@ public sealed class InfiniteWorldChunkGenerator
             _noiseFactory(seed),
             seed,
             tileX,
-            _regionalPlanner?.PlanAtTileX(tileX));
+            _regionalPlanner?.PlanAtTileX(tileX),
+            _generationVersion);
     }
 
     public Func<int, int> CreateSurfaceHeightResolver(WorldGenerationProfile profile, int seed)
@@ -109,10 +124,16 @@ public sealed class InfiniteWorldChunkGenerator
             noise,
             seed,
             tileX,
-            _regionalPlanner?.PlanAtTileX(tileX));
+            _regionalPlanner?.PlanAtTileX(tileX),
+            _generationVersion);
     }
 
-    private void FillTiles(WorldGenerationProfile profile, int seed, ChunkPos position, TileInstance[] tiles)
+    private void FillTiles(
+        WorldGenerationProfile profile,
+        int seed,
+        ChunkPos position,
+        TileInstance[] tiles,
+        int generationVersion)
     {
         var noise = _noiseFactory(seed);
         var dimensions = ResolveDimensions(profile);
@@ -145,12 +166,13 @@ public sealed class InfiniteWorldChunkGenerator
                     tileXs[localX],
                     tileY,
                     region,
-                    biome);
+                    biome,
+                    generationVersion);
             }
         }
     }
 
-    private static TileInstance GenerateTile(
+    private TileInstance GenerateTile(
         WorldGenerationProfile profile,
         IReadOnlyList<WorldDimensionDefinition> dimensions,
         INoiseService noise,
@@ -158,7 +180,8 @@ public sealed class InfiniteWorldChunkGenerator
         int tileX,
         int tileY,
         WorldRegionPlan? region,
-        WorldBiomeResolution? biome)
+        WorldBiomeResolution? biome,
+        int generationVersion)
     {
         if (tileY < 0 || tileY >= profile.HeightTiles)
         {
@@ -166,7 +189,7 @@ public sealed class InfiniteWorldChunkGenerator
         }
 
         var dimension = ResolveDimension(dimensions, tileY);
-        var surfaceY = ComputeSurfaceHeight(profile, noise, seed, tileX, region);
+        var surfaceY = ComputeSurfaceHeight(profile, noise, seed, tileX, region, generationVersion);
         if (TryGenerateStructureTile(
                 profile,
                 dimensions,
@@ -174,12 +197,21 @@ public sealed class InfiniteWorldChunkGenerator
                 seed,
                 tileX,
                 tileY,
-                region) is { } structureTile)
+                region,
+                generationVersion) is { } structureTile)
         {
             return structureTile;
         }
 
-        if (TryGenerateTreeTile(profile, dimensions, noise, seed, tileX, tileY, region) is { } treeTile)
+        if (TryGenerateTreeTile(
+                profile,
+                dimensions,
+                noise,
+                seed,
+                tileX,
+                tileY,
+                region,
+                generationVersion) is { } treeTile)
         {
             return treeTile;
         }
@@ -189,7 +221,7 @@ public sealed class InfiniteWorldChunkGenerator
             return new TileInstance { TileId = KnownTileIds.Air, Light = 255 };
         }
 
-        var dirtDepth = ComputeDirtDepth(profile, seed, tileX, region);
+        var dirtDepth = ComputeDirtDepth(profile, seed, tileX, region, generationVersion);
         var surfaceTileId = ResolveBiomeTileId(biome?.Biome.SurfaceTile, dimension.SurfaceTileId);
         var undergroundTileId = ResolveBiomeTileId(biome?.Biome.UndergroundTile, dimension.SubsurfaceTileId);
         var tileId = tileY == surfaceY
@@ -229,7 +261,8 @@ public sealed class InfiniteWorldChunkGenerator
         int seed,
         int tileX,
         int tileY,
-        WorldRegionPlan? region)
+        WorldRegionPlan? region,
+        int generationVersion)
     {
         if (region is null || region.Structures.Count == 0)
         {
@@ -250,7 +283,13 @@ public sealed class InfiniteWorldChunkGenerator
                 continue;
             }
 
-            var originTileY = ResolveStructureOriginTileY(profile, noise, seed, region, structure);
+            var originTileY = ResolveStructureOriginTileY(
+                profile,
+                noise,
+                seed,
+                region,
+                structure,
+                generationVersion);
             if (!StructureTemplateMaterializer.TryResolveTile(
                     structure,
                     tileX,
@@ -268,7 +307,13 @@ public sealed class InfiniteWorldChunkGenerator
             if (numericTileId == KnownTileIds.Air)
             {
                 var air = TileInstance.Air;
-                air.Light = tileY < ComputeSurfaceHeight(profile, noise, seed, tileX, region)
+                air.Light = tileY < ComputeSurfaceHeight(
+                    profile,
+                    noise,
+                    seed,
+                    tileX,
+                    region,
+                    generationVersion)
                     ? byte.MaxValue
                     : ResolveDimension(dimensions, tileY).AmbientLight;
                 return air;
@@ -285,12 +330,19 @@ public sealed class InfiniteWorldChunkGenerator
         INoiseService noise,
         int seed,
         WorldRegionPlan region,
-        PlannedStructure structure)
+        PlannedStructure structure,
+        int generationVersion)
     {
         if (structure.Placement.Equals("surface", StringComparison.OrdinalIgnoreCase))
         {
             var anchorX = SaturateToInt(structure.TileX);
-            return ComputeSurfaceHeight(profile, noise, seed, anchorX, region) - structure.HeightTiles;
+            return ComputeSurfaceHeight(
+                profile,
+                noise,
+                seed,
+                anchorX,
+                region,
+                generationVersion) - structure.HeightTiles;
         }
 
         if (structure.Placement.Contains("cave", StringComparison.OrdinalIgnoreCase))
@@ -306,11 +358,17 @@ public sealed class InfiniteWorldChunkGenerator
         INoiseService noise,
         int seed,
         int tileX,
-        WorldRegionPlan? region)
+        WorldRegionPlan? region,
+        int generationVersion)
     {
         var baseSurfaceY = Math.Clamp(profile.SurfaceBaseY, 6, profile.HeightTiles - 10);
         var elevationMultiplier = (region?.Biome.Terrain.ElevationMultiplier ?? 1f) *
             (region?.SubBiome?.ElevationMultiplier ?? 1f);
+        if (WorldGenerationVersions.Normalize(generationVersion) >= WorldGenerationVersions.TerrariaTopology)
+        {
+            return WorldSurfaceSampler.GetSurfaceHeight(profile, seed, tileX, elevationMultiplier);
+        }
+
         var amplitude = Math.Max(1, (int)MathF.Round(profile.SurfaceAmplitude * elevationMultiplier));
         var continental = noise.GetNoise(tileX * 0.65f, seed * 0.013f);
         var detail = noise.GetNoise(tileX * 2.25f + 91, seed * 0.021f) * 0.35f;
@@ -318,26 +376,36 @@ public sealed class InfiniteWorldChunkGenerator
         return Math.Clamp(surfaceY, Math.Max(3, profile.HeightTiles / 8), Math.Max(4, profile.HeightTiles / 2));
     }
 
-    private static TileInstance? TryGenerateTreeTile(
+    private TileInstance? TryGenerateTreeTile(
         WorldGenerationProfile profile,
         IReadOnlyList<WorldDimensionDefinition> dimensions,
         INoiseService noise,
         int seed,
         int tileX,
         int tileY,
-        WorldRegionPlan? region)
+        WorldRegionPlan? region,
+        int generationVersion)
     {
         if (tileY <= 0)
         {
             return null;
         }
 
-        var firstCenter = Math.Max(int.MinValue, (long)tileX - 2);
-        var lastCenter = Math.Min(int.MaxValue, (long)tileX + 2);
+        var firstCenter = Math.Max(int.MinValue, (long)tileX - TreeSilhouettePlanner.MaximumHalfWidth);
+        var lastCenter = Math.Min(int.MaxValue, (long)tileX + TreeSilhouettePlanner.MaximumHalfWidth);
         for (var centerValue = firstCenter; centerValue <= lastCenter; centerValue++)
         {
             var centerX = (int)centerValue;
-            var surfaceY = ComputeSurfaceHeight(profile, noise, seed, centerX, region);
+            var treeRegion = region is not null && region.ContainsTileX(centerX)
+                ? region
+                : _regionalPlanner?.PlanAtTileX(centerX);
+            var surfaceY = ComputeSurfaceHeight(
+                profile,
+                noise,
+                seed,
+                centerX,
+                treeRegion,
+                generationVersion);
             if (tileY >= surfaceY)
             {
                 continue;
@@ -349,28 +417,34 @@ public sealed class InfiniteWorldChunkGenerator
                 continue;
             }
 
-            if (!ShouldGrowTreeAt(profile, seed, centerX, region))
+            if (!ShouldGrowTreeAt(profile, seed, centerX, treeRegion))
             {
                 continue;
             }
 
             var height = ComputeTreeHeight(profile, seed, centerX);
             var topY = surfaceY - height;
-            if (topY <= 2)
+            if (topY <= TreeSilhouettePlanner.TopPadding)
             {
                 continue;
             }
 
-            if (tileX == centerX && tileY >= topY && tileY < surfaceY)
+            var variation = StableHash(seed ^ unchecked((int)0x6A09E667), centerX);
+            var cell = TreeSilhouettePlanner.Classify(
+                tileX - centerX,
+                tileY - topY,
+                height,
+                variation,
+                generationVersion);
+            var material = TreeMaterialResolver.Resolve(treeRegion?.Biome);
+            if (cell == TreeSilhouetteCell.Trunk)
             {
-                return LitPassThroughTile(KnownTileIds.Wood);
+                return LitPassThroughTile(material.TrunkTileId);
             }
 
-            var dx = Math.Abs((long)tileX - centerX);
-            var dy = Math.Abs((long)tileY - topY);
-            if (tileY >= topY - 2 && tileY <= topY + 1 && dx + dy <= 3)
+            if (cell == TreeSilhouetteCell.Leaves)
             {
-                return LitPassThroughTile(KnownTileIds.Leaves);
+                return LitPassThroughTile(material.CanopyTileId);
             }
         }
 
@@ -433,8 +507,18 @@ public sealed class InfiniteWorldChunkGenerator
         WorldGenerationProfile profile,
         int seed,
         int tileX,
-        WorldRegionPlan? region)
+        WorldRegionPlan? region,
+        int generationVersion)
     {
+        if (WorldGenerationVersions.Normalize(generationVersion) >= WorldGenerationVersions.TerrariaTopology)
+        {
+            return WorldSurfaceSampler.GetDirtDepth(
+                profile,
+                seed,
+                tileX,
+                region?.Biome.Terrain.SoilDepthMultiplier ?? 1f);
+        }
+
         var dirtDepthMin = Math.Max(1, Math.Min(profile.DirtDepthMin, profile.DirtDepthMax));
         var dirtDepthMax = Math.Max(dirtDepthMin, Math.Max(profile.DirtDepthMin, profile.DirtDepthMax));
         var baseDepth = dirtDepthMin + Math.Abs(StableHash(seed, tileX) % (dirtDepthMax - dirtDepthMin + 1));
@@ -492,20 +576,7 @@ public sealed class InfiniteWorldChunkGenerator
 
     private static bool TryResolveKnownTileId(string tileId, out ushort resolved)
     {
-        resolved = tileId.ToLowerInvariant() switch
-        {
-            "air" => KnownTileIds.Air,
-            "dirt" => KnownTileIds.Dirt,
-            "grass" => KnownTileIds.Grass,
-            "stone" => KnownTileIds.Stone,
-            "wood" => KnownTileIds.Wood,
-            "leaves" => KnownTileIds.Leaves,
-            "copper_ore" => KnownTileIds.CopperOre,
-            "iron_ore" => KnownTileIds.IronOre,
-            _ => ushort.MaxValue
-        };
-
-        return resolved != ushort.MaxValue;
+        return KnownTileIds.TryResolveContentId(tileId, out resolved);
     }
 
     private static bool ShouldFillWaterPocket(

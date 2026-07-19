@@ -1,0 +1,21 @@
+{
+  "id": "forest_day_foragers",
+  "biomeIds": ["forest"],
+  "verticalLayerIds": ["surface"],
+  "time": "day",
+  "weight": 1.0,
+  "minDistanceTiles": 20,
+  "maxDistanceTiles": 44,
+  "cooldownSeconds": 6.0,
+  "maxActiveGlobal": 18,
+  "populationRegionSizeTiles": 96,
+  "maxActiveInRegion": 7,
+  "minRoleSelections": 4,
+  "maxRoleSelections": 4,
+  "roles": [
+    { "id": "flock", "spawnRuleId": "forest_day_flock_bird", "weight": 1.4, "minCount": 2, "maxCount": 2 },
+    { "id": "forager", "spawnRuleId": "forest_day_squirrel", "weight": 1.2, "minCount": 1, "maxCount": 1 },
+    { "id": "grazer", "spawnRuleId": "forest_day_rabbit", "weight": 1.0, "minCount": 1, "maxCount": 1 },
+    { "id": "guard", "spawnRuleId": "forest_boar", "weight": 0.45, "minCount": 1, "maxCount": 1 }
+  ]
+}

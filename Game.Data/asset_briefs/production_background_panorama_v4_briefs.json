@@ -1,0 +1,86 @@
+{
+  "version": 1,
+  "scope": "background_panorama_v4_imagegen",
+  "globalStyle": "YjsE yjse-pixel-v1 opaque 4:1 side-view panorama; modern painterly light depth; clean medium-fine hard pixel clusters; top-left light; low-frequency detail; no blur, antialiasing, smooth gradients, text, or watermark.",
+  "globalNegativePrompt": "giant foreground framing objects, noisy one-pixel texture, repeated stamps, interactable-looking props, bilateral symmetry, soft airbrush, blur, antialiasing, photographic detail, bokeh, text, logo, border, watermark, transparency",
+  "globalRequirements": [
+    "Generate each concept source with the built-in image_gen tool.",
+    "Export exactly 1024x256 RGBA with alpha fixed to 255.",
+    "Use only colors declared in Game.Data/art_direction/yjse_pixel_style.json.",
+    "Preserve finer detail than V3 through a 512x128 logical raster and nearest-neighbor 2x delivery.",
+    "Keep 45-55 percent of the upper frame as quiet sky or atmospheric cavern void.",
+    "Keep the lower half readable as three or four separated silhouette/depth planes behind gameplay.",
+    "Keep left and right columns byte-identical and visually inspect the wrapped period in the V4 contact sheet.",
+    "Add new versioned IDs and paths; do not overwrite existing background assets."
+  ],
+  "briefs": [
+    {
+      "spriteId": "world/backgrounds/forest_parallax_layer_v4",
+      "outputPath": "sprites/world/backgrounds/forest_parallax_layer_v4.png",
+      "width": 1024,
+      "height": 256,
+      "subject": "Temperate forest panorama with calm sky, soft mountain depth, mixed tree silhouettes, and a secondary reclaimed ruin.",
+      "prompt": "Create a clearly readable temperate Forest panorama for a 4:1 horizontally repeating YjsE parallax background. Keep the upper 45-55 percent as calm pale atmospheric sky and negative space with only a few broad faint cloud bands. Build the lower half from soft distant blue-gray mountains, misty foothills, a far mixed forest, a middle tree line, and a restrained near ridge as four separated depth planes. Use deciduous crowns, slender conifers, small boulders, and one subtle moss-softened ruin silhouette, with landmarks secondary and away from both edges. Render clean hand-authored modern pixel art with painterly light depth, medium-fine clusters, controlled low-frequency detail, top-left light, and restrained YjsE greens, blue-grays, pale sky, and muted stone. Keep edge sky and ridges low-detail and continuous. Opaque; no giant foreground objects, characters, creatures, interactables, UI, text, logo, border, watermark, blur, antialiasing, repeated tree stamps, dense texture, or pixel noise.",
+      "requirements": [
+        "Soft mountain, foothill, far-tree, mid-tree, and near-ridge depth remains readable at native scale.",
+        "The upper field stays calm enough for gameplay silhouettes and weather overlays.",
+        "No tree, ruin, or rock becomes a giant foreground framing object.",
+        "Final PNG is opaque, yjse-pixel-v1 palette-only, and horizontal-seam-safe."
+      ],
+      "tags": ["world", "background", "forest", "mountains", "tree-depth", "parallax", "tileable", "version-4"],
+      "runtimeIdTarget": "world/backgrounds/forest_parallax_layer_v4",
+      "sourcePromptId": "background_panorama_v4_forest_imagegen"
+    },
+    {
+      "spriteId": "world/backgrounds/amber_grove_parallax_layer_v4",
+      "outputPath": "sprites/world/backgrounds/amber_grove_parallax_layer_v4.png",
+      "width": 1024,
+      "height": 256,
+      "subject": "Warm Amber Grove panorama with resin trees, hazy ridges, restrained standing stones, and a root-reclaimed ruin.",
+      "prompt": "Create a clearly distinct Amber Grove panorama for a 4:1 horizontally repeating YjsE parallax background. Keep the upper 45-55 percent as calm honey-apricot atmospheric sky and negative space with only two or three broad pale cloud bands. Build the lower half from hazy ochre ridges, a far grove, a middle grove, and a low near ridge as four separated depth planes. Show ancient resin-rich trees with slender dark trunks, rounded amber and muted green crowns, sparse glowing resin seams, one small broken stone-arch ruin reclaimed by roots, and restrained standing-stone fragments, with unique landmarks away from both edges. Render clean hand-authored modern pixel art with painterly light depth, medium-fine clusters, broad controlled shapes, top-left light, and restrained YjsE honey, copper, moss, plum-shadow, pale-sky, and stone colors. Keep edge sky, grove, and ridge low-detail and continuous. Opaque; no giant foreground objects, characters, creatures, enterable buildings, doors, chests, UI, text, logo, border, watermark, blur, antialiasing, excessive orange saturation or glow, repeated stamps, dense texture, or pixel noise.",
+      "requirements": [
+        "Resin-tree silhouettes and the secondary ruin distinguish Amber Grove from Forest at native scale.",
+        "Warm light remains restrained enough for gameplay contrast.",
+        "No tree, resin feature, ruin, or stone becomes a giant foreground framing object.",
+        "Final PNG is opaque, yjse-pixel-v1 palette-only, and horizontal-seam-safe."
+      ],
+      "tags": ["world", "background", "amber-grove", "resin-trees", "ruins", "parallax", "tileable", "version-4"],
+      "runtimeIdTarget": "world/backgrounds/amber_grove_parallax_layer_v4",
+      "sourcePromptId": "background_panorama_v4_amber_grove_imagegen"
+    },
+    {
+      "spriteId": "world/backgrounds/twilight_marsh_parallax_layer_v4",
+      "outputPath": "sprites/world/backgrounds/twilight_marsh_parallax_layer_v4.png",
+      "width": 1024,
+      "height": 256,
+      "subject": "Twilight marsh panorama with quiet dusk, fog banks, layered mangroves, reed islands, shallow water, and restrained reflections.",
+      "prompt": "Create a clearly distinct Twilight Marsh panorama for a 4:1 horizontally repeating YjsE parallax background. Keep the upper 45-55 percent as quiet blue-teal dusk atmosphere and open misty negative space with a thin muted rose horizon and only a few broad low cloud wisps. Build the lower half from fogged far canopy, distant mangroves, middle roots and water islands, and low near water and reeds as four separated depth planes. Show sparse thin trunks, arching roots, calm reflective channels, reed clumps, horizontal fog banks, and only a restrained handful of tiny natural firefly points. Render clean hand-authored modern pixel art with painterly light depth, medium-fine clusters, broad controlled silhouettes and reflections, and restrained YjsE teal, blue, violet, moss, fog, and warm-horizon colors. Keep edge fog, water line, and mangrove silhouettes low-detail and continuous. Opaque; no giant foreground objects, characters, creatures, huts, docks, lanterns, boats, collectible-looking lights, UI, text, logo, border, watermark, blur, antialiasing, heavy rain, repeated stamps, dense texture, or pixel noise.",
+      "requirements": [
+        "Water, mangrove roots, fog, and dusk color distinguish the marsh at native scale.",
+        "Reflections remain broad and subordinate to gameplay readability.",
+        "No trunk, vine, root, or plant becomes a giant foreground framing object.",
+        "Final PNG is opaque, yjse-pixel-v1 palette-only, and horizontal-seam-safe."
+      ],
+      "tags": ["world", "background", "twilight-marsh", "water", "mangroves", "fog", "parallax", "tileable", "version-4"],
+      "runtimeIdTarget": "world/backgrounds/twilight_marsh_parallax_layer_v4",
+      "sourcePromptId": "background_panorama_v4_twilight_marsh_imagegen"
+    },
+    {
+      "spriteId": "world/backgrounds/crystal_depths_parallax_layer_v4",
+      "outputPath": "sprites/world/backgrounds/crystal_depths_parallax_layer_v4.png",
+      "width": 1024,
+      "height": 256,
+      "subject": "Underground Crystal Depths panorama with a quiet cavern void, layered walls and arches, sparse crystals, and no surface sky.",
+      "prompt": "Create a clearly distinct Crystal Depths underground panorama for a 4:1 horizontally repeating YjsE parallax background. Show no surface sky, sun, moon, clouds, trees, or outdoor horizon. Keep the upper 45-55 percent as a vast quiet cavern void with subdued blue-violet atmospheric haze, a very high softly implied ceiling, and only a few small distant stalactite silhouettes. Build the lower half from a far chamber wall, distant arch, middle ledge and crystal plane, and low near floor as four separated depth planes. Keep slender blue-cyan and violet crystal clusters sparse, geological, below 15 percent of the frame, away from both edges, and never item-like. Render clean hand-authored modern pixel art with painterly light depth, medium-fine clusters, broad controlled rock planes, and restrained YjsE charcoal-violet, indigo, blue, cyan, and pale mineral-haze colors. Keep edge haze, wall, and floor low-detail and continuous. Opaque; no surface elements, giant foreground crystals, columns, stalactites, stalagmites, arches, characters, creatures, ore icons, pickups, doors, UI, text, logo, border, watermark, blur, antialiasing, excessive glow, repeated stamps, dense texture, or pixel noise.",
+      "requirements": [
+        "The upper quiet field reads as cavern atmosphere rather than surface sky.",
+        "Four rock-depth planes remain readable without bright ore-like competition.",
+        "Crystals remain sparse accents and no formation becomes a giant foreground frame.",
+        "Final PNG is opaque, yjse-pixel-v1 palette-only, and horizontal-seam-safe."
+      ],
+      "tags": ["world", "background", "crystal-depths", "underground", "cavern", "crystals", "parallax", "tileable", "version-4"],
+      "runtimeIdTarget": "world/backgrounds/crystal_depths_parallax_layer_v4",
+      "sourcePromptId": "background_panorama_v4_crystal_depths_imagegen"
+    }
+  ]
+}

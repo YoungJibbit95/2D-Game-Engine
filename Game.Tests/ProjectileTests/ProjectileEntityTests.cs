@@ -1,3 +1,5 @@
+using Game.Core.Entities;
+using Game.Core.Physics;
 using Game.Core.Projectiles;
 using Game.Core.World;
 using System.Numerics;
@@ -89,6 +91,86 @@ public sealed class ProjectileEntityTests
 
         Assert.True(velocityAfterHoming.Y < 0);
         Assert.Equal(velocityAfterHoming, projectile.Velocity);
+    }
+
+    [Fact]
+    public void EntityManager_UpdateSuppliesSpatialHomingTargetsWithoutCallerArrays()
+    {
+        var world = new World(32, 32, WorldMetadata.CreateDefault(seed: 1));
+        var entities = new EntityManager(spatialCellSize: 32);
+        entities.Add(new EntityFactory(new TileCollisionResolver()).CreateEnemy(
+            new EntityDefinition
+            {
+                Id = "flying-target",
+                DisplayName = "Flying Target",
+                TexturePath = "entities/flying-target",
+                MaxHealth = 10,
+                ContactDamage = 0,
+                MovementMode = EntityMovementMode.Flying
+            },
+            new Vector2(96, 96)));
+        var projectile = new ProjectileFactory().Create(
+            CreateDefinition() with
+            {
+                HomingRange = 256,
+                HomingTurnRateRadiansPerSecond = MathF.PI
+            },
+            new Vector2(32, 32),
+            Vector2.UnitX,
+            ownerEntityId: 99,
+            ownerFaction: EntityFaction.Friendly);
+        entities.Add(projectile);
+
+        entities.UpdateAll(world, 0.25f);
+
+        Assert.True(projectile.Velocity.Y > 0);
+    }
+
+    [Fact]
+    public void EntityManager_BudgetsDenseHomingQueriesAndRotatesDeferredProjectiles()
+    {
+        const int projectileCount = 257;
+        var world = new World(64, 64, WorldMetadata.CreateDefault(seed: 1));
+        var entities = new EntityManager(spatialCellSize: 256);
+        entities.Add(new EntityFactory(new TileCollisionResolver()).CreateEnemy(
+            new EntityDefinition
+            {
+                Id = "homing-target",
+                DisplayName = "Homing Target",
+                TexturePath = "entities/homing-target",
+                MaxHealth = 10,
+                ContactDamage = 0,
+                MovementMode = EntityMovementMode.Flying
+            },
+            new Vector2(64, 128)));
+        var projectiles = new ProjectileEntity[projectileCount];
+        var definition = CreateDefinition() with
+        {
+            HomingRange = 512,
+            HomingTurnRateRadiansPerSecond = MathF.PI
+        };
+        for (var index = 0; index < projectiles.Length; index++)
+        {
+            projectiles[index] = new ProjectileFactory().Create(
+                definition,
+                new Vector2(64, 64),
+                Vector2.UnitX,
+                ownerEntityId: 10_000 + index,
+                ownerFaction: EntityFaction.Friendly);
+            entities.Add(projectiles[index]);
+        }
+
+        entities.UpdateAll(world, 0.01f);
+
+        Assert.Equal(256, entities.HomingQueriesPreparedLastUpdate);
+        Assert.Equal(1, entities.HomingQueriesDeferredLastUpdate);
+        Assert.Equal(0f, projectiles[^1].Velocity.Y);
+
+        entities.UpdateAll(world, 0.01f);
+
+        Assert.Equal(256, entities.HomingQueriesPreparedLastUpdate);
+        Assert.Equal(1, entities.HomingQueriesDeferredLastUpdate);
+        Assert.True(projectiles[^1].Velocity.Y > 0f);
     }
 
     [Fact]

@@ -31,6 +31,18 @@ public static class WaterReflectionSurfacePlanner
         in PresentationQualityProfile profile,
         Span<WaterReflectionSurface> destination)
     {
+        var palette = WaterPresentationPaletteCatalog.ClearWater;
+        return Build(world, camera, viewport, profile, palette, destination);
+    }
+
+    public static WaterReflectionPlanTelemetry Build(
+        World world,
+        Camera2D camera,
+        Rectangle viewport,
+        in PresentationQualityProfile profile,
+        in WaterPresentationPalette palette,
+        Span<WaterReflectionSurface> destination)
+    {
         ArgumentNullException.ThrowIfNull(world);
         ArgumentNullException.ThrowIfNull(camera);
         var maximum = Math.Min(destination.Length, profile.Budget.MaxReflectionSurfaces);
@@ -103,6 +115,7 @@ public static class WaterReflectionSurfacePlanner
                             runEndExclusive,
                             Math.Min((long)world.HeightTiles, tileY + stepY),
                             runKind,
+                            palette,
                             out var surface))
                     {
                         destination[count++] = surface;
@@ -165,6 +178,7 @@ public static class WaterReflectionSurfacePlanner
         long rightTileExclusive,
         long bottomTileExclusive,
         ReflectionSurfaceKind kind,
+        in WaterPresentationPalette palette,
         out WaterReflectionSurface surface)
     {
         var left = WorldToScreenX(leftTile * GameConstants.TileSize, camera, viewport);
@@ -191,8 +205,18 @@ public static class WaterReflectionSurfacePlanner
 
         var phase = unchecked((uint)leftTile * 0x9E3779B9u ^ (uint)topTile * 0x85EBCA6Bu);
         surface = kind == ReflectionSurfaceKind.Water
-            ? new WaterReflectionSurface(bounds, kind, new Color(118, 177, 211), 0.42f, phase)
-            : new WaterReflectionSurface(bounds, kind, new Color(174, 205, 220), 0.22f, phase);
+            ? new WaterReflectionSurface(
+                bounds,
+                kind,
+                palette.ReflectionTint,
+                palette.WaterReflectivity,
+                phase)
+            : new WaterReflectionSurface(
+                bounds,
+                kind,
+                palette.WetSurfaceTint,
+                palette.WetSurfaceReflectivity,
+                phase);
         return true;
     }
 

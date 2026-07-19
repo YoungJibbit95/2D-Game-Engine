@@ -9,6 +9,7 @@ public sealed class UndergroundWallGenerationStep : IWorldGenerationStep
     public void Apply(WorldGenerationContext context)
     {
         var world = context.World;
+        var tiles = context.Tiles;
         var profile = context.Profile;
         if (profile.DirtWallId == 0 || profile.StoneWallId == 0)
         {
@@ -26,7 +27,7 @@ public sealed class UndergroundWallGenerationStep : IWorldGenerationStep
             var startY = Math.Clamp(context.SurfaceHeights[x] + startOffset, 0, world.HeightTiles);
             for (var y = startY; y < world.HeightTiles; y++)
             {
-                var tile = world.GetTile(x, y);
+                var tile = tiles.GetTile(x, y);
                 var coverage = tile.IsSolid ? solidCoverage : caveCoverage;
                 if (coverage <= 0f || SamplePatch(context, x, y, patchScale) > coverage)
                 {
@@ -36,7 +37,7 @@ public sealed class UndergroundWallGenerationStep : IWorldGenerationStep
                 var useStoneWall = y >= context.SurfaceHeights[x] + dirtDepth ||
                     tile.TileId is KnownTileIds.Stone or KnownTileIds.CopperOre or KnownTileIds.IronOre;
                 WorldGenerationTileMutations.SetWall(
-                    world,
+                    tiles,
                     x,
                     y,
                     useStoneWall ? profile.StoneWallId : profile.DirtWallId);

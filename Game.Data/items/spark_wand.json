@@ -16,6 +16,7 @@
   "actions": [
     {
       "kind": "Cast",
+      "attackSequence": "weapon.spark_wand.cast",
       "projectile": "spark_bolt",
       "projectileSpeedMultiplier": 1.08
     }

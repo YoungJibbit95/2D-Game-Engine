@@ -232,4 +232,40 @@ public sealed class ChunkStreamingPlannerTests
         Assert.True(maxCenter > 100_000);
         Assert.Equal(4_097, sequence);
     }
+
+    [Fact]
+    public void CreateRequestSnapshot_CompactWindowsKeepPlanningAllocationBounded()
+    {
+        var world = new World(
+            Game.Core.GameConstants.ChunkSize,
+            160,
+            WorldMetadata.CreateDefault(seed: 912_445),
+            isHorizontallyInfinite: true);
+        var planner = new ChunkStreamingPlanner();
+        var options = new ChunkStreamingOptions
+        {
+            LoadMarginChunks = 2,
+            UnloadMarginChunks = 5,
+            MaxChunkOperationsPerUpdate = 8
+        };
+        var visible = new RectI(-48, 32, 96, 64);
+
+        for (var index = 0; index < 128; index++)
+        {
+            GC.KeepAlive(planner.CreateRequestSnapshot(world, visible, 4, index, options).ToPlan());
+        }
+
+        const int sampleCount = 1_024;
+        var before = GC.GetAllocatedBytesForCurrentThread();
+        for (var index = 0; index < sampleCount; index++)
+        {
+            GC.KeepAlive(planner.CreateRequestSnapshot(world, visible, 4, index, options).ToPlan());
+        }
+
+        var allocatedBytesPerPlan = (GC.GetAllocatedBytesForCurrentThread() - before) / (double)sampleCount;
+
+        Assert.True(
+            allocatedBytesPerPlan <= 2_500,
+            $"Streaming plan allocated {allocatedBytesPerPlan:0.0} B per unchanged camera snapshot.");
+    }
 }

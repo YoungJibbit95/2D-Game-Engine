@@ -79,10 +79,28 @@ public static class PresentationSettingsAdapter
             shadowStrength: settings.LightingBlendStrength,
             bloomStrength: settings.TorchBloomStrength) with
         {
-            CaveResidualLight = Math.Clamp(settings.CaveAmbientLight, 0f, 1f),
+            CaveResidualLight = ResolveCaveResidualLight(settings, livingWorld),
             ShadowStrength = Math.Clamp(settings.LightingBlendStrength, 0f, 1f),
             BloomStrength = Math.Clamp(settings.TorchBloomStrength, 0f, 1f)
         };
+    }
+
+    internal static float ResolveCaveResidualLight(
+        RenderingSettings settings,
+        in LivingWorldFrameSnapshot livingWorld)
+    {
+        ArgumentNullException.ThrowIfNull(settings);
+        var configuredFloor = Math.Clamp(settings.CaveAmbientLight, 0f, 0.65f);
+        if (!livingWorld.IsUnderground)
+        {
+            return configuredFloor;
+        }
+
+        // Authored cave ambience is a biome contract (crystal glow, mushroom
+        // luminescence, etc.). The player setting remains a global minimum,
+        // while intentionally dark biomes continue to use that minimum.
+        var authoredFloor = Math.Clamp(livingWorld.AmbientLight * 0.9f, 0f, 0.65f);
+        return Math.Max(configuredFloor, authoredFloor);
     }
 
     public static PresentationQualityTier ResolveTier(int quality)
@@ -119,7 +137,8 @@ public static class PresentationSettingsAdapter
             ? 0
             : Math.Max(1, DivideRoundUp(settings.BlurRadiusPixels, divisor));
         var softnessRadius = settings.SoftShadows
-            ? (int)MathF.Ceiling(requestedBlurTexels * Math.Clamp(settings.ShadowSoftness, 0f, 1f))
+            ? (int)MathF.Ceiling(
+                requestedBlurTexels * (0.75f + Math.Clamp(settings.ShadowSoftness, 0f, 1f)))
             : 0;
         var raySteps = Math.Min(
             settings.RaymarchStepBudget,

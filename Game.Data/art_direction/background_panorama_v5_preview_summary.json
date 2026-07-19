@@ -1,0 +1,93 @@
+{
+  "schemaVersion": 1,
+  "waveId": "background_panorama_v5_imagegen",
+  "preview": "art_direction/background_panorama_v5_contact_sheet.png",
+  "dimensions": [
+    2060,
+    1234
+  ],
+  "sha256": "5c3f636cdff2a9c67e172f2e682c44d43792771e69dce7a051f5ebeadce46502",
+  "views": [
+    "native-period",
+    "horizontal-wrap-last-384-plus-first-1152"
+  ],
+  "deliveryRaster": [
+    1536,
+    384
+  ],
+  "sourceResampling": "none-native-crop",
+  "quietUpperFieldTargetPercent": [
+    30,
+    40
+  ],
+  "assets": [
+    {
+      "label": "FOREST",
+      "path": "sprites/world/backgrounds/forest_parallax_layer_v5.png",
+      "dimensions": [
+        1536,
+        384
+      ],
+      "mode": "RGBA",
+      "sha256": "7272c164ba699166ecc1e10144ac532eae156e66482effee201d77c7a4f2e6b1",
+      "fileBytes": 714031,
+      "uniqueColorCount": 256,
+      "alphaValues": [
+        255
+      ],
+      "horizontalSeamColumnsEqual": true,
+      "maximumWrapSeamChannelDelta": 0
+    },
+    {
+      "label": "AMBER GROVE",
+      "path": "sprites/world/backgrounds/amber_grove_parallax_layer_v5.png",
+      "dimensions": [
+        1536,
+        384
+      ],
+      "mode": "RGBA",
+      "sha256": "3f3292e235b3cdfe0106cf682161f16a950aad218d145777c484a60430720571",
+      "fileBytes": 1097422,
+      "uniqueColorCount": 256,
+      "alphaValues": [
+        255
+      ],
+      "horizontalSeamColumnsEqual": true,
+      "maximumWrapSeamChannelDelta": 0
+    },
+    {
+      "label": "TWILIGHT MARSH",
+      "path": "sprites/world/backgrounds/twilight_marsh_parallax_layer_v5.png",
+      "dimensions": [
+        1536,
+        384
+      ],
+      "mode": "RGBA",
+      "sha256": "89dcc5b56610e5c18fc85b8afa0a6888ccf6e585edc6d4d0b5cd658addaab991",
+      "fileBytes": 605071,
+      "uniqueColorCount": 256,
+      "alphaValues": [
+        255
+      ],
+      "horizontalSeamColumnsEqual": true,
+      "maximumWrapSeamChannelDelta": 0
+    },
+    {
+      "label": "CRYSTAL DEPTHS",
+      "path": "sprites/world/backgrounds/crystal_depths_parallax_layer_v5.png",
+      "dimensions": [
+        1536,
+        384
+      ],
+      "mode": "RGBA",
+      "sha256": "3003f6044df43f5a7ccab41f08d7b656c5628ee8df40b024fed1603f893de13e",
+      "fileBytes": 708128,
+      "uniqueColorCount": 256,
+      "alphaValues": [
+        255
+      ],
+      "horizontalSeamColumnsEqual": true,
+      "maximumWrapSeamChannelDelta": 0
+    }
+  ]
+}

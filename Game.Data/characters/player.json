@@ -4,7 +4,7 @@
   "width": 12,
   "height": 28,
   "defaultAppearance": {
-    "bodySpriteId": "entities/player/character_v1_wave04/body",
+    "bodySpriteId": "entities/player/character_v2_wave06/body",
     "skinTone": "#c98f62",
     "hairStyleId": "short",
     "clothesStyleId": "blue_jeans",
@@ -33,72 +33,72 @@
   "runtimeAnimationContent": {
     "rigs": [
       {
-        "id": "player.character-v1.wave04",
+        "id": "player.character-v2.wave06",
         "layers": [
           {
             "id": "body",
             "appearanceSlot": "Body",
             "animationTrackId": "body",
             "drawOrder": 0,
-            "pivot": { "x": 8, "y": 32 }
+            "pivot": { "x": 12, "y": 40 }
           },
           {
             "id": "clothes",
             "appearanceSlot": "Clothing",
             "animationTrackId": "body",
             "drawOrder": 10,
-            "pivot": { "x": 8, "y": 32 }
+            "pivot": { "x": 12, "y": 40 }
           },
           {
             "id": "hair",
             "appearanceSlot": "Hair",
             "animationTrackId": "body",
             "drawOrder": 20,
-            "pivot": { "x": 8, "y": 32 }
+            "pivot": { "x": 12, "y": 40 }
           },
           {
             "id": "armor",
             "appearanceSlot": "Armor",
             "animationTrackId": "body",
             "drawOrder": 30,
-            "pivot": { "x": 8, "y": 32 }
+            "pivot": { "x": 12, "y": 40 }
           },
           {
             "id": "equipment",
             "appearanceSlot": "Tool",
             "animationTrackId": "body",
             "drawOrder": 40,
-            "pivot": { "x": 8, "y": 32 }
+            "pivot": { "x": 12, "y": 40 }
           }
         ]
       }
     ],
     "characterProfiles": [
       {
-        "id": "player.wave04",
-        "rigId": "player.character-v1.wave04",
-        "stateMachineId": "player.wave04.states",
+        "id": "player.wave06",
+        "rigId": "player.character-v2.wave06",
+        "stateMachineId": "player.wave06.states",
         "spriteBindings": [
           {
             "slot": "Body",
-            "spriteId": "entities/player/character_v1_wave04/body"
+            "spriteId": "entities/player/character_v2_wave06/body"
           },
           {
             "slot": "Clothing",
-            "spriteId": "entities/player/character_v1_wave04/clothes"
+            "spriteId": "entities/player/character_v2_wave06/clothes"
           },
           {
             "slot": "Hair",
-            "spriteId": "entities/player/character_v1_wave04/hair"
+            "spriteId": "entities/player/character_v2_wave06/hair"
           },
           {
             "slot": "Armor",
-            "spriteId": "entities/player/character_v1_wave04/armor",
+            "spriteId": "entities/player/character_v2_wave06/armor",
             "visibleByDefault": false
           },
           {
             "slot": "Tool",
-            "spriteId": "entities/player/character_v1_wave04/equipment"
+            "spriteId": "entities/player/character_v2_wave06/equipment"
           }
         ],
         "actions": [
@@ -135,5 +135,5 @@
       }
     ]
   },
-  "tags": ["player", "editable", "side-view"]
+  "tags": ["player", "editable", "side-view", "wave-06", "24x40"]
 }

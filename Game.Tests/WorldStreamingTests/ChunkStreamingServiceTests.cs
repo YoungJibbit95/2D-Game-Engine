@@ -4,10 +4,12 @@ using Game.Core.Saving;
 using Game.Core.World;
 using Game.Core.World.Generation;
 using Game.Core.World.Streaming;
+using Game.Tests.PerformanceTests;
 using Xunit;
 
 namespace Game.Tests.WorldStreamingTests;
 
+[Collection(LongSessionPerformanceCollection.Name)]
 public sealed class ChunkStreamingServiceTests : IDisposable
 {
     private readonly string _tempDirectory = Path.Combine(

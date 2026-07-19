@@ -11,6 +11,52 @@ namespace Game.Tests.EntityTests;
 
 public sealed class FactionAndAiTests
 {
+    [Fact]
+    public void AiProfile_RejectsEnabledSingleMemberFlock()
+    {
+        var profile = new AiProfileDefinition
+        {
+            FlockRadius = 64,
+            FlockWeight = 0.5f,
+            MinFlockSize = 1
+        };
+
+        Assert.Throws<Game.Core.Data.RegistryValidationException>(() =>
+            AiProfileDefinition.Validate("unsafe-flock", profile));
+    }
+
+    [Fact]
+    public void EnemyEntity_RejectsNullAiBehavior()
+    {
+        Assert.Throws<ArgumentNullException>(() => new EnemyEntity(
+            "invalid-ai",
+            Vector2.Zero,
+            new Vector2(12, 10),
+            new HealthComponent(10),
+            null!,
+            new TileCollisionResolver()));
+    }
+
+    [Fact]
+    public void EntityManager_UpdateMovesSpatialQueryMembership()
+    {
+        var world = CreateGroundWorld();
+        var entities = new EntityManager(16);
+        var actor = CreateActor(
+            "moving-bird",
+            EntityFaction.Friendly,
+            AiBehaviorKind.None,
+            new Vector2(32, 48),
+            profile => profile with { Kind = AiBehaviorKind.None });
+        actor.Body.Velocity = new Vector2(64, 0);
+        entities.Add(actor);
+
+        entities.UpdateAll(world, 0.5f);
+
+        Assert.DoesNotContain(actor, entities.Query(new RectI(28, 44, 20, 24)));
+        Assert.Contains(actor, entities.Query(new RectI(60, 44, 20, 24)));
+    }
+
     [Theory]
     [InlineData(EntityFaction.Friendly, EntityFaction.Friendly, EntityDisposition.Friendly)]
     [InlineData(EntityFaction.Hostile, EntityFaction.Hostile, EntityDisposition.Friendly)]

@@ -1,0 +1,86 @@
+{
+  "version": 1,
+  "scope": "background_panorama_v5_imagegen",
+  "globalStyle": "Native 1536x384 opaque RGBA side-view panorama for a modern 2D sandbox. Pixel-art-inspired silhouettes and material breakup with clean painterly atmosphere, fine native detail, restrained gradients and no low-resolution upscale artifacts.",
+  "globalNegativePrompt": "nearest-neighbor upscale, chunky 8-bit blocks, giant foreground objects, central focal prop, repeated stamps, characters, creatures, buildings, interactable-looking objects, text, UI, logo, border, watermark, black crush, film grain, photographic noise",
+  "globalRequirements": [
+    "Generate every concept source with the built-in image_gen tool at dimensions larger than the 1536x384 delivery crop.",
+    "Export exactly 1536x384 RGBA with alpha fixed to 255 and no source-to-delivery raster upscale.",
+    "Retain genuine one-to-four-pixel native texture and silhouette detail after a 256-color biome-specific palette reduction.",
+    "Reserve 30-40 percent of the upper frame as low-frequency sky, mist or cavern-vault atmosphere.",
+    "Separate distant, middle and near planes through value, hue, edge sharpness and atmospheric perspective.",
+    "Keep both horizontal edge bands compositionally compatible and make the outer columns byte-identical.",
+    "Validate the period and wrapped period side by side in the V5 contact sheet.",
+    "Use additive versioned IDs and paths; never overwrite V4 or earlier assets."
+  ],
+  "briefs": [
+    {
+      "spriteId": "world/backgrounds/forest_parallax_layer_v5",
+      "outputPath": "sprites/world/backgrounds/forest_parallax_layer_v5.png",
+      "width": 1536,
+      "height": 384,
+      "subject": "Temperate living forest with cool atmospheric mountains, mixed evergreen and broadleaf canopy planes, clearings and mist ribbons.",
+      "prompt": "Create a native high-resolution Forest biome panorama for a polished side-view 2D game. Use a quiet blue-cyan upper sky, distant blue-grey ridgelines, layered evergreen and broadleaf silhouettes, intermittent clearings and subtle mist ribbons. Keep terrain mostly in the lower two thirds and separate far, middle and near planes clearly. Use clean modern pixel-art-inspired painted forms with fine native foliage and rock detail, restrained soft atmospheric shading and readable morning light. Make the 4:1 composition horizontally periodic and seam-safe, with matching edge colors, heights, silhouettes and texture. No text, figures, buildings, giant foreground trunks, central focal object, blur, film grain, photorealism or visible square pixels.",
+      "requirements": [
+        "Forest reads cool, humid and natural rather than tropical or amber.",
+        "The sky and distant mountains stay calm enough for weather and entity silhouettes.",
+        "Mixed canopy species avoid obvious repeated stamps.",
+        "Final PNG is native-resolution, opaque, 256-color and horizontal-seam-safe."
+      ],
+      "tags": ["forest", "mountains", "mixed-canopy", "mist", "modern-painted-pixel", "version-5"],
+      "runtimeIdTarget": "world/backgrounds/forest_parallax_layer_v5",
+      "sourcePromptId": "background_panorama_v5_forest_imagegen"
+    },
+    {
+      "spriteId": "world/backgrounds/amber_grove_parallax_layer_v5",
+      "outputPath": "sprites/world/backgrounds/amber_grove_parallax_layer_v5.png",
+      "width": 1536,
+      "height": 384,
+      "subject": "Ancient amber woodland with honey-gold canopy, dark slender trunks, pale stone terraces, resin pools and ochre distance.",
+      "prompt": "Create a native high-resolution Amber Grove biome panorama for a polished side-view 2D game. Use a calm apricot upper sky, hazy ochre hills, layered groves of ancient honey-gold trees, dark slender trunks with sparse hanging seed clusters, pale stone terraces and restrained resin-colored pools. Separate far, middle and near planes through atmospheric value and edge detail. Use clean modern pixel-art-inspired painted forms with rich native foliage and stone texture, luminous late-afternoon light and controlled warm contrast. Make the 4:1 composition horizontally periodic and seam-safe, with matching edge colors, heights, silhouettes and texture. No text, figures, buildings, giant foreground trees, central focal object, blur, film grain, photorealism or visible square pixels.",
+      "requirements": [
+        "Amber Grove is immediately distinct from Forest through tree shape, warm light and terraced geology.",
+        "Warm values retain enough cool shadow separation for gameplay readability.",
+        "Resin and stone remain environmental depth details rather than interactable props.",
+        "Final PNG is native-resolution, opaque, 256-color and horizontal-seam-safe."
+      ],
+      "tags": ["amber-grove", "resin-trees", "terraces", "ochre", "modern-painted-pixel", "version-5"],
+      "runtimeIdTarget": "world/backgrounds/amber_grove_parallax_layer_v5",
+      "sourcePromptId": "background_panorama_v5_amber_grove_imagegen"
+    },
+    {
+      "spriteId": "world/backgrounds/twilight_marsh_parallax_layer_v5",
+      "outputPath": "sprites/world/backgrounds/twilight_marsh_parallax_layer_v5.png",
+      "width": 1536,
+      "height": 384,
+      "subject": "Blue-violet twilight wetland with cypress silhouettes, low islands, reflective channels, reeds, mist and sparse aqua flora.",
+      "prompt": "Create a native high-resolution Twilight Marsh biome panorama for a polished side-view 2D game. Use a calm periwinkle and rose twilight sky, distant fog-separated cypress silhouettes, low marsh islands, reflective shallow channels, reeds, cattails, hanging moss and sparse natural aqua glow. Separate far, middle and near planes through mist, reflection sharpness and silhouette value. Use clean modern pixel-art-inspired painted forms with intricate native vegetation and water detail, luminous cool twilight and readable dark values. Make the 4:1 composition horizontally periodic and seam-safe, with matching edge colors, heights, silhouettes and texture. No text, figures, huts, boats, giant foreground trunks or reeds, central focal object, black overlay, blur, film grain, photorealism or visible square pixels.",
+      "requirements": [
+        "Water, cypress shape, fog and twilight color make the marsh unmistakable.",
+        "Reflections stay broad and subordinate to gameplay silhouettes.",
+        "Dark values remain chromatic and readable instead of crushed to black.",
+        "Final PNG is native-resolution, opaque, 256-color and horizontal-seam-safe."
+      ],
+      "tags": ["twilight-marsh", "cypress", "water", "fog", "modern-painted-pixel", "version-5"],
+      "runtimeIdTarget": "world/backgrounds/twilight_marsh_parallax_layer_v5",
+      "sourcePromptId": "background_panorama_v5_twilight_marsh_imagegen"
+    },
+    {
+      "spriteId": "world/backgrounds/crystal_depths_parallax_layer_v5",
+      "outputPath": "sprites/world/backgrounds/crystal_depths_parallax_layer_v5.png",
+      "width": 1536,
+      "height": 384,
+      "subject": "Vast underground crystal cavern with vaulted chambers, layered ledges, mineral haze, local cyan-lavender light and subtle water.",
+      "prompt": "Create a native high-resolution Crystal Depths underground panorama for a polished side-view 2D game. Show a quiet dark cavern vault, enormous distant chambers, arching rock columns, layered ledges, mineral haze, subtle underground water and sparse clusters of luminous cyan and lavender crystals. Separate far, middle and near geology through indigo value, atmospheric softness and edge detail. Use clean modern pixel-art-inspired painted forms with deliberate rock silhouettes, small faceted native details, believable local crystal illumination and soft residual blue ambience. Make the 4:1 composition horizontally periodic and seam-safe, with matching edge colors, heights, silhouettes and texture. No surface sky, text, figures, buildings, giant foreground crystals, central focal object, black crush, blur, film grain, photorealism or visible square pixels.",
+      "requirements": [
+        "The frame reads unambiguously as a vast underground environment.",
+        "Crystal light exposes depth without competing with gameplay light sources.",
+        "Geology carries the composition; crystals remain distributed accents.",
+        "Final PNG is native-resolution, opaque, 256-color and horizontal-seam-safe."
+      ],
+      "tags": ["crystal-depths", "cavern", "mineral-haze", "crystals", "modern-painted-pixel", "version-5"],
+      "runtimeIdTarget": "world/backgrounds/crystal_depths_parallax_layer_v5",
+      "sourcePromptId": "background_panorama_v5_crystal_depths_imagegen"
+    }
+  ]
+}

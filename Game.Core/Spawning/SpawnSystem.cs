@@ -162,23 +162,127 @@ public sealed class SpawnSystem
             return SpawnAttemptResult.None;
         }
 
-        var chance = Math.Clamp(selectedRule.Chance * selected.DensityMultiplier, 0f, 1f);
-        if (_random.NextSingle() > chance)
+        return SpawnSelected(selectedRule, selected, entities, applyChance: true);
+    }
+
+    internal SpawnAttemptResult TrySpawnRule(
+        World.World world,
+        EntityManager entities,
+        GameContentDatabase content,
+        WorldTime time,
+        SpawnAttemptContext context,
+        string ruleId)
+    {
+        ArgumentNullException.ThrowIfNull(world);
+        ArgumentNullException.ThrowIfNull(entities);
+        ArgumentNullException.ThrowIfNull(content);
+        ArgumentNullException.ThrowIfNull(time);
+        ArgumentException.ThrowIfNullOrWhiteSpace(ruleId);
+
+        if (!content.SpawnRules.TryGetById(ruleId, out var rule) ||
+            !TryEvaluateRule(
+                rule,
+                world,
+                entities,
+                content,
+                time,
+                context,
+                out var evaluation,
+                ignoreCooldown: true))
         {
             return SpawnAttemptResult.None;
         }
 
+        return SpawnSelected(rule, evaluation, entities, applyChance: false);
+    }
+
+    internal SpawnAttemptResult TrySpawnWarmStart(
+        World.World world,
+        EntityManager entities,
+        GameContentDatabase content,
+        WorldTime time,
+        SpawnAttemptContext context)
+    {
+        ArgumentNullException.ThrowIfNull(world);
+        ArgumentNullException.ThrowIfNull(entities);
+        ArgumentNullException.ThrowIfNull(content);
+        ArgumentNullException.ThrowIfNull(time);
+
+        SpawnRuleDefinition? selectedRule = null;
+        SpawnEvaluation selected = default;
+        var selectedPriority = int.MinValue;
+        var definitions = content.SpawnRules.Definitions;
+        for (var ruleIndex = 0; ruleIndex < definitions.Count; ruleIndex++)
+        {
+            var rule = definitions[ruleIndex];
+            if (rule.Chance <= 0 ||
+                !TryEvaluateRule(rule, world, entities, content, time, context, out var evaluation) ||
+                evaluation.DensityMultiplier <= 0)
+            {
+                continue;
+            }
+
+            var priority = ResolveWarmStartPriority(evaluation.Definition);
+            if (priority < selectedPriority ||
+                priority == selectedPriority && selectedRule is not null &&
+                (evaluation.Weight < selected.Weight ||
+                 evaluation.Weight == selected.Weight &&
+                 string.CompareOrdinal(rule.Id, selectedRule.Id) >= 0))
+            {
+                continue;
+            }
+
+            selectedRule = rule;
+            selected = evaluation;
+            selectedPriority = priority;
+        }
+
+        return selectedRule is null
+            ? SpawnAttemptResult.None
+            : SpawnSelected(selectedRule, selected, entities, applyChance: false);
+    }
+
+    private SpawnAttemptResult SpawnSelected(
+        SpawnRuleDefinition rule,
+        SpawnEvaluation evaluation,
+        EntityManager entities,
+        bool applyChance)
+    {
+        if (applyChance)
+        {
+            var chance = Math.Clamp(rule.Chance * evaluation.DensityMultiplier, 0f, 1f);
+            if (_random.NextSingle() > chance)
+            {
+                return SpawnAttemptResult.None;
+            }
+        }
+
         var entity = _entityFactory.CreateEnemy(
-            selected.Definition,
-            CoordinateUtils.TileToWorld(selected.Tile));
+            evaluation.Definition,
+            CoordinateUtils.TileToWorld(evaluation.Tile));
         entity.AssignSpawnMetadata(
-            selectedRule.Id,
-            selectedRule.PopulationGroup,
-            selected.Region,
-            selected.Habitat);
+            rule.Id,
+            rule.PopulationGroup,
+            evaluation.Region,
+            evaluation.Habitat);
         entities.Add(entity);
-        StartCooldown(selectedRule);
-        return new SpawnAttemptResult(true, selectedRule.Id, entity);
+        StartCooldown(rule);
+        return new SpawnAttemptResult(true, rule.Id, entity);
+    }
+
+    private static int ResolveWarmStartPriority(EntityDefinition definition)
+    {
+        var faction = definition.Faction switch
+        {
+            EntityFaction.Hostile => 300,
+            EntityFaction.Friendly => 200,
+            _ => 100
+        };
+        var hasConfiguredAi = definition.Ai is not null ||
+                              !string.IsNullOrWhiteSpace(definition.AiBehavior);
+        var mobile = definition.Ai is { MoveSpeed: > 0 } ||
+                     !string.IsNullOrWhiteSpace(definition.AiBehavior);
+        return faction + (hasConfiguredAi ? 20 : 0) + (mobile ? 10 : 0);
     }
 
     private bool TryEvaluateRule(
@@ -188,10 +292,11 @@ public sealed class SpawnSystem
         GameContentDatabase content,
         WorldTime time,
         SpawnAttemptContext context,
-        out SpawnEvaluation evaluation)
+        out SpawnEvaluation evaluation,
+        bool ignoreCooldown = false)
     {
         evaluation = default;
-        if (_cooldowns.ContainsKey(rule.Id) || !MatchesTime(rule, time))
+        if ((!ignoreCooldown && _cooldowns.ContainsKey(rule.Id)) || !MatchesTime(rule, time))
         {
             return false;
         }
@@ -417,16 +522,7 @@ public sealed class SpawnSystem
             Saturate((long)candidate.Y * GameConstants.TileSize),
             Math.Max(1, (int)Math.Ceiling(width)),
             Math.Max(1, (int)Math.Ceiling(height)));
-        for (var index = 0; index < entities.Entities.Count; index++)
-        {
-            var entity = entities.Entities[index];
-            if (entity.IsActive && entity.Bounds.Intersects(bounds))
-            {
-                return true;
-            }
-        }
-
-        return false;
+        return entities.IntersectsActive(bounds);
     }
 
     private static bool WithinPopulationCaps(
@@ -602,14 +698,15 @@ public sealed class SpawnSystem
             return true;
         }
 
+        var isSurface = IsSurfaceHabitat(world, candidate);
         for (var index = 0; index < habitats.Count; index++)
         {
             var matches = habitats[index] switch
             {
                 SpawnHabitat.Any => true,
-                SpawnHabitat.Surface => candidate.Y <= world.HeightTiles * 0.35f,
-                SpawnHabitat.Underground => candidate.Y >= world.HeightTiles * 0.25f,
-                SpawnHabitat.Cavern => candidate.Y >= world.HeightTiles * 0.55f,
+                SpawnHabitat.Surface => isSurface,
+                SpawnHabitat.Underground => !isSurface && candidate.Y >= world.HeightTiles * 0.25f,
+                SpawnHabitat.Cavern => !isSurface && candidate.Y >= world.HeightTiles * 0.5f,
                 SpawnHabitat.OpenAir => HasOpenAir(world, candidate),
                 SpawnHabitat.WaterEdge => HasNearbyLiquid(world, candidate),
                 _ => false
@@ -623,6 +720,37 @@ public sealed class SpawnSystem
 
         resolved = default;
         return false;
+    }
+
+    private static bool IsSurfaceHabitat(World.World world, TilePos candidate)
+    {
+        if (candidate.Y > world.HeightTiles * 0.45f)
+        {
+            return false;
+        }
+
+        const int minimumSkyClearanceTiles = 10;
+        for (var offset = 0; offset < minimumSkyClearanceTiles; offset++)
+        {
+            var tileY = (long)candidate.Y - offset;
+            if (tileY < 0)
+            {
+                return true;
+            }
+
+            if (tileY > int.MaxValue)
+            {
+                return false;
+            }
+
+            if (world.TryGetTile(candidate.X, (int)tileY, out var tile) &&
+                (tile.Flags & TileFlags.Solid) != 0)
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private static bool HasOpenAir(World.World world, TilePos candidate)

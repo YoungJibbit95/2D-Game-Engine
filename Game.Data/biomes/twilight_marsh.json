@@ -4,6 +4,10 @@
   "surfaceTile": "marsh_moss",
   "undergroundTile": "amberstone",
   "treeType": "mangrove_tree",
+  "treeMaterial": {
+    "trunkTile": "mangrove_root",
+    "canopyTile": "marsh_leaves"
+  },
   "enemySpawnTable": "twilight_marsh_frog",
   "isRegionalBiome": true,
   "selectionWeight": 2,
@@ -52,7 +56,7 @@
     "resourceTableIds": ["marsh_roots", "marsh_forage"]
   },
   "presentation": {
-    "backgroundSpriteId": "world/backgrounds/wave05/twilight_marsh",
+    "backgroundSpriteId": "world/backgrounds/twilight_marsh_parallax_layer_v5",
     "ambientParticleSpriteId": "particles/meadow_pollen",
     "ambientCritterSpriteId": "entities/wave05/marsh_frog",
     "biomeIconSpriteId": "ui/wave05/quest",

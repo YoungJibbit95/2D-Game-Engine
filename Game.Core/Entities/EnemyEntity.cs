@@ -10,13 +10,13 @@ using GameWorld = Game.Core.World.World;
 
 namespace Game.Core.Entities;
 
-public sealed class EnemyEntity : Entity
+public sealed class EnemyEntity : Entity, IEntityPhysicsParticipant
 {
-    private const float Gravity = 1050f;
     private const float MaxFallSpeed = 620f;
 
-    private readonly TileCollisionResolver _collisionResolver;
+    private readonly TileCollisionResolver _standaloneCollisionResolver;
     private readonly IAiBehavior _aiBehavior;
+    private PhysicsWorld? _standalonePhysicsWorld;
 
     public EnemyEntity(
         string definitionId,
@@ -51,12 +51,20 @@ public sealed class EnemyEntity : Entity
         Faction = faction;
         MovementMode = movementMode;
         Tags = tags ?? Array.Empty<string>();
-        _aiBehavior = aiBehavior;
-        _collisionResolver = collisionResolver;
+        _aiBehavior = aiBehavior ?? throw new ArgumentNullException(nameof(aiBehavior));
+        ArgumentNullException.ThrowIfNull(collisionResolver);
+        _standaloneCollisionResolver = collisionResolver;
+        CollisionSettings = collisionResolver.Settings;
         Body = new PhysicsBody
         {
             Position = spawnPosition,
-            Size = size
+            Size = size,
+            BodyType = movementMode == EntityMovementMode.Ground
+                ? PhysicsBodyType.Dynamic
+                : PhysicsBodyType.Kinematic,
+            CollisionLayer = PhysicsCollisionLayer.Enemy,
+            GravityScale = movementMode == EntityMovementMode.Ground ? 1f : 0f,
+            MaximumAbsoluteVelocity = new Vector2(float.PositiveInfinity, MaxFallSpeed)
         };
         Position = spawnPosition;
     }
@@ -79,6 +87,8 @@ public sealed class EnemyEntity : Entity
 
     public string? SpawnRuleId { get; private set; }
 
+    public string? SpawnEncounterId { get; private set; }
+
     public string? SpawnGroup { get; private set; }
 
     public SpawnRegionKey? SpawnRegion { get; private set; }
@@ -86,6 +96,10 @@ public sealed class EnemyEntity : Entity
     public SpawnHabitat? SpawnHabitat { get; private set; }
 
     public PhysicsBody Body { get; }
+
+    TileCollisionSettings IEntityPhysicsParticipant.CollisionSettings => CollisionSettings;
+
+    internal TileCollisionSettings CollisionSettings { get; }
 
     public HealthComponent Health { get; }
 
@@ -173,6 +187,12 @@ public sealed class EnemyEntity : Entity
         SpawnHabitat = habitat;
     }
 
+    internal void AssignSpawnEncounter(string encounterId)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(encounterId);
+        SpawnEncounterId = encounterId;
+    }
+
     public bool TryConsumeAttackIntent(out AiAttackIntent intent)
     {
         return _aiBehavior.TryConsumeAttackIntent(out intent);
@@ -198,22 +218,48 @@ public sealed class EnemyEntity : Entity
 
     public void Update(AiUpdateContext context, float deltaSeconds)
     {
+        if (!PreparePhysicsUpdate(context, deltaSeconds))
+        {
+            return;
+        }
+
+        GetStandalonePhysicsWorld().StepBody(
+            context.World,
+            Body,
+            deltaSeconds,
+            Span<PhysicsContact>.Empty);
+        SynchronizePhysicsState();
+    }
+
+    internal bool PreparePhysicsUpdate(AiUpdateContext context, float deltaSeconds)
+    {
         _despawnProtectionRemaining = Math.Max(0, _despawnProtectionRemaining - Math.Max(0, deltaSeconds));
         StatusEffects.Update(deltaSeconds, Health);
         Health.Update(deltaSeconds);
         if (Health.IsDead)
         {
             IsActive = false;
-            return;
+            return false;
         }
 
         _aiBehavior.Update(this, context, deltaSeconds);
-        if (MovementMode == EntityMovementMode.Ground)
-        {
-            Body.Velocity = new Vector2(Body.Velocity.X, Math.Min(Body.Velocity.Y + Gravity * deltaSeconds, MaxFallSpeed));
-        }
+        return true;
+    }
 
-        _collisionResolver.Move(context.World, Body, deltaSeconds);
+    void IEntityPhysicsParticipant.SynchronizePhysicsState()
+    {
+        SynchronizePhysicsState();
+    }
+
+    internal void SynchronizePhysicsState()
+    {
         Position = Body.Position;
+    }
+
+    private PhysicsWorld GetStandalonePhysicsWorld()
+    {
+        return _standalonePhysicsWorld ??= new PhysicsWorld(
+            _standaloneCollisionResolver,
+            EntityPhysicsRuntime.CreateSettings(EntityPhysicsRuntime.DefaultMaximumBodies));
     }
 }

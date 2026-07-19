@@ -1,0 +1,72 @@
+{
+  "version": 1,
+  "scope": "background_panorama_v3_imagegen",
+  "globalStyle": "YjsE yjse-pixel-v1 opaque side-view pixel art; top-left light; hard two-pixel clusters; no antialiasing, blur, smooth gradients, text, or watermark.",
+  "globalNegativePrompt": "generic horizontal stripes, bilateral symmetry, evenly spaced repeated forms, soft airbrush, blur, antialiasing, photographic detail, bokeh, text, logo, border, watermark, transparency",
+  "globalRequirements": [
+    "Generate each concept source with the built-in image_gen tool.",
+    "Export exactly 512x128 RGBA with alpha fixed to 255.",
+    "Use only colors declared in Game.Data/art_direction/yjse_pixel_style.json.",
+    "Preserve hard pixel clusters through a 256x64 logical raster and nearest-neighbor 2x export.",
+    "Keep left and right columns byte-identical and make the wrapped horizon, ceiling, floor, and depth planes visually continuous.",
+    "Add new versioned IDs and paths; do not redirect or overwrite existing background IDs."
+  ],
+  "briefs": [
+    {
+      "spriteId": "world/backgrounds/forest_parallax_layer_v3",
+      "outputPath": "sprites/world/backgrounds/forest_parallax_layer_v3.png",
+      "width": 512,
+      "height": 128,
+      "subject": "Temperate forest parallax panorama with mountains, asymmetrical tree groups, ruins, stones, and layered depth.",
+      "prompt": "Create an extreme-wide 4:1 horizontally seamless temperate forest panorama for YjsE, substantially richer than a generic striped background. Show clear distant blue-gray mountains, layered misty foothills, mixed deciduous and conifer forest, asymmetrical tree groups, a moss-reclaimed broken stone ruin, standing stones, boulders, and a fallen trunk across at least five readable depth planes. Use crisp hand-authored 16-bit pixel art, deliberate hard clusters, restrained YjsE colors, and top-left light. Keep major landmarks away from the boundaries and make both edges tile continuously. Opaque; no text, watermark, border, blur, antialiasing, gradients, or repeated tree stamps.",
+      "requirements": [
+        "Distant mountains remain clearly readable at native 512x128 scale.",
+        "Tree silhouettes vary by species, height, density, and spacing.",
+        "Ruin and stone landmarks remain secondary to parallax readability.",
+        "Final PNG is opaque, yjse-pixel-v1 palette-only, and horizontal-seam-safe."
+      ],
+      "tags": [
+        "world",
+        "background",
+        "forest",
+        "temperate",
+        "mountains",
+        "ruins",
+        "parallax",
+        "tileable",
+        "version-3"
+      ],
+      "runtimeIdTarget": "world/backgrounds/forest_parallax_layer_v3",
+      "sourcePromptId": "background_panorama_v3_forest_imagegen"
+    },
+    {
+      "spriteId": "world/backgrounds/cave_parallax_layer_v3",
+      "outputPath": "sprites/world/backgrounds/cave_parallax_layer_v3.png",
+      "width": 512,
+      "height": 128,
+      "subject": "Deep cave parallax panorama with staggered rock arches, stalactites, mushrooms, crystals, and depth fog.",
+      "prompt": "Create an extreme-wide 4:1 horizontally seamless deep cave panorama for YjsE, substantially richer than a generic striped background. Build a vast cavern from multiple overlapping chambers, asymmetrically staggered stone arches, broken ledges, readable ceiling stalactites, sparse floor stalagmites, small mushroom clusters, restrained blue-cyan and violet crystals, ancient worn stone fragments, and stepped depth fog across at least five planes. Use crisp hand-authored 16-bit pixel art, deliberate hard clusters, YjsE violet-charcoal cave colors, and top-left ambient light with restrained local accents. Keep unique formations away from the boundaries and make both edges tile continuously. Opaque; no text, watermark, border, blur, antialiasing, smooth gradients, or excessive bloom.",
+      "requirements": [
+        "At least three staggered rock-arch depths remain readable at native scale.",
+        "Stalactites avoid uniform spacing and repeated silhouettes.",
+        "Mushroom and crystal accents support navigation without dominating the cave palette.",
+        "Final PNG is opaque, yjse-pixel-v1 palette-only, and horizontal-seam-safe."
+      ],
+      "tags": [
+        "world",
+        "background",
+        "cave",
+        "rock-arches",
+        "stalactites",
+        "mushrooms",
+        "crystals",
+        "depth-fog",
+        "parallax",
+        "tileable",
+        "version-3"
+      ],
+      "runtimeIdTarget": "world/backgrounds/cave_parallax_layer_v3",
+      "sourcePromptId": "background_panorama_v3_cave_imagegen"
+    }
+  ]
+}

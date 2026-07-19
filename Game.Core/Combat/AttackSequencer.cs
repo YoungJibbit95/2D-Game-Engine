@@ -17,9 +17,11 @@ public sealed class AttackSequencer
     private bool _hasTransition;
     private bool _comboQueued;
     private bool _hasBufferedInput;
+    private ulong _queuedComboInputSequence;
     private AttackInputCommand _bufferedInput;
     private ulong _bufferActivationTick;
     private ulong _bufferExpiryTick;
+    private IAttackStartGate? _startGate;
 
     public AttackSequencer(AttackSequenceDefinition definition)
     {
@@ -93,7 +95,10 @@ public sealed class AttackSequencer
         return _commands.TryEnqueue(tick, kind);
     }
 
-    public AttackSequencerAdvanceResult AdvanceTo(ulong tick, AttackEventBuffer events)
+    public AttackSequencerAdvanceResult AdvanceTo(
+        ulong tick,
+        AttackEventBuffer events,
+        IAttackStartGate? startGate = null)
     {
         ArgumentNullException.ThrowIfNull(events);
         if (tick < _currentTick)
@@ -102,21 +107,29 @@ public sealed class AttackSequencer
         }
 
         events.Clear();
-        while (TryGetNextMilestone(tick, out var milestone))
+        _startGate = startGate;
+        try
         {
-            _currentTick = milestone;
-            ProcessTransitions(events);
-            ProcessBufferedInput(events);
-            ProcessCommandsAtCurrentTick(events);
-        }
+            while (TryGetNextMilestone(tick, out var milestone))
+            {
+                _currentTick = milestone;
+                ProcessTransitions(events);
+                ProcessBufferedInput(events);
+                ProcessCommandsAtCurrentTick(events);
+            }
 
-        _currentTick = tick;
-        return new AttackSequencerAdvanceResult(
-            tick,
-            Phase,
-            events.Count,
-            events.DroppedCount,
-            events.Count > 0 || events.DroppedCount > 0);
+            _currentTick = tick;
+            return new AttackSequencerAdvanceResult(
+                tick,
+                Phase,
+                events.Count,
+                events.DroppedCount,
+                events.Count > 0 || events.DroppedCount > 0);
+        }
+        finally
+        {
+            _startGate = null;
+        }
     }
 
     public AttackHitRegistrationResult TryRegisterHit(int targetEntityId, AttackEventBuffer events)
@@ -250,6 +263,7 @@ public sealed class AttackSequencer
         if (_currentTick >= comboOpen && _currentTick < comboClose)
         {
             _comboQueued = true;
+            _queuedComboInputSequence = command.Sequence;
             WriteEvent(events, AttackRuntimeEventKind.ComboQueued, command.Sequence);
             return;
         }
@@ -401,8 +415,15 @@ public sealed class AttackSequencer
         var nextStepIndex = _nextStepIndices[_stepIndex];
         if (_comboQueued && nextStepIndex >= 0)
         {
-            WriteEvent(events, AttackRuntimeEventKind.ComboAdvanced);
-            StartAttack(nextStepIndex, _comboIndex + 1, inputSequence: 0, events);
+            var inputSequence = _queuedComboInputSequence;
+            if (StartAttack(nextStepIndex, _comboIndex + 1, inputSequence, events))
+            {
+                WriteEvent(events, AttackRuntimeEventKind.ComboAdvanced, inputSequence);
+                return;
+            }
+
+            WriteEvent(events, AttackRuntimeEventKind.ComboReset, inputSequence);
+            EnterCooldown(AttackRuntimePhase.Recovery, events);
             return;
         }
 
@@ -418,11 +439,34 @@ public sealed class AttackSequencer
         EnterCooldown(AttackRuntimePhase.Recovery, events);
     }
 
-    private void StartAttack(int stepIndex, int comboIndex, ulong inputSequence, AttackEventBuffer events)
+    private bool StartAttack(int stepIndex, int comboIndex, ulong inputSequence, AttackEventBuffer events)
     {
+        var step = _steps[stepIndex];
+        var startRequest = new AttackStartRequest(
+            _currentTick,
+            inputSequence,
+            Definition.Id,
+            step.Id,
+            comboIndex,
+            step.Cost);
+        var failure = _startGate?.TryAccept(startRequest) ?? AttackInputFailure.None;
+        if (failure != AttackInputFailure.None)
+        {
+            WriteEvent(
+                events,
+                AttackRuntimeEventKind.InputRejected,
+                inputSequence,
+                failure: failure,
+                cost: step.Cost,
+                attackId: step.Id,
+                comboIndex: comboIndex);
+            return false;
+        }
+
         _stepIndex = stepIndex;
         _comboIndex = comboIndex;
         _comboQueued = false;
+        _queuedComboInputSequence = 0;
         _hitCount = 0;
         _attackStartTick = _currentTick;
         AttackInstanceId = _nextAttackInstanceId;
@@ -448,12 +492,15 @@ public sealed class AttackSequencer
         {
             WriteEvent(events, AttackRuntimeEventKind.ActiveWindowOpened);
         }
+
+        return true;
     }
 
     private void EnterCooldown(AttackRuntimePhase previous, AttackEventBuffer events)
     {
         ClearBufferedInput();
         _comboQueued = false;
+        _queuedComboInputSequence = 0;
         _hitCount = 0;
         var cooldownTicks = _steps[_stepIndex].Timeline.CooldownTicks;
         if (cooldownTicks <= 0)
@@ -524,15 +571,17 @@ public sealed class AttackSequencer
         AttackRuntimePhase? phase = null,
         AttackInputFailure failure = AttackInputFailure.None,
         int targetEntityId = 0,
-        AttackResourceCost cost = default)
+        AttackResourceCost cost = default,
+        string? attackId = null,
+        int? comboIndex = null)
     {
         events.TryWrite(new AttackRuntimeEvent(
             kind,
             _currentTick,
             AttackInstanceId,
             inputSequence,
-            _stepIndex < 0 ? null : _steps[_stepIndex].Id,
-            _comboIndex,
+            attackId ?? (_stepIndex < 0 ? null : _steps[_stepIndex].Id),
+            comboIndex ?? _comboIndex,
             previousPhase ?? Phase,
             phase ?? Phase,
             failure,

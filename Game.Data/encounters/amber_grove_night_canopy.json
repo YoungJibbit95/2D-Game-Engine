@@ -1,0 +1,19 @@
+{
+  "id": "amber_grove_night_canopy",
+  "biomeIds": ["amber_grove"],
+  "verticalLayerIds": ["surface"],
+  "time": "night",
+  "weight": 1.0,
+  "minDistanceTiles": 20,
+  "maxDistanceTiles": 45,
+  "cooldownSeconds": 6.5,
+  "maxActiveGlobal": 14,
+  "populationRegionSizeTiles": 96,
+  "maxActiveInRegion": 6,
+  "minRoleSelections": 2,
+  "maxRoleSelections": 2,
+  "roles": [
+    { "id": "owls", "spawnRuleId": "amber_grove_owl", "weight": 1.0, "minCount": 1, "maxCount": 2 },
+    { "id": "lanterns", "spawnRuleId": "amber_grove_firefly", "weight": 1.4, "minCount": 2, "maxCount": 3 }
+  ]
+}

@@ -67,6 +67,7 @@ public sealed class SurfaceLakeGenerationStep : IWorldGenerationStep
         float irregularity)
     {
         var world = context.World;
+        var tiles = context.Tiles;
         var centerX = (startX + endX) / 2;
         var waterLine = Math.Clamp(context.SurfaceHeights[centerX] + 1, 2, world.HeightTiles - 3);
         var width = endX - startX;
@@ -86,18 +87,18 @@ public sealed class SurfaceLakeGenerationStep : IWorldGenerationStep
 
             for (var y = carveTop; y < bottomY; y++)
             {
-                if (!world.IsInBounds(x, y))
+                if (!tiles.IsInBounds(x, y))
                 {
                     continue;
                 }
 
                 if (y < waterLine)
                 {
-                    world.RemoveTile(x, y);
+                    tiles.RemoveTile(x, y);
                 }
                 else
                 {
-                    WorldGenerationTileMutations.SetLiquid(world, x, y);
+                    WorldGenerationTileMutations.SetLiquid(tiles, x, y);
                 }
             }
         }

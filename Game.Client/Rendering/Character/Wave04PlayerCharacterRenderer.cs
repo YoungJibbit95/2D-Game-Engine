@@ -11,11 +11,11 @@ namespace Game.Client.Rendering.Character;
 
 public sealed class Wave04PlayerCharacterRenderer
 {
-    private const string BodySprite = "entities/player/character_v1_wave04/body";
-    private const string HairSprite = "entities/player/character_v1_wave04/hair";
-    private const string ClothesSprite = "entities/player/character_v1_wave04/clothes";
-    private const string ArmorSprite = "entities/player/character_v1_wave04/armor";
-    private const string EquipmentSprite = "entities/player/character_v1_wave04/equipment";
+    private const string BodySprite = "entities/player/character_v2_wave06/body";
+    private const string HairSprite = "entities/player/character_v2_wave06/hair";
+    private const string ClothesSprite = "entities/player/character_v2_wave06/clothes";
+    private const string ArmorSprite = "entities/player/character_v2_wave06/armor";
+    private const string EquipmentSprite = "entities/player/character_v2_wave06/equipment";
 
     private readonly PlayerAnimationSnapshotAdapter _snapshotAdapter = new();
     private readonly CharacterSpriteLayerPoseBuilder _poseBuilder = new();
@@ -178,7 +178,7 @@ public sealed class Wave04PlayerCharacterRenderer
     private static CharacterRigProfile CreateRig()
     {
         return new CharacterRigProfile(
-            "player.character-v1.wave04",
+            "player.character-v2.wave06",
             new[]
             {
                 Layer("body", CharacterAppearanceSlot.Body, 0),
@@ -199,7 +199,7 @@ public sealed class Wave04PlayerCharacterRenderer
             slot,
             animationTrackId: "body",
             drawOrder,
-            pivot: new CoreVector2(8, 32));
+            pivot: new CoreVector2(12, 40));
     }
 
     private static LayeredAnimationStateMachine CreateStateMachine()
@@ -286,7 +286,7 @@ public sealed class Wave04PlayerCharacterRenderer
         }
 
         var clip = new AnimationClip(
-            $"player.wave04.{id}",
+            $"player.wave06.{id}",
             loopMode,
             new[] { new AnimationTrack("body", "body", BodySprite, frames) });
         return new AnimationStateDefinition(

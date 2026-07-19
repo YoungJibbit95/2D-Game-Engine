@@ -88,13 +88,13 @@ public sealed class CavernGenerationStep : IWorldGenerationStep
 
     private static void CarveRoom(WorldGenerationContext context, CavernRoom room)
     {
-        var world = context.World;
+        var tiles = context.Tiles;
         var irregularity = Math.Clamp(context.Profile.CavernIrregularity, 0f, 1f);
         for (var y = room.CenterY - room.RadiusY - 1; y <= room.CenterY + room.RadiusY + 1; y++)
         {
             for (var x = room.CenterX - room.RadiusX - 1; x <= room.CenterX + room.RadiusX + 1; x++)
             {
-                if (!world.IsInBounds(x, y) || y <= context.SurfaceHeights[x] + 2)
+                if (!tiles.IsInBounds(x, y) || y <= context.SurfaceHeights[x] + 2)
                 {
                     continue;
                 }
@@ -106,7 +106,7 @@ public sealed class CavernGenerationStep : IWorldGenerationStep
                 var edge = 1f + edgeNoise * irregularity;
                 if (distance <= edge)
                 {
-                    world.RemoveTile(x, y);
+                    tiles.RemoveTile(x, y);
                 }
             }
         }
@@ -144,12 +144,12 @@ public sealed class CavernGenerationStep : IWorldGenerationStep
 
     private static void CarveTunnelDisc(WorldGenerationContext context, int centerX, int centerY, int radius)
     {
-        var world = context.World;
+        var tiles = context.Tiles;
         for (var y = centerY - radius; y <= centerY + radius; y++)
         {
             for (var x = centerX - radius; x <= centerX + radius; x++)
             {
-                if (!world.IsInBounds(x, y) || y <= context.SurfaceHeights[x] + 2)
+                if (!tiles.IsInBounds(x, y) || y <= context.SurfaceHeights[x] + 2)
                 {
                     continue;
                 }
@@ -158,7 +158,7 @@ public sealed class CavernGenerationStep : IWorldGenerationStep
                 var dy = y - centerY;
                 if (dx * dx + dy * dy <= radius * radius)
                 {
-                    world.RemoveTile(x, y);
+                    tiles.RemoveTile(x, y);
                 }
             }
         }

@@ -51,12 +51,12 @@ public sealed class InputManager
 
     public bool IsBindingDown(string binding)
     {
-        return EnumerateBindingTokens(binding).Any(IsTokenDown);
+        return EvaluateBinding(binding, pressedOnly: false);
     }
 
     public bool IsBindingPressed(string binding)
     {
-        return EnumerateBindingTokens(binding).Any(IsTokenPressed);
+        return EvaluateBinding(binding, pressedOnly: true);
     }
 
     public string? FirstPressedKeyName()
@@ -82,7 +82,36 @@ public sealed class InputManager
         return null;
     }
 
-    private bool IsTokenDown(string token)
+    private bool EvaluateBinding(string binding, bool pressedOnly)
+    {
+        if (string.IsNullOrWhiteSpace(binding))
+        {
+            return false;
+        }
+
+        var remaining = binding.AsSpan();
+        while (!remaining.IsEmpty)
+        {
+            var separator = remaining.IndexOf(',');
+            var token = separator < 0 ? remaining : remaining[..separator];
+            token = token.Trim();
+            if (!token.IsEmpty && (pressedOnly ? IsTokenPressed(token) : IsTokenDown(token)))
+            {
+                return true;
+            }
+
+            if (separator < 0)
+            {
+                break;
+            }
+
+            remaining = remaining[(separator + 1)..];
+        }
+
+        return false;
+    }
+
+    private bool IsTokenDown(ReadOnlySpan<char> token)
     {
         if (IsMouseToken(token, out var down, out _))
         {
@@ -92,7 +121,7 @@ public sealed class InputManager
         return Enum.TryParse<Keys>(token, ignoreCase: true, out var key) && IsKeyDown(key);
     }
 
-    private bool IsTokenPressed(string token)
+    private bool IsTokenPressed(ReadOnlySpan<char> token)
     {
         if (IsMouseToken(token, out _, out var pressed))
         {
@@ -102,16 +131,16 @@ public sealed class InputManager
         return Enum.TryParse<Keys>(token, ignoreCase: true, out var key) && IsKeyPressed(key);
     }
 
-    private bool IsMouseToken(string token, out bool down, out bool pressed)
+    private bool IsMouseToken(ReadOnlySpan<char> token, out bool down, out bool pressed)
     {
-        if (string.Equals(token, "MouseLeft", StringComparison.OrdinalIgnoreCase))
+        if (token.Equals("MouseLeft", StringComparison.OrdinalIgnoreCase))
         {
             down = IsLeftMouseDown;
             pressed = IsLeftMousePressed;
             return true;
         }
 
-        if (string.Equals(token, "MouseRight", StringComparison.OrdinalIgnoreCase))
+        if (token.Equals("MouseRight", StringComparison.OrdinalIgnoreCase))
         {
             down = IsRightMouseDown;
             pressed = IsRightMousePressed;
@@ -123,16 +152,4 @@ public sealed class InputManager
         return false;
     }
 
-    private static IEnumerable<string> EnumerateBindingTokens(string binding)
-    {
-        if (string.IsNullOrWhiteSpace(binding))
-        {
-            yield break;
-        }
-
-        foreach (var token in binding.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
-        {
-            yield return token;
-        }
-    }
 }

@@ -1,8 +1,11 @@
 using Game.Core;
+using Game.Core.Actions;
+using Game.Core.Combat;
 using Game.Core.Crafting;
 using Game.Core.Events;
 using Game.Core.Feedback;
 using Game.Core.Inventory;
+using Game.Core.Projectiles;
 using Game.Core.World;
 using Game.Core.WorldEvents;
 using System.Numerics;
@@ -157,6 +160,151 @@ public sealed class GameplayFeedbackRouterTests
     }
 
     [Fact]
+    public void CombatEvents_RouteEachDefensiveOutcomeExactlyOnce()
+    {
+        var bus = new GameEventBus();
+        var playerPosition = new Vector2(120, 48);
+        using var router = new GameplayFeedbackRouter(
+            bus,
+            entityId => entityId == 7 ? playerPosition : null,
+            capacity: 8);
+        bus.Publish(new CombatParriedEvent(11, 3, 7));
+        bus.Publish(new CombatHitResolvedEvent(11, 3, 7, CombatHitOutcome.Parried, 0, false, Vector2.Zero));
+        bus.Publish(new CombatBlockedEvent(12, 3, 7, 18f, 3));
+        bus.Publish(new CombatHitResolvedEvent(12, 3, 7, CombatHitOutcome.Blocked, 3, false, Vector2.Zero));
+        bus.Publish(new GuardBrokenCombatEvent(13, 3, 7, 0.8f));
+        bus.Publish(new CombatHitResolvedEvent(13, 3, 7, CombatHitOutcome.GuardBroken, 8, false, Vector2.Zero));
+
+        var visuals = new GameplayFeedbackCue[8];
+        var audio = new GameplayAudioCue[8];
+        Assert.Equal(3, router.DrainTo(visuals));
+        Assert.Equal(3, router.DrainAudioTo(audio));
+        Assert.Equal(
+            new[]
+            {
+                GameplayFeedbackCueKind.CombatParried,
+                GameplayFeedbackCueKind.CombatBlocked,
+                GameplayFeedbackCueKind.GuardBroken
+            },
+            visuals[..3].Select(cue => cue.Kind));
+        Assert.All(visuals[..3], cue => Assert.Equal(playerPosition, cue.WorldPosition));
+        Assert.Equal(3, visuals[1].Amount);
+        Assert.Equal("gameplay.combat.parried", audio[0].AudioId);
+        Assert.Equal("gameplay.combat.blocked", audio[1].AudioId);
+        Assert.Equal("gameplay.combat.guard-broken", audio[2].AudioId);
+        Assert.True(audio[0].Priority > audio[1].Priority);
+        Assert.True(audio[2].Priority > audio[1].Priority);
+    }
+
+    [Fact]
+    public void ProjectileLifecycle_RoutesOnlyAuthoritativeTransitions()
+    {
+        var bus = new GameEventBus();
+        var targetPosition = new Vector2(160, 80);
+        using var router = new GameplayFeedbackRouter(
+            bus,
+            entityId => entityId == 9 ? targetPosition : null,
+            capacity: 8);
+        var launchPosition = new Vector2(32, 48);
+        var bouncePosition = new Vector2(80, 64);
+        var expiredPosition = new Vector2(240, 96);
+        var destroyedPosition = new Vector2(192, 112);
+
+        bus.Publish(new PlayerItemUseCompletedEvent(
+            1,
+            "wooden_bow",
+            PlayerItemUseKind.Shoot,
+            GameplayActionSuccessReason.ProjectileSpawned,
+            new TilePos(2, 3),
+            launchPosition,
+            0.25f,
+            0,
+            0,
+            0));
+        router.RouteProjectileTileCollision(
+            "wooden_arrow",
+            new ProjectileTileCollisionResult(
+                ProjectileTileCollisionDecision.Bounced,
+                bouncePosition,
+                new Vector2(-240, 0),
+                1,
+                true,
+                ProjectileTerminationReason.None));
+        router.RouteProjectileEntityCollision(
+            "wooden_arrow",
+            9,
+            new ProjectileEntityCollisionResult(
+                ProjectileEntityCollisionDecision.Hit,
+                null,
+                1,
+                true,
+                ProjectileTerminationReason.None));
+        router.RouteProjectileEntityCollision(
+            "wooden_arrow",
+            9,
+            new ProjectileEntityCollisionResult(
+                ProjectileEntityCollisionDecision.HitAndStopped,
+                null,
+                0,
+                false,
+                ProjectileTerminationReason.EntityHit));
+        router.RouteProjectileMotion(
+            "spark_bolt",
+            new ProjectileMotionResult(
+                expiredPosition - Vector2.UnitX,
+                expiredPosition,
+                Vector2.UnitX,
+                2f,
+                null,
+                true,
+                ProjectileTerminationReason.LifetimeExpired));
+        router.RouteProjectileTileCollision(
+            "spark_bolt",
+            new ProjectileTileCollisionResult(
+                ProjectileTileCollisionDecision.Destroyed,
+                destroyedPosition,
+                Vector2.Zero,
+                0,
+                false,
+                ProjectileTerminationReason.TileCollision));
+        router.RouteProjectileTileCollision(
+            "ignored",
+            new ProjectileTileCollisionResult(
+                ProjectileTileCollisionDecision.IgnoredInactive,
+                Vector2.Zero,
+                Vector2.Zero,
+                0,
+                false,
+                ProjectileTerminationReason.LifetimeExpired));
+
+        var visuals = new GameplayFeedbackCue[8];
+        var audio = new GameplayAudioCue[8];
+        Assert.Equal(6, router.DrainTo(visuals));
+        Assert.Equal(6, router.DrainAudioTo(audio));
+        Assert.Equal(
+            new[]
+            {
+                GameplayFeedbackCueKind.ProjectileLaunched,
+                GameplayFeedbackCueKind.ProjectileBounced,
+                GameplayFeedbackCueKind.ProjectilePierced,
+                GameplayFeedbackCueKind.ProjectileDestroyed,
+                GameplayFeedbackCueKind.ProjectileExpired,
+                GameplayFeedbackCueKind.ProjectileDestroyed
+            },
+            visuals[..6].Select(cue => cue.Kind));
+        Assert.Equal(launchPosition, visuals[0].WorldPosition);
+        Assert.Equal(bouncePosition, visuals[1].WorldPosition);
+        Assert.Equal(targetPosition, visuals[2].WorldPosition);
+        Assert.Equal(targetPosition, visuals[3].WorldPosition);
+        Assert.Equal(expiredPosition, visuals[4].WorldPosition);
+        Assert.Equal(destroyedPosition, visuals[5].WorldPosition);
+        Assert.Equal("gameplay.projectile.launched", audio[0].AudioId);
+        Assert.Equal("gameplay.projectile.bounced", audio[1].AudioId);
+        Assert.Equal("gameplay.projectile.pierced", audio[2].AudioId);
+        Assert.Equal("gameplay.projectile.expired", audio[4].AudioId);
+    }
+
+    [Fact]
     public void DrainTo_ReusesCallerBuffersWithoutSteadyStateAllocation()
     {
         var bus = new GameEventBus();
@@ -174,6 +322,37 @@ public sealed class GameplayFeedbackRouterTests
             audio));
     }
 
+    [Fact]
+    public void CombatAndProjectileAdapters_ReuseBoundedQueuesWithoutSteadyStateAllocation()
+    {
+        var bus = new GameEventBus();
+        using var router = new GameplayFeedbackRouter(bus, _ => new Vector2(24, 24), capacity: 4);
+        var combatEvent = new CombatBlockedEvent(42, 3, 7, 6f, 2);
+        var projectileResult = new ProjectileTileCollisionResult(
+            ProjectileTileCollisionDecision.Bounced,
+            new Vector2(48, 64),
+            new Vector2(-180, 0),
+            1,
+            true,
+            ProjectileTerminationReason.None);
+        var visuals = new GameplayFeedbackCue[4];
+        var audio = new GameplayAudioCue[4];
+
+        Assert.Equal(1_024, ExerciseAdapterDrain(
+            router,
+            combatEvent,
+            projectileResult,
+            visuals,
+            audio,
+            256));
+        Assert.Equal(0, MeasureAdapterAllocationUntilStable(
+            router,
+            combatEvent,
+            projectileResult,
+            visuals,
+            audio));
+    }
+
     private static long MeasureUntilConsecutiveAllocationFreeWindows(
         GameEventBus bus,
         GameplayFeedbackRouter router,
@@ -186,6 +365,38 @@ public sealed class GameplayFeedbackRouterTests
         for (var window = 0; window < 6; window++)
         {
             lastAllocated = MeasureAllocationWindow(bus, router, gameEvent, visuals, audio);
+            consecutiveAllocationFreeWindows = lastAllocated == 0
+                ? consecutiveAllocationFreeWindows + 1
+                : 0;
+            if (consecutiveAllocationFreeWindows == 2)
+            {
+                return 0;
+            }
+        }
+
+        return lastAllocated;
+    }
+
+    private static long MeasureAdapterAllocationUntilStable(
+        GameplayFeedbackRouter router,
+        CombatBlockedEvent combatEvent,
+        ProjectileTileCollisionResult projectileResult,
+        GameplayFeedbackCue[] visuals,
+        GameplayAudioCue[] audio)
+    {
+        var consecutiveAllocationFreeWindows = 0;
+        var lastAllocated = long.MaxValue;
+        for (var window = 0; window < 6; window++)
+        {
+            var before = GC.GetAllocatedBytesForCurrentThread();
+            _ = ExerciseAdapterDrain(
+                router,
+                combatEvent,
+                projectileResult,
+                visuals,
+                audio,
+                1_000);
+            lastAllocated = GC.GetAllocatedBytesForCurrentThread() - before;
             consecutiveAllocationFreeWindows = lastAllocated == 0
                 ? consecutiveAllocationFreeWindows + 1
                 : 0;
@@ -224,6 +435,27 @@ public sealed class GameplayFeedbackRouterTests
         for (var index = 0; index < iterations; index++)
         {
             bus.Publish(gameEvent);
+            drained += router.DrainTo(visuals);
+            drained += router.DrainAudioTo(audio);
+        }
+
+        return drained;
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private static int ExerciseAdapterDrain(
+        GameplayFeedbackRouter router,
+        CombatBlockedEvent combatEvent,
+        ProjectileTileCollisionResult projectileResult,
+        GameplayFeedbackCue[] visuals,
+        GameplayAudioCue[] audio,
+        int iterations)
+    {
+        var drained = 0;
+        for (var index = 0; index < iterations; index++)
+        {
+            router.RouteCombatEvent(combatEvent);
+            router.RouteProjectileTileCollision("wooden_arrow", projectileResult);
             drained += router.DrainTo(visuals);
             drained += router.DrainAudioTo(audio);
         }

@@ -2,6 +2,8 @@ using Game.Client.GameStates;
 using Game.Client.Configuration;
 using Game.Client.Diagnostics;
 using Game.Client.Rendering;
+using Game.Client.Rendering.Diagnostics;
+using Game.Client.Rendering.Performance;
 using Game.Core;
 using Game.Core.Projects;
 using Game.Core.Settings;
@@ -20,6 +22,10 @@ public sealed class MainGame : Microsoft.Xna.Framework.Game
     private readonly GameTimeService _time;
     private readonly FixedUpdateRunner _fixedUpdateRunner;
     private readonly PerformanceProfiler _performance = new();
+    private readonly FrameTimeTelemetryWindow _frameTimes = new(512);
+    private readonly RendererMetricsTelemetryWindow _rendererMetrics = new(512);
+    private readonly HighResolutionFrameLimiter _frameLimiter = new();
+    private readonly GameThreadSchedulingScope _gameThreadScheduling = new();
     private GameSettings _settings;
     private readonly GameSettingsService _settingsService;
     private readonly ClientSmokeOptions? _smokeOptions;
@@ -38,23 +44,25 @@ public sealed class MainGame : Microsoft.Xna.Framework.Game
     private string? _smokeProjectManifestPath;
     private int _drawnFrames;
     private bool _clientDisposed;
+    private long _previousDrawStartedAt;
 
     public MainGame(ClientSmokeOptions? smokeOptions = null)
     {
         _smokeOptions = smokeOptions;
         _settingsService = new GameSettingsService();
         _settings = LoadSettings();
-        if (_smokeOptions is not null)
+        if (_smokeOptions is { UseConfiguredVideoSettings: false })
         {
             _settings = _settings with
             {
                 Video = _settings.Video with
                 {
-                    Width = 640,
-                    Height = 360,
+                    Width = _smokeOptions.Width,
+                    Height = _smokeOptions.Height,
                     Fullscreen = false,
                     VSync = false,
-                    FrameRateLimit = 0
+                    LowLatencyFramePacing = false,
+                    FrameRateLimit = _smokeOptions.FrameRateLimit
                 }
             };
             IsFixedTimeStep = false;
@@ -66,11 +74,11 @@ public sealed class MainGame : Microsoft.Xna.Framework.Game
         {
             PreferredBackBufferWidth = _settings.Video.Width,
             PreferredBackBufferHeight = _settings.Video.Height,
-            SynchronizeWithVerticalRetrace = _settings.Video.VSync,
+            SynchronizeWithVerticalRetrace = FramePacingPolicy.Resolve(_settings.Video).SynchronizeWithVerticalRetrace,
             IsFullScreen = _settings.Video.Fullscreen
         };
 
-        _states = new GameStateManager(Exit, ApplySettings);
+        _states = new GameStateManager(Exit, ApplySettings, _performance);
         _time = new GameTimeService();
         _fixedUpdateRunner = new FixedUpdateRunner();
 
@@ -110,8 +118,10 @@ public sealed class MainGame : Microsoft.Xna.Framework.Game
             ClientSmokeStartState.Playing => new PlayingState(
                 _states,
                 openConsoleOnInitialize: _smokeOptions.OpenConsole,
+                openPauseOnInitialize: _smokeOptions.OpenPause,
                 forcedBiomeId: _smokeOptions.ForcedBiomeId,
-                suppressDebugOverlays: true),
+                suppressDebugOverlays: !_smokeOptions.IncludeDebugOverlays,
+                scriptedTraversal: _smokeOptions.ScriptedTraversal),
             _ => menu
         };
     }
@@ -148,6 +158,10 @@ public sealed class MainGame : Microsoft.Xna.Framework.Game
         {
             _states.Update(_time.FrameDeltaSeconds);
             _fixedUpdateRunner.Run(_time.FrameDeltaSeconds, FixedUpdate);
+            using (_performance.Measure("Presentation.LateUpdate", 4.0))
+            {
+                _states.LateUpdate(_time.FrameDeltaSeconds);
+            }
         }
 
         base.Update(gameTime);
@@ -160,6 +174,15 @@ public sealed class MainGame : Microsoft.Xna.Framework.Game
             return;
         }
 
+        _frameLimiter.WaitForNextFrame();
+        var drawStartedAt = System.Diagnostics.Stopwatch.GetTimestamp();
+        if (_previousDrawStartedAt != 0)
+        {
+            _frameTimes.Record(System.Diagnostics.Stopwatch.GetElapsedTime(_previousDrawStartedAt, drawStartedAt));
+        }
+
+        _previousDrawStartedAt = drawStartedAt;
+        _rendererMetrics.BeginFrame(RendererMetricCounters.Capture(GraphicsDevice.Metrics));
         GraphicsDevice.Clear(Color.Black);
 
         _spriteBatch.Begin(samplerState: SamplerState.PointClamp);
@@ -171,16 +194,22 @@ public sealed class MainGame : Microsoft.Xna.Framework.Game
             _pixel,
             _time,
             GraphicsDevice.Viewport.Bounds,
-            _performance);
+            _performance,
+            _frameTimes,
+            _rendererMetrics);
 
         using (_performance.Measure("Frame.Draw", 16.67))
         {
             _states.Draw(context);
             DrawSmokeAssetSample(context);
             DrawDebugOverlay(context);
+            using (_performance.Measure("Render.FinalFlush", 2.0))
+            {
+                _spriteBatch.End();
+            }
         }
 
-        _spriteBatch.End();
+        _rendererMetrics.EndFrame(RendererMetricCounters.Capture(GraphicsDevice.Metrics));
         _time.RecordDrawFrame();
         CaptureSmokeFrameWhenReady();
 
@@ -199,6 +228,8 @@ public sealed class MainGame : Microsoft.Xna.Framework.Game
         {
             _clientDisposed = true;
             _smokeWatchdog?.Dispose();
+            _frameLimiter.Dispose();
+            _gameThreadScheduling.Dispose();
             Window.TextInput -= OnTextInput;
             _states.Dispose();
             DisposeLoadedClientResources();
@@ -211,6 +242,7 @@ public sealed class MainGame : Microsoft.Xna.Framework.Game
     {
         _smokeTextures?.Dispose();
         _smokeTextures = null;
+        _debugText?.Dispose();
         _debugText = null;
         _spriteBatch?.Dispose();
         _spriteBatch = null;
@@ -246,7 +278,20 @@ public sealed class MainGame : Microsoft.Xna.Framework.Game
 
     private void CaptureSmokeFrameWhenReady()
     {
-        if (_smokeOptions is null || SmokeResult is not null || ++_drawnFrames < _smokeOptions.Frames)
+        if (_smokeOptions is null || SmokeResult is not null)
+        {
+            return;
+        }
+
+        _drawnFrames++;
+        if (_drawnFrames == _smokeOptions.WarmupFrames)
+        {
+            _performance.Clear();
+            _frameTimes.Clear();
+            _rendererMetrics.Reset();
+        }
+
+        if (_drawnFrames < _smokeOptions.Frames)
         {
             return;
         }
@@ -354,7 +399,14 @@ public sealed class MainGame : Microsoft.Xna.Framework.Game
                 passed
                     ? null
                     : $"Expected a nonblank scene outside the synthetic sample panel, all UI sample sprites, " +
-                      $"and {expectedFrameCount} preloaded texture frames without explicit asset placeholders."));
+                      $"and {expectedFrameCount} preloaded texture frames without explicit asset placeholders.")
+            {
+                PerformanceMetrics = _performance.Snapshot(),
+                FrameTiming = _frameTimes.Capture(),
+                RendererMetrics = _rendererMetrics.Capture(),
+                Gameplay = (_states.CurrentState as IClientGameplaySmokeTelemetryProvider)?
+                    .CaptureGameplaySmokeTelemetry() ?? ClientGameplaySmokeTelemetry.NotCaptured
+            });
         }
         catch (Exception exception)
         {
@@ -381,7 +433,10 @@ public sealed class MainGame : Microsoft.Xna.Framework.Game
             _smokeProjectManifestPath,
             _smokeTextures?.Telemetry ?? default,
             _smokeTextures?.ExpectedPreloadedFrameCount ?? 0,
-            _smokeTextures?.PlaceholderAssetIds.Count ?? 0);
+            _smokeTextures?.PlaceholderAssetIds.Count ?? 0) with
+        {
+            RendererMetrics = _rendererMetrics.Capture()
+        };
         if (Interlocked.CompareExchange(ref _smokeResult, timedOut, comparand: null) is null)
         {
             Exit();
@@ -449,7 +504,14 @@ public sealed class MainGame : Microsoft.Xna.Framework.Game
             _smokeProjectManifestPath,
             _smokeTextures?.Telemetry ?? default,
             _smokeTextures?.ExpectedPreloadedFrameCount ?? 0,
-            _smokeTextures?.PlaceholderAssetIds.Count ?? 0);
+            _smokeTextures?.PlaceholderAssetIds.Count ?? 0) with
+        {
+            PerformanceMetrics = _performance.Snapshot(),
+            FrameTiming = _frameTimes.Capture(),
+            RendererMetrics = _rendererMetrics.Capture(),
+            Gameplay = (_states.CurrentState as IClientGameplaySmokeTelemetryProvider)?
+                .CaptureGameplaySmokeTelemetry() ?? ClientGameplaySmokeTelemetry.NotCaptured
+        };
     }
 
     private static void ValidateSmokeTexturePreload(ClientTextureRegistry textures)
@@ -536,7 +598,7 @@ public sealed class MainGame : Microsoft.Xna.Framework.Game
 
     private void DrawDebugOverlay(RenderContext context)
     {
-        if (_smokeOptions is not null ||
+        if (_smokeOptions is { IncludeDebugOverlays: false } ||
             !_settings.Rendering.DrawDebugOverlays ||
             !_settings.Debug.ShowDebugOverlay)
         {
@@ -580,16 +642,17 @@ public sealed class MainGame : Microsoft.Xna.Framework.Game
         ConfigureFrameTiming(settings.Video);
 
         var video = settings.Video;
+        var pacing = FramePacingPolicy.Resolve(video);
         var needsApply =
             _graphics.PreferredBackBufferWidth != video.Width ||
             _graphics.PreferredBackBufferHeight != video.Height ||
             _graphics.IsFullScreen != video.Fullscreen ||
-            _graphics.SynchronizeWithVerticalRetrace != video.VSync;
+            _graphics.SynchronizeWithVerticalRetrace != pacing.SynchronizeWithVerticalRetrace;
 
         _graphics.PreferredBackBufferWidth = video.Width;
         _graphics.PreferredBackBufferHeight = video.Height;
         _graphics.IsFullScreen = video.Fullscreen;
-        _graphics.SynchronizeWithVerticalRetrace = video.VSync;
+        _graphics.SynchronizeWithVerticalRetrace = pacing.SynchronizeWithVerticalRetrace;
 
         if (needsApply)
         {
@@ -599,13 +662,7 @@ public sealed class MainGame : Microsoft.Xna.Framework.Game
 
     private void ConfigureFrameTiming(VideoSettings video)
     {
-        if (video.FrameRateLimit == 0)
-        {
-            IsFixedTimeStep = false;
-            return;
-        }
-
-        IsFixedTimeStep = true;
-        TargetElapsedTime = TimeSpan.FromSeconds(1d / video.FrameRateLimit);
+        IsFixedTimeStep = false;
+        _frameLimiter.Configure(FramePacingPolicy.Resolve(video).SoftwareFrameRateLimit);
     }
 }

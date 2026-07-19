@@ -5,6 +5,35 @@
   "maxHealth": 28,
   "width": 18,
   "height": 10,
+  "faction": "hostile",
+  "movementMode": "ground",
+  "tags": ["enemy", "worm", "cave", "cave_hostiles"],
   "contactDamage": 12,
-  "contactKnockback": 170
+  "contactKnockback": 170,
+  "attackDamage": 13,
+  "attackKnockback": 210,
+  "despawn": {
+    "mode": "whenIdle",
+    "spawnProtectionSeconds": 8,
+    "damageProtectionSeconds": 14
+  },
+  "ai": {
+    "kind": "hostile",
+    "detectionRange": 128,
+    "loseTargetRange": 208,
+    "moveSpeed": 50,
+    "fleeSpeed": 92,
+    "patrolRadius": 112,
+    "returnHomeDistance": 176,
+    "attackRange": 24,
+    "attackCooldown": 1.05,
+    "perceptionMemorySeconds": 3,
+    "jumpSpeed": 220,
+    "decisionInterval": 1,
+    "activityPeriod": "any",
+    "perchWhenInactive": false,
+    "requiresLineOfSight": true,
+    "avoidLedges": true,
+    "avoidLiquid": true
+  }
 }

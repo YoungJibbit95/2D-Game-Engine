@@ -79,6 +79,11 @@ public sealed class GameSettingsValidator
             result.Add("rendering.blurRadiusPixels", "Blur radius must be between 0 and 24 pixels.");
         }
 
+        ValidatePresentationRate(rendering.LightingUpdateRateHz, "rendering.lightingUpdateRateHz", result);
+        ValidatePresentationRate(rendering.ReflectionUpdateRateHz, "rendering.reflectionUpdateRateHz", result);
+        ValidatePresentationRate(rendering.AtmosphereUpdateRateHz, "rendering.atmosphereUpdateRateHz", result);
+        ValidatePresentationRate(rendering.SceneCaptureUpdateRateHz, "rendering.sceneCaptureUpdateRateHz", result);
+
         if (rendering.MaxChunkRenderCacheEntries < 32 || rendering.MaxChunkRenderCacheEntries > 4096)
         {
             result.Add("rendering.maxChunkRenderCacheEntries", "Max chunk render cache entries must be between 32 and 4096.");
@@ -312,6 +317,14 @@ public sealed class GameSettingsValidator
         if (value < 0 || value > 1)
         {
             result.Add(path, "Value must be in the range 0..1.");
+        }
+    }
+
+    private static void ValidatePresentationRate(int value, string path, SettingsValidationResult result)
+    {
+        if (value is < 10 or > 240)
+        {
+            result.Add(path, "Presentation update rate must be between 10 and 240 Hz.");
         }
     }
 

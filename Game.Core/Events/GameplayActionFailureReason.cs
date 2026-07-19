@@ -12,6 +12,7 @@ public enum GameplayActionFailureReason
     InsufficientToolPower,
     InsufficientMana,
     InsufficientAmmo,
+    InsufficientStamina,
     InsufficientItem,
     InvalidItem,
     InvalidTarget,

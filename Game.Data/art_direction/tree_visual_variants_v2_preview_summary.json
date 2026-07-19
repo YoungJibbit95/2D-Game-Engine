@@ -1,0 +1,18 @@
+{
+  "sliceId": "tree_visual_variants_v2",
+  "preview": "art_direction/tree_visual_variants_v2_preview.png",
+  "dimensions": [
+    1580,
+    820
+  ],
+  "sha256": "37914a8175bc4cd2f9577aabc382c85f2c02ee4f7720e13794056261151e45bd",
+  "paletteCount": 3,
+  "silhouetteVariationCount": 12,
+  "sampleVariations": [
+    1,
+    4,
+    8
+  ],
+  "integerScale": 2,
+  "assetAuditPassed": true
+}

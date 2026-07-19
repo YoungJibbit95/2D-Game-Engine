@@ -1,0 +1,19 @@
+{
+  "id": "amber_grove_firefly",
+  "entityId": "firefly",
+  "biomeId": "amber_grove",
+  "time": "night",
+  "habitats": ["surface", "openAir"],
+  "minTileY": 0,
+  "chance": 0.3,
+  "weight": 1.2,
+  "maxActive": 8,
+  "populationGroup": "grove-wildlife",
+  "maxActiveInGroup": 10,
+  "populationRegionSizeTiles": 80,
+  "maxActiveInRegion": 5,
+  "maxActiveInHabitat": 8,
+  "localPopulationRadiusTiles": 32,
+  "maxActiveInLocalArea": 4,
+  "cooldownSeconds": 2.8
+}

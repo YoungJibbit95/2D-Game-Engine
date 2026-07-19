@@ -5,6 +5,34 @@
   "maxHealth": 5,
   "width": 12,
   "height": 10,
+  "faction": "friendly",
+  "movementMode": "ground",
+  "tags": ["critter", "rabbit", "surface", "forest_wildlife"],
   "contactDamage": 0,
-  "contactKnockback": 0
+  "contactKnockback": 0,
+  "despawn": {
+    "mode": "whenIdle",
+    "spawnProtectionSeconds": 6,
+    "damageProtectionSeconds": 10
+  },
+  "ai": {
+    "kind": "critter",
+    "detectionRange": 112,
+    "loseTargetRange": 160,
+    "moveSpeed": 46,
+    "fleeSpeed": 98,
+    "patrolRadius": 128,
+    "returnHomeDistance": 192,
+    "flockRadius": 80,
+    "flockWeight": 0.2,
+    "minFlockSize": 2,
+    "jumpSpeed": 250,
+    "decisionInterval": 0.75,
+    "idleChance": 0.3,
+    "activityPeriod": "day",
+    "perchWhenInactive": false,
+    "requiresLineOfSight": true,
+    "avoidLedges": true,
+    "avoidLiquid": true
+  }
 }

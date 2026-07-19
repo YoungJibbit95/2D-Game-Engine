@@ -36,6 +36,8 @@ public sealed record VideoSettings
 
     public bool VSync { get; init; } = true;
 
+    public bool LowLatencyFramePacing { get; init; } = true;
+
     public int FrameRateLimit { get; init; }
 
     public float UiScale { get; init; } = 1f;
@@ -87,7 +89,7 @@ public sealed record RenderingSettings
 
     public bool AmbientOcclusion { get; init; } = true;
 
-    public float CaveAmbientLight { get; init; } = 0.16f;
+    public float CaveAmbientLight { get; init; } = 0.22f;
 
     public float TorchBloomStrength { get; init; } = 0.65f;
 
@@ -98,6 +100,16 @@ public sealed record RenderingSettings
     public int RaymarchStepBudget { get; init; } = 24;
 
     public int BlurRadiusPixels { get; init; } = 6;
+
+    public bool AdaptivePresentationCadence { get; init; } = true;
+
+    public int LightingUpdateRateHz { get; init; } = 45;
+
+    public int ReflectionUpdateRateHz { get; init; } = 24;
+
+    public int AtmosphereUpdateRateHz { get; init; } = 24;
+
+    public int SceneCaptureUpdateRateHz { get; init; } = 30;
 }
 
 public sealed record UiSettings

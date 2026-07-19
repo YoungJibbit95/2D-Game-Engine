@@ -1,0 +1,768 @@
+{
+  "animations": [
+    {
+      "id": "player.wave06.idle",
+      "displayName": "Wave 06 Player Idle",
+      "sprite": "entities/player/character_v2_wave06/body",
+      "loopMode": "PingPong",
+      "frames": [
+        {
+          "frame": 0,
+          "frameId": "idle_0",
+          "sourceRectangle": {
+            "x": 0,
+            "y": 0,
+            "width": 24,
+            "height": 40
+          },
+          "durationSeconds": 0.3,
+          "durationTicks": 18
+        },
+        {
+          "frame": 1,
+          "frameId": "idle_1",
+          "sourceRectangle": {
+            "x": 24,
+            "y": 0,
+            "width": 24,
+            "height": 40
+          },
+          "durationSeconds": 0.3,
+          "durationTicks": 18
+        }
+      ],
+      "tags": [
+        "player",
+        "wave-06",
+        "fixed-tick",
+        "locomotion"
+      ]
+    },
+    {
+      "id": "player.wave06.run",
+      "displayName": "Wave 06 Player Run",
+      "sprite": "entities/player/character_v2_wave06/body",
+      "loopMode": "Loop",
+      "frames": [
+        {
+          "frame": 2,
+          "frameId": "run_0",
+          "sourceRectangle": {
+            "x": 48,
+            "y": 0,
+            "width": 24,
+            "height": 40
+          },
+          "durationSeconds": 0.08333333333333333,
+          "durationTicks": 5
+        },
+        {
+          "frame": 3,
+          "frameId": "run_1",
+          "sourceRectangle": {
+            "x": 72,
+            "y": 0,
+            "width": 24,
+            "height": 40
+          },
+          "durationSeconds": 0.08333333333333333,
+          "durationTicks": 5
+        },
+        {
+          "frame": 4,
+          "frameId": "run_2",
+          "sourceRectangle": {
+            "x": 96,
+            "y": 0,
+            "width": 24,
+            "height": 40
+          },
+          "durationSeconds": 0.08333333333333333,
+          "durationTicks": 5
+        },
+        {
+          "frame": 5,
+          "frameId": "run_3",
+          "sourceRectangle": {
+            "x": 120,
+            "y": 0,
+            "width": 24,
+            "height": 40
+          },
+          "durationSeconds": 0.08333333333333333,
+          "durationTicks": 5
+        },
+        {
+          "frame": 6,
+          "frameId": "run_4",
+          "sourceRectangle": {
+            "x": 144,
+            "y": 0,
+            "width": 24,
+            "height": 40
+          },
+          "durationSeconds": 0.08333333333333333,
+          "durationTicks": 5
+        },
+        {
+          "frame": 7,
+          "frameId": "run_5",
+          "sourceRectangle": {
+            "x": 168,
+            "y": 0,
+            "width": 24,
+            "height": 40
+          },
+          "durationSeconds": 0.08333333333333333,
+          "durationTicks": 5
+        }
+      ],
+      "tags": [
+        "player",
+        "wave-06",
+        "fixed-tick",
+        "locomotion"
+      ]
+    },
+    {
+      "id": "player.wave06.jump",
+      "displayName": "Wave 06 Player Jump",
+      "sprite": "entities/player/character_v2_wave06/body",
+      "loopMode": "Once",
+      "frames": [
+        {
+          "frame": 8,
+          "frameId": "jump",
+          "sourceRectangle": {
+            "x": 192,
+            "y": 0,
+            "width": 24,
+            "height": 40
+          },
+          "durationSeconds": 0.13333333333333333,
+          "durationTicks": 8
+        }
+      ],
+      "tags": [
+        "player",
+        "wave-06",
+        "fixed-tick",
+        "airborne"
+      ]
+    },
+    {
+      "id": "player.wave06.fall",
+      "displayName": "Wave 06 Player Fall",
+      "sprite": "entities/player/character_v2_wave06/body",
+      "loopMode": "Once",
+      "frames": [
+        {
+          "frame": 9,
+          "frameId": "fall",
+          "sourceRectangle": {
+            "x": 216,
+            "y": 0,
+            "width": 24,
+            "height": 40
+          },
+          "durationSeconds": 0.13333333333333333,
+          "durationTicks": 8
+        }
+      ],
+      "tags": [
+        "player",
+        "wave-06",
+        "fixed-tick",
+        "airborne"
+      ]
+    },
+    {
+      "id": "player.wave06.tool",
+      "displayName": "Wave 06 Player Tool Action",
+      "sprite": "entities/player/character_v2_wave06/body",
+      "loopMode": "Once",
+      "frames": [
+        {
+          "frame": 10,
+          "frameId": "tool_0",
+          "sourceRectangle": {
+            "x": 240,
+            "y": 0,
+            "width": 24,
+            "height": 40
+          },
+          "durationSeconds": 0.08333333333333333,
+          "durationTicks": 5
+        },
+        {
+          "frame": 11,
+          "frameId": "tool_1",
+          "sourceRectangle": {
+            "x": 264,
+            "y": 0,
+            "width": 24,
+            "height": 40
+          },
+          "durationSeconds": 0.08333333333333333,
+          "durationTicks": 5
+        },
+        {
+          "frame": 12,
+          "frameId": "tool_2",
+          "sourceRectangle": {
+            "x": 288,
+            "y": 0,
+            "width": 24,
+            "height": 40
+          },
+          "durationSeconds": 0.08333333333333333,
+          "durationTicks": 5
+        }
+      ],
+      "tags": [
+        "player",
+        "wave-06",
+        "fixed-tick",
+        "action"
+      ],
+      "events": [
+        {
+          "id": "tool.windup",
+          "tick": 0
+        },
+        {
+          "id": "tool.impact",
+          "tick": 5
+        }
+      ]
+    },
+    {
+      "id": "player.wave06.block",
+      "displayName": "Wave 06 Player Block",
+      "sprite": "entities/player/character_v2_wave06/body",
+      "loopMode": "Loop",
+      "frames": [
+        {
+          "frame": 13,
+          "frameId": "block",
+          "sourceRectangle": {
+            "x": 312,
+            "y": 0,
+            "width": 24,
+            "height": 40
+          },
+          "durationSeconds": 0.13333333333333333,
+          "durationTicks": 8
+        }
+      ],
+      "tags": [
+        "player",
+        "wave-06",
+        "fixed-tick",
+        "guard"
+      ]
+    },
+    {
+      "id": "player.wave06.hurt",
+      "displayName": "Wave 06 Player Hurt",
+      "sprite": "entities/player/character_v2_wave06/body",
+      "loopMode": "Once",
+      "frames": [
+        {
+          "frame": 14,
+          "frameId": "hurt_0",
+          "sourceRectangle": {
+            "x": 336,
+            "y": 0,
+            "width": 24,
+            "height": 40
+          },
+          "durationSeconds": 0.08333333333333333,
+          "durationTicks": 5
+        },
+        {
+          "frame": 15,
+          "frameId": "hurt_1",
+          "sourceRectangle": {
+            "x": 360,
+            "y": 0,
+            "width": 24,
+            "height": 40
+          },
+          "durationSeconds": 0.08333333333333333,
+          "durationTicks": 5
+        }
+      ],
+      "tags": [
+        "player",
+        "wave-06",
+        "fixed-tick",
+        "action"
+      ],
+      "events": [
+        {
+          "id": "hurt.flash",
+          "tick": 0
+        }
+      ]
+    },
+    {
+      "id": "player.wave06.death",
+      "displayName": "Wave 06 Player Death Hold",
+      "sprite": "entities/player/character_v2_wave06/body",
+      "loopMode": "Once",
+      "frames": [
+        {
+          "frame": 15,
+          "frameId": "hurt_1",
+          "sourceRectangle": {
+            "x": 360,
+            "y": 0,
+            "width": 24,
+            "height": 40
+          },
+          "durationSeconds": 1.0,
+          "durationTicks": 60
+        }
+      ],
+      "tags": [
+        "player",
+        "wave-06",
+        "fixed-tick",
+        "terminal"
+      ]
+    }
+  ],
+  "runtimeAnimationContent": {
+    "clips": [
+      {
+        "id": "player.wave06.idle",
+        "displayName": "Wave 06 Player Idle",
+        "sprite": "entities/player/character_v2_wave06/body",
+        "loopMode": "PingPong",
+        "frames": [
+          {
+            "frame": 0,
+            "frameId": "idle_0",
+            "sourceRectangle": {
+              "x": 0,
+              "y": 0,
+              "width": 24,
+              "height": 40
+            },
+            "durationSeconds": 0.3,
+            "durationTicks": 18
+          },
+          {
+            "frame": 1,
+            "frameId": "idle_1",
+            "sourceRectangle": {
+              "x": 24,
+              "y": 0,
+              "width": 24,
+              "height": 40
+            },
+            "durationSeconds": 0.3,
+            "durationTicks": 18
+          }
+        ],
+        "tags": [
+          "player",
+          "wave-06",
+          "fixed-tick",
+          "locomotion"
+        ]
+      },
+      {
+        "id": "player.wave06.run",
+        "displayName": "Wave 06 Player Run",
+        "sprite": "entities/player/character_v2_wave06/body",
+        "loopMode": "Loop",
+        "frames": [
+          {
+            "frame": 2,
+            "frameId": "run_0",
+            "sourceRectangle": {
+              "x": 48,
+              "y": 0,
+              "width": 24,
+              "height": 40
+            },
+            "durationSeconds": 0.08333333333333333,
+            "durationTicks": 5
+          },
+          {
+            "frame": 3,
+            "frameId": "run_1",
+            "sourceRectangle": {
+              "x": 72,
+              "y": 0,
+              "width": 24,
+              "height": 40
+            },
+            "durationSeconds": 0.08333333333333333,
+            "durationTicks": 5
+          },
+          {
+            "frame": 4,
+            "frameId": "run_2",
+            "sourceRectangle": {
+              "x": 96,
+              "y": 0,
+              "width": 24,
+              "height": 40
+            },
+            "durationSeconds": 0.08333333333333333,
+            "durationTicks": 5
+          },
+          {
+            "frame": 5,
+            "frameId": "run_3",
+            "sourceRectangle": {
+              "x": 120,
+              "y": 0,
+              "width": 24,
+              "height": 40
+            },
+            "durationSeconds": 0.08333333333333333,
+            "durationTicks": 5
+          },
+          {
+            "frame": 6,
+            "frameId": "run_4",
+            "sourceRectangle": {
+              "x": 144,
+              "y": 0,
+              "width": 24,
+              "height": 40
+            },
+            "durationSeconds": 0.08333333333333333,
+            "durationTicks": 5
+          },
+          {
+            "frame": 7,
+            "frameId": "run_5",
+            "sourceRectangle": {
+              "x": 168,
+              "y": 0,
+              "width": 24,
+              "height": 40
+            },
+            "durationSeconds": 0.08333333333333333,
+            "durationTicks": 5
+          }
+        ],
+        "tags": [
+          "player",
+          "wave-06",
+          "fixed-tick",
+          "locomotion"
+        ]
+      },
+      {
+        "id": "player.wave06.jump",
+        "displayName": "Wave 06 Player Jump",
+        "sprite": "entities/player/character_v2_wave06/body",
+        "loopMode": "Once",
+        "frames": [
+          {
+            "frame": 8,
+            "frameId": "jump",
+            "sourceRectangle": {
+              "x": 192,
+              "y": 0,
+              "width": 24,
+              "height": 40
+            },
+            "durationSeconds": 0.13333333333333333,
+            "durationTicks": 8
+          }
+        ],
+        "tags": [
+          "player",
+          "wave-06",
+          "fixed-tick",
+          "airborne"
+        ]
+      },
+      {
+        "id": "player.wave06.fall",
+        "displayName": "Wave 06 Player Fall",
+        "sprite": "entities/player/character_v2_wave06/body",
+        "loopMode": "Once",
+        "frames": [
+          {
+            "frame": 9,
+            "frameId": "fall",
+            "sourceRectangle": {
+              "x": 216,
+              "y": 0,
+              "width": 24,
+              "height": 40
+            },
+            "durationSeconds": 0.13333333333333333,
+            "durationTicks": 8
+          }
+        ],
+        "tags": [
+          "player",
+          "wave-06",
+          "fixed-tick",
+          "airborne"
+        ]
+      },
+      {
+        "id": "player.wave06.tool",
+        "displayName": "Wave 06 Player Tool Action",
+        "sprite": "entities/player/character_v2_wave06/body",
+        "loopMode": "Once",
+        "frames": [
+          {
+            "frame": 10,
+            "frameId": "tool_0",
+            "sourceRectangle": {
+              "x": 240,
+              "y": 0,
+              "width": 24,
+              "height": 40
+            },
+            "durationSeconds": 0.08333333333333333,
+            "durationTicks": 5
+          },
+          {
+            "frame": 11,
+            "frameId": "tool_1",
+            "sourceRectangle": {
+              "x": 264,
+              "y": 0,
+              "width": 24,
+              "height": 40
+            },
+            "durationSeconds": 0.08333333333333333,
+            "durationTicks": 5
+          },
+          {
+            "frame": 12,
+            "frameId": "tool_2",
+            "sourceRectangle": {
+              "x": 288,
+              "y": 0,
+              "width": 24,
+              "height": 40
+            },
+            "durationSeconds": 0.08333333333333333,
+            "durationTicks": 5
+          }
+        ],
+        "tags": [
+          "player",
+          "wave-06",
+          "fixed-tick",
+          "action"
+        ],
+        "events": [
+          {
+            "id": "tool.windup",
+            "tick": 0
+          },
+          {
+            "id": "tool.impact",
+            "tick": 5
+          }
+        ]
+      },
+      {
+        "id": "player.wave06.block",
+        "displayName": "Wave 06 Player Block",
+        "sprite": "entities/player/character_v2_wave06/body",
+        "loopMode": "Loop",
+        "frames": [
+          {
+            "frame": 13,
+            "frameId": "block",
+            "sourceRectangle": {
+              "x": 312,
+              "y": 0,
+              "width": 24,
+              "height": 40
+            },
+            "durationSeconds": 0.13333333333333333,
+            "durationTicks": 8
+          }
+        ],
+        "tags": [
+          "player",
+          "wave-06",
+          "fixed-tick",
+          "guard"
+        ]
+      },
+      {
+        "id": "player.wave06.hurt",
+        "displayName": "Wave 06 Player Hurt",
+        "sprite": "entities/player/character_v2_wave06/body",
+        "loopMode": "Once",
+        "frames": [
+          {
+            "frame": 14,
+            "frameId": "hurt_0",
+            "sourceRectangle": {
+              "x": 336,
+              "y": 0,
+              "width": 24,
+              "height": 40
+            },
+            "durationSeconds": 0.08333333333333333,
+            "durationTicks": 5
+          },
+          {
+            "frame": 15,
+            "frameId": "hurt_1",
+            "sourceRectangle": {
+              "x": 360,
+              "y": 0,
+              "width": 24,
+              "height": 40
+            },
+            "durationSeconds": 0.08333333333333333,
+            "durationTicks": 5
+          }
+        ],
+        "tags": [
+          "player",
+          "wave-06",
+          "fixed-tick",
+          "action"
+        ],
+        "events": [
+          {
+            "id": "hurt.flash",
+            "tick": 0
+          }
+        ]
+      },
+      {
+        "id": "player.wave06.death",
+        "displayName": "Wave 06 Player Death Hold",
+        "sprite": "entities/player/character_v2_wave06/body",
+        "loopMode": "Once",
+        "frames": [
+          {
+            "frame": 15,
+            "frameId": "hurt_1",
+            "sourceRectangle": {
+              "x": 360,
+              "y": 0,
+              "width": 24,
+              "height": 40
+            },
+            "durationSeconds": 1.0,
+            "durationTicks": 60
+          }
+        ],
+        "tags": [
+          "player",
+          "wave-06",
+          "fixed-tick",
+          "terminal"
+        ]
+      }
+    ],
+    "stateMachines": [
+      {
+        "id": "player.wave06.states",
+        "layers": [
+          {
+            "id": "base",
+            "priority": 0,
+            "initialStateId": "idle",
+            "states": [
+              {
+                "id": "idle",
+                "clipId": "player.wave06.idle"
+              },
+              {
+                "id": "run",
+                "clipId": "player.wave06.run",
+                "scaleWithLocomotion": true,
+                "locomotionReferenceSpeedMilliUnitsPerSecond": 120000,
+                "minimumLocomotionRatePercentage": 50,
+                "maximumLocomotionRatePercentage": 200
+              },
+              {
+                "id": "jump",
+                "clipId": "player.wave06.jump"
+              },
+              {
+                "id": "fall",
+                "clipId": "player.wave06.fall"
+              },
+              {
+                "id": "tool",
+                "clipId": "player.wave06.tool",
+                "actionLockMode": "UntilClipComplete",
+                "completionStateId": "idle"
+              },
+              {
+                "id": "block",
+                "clipId": "player.wave06.block"
+              },
+              {
+                "id": "hurt",
+                "clipId": "player.wave06.hurt",
+                "actionLockMode": "UntilClipComplete",
+                "completionStateId": "idle"
+              },
+              {
+                "id": "death",
+                "clipId": "player.wave06.death"
+              }
+            ],
+            "transitions": [
+              {
+                "fromStateId": "*",
+                "toStateId": "idle",
+                "blendTicks": 2
+              },
+              {
+                "fromStateId": "*",
+                "toStateId": "run",
+                "blendTicks": 2
+              },
+              {
+                "fromStateId": "*",
+                "toStateId": "jump",
+                "blendTicks": 1
+              },
+              {
+                "fromStateId": "*",
+                "toStateId": "fall",
+                "blendTicks": 1
+              },
+              {
+                "fromStateId": "*",
+                "toStateId": "tool",
+                "blendTicks": 1
+              },
+              {
+                "fromStateId": "*",
+                "toStateId": "block",
+                "blendTicks": 1
+              },
+              {
+                "fromStateId": "*",
+                "toStateId": "hurt",
+                "blendTicks": 1
+              },
+              {
+                "fromStateId": "*",
+                "toStateId": "death",
+                "blendTicks": 0
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

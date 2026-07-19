@@ -3,6 +3,8 @@ using Game.Core.Feedback;
 using Game.Core.Runtime;
 using Game.Core.Settings;
 using Game.Core.Weather;
+using Game.Core.World;
+using Game.Core.World.Vegetation;
 using Microsoft.Xna.Framework;
 
 namespace Game.Client.Rendering;
@@ -11,11 +13,12 @@ public readonly record struct AmbientParticleFrame(
     LivingWorldFrameSnapshot LivingWorld,
     Rectangle VisibleWorld,
     long TickNumber,
-    int Quality);
+    int Quality,
+    World? World = null);
 
 public sealed class GameplayParticleSystem
 {
-    private const int AbsoluteCapacity = 640;
+    private const int AbsoluteCapacity = ParticleQualityBudget.AbsoluteMaximumParticles;
     private readonly ParticleState[] _particles = new ParticleState[AbsoluteCapacity];
     private int _count;
     private int _replacementCursor;
@@ -26,9 +29,14 @@ public sealed class GameplayParticleSystem
 
     public int Capacity => AbsoluteCapacity;
 
+    public int LastDrawPrimitiveCount { get; private set; }
+
+    public int LastVisibleParticleCount { get; private set; }
+
     public void Emit(GameplayFeedbackCue cue, int quality)
     {
-        var maximum = ResolveMaximum(quality);
+        var budget = ParticleQualityBudget.ForQuality(quality);
+        var maximum = budget.MaximumParticles;
         if (maximum == 0)
         {
             return;
@@ -49,7 +57,10 @@ public sealed class GameplayParticleSystem
                 GameplayFeedbackCueKind.ResourceRestored => 6,
             _ => 4
         };
-        var count = Math.Clamp(baseCount * Math.Clamp(quality, 1, 3) / 2, 2, 24);
+        var count = Math.Clamp(
+            baseCount * Math.Clamp(quality, 1, 3) / 2,
+            2,
+            budget.MaximumEmissionsPerCall);
         var color = ResolveColor(cue.Kind);
         var buoyant = cue.Kind is GameplayFeedbackCueKind.ItemPickup or
             GameplayFeedbackCueKind.RareItemPickup or
@@ -58,13 +69,14 @@ public sealed class GameplayParticleSystem
             GameplayFeedbackCueKind.CraftCompleted or
             GameplayFeedbackCueKind.ResourceRestored;
         var lifetime = buoyant ? 0.7f : 0.45f;
+        var cueIntensity = float.IsFinite(cue.Intensity)
+            ? Math.Clamp(cue.Intensity, 0.35f, 4f)
+            : 1f;
+        var shape = ResolveShape(cue.Kind);
 
         for (var index = 0; index < count; index++)
         {
             var angle = NextUnit() * MathF.Tau;
-            var cueIntensity = float.IsFinite(cue.Intensity)
-                ? Math.Clamp(cue.Intensity, 0.35f, 4f)
-                : 1f;
             var speed = 20f + NextUnit() * 55f * cueIntensity;
             var velocity = new System.Numerics.Vector2(
                 MathF.Cos(angle) * speed,
@@ -77,14 +89,20 @@ public sealed class GameplayParticleSystem
                     lifetime + NextUnit() * 0.25f,
                     1.5f + NextUnit() * 2.5f,
                     buoyant ? -12f : 90f,
-                    ParticleShape.Dot),
+                    shape,
+                    buoyant ? 0.18f : 0.75f,
+                    shape is ParticleShape.Spark or ParticleShape.Ring ? 0.28f : 0.12f,
+                    NextUnit() * MathF.Tau,
+                    buoyant ? 3.5f : 0.8f,
+                    4f + NextUnit() * 5f),
                 maximum);
         }
     }
 
     public void EmitAmbient(in AmbientParticleFrame frame)
     {
-        var maximum = ResolveMaximum(frame.Quality);
+        var budget = ParticleQualityBudget.ForQuality(frame.Quality);
+        var maximum = budget.MaximumParticles;
         if (maximum == 0 ||
             frame.TickNumber < 0 ||
             frame.TickNumber == _lastAmbientTick ||
@@ -95,31 +113,51 @@ public sealed class GameplayParticleSystem
 
         _lastAmbientTick = frame.TickNumber;
         TrimToBudget(maximum);
+        if (frame.TickNumber % budget.AmbientTickStride != 0)
+        {
+            return;
+        }
+
         var living = frame.LivingWorld;
         var quality = Math.Clamp(frame.Quality, 1, 3);
-        var weatherCount = living.Weather switch
+        var weatherBaseCount = living.Weather switch
         {
-            WeatherKind.Storm => quality * 3,
-            WeatherKind.Rain => quality * 2,
+            WeatherKind.Storm => quality * 4,
+            WeatherKind.Rain => quality * 3,
             WeatherKind.Fog => quality,
             _ => 0
         };
+        var weatherCount = Math.Min(
+            budget.MaximumAmbientEmissionsPerTick,
+            (int)MathF.Ceiling(weatherBaseCount * Math.Clamp(living.WeatherIntensity, 0.2f, 1f)));
+        var emitted = 0;
         for (var index = 0; index < weatherCount; index++)
         {
             EmitWeatherParticle(frame, index, maximum);
+            emitted++;
         }
 
-        if (frame.TickNumber % 4 != 0)
+        if (frame.TickNumber % 3 != 0 || emitted >= budget.MaximumAmbientEmissionsPerTick)
         {
             return;
         }
 
         var ambientKind = ResolveAmbientKind(living.BiomeId, living.SubBiomeId);
-        var ambientCount = ambientKind == AmbientParticleKind.None ? 0 : quality;
+        var density = float.IsFinite(living.Presentation.AmbientParticleDensity)
+            ? Math.Clamp(living.Presentation.AmbientParticleDensity, 0f, 3f)
+            : 0f;
+        var ambientCount = ambientKind == AmbientParticleKind.None
+            ? 0
+            : Math.Min(
+                budget.MaximumAmbientEmissionsPerTick - emitted,
+                quality + (int)MathF.Ceiling(quality * density));
         for (var index = 0; index < ambientCount; index++)
         {
             EmitBiomeParticle(frame, ambientKind, index, maximum);
         }
+
+        emitted += ambientCount;
+        EmitFallingLeaves(frame, budget.MaximumAmbientEmissionsPerTick - emitted, maximum);
     }
 
     public void Update(float deltaSeconds)
@@ -141,7 +179,10 @@ public sealed class GameplayParticleSystem
             }
 
             particle.Velocity.Y += particle.Gravity * deltaSeconds;
+            var damping = 1f / (1f + particle.Drag * deltaSeconds);
+            particle.Velocity *= damping;
             particle.Position += particle.Velocity * deltaSeconds;
+            particle.Phase += particle.AnimationSpeed * deltaSeconds;
         }
     }
 
@@ -149,7 +190,10 @@ public sealed class GameplayParticleSystem
     {
         ArgumentNullException.ThrowIfNull(camera);
         ArgumentNullException.ThrowIfNull(settings);
-        var maximum = ResolveMaximum(settings.Rendering.ParticleQuality);
+        var budget = ParticleQualityBudget.ForQuality(settings.Rendering.ParticleQuality);
+        var maximum = budget.MaximumParticles;
+        LastDrawPrimitiveCount = 0;
+        LastVisibleParticleCount = 0;
         if (maximum == 0)
         {
             return;
@@ -158,24 +202,59 @@ public sealed class GameplayParticleSystem
         TrimToBudget(maximum);
         for (var index = 0; index < _count; index++)
         {
+            if (LastDrawPrimitiveCount >= budget.MaximumDrawPrimitives)
+            {
+                break;
+            }
+
             ref readonly var particle = ref _particles[index];
             var screen = camera.WorldToScreen(
                 new Vector2(particle.Position.X, particle.Position.Y),
                 context.ViewportBounds);
-            var normalizedAge = particle.Age / particle.Lifetime;
-            var alpha = 1f - Math.Clamp(normalizedAge, 0f, 1f);
-            var width = Math.Max(1, (int)MathF.Round(particle.Size * camera.Zoom));
+            if (screen.X < context.ViewportBounds.Left - 32f ||
+                screen.X > context.ViewportBounds.Right + 32f ||
+                screen.Y < context.ViewportBounds.Top - 32f ||
+                screen.Y > context.ViewportBounds.Bottom + 32f)
+            {
+                continue;
+            }
+
+            var animation = ParticleAnimationPlanner.Sample(
+                particle.Age,
+                particle.Lifetime,
+                particle.Phase,
+                particle.Pulse,
+                particle.SwayAmplitude);
+            if (animation.Opacity <= 0.001f)
+            {
+                continue;
+            }
+
+            LastVisibleParticleCount++;
+            var width = Math.Max(1, (int)MathF.Round(particle.Size * animation.Scale * camera.Zoom));
             var height = particle.Shape == ParticleShape.Streak
                 ? Math.Max(width + 2, (int)MathF.Round(particle.Size * 3.4f * camera.Zoom))
                 : width;
-            context.SpriteBatch.Draw(
-                context.Pixel,
-                new Rectangle(
-                    SaturatingRound(screen.X),
-                    SaturatingRound(screen.Y),
-                    width,
-                    height),
-                particle.Color * alpha);
+            var bounds = new Rectangle(
+                SaturatingRound(screen.X + animation.Sway),
+                SaturatingRound(screen.Y),
+                width,
+                height);
+            var remaining = budget.MaximumDrawPrimitives - LastDrawPrimitiveCount;
+            if (particle.Shape == ParticleShape.Leaf &&
+                DrawProceduralLeaf(context, screen, camera.Zoom, particle, animation, remaining) is var leafPrimitives &&
+                leafPrimitives > 0)
+            {
+                LastDrawPrimitiveCount += leafPrimitives;
+                continue;
+            }
+
+            LastDrawPrimitiveCount += DrawParticle(
+                context,
+                bounds,
+                particle.Color * animation.Opacity,
+                particle.Shape,
+                remaining);
         }
     }
 
@@ -185,6 +264,8 @@ public sealed class GameplayParticleSystem
         _count = 0;
         _replacementCursor = 0;
         _lastAmbientTick = -1;
+        LastDrawPrimitiveCount = 0;
+        LastVisibleParticleCount = 0;
     }
 
     internal ulong ComputeStateHash()
@@ -200,6 +281,7 @@ public sealed class GameplayParticleSystem
             Mix(ref hash, unchecked((uint)BitConverter.SingleToInt32Bits(particle.Velocity.Y)));
             Mix(ref hash, particle.Color.PackedValue);
             Mix(ref hash, unchecked((uint)BitConverter.SingleToInt32Bits(particle.Age)));
+            Mix(ref hash, unchecked((uint)BitConverter.SingleToInt32Bits(particle.Phase)));
         }
 
         return hash;
@@ -231,7 +313,12 @@ public sealed class GameplayParticleSystem
                     1.8f,
                     2.2f,
                     0f,
-                    ParticleShape.Dot),
+                    ParticleShape.Dot,
+                    0.08f,
+                    0.18f,
+                    SampleUnit(frame.TickNumber, index, 0xD4E12C77u) * MathF.Tau,
+                    7f,
+                    5f),
                 maximum);
             return;
         }
@@ -245,7 +332,12 @@ public sealed class GameplayParticleSystem
                 storm ? 0.72f : 0.9f,
                 storm ? 1.4f : 1f,
                 0f,
-                ParticleShape.Streak),
+                ParticleShape.Streak,
+                0.02f,
+                0f,
+                0f,
+                0f,
+                0f),
             maximum);
     }
 
@@ -293,8 +385,75 @@ public sealed class GameplayParticleSystem
                 1.2f + SampleUnit(frame.TickNumber, index, salt ^ 0xD1B54A35u),
                 kind == AmbientParticleKind.Firefly ? 2f : 1.4f,
                 -1.5f,
-                ParticleShape.Dot),
+                kind == AmbientParticleKind.CrystalMote ? ParticleShape.Spark : ParticleShape.Dot,
+                0.12f,
+                kind == AmbientParticleKind.Firefly ? 0.32f : 0.18f,
+                SampleUnit(frame.TickNumber, index, salt ^ 0x94D049BBu) * MathF.Tau,
+                kind == AmbientParticleKind.Firefly ? 5f : 2.5f,
+                3f + SampleUnit(frame.TickNumber, index, salt ^ 0x369DEA0Fu) * 5f),
             maximum);
+    }
+
+    private void EmitFallingLeaves(in AmbientParticleFrame frame, int emissionBudget, int maximum)
+    {
+        if (frame.World is null ||
+            frame.LivingWorld.IsUnderground ||
+            emissionBudget <= 0)
+        {
+            return;
+        }
+
+        var quality = Math.Clamp(frame.Quality, 1, 3);
+        var tickStride = quality switch
+        {
+            1 => 12,
+            2 => 8,
+            _ => 6
+        };
+        if (frame.TickNumber % tickStride != 0)
+        {
+            return;
+        }
+
+        Span<FallingLeafSpawn> planned = stackalloc FallingLeafSpawn[6];
+        var requested = Math.Min(planned.Length, Math.Min(emissionBudget, quality * 2));
+        if (requested <= 0)
+        {
+            return;
+        }
+
+        var visible = new RectI(
+            frame.VisibleWorld.X,
+            frame.VisibleWorld.Y,
+            frame.VisibleWorld.Width,
+            frame.VisibleWorld.Height);
+        var count = FallingLeafPlanner.Plan(
+            frame.World,
+            visible,
+            frame.LivingWorld.SurfaceTileY,
+            frame.TickNumber,
+            frame.LivingWorld.Wind,
+            frame.LivingWorld.VegetationDensityMultiplier,
+            planned[..requested]);
+        for (var index = 0; index < count; index++)
+        {
+            ref readonly var leaf = ref planned[index];
+            Add(
+                new ParticleState(
+                    leaf.WorldPosition,
+                    leaf.InitialVelocity,
+                    ResolveLeafColor(frame.LivingWorld.BiomeId, leaf.ColorVariation),
+                    leaf.Lifetime,
+                    1.7f * leaf.Scale,
+                    gravity: 13f,
+                    ParticleShape.Leaf,
+                    drag: 0.16f,
+                    pulse: 0.08f,
+                    leaf.Phase,
+                    leaf.SwayAmplitude,
+                    leaf.AnimationSpeed),
+                maximum);
+        }
     }
 
     private void Add(in ParticleState particle, int maximum)
@@ -350,16 +509,105 @@ public sealed class GameplayParticleSystem
         return (_randomState & 0x00FFFFFFu) / 16777215f;
     }
 
-    private static int ResolveMaximum(int quality)
+    private static int DrawProceduralLeaf(
+        RenderContext context,
+        Vector2 screen,
+        float zoom,
+        in ParticleState particle,
+        in ParticleAnimationSample animation,
+        int remainingPrimitives)
     {
-        var tier = quality switch
+        if (remainingPrimitives <= 0)
         {
-            <= 0 => PresentationQualityTier.Disabled,
-            1 => PresentationQualityTier.Low,
-            2 => PresentationQualityTier.Medium,
-            _ => PresentationQualityTier.High
+            return 0;
+        }
+
+        var size = Math.Max(1, (int)MathF.Round(particle.Size * animation.Scale * zoom));
+        var horizontal = MathF.Sin(particle.Phase) >= 0f;
+        var width = horizontal ? Math.Max(2, size + 1) : Math.Max(1, size);
+        var height = horizontal ? Math.Max(1, size) : Math.Max(2, size + 1);
+        var left = SaturatingRound(screen.X + animation.Sway - width * 0.5f);
+        var top = SaturatingRound(screen.Y - height * 0.5f);
+        context.SpriteBatch.Draw(
+            context.Pixel,
+            new Rectangle(left, top, width, height),
+            particle.Color * animation.Opacity);
+        if (remainingPrimitives < 2 || width <= 1 || height <= 1)
+        {
+            return 1;
+        }
+
+        var highlight = Color.Lerp(particle.Color, Color.White, 0.28f) * (animation.Opacity * 0.7f);
+        context.SpriteBatch.Draw(
+            context.Pixel,
+            new Rectangle(
+                horizontal ? left + width - 1 : left,
+                horizontal ? top : top + height - 1,
+                1,
+                1),
+            highlight);
+        return 2;
+    }
+
+    private static int DrawParticle(
+        RenderContext context,
+        in Rectangle bounds,
+        Color color,
+        ParticleShape shape,
+        int remainingPrimitives)
+    {
+        if (remainingPrimitives <= 0 || bounds.IsEmpty || color.A == 0)
+        {
+            return 0;
+        }
+
+        if (shape == ParticleShape.Spark && remainingPrimitives >= 2)
+        {
+            var centerX = bounds.X + bounds.Width / 2;
+            var centerY = bounds.Y + bounds.Height / 2;
+            context.SpriteBatch.Draw(
+                context.Pixel,
+                new Rectangle(bounds.X - bounds.Width, centerY, bounds.Width * 3, Math.Max(1, bounds.Height / 3)),
+                color);
+            context.SpriteBatch.Draw(
+                context.Pixel,
+                new Rectangle(centerX, bounds.Y - bounds.Height, Math.Max(1, bounds.Width / 3), bounds.Height * 3),
+                color);
+            return 2;
+        }
+
+        if (shape == ParticleShape.Ring && remainingPrimitives >= 4)
+        {
+            var thickness = Math.Max(1, Math.Min(bounds.Width, bounds.Height) / 4);
+            context.SpriteBatch.Draw(context.Pixel, new Rectangle(bounds.X, bounds.Y, bounds.Width, thickness), color);
+            context.SpriteBatch.Draw(
+                context.Pixel,
+                new Rectangle(bounds.X, bounds.Bottom - thickness, bounds.Width, thickness),
+                color);
+            context.SpriteBatch.Draw(context.Pixel, new Rectangle(bounds.X, bounds.Y, thickness, bounds.Height), color);
+            context.SpriteBatch.Draw(
+                context.Pixel,
+                new Rectangle(bounds.Right - thickness, bounds.Y, thickness, bounds.Height),
+                color);
+            return 4;
+        }
+
+        context.SpriteBatch.Draw(context.Pixel, bounds, color);
+        return 1;
+    }
+
+    private static ParticleShape ResolveShape(GameplayFeedbackCueKind kind)
+    {
+        return kind switch
+        {
+            GameplayFeedbackCueKind.WorldEventActivated or
+                GameplayFeedbackCueKind.RareItemPickup or
+                GameplayFeedbackCueKind.RareLootDropped => ParticleShape.Ring,
+            GameplayFeedbackCueKind.MeleeHit or
+                GameplayFeedbackCueKind.ProjectileHit or
+                GameplayFeedbackCueKind.EntityDeath => ParticleShape.Spark,
+            _ => ParticleShape.Dot
         };
-        return PresentationBudget.ForTier(tier).MaxParticles;
     }
 
     private static AmbientParticleKind ResolveAmbientKind(string? biomeId, string? subBiomeId)
@@ -423,6 +671,22 @@ public sealed class GameplayParticleSystem
         };
     }
 
+    private static Color ResolveLeafColor(string? biomeId, float variation)
+    {
+        variation = float.IsFinite(variation) ? Math.Clamp(variation, 0f, 1f) : 0.5f;
+        if (biomeId?.Contains("amber", StringComparison.OrdinalIgnoreCase) == true)
+        {
+            return Color.Lerp(new Color(196, 101, 42), new Color(242, 178, 67), variation);
+        }
+
+        if (biomeId?.Contains("marsh", StringComparison.OrdinalIgnoreCase) == true)
+        {
+            return Color.Lerp(new Color(47, 108, 83), new Color(115, 158, 92), variation);
+        }
+
+        return Color.Lerp(new Color(55, 125, 54), new Color(151, 184, 75), variation);
+    }
+
     private static int SaturatingRound(float value)
     {
         if (!float.IsFinite(value))
@@ -454,7 +718,10 @@ public sealed class GameplayParticleSystem
     private enum ParticleShape
     {
         Dot,
-        Streak
+        Streak,
+        Spark,
+        Ring,
+        Leaf
     }
 
     private struct ParticleState
@@ -466,7 +733,12 @@ public sealed class GameplayParticleSystem
             float lifetime,
             float size,
             float gravity,
-            ParticleShape shape)
+            ParticleShape shape,
+            float drag,
+            float pulse,
+            float phase,
+            float swayAmplitude,
+            float animationSpeed)
         {
             Position = position;
             Velocity = velocity;
@@ -475,6 +747,11 @@ public sealed class GameplayParticleSystem
             Size = size;
             Gravity = gravity;
             Shape = shape;
+            Drag = Math.Max(0f, drag);
+            Pulse = Math.Max(0f, pulse);
+            Phase = phase;
+            SwayAmplitude = Math.Max(0f, swayAmplitude);
+            AnimationSpeed = Math.Max(0f, animationSpeed);
             Age = 0f;
         }
 
@@ -485,6 +762,11 @@ public sealed class GameplayParticleSystem
         public float Size;
         public float Gravity;
         public float Age;
+        public float Drag;
+        public float Pulse;
+        public float Phase;
+        public float SwayAmplitude;
+        public float AnimationSpeed;
         public ParticleShape Shape;
     }
 }

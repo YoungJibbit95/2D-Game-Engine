@@ -106,6 +106,28 @@ public sealed class GameEventBusTests
     }
 
     [Fact]
+    public void Publish_ValueEventSteadyStateDoesNotBox()
+    {
+        var bus = new GameEventBus();
+        var received = 0;
+        bus.Subscribe<ValueGameEvent>(gameEvent => received += gameEvent.Amount);
+        var gameEvent = new ValueGameEvent(1);
+        for (var index = 0; index < 32; index++)
+        {
+            bus.Publish(gameEvent);
+        }
+
+        var before = GC.GetAllocatedBytesForCurrentThread();
+        for (var index = 0; index < 1_000; index++)
+        {
+            bus.Publish(gameEvent);
+        }
+
+        Assert.Equal(0, GC.GetAllocatedBytesForCurrentThread() - before);
+        Assert.Equal(1_032, received);
+    }
+
+    [Fact]
     public void GameEventJournal_RecordsEventsWithCapacityAndDrain()
     {
         var bus = new GameEventBus();
@@ -127,4 +149,6 @@ public sealed class GameEventBusTests
         Assert.Equal(2, drained.Count);
         Assert.Equal(0, journal.Count);
     }
+
+    private readonly record struct ValueGameEvent(int Amount) : IGameEvent;
 }
