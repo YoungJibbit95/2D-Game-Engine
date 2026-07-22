@@ -41,6 +41,22 @@ public sealed class InteractionTargetingSystemTests
     }
 
     [Fact]
+    public void FindMiningTarget_FindsWallTile()
+    {
+        var world = CreateWorld();
+        world.SetWall(4, 2, KnownTileIds.Stone);
+
+        var target = new InteractionTargetingSystem().FindMiningTarget(
+            world,
+            new Vector2(16, 40),
+            new Vector2(120, 40),
+            reachPixels: 160);
+
+        Assert.True(target.Found);
+        Assert.Equal(new TilePos(4, 2), target.TilePosition);
+    }
+
+    [Fact]
     public void FindMiningTarget_ClampsToReach()
     {
         var world = CreateWorld();

@@ -48,22 +48,44 @@ public sealed class TreeTileVisualSelectorTests
         Assert.Equal(0, TreeTileVisualSelector.Resolve(world, 40, 16, KnownTileIds.Stone));
     }
 
-    [Fact]
-    public void Resolve_UsesOneStableVariantAcrossRegionalOakTree()
+    [Theory]
+    [InlineData(KnownTileIds.OakTrunk, KnownTileIds.OakLeaves)]
+    [InlineData(KnownTileIds.LivingWood, KnownTileIds.AutumnLeaves)]
+    [InlineData(KnownTileIds.MangroveRoot, KnownTileIds.MarshLeaves)]
+    public void Resolve_RegionalFoliageUsesStableLocalLobeVariantsWhileTrunkRemainsConsistent(
+        ushort trunkTileId,
+        ushort foliageTileId)
     {
         var world = CreateWorld(seed: 41_901, width: 96);
+        PlaceRegionalTree(world, 40, trunkTileId, foliageTileId);
+        var trunkVariants = new HashSet<byte>();
+        var foliageVariants = new HashSet<byte>();
+
         for (var y = 10; y <= 19; y++)
         {
-            world.SetTile(40, y, TileInstance.FromTileId(KnownTileIds.OakTrunk));
+            var variant = TreeTileVisualSelector.Resolve(world, 40, y, trunkTileId);
+            Assert.InRange(variant, (byte)0, (byte)(TreeTileVisualSelector.VariantCount - 1));
+            trunkVariants.Add(variant);
         }
 
-        world.SetTile(37, 11, TileInstance.FromTileId(KnownTileIds.OakLeaves));
-        world.SetTile(43, 12, TileInstance.FromTileId(KnownTileIds.OakLeaves));
+        for (var y = 6; y <= 12; y++)
+        {
+            for (var x = 35; x <= 45; x++)
+            {
+                if (world.GetTile(x, y).TileId != foliageTileId)
+                {
+                    continue;
+                }
 
-        var expected = TreeTileVisualSelector.Resolve(world, 40, 18, KnownTileIds.OakTrunk);
-        Assert.InRange(expected, (byte)0, (byte)(TreeTileVisualSelector.VariantCount - 1));
-        Assert.Equal(expected, TreeTileVisualSelector.Resolve(world, 43, 12, KnownTileIds.OakLeaves));
-        Assert.Equal(expected, TreeTileVisualSelector.Resolve(world, 37, 11, KnownTileIds.OakLeaves));
+                var variant = TreeTileVisualSelector.Resolve(world, x, y, foliageTileId);
+                Assert.Equal(variant, TreeTileVisualSelector.Resolve(world, x, y, foliageTileId));
+                Assert.InRange(variant, (byte)0, (byte)(TreeTileVisualSelector.VariantCount - 1));
+                foliageVariants.Add(variant);
+            }
+        }
+
+        Assert.Single(trunkVariants);
+        Assert.Equal(TreeTileVisualSelector.VariantCount, foliageVariants.Count);
     }
 
     [Fact]
@@ -85,18 +107,29 @@ public sealed class TreeTileVisualSelectorTests
     public void ResolveTransform_IsStableDistributedAndFoliageOnly()
     {
         var world = CreateWorld(seed: 73_019, width: 96);
-        var transforms = new HashSet<TileVisualTransform>();
+        ushort[] foliageTileIds =
+        [
+            KnownTileIds.Leaves,
+            KnownTileIds.OakLeaves,
+            KnownTileIds.AutumnLeaves,
+            KnownTileIds.MarshLeaves
+        ];
 
-        for (var x = 12; x < 44; x++)
+        foreach (var tileId in foliageTileIds)
         {
-            var first = TreeTileVisualSelector.ResolveTransform(world, x, 10, KnownTileIds.OakLeaves);
-            transforms.Add(first);
-            Assert.Equal(first, TreeTileVisualSelector.ResolveTransform(world, x, 10, KnownTileIds.OakLeaves));
+            var transforms = new HashSet<TileVisualTransform>();
+            for (var x = 12; x < 44; x++)
+            {
+                var first = TreeTileVisualSelector.ResolveTransform(world, x, 10, tileId);
+                transforms.Add(first);
+                Assert.Equal(first, TreeTileVisualSelector.ResolveTransform(world, x, 10, tileId));
+            }
+
+            Assert.Equal(2, transforms.Count);
+            Assert.Contains(TileVisualTransform.None, transforms);
+            Assert.Contains(TileVisualTransform.FlipHorizontal, transforms);
         }
 
-        Assert.Equal(2, transforms.Count);
-        Assert.Contains(TileVisualTransform.None, transforms);
-        Assert.Contains(TileVisualTransform.FlipHorizontal, transforms);
         Assert.Equal(
             TileVisualTransform.None,
             TreeTileVisualSelector.ResolveTransform(world, 20, 10, KnownTileIds.OakTrunk));
@@ -122,27 +155,36 @@ public sealed class TreeTileVisualSelectorTests
     }
 
     [Fact]
-    public void FoliageTransformSelection_DoesNotAllocate()
+    public void FoliageVariantTransformAndMaskSelection_DoesNotAllocate()
     {
         var world = CreateWorld(seed: 55_731, width: 96);
-        _ = TreeTileVisualSelector.ResolveTransform(world, 20, 10, KnownTileIds.OakLeaves);
-        _ = TreeTileVisualSelector.ResolveSourceMask(
-            AutoTileMask.Left | AutoTileMask.Top,
-            TileVisualTransform.FlipHorizontal);
+        PlaceRegionalTree(world, 40, KnownTileIds.OakTrunk, KnownTileIds.OakLeaves);
+        var checksum = 0;
+        for (var warmup = 0; warmup < 512; warmup++)
+        {
+            var x = 35 + warmup % 11;
+            var y = 6 + (warmup / 11) % 7;
+            checksum += TreeTileVisualSelector.Resolve(world, x, y, KnownTileIds.OakLeaves);
+            checksum += (int)TreeTileVisualSelector.ResolveTransform(world, x, y, KnownTileIds.OakLeaves);
+        }
 
         var before = GC.GetAllocatedBytesForCurrentThread();
         for (var iteration = 0; iteration < 10_000; iteration++)
         {
+            var x = 35 + iteration % 11;
+            var y = 6 + (iteration / 11) % 7;
+            checksum += TreeTileVisualSelector.Resolve(world, x, y, KnownTileIds.OakLeaves);
             var transform = TreeTileVisualSelector.ResolveTransform(
                 world,
-                20 + (iteration & 7),
-                10 + (iteration & 3),
+                x,
+                y,
                 KnownTileIds.OakLeaves);
-            _ = TreeTileVisualSelector.ResolveSourceMask(
+            checksum += (int)TreeTileVisualSelector.ResolveSourceMask(
                 AutoTileMask.Left | AutoTileMask.Top,
                 transform);
         }
 
+        Assert.True(checksum > 0);
         Assert.Equal(0, GC.GetAllocatedBytesForCurrentThread() - before);
     }
 
@@ -186,6 +228,30 @@ public sealed class TreeTileVisualSelectorTests
         foreach (var (dx, dy) in new[] { (-3, 11), (-2, 10), (0, 9), (2, 10), (3, 12), (4, 13) })
         {
             world.SetTile(anchorX + dx, dy, TileInstance.FromTileId(KnownTileIds.Leaves));
+        }
+    }
+
+    private static void PlaceRegionalTree(
+        World world,
+        int anchorX,
+        ushort trunkTileId,
+        ushort foliageTileId)
+    {
+        for (var y = 10; y <= 19; y++)
+        {
+            world.SetTile(anchorX, y, TileInstance.FromTileId(trunkTileId));
+        }
+
+        for (var y = 6; y <= 12; y++)
+        {
+            var halfWidth = y is 6 or 12 ? 3 : 5;
+            for (var x = anchorX - halfWidth; x <= anchorX + halfWidth; x++)
+            {
+                if (x != anchorX || y < 10)
+                {
+                    world.SetTile(x, y, TileInstance.FromTileId(foliageTileId));
+                }
+            }
         }
     }
 }

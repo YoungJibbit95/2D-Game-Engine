@@ -1,0 +1,206 @@
+{
+  "version": 1,
+  "scope": "background_features_v7",
+  "briefs": [
+    {
+      "spriteId": "world/backgrounds/features_v7/forest_mountains",
+      "outputPath": "assets/BackgroundFeaturesV7/forest_mountains.png",
+      "width": 1024,
+      "height": 256,
+      "subject": "forest mountains",
+      "prompt": "Create a transparent, seam-safe three-ridge pixel-art mountain plane that fills the lower field without a rectangular sky.",
+      "requirements": [
+        "Binary alpha only.",
+        "Horizontal composition must tolerate deterministic phase and horizontal flip.",
+        "Use the biome palette and remain readable behind gameplay."
+      ],
+      "tags": [
+        "world",
+        "background",
+        "parallax",
+        "feature-plane",
+        "forest",
+        "mountains",
+        "binary-alpha",
+        "runtime-active",
+        "version-7"
+      ],
+      "runtimeIdTarget": "world/backgrounds/features_v7/forest_mountains"
+    },
+    {
+      "spriteId": "world/backgrounds/features_v7/forest_floating_islands",
+      "outputPath": "assets/BackgroundFeaturesV7/forest_floating_islands.png",
+      "width": 1024,
+      "height": 256,
+      "subject": "forest floating islands",
+      "prompt": "Create a transparent sparse pixel-art floating-island plane with rock shelves, roots, vegetation and occasional waterfalls.",
+      "requirements": [
+        "Binary alpha only.",
+        "Horizontal composition must tolerate deterministic phase and horizontal flip.",
+        "Use the biome palette and remain readable behind gameplay."
+      ],
+      "tags": [
+        "world",
+        "background",
+        "parallax",
+        "feature-plane",
+        "forest",
+        "floating-islands",
+        "binary-alpha",
+        "runtime-active",
+        "version-7"
+      ],
+      "runtimeIdTarget": "world/backgrounds/features_v7/forest_floating_islands"
+    },
+    {
+      "spriteId": "world/backgrounds/features_v7/amber_mountains",
+      "outputPath": "assets/BackgroundFeaturesV7/amber_mountains.png",
+      "width": 1024,
+      "height": 256,
+      "subject": "amber mountains",
+      "prompt": "Create a transparent, seam-safe three-ridge pixel-art mountain plane that fills the lower field without a rectangular sky.",
+      "requirements": [
+        "Binary alpha only.",
+        "Horizontal composition must tolerate deterministic phase and horizontal flip.",
+        "Use the biome palette and remain readable behind gameplay."
+      ],
+      "tags": [
+        "world",
+        "background",
+        "parallax",
+        "feature-plane",
+        "amber",
+        "mountains",
+        "binary-alpha",
+        "runtime-active",
+        "version-7"
+      ],
+      "runtimeIdTarget": "world/backgrounds/features_v7/amber_mountains"
+    },
+    {
+      "spriteId": "world/backgrounds/features_v7/amber_floating_islands",
+      "outputPath": "assets/BackgroundFeaturesV7/amber_floating_islands.png",
+      "width": 1024,
+      "height": 256,
+      "subject": "amber floating islands",
+      "prompt": "Create a transparent sparse pixel-art floating-island plane with rock shelves, roots, vegetation and occasional waterfalls.",
+      "requirements": [
+        "Binary alpha only.",
+        "Horizontal composition must tolerate deterministic phase and horizontal flip.",
+        "Use the biome palette and remain readable behind gameplay."
+      ],
+      "tags": [
+        "world",
+        "background",
+        "parallax",
+        "feature-plane",
+        "amber",
+        "floating-islands",
+        "binary-alpha",
+        "runtime-active",
+        "version-7"
+      ],
+      "runtimeIdTarget": "world/backgrounds/features_v7/amber_floating_islands"
+    },
+    {
+      "spriteId": "world/backgrounds/features_v7/twilight_mountains",
+      "outputPath": "assets/BackgroundFeaturesV7/twilight_mountains.png",
+      "width": 1024,
+      "height": 256,
+      "subject": "twilight mountains",
+      "prompt": "Create a transparent, seam-safe three-ridge pixel-art mountain plane that fills the lower field without a rectangular sky.",
+      "requirements": [
+        "Binary alpha only.",
+        "Horizontal composition must tolerate deterministic phase and horizontal flip.",
+        "Use the biome palette and remain readable behind gameplay."
+      ],
+      "tags": [
+        "world",
+        "background",
+        "parallax",
+        "feature-plane",
+        "twilight",
+        "mountains",
+        "binary-alpha",
+        "runtime-active",
+        "version-7"
+      ],
+      "runtimeIdTarget": "world/backgrounds/features_v7/twilight_mountains"
+    },
+    {
+      "spriteId": "world/backgrounds/features_v7/twilight_floating_islands",
+      "outputPath": "assets/BackgroundFeaturesV7/twilight_floating_islands.png",
+      "width": 1024,
+      "height": 256,
+      "subject": "twilight floating islands",
+      "prompt": "Create a transparent sparse pixel-art floating-island plane with rock shelves, roots, vegetation and occasional waterfalls.",
+      "requirements": [
+        "Binary alpha only.",
+        "Horizontal composition must tolerate deterministic phase and horizontal flip.",
+        "Use the biome palette and remain readable behind gameplay."
+      ],
+      "tags": [
+        "world",
+        "background",
+        "parallax",
+        "feature-plane",
+        "twilight",
+        "floating-islands",
+        "binary-alpha",
+        "runtime-active",
+        "version-7"
+      ],
+      "runtimeIdTarget": "world/backgrounds/features_v7/twilight_floating_islands"
+    },
+    {
+      "spriteId": "world/backgrounds/features_v7/crystal_mountains",
+      "outputPath": "assets/BackgroundFeaturesV7/crystal_mountains.png",
+      "width": 1024,
+      "height": 256,
+      "subject": "crystal mountains",
+      "prompt": "Create a transparent, seam-safe three-ridge pixel-art mountain plane that fills the lower field without a rectangular sky.",
+      "requirements": [
+        "Binary alpha only.",
+        "Horizontal composition must tolerate deterministic phase and horizontal flip.",
+        "Use the biome palette and remain readable behind gameplay."
+      ],
+      "tags": [
+        "world",
+        "background",
+        "parallax",
+        "feature-plane",
+        "crystal",
+        "mountains",
+        "binary-alpha",
+        "runtime-active",
+        "version-7"
+      ],
+      "runtimeIdTarget": "world/backgrounds/features_v7/crystal_mountains"
+    },
+    {
+      "spriteId": "world/backgrounds/features_v7/crystal_floating_islands",
+      "outputPath": "assets/BackgroundFeaturesV7/crystal_floating_islands.png",
+      "width": 1024,
+      "height": 256,
+      "subject": "crystal floating islands",
+      "prompt": "Create a transparent sparse pixel-art floating-island plane with rock shelves, roots, vegetation and occasional waterfalls.",
+      "requirements": [
+        "Binary alpha only.",
+        "Horizontal composition must tolerate deterministic phase and horizontal flip.",
+        "Use the biome palette and remain readable behind gameplay."
+      ],
+      "tags": [
+        "world",
+        "background",
+        "parallax",
+        "feature-plane",
+        "crystal",
+        "floating-islands",
+        "binary-alpha",
+        "runtime-active",
+        "version-7"
+      ],
+      "runtimeIdTarget": "world/backgrounds/features_v7/crystal_floating_islands"
+    }
+  ]
+}

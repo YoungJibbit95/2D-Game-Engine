@@ -17,7 +17,16 @@
     {
       "kind": "Cast",
       "projectile": "spark_bolt",
-      "projectileSpeedMultiplier": 1.2
+      "projectileSpeedMultiplier": 1.2,
+      "manaRegenerationDelaySeconds": 0.8,
+      "manaRefundPolicy": "BeforeEffect"
+    }
+  ],
+  "onHitEffects": [
+    {
+      "effect": "arcane_chill",
+      "chance": 0.35,
+      "durationSeconds": 2.5
     }
   ],
   "tags": ["weapon", "magic", "mana", "wave05"]

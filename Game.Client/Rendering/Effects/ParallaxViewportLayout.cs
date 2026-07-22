@@ -54,6 +54,40 @@ public static class ParallaxViewportLayoutPlanner
             clampedSurfaceHorizon,
             undergroundHorizon,
             Math.Clamp(undergroundBlend, 0f, 1f));
+        if (projectionMode == ParallaxProjectionMode.FullscreenDepthPlane)
+        {
+            // Fullscreen planes preserve the complete source rectangle. A uniform
+            // integer scale covers Y; bounded horizontal repeats cover wide views.
+            // No source row is stretched or repeated vertically to fill a gap.
+            var minimumScale = Math.Max(1f, MathF.Ceiling(viewport.Height / (float)sourceHeight));
+            var requestedMultiplier = float.IsFinite(scaleMultiplier)
+                ? Math.Clamp(scaleMultiplier, 0.25f, 4f)
+                : 1f;
+            var requestedScale = MathF.Ceiling(minimumScale * requestedMultiplier);
+            var fullscreenScale = Math.Max(minimumScale, requestedScale);
+            var fullscreenWidth = Math.Max(8, SaturatingRound(sourceWidth * fullscreenScale));
+            var fullscreenHeight = Math.Max(viewport.Height, SaturatingRound(sourceHeight * fullscreenScale));
+            var maximumScroll = Math.Clamp(viewport.Height * 0.025f, 8f, 40f);
+            var boundedScroll = float.IsFinite(verticalScroll)
+                ? Math.Clamp(verticalScroll, -maximumScroll, maximumScroll)
+                : 0f;
+            var centeredY = viewport.Top - (fullscreenHeight - viewport.Height) / 2f + verticalOffset - boundedScroll;
+            var fullscreenY = Math.Clamp(
+                SaturatingRound(centeredY),
+                viewport.Bottom - fullscreenHeight,
+                viewport.Top);
+            var fullscreenHorizon = ResolveDistantSurfaceHorizon(
+                viewport,
+                terrainEnvelopeDepthPixels: 0f,
+                depthPlane);
+            return new ParallaxViewportLayout(
+                fullscreenScale,
+                fullscreenWidth,
+                fullscreenHeight,
+                fullscreenHorizon,
+                fullscreenY);
+        }
+
         if (projectionMode == ParallaxProjectionMode.DistantHorizonBand)
         {
             // Distance scale is derived from viewport density and the authored plane only.

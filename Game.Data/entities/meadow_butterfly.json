@@ -1,0 +1,41 @@
+{
+  "id": "meadow_butterfly",
+  "displayName": "Meadow Butterfly",
+  "texture": "entities/critters/meadow_butterfly",
+  "maxHealth": 3,
+  "width": 8,
+  "height": 7,
+  "faction": "friendly",
+  "movementMode": "flying",
+  "tags": ["critter", "butterfly", "meadow", "surface", "diurnal", "meadow_wildlife"],
+  "contactDamage": 0,
+  "contactKnockback": 0,
+  "attackDamage": 0,
+  "despawn": {
+    "mode": "whenIdle",
+    "spawnProtectionSeconds": 6,
+    "damageProtectionSeconds": 10
+  },
+  "ai": {
+    "kind": "critter",
+    "detectionRange": 88,
+    "loseTargetRange": 136,
+    "moveSpeed": 34,
+    "fleeSpeed": 78,
+    "patrolRadius": 112,
+    "returnHomeDistance": 160,
+    "flockRadius": 80,
+    "flockWeight": 0.62,
+    "minFlockSize": 3,
+    "perceptionMemorySeconds": 1.8,
+    "decisionInterval": 0.7,
+    "idleChance": 0.12,
+    "activityPeriod": "day",
+    "dayMoveSpeedMultiplier": 1.1,
+    "nightMoveSpeedMultiplier": 0.25,
+    "perchWhenInactive": true,
+    "requiresLineOfSight": false,
+    "avoidLedges": false,
+    "avoidLiquid": true
+  }
+}

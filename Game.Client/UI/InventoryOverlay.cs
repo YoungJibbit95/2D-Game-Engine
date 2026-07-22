@@ -212,66 +212,80 @@ public sealed class InventoryOverlay
 
         EnsureServices(inventory, items, equipment);
         var palette = UiTheme.Resolve(settings);
-        context.SpriteBatch.Draw(
-            context.Pixel,
-            context.ViewportBounds,
-            UiTheme.WithAlpha(palette.Backdrop, settings.Ui.MenuBackdropOpacity * 0.85f));
-
-        var panelWidth = Math.Max(1, Math.Min(980, context.ViewportBounds.Width - 24));
-        var panelHeight = Math.Max(1, Math.Min(530, context.ViewportBounds.Height - 36));
-        var panel = new Rectangle(
-            context.ViewportBounds.Width / 2 - panelWidth / 2,
-            context.ViewportBounds.Height / 2 - panelHeight / 2,
-            panelWidth,
-            panelHeight);
-
+        var layout = PixelInventoryLayoutPlanner.Resolve(context.ViewportBounds);
+        var panel = layout.Panel;
+        UiTheme.DrawBackdrop(context, palette, settings.Ui.MenuBackdropOpacity * 0.85f, settings);
         UiTheme.DrawPanel(context, panel, palette, settings.Ui.PanelOpacity);
-        UiTheme.DrawHeader(context, new Rectangle(panel.X + 1, panel.Y + 1, panel.Width - 2, 54), palette);
+        UiTheme.DrawHeader(context, layout.Header, palette, settings: settings);
 
         var inventoryStats = _statisticsCache.Get(_queryService, inventory);
-        var headerIconBounds = new Rectangle(panel.X + 18, panel.Y + 10, 34, 34);
+        var headerIconSize = layout.Density == PixelUiDensity.Compact ? 22 : 34;
+        var headerIconBounds = new Rectangle(
+            layout.Header.X + 12,
+            layout.Header.Y + Math.Max(2, (layout.Header.Height - headerIconSize) / 2),
+            headerIconSize,
+            headerIconSize);
         var drewHeaderIcon = ItemIconRenderer.TryDrawSprite(context, textures, "ui/inventory_tab", headerIconBounds);
+        var titleScale = layout.Density == PixelUiDensity.Compact ? 1 : 2;
         context.DebugText.Draw(
-            new Vector2(panel.X + (drewHeaderIcon ? 60 : 20), panel.Y + (drewHeaderIcon ? 19 : 16)),
+            new Vector2(
+                layout.Header.X + (drewHeaderIcon ? headerIconSize + 20 : 14),
+                layout.Header.Y + Math.Max(4, (layout.Header.Height - 7 * titleScale) / 2)),
             "INVENTORY",
             palette.Accent,
-            drewHeaderIcon ? 2 : 3);
+            titleScale);
         if (inventoryStats is not null && panel.Width >= 860)
         {
-            context.DebugText.Draw(new Vector2(panel.X + 190, panel.Y + 21), _statisticsCache.Summary, palette.TextMuted, 1);
+            context.DebugText.Draw(
+                new Vector2(layout.Header.X + 190, layout.Header.Y + Math.Max(5, (layout.Header.Height - 7) / 2)),
+                _statisticsCache.Summary,
+                palette.TextMuted,
+                1);
         }
 
-        DrawControls(context, palette, panel);
-        DrawFilters(context, palette, panel);
+        DrawControls(context, palette, layout.Toolbar);
+        DrawFilters(context, palette, layout.Filters);
 
-        var sideWidth = Math.Clamp(panel.Width / 3, 220, 330);
-        var leftWidth = Math.Max(300, panel.Width - sideWidth - 54);
-        var widthSlotSize = (leftWidth - (MainColumns - 1) * SlotGap) / MainColumns;
-        var compactHeight = panel.Height < 460;
-        var heightSlotSize = Math.Max(MinimumSlotSize, (panel.Height - (compactHeight ? 178 : 232) - 4 * SlotGap) / 5);
-        _slotSize = Math.Clamp(Math.Min(widthSlotSize, heightSlotSize), MinimumSlotSize, MaximumSlotSize);
-
+        context.SpriteBatch.Draw(context.Pixel, layout.PackSurface, UiTheme.WithAlpha(palette.Surface, 0.48f));
+        UiTheme.DrawBorder(context, layout.PackSurface, UiTheme.WithAlpha(palette.SurfaceHover, 0.72f), 1);
+        _slotSize = layout.SlotSize;
         _slotHitZones.Clear();
-        var hotbarStart = new Point(panel.X + 20, panel.Y + (compactHeight ? 98 : 126));
-        DrawSection(context, palette, inventory.Hotbar, SlotSection.Hotbar, hotbarStart, HotbarColumns, textures, _hotbarView, applyFilter: false);
+        DrawSection(context, palette, inventory.Hotbar, SlotSection.Hotbar, layout.HotbarOrigin, layout.Columns, layout.SlotGap, textures, _hotbarView, applyFilter: false);
+        DrawSection(context, palette, inventory.Main, SlotSection.Main, layout.MainOrigin, layout.Columns, layout.SlotGap, textures, _mainView, applyFilter: true);
 
-        var mainStart = new Point(panel.X + 20, hotbarStart.Y + _slotSize + (compactHeight ? 28 : 48));
-        DrawSection(context, palette, inventory.Main, SlotSection.Main, mainStart, MainColumns, textures, _mainView, applyFilter: true);
-
-        var dividerX = panel.Right - sideWidth - 18;
-        context.SpriteBatch.Draw(
-            context.Pixel,
-            new Rectangle(dividerX, panel.Y + 104, 1, panel.Height - 140),
-            UiTheme.WithAlpha(palette.AccentSoft, 0.55f));
-        var sideBounds = new Rectangle(dividerX + 18, panel.Y + 104, sideWidth - 20, panel.Height - 140);
-        DrawEquipmentAndStats(context, palette, sideBounds, equipment, items, textures, stats, mana, maxMana);
+        if (layout.ShowEquipment)
+        {
+            context.SpriteBatch.Draw(context.Pixel, layout.EquipmentSurface, UiTheme.WithAlpha(palette.Surface, 0.48f));
+            UiTheme.DrawBorder(context, layout.EquipmentSurface, UiTheme.WithAlpha(palette.SurfaceHover, 0.72f), 1);
+            DrawEquipmentAndStats(
+                context,
+                palette,
+                new Rectangle(
+                    layout.EquipmentSurface.X + 12,
+                    layout.EquipmentSurface.Y + 12,
+                    Math.Max(0, layout.EquipmentSurface.Width - 24),
+                    Math.Max(0, layout.EquipmentSurface.Height - 24)),
+                equipment,
+                items,
+                textures,
+                stats,
+                mana,
+                maxMana);
+        }
+        else
+        {
+            _equipmentHitZones.Clear();
+        }
 
         DrawTooltip(context, palette, panel, settings);
         DrawCursorStack(context, palette, context.ViewportBounds, textures);
-
         if (!string.IsNullOrWhiteSpace(_status))
         {
-            context.DebugText.Draw(new Vector2(panel.X + 20, panel.Bottom - 24), _status, palette.Warning, 1);
+            context.DebugText.Draw(
+                new Vector2(layout.StatusBar.X, layout.StatusBar.Y + Math.Max(1, (layout.StatusBar.Height - 7) / 2)),
+                AbbreviateLabel(_status, Math.Max(3, layout.StatusBar.Width / 8)),
+                palette.Warning,
+                1);
         }
     }
 
@@ -608,12 +622,16 @@ public sealed class InventoryOverlay
         return true;
     }
 
-    private void DrawControls(RenderContext context, UiPalette palette, Rectangle panel)
+    private void DrawControls(RenderContext context, UiPalette palette, Rectangle bounds)
     {
         _controlHitZones.Clear();
-        var compact = new Rectangle(panel.Right - 112, panel.Y + 13, 92, 30);
-        var sort = new Rectangle(compact.X - 74, compact.Y, 66, compact.Height);
-        var mode = new Rectangle(sort.X - 120, sort.Y, 112, sort.Height);
+        var gap = Math.Min(4, Math.Max(1, bounds.Width / 80));
+        var compactWidth = Math.Clamp(bounds.Width * 30 / 100, 48, 92);
+        var sortWidth = Math.Clamp(bounds.Width * 22 / 100, 42, 66);
+        var modeWidth = Math.Max(1, bounds.Width - compactWidth - sortWidth - gap * 2);
+        var mode = new Rectangle(bounds.X, bounds.Y, modeWidth, bounds.Height);
+        var sort = new Rectangle(mode.Right + gap, bounds.Y, sortWidth, bounds.Height);
+        var compact = new Rectangle(sort.Right + gap, bounds.Y, compactWidth, bounds.Height);
 
         DrawControl(context, palette, mode, GetSortModeLabel(_sortMode), ControlAction.Mode);
         DrawControl(context, palette, sort, "SORT", ControlAction.Sort);
@@ -623,30 +641,34 @@ public sealed class InventoryOverlay
     private void DrawControl(RenderContext context, UiPalette palette, Rectangle bounds, string label, ControlAction action)
     {
         UiTheme.DrawButton(context, bounds, palette, selected: false, hovered: bounds.Contains(_mousePosition));
-        context.DebugText.Draw(new Vector2(bounds.X + 8, bounds.Y + 9), label, palette.Text, 1);
+        context.DebugText.Draw(
+            new Vector2(bounds.X + 6, bounds.Y + Math.Max(2, (bounds.Height - 7) / 2)),
+            AbbreviateLabel(label, Math.Max(3, (bounds.Width - 10) / 8)),
+            palette.Text,
+            1);
         _controlHitZones.Add(bounds, action);
     }
 
-    private void DrawFilters(RenderContext context, UiPalette palette, Rectangle panel)
+    private void DrawFilters(RenderContext context, UiPalette palette, Rectangle bounds)
     {
         _filterHitZones.Clear();
-        var startX = panel.X + 20;
-        var availableWidth = panel.Width - 40;
-        var gap = 4;
-        var width = Math.Max(42, (availableWidth - gap * (Filters.Length - 1)) / Filters.Length);
-        var y = panel.Y + 66;
+        var gap = bounds.Width < 520 ? 2 : 4;
+        var width = Math.Max(1, (bounds.Width - gap * (Filters.Length - 1)) / Filters.Length);
 
         for (var index = 0; index < Filters.Length; index++)
         {
-            var bounds = new Rectangle(startX + index * (width + gap), y, width, 26);
+            var tabWidth = index == Filters.Length - 1
+                ? Math.Max(1, bounds.Right - (bounds.X + index * (width + gap)))
+                : width;
+            var tab = new Rectangle(bounds.X + index * (width + gap), bounds.Y, tabWidth, bounds.Height);
             var selected = index == _activeFilterIndex;
-            UiTheme.DrawButton(context, bounds, palette, selected, bounds.Contains(_mousePosition));
+            UiTheme.DrawButton(context, tab, palette, selected, tab.Contains(_mousePosition));
             context.DebugText.Draw(
-                new Vector2(bounds.X + 6, bounds.Y + 7),
-                AbbreviateLabel(Filters[index].Label, Math.Max(3, (bounds.Width - 10) / 8)),
+                new Vector2(tab.X + 4, tab.Y + Math.Max(2, (tab.Height - 7) / 2)),
+                AbbreviateLabel(Filters[index].Label, Math.Max(2, (tab.Width - 7) / 8)),
                 selected ? palette.Warning : palette.TextMuted,
                 1);
-            _filterHitZones.Add(bounds, index);
+            _filterHitZones.Add(tab, index);
         }
     }
 
@@ -657,6 +679,7 @@ public sealed class InventoryOverlay
         SlotSection section,
         Point start,
         int columns,
+        int slotGap,
         ClientTextureRegistry? textures,
         InventorySectionQueryCache view,
         bool applyFilter)
@@ -670,8 +693,8 @@ public sealed class InventoryOverlay
             var column = index % columns;
             var row = index / columns;
             var bounds = new Rectangle(
-                start.X + column * (_slotSize + SlotGap),
-                start.Y + row * (_slotSize + SlotGap),
+                start.X + column * (_slotSize + slotGap),
+                start.Y + row * (_slotSize + slotGap),
                 _slotSize,
                 _slotSize);
             var slot = inventory.Slots[index];

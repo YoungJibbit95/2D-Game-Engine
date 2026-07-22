@@ -19,7 +19,9 @@ public sealed class SpawnCommand : TypedConsoleCommand
                 new CommandArgumentSpecification("x", CommandArgumentType.Number, false, "World X position."),
                 new CommandArgumentSpecification("y", CommandArgumentType.Number, false, "World Y position.")
             },
-            examples: new[] { "/spawn slime", "/spawn slime 32 48" }))
+            examples: new[] { "/spawn slime", "/spawn slime 32 48" },
+            category: CommandCategory.Entities,
+            searchTerms: new[] { "entity", "mob", "enemy", "create" }))
     {
     }
 
@@ -28,18 +30,18 @@ public sealed class SpawnCommand : TypedConsoleCommand
         var arguments = typedArguments.Raw;
         if (context.Content is null)
         {
-            return CommandResult.Failure("Content database is required for /spawn.");
+            return CommandResult.Failure("missing_content", "Content database is required for /spawn.");
         }
 
         if (context.EntityManager is null || context.EntityFactory is null)
         {
-            return CommandResult.Failure("Entity manager and factory are required for /spawn.");
+            return CommandResult.Failure("missing_entity_runtime", "Entity manager and factory are required for /spawn.");
         }
 
         var entityId = typedArguments.GetString("entityId");
         if (!context.Content.Entities.TryGetById(entityId, out var definition))
         {
-            return CommandResult.Failure($"Unknown entity '{entityId}'.");
+            return CommandResult.Failure("unknown_entity", $"Unknown entity '{entityId}'.");
         }
 
         if (arguments.Count == 2)
@@ -50,12 +52,12 @@ public sealed class SpawnCommand : TypedConsoleCommand
         var positionResult = TryReadPosition(arguments, context.PlayerPosition);
         if (!positionResult.IsSuccess)
         {
-            return CommandResult.Failure(positionResult.Error);
+            return CommandResult.Failure("invalid_position", positionResult.Error);
         }
 
         var entity = context.EntityFactory.CreateEnemy(definition, positionResult.Position);
         context.EntityManager.Add(entity);
-        return CommandResult.Success($"Spawned {entityId} #{entity.Id} at {positionResult.Position.X:0.##}, {positionResult.Position.Y:0.##}.");
+        return CommandResult.Success("entity_spawned", $"Spawned {entityId} #{entity.Id} at {positionResult.Position.X:0.##}, {positionResult.Position.Y:0.##}.");
     }
 
     private static PositionParseResult TryReadPosition(IReadOnlyList<string> arguments, Vector2? fallbackPosition)

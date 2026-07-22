@@ -9,6 +9,14 @@ namespace Game.Core.Interaction;
 public sealed class MiningSystem
 {
     private const float ProgressEventStep = 0.05f;
+    /// <summary>
+    /// Global duration factor applied after tool and equipment modifiers. A value
+    /// of 0.25 makes every valid mining action complete four times faster.
+    /// </summary>
+    public const float GlobalDurationFactor = 0.25f;
+
+    private const float MaximumAccumulatedDeltaSeconds = 0.25f;
+
 
     private TilePos? _currentTarget;
     private float _progress;
@@ -47,25 +55,26 @@ public sealed class MiningSystem
         }
 
         var tile = world.GetTile(target.X, target.Y);
-        if (tile.IsAir)
+        if (tile.IsAir && tile.WallId == 0)
         {
             return Block(target, 0, GameplayActionFailureReason.InvalidTarget, events);
         }
 
-        var definition = tiles.GetByNumericId(tile.TileId);
+        var minedTileId = tile.IsAir ? tile.WallId : tile.TileId;
+        var definition = tiles.GetByNumericId(minedTileId);
         if (!IsWithinReach(actorCenterWorld, target, reachPixels))
         {
-            return Block(target, tile.TileId, GameplayActionFailureReason.OutOfReach, events);
+            return Block(target, minedTileId, GameplayActionFailureReason.OutOfReach, events);
         }
 
         if (toolPower < definition.MiningPowerRequired)
         {
-            return Block(target, tile.TileId, GameplayActionFailureReason.InsufficientToolPower, events);
+            return Block(target, minedTileId, GameplayActionFailureReason.InsufficientToolPower, events);
         }
 
-        if (deltaSeconds <= 0)
+        if (!float.IsFinite(deltaSeconds) || deltaSeconds <= 0f)
         {
-            return Block(target, tile.TileId, GameplayActionFailureReason.InvalidTarget, events);
+            return Block(target, minedTileId, GameplayActionFailureReason.InvalidTarget, events);
         }
 
         ClearBlockedFeedback();
@@ -75,27 +84,36 @@ public sealed class MiningSystem
             _currentTarget = target;
             _progress = 0;
             _lastPublishedProgress = 0;
-            events?.Publish(new MiningStartedEvent(target, tile.TileId));
+            events?.Publish(new MiningStartedEvent(target, minedTileId));
         }
 
         var speed = MiningProgressCalculator.GetProgressPerSecond(definition, toolPower, _tuning);
         var previousProgress = Math.Clamp(_progress, 0f, 1f);
-        _progress += deltaSeconds * speed;
+        var accumulatedDeltaSeconds = Math.Min(deltaSeconds, MaximumAccumulatedDeltaSeconds);
+        var durationScaledDeltaSeconds = accumulatedDeltaSeconds / GlobalDurationFactor;
+        _progress += durationScaledDeltaSeconds * speed;
         var currentProgress = Math.Clamp(_progress, 0f, 1f);
 
         if (_progress < 1f)
         {
             if (currentProgress - _lastPublishedProgress >= ProgressEventStep)
             {
-                events?.Publish(new MiningProgressEvent(target, tile.TileId, _lastPublishedProgress, currentProgress));
+                events?.Publish(new MiningProgressEvent(target, minedTileId, _lastPublishedProgress, currentProgress));
                 _lastPublishedProgress = currentProgress;
             }
 
-            return MiningResult.Progressed(target, tile.TileId, previousProgress, currentProgress, started);
+            return MiningResult.Progressed(target, minedTileId, previousProgress, currentProgress, started);
         }
 
-        var minedTileId = tile.TileId;
-        world.RemoveTile(target.X, target.Y);
+        if (tile.IsAir)
+        {
+            world.SetWall(target.X, target.Y, 0);
+        }
+        else
+        {
+            world.RemoveTile(target.X, target.Y);
+        }
+
         var drop = string.IsNullOrWhiteSpace(definition.DropItemId)
             ? ItemStack.Empty
             : new ItemStack(definition.DropItemId, 1);

@@ -1,0 +1,91 @@
+{
+  "schemaVersion": 1,
+  "waveId": "legacy_boar_polish_v1",
+  "generatedOn": "2026-07-22",
+  "sourceType": "checked-in deterministic native-pixel generator",
+  "externalDownloads": false,
+  "modelGeneratedSource": false,
+  "generator": {
+    "path": "art_direction/tools/generate_legacy_boar_polish_v1.py",
+    "version": "1.0.0",
+    "sha256": "43861d7cc0f13df5d4ddae26e1ca392ba7cbcca4ef905b5aa4f40b045735613d",
+    "runtime": "Python 3 plus Pillow from art_direction/requirements.txt",
+    "method": "Direct final-size pixel primitives constrained to yjse-pixel-v1; no hidden source art or manual raster edits."
+  },
+  "manifest": "assets/sprites.json",
+  "briefs": [
+    "asset_briefs/base_sprite_generation_briefs.json",
+    "asset_briefs/production_wave_03_briefs.json"
+  ],
+  "preview": "art_direction/legacy_boar_polish_v1_contact_sheet.png",
+  "assets": [
+    {
+      "spriteId": "entities/enemies/forest_boar",
+      "entityIds": [
+        "forest_boar"
+      ],
+      "path": "sprites/entities/enemies/forest_boar.png",
+      "sha256": "4a5305ee2a4143e95cf6899f58bc0525097a2061f4042dea243f88854db67f05",
+      "dimensions": [
+        128,
+        32
+      ],
+      "frameDimensions": [
+        32,
+        32
+      ],
+      "frames": [
+        "idle",
+        "windup",
+        "charge",
+        "attack"
+      ],
+      "origin": [
+        16,
+        31
+      ],
+      "alphaValues": [
+        0,
+        255
+      ],
+      "generator": "art_direction/tools/generate_legacy_boar_polish_v1.py",
+      "method": "deterministic native-size Pillow pixel primitives",
+      "license": "YjsE-Project-Owned",
+      "runtimeConsumer": "EntityDefinition texture plus RuntimeEntityAnimationProfile source-rectangle animation through ClientTextureRegistry"
+    },
+    {
+      "spriteId": "entities/enemies/forest_boar_elite",
+      "entityIds": [
+        "forest_boar_elite"
+      ],
+      "path": "sprites/entities/enemies/forest_boar_elite.png",
+      "sha256": "df3abefe10386f1762cb843c1f7c114cc036c6c5848dc7a2161f753f34160a05",
+      "dimensions": [
+        128,
+        32
+      ],
+      "frameDimensions": [
+        32,
+        32
+      ],
+      "frames": [
+        "idle",
+        "windup",
+        "charge",
+        "attack"
+      ],
+      "origin": [
+        16,
+        31
+      ],
+      "alphaValues": [
+        0,
+        255
+      ],
+      "generator": "art_direction/tools/generate_legacy_boar_polish_v1.py",
+      "method": "deterministic native-size Pillow pixel primitives",
+      "license": "YjsE-Project-Owned",
+      "runtimeConsumer": "EntityDefinition texture plus RuntimeEntityAnimationProfile source-rectangle animation through ClientTextureRegistry"
+    }
+  ]
+}

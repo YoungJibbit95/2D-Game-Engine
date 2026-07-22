@@ -74,6 +74,8 @@ public sealed class TilemapRenderer : IDisposable
 
     public TilemapRenderMetrics LastMetrics { get; private set; }
 
+    public int LastTerrainDetailCommands { get; private set; }
+
     public TileAtlasTelemetry AtlasTelemetry { get; private set; }
 
     public LiquidPresentationTelemetry LiquidPresentationTelemetry { get; private set; }
@@ -171,6 +173,7 @@ public sealed class TilemapRenderer : IDisposable
     public void Draw(RenderContext context, World world, Camera2D camera)
     {
         var tileCommands = 0;
+        var terrainDetailCommands = 0;
         var liquidCommands = 0;
         camera.GetVisibleChunkBounds(out var minimum, out var maximum);
         var visibleChunkCount = CollectVisibleChunks(context, world, camera, minimum, maximum);
@@ -202,6 +205,18 @@ public sealed class TilemapRenderer : IDisposable
             }
         }
 
+        for (var visibleIndex = 0; visibleIndex < visibleChunkCount; visibleIndex++)
+        {
+            DrawChunkTerrainDetails(
+                context,
+                world,
+                in _visibleChunks[visibleIndex],
+                scaledTileSize,
+                roundedTileSize,
+                useIntegerTileGrid,
+                ref terrainDetailCommands);
+        }
+
         context.SpriteBatch.End();
         context.SpriteBatch.Begin(
             SpriteSortMode.Deferred,
@@ -230,6 +245,7 @@ public sealed class TilemapRenderer : IDisposable
             evicted,
             tileCommands,
             liquidCommands);
+        LastTerrainDetailCommands = terrainDetailCommands;
         _preparedRebuilds = 0;
     }
 
@@ -294,6 +310,7 @@ public sealed class TilemapRenderer : IDisposable
         _cache.Clear();
         _preparedRebuilds = 0;
         _liquidPresentationCommandCount = 0;
+        LastTerrainDetailCommands = 0;
         LiquidPresentationTelemetry = default;
         LastMetrics = default;
     }
@@ -430,6 +447,56 @@ public sealed class TilemapRenderer : IDisposable
         }
     }
 
+    private static void DrawChunkTerrainDetails(
+        RenderContext context,
+        World world,
+        in VisibleChunkRenderData visibleChunk,
+        float scaledTileSize,
+        int roundedTileSize,
+        bool useIntegerTileGrid,
+        ref int terrainDetailCommands)
+    {
+        var chunkScreen = visibleChunk.ScreenPosition;
+        var preparedTiles = visibleChunk.Commands.TileCommands;
+        for (var index = 0; index < preparedTiles.Length; index++)
+        {
+            var command = preparedTiles[index];
+            var tileX = visibleChunk.TileLeft + command.LocalX;
+            var tileY = visibleChunk.TileTop + command.LocalY;
+            if (!visibleChunk.FullyInBounds && !world.IsInBounds(tileX, tileY))
+            {
+                continue;
+            }
+
+            int left;
+            int top;
+            int right;
+            int bottom;
+            if (useIntegerTileGrid)
+            {
+                left = visibleChunk.ScreenLeft + command.LocalX * roundedTileSize;
+                top = visibleChunk.ScreenTop + command.LocalY * roundedTileSize;
+                right = visibleChunk.ScreenRight + (command.LocalX + 1) * roundedTileSize;
+                bottom = visibleChunk.ScreenBottom + (command.LocalY + 1) * roundedTileSize;
+            }
+            else
+            {
+                left = (int)MathF.Floor(chunkScreen.X + command.LocalX * scaledTileSize);
+                top = (int)MathF.Floor(chunkScreen.Y + command.LocalY * scaledTileSize);
+                right = (int)MathF.Ceiling(chunkScreen.X + (command.LocalX + 1) * scaledTileSize);
+                bottom = (int)MathF.Ceiling(chunkScreen.Y + (command.LocalY + 1) * scaledTileSize);
+            }
+
+            terrainDetailCommands += TerrainSurfaceDetailRenderer.Draw(
+                context,
+                new Rectangle(left, top, Math.Max(1, right - left), Math.Max(1, bottom - top)),
+                command.Tile.TileId,
+                command.AutoTileMask,
+                tileX,
+                tileY);
+        }
+    }
+
     private void DrawPreparedLiquids(RenderContext context)
     {
         for (var index = 0; index < _liquidPresentationCommandCount; index++)
@@ -535,6 +602,8 @@ public sealed class TilemapRenderer : IDisposable
             KnownTileIds.LivingWood => new Color(132, 82, 43),
             KnownTileIds.AutumnLeaves => new Color(202, 113, 42),
             KnownTileIds.MarshLeaves => new Color(50, 116, 89),
+            KnownTileIds.Snow => new Color(220, 232, 239),
+            KnownTileIds.Ice => new Color(126, 177, 207),
             KnownTileIds.Workbench => new Color(141, 92, 48),
             _ => Color.Magenta
         };

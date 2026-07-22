@@ -1,6 +1,7 @@
 using System.Globalization;
 using Game.Client.Rendering;
 using Game.Client.UI;
+using Game.Core.Settings;
 using Microsoft.Xna.Framework;
 
 namespace Game.Client.GameStates;
@@ -417,30 +418,8 @@ internal static class WorldMenuText
 
 internal static class WorldMenuPresentation
 {
-    public static void DrawBackdrop(RenderContext context, UiPalette palette)
+    public static void DrawBackdrop(RenderContext context, UiPalette palette, GameSettings settings)
     {
-        var viewport = context.ViewportBounds;
-        context.SpriteBatch.Draw(context.Pixel, viewport, palette.Backdrop);
-
-        var skyTop = new Rectangle(viewport.X, viewport.Y, viewport.Width, Math.Max(1, viewport.Height / 3));
-        var skyMiddle = new Rectangle(viewport.X, skyTop.Bottom, viewport.Width, Math.Max(1, viewport.Height / 3));
-        var skyBottom = new Rectangle(viewport.X, skyMiddle.Bottom, viewport.Width, Math.Max(1, viewport.Bottom - skyMiddle.Bottom));
-        context.SpriteBatch.Draw(context.Pixel, skyTop, UiTheme.WithAlpha(palette.AccentSoft, 0.16f));
-        context.SpriteBatch.Draw(context.Pixel, skyMiddle, UiTheme.WithAlpha(palette.SurfaceHover, 0.22f));
-        context.SpriteBatch.Draw(context.Pixel, skyBottom, UiTheme.WithAlpha(palette.AccentSoft, 0.08f));
-
-        var horizonY = viewport.Y + viewport.Height * 72 / 100;
-        context.SpriteBatch.Draw(
-            context.Pixel,
-            new Rectangle(viewport.X, horizonY, viewport.Width, Math.Max(1, viewport.Bottom - horizonY)),
-            UiTheme.WithAlpha(palette.Surface, 0.72f));
-        context.SpriteBatch.Draw(
-            context.Pixel,
-            new Rectangle(viewport.X, horizonY, viewport.Width, Math.Max(2, viewport.Height / 120)),
-            UiTheme.WithAlpha(palette.Accent, 0.68f));
-        context.SpriteBatch.Draw(
-            context.Pixel,
-            new Rectangle(viewport.X, viewport.Bottom - Math.Max(18, viewport.Height / 9), viewport.Width, Math.Max(18, viewport.Height / 9)),
-            UiTheme.WithAlpha(palette.Backdrop, 0.78f));
+        PixelMenuScene.Draw(context, palette, settings, PixelMenuSceneMood.Twilight);
     }
 }

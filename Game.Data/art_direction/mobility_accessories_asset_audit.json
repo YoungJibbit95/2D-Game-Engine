@@ -1,0 +1,328 @@
+{
+  "schemaVersion": 2,
+  "generatorVersion": "2.0.0",
+  "styleId": "yjse-pixel-v1",
+  "styleEffectiveDate": "2026-07-10",
+  "auditTimestampUtc": "2026-07-22T08:25:22.479868+00:00",
+  "validationPolicy": {
+    "duplicateContentHashesAllowed": false,
+    "transparentCornersRequired": true,
+    "standaloneRecommendedUniqueColorMaximum": 16,
+    "smallWorldSpriteRecommendedUniqueColorMaximum": 32,
+    "productionStyleIssuesAreHard": [
+      "opaque_corner",
+      "palette_over_recommended",
+      "style_palette_mismatch",
+      "weak_dark_silhouette"
+    ]
+  },
+  "scope": {
+    "scanRoot": "assets/MobilityAccessories",
+    "manifestEntries": 4,
+    "uniqueManifestPaths": 4,
+    "pngFilesOnDisk": 4,
+    "manifestPathsMissingOnDisk": [],
+    "unmanifestedPngPaths": [],
+    "generationBriefs": {
+      "briefFiles": 15,
+      "uniqueBriefIds": 256,
+      "missingBriefIds": [],
+      "dimensionMismatchIds": [],
+      "duplicateBriefIds": []
+    }
+  },
+  "summary": {
+    "qualityTiers": {
+      "pass": 4
+    },
+    "issueCounts": {},
+    "duplicateGroupCount": 0,
+    "sourceAliasGroupCount": 0,
+    "dimensionMismatchCount": 0,
+    "missingFileCount": 0,
+    "hardIssueAssetCount": 0,
+    "hardIssueCount": 0
+  },
+  "hardScopeIssues": [],
+  "duplicateGroups": [],
+  "sourceAliasGroups": [],
+  "assets": [
+    {
+      "id": "items/double_jump_boots",
+      "path": "assets/MobilityAccessories/items/double_jump_boots.png",
+      "sourceAliasOf": null,
+      "sourceAliasValid": null,
+      "category": "Item",
+      "declaredSize": [
+        32,
+        32
+      ],
+      "atlasId": "mobility.accessories",
+      "origin": [
+        16,
+        16
+      ],
+      "renderLayer": "items",
+      "license": "YjsE-Project-Owned",
+      "provenance": "mobility_accessories_v1; deterministic Pillow generator; mobility_accessories_provenance.json",
+      "tags": [
+        "production-sample",
+        "runtime-preloaded",
+        "item",
+        "accessory",
+        "mobility",
+        "double-jump"
+      ],
+      "issues": [],
+      "frameCount": 0,
+      "frameContractValid": true,
+      "exists": true,
+      "actualSize": [
+        32,
+        32
+      ],
+      "dimensionsMatch": true,
+      "sourceMode": "RGBA",
+      "sourceHasAlpha": true,
+      "hasTransparentPixels": true,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "partialAlphaPixels": 0,
+      "cornerAlphaValues": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "transparentCorners": true,
+      "transparentCornersRequired": true,
+      "visibleBounds": [
+        3,
+        2,
+        30,
+        29
+      ],
+      "opaquePixelCount": 632,
+      "occupancyRatio": 0.6172,
+      "uniqueOpaqueColors": 14,
+      "recommendedUniqueColorMaximum": 16,
+      "outOfStyleOpaquePixels": 0,
+      "stylePaletteComplianceRatio": 1.0,
+      "darkBoundaryRatio": 1.0,
+      "contentSha256": "893a9a6023fe50fafd406b8c6358aaae01d0d7f99297f08485f7a06c0216c803",
+      "readabilityScore": 100,
+      "qualityTier": "pass",
+      "hardIssues": []
+    },
+    {
+      "id": "items/skyward_wings",
+      "path": "assets/MobilityAccessories/items/skyward_wings.png",
+      "sourceAliasOf": null,
+      "sourceAliasValid": null,
+      "category": "Item",
+      "declaredSize": [
+        32,
+        32
+      ],
+      "atlasId": "mobility.accessories",
+      "origin": [
+        16,
+        16
+      ],
+      "renderLayer": "items",
+      "license": "YjsE-Project-Owned",
+      "provenance": "mobility_accessories_v1; deterministic Pillow generator; mobility_accessories_provenance.json",
+      "tags": [
+        "production-sample",
+        "runtime-preloaded",
+        "item",
+        "accessory",
+        "mobility",
+        "flight"
+      ],
+      "issues": [],
+      "frameCount": 0,
+      "frameContractValid": true,
+      "exists": true,
+      "actualSize": [
+        32,
+        32
+      ],
+      "dimensionsMatch": true,
+      "sourceMode": "RGBA",
+      "sourceHasAlpha": true,
+      "hasTransparentPixels": true,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "partialAlphaPixels": 0,
+      "cornerAlphaValues": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "transparentCorners": true,
+      "transparentCornersRequired": true,
+      "visibleBounds": [
+        2,
+        2,
+        30,
+        28
+      ],
+      "opaquePixelCount": 424,
+      "occupancyRatio": 0.4141,
+      "uniqueOpaqueColors": 10,
+      "recommendedUniqueColorMaximum": 16,
+      "outOfStyleOpaquePixels": 0,
+      "stylePaletteComplianceRatio": 1.0,
+      "darkBoundaryRatio": 1.0,
+      "contentSha256": "ed886e2c6573df58e47630e99f0d486da205f34f263fe3ab1a8e4c4e4bfac052",
+      "readabilityScore": 100,
+      "qualityTier": "pass",
+      "hardIssues": []
+    },
+    {
+      "id": "items/ether_glider",
+      "path": "assets/MobilityAccessories/items/ether_glider.png",
+      "sourceAliasOf": null,
+      "sourceAliasValid": null,
+      "category": "Item",
+      "declaredSize": [
+        32,
+        32
+      ],
+      "atlasId": "mobility.accessories",
+      "origin": [
+        16,
+        16
+      ],
+      "renderLayer": "items",
+      "license": "YjsE-Project-Owned",
+      "provenance": "mobility_accessories_v1; deterministic Pillow generator; mobility_accessories_provenance.json",
+      "tags": [
+        "production-sample",
+        "runtime-preloaded",
+        "item",
+        "accessory",
+        "mobility",
+        "glide"
+      ],
+      "issues": [],
+      "frameCount": 0,
+      "frameContractValid": true,
+      "exists": true,
+      "actualSize": [
+        32,
+        32
+      ],
+      "dimensionsMatch": true,
+      "sourceMode": "RGBA",
+      "sourceHasAlpha": true,
+      "hasTransparentPixels": true,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "partialAlphaPixels": 0,
+      "cornerAlphaValues": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "transparentCorners": true,
+      "transparentCornersRequired": true,
+      "visibleBounds": [
+        2,
+        2,
+        30,
+        30
+      ],
+      "opaquePixelCount": 441,
+      "occupancyRatio": 0.4307,
+      "uniqueOpaqueColors": 10,
+      "recommendedUniqueColorMaximum": 16,
+      "outOfStyleOpaquePixels": 0,
+      "stylePaletteComplianceRatio": 1.0,
+      "darkBoundaryRatio": 0.9618,
+      "contentSha256": "13384ae679481dc68c8275ef761ae4f49bb503809682857e04dd4b5c7f2f29df",
+      "readabilityScore": 100,
+      "qualityTier": "pass",
+      "hardIssues": []
+    },
+    {
+      "id": "ui/mobility_abilities",
+      "path": "assets/MobilityAccessories/ui/mobility_abilities.png",
+      "sourceAliasOf": null,
+      "sourceAliasValid": null,
+      "category": "UI",
+      "declaredSize": [
+        48,
+        16
+      ],
+      "atlasId": "ui.mobility",
+      "origin": [
+        8,
+        8
+      ],
+      "renderLayer": "ui.icon.ability",
+      "license": "YjsE-Project-Owned",
+      "provenance": "mobility_accessories_v1; deterministic Pillow generator; mobility_accessories_provenance.json",
+      "tags": [
+        "production-sample",
+        "runtime-preloaded",
+        "ui",
+        "hud",
+        "ability",
+        "mobility",
+        "sprite-sheet"
+      ],
+      "issues": [],
+      "frameCount": 3,
+      "frameContractValid": true,
+      "exists": true,
+      "actualSize": [
+        48,
+        16
+      ],
+      "dimensionsMatch": true,
+      "sourceMode": "RGBA",
+      "sourceHasAlpha": true,
+      "hasTransparentPixels": true,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "partialAlphaPixels": 0,
+      "cornerAlphaValues": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "transparentCorners": true,
+      "transparentCornersRequired": true,
+      "visibleBounds": [
+        2,
+        2,
+        47,
+        15
+      ],
+      "opaquePixelCount": 274,
+      "occupancyRatio": 0.3568,
+      "uniqueOpaqueColors": 10,
+      "recommendedUniqueColorMaximum": 16,
+      "outOfStyleOpaquePixels": 0,
+      "stylePaletteComplianceRatio": 1.0,
+      "darkBoundaryRatio": 0.8375,
+      "contentSha256": "fa418f98df0d5e36240d64d315a67fc45d0c68843668237b1e6e2309c4b5ea96",
+      "readabilityScore": 100,
+      "qualityTier": "pass",
+      "hardIssues": []
+    }
+  ]
+}

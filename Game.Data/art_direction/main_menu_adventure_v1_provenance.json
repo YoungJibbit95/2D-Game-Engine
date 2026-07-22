@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "assetId": "ui/main_menu/adventure_v1",
+  "generatedAt": "2026-07-22",
+  "mode": "OpenAI built-in image generation",
+  "tool": "image_gen",
+  "reference": {
+    "role": "User-selected style, palette, density, atmosphere and composition reference",
+    "conversationAsset": "exec-6b07daea-9da8-445b-b7f8-e609d301d01f.png",
+    "dimensions": [1672, 941],
+    "sha256": "8832d0634b02bb1fa728903dd32b608e88f7780f95875d5556cbc9bba7014e96"
+  },
+  "runtimeAsset": {
+    "path": "assets/MainMenuAdventureV1/main_menu_adventure_v1.png",
+    "dimensions": [1672, 941],
+    "sha256": "1f9e330cadd7de484b36ccfafe4a9cb102bd2dcddec8fff1468880054aa69ed3",
+    "license": "YjsE-Project-Owned"
+  },
+  "preview": {
+    "path": "art_direction/main_menu_adventure_v1_preview.png",
+    "dimensions": [836, 471],
+    "sha256": "54f67bbfbe47d0e7671a4fb703c36840c71935affd37ed70a6a16821b99c530c"
+  },
+  "prompt": "Use case: stylized-concept. Asset type: production game main-menu background, 16:9 landscape. Image 1 is the exact style, palette, density, atmosphere, and composition reference. Create a new original, richly detailed Terraria-like side-view pixel-art fantasy sandbox world background matching the reference closely in visual ambition and structure: enormous ancient jungle trees framing both edges; inhabited treehouse platforms with warm lanterns; layered misty blue-green mountains; overgrown temple ruins and terraced stone platforms; several waterfalls; exactly three prominent floating islands with foliage, roots and thin waterfalls; deep foreground plants, flowers, mushrooms and moss. Handcrafted high-detail 2D pixel art with crisp clustered pixels. Full-bleed side-view establishing shot with dense edge framing, an open central valley and a naturally calmer darker center-left menu area. Magical violet-blue dusk fading to coral-gold, cool valley mist, amber lights and bioluminescent accents. No text, logo, menu buttons, UI panels, border, watermark, photorealism, vector art or 3D render.",
+  "postProcessing": "Copied without color or geometry edits. A 836x471 nearest-neighbor preview was generated for review.",
+  "runtimeLoaded": true
+}

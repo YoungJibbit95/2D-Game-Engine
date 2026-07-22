@@ -14,9 +14,9 @@ public sealed class WorldGenerationWorkspaceTests
         var advanced = new AdvancedWorldGenerator().Generate(256, 128, seed: 1337);
 
         Assert.Equal(0x8402E5E667368676UL, ComputeHash(simple));
-        // Shared multi-band surface sampling and the sparse V3 branch/crown
-        // silhouettes intentionally establish this finite-world topology baseline.
-        Assert.Equal(0xCBC6708E7949C7B3UL, ComputeHash(advanced));
+        // Shared multi-band surface sampling, production tree heights, collision-free
+        // finite spacing and the dense overlapping V5 crowns establish this topology baseline.
+        Assert.Equal(0xEEC7ED03D9831CB3UL, ComputeHash(advanced));
     }
 
     [Fact]

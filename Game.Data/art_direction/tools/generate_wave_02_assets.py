@@ -392,7 +392,7 @@ def draw_lantern() -> Image.Image:
 ASSETS = {
     "sprites/entities/critters/squirrel.png": draw_squirrel,
     "sprites/entities/critters/firefly.png": draw_firefly,
-    "sprites/entities/enemies/forest_boar.png": draw_boar,
+    # forest_boar.png is now owned by generate_legacy_boar_polish_v1.py.
     "sprites/entities/enemies/cave_spider.png": draw_spider,
     "sprites/world/backgrounds/meadow_parallax_layer.png": draw_meadow_background,
     "sprites/world/backgrounds/mushroom_cave_parallax_layer.png": draw_mushroom_background,

@@ -2,7 +2,9 @@ using Game.Client.Rendering;
 using Game.Client.Rendering.Diagnostics;
 using Game.Client.Rendering.Performance;
 using Game.Core.Diagnostics;
+using Game.Core.Weather;
 using System.Text.Json;
+using System.Globalization;
 
 namespace Game.Client.Diagnostics;
 
@@ -20,7 +22,11 @@ public sealed record ClientSmokeOptions(
     bool OpenPause = false,
     bool UseConfiguredVideoSettings = false,
     bool IncludeDebugOverlays = false,
-    bool ScriptedTraversal = false)
+    bool ScriptedTraversal = false,
+    double? ForcedTimeOfDay = null,
+    WeatherKind? ForcedWeather = null,
+    float ForcedWeatherIntensity = 0.75f,
+    bool OpenCrafting = false)
 {
     public const int DefaultTimeoutSeconds = 20;
 
@@ -42,9 +48,14 @@ public sealed record ClientSmokeOptions(
         var warmupFrames = 0;
         var frameRateLimit = 0;
         var openPause = false;
+        var openCrafting = false;
         var useConfiguredVideoSettings = false;
         var includeDebugOverlays = false;
         var scriptedTraversal = false;
+        double? forcedTimeOfDay = null;
+        WeatherKind? forcedWeather = null;
+        var forcedWeatherIntensity = 0.75f;
+        var forcedWeatherIntensitySpecified = false;
         for (var index = 0; index < args.Length; index++)
         {
             if (string.Equals(args[index], "--frames", StringComparison.OrdinalIgnoreCase))
@@ -120,6 +131,10 @@ public sealed record ClientSmokeOptions(
             {
                 openPause = true;
             }
+            else if (string.Equals(args[index], "--open-crafting", StringComparison.OrdinalIgnoreCase))
+            {
+                openCrafting = true;
+            }
             else if (string.Equals(args[index], "--use-configured-video", StringComparison.OrdinalIgnoreCase))
             {
                 useConfiguredVideoSettings = true;
@@ -143,6 +158,51 @@ public sealed record ClientSmokeOptions(
                     _ => forcedBiomeId
                 };
             }
+            else if (string.Equals(args[index], "--scene-time", StringComparison.OrdinalIgnoreCase))
+            {
+                var value = RequireValue(args, ref index, "--scene-time");
+                forcedTimeOfDay = value.ToLowerInvariant() switch
+                {
+                    "midnight" or "night" => 0d,
+                    "dawn" => 0.25d,
+                    "day" or "noon" => 0.5d,
+                    "dusk" => 0.75d,
+                    _ when double.TryParse(
+                        value,
+                        NumberStyles.Float,
+                        CultureInfo.InvariantCulture,
+                        out var normalizedTime) && normalizedTime is >= 0d and < 1d => normalizedTime,
+                    _ => throw new ArgumentException(
+                        "--scene-time must be dawn, day, noon, dusk, night, midnight, or a normalized value from 0 through less than 1.")
+                };
+            }
+            else if (string.Equals(args[index], "--scene-weather", StringComparison.OrdinalIgnoreCase))
+            {
+                var value = RequireValue(args, ref index, "--scene-weather");
+                forcedWeather = value.ToLowerInvariant() switch
+                {
+                    "clear" => WeatherKind.Clear,
+                    "rain" => WeatherKind.Rain,
+                    "storm" => WeatherKind.Storm,
+                    "fog" => WeatherKind.Fog,
+                    "snow" => WeatherKind.Snow,
+                    "blizzard" => WeatherKind.Blizzard,
+                    _ => throw new ArgumentException(
+                        "--scene-weather must be clear, rain, storm, fog, snow, or blizzard.")
+                };
+            }
+            else if (string.Equals(args[index], "--scene-weather-intensity", StringComparison.OrdinalIgnoreCase))
+            {
+                var value = RequireValue(args, ref index, "--scene-weather-intensity");
+                if (!float.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out forcedWeatherIntensity) ||
+                    !float.IsFinite(forcedWeatherIntensity) ||
+                    forcedWeatherIntensity is < 0f or > 1f)
+                {
+                    throw new ArgumentException("--scene-weather-intensity must be a finite value from 0 through 1.");
+                }
+
+                forcedWeatherIntensitySpecified = true;
+            }
         }
 
         if (forcedBiomeId is not null && startState != ClientSmokeStartState.Playing)
@@ -150,9 +210,34 @@ public sealed record ClientSmokeOptions(
             throw new ArgumentException("--scene-biome requires --start-state playing.");
         }
 
+        if (forcedTimeOfDay is not null && startState != ClientSmokeStartState.Playing)
+        {
+            throw new ArgumentException("--scene-time requires --start-state playing.");
+        }
+
+        if (forcedWeather is not null && startState != ClientSmokeStartState.Playing)
+        {
+            throw new ArgumentException("--scene-weather requires --start-state playing.");
+        }
+
+        if (forcedWeatherIntensitySpecified && forcedWeather is null)
+        {
+            throw new ArgumentException("--scene-weather-intensity requires --scene-weather.");
+        }
+
         if (openPause && startState != ClientSmokeStartState.Playing)
         {
             throw new ArgumentException("--open-pause requires --start-state playing.");
+        }
+
+        if (openCrafting && startState != ClientSmokeStartState.Playing)
+        {
+            throw new ArgumentException("--open-crafting requires --start-state playing.");
+        }
+
+        if (openCrafting && (openPause || openConsole))
+        {
+            throw new ArgumentException("--open-crafting cannot be combined with --open-pause or --open-console.");
         }
 
         if (warmupFrames >= frames)
@@ -174,7 +259,11 @@ public sealed record ClientSmokeOptions(
             openPause,
             useConfiguredVideoSettings,
             includeDebugOverlays,
-            scriptedTraversal);
+            scriptedTraversal,
+            forcedTimeOfDay,
+            forcedWeather,
+            forcedWeatherIntensity,
+            openCrafting);
     }
 
     private static string NormalizeContentId(string value, string option)

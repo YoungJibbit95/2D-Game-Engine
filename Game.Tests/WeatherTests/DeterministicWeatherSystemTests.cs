@@ -1,6 +1,7 @@
 using System.Text.Json;
 
 using Game.Core.Biomes;
+using Game.Core.Data;
 using Game.Core.Weather;
 using Game.Core.WorldEvents;
 using System.Runtime.CompilerServices;
@@ -181,6 +182,122 @@ public sealed class DeterministicWeatherSystemTests
             var state = system.GetState(biome, tick);
             Assert.InRange(tick, state.StartTick, state.EndTickExclusive - 1);
         }
+    }
+
+    [Fact]
+    public void FrozenWeather_IsAllowedOnlyByExplicitBiomeProfiles()
+    {
+        var temperate = CreateBiome();
+        var frozen = CreateFrozenBiome();
+
+        Assert.False(BiomeWeatherEligibility.IsAllowed(temperate.Weather, WeatherKind.Snow));
+        Assert.False(BiomeWeatherEligibility.IsAllowed(temperate.Weather, WeatherKind.Blizzard));
+        Assert.True(BiomeWeatherEligibility.IsAllowed(frozen.Weather, WeatherKind.Snow));
+        Assert.True(BiomeWeatherEligibility.IsAllowed(frozen.Weather, WeatherKind.Blizzard));
+        Assert.Equal(WeatherKind.Rain, BiomeWeatherEligibility.Normalize(temperate.Weather, WeatherKind.Snow));
+        Assert.Equal(WeatherKind.Storm, BiomeWeatherEligibility.Normalize(temperate.Weather, WeatherKind.Blizzard));
+    }
+
+    [Fact]
+    public void Advance_NormalizesInjectedFrozenWeatherBeforePublishingTemperateSnapshot()
+    {
+        var biome = CreateBiome();
+        var system = new DeterministicWeatherSystem(91);
+        var snapshot = system.CreateSnapshot(biome);
+        snapshot = snapshot with
+        {
+            Previous = snapshot.Previous with { Kind = WeatherKind.Blizzard, Intensity = 1f },
+            Current = snapshot.Current with { Kind = WeatherKind.Snow, Intensity = 0.8f }
+        };
+
+        var normalized = system.Advance(biome, snapshot, snapshot.LastAdvancedTick);
+
+        Assert.Equal(WeatherKind.Storm, normalized.Previous.Kind);
+        Assert.Equal(WeatherKind.Rain, normalized.Current.Kind);
+        Assert.InRange(normalized.Current.CloudCover, 0f, 1f);
+        Assert.InRange(normalized.Current.Visibility, 0.15f, 1f);
+    }
+
+    [Fact]
+    public void FrozenBiome_ProducesOnlyConfiguredSnowAndBlizzardDeterministically()
+    {
+        var biome = CreateFrozenBiome();
+        var first = new DeterministicWeatherSystem(7_331);
+        var second = new DeterministicWeatherSystem(7_331);
+        var observedSnow = false;
+        var observedBlizzard = false;
+
+        for (var period = 0; period < 128; period++)
+        {
+            var tick = period * biome.Weather.MinDurationTicks;
+            var firstState = first.GetState(biome, tick);
+            var secondState = second.GetState(biome, tick);
+            Assert.Equal(firstState, secondState);
+            Assert.True(firstState.Kind is WeatherKind.Snow or WeatherKind.Blizzard);
+            observedSnow |= firstState.Kind == WeatherKind.Snow;
+            observedBlizzard |= firstState.Kind == WeatherKind.Blizzard;
+        }
+
+        Assert.True(observedSnow);
+        Assert.True(observedBlizzard);
+    }
+
+    [Fact]
+    public void Registry_RejectsFrozenWeightsWithoutExplicitEligibility()
+    {
+        var invalid = CreateBiome() with
+        {
+            Weather = CreateBiome().Weather with { SnowWeight = 1 }
+        };
+
+        Assert.Throws<RegistryValidationException>(() => BiomeRegistry.Create([invalid]));
+    }
+
+    [Fact]
+    public void EligibilityNormalization_IsAllocationFreeInSteadyState()
+    {
+        var profile = CreateBiome().Weather;
+        var state = new WeatherState(
+            WeatherKind.Snow,
+            0,
+            60,
+            0.8f,
+            0.4f,
+            0.8f,
+            0.7f,
+            0.65f);
+        _ = BiomeWeatherEligibility.Normalize(profile, state);
+        var before = GC.GetAllocatedBytesForCurrentThread();
+
+        for (var iteration = 0; iteration < 100_000; iteration++)
+        {
+            _ = BiomeWeatherEligibility.Normalize(profile, WeatherKind.Snow);
+            _ = BiomeWeatherEligibility.Normalize(profile, state);
+        }
+
+        Assert.Equal(0, GC.GetAllocatedBytesForCurrentThread() - before);
+    }
+
+    private static BiomeDefinition CreateFrozenBiome()
+    {
+        return CreateBiome() with
+        {
+            Id = "frostwood",
+            DisplayName = "Frostwood",
+            Weather = new BiomeWeatherProfile
+            {
+                ClearWeight = 0,
+                RainWeight = 0,
+                StormWeight = 0,
+                FogWeight = 0,
+                SnowWeight = 1,
+                BlizzardWeight = 1,
+                AllowsFrozenPrecipitation = true,
+                MinDurationTicks = 20,
+                MaxDurationTicks = 20,
+                TransitionDurationTicks = 5
+            }
+        };
     }
 
     private static BiomeDefinition CreateBiome()

@@ -129,6 +129,32 @@ public sealed class ProjectileRuntimeStateTests
     }
 
     [Fact]
+    public void ResolveEntityCollisionBeforeTile_ResolvesEarlierMagicImpactAfterTerminalTileState()
+    {
+        var runtime = CreateRuntime(CreateDefinition() with
+        {
+            Damage = 9,
+            DamageType = DamageType.Magic
+        });
+        var incomingVelocity = new Vector2(80, 20);
+        var tile = runtime.ResolveTileCollision(new ProjectileTileCollision(
+            new Vector2(64, 0),
+            -Vector2.UnitX));
+
+        var entity = runtime.ResolveEntityCollisionBeforeTile(
+            new ProjectileEntityCollision(7, EntityFaction.Hostile),
+            incomingVelocity);
+
+        Assert.Equal(ProjectileTileCollisionDecision.Destroyed, tile.Decision);
+        Assert.True(entity.Accepted);
+        Assert.Equal(ProjectileEntityCollisionDecision.HitAndStopped, entity.Decision);
+        Assert.Equal(ProjectileTerminationReason.EntityHit, entity.TerminationReason);
+        Assert.Equal(9, entity.DamageRequest?.BaseDamage);
+        Assert.Equal(DamageType.Magic, entity.DamageRequest?.DamageType);
+        Assert.Equal(incomingVelocity, entity.DamageRequest?.ImpactDirection);
+    }
+
+    [Fact]
     public void ResolveTileCollision_BouncesConfiguredCountThenDestroys()
     {
         var runtime = CreateRuntime(CreateDefinition() with
@@ -151,6 +177,24 @@ public sealed class ProjectileRuntimeStateTests
         Assert.True(first.IsActive);
         Assert.Equal(ProjectileTileCollisionDecision.Destroyed, second.Decision);
         Assert.False(second.IsActive);
+    }
+
+    [Fact]
+    public void ResolveTileCollision_PropagatesTileLocationAndId()
+    {
+        var runtime = CreateRuntime(CreateDefinition());
+
+        var result = runtime.ResolveTileCollision(new ProjectileTileCollision(
+            new Vector2(10, 0),
+            Vector2.UnitX,
+            7,
+            11,
+            1234));
+
+        Assert.Equal(ProjectileTileCollisionDecision.Destroyed, result.Decision);
+        Assert.Equal(7, result.TileX);
+        Assert.Equal(11, result.TileY);
+        Assert.Equal((ushort)1234, result.TileId);
     }
 
     [Fact]

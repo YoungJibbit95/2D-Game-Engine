@@ -1,0 +1,17 @@
+{
+  "id": "wayfinder_charm",
+  "displayName": "Wayfinder Charm",
+  "description": "A surveyor's compass that steadies travel, mining cadence, and mana flow.",
+  "rarity": "Rare",
+  "value": 540,
+  "category": "Equipment",
+  "sortPriority": 78,
+  "type": "Accessory",
+  "texture": "items/adventure_v1/wayfinder_charm",
+  "maxStack": 1,
+  "equipmentSlot": "Accessory1",
+  "movementSpeedBonus": 0.08,
+  "miningSpeedBonus": 0.06,
+  "maxManaBonus": 10,
+  "tags": ["equipment", "accessory", "exploration", "adventure-arsenal-v1"]
+}

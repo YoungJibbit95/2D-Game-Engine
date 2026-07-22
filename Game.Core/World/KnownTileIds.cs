@@ -23,6 +23,8 @@ public static class KnownTileIds
     public const ushort LivingWood = 18;
     public const ushort AutumnLeaves = 19;
     public const ushort MarshLeaves = 20;
+    public const ushort Snow = 21;
+    public const ushort Ice = 22;
 
     public static bool IsFoliage(ushort tileId)
     {
@@ -59,6 +61,8 @@ public static class KnownTileIds
             "living_wood" => LivingWood,
             "autumn_leaves" => AutumnLeaves,
             "marsh_leaves" => MarshLeaves,
+            "snow" => Snow,
+            "ice" => Ice,
             _ => ushort.MaxValue
         };
 

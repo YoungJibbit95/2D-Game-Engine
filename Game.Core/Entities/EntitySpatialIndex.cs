@@ -17,9 +17,12 @@ internal enum EntitySpatialQueryKinds : byte
 
 internal sealed class EntitySpatialIndex
 {
+    private const int PreparedBucketReserve = 32;
+    private const int InitialBucketEntryCapacity = 8;
     private readonly Dictionary<CellPos, List<Entry>> _cells = new();
     private readonly Dictionary<Entity, Entry> _entries = new();
     private readonly Stack<List<Entry>> _bucketPool = new();
+    private int _peakActiveBucketCount;
     private uint _queryStamp;
 
     public EntitySpatialIndex(int cellSize)
@@ -34,6 +37,12 @@ internal sealed class EntitySpatialIndex
 
     public int CellSize { get; }
 
+    internal EntitySpatialIndexTelemetry Telemetry => new(
+        _cells.Count,
+        _bucketPool.Count,
+        _peakActiveBucketCount,
+        PreparedBucketReserve);
+
     public void Insert(Entity entity, RectI bounds)
     {
         ArgumentNullException.ThrowIfNull(entity);
@@ -46,6 +55,7 @@ internal sealed class EntitySpatialIndex
         var entry = new Entry(entity, bounds);
         _entries.Add(entity, entry);
         AddToCells(entry);
+        PrepareBucketReserve();
     }
 
     public void Update(Entity entity, RectI bounds)
@@ -251,12 +261,28 @@ internal sealed class EntitySpatialIndex
                 var cell = new CellPos(x, y);
                 if (!_cells.TryGetValue(cell, out var bucket))
                 {
-                    bucket = _bucketPool.Count > 0 ? _bucketPool.Pop() : new List<Entry>();
+                    bucket = _bucketPool.Count > 0
+                        ? _bucketPool.Pop()
+                        : new List<Entry>(InitialBucketEntryCapacity);
                     _cells.Add(cell, bucket);
                 }
 
                 bucket.Add(entry);
             }
+        }
+
+        _peakActiveBucketCount = Math.Max(_peakActiveBucketCount, _cells.Count);
+    }
+
+    private void PrepareBucketReserve()
+    {
+        _cells.EnsureCapacity(checked(_cells.Count + PreparedBucketReserve));
+        while (_bucketPool.Count < PreparedBucketReserve)
+        {
+            // Eight entries covers compact contact clusters without sizing every
+            // bucket for the global entity limit. A fixed prepared frontier absorbs
+            // moving-cell churn without O(entity-count) empty-bucket retention.
+            _bucketPool.Push(new List<Entry>(InitialBucketEntryCapacity));
         }
     }
 
@@ -410,3 +436,9 @@ internal sealed class EntitySpatialIndex
         public uint LastQueryStamp { get; set; }
     }
 }
+
+internal readonly record struct EntitySpatialIndexTelemetry(
+    int ActiveBuckets,
+    int PreparedBuckets,
+    int PeakActiveBuckets,
+    int PreparedBucketReserve);

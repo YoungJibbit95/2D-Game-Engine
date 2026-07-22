@@ -7,7 +7,7 @@ namespace Game.Tests.BiomeTests;
 public sealed class LivingWorldProfileTests
 {
     [Fact]
-    public void RepositoryProfiles_LoadSevenRuntimeBiomesAndRegionalContracts()
+    public void RepositoryProfiles_LoadEightRuntimeBiomesAndRegionalContracts()
     {
         var dataRoot = FindGameDataRoot();
         var biomes = new BiomeJsonLoader().LoadDefinitionsFromDirectory(Path.Combine(dataRoot, "biomes"));
@@ -19,9 +19,9 @@ public sealed class LivingWorldProfileTests
             Path.Combine(dataRoot, "structures"));
 
         Assert.Equal(
-            ["amber_grove", "crystal_depths", "deep_cave", "forest", "meadow", "mushroom_cave", "twilight_marsh"],
+            ["amber_grove", "crystal_depths", "deep_cave", "forest", "frostwood", "meadow", "mushroom_cave", "twilight_marsh"],
             registry.Definitions.Select(value => value.Id).Order(StringComparer.Ordinal).ToArray());
-        Assert.Equal(["amber_grove", "forest", "meadow", "twilight_marsh"], registry.Definitions
+        Assert.Equal(["amber_grove", "forest", "frostwood", "meadow", "twilight_marsh"], registry.Definitions
             .Where(value => value.IsRegionalBiome)
             .Select(value => value.Id)
             .Order(StringComparer.Ordinal)
@@ -36,6 +36,19 @@ public sealed class LivingWorldProfileTests
         Assert.Equal(7, structures.Count);
         Assert.Contains(profile.Features, value => value.Id == "amber_grove_workshops");
         Assert.Contains(profile.Features, value => value.Id == "twilight_marsh_roots");
+        Assert.Contains(profile.Features, value => value.Id == "frostwood_pine_groves");
+        var frostwood = registry.GetById("frostwood");
+        Assert.True(frostwood.Weather.AllowsFrozenPrecipitation);
+        Assert.True(frostwood.Weather.SnowWeight > 0);
+        Assert.True(frostwood.Weather.BlizzardWeight > 0);
+        Assert.All(
+            registry.Definitions.Where(value => value.Id != "frostwood"),
+            biome =>
+            {
+                Assert.False(biome.Weather.AllowsFrozenPrecipitation);
+                Assert.Equal(0, biome.Weather.SnowWeight);
+                Assert.Equal(0, biome.Weather.BlizzardWeight);
+            });
 
         foreach (var biome in registry.Definitions)
         {

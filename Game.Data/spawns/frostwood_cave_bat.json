@@ -1,0 +1,19 @@
+{
+  "id": "frostwood_cave_bat",
+  "entityId": "bat",
+  "biomeId": "frostwood",
+  "habitats": ["underground", "cavern", "openAir"],
+  "minTileY": 68,
+  "maxTileY": 159,
+  "chance": 0.2,
+  "weight": 1.0,
+  "maxActive": 6,
+  "populationGroup": "frostwood-cave-hostiles",
+  "maxActiveInGroup": 8,
+  "populationRegionSizeTiles": 96,
+  "maxActiveInRegion": 4,
+  "maxActiveInHabitat": 6,
+  "localPopulationRadiusTiles": 40,
+  "maxActiveInLocalArea": 3,
+  "cooldownSeconds": 4.0
+}

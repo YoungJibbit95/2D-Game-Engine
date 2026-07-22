@@ -62,7 +62,10 @@ public readonly record struct ProjectileMotionResult(
 
 public readonly record struct ProjectileTileCollision(
     Vector2 ContactPoint,
-    Vector2 SurfaceNormal);
+    Vector2 SurfaceNormal,
+    int? TileX = null,
+    int? TileY = null,
+    ushort? TileId = null);
 
 public readonly record struct ProjectileTileCollisionResult(
     ProjectileTileCollisionDecision Decision,
@@ -70,7 +73,10 @@ public readonly record struct ProjectileTileCollisionResult(
     Vector2 Velocity,
     int RemainingBounces,
     bool IsActive,
-    ProjectileTerminationReason TerminationReason);
+    ProjectileTerminationReason TerminationReason,
+    int? TileX = null,
+    int? TileY = null,
+    ushort? TileId = null);
 
 public readonly record struct ProjectileEntityCollision(
     int TargetEntityId,

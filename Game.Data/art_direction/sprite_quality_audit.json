@@ -3,7 +3,7 @@
   "generatorVersion": "2.0.0",
   "styleId": "yjse-pixel-v1",
   "styleEffectiveDate": "2026-07-10",
-  "auditTimestampUtc": "2026-07-14T18:37:40.380692+00:00",
+  "auditTimestampUtc": "2026-07-22T10:17:26.691706+00:00",
   "validationPolicy": {
     "duplicateContentHashesAllowed": false,
     "transparentCornersRequired": true,
@@ -17,14 +17,15 @@
     ]
   },
   "scope": {
-    "manifestEntries": 180,
-    "uniqueManifestPaths": 174,
-    "pngFilesOnDisk": 174,
+    "scanRoot": "sprites",
+    "manifestEntries": 190,
+    "uniqueManifestPaths": 184,
+    "pngFilesOnDisk": 184,
     "manifestPathsMissingOnDisk": [],
     "unmanifestedPngPaths": [],
     "generationBriefs": {
-      "briefFiles": 4,
-      "uniqueBriefIds": 180,
+      "briefFiles": 17,
+      "uniqueBriefIds": 268,
       "missingBriefIds": [],
       "dimensionMismatchIds": [],
       "duplicateBriefIds": []
@@ -32,12 +33,12 @@
   },
   "summary": {
     "qualityTiers": {
-      "pass": 146,
+      "pass": 156,
       "review": 34
     },
     "issueCounts": {
       "low_canvas_occupancy": 2,
-      "style_palette_mismatch": 100,
+      "style_palette_mismatch": 104,
       "weak_dark_silhouette": 32
     },
     "duplicateGroupCount": 0,
@@ -9243,12 +9244,14 @@
       ],
       "renderLayer": "world.entity",
       "license": "YjsE-Project-Owned",
-      "provenance": "wave_02_creatures_biomes_character_props; deterministic Pillow pixel primitives; wave_02_provenance.json",
+      "provenance": "legacy_boar_polish_v1; deterministic native-size Pillow pixel primitives; legacy_boar_polish_v1_provenance.json",
       "tags": [
         "entity",
         "enemy",
         "forest",
         "animated",
+        "native-32px",
+        "legacy-polish-v1",
         "production-sample",
         "runtime-preloaded"
       ],
@@ -9278,19 +9281,19 @@
       "transparentCorners": true,
       "transparentCornersRequired": false,
       "visibleBounds": [
-        4,
+        1,
         7,
         128,
-        26
+        31
       ],
-      "opaquePixelCount": 1378,
-      "occupancyRatio": 0.3364,
-      "uniqueOpaqueColors": 6,
+      "opaquePixelCount": 1776,
+      "occupancyRatio": 0.4336,
+      "uniqueOpaqueColors": 8,
       "recommendedUniqueColorMaximum": null,
       "outOfStyleOpaquePixels": 0,
       "stylePaletteComplianceRatio": 1.0,
-      "darkBoundaryRatio": 0.9084,
-      "contentSha256": "3966db2ceeafaeec21abad0b916201ca54876c3f0497bfb0ccc3ce4f74ede574",
+      "darkBoundaryRatio": 0.9601,
+      "contentSha256": "e2e88fd77f5458c01ca3529d260cdf04f9588de649e4e0398c25dbf994a13468",
       "readabilityScore": 100,
       "qualityTier": "pass",
       "hardIssues": []
@@ -9591,13 +9594,15 @@
       ],
       "renderLayer": "world.entity.ambient",
       "license": "YjsE-Project-Owned",
-      "provenance": "wave_03_player_biome_production; deterministic Pillow pixel primitives; wave_03_provenance.json",
+      "provenance": "flying_wildlife_polish_v1; deterministic native-size Pillow pixel primitives; flying_wildlife_polish_v1_provenance.json",
       "tags": [
         "entity",
         "critter",
         "ambient",
         "meadow",
         "animated",
+        "native-16px",
+        "wildlife-polish-v1",
         "production-sample",
         "runtime-preloaded"
       ],
@@ -9627,19 +9632,19 @@
       "transparentCorners": true,
       "transparentCornersRequired": false,
       "visibleBounds": [
-        2,
-        3,
-        62,
-        12
+        1,
+        1,
+        64,
+        15
       ],
-      "opaquePixelCount": 164,
-      "occupancyRatio": 0.1602,
-      "uniqueOpaqueColors": 3,
+      "opaquePixelCount": 306,
+      "occupancyRatio": 0.2988,
+      "uniqueOpaqueColors": 6,
       "recommendedUniqueColorMaximum": null,
       "outOfStyleOpaquePixels": 0,
       "stylePaletteComplianceRatio": 1.0,
-      "darkBoundaryRatio": 0.9429,
-      "contentSha256": "048c874e19cfc3895a7f239befc75df2b313296bb596e1ecf9d9a2271d3e7e3c",
+      "darkBoundaryRatio": 0.75,
+      "contentSha256": "b4859eabe1e8072820d25facd7ec9cf84d0af6a3cfe61c9223f10fb26f7112b5",
       "readabilityScore": 100,
       "qualityTier": "pass",
       "hardIssues": []
@@ -9661,13 +9666,15 @@
       ],
       "renderLayer": "world.entity.ambient",
       "license": "YjsE-Project-Owned",
-      "provenance": "wave_03_player_biome_production; deterministic Pillow pixel primitives; wave_03_provenance.json",
+      "provenance": "flying_wildlife_polish_v1; deterministic native-size Pillow pixel primitives; flying_wildlife_polish_v1_provenance.json",
       "tags": [
         "entity",
         "critter",
         "ambient",
         "forest",
         "animated",
+        "native-16px",
+        "wildlife-polish-v1",
         "production-sample",
         "runtime-preloaded"
       ],
@@ -9697,19 +9704,19 @@
       "transparentCorners": true,
       "transparentCornersRequired": false,
       "visibleBounds": [
+        1,
         2,
-        3,
-        62,
-        11
+        64,
+        15
       ],
-      "opaquePixelCount": 156,
-      "occupancyRatio": 0.1523,
-      "uniqueOpaqueColors": 3,
+      "opaquePixelCount": 285,
+      "occupancyRatio": 0.2783,
+      "uniqueOpaqueColors": 7,
       "recommendedUniqueColorMaximum": null,
       "outOfStyleOpaquePixels": 0,
       "stylePaletteComplianceRatio": 1.0,
-      "darkBoundaryRatio": 0.9355,
-      "contentSha256": "94372e55a5b5f287399571d223af37a740b37f6735a3e302ebf09053e21f17cd",
+      "darkBoundaryRatio": 0.8333,
+      "contentSha256": "9045ee7ac6e8123c954a80b45612bf701e91161ec16455317a3b1ded2d9c3df9",
       "readabilityScore": 100,
       "qualityTier": "pass",
       "hardIssues": []
@@ -9731,13 +9738,15 @@
       ],
       "renderLayer": "world.entity.ambient",
       "license": "YjsE-Project-Owned",
-      "provenance": "wave_03_player_biome_production; deterministic Pillow pixel primitives; wave_03_provenance.json",
+      "provenance": "flying_wildlife_polish_v1; deterministic native-size Pillow pixel primitives; flying_wildlife_polish_v1_provenance.json",
       "tags": [
         "entity",
         "critter",
         "ambient",
         "cave",
         "animated",
+        "native-16px",
+        "wildlife-polish-v1",
         "production-sample",
         "runtime-preloaded"
       ],
@@ -9768,18 +9777,18 @@
       "transparentCornersRequired": false,
       "visibleBounds": [
         3,
-        5,
-        61,
-        13
+        2,
+        64,
+        15
       ],
-      "opaquePixelCount": 176,
-      "occupancyRatio": 0.1719,
-      "uniqueOpaqueColors": 3,
+      "opaquePixelCount": 244,
+      "occupancyRatio": 0.2383,
+      "uniqueOpaqueColors": 5,
       "recommendedUniqueColorMaximum": null,
       "outOfStyleOpaquePixels": 0,
       "stylePaletteComplianceRatio": 1.0,
-      "darkBoundaryRatio": 0.7812,
-      "contentSha256": "49e9dcdd36492baeb42e5f28815d5d4b1212b3885971a80c3feeb3b4d9b707c3",
+      "darkBoundaryRatio": 0.7966,
+      "contentSha256": "79b6cd803c8dc9cac2f6ac02895ab65c9cb7ea521b0b78987cae9aec0153e926",
       "readabilityScore": 100,
       "qualityTier": "pass",
       "hardIssues": []
@@ -10078,13 +10087,15 @@
       ],
       "renderLayer": "world.entity",
       "license": "YjsE-Project-Owned",
-      "provenance": "wave_03_player_biome_production; deterministic Pillow pixel primitives; wave_03_provenance.json",
+      "provenance": "legacy_boar_polish_v1; deterministic native-size Pillow pixel primitives; legacy_boar_polish_v1_provenance.json",
       "tags": [
         "entity",
         "enemy",
         "elite",
         "forest",
         "animated",
+        "native-32px",
+        "legacy-polish-v1",
         "production-sample",
         "runtime-preloaded"
       ],
@@ -10114,19 +10125,19 @@
       "transparentCorners": true,
       "transparentCornersRequired": false,
       "visibleBounds": [
-        4,
-        7,
+        1,
+        5,
         128,
-        26
+        31
       ],
-      "opaquePixelCount": 1381,
-      "occupancyRatio": 0.3372,
-      "uniqueOpaqueColors": 9,
+      "opaquePixelCount": 1840,
+      "occupancyRatio": 0.4492,
+      "uniqueOpaqueColors": 12,
       "recommendedUniqueColorMaximum": null,
       "outOfStyleOpaquePixels": 0,
       "stylePaletteComplianceRatio": 1.0,
-      "darkBoundaryRatio": 0.8537,
-      "contentSha256": "1d03cc5404cea9ed65101c163c16fa4382455b074a1a9c2a7d87b55791f21bda",
+      "darkBoundaryRatio": 0.9145,
+      "contentSha256": "177378f2300e6e24850ea36ce54c39df2a3bb10f09f8427e0ccad48b4247f22c",
       "readabilityScore": 100,
       "qualityTier": "pass",
       "hardIssues": []
@@ -12593,6 +12604,798 @@
       "darkBoundaryRatio": 1.0,
       "contentSha256": "62671725398967202284e7f1e03a5b1a24c7336b3efe5035b74fe9d6b366a551",
       "readabilityScore": 100,
+      "qualityTier": "pass",
+      "hardIssues": []
+    },
+    {
+      "id": "world/backgrounds/forest_parallax_layer_v3",
+      "path": "sprites/world/backgrounds/forest_parallax_layer_v3.png",
+      "sourceAliasOf": null,
+      "sourceAliasValid": null,
+      "category": "Background",
+      "declaredSize": [
+        512,
+        128
+      ],
+      "atlasId": "backgrounds",
+      "origin": [
+        0,
+        127
+      ],
+      "renderLayer": "background.mid",
+      "license": "YjsE-Project-Owned",
+      "provenance": "background_panorama_v3_imagegen; built-in image_gen source plus deterministic nearest-neighbor palette and seam processing; background_panorama_v3_provenance.json",
+      "tags": [
+        "world",
+        "background",
+        "forest",
+        "temperate",
+        "mountains",
+        "ruins",
+        "parallax",
+        "tileable",
+        "opaque",
+        "imagegen",
+        "yjse-palette",
+        "production-sample",
+        "runtime-preloaded",
+        "version-3"
+      ],
+      "issues": [],
+      "frameCount": 0,
+      "frameContractValid": true,
+      "exists": true,
+      "actualSize": [
+        512,
+        128
+      ],
+      "dimensionsMatch": true,
+      "sourceMode": "RGBA",
+      "sourceHasAlpha": true,
+      "hasTransparentPixels": false,
+      "alphaExtrema": [
+        255,
+        255
+      ],
+      "partialAlphaPixels": 0,
+      "cornerAlphaValues": [
+        255,
+        255,
+        255,
+        255
+      ],
+      "transparentCorners": false,
+      "transparentCornersRequired": false,
+      "visibleBounds": [
+        0,
+        0,
+        512,
+        128
+      ],
+      "opaquePixelCount": 65536,
+      "occupancyRatio": 1.0,
+      "uniqueOpaqueColors": 44,
+      "recommendedUniqueColorMaximum": null,
+      "outOfStyleOpaquePixels": 0,
+      "stylePaletteComplianceRatio": 1.0,
+      "darkBoundaryRatio": 0.3041,
+      "contentSha256": "dd2ddf3a4031c834c49c7d041b1ebf6c92f1f9964abd2b01056108515ac9dacb",
+      "readabilityScore": 100,
+      "qualityTier": "pass",
+      "hardIssues": []
+    },
+    {
+      "id": "world/backgrounds/cave_parallax_layer_v3",
+      "path": "sprites/world/backgrounds/cave_parallax_layer_v3.png",
+      "sourceAliasOf": null,
+      "sourceAliasValid": null,
+      "category": "Background",
+      "declaredSize": [
+        512,
+        128
+      ],
+      "atlasId": "backgrounds",
+      "origin": [
+        0,
+        127
+      ],
+      "renderLayer": "background.mid",
+      "license": "YjsE-Project-Owned",
+      "provenance": "background_panorama_v3_imagegen; built-in image_gen source plus deterministic nearest-neighbor palette and seam processing; background_panorama_v3_provenance.json",
+      "tags": [
+        "world",
+        "background",
+        "cave",
+        "rock-arches",
+        "stalactites",
+        "mushrooms",
+        "crystals",
+        "depth-fog",
+        "parallax",
+        "tileable",
+        "opaque",
+        "imagegen",
+        "yjse-palette",
+        "production-sample",
+        "runtime-preloaded",
+        "version-3"
+      ],
+      "issues": [],
+      "frameCount": 0,
+      "frameContractValid": true,
+      "exists": true,
+      "actualSize": [
+        512,
+        128
+      ],
+      "dimensionsMatch": true,
+      "sourceMode": "RGBA",
+      "sourceHasAlpha": true,
+      "hasTransparentPixels": false,
+      "alphaExtrema": [
+        255,
+        255
+      ],
+      "partialAlphaPixels": 0,
+      "cornerAlphaValues": [
+        255,
+        255,
+        255,
+        255
+      ],
+      "transparentCorners": false,
+      "transparentCornersRequired": false,
+      "visibleBounds": [
+        0,
+        0,
+        512,
+        128
+      ],
+      "opaquePixelCount": 65536,
+      "occupancyRatio": 1.0,
+      "uniqueOpaqueColors": 29,
+      "recommendedUniqueColorMaximum": null,
+      "outOfStyleOpaquePixels": 0,
+      "stylePaletteComplianceRatio": 1.0,
+      "darkBoundaryRatio": 0.8276,
+      "contentSha256": "a571a9fbfee191c5b9fbc268af87335bfdce0866a2192b6ee7799ffac2461708",
+      "readabilityScore": 100,
+      "qualityTier": "pass",
+      "hardIssues": []
+    },
+    {
+      "id": "world/backgrounds/forest_parallax_layer_v4",
+      "path": "sprites/world/backgrounds/forest_parallax_layer_v4.png",
+      "sourceAliasOf": null,
+      "sourceAliasValid": null,
+      "category": "Background",
+      "declaredSize": [
+        1024,
+        256
+      ],
+      "atlasId": "backgrounds",
+      "origin": [
+        0,
+        255
+      ],
+      "renderLayer": "background.mid",
+      "license": "YjsE-Project-Owned",
+      "provenance": "background_panorama_v4_imagegen; built-in image_gen source plus deterministic fine-raster palette and seam processing; background_panorama_v4_provenance.json",
+      "tags": [
+        "world",
+        "background",
+        "forest",
+        "temperate",
+        "mountains",
+        "tree-depth",
+        "parallax",
+        "panorama",
+        "tileable",
+        "opaque",
+        "imagegen",
+        "yjse-palette",
+        "production-sample",
+        "runtime-active",
+        "version-4"
+      ],
+      "issues": [],
+      "frameCount": 0,
+      "frameContractValid": true,
+      "exists": true,
+      "actualSize": [
+        1024,
+        256
+      ],
+      "dimensionsMatch": true,
+      "sourceMode": "RGBA",
+      "sourceHasAlpha": true,
+      "hasTransparentPixels": false,
+      "alphaExtrema": [
+        255,
+        255
+      ],
+      "partialAlphaPixels": 0,
+      "cornerAlphaValues": [
+        255,
+        255,
+        255,
+        255
+      ],
+      "transparentCorners": false,
+      "transparentCornersRequired": false,
+      "visibleBounds": [
+        0,
+        0,
+        1024,
+        256
+      ],
+      "opaquePixelCount": 262144,
+      "occupancyRatio": 1.0,
+      "uniqueOpaqueColors": 13,
+      "recommendedUniqueColorMaximum": null,
+      "outOfStyleOpaquePixels": 0,
+      "stylePaletteComplianceRatio": 1.0,
+      "darkBoundaryRatio": 0.0313,
+      "contentSha256": "318c2f4d6498411a745e1f95a7bd2b8b6134b477982066c7cda705cf31bef6ed",
+      "readabilityScore": 100,
+      "qualityTier": "pass",
+      "hardIssues": []
+    },
+    {
+      "id": "world/backgrounds/amber_grove_parallax_layer_v4",
+      "path": "sprites/world/backgrounds/amber_grove_parallax_layer_v4.png",
+      "sourceAliasOf": null,
+      "sourceAliasValid": null,
+      "category": "Background",
+      "declaredSize": [
+        1024,
+        256
+      ],
+      "atlasId": "backgrounds",
+      "origin": [
+        0,
+        255
+      ],
+      "renderLayer": "background.mid",
+      "license": "YjsE-Project-Owned",
+      "provenance": "background_panorama_v4_imagegen; built-in image_gen source plus deterministic fine-raster palette and seam processing; background_panorama_v4_provenance.json",
+      "tags": [
+        "world",
+        "background",
+        "amber-grove",
+        "resin-trees",
+        "ruins",
+        "warm",
+        "parallax",
+        "panorama",
+        "tileable",
+        "opaque",
+        "imagegen",
+        "yjse-palette",
+        "production-sample",
+        "runtime-active",
+        "version-4"
+      ],
+      "issues": [],
+      "frameCount": 0,
+      "frameContractValid": true,
+      "exists": true,
+      "actualSize": [
+        1024,
+        256
+      ],
+      "dimensionsMatch": true,
+      "sourceMode": "RGBA",
+      "sourceHasAlpha": true,
+      "hasTransparentPixels": false,
+      "alphaExtrema": [
+        255,
+        255
+      ],
+      "partialAlphaPixels": 0,
+      "cornerAlphaValues": [
+        255,
+        255,
+        255,
+        255
+      ],
+      "transparentCorners": false,
+      "transparentCornersRequired": false,
+      "visibleBounds": [
+        0,
+        0,
+        1024,
+        256
+      ],
+      "opaquePixelCount": 262144,
+      "occupancyRatio": 1.0,
+      "uniqueOpaqueColors": 19,
+      "recommendedUniqueColorMaximum": null,
+      "outOfStyleOpaquePixels": 0,
+      "stylePaletteComplianceRatio": 1.0,
+      "darkBoundaryRatio": 0.4249,
+      "contentSha256": "cbc8295117fdc83eba1db9cecfa49c4079e54ae0006a512b58c6bf72c5290ae1",
+      "readabilityScore": 100,
+      "qualityTier": "pass",
+      "hardIssues": []
+    },
+    {
+      "id": "world/backgrounds/twilight_marsh_parallax_layer_v4",
+      "path": "sprites/world/backgrounds/twilight_marsh_parallax_layer_v4.png",
+      "sourceAliasOf": null,
+      "sourceAliasValid": null,
+      "category": "Background",
+      "declaredSize": [
+        1024,
+        256
+      ],
+      "atlasId": "backgrounds",
+      "origin": [
+        0,
+        255
+      ],
+      "renderLayer": "background.mid",
+      "license": "YjsE-Project-Owned",
+      "provenance": "background_panorama_v4_imagegen; built-in image_gen source plus deterministic fine-raster palette and seam processing; background_panorama_v4_provenance.json",
+      "tags": [
+        "world",
+        "background",
+        "twilight-marsh",
+        "water",
+        "mangroves",
+        "fog",
+        "parallax",
+        "panorama",
+        "tileable",
+        "opaque",
+        "imagegen",
+        "yjse-palette",
+        "production-sample",
+        "runtime-active",
+        "version-4"
+      ],
+      "issues": [],
+      "frameCount": 0,
+      "frameContractValid": true,
+      "exists": true,
+      "actualSize": [
+        1024,
+        256
+      ],
+      "dimensionsMatch": true,
+      "sourceMode": "RGBA",
+      "sourceHasAlpha": true,
+      "hasTransparentPixels": false,
+      "alphaExtrema": [
+        255,
+        255
+      ],
+      "partialAlphaPixels": 0,
+      "cornerAlphaValues": [
+        255,
+        255,
+        255,
+        255
+      ],
+      "transparentCorners": false,
+      "transparentCornersRequired": false,
+      "visibleBounds": [
+        0,
+        0,
+        1024,
+        256
+      ],
+      "opaquePixelCount": 262144,
+      "occupancyRatio": 1.0,
+      "uniqueOpaqueColors": 20,
+      "recommendedUniqueColorMaximum": null,
+      "outOfStyleOpaquePixels": 0,
+      "stylePaletteComplianceRatio": 1.0,
+      "darkBoundaryRatio": 0.4593,
+      "contentSha256": "c17a3a5a247c10b59a18bce3bda0abce3fcde98373674f17d4e7539a58a844da",
+      "readabilityScore": 100,
+      "qualityTier": "pass",
+      "hardIssues": []
+    },
+    {
+      "id": "world/backgrounds/crystal_depths_parallax_layer_v4",
+      "path": "sprites/world/backgrounds/crystal_depths_parallax_layer_v4.png",
+      "sourceAliasOf": null,
+      "sourceAliasValid": null,
+      "category": "Background",
+      "declaredSize": [
+        1024,
+        256
+      ],
+      "atlasId": "backgrounds",
+      "origin": [
+        0,
+        255
+      ],
+      "renderLayer": "background.mid",
+      "license": "YjsE-Project-Owned",
+      "provenance": "background_panorama_v4_imagegen; built-in image_gen source plus deterministic fine-raster palette and seam processing; background_panorama_v4_provenance.json",
+      "tags": [
+        "world",
+        "background",
+        "crystal-depths",
+        "underground",
+        "cavern",
+        "crystals",
+        "parallax",
+        "panorama",
+        "tileable",
+        "opaque",
+        "imagegen",
+        "yjse-palette",
+        "production-sample",
+        "runtime-active",
+        "version-4"
+      ],
+      "issues": [],
+      "frameCount": 0,
+      "frameContractValid": true,
+      "exists": true,
+      "actualSize": [
+        1024,
+        256
+      ],
+      "dimensionsMatch": true,
+      "sourceMode": "RGBA",
+      "sourceHasAlpha": true,
+      "hasTransparentPixels": false,
+      "alphaExtrema": [
+        255,
+        255
+      ],
+      "partialAlphaPixels": 0,
+      "cornerAlphaValues": [
+        255,
+        255,
+        255,
+        255
+      ],
+      "transparentCorners": false,
+      "transparentCornersRequired": false,
+      "visibleBounds": [
+        0,
+        0,
+        1024,
+        256
+      ],
+      "opaquePixelCount": 262144,
+      "occupancyRatio": 1.0,
+      "uniqueOpaqueColors": 11,
+      "recommendedUniqueColorMaximum": null,
+      "outOfStyleOpaquePixels": 0,
+      "stylePaletteComplianceRatio": 1.0,
+      "darkBoundaryRatio": 1.0,
+      "contentSha256": "48d030d92c5ebb98f99b171dd6983668dd616c2728423574e9ceea598d91e43e",
+      "readabilityScore": 100,
+      "qualityTier": "pass",
+      "hardIssues": []
+    },
+    {
+      "id": "world/backgrounds/forest_parallax_layer_v5",
+      "path": "sprites/world/backgrounds/forest_parallax_layer_v5.png",
+      "sourceAliasOf": null,
+      "sourceAliasValid": null,
+      "category": "Background",
+      "declaredSize": [
+        1536,
+        384
+      ],
+      "atlasId": "backgrounds",
+      "origin": [
+        0,
+        383
+      ],
+      "renderLayer": "background.mid",
+      "license": "YjsE-Project-Owned",
+      "provenance": "background_panorama_v5_imagegen; built-in image_gen source plus native-resolution crop, detail-preserving palette reduction and seam processing; background_panorama_v5_provenance.json",
+      "tags": [
+        "world",
+        "background",
+        "forest",
+        "temperate",
+        "mountains",
+        "tree-depth",
+        "parallax",
+        "panorama",
+        "tileable",
+        "opaque",
+        "imagegen",
+        "modern-painted-pixel",
+        "biome-palette-256",
+        "native-high-resolution",
+        "runtime-active",
+        "version-5"
+      ],
+      "issues": [
+        "style_palette_mismatch"
+      ],
+      "frameCount": 0,
+      "frameContractValid": true,
+      "exists": true,
+      "actualSize": [
+        1536,
+        384
+      ],
+      "dimensionsMatch": true,
+      "sourceMode": "RGBA",
+      "sourceHasAlpha": true,
+      "hasTransparentPixels": false,
+      "alphaExtrema": [
+        255,
+        255
+      ],
+      "partialAlphaPixels": 0,
+      "cornerAlphaValues": [
+        255,
+        255,
+        255,
+        255
+      ],
+      "transparentCorners": false,
+      "transparentCornersRequired": false,
+      "visibleBounds": [
+        0,
+        0,
+        1536,
+        384
+      ],
+      "opaquePixelCount": 589824,
+      "occupancyRatio": 1.0,
+      "uniqueOpaqueColors": 256,
+      "recommendedUniqueColorMaximum": null,
+      "outOfStyleOpaquePixels": 589824,
+      "stylePaletteComplianceRatio": 0.0,
+      "darkBoundaryRatio": 0.1825,
+      "contentSha256": "b5ccd9819c86d1e2cdd4f51fbc1b007d865d8a4d1f34b838c0c393ed272c7e23",
+      "readabilityScore": 85,
+      "qualityTier": "pass",
+      "hardIssues": []
+    },
+    {
+      "id": "world/backgrounds/amber_grove_parallax_layer_v5",
+      "path": "sprites/world/backgrounds/amber_grove_parallax_layer_v5.png",
+      "sourceAliasOf": null,
+      "sourceAliasValid": null,
+      "category": "Background",
+      "declaredSize": [
+        1536,
+        384
+      ],
+      "atlasId": "backgrounds",
+      "origin": [
+        0,
+        383
+      ],
+      "renderLayer": "background.mid",
+      "license": "YjsE-Project-Owned",
+      "provenance": "background_panorama_v5_imagegen; built-in image_gen source plus native-resolution crop, detail-preserving palette reduction and seam processing; background_panorama_v5_provenance.json",
+      "tags": [
+        "world",
+        "background",
+        "amber-grove",
+        "resin-trees",
+        "stone-terraces",
+        "warm",
+        "parallax",
+        "panorama",
+        "tileable",
+        "opaque",
+        "imagegen",
+        "modern-painted-pixel",
+        "biome-palette-256",
+        "native-high-resolution",
+        "runtime-active",
+        "version-5"
+      ],
+      "issues": [
+        "style_palette_mismatch"
+      ],
+      "frameCount": 0,
+      "frameContractValid": true,
+      "exists": true,
+      "actualSize": [
+        1536,
+        384
+      ],
+      "dimensionsMatch": true,
+      "sourceMode": "RGBA",
+      "sourceHasAlpha": true,
+      "hasTransparentPixels": false,
+      "alphaExtrema": [
+        255,
+        255
+      ],
+      "partialAlphaPixels": 0,
+      "cornerAlphaValues": [
+        255,
+        255,
+        255,
+        255
+      ],
+      "transparentCorners": false,
+      "transparentCornersRequired": false,
+      "visibleBounds": [
+        0,
+        0,
+        1536,
+        384
+      ],
+      "opaquePixelCount": 589824,
+      "occupancyRatio": 1.0,
+      "uniqueOpaqueColors": 256,
+      "recommendedUniqueColorMaximum": null,
+      "outOfStyleOpaquePixels": 589824,
+      "stylePaletteComplianceRatio": 0.0,
+      "darkBoundaryRatio": 0.0568,
+      "contentSha256": "ab7b77377a72b1d22b99ec11ba85456a27d0f040992f65d501d08bfa70525915",
+      "readabilityScore": 85,
+      "qualityTier": "pass",
+      "hardIssues": []
+    },
+    {
+      "id": "world/backgrounds/twilight_marsh_parallax_layer_v5",
+      "path": "sprites/world/backgrounds/twilight_marsh_parallax_layer_v5.png",
+      "sourceAliasOf": null,
+      "sourceAliasValid": null,
+      "category": "Background",
+      "declaredSize": [
+        1536,
+        384
+      ],
+      "atlasId": "backgrounds",
+      "origin": [
+        0,
+        383
+      ],
+      "renderLayer": "background.mid",
+      "license": "YjsE-Project-Owned",
+      "provenance": "background_panorama_v5_imagegen; built-in image_gen source plus native-resolution crop, detail-preserving palette reduction and seam processing; background_panorama_v5_provenance.json",
+      "tags": [
+        "world",
+        "background",
+        "twilight-marsh",
+        "water",
+        "cypress",
+        "fog",
+        "parallax",
+        "panorama",
+        "tileable",
+        "opaque",
+        "imagegen",
+        "modern-painted-pixel",
+        "biome-palette-256",
+        "native-high-resolution",
+        "runtime-active",
+        "version-5"
+      ],
+      "issues": [
+        "style_palette_mismatch"
+      ],
+      "frameCount": 0,
+      "frameContractValid": true,
+      "exists": true,
+      "actualSize": [
+        1536,
+        384
+      ],
+      "dimensionsMatch": true,
+      "sourceMode": "RGBA",
+      "sourceHasAlpha": true,
+      "hasTransparentPixels": false,
+      "alphaExtrema": [
+        255,
+        255
+      ],
+      "partialAlphaPixels": 0,
+      "cornerAlphaValues": [
+        255,
+        255,
+        255,
+        255
+      ],
+      "transparentCorners": false,
+      "transparentCornersRequired": false,
+      "visibleBounds": [
+        0,
+        0,
+        1536,
+        384
+      ],
+      "opaquePixelCount": 589824,
+      "occupancyRatio": 1.0,
+      "uniqueOpaqueColors": 256,
+      "recommendedUniqueColorMaximum": null,
+      "outOfStyleOpaquePixels": 589824,
+      "stylePaletteComplianceRatio": 0.0,
+      "darkBoundaryRatio": 0.1642,
+      "contentSha256": "4d294b33e548ddf6580f7ba46f07cadb3e9b44c3908bf2b27755d28e1b0d339f",
+      "readabilityScore": 85,
+      "qualityTier": "pass",
+      "hardIssues": []
+    },
+    {
+      "id": "world/backgrounds/crystal_depths_parallax_layer_v5",
+      "path": "sprites/world/backgrounds/crystal_depths_parallax_layer_v5.png",
+      "sourceAliasOf": null,
+      "sourceAliasValid": null,
+      "category": "Background",
+      "declaredSize": [
+        1536,
+        384
+      ],
+      "atlasId": "backgrounds",
+      "origin": [
+        0,
+        383
+      ],
+      "renderLayer": "background.mid",
+      "license": "YjsE-Project-Owned",
+      "provenance": "background_panorama_v5_imagegen; built-in image_gen source plus native-resolution crop, detail-preserving palette reduction and seam processing; background_panorama_v5_provenance.json",
+      "tags": [
+        "world",
+        "background",
+        "crystal-depths",
+        "underground",
+        "cavern",
+        "crystals",
+        "parallax",
+        "panorama",
+        "tileable",
+        "opaque",
+        "imagegen",
+        "modern-painted-pixel",
+        "biome-palette-256",
+        "native-high-resolution",
+        "runtime-active",
+        "version-5"
+      ],
+      "issues": [
+        "style_palette_mismatch"
+      ],
+      "frameCount": 0,
+      "frameContractValid": true,
+      "exists": true,
+      "actualSize": [
+        1536,
+        384
+      ],
+      "dimensionsMatch": true,
+      "sourceMode": "RGBA",
+      "sourceHasAlpha": true,
+      "hasTransparentPixels": false,
+      "alphaExtrema": [
+        255,
+        255
+      ],
+      "partialAlphaPixels": 0,
+      "cornerAlphaValues": [
+        255,
+        255,
+        255,
+        255
+      ],
+      "transparentCorners": false,
+      "transparentCornersRequired": false,
+      "visibleBounds": [
+        0,
+        0,
+        1536,
+        384
+      ],
+      "opaquePixelCount": 589824,
+      "occupancyRatio": 1.0,
+      "uniqueOpaqueColors": 256,
+      "recommendedUniqueColorMaximum": null,
+      "outOfStyleOpaquePixels": 589824,
+      "stylePaletteComplianceRatio": 0.0,
+      "darkBoundaryRatio": 0.75,
+      "contentSha256": "9ecbc0f1b0e32ae91fc8b8620feb0a3cf9e3108ff79e873057e065e2d8777f61",
+      "readabilityScore": 85,
       "qualityTier": "pass",
       "hardIssues": []
     }

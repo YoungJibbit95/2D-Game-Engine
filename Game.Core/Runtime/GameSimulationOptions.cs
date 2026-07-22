@@ -29,4 +29,20 @@ public sealed record GameSimulationOptions
     public int SpawnVisibleHalfHeightTiles { get; init; } = 10;
 
     public bool SpawnOutsideViewportOnly { get; init; } = true;
+
+    public float WorldTimeRateMultiplier { get; init; } = 1f;
+
+    public float PlayerMovementSpeedMultiplier { get; init; } = 1f;
+
+    public float PlayerMiningSpeedMultiplier { get; init; } = 1f;
+
+    public float PlayerManaCostMultiplier { get; init; } = 1f;
+
+    public bool PlayerInvulnerable { get; init; }
+
+    public bool PlayerNoClip { get; init; }
+
+    public bool PlayerFreeFlight { get; init; }
+
+    public bool FriendlyFireEnabled { get; init; }
 }

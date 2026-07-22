@@ -1,0 +1,12 @@
+{
+  "id": "cinderbloom_staff",
+  "result": { "itemId": "cinderbloom_staff", "count": 1 },
+  "ingredients": [
+    { "itemId": "amberwood_plank_block", "count": 6 },
+    { "itemId": "gel", "count": 8 },
+    { "itemId": "mana_crystal", "count": 1 }
+  ],
+  "station": "anvil",
+  "category": "weapons",
+  "sortOrder": 82
+}

@@ -11,6 +11,7 @@ public sealed class LivingWorldRuntime
     private const int EventAdvanceIntervalTicks = 60;
 
     private readonly RegionalGenerationProfile _profile;
+    private readonly BiomeRegistry _biomes;
     private readonly WorldRegionPlanner _regions;
     private readonly DeterministicWeatherSystem _weather;
     private readonly DeterministicWorldEventExecutor _events;
@@ -26,6 +27,9 @@ public sealed class LivingWorldRuntime
     private bool _lastEventIsUnderground;
     private int _cachedSurfaceTileX = int.MinValue;
     private int _cachedSurfaceTileY;
+    private string? _biomeOverrideId;
+    private WeatherKind? _weatherOverrideKind;
+    private float _weatherOverrideIntensity;
 
     public LivingWorldRuntime(
         int seed,
@@ -37,6 +41,7 @@ public sealed class LivingWorldRuntime
         ArgumentNullException.ThrowIfNull(profile);
         ArgumentNullException.ThrowIfNull(biomes);
         _profile = profile;
+        _biomes = biomes;
         _regions = new WorldRegionPlanner(seed, profile, biomes, structures);
         _weather = new DeterministicWeatherSystem(seed);
         var eventRegistry = MergeWorldEvents(profile.WorldEvents, worldEvents);
@@ -47,8 +52,112 @@ public sealed class LivingWorldRuntime
 
     public WorldEventRuntimeSnapshot? WorldEventSnapshot => _eventSnapshot;
 
+
     public long LastProcessedPlayerActionSequence => _lastProcessedPlayerActionSequence;
 
+    public string? BiomeOverrideId => _biomeOverrideId;
+
+    public WeatherKind? WeatherOverrideKind => _weatherOverrideKind;
+
+    public float WeatherOverrideIntensity => _weatherOverrideKind.HasValue
+        ? _weatherOverrideIntensity
+        : 0f;
+
+    public void SetBiomeOverride(string biomeId)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(biomeId);
+        if (!_biomes.TryGetById(biomeId, out var biome))
+        {
+            throw new KeyNotFoundException($"Biome '{biomeId}' was not registered.");
+        }
+
+        _biomeOverrideId = biome.Id;
+        _lastEventWeatherId = null;
+    }
+
+    public void ClearBiomeOverride()
+    {
+        _biomeOverrideId = null;
+        _lastEventWeatherId = null;
+    }
+    public void SetWeatherOverride(WeatherKind kind, float intensity)
+    {
+        if (!Enum.IsDefined(kind))
+        {
+            throw new ArgumentOutOfRangeException(nameof(kind));
+        }
+
+        if (!float.IsFinite(intensity) || intensity is < 0f or > 1f)
+        {
+            throw new ArgumentOutOfRangeException(nameof(intensity));
+        }
+
+        _weatherOverrideKind = kind;
+        _weatherOverrideIntensity = kind == WeatherKind.Clear ? 0f : intensity;
+        _lastEventWeatherId = null;
+    }
+
+    public void ClearWeatherOverride()
+    {
+        _weatherOverrideKind = null;
+        _weatherOverrideIntensity = 0f;
+        _lastEventWeatherId = null;
+    }
+
+    public bool AlignWorldEventClock(long worldTick)
+    {
+        if (worldTick < 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(worldTick));
+        }
+
+        if (_eventSnapshot is not { } snapshot || worldTick >= snapshot.LastAdvancedTick)
+        {
+            return false;
+        }
+
+        var rewindTicks = snapshot.LastAdvancedTick - worldTick;
+        var cooldowns = new WorldEventCooldownState[snapshot.Cooldowns.Count];
+        for (var index = 0; index < cooldowns.Length; index++)
+        {
+            var cooldown = snapshot.Cooldowns[index];
+            cooldowns[index] = cooldown with
+            {
+                UntilTickExclusive = RebaseTick(cooldown.UntilTickExclusive, rewindTicks)
+            };
+        }
+
+        _eventSnapshot = snapshot with
+        {
+            LastAdvancedTick = worldTick,
+            StartTick = RebaseTick(snapshot.StartTick, rewindTicks),
+            EndTickExclusive = RebaseTick(snapshot.EndTickExclusive, rewindTicks),
+            Cooldowns = cooldowns
+        };
+
+        var journal = _eventJournal.Capture();
+        if (journal.Entries.Count > 0)
+        {
+            var entries = new WorldEventDomainEvent[journal.Entries.Count];
+            for (var index = 0; index < entries.Length; index++)
+            {
+                var entry = journal.Entries[index];
+                entries[index] = entry with
+                {
+                    WorldTick = RebaseTick(entry.WorldTick, rewindTicks),
+                    CooldownUntilTickExclusive = RebaseTick(
+                        entry.CooldownUntilTickExclusive,
+                        rewindTicks)
+                };
+            }
+
+            _eventJournal.Restore(journal with { Entries = entries });
+        }
+
+        _lastEventContext = null;
+        _lastEventWeatherId = null;
+        return true;
+    }
     public WorldEventJournalSnapshot CaptureWorldEventJournal() => _eventJournal.Capture();
 
     public WorldEventRuntimeStateSnapshot? CaptureWorldEventState()
@@ -136,15 +245,38 @@ public sealed class LivingWorldRuntime
 
     public LivingWorldFrameSnapshot Capture(TilePos playerTile, long worldTick, float daylight)
     {
+        AlignWorldEventClock(worldTick);
         var region = ResolveRegion(playerTile.X);
         var cave = FindCave(region, playerTile);
         var resolution = _regions.ResolveBiome(
             region,
             playerTile.X,
             Math.Clamp(playerTile.Y, 0, _profile.WorldHeightTiles - 1));
+        if (_biomeOverrideId is { } biomeOverrideId)
+        {
+            var overrideBiome = _biomes.GetById(biomeOverrideId);
+            resolution = resolution with
+            {
+                SurfaceBiomeId = overrideBiome.Id,
+                Biome = overrideBiome,
+                SubBiome = null
+            };
+        }
         var surfaceTileY = ResolveSurfaceHeight(playerTile.X);
         var isUnderground = resolution.IsCave || playerTile.Y >= surfaceTileY + 8;
         var weather = _weather.GetState(resolution.Biome, worldTick);
+        if (_weatherOverrideKind is { } overrideKind)
+        {
+            weather = WeatherAtmosphere.Apply(
+                weather with
+                {
+                    Kind = overrideKind,
+                    Intensity = _weatherOverrideIntensity,
+                    StartTick = worldTick,
+                    EndTickExclusive = long.MaxValue
+                },
+                overrideKind);
+        }
         var ambient = _ambient.Resolve(
             resolution.Biome,
             resolution.SubBiome,
@@ -242,6 +374,7 @@ public sealed class LivingWorldRuntime
                 resolution.Biome.Presentation.WindResponse))
         {
             SurfaceTileY = surfaceTileY,
+            AllowsFrozenPrecipitation = resolution.Biome.Weather.AllowsFrozenPrecipitation,
             WorldEventPhaseId = worldEvent.PhaseId,
             WorldEventPhaseProgress = worldEvent.PhaseProgress,
             WorldEventParticleSpriteId = eventActive ? modified.ParticleSpriteId : null,
@@ -297,6 +430,10 @@ public sealed class LivingWorldRuntime
         return null;
     }
 
+    private static long RebaseTick(long tick, long rewindTicks)
+    {
+        return tick <= rewindTicks ? 0L : tick - rewindTicks;
+    }
     private int ResolveSurfaceHeight(int tileX)
     {
         if (_cachedSurfaceTileX == tileX)

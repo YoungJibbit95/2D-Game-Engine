@@ -245,6 +245,10 @@ public sealed record KeyBindingSettings
 
     public string Jump { get; init; } = "Space,W,Up";
 
+    public string Fly { get; init; } = "LeftShift";
+
+    public string Glide { get; init; } = "LeftAlt";
+
     public string AttackPrimary { get; init; } = "MouseLeft";
 
     public string AttackSecondary { get; init; } = "MouseRight";

@@ -8,6 +8,7 @@ internal static class TreeTileVisualSelector
     public const byte VariantCount = 3;
     private const int HorizontalSearchRadius = 7;
     private const int VerticalSearchRadius = 12;
+    private const int FoliageBandHeight = 2;
 
     public static byte Resolve(World world, int tileX, int tileY, ushort tileId)
     {
@@ -30,7 +31,11 @@ internal static class TreeTileVisualSelector
             for (var scanY = minimumY; scanY <= maximumY; scanY++)
             {
                 var candidate = world.GetTile(candidateX, scanY).TileId;
-                woodCount += candidate == trunkTileId ? 1 : 0;
+                if (candidate == trunkTileId)
+                {
+                    woodCount++;
+                }
+
                 foundLeaves |= candidate == canopyTileId;
             }
 
@@ -52,7 +57,13 @@ internal static class TreeTileVisualSelector
             return 0;
         }
 
-        return (byte)(StableHash(world.Metadata.Seed, bestAnchorX) % VariantCount);
+        var treeHash = StableHash(world.Metadata.Seed, bestAnchorX);
+        if (tileId == canopyTileId && tileId != KnownTileIds.Leaves)
+        {
+            return ResolveRegionalFoliageVariant(treeHash, bestAnchorX, tileX, tileY, tileId);
+        }
+
+        return (byte)(treeHash % VariantCount);
     }
 
     /// <summary>
@@ -115,6 +126,59 @@ internal static class TreeTileVisualSelector
             hash *= 0x846CA68Bu;
             return hash ^ (hash >> 16);
         }
+    }
+
+    private static byte ResolveRegionalFoliageVariant(
+        uint treeHash,
+        int anchorX,
+        int tileX,
+        int tileY,
+        ushort tileId)
+    {
+        var band = FloorDivide(tileY, FoliageBandHeight);
+        var lobeWidth = 2 + (int)(StableHash(
+            unchecked((int)treeHash),
+            band,
+            tileId,
+            307) & 1u);
+        var localX = SaturateToInt((long)tileX - anchorX);
+        var lobe = FloorDivide(
+            SaturateToInt((long)localX + (band & 1)),
+            lobeWidth);
+        var variantHash = StableHash(
+            unchecked((int)treeHash),
+            band,
+            lobe,
+            tileId ^ 311);
+        return (byte)(variantHash % VariantCount);
+    }
+
+    private static uint StableHash(int first, int second, int third, int fourth)
+    {
+        unchecked
+        {
+            var hash = 0x9E3779B9u;
+            hash = MixHash(hash, first);
+            hash = MixHash(hash, second);
+            hash = MixHash(hash, third);
+            return MixHash(hash, fourth);
+        }
+    }
+
+    private static uint MixHash(uint hash, int value)
+    {
+        unchecked
+        {
+            hash ^= (uint)value + 0x85EBCA6Bu + (hash << 6) + (hash >> 2);
+            hash *= 0x7FEB352Du;
+            return hash ^ (hash >> 15);
+        }
+    }
+
+    private static int FloorDivide(int value, int divisor)
+    {
+        var quotient = value / divisor;
+        return value % divisor < 0 ? quotient - 1 : quotient;
     }
 
     private static bool TryResolveMaterialPair(

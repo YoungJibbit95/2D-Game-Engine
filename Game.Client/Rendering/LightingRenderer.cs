@@ -37,6 +37,10 @@ public sealed class LightingRenderer : IDisposable
     private float[] _lightBlue = Array.Empty<float>();
     private float[] _bloomValues = Array.Empty<float>();
     private float[] _scratch = Array.Empty<float>();
+    private float[] _previousShadowValues = Array.Empty<float>();
+    private float[] _previousLightRed = Array.Empty<float>();
+    private float[] _previousLightGreen = Array.Empty<float>();
+    private float[] _previousLightBlue = Array.Empty<float>();
     private PresentationQualityProfile _quality;
     private Rectangle _resourceViewport;
     private Rectangle _preparedViewport;
@@ -46,6 +50,9 @@ public sealed class LightingRenderer : IDisposable
     private bool _hasReflection;
     private bool _wasConfigured;
     private float _reflectionStrength;
+    private Rectangle _previousVisibleWorld;
+    private long _previousLightingFrameIndex = -1;
+    private bool _hasLightingHistory;
     private TextureUploadContentTracker _shadowContent;
     private TextureUploadContentTracker _coloredLightContent;
     private TextureUploadContentTracker _bloomContent;
@@ -62,6 +69,8 @@ public sealed class LightingRenderer : IDisposable
     public LightingReflectionTelemetry LastReflectionTelemetry { get; private set; }
 
     public WaterReflectionPlanTelemetry LastReflectionSurfaceTelemetry { get; private set; }
+    public LightingTemporalStabilizationTelemetry LastTemporalTelemetry { get; private set; }
+
 
     public int LastTextureUploadCount { get; private set; }
 
@@ -168,6 +177,10 @@ public sealed class LightingRenderer : IDisposable
         _lightBlue = new float[count];
         _bloomValues = new float[count];
         _scratch = new float[count];
+        _previousShadowValues = new float[count];
+        _previousLightRed = new float[count];
+        _previousLightGreen = new float[count];
+        _previousLightBlue = new float[count];
     }
 
     public LightingBuildTelemetry PrepareFrame(
@@ -176,7 +189,9 @@ public sealed class LightingRenderer : IDisposable
         Rectangle viewport,
         in LightingFrameParameters frame,
         ReadOnlySpan<ScreenSpaceLight> pointLights,
-        PerformanceProfiler? performance = null)
+        PerformanceProfiler? performance = null,
+        int? surfaceTileY = null,
+        Func<int, int>? surfaceHeightResolver = null)
     {
         ArgumentNullException.ThrowIfNull(world);
         ArgumentNullException.ThrowIfNull(camera);
@@ -187,6 +202,7 @@ public sealed class LightingRenderer : IDisposable
             LastTelemetry = default;
             LastReflectionTelemetry = default;
             LastReflectionSurfaceTelemetry = default;
+            LastTemporalTelemetry = default;
             return LastTelemetry;
         }
 
@@ -196,11 +212,12 @@ public sealed class LightingRenderer : IDisposable
                 "Lighting resources do not match the requested viewport. Call PrepareResources before PrepareFrame.");
         }
 
+        var visibleWorld = camera.VisibleWorldRect;
         using (performance?.Measure("Presentation.LightingMaskCpu", 1.25) ?? default)
         {
             LastTelemetry = TileRayCastShadowMaskBuilder.Build(
                 world,
-                camera.VisibleWorldRect,
+                visibleWorld,
                 _quality,
                 frame,
                 pointLights,
@@ -209,8 +226,44 @@ public sealed class LightingRenderer : IDisposable
                 _lightGreen,
                 _lightBlue,
                 _bloomValues,
-                _scratch);
+                _scratch,
+                surfaceTileY,
+                surfaceHeightResolver);
         }
+
+        var canUseHistory = _hasLightingHistory &&
+            frame.FrameIndex > _previousLightingFrameIndex &&
+            frame.FrameIndex - _previousLightingFrameIndex <= 8;
+        if (canUseHistory)
+        {
+            using (performance?.Measure("Presentation.LightingTemporal", 0.2) ?? default)
+            {
+                LastTemporalTelemetry = LightingTemporalStabilizer.Apply(
+                    _previousVisibleWorld,
+                    visibleWorld,
+                    _quality.MaskSize,
+                    _previousShadowValues,
+                    _previousLightRed,
+                    _previousLightGreen,
+                    _previousLightBlue,
+                    _shadowValues,
+                    _lightRed,
+                    _lightGreen,
+                    _lightBlue);
+            }
+        }
+        else
+        {
+            LastTemporalTelemetry = new LightingTemporalStabilizationTelemetry(0, 0, true);
+        }
+
+        _shadowValues.AsSpan(0, _quality.MaskPixelCount).CopyTo(_previousShadowValues);
+        _lightRed.AsSpan(0, _quality.MaskPixelCount).CopyTo(_previousLightRed);
+        _lightGreen.AsSpan(0, _quality.MaskPixelCount).CopyTo(_previousLightGreen);
+        _lightBlue.AsSpan(0, _quality.MaskPixelCount).CopyTo(_previousLightBlue);
+        _previousVisibleWorld = visibleWorld;
+        _previousLightingFrameIndex = frame.FrameIndex;
+        _hasLightingHistory = true;
 
         var hasReflection = false;
         if (_quality.EnableReflections &&
@@ -252,7 +305,7 @@ public sealed class LightingRenderer : IDisposable
             new Color(10, 4, 18),
             caveBlend);
         var skyIllumination = TileRayCastShadowMaskBuilder.ResolveSkyIllumination(frame.NormalizedTimeOfDay);
-        var surfaceTint = Color.Lerp(new Color(8, 12, 22), new Color(18, 20, 24), skyIllumination);
+        var surfaceTint = Color.Lerp(new Color(18, 28, 58), new Color(18, 20, 24), skyIllumination);
         var shadowTint = Color.Lerp(surfaceTint, caveTint, caveBlend);
         var hasColoredLight = false;
         var hasBloom = false;
@@ -419,7 +472,9 @@ public sealed class LightingRenderer : IDisposable
         RenderingSettings settings,
         long frameIndex,
         ReadOnlySpan<ScreenSpaceLight> pointLights,
-        PerformanceProfiler? performance = null)
+        PerformanceProfiler? performance = null,
+        int? surfaceTileY = null,
+        Func<int, int>? surfaceHeightResolver = null)
     {
         var frame = PresentationSettingsAdapter.CreateLightingFrame(
             settings,
@@ -428,10 +483,23 @@ public sealed class LightingRenderer : IDisposable
             time,
             livingWorld,
             frameIndex);
-        return PrepareFrame(world, camera, viewport, frame, pointLights, performance);
+        return PrepareFrame(
+            world,
+            camera,
+            viewport,
+            frame,
+            pointLights,
+            performance,
+            surfaceTileY,
+            surfaceHeightResolver);
     }
 
-    public void Draw(RenderContext context, World world, Camera2D camera, float blendStrength = 1f)
+    public void Draw(
+        RenderContext context,
+        World world,
+        Camera2D camera,
+        float blendStrength = 1f,
+        int? surfaceTileY = null)
     {
         ArgumentNullException.ThrowIfNull(world);
         ArgumentNullException.ThrowIfNull(camera);
@@ -456,7 +524,7 @@ public sealed class LightingRenderer : IDisposable
             return;
         }
 
-        DrawLowQualityFallback(context, world, camera, blendStrength);
+        DrawLowQualityFallback(context, world, camera, blendStrength, surfaceTileY);
     }
 
     public void Dispose()
@@ -540,14 +608,20 @@ public sealed class LightingRenderer : IDisposable
         RenderContext context,
         World world,
         Camera2D camera,
-        float blendStrength)
+        float blendStrength,
+        int? surfaceTileY)
     {
         var centerTile = CoordinateUtils.WorldToTile(camera.Position.X, camera.Position.Y);
         var light = world.TryGetTile(centerTile.X, centerTile.Y, out var tile)
             ? tile.Light / 255f
             : 0f;
+        var surfaceY = surfaceTileY ?? world.Metadata.SpawnTile.Y;
+        if (centerTile.Y <= surfaceY && (tile.Flags & TileFlags.Solid) == 0)
+        {
+            light = Math.Max(light, 0.82f);
+        }
         var depth = Math.Clamp(
-            (centerTile.Y - world.Metadata.SpawnTile.Y) / 90f,
+            (centerTile.Y - surfaceY) / 90f,
             0f,
             1f);
         var alpha = Math.Clamp((1f - light) * blendStrength, 0f, 0.82f);
@@ -609,6 +683,14 @@ public sealed class LightingRenderer : IDisposable
         _lightBlue = Array.Empty<float>();
         _bloomValues = Array.Empty<float>();
         _scratch = Array.Empty<float>();
+        _previousShadowValues = Array.Empty<float>();
+        _previousLightRed = Array.Empty<float>();
+        _previousLightGreen = Array.Empty<float>();
+        _previousLightBlue = Array.Empty<float>();
+        _previousVisibleWorld = default;
+        _previousLightingFrameIndex = -1;
+        _hasLightingHistory = false;
+        LastTemporalTelemetry = default;
         _hasPreparedFrame = false;
         _hasColoredLight = false;
         _hasBloom = false;

@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "waveId": "mobility_accessories_v1",
+  "preview": "art_direction/mobility_accessories_contact_sheet.png",
+  "previewDimensions": [
+    448,
+    128
+  ],
+  "nativeSpriteDimensions": [
+    32,
+    32
+  ],
+  "hudSheetDimensions": [
+    48,
+    16
+  ],
+  "hudFrameDimensions": [
+    16,
+    16
+  ],
+  "scale": 2.5,
+  "resampling": "nearest-neighbor",
+  "spriteIds": [
+    "items/double_jump_boots",
+    "items/skyward_wings",
+    "items/ether_glider",
+    "ui/mobility_abilities"
+  ],
+  "generatorSha256": "2a4027e1f01736741400296577d2f1cce369173b489a07ca9bfab24e83c47944"
+}

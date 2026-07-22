@@ -1,0 +1,22 @@
+{
+  "id": "double_jump_boots",
+  "displayName": "Double Jump Boots",
+  "description": "Boots that trigger a second, higher jump while airborne when equipped.",
+  "rarity": "Rare",
+  "value": 420,
+  "category": "Equipment",
+  "sortPriority": 68,
+  "type": "Accessory",
+  "texture": "items/double_jump_boots",
+  "maxStack": 1,
+  "mobility": {
+    "extraJumpCount": 1,
+    "airJumpVelocityMultiplier": 0.94
+  },
+  "tags": [
+    "equipment",
+    "accessory",
+    "mobility",
+    "double-jump"
+  ]
+}

@@ -59,9 +59,16 @@ public static class ParallaxCompositionPlanner
             ? 0
             : (int)(((ulong)layer.VariationSeed * (uint)stride) >> 32);
         var scroll = SaturatingRoundToLong((double)cameraX * layer.HorizontalParallax);
-        var firstCell = FloorDivide((long)viewport.Left + scroll - phase, stride) - 1;
-        var paddedLeft = (long)viewport.Left - repeatWidth;
-        var paddedRight = (long)viewport.Right + repeatWidth;
+        var fullscreenDepthPlane =
+            layer.ProjectionMode == ParallaxProjectionMode.FullscreenDepthPlane;
+        var firstCell = FloorDivide((long)viewport.Left + scroll - phase, stride) -
+            (fullscreenDepthPlane ? 0 : 1);
+        var paddedLeft = fullscreenDepthPlane
+            ? viewport.Left
+            : (long)viewport.Left - repeatWidth;
+        var paddedRight = fullscreenDepthPlane
+            ? viewport.Right
+            : (long)viewport.Right + repeatWidth;
         var commandCount = 0;
         var repeatCount = 0;
         var landmarkCount = 0;

@@ -1,0 +1,108 @@
+{
+  "schemaVersion": 1,
+  "waveId": "adventure_arsenal_v1",
+  "generatedOn": "2026-07-22",
+  "sourceType": "checked-in deterministic native-pixel generator",
+  "externalDownloads": false,
+  "modelGeneratedSource": false,
+  "generator": {
+    "path": "art_direction/tools/generate_adventure_arsenal_v1.py",
+    "version": "1.0.0",
+    "sha256": "433c8edb95255e5f17bbf1d5fc49ef9ab11d8d3ef81bde7216ee642a16e0c6fe",
+    "runtime": "Python 3 plus Pillow from art_direction/requirements.txt",
+    "method": "Direct final-size pixel primitives constrained to yjse-pixel-v1; no hidden source art or manual raster edits."
+  },
+  "manifest": "assets/adventure_arsenal_v1.sprites.json",
+  "brief": "asset_briefs/adventure_arsenal_v1_briefs.json",
+  "preview": "art_direction/adventure_arsenal_v1_contact_sheet.png",
+  "assets": [
+    {
+      "spriteId": "items/adventure_v1/cinderbloom_staff",
+      "itemId": "cinderbloom_staff",
+      "path": "assets/AdventureArsenalV1/items/cinderbloom_staff.png",
+      "sha256": "2bdf5b8b3df33058fdd1960a07c8c04aacb4c296f10703155188e905e25203a2",
+      "dimensions": [
+        32,
+        32
+      ],
+      "origin": [
+        16,
+        16
+      ],
+      "alphaValues": [
+        0,
+        255
+      ],
+      "generator": "art_direction/tools/generate_adventure_arsenal_v1.py",
+      "method": "deterministic native-size Pillow pixel primitives",
+      "license": "YjsE-Project-Owned",
+      "runtimeConsumer": "ItemDefinition texture through SpriteAssetRegistry and ClientTextureRegistry"
+    },
+    {
+      "spriteId": "items/adventure_v1/frostglass_scepter",
+      "itemId": "frostglass_scepter",
+      "path": "assets/AdventureArsenalV1/items/frostglass_scepter.png",
+      "sha256": "713a0c69c03d6ff31b5b97193647d4914820ec46a814448b964288e47b46bedb",
+      "dimensions": [
+        32,
+        32
+      ],
+      "origin": [
+        16,
+        16
+      ],
+      "alphaValues": [
+        0,
+        255
+      ],
+      "generator": "art_direction/tools/generate_adventure_arsenal_v1.py",
+      "method": "deterministic native-size Pillow pixel primitives",
+      "license": "YjsE-Project-Owned",
+      "runtimeConsumer": "ItemDefinition texture through SpriteAssetRegistry and ClientTextureRegistry"
+    },
+    {
+      "spriteId": "items/adventure_v1/ambercore_pickaxe",
+      "itemId": "ambercore_pickaxe",
+      "path": "assets/AdventureArsenalV1/items/ambercore_pickaxe.png",
+      "sha256": "75688a95a3b377f6166b6581940c0432db7c74e133dc44696a6ff658f2edf146",
+      "dimensions": [
+        32,
+        32
+      ],
+      "origin": [
+        16,
+        16
+      ],
+      "alphaValues": [
+        0,
+        255
+      ],
+      "generator": "art_direction/tools/generate_adventure_arsenal_v1.py",
+      "method": "deterministic native-size Pillow pixel primitives",
+      "license": "YjsE-Project-Owned",
+      "runtimeConsumer": "ItemDefinition texture through SpriteAssetRegistry and ClientTextureRegistry"
+    },
+    {
+      "spriteId": "items/adventure_v1/wayfinder_charm",
+      "itemId": "wayfinder_charm",
+      "path": "assets/AdventureArsenalV1/items/wayfinder_charm.png",
+      "sha256": "202ce731cfcb5f1f86adb0bceca2fd40d2775c2d8738751efec5e94b9c2a14af",
+      "dimensions": [
+        32,
+        32
+      ],
+      "origin": [
+        16,
+        16
+      ],
+      "alphaValues": [
+        0,
+        255
+      ],
+      "generator": "art_direction/tools/generate_adventure_arsenal_v1.py",
+      "method": "deterministic native-size Pillow pixel primitives",
+      "license": "YjsE-Project-Owned",
+      "runtimeConsumer": "ItemDefinition texture through SpriteAssetRegistry and ClientTextureRegistry"
+    }
+  ]
+}

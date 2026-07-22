@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "waveId": "adventure_arsenal_v1",
+  "preview": "art_direction/adventure_arsenal_v1_contact_sheet.png",
+  "previewDimensions": [
+    760,
+    270
+  ],
+  "nativeDimensions": [
+    32,
+    32
+  ],
+  "scale": 5,
+  "resampling": "nearest-neighbor",
+  "spriteIds": [
+    "items/adventure_v1/cinderbloom_staff",
+    "items/adventure_v1/frostglass_scepter",
+    "items/adventure_v1/ambercore_pickaxe",
+    "items/adventure_v1/wayfinder_charm"
+  ],
+  "generatorSha256": "433c8edb95255e5f17bbf1d5fc49ef9ab11d8d3ef81bde7216ee642a16e0c6fe"
+}

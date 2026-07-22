@@ -1,4 +1,5 @@
 using System.Numerics;
+using System.Runtime.InteropServices;
 using GameWorld = Game.Core.World.World;
 
 namespace Game.Core.Physics;
@@ -109,13 +110,25 @@ public sealed class PhysicsWorld
     public PhysicsWorld(
         TileCollisionResolver? collisionResolver = null,
         PhysicsStepSettings? settings = null,
-        PhysicsBroadphaseSettings? broadphaseSettings = null,
-        PhysicsContinuousCollisionSettings? continuousSettings = null)
+        PhysicsBroadphaseSettings? broadphaseSettings = null)
+        : this(
+            collisionResolver,
+            settings,
+            broadphaseSettings,
+            PhysicsContinuousCollisionSettings.Default)
+    {
+    }
+
+    public PhysicsWorld(
+        TileCollisionResolver? collisionResolver,
+        PhysicsStepSettings? settings,
+        PhysicsBroadphaseSettings? broadphaseSettings,
+        PhysicsContinuousCollisionSettings continuousSettings)
     {
         _collisionResolver = collisionResolver ?? new TileCollisionResolver();
         _broadphase = new PhysicsBroadphase(broadphaseSettings);
         _settings = (settings ?? PhysicsStepSettings.Default).Validate();
-        _continuousSettings = (continuousSettings ?? PhysicsContinuousCollisionSettings.Default).Validate();
+        _continuousSettings = continuousSettings.Validate();
     }
 
     public PhysicsStepSettings Settings => _settings;
@@ -205,7 +218,9 @@ public sealed class PhysicsWorld
     /// TOIs for that set are rebuilt after every bounded solver pass, so impulses can
     /// propagate through candidate chains (including pairs touching at t=0). A pass
     /// never discovers a pair outside the initial swept-AABB closure; callers that
-    /// need wider impulse propagation must use smaller authoritative substeps.
+    /// need wider impulse propagation must use smaller authoritative substeps. If the
+    /// configured pass limit is exhausted, bodies belonging to unresolved candidates
+    /// are frozen for the unchecked remainder and reported through result/step telemetry.
     /// </summary>
     public PhysicsStepTelemetry StepWithContinuousBodyCollisions(
         GameWorld world,
@@ -242,6 +257,12 @@ public sealed class PhysicsWorld
         {
             throw new ArgumentException(
                 "TOI scratch storage must contain one slot for every body-pair slot.",
+                nameof(toiContacts));
+        }
+        if (MemoryMarshal.AsBytes(bodyContacts).Overlaps(MemoryMarshal.AsBytes(toiContacts)))
+        {
+            throw new ArgumentException(
+                "Body-contact output storage and TOI scratch storage must not overlap.",
                 nameof(toiContacts));
         }
 
@@ -621,7 +642,7 @@ public sealed class PhysicsWorld
         ReadOnlySpan<PhysicsBodySweepState> sweepStates,
         ReadOnlySpan<PhysicsBodyPair> pairs,
         float deltaSeconds,
-        Span<PhysicsBodyContact> contacts)
+        Span<PhysicsContinuousContactCandidate> contacts)
     {
         var contactCount = 0;
         for (var pairIndex = 0; pairIndex < pairs.Length; pairIndex++)
@@ -646,7 +667,7 @@ public sealed class PhysicsWorld
             var velocityB = ResolveSweepVelocity(bodyB);
             var positionA = ProjectPositionAtTime(bodyA, stateA, velocityA, baseTime);
             var positionB = ProjectPositionAtTime(bodyB, stateB, velocityB, baseTime);
-            PhysicsBodyContact contact;
+            PhysicsContinuousContactCandidate contact;
             if (TryBuildBodyContactAtPositions(
                     bodyA,
                     positionA,
@@ -657,18 +678,21 @@ public sealed class PhysicsWorld
                     out var normal,
                     out var penetration))
             {
-                contact = new PhysicsBodyContact(
-                    pair.BodyAIndex,
-                    pair.BodyBIndex,
-                    point,
-                    normal,
-                    penetration,
-                    0f,
-                    0f,
-                    baseTime,
-                    pairIndex,
-                    stateA.Revision,
-                    stateB.Revision);
+                contact = new PhysicsContinuousContactCandidate
+                {
+                    Contact = new PhysicsBodyContact(
+                        pair.BodyAIndex,
+                        pair.BodyBIndex,
+                        point,
+                        normal,
+                        penetration,
+                        0f,
+                        0f),
+                    TimeOfImpactSeconds = baseTime,
+                    CandidatePairIndex = pairIndex,
+                    BodyARevision = stateA.Revision,
+                    BodyBRevision = stateB.Revision
+                };
             }
             else if (!TryBuildSweptBodyContact(
                          bodyA,
@@ -724,7 +748,7 @@ public sealed class PhysicsWorld
         int candidatePairIndex,
         int bodyARevision,
         int bodyBRevision,
-        out PhysicsBodyContact contact)
+        out PhysicsContinuousContactCandidate contact)
     {
         var relativeVelocity = velocityA - velocityB;
         if (!TryCalculateAxisTimes(
@@ -777,18 +801,21 @@ public sealed class PhysicsWorld
             : new Vector2(
                 (overlapLeft + overlapRight) * 0.5f,
                 normal.Y > 0f ? impactPositionA.Y + bodyA.Size.Y : impactPositionA.Y);
-        contact = new PhysicsBodyContact(
-            pair.BodyAIndex,
-            pair.BodyBIndex,
-            point,
-            normal,
-            0f,
-            0f,
-            0f,
-            baseTimeSeconds + entryTime,
-            candidatePairIndex,
-            bodyARevision,
-            bodyBRevision);
+        contact = new PhysicsContinuousContactCandidate
+        {
+            Contact = new PhysicsBodyContact(
+                pair.BodyAIndex,
+                pair.BodyBIndex,
+                point,
+                normal,
+                0f,
+                0f,
+                0f),
+            TimeOfImpactSeconds = baseTimeSeconds + entryTime,
+            CandidatePairIndex = candidatePairIndex,
+            BodyARevision = bodyARevision,
+            BodyBRevision = bodyBRevision
+        };
         return true;
     }
 
@@ -820,8 +847,8 @@ public sealed class PhysicsWorld
     }
 
     private static bool ComesBeforeContinuousContact(
-        PhysicsBodyContact left,
-        PhysicsBodyContact right,
+        PhysicsContinuousContactCandidate left,
+        PhysicsContinuousContactCandidate right,
         ReadOnlySpan<PhysicsBody> bodies)
     {
         var comparison = left.TimeOfImpactSeconds.CompareTo(right.TimeOfImpactSeconds);
@@ -830,10 +857,10 @@ public sealed class PhysicsWorld
             return comparison < 0;
         }
 
-        var leftA = bodies[left.BodyAIndex];
-        var leftB = bodies[left.BodyBIndex];
-        var rightA = bodies[right.BodyAIndex];
-        var rightB = bodies[right.BodyBIndex];
+        var leftA = bodies[left.Contact.BodyAIndex];
+        var leftB = bodies[left.Contact.BodyBIndex];
+        var rightA = bodies[right.Contact.BodyAIndex];
+        var rightB = bodies[right.Contact.BodyBIndex];
         var leftMinimumOrder = Math.Min(leftA.DeterministicOrder, leftB.DeterministicOrder);
         var rightMinimumOrder = Math.Min(rightA.DeterministicOrder, rightB.DeterministicOrder);
         comparison = leftMinimumOrder.CompareTo(rightMinimumOrder);
@@ -848,14 +875,14 @@ public sealed class PhysicsWorld
         {
             return comparison < 0;
         }
-        comparison = left.BodyAIndex.CompareTo(right.BodyAIndex);
+        comparison = left.Contact.BodyAIndex.CompareTo(right.Contact.BodyAIndex);
         return comparison != 0
             ? comparison < 0
-            : left.BodyBIndex < right.BodyBIndex;
+            : left.Contact.BodyBIndex < right.Contact.BodyBIndex;
     }
 
     private static void HeapSortContinuousContacts(
-        Span<PhysicsBodyContact> contacts,
+        Span<PhysicsContinuousContactCandidate> contacts,
         ReadOnlySpan<PhysicsBody> bodies)
     {
         for (var parent = contacts.Length / 2 - 1; parent >= 0; parent--)
@@ -870,7 +897,7 @@ public sealed class PhysicsWorld
     }
 
     private static void SiftDownContinuousContacts(
-        Span<PhysicsBodyContact> contacts,
+        Span<PhysicsContinuousContactCandidate> contacts,
         ReadOnlySpan<PhysicsBody> bodies,
         int root,
         int count)
@@ -911,6 +938,23 @@ public sealed class PhysicsWorld
         }
 
         return false;
+    }
+
+    private static void MarkActiveCandidateBodiesBlocked(
+        ReadOnlySpan<PhysicsBodyPair> pairs,
+        Span<PhysicsBodySweepState> sweepStates)
+    {
+        for (var pairIndex = 0; pairIndex < pairs.Length; pairIndex++)
+        {
+            var pair = pairs[pairIndex];
+            if (pair.BodyAIndex < 0)
+            {
+                continue;
+            }
+
+            sweepStates[pair.BodyAIndex].ContinuousMotionBlocked = true;
+            sweepStates[pair.BodyBIndex].ContinuousMotionBlocked = true;
+        }
     }
 
     private bool AdvanceSweepBody(

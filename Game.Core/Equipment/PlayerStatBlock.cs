@@ -10,7 +10,11 @@ public readonly record struct PlayerStatBlock(
     int MaxMana = 20,
     float MagicDamageMultiplier = 1f,
     float ManaCostMultiplier = 1f,
-    float ManaRegenMultiplier = 1f)
+    float ManaRegenMultiplier = 1f,
+    bool CanDoubleJump = false,
+    bool CanWallJump = false,
+    bool CanFly = false,
+    bool CanGlide = false)
 {
     public static PlayerStatBlock Base { get; } = new(
         MaxHealth: 100,
@@ -22,5 +26,9 @@ public readonly record struct PlayerStatBlock(
         MaxMana: 20,
         MagicDamageMultiplier: 1f,
         ManaCostMultiplier: 1f,
-        ManaRegenMultiplier: 1f);
+        ManaRegenMultiplier: 1f,
+        CanDoubleJump: false,
+        CanWallJump: false,
+        CanFly: false,
+        CanGlide: false);
 }

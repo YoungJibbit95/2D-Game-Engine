@@ -119,7 +119,7 @@ public sealed class WorldSelectState : IGameState
         _typography = UiTheme.ResolveContract(_settings).Typography;
         var offsetY = (int)MathF.Round(_introAnimation.GetValue(UiAnimationProperty.OffsetY, 0f));
         var layout = WorldMenuLayoutPlanner.PlanWorldSelect(context.ViewportBounds, _entries.Count, offsetY);
-        WorldMenuPresentation.DrawBackdrop(context, palette);
+        WorldMenuPresentation.DrawBackdrop(context, palette, _settings);
 
         UiTheme.DrawPanel(context, layout.Panel, palette, _settings.Ui.PanelOpacity, settings: _settings);
         var titleScale = layout.Compact ? Math.Min(2, _typography.TitleScale) : _typography.TitleScale;

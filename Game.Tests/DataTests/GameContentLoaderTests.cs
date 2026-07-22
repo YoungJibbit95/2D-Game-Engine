@@ -589,7 +589,13 @@ public sealed class GameContentLoaderTests : IDisposable
         Assert.NotNull(result.Database.RuntimeAnimations);
         Assert.True(result.Database.RuntimeAnimations.TryGetCharacter("player.wave06", out var runtimePlayer));
         Assert.Equal(5, runtimePlayer.Rig.Layers.Count);
-        Assert.Equal(14, result.Database.RuntimeAnimations.Entities.Count);
+        Assert.Equal(17, result.Database.RuntimeAnimations.Entities.Count);
+        Assert.Equal(
+            new[] { "cave_glowbug", "forest_moth", "meadow_butterfly" },
+            result.Database.RuntimeAnimations.Entities
+                .Where(profile => profile.Id is "cave_glowbug" or "forest_moth" or "meadow_butterfly")
+                .Select(profile => profile.Id)
+                .ToArray());
         Assert.True(result.Database.Characters.TryGetById("player", out var player));
         Assert.Equal("player.idle", player.AnimationSet.ResolveClipId(Game.Core.Characters.CharacterAnimationState.Idle));
         Assert.True(result.Database.WorldEvents.TryGetById("firefly_bloom", out var fireflyBloom));
@@ -598,6 +604,17 @@ public sealed class GameContentLoaderTests : IDisposable
         Assert.True(result.Database.Biomes.TryGetById("amber_grove", out var amberGrove));
         Assert.Equal("world/backgrounds/amber_grove_parallax_layer_v5", amberGrove.Presentation.BackgroundSpriteId);
         Assert.True(result.Database.Biomes.TryGetById("twilight_marsh", out _));
+        Assert.True(result.Database.Biomes.TryGetById("frostwood", out var frostwood));
+        Assert.True(frostwood.Weather.AllowsFrozenPrecipitation);
+        Assert.Equal("frostwood_day_rabbit", frostwood.Spawning.SurfaceDayTableId);
+        Assert.True(result.Database.Tiles.TryGetById("snow", out var snow));
+        Assert.Equal((ushort)21, snow.NumericId);
+        Assert.True(result.Database.Tiles.TryGetById("ice", out var ice));
+        Assert.Equal((ushort)22, ice.NumericId);
+        Assert.True(result.Database.SpawnRules.TryGetById("frostwood_day_rabbit", out _));
+        Assert.True(result.Database.SpawnRules.TryGetById("frostwood_night_bat", out _));
+        Assert.True(result.Database.SpawnRules.TryGetById("frostwood_cave_bat", out _));
+        Assert.Contains(livingWorld.Features, feature => feature.Id == "frostwood_pine_groves");
         Assert.Equal("world/tiles/polish_v1/forest_grass_loam_autotile", result.Database.Tiles.GetById("grass").TexturePath);
         Assert.Equal("world/tiles/polish_v1/forest_loam_autotile", result.Database.Tiles.GetById("dirt").TexturePath);
         Assert.Equal("world/tiles/polish_v1/layered_stone_autotile", result.Database.Tiles.GetById("stone").TexturePath);

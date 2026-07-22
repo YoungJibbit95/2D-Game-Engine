@@ -67,6 +67,62 @@ public sealed class LivingWorldRuntimeTests
     }
 
     [Fact]
+    public void BiomeOverride_ReplacesPresentationProfileAndCanBeCleared()
+    {
+        var runtime = new LivingWorldRuntime(19, CreateProfile(), CreateBiomes());
+        runtime.SetBiomeOverride("meadow");
+
+        var forced = runtime.Capture(new TilePos(20, 40), 0, 0.8f);
+
+        Assert.Equal("meadow", runtime.BiomeOverrideId);
+        Assert.Equal("meadow", forced.BiomeId);
+        Assert.Equal("Meadow", forced.BiomeDisplayName);
+        Assert.Null(forced.SubBiomeId);
+
+        runtime.ClearBiomeOverride();
+
+        Assert.Null(runtime.BiomeOverrideId);
+    }
+
+    [Fact]
+    public void BiomeOverride_RejectsUnknownBiome()
+    {
+        var runtime = new LivingWorldRuntime(19, CreateProfile(), CreateBiomes());
+
+        Assert.Throws<KeyNotFoundException>(() => runtime.SetBiomeOverride("missing"));
+    }
+    [Fact]
+    public void WeatherOverride_IsExplicitAndCanReturnToDeterministicBiomeWeather()
+    {
+        var runtime = new LivingWorldRuntime(19, CreateProfile(), CreateBiomes());
+        runtime.SetWeatherOverride(WeatherKind.Snow, 0.65f);
+
+        var forced = runtime.Capture(new TilePos(20, 40), 720, 0.8f);
+
+        Assert.Equal(WeatherKind.Snow, forced.Weather);
+        Assert.Equal(0.65f, forced.WeatherIntensity, 3);
+        Assert.Equal(WeatherKind.Snow, runtime.WeatherOverrideKind);
+        Assert.Equal(0.65f, runtime.WeatherOverrideIntensity, 3);
+
+        runtime.ClearWeatherOverride();
+        var deterministic = runtime.Capture(new TilePos(20, 40), 720, 0.8f);
+
+        Assert.Null(runtime.WeatherOverrideKind);
+        Assert.NotEqual(WeatherKind.Snow, deterministic.Weather);
+        Assert.NotEqual(WeatherKind.Blizzard, deterministic.Weather);
+    }
+
+    [Theory]
+    [InlineData(-0.01f)]
+    [InlineData(1.01f)]
+    public void WeatherOverride_RejectsInvalidIntensity(float intensity)
+    {
+        var runtime = new LivingWorldRuntime(19, CreateProfile(), CreateBiomes());
+
+        Assert.Throws<ArgumentOutOfRangeException>(() =>
+            runtime.SetWeatherOverride(WeatherKind.Rain, intensity));
+    }
+    [Fact]
     public void Capture_ExposesWeatherAmbientAndScheduledWorldEvents()
     {
         var runtime = new LivingWorldRuntime(19, CreateProfile(), CreateBiomes());
@@ -215,6 +271,41 @@ public sealed class LivingWorldRuntimeTests
             actualState.LastProcessedPlayerActionSequence);
     }
 
+    [Fact]
+    public void AlignWorldEventClock_PreservesActiveDurationAndRebasesJournal()
+    {
+        var definition = new WorldEventDefinition
+        {
+            Id = "clock_resonance",
+            ChancePerWindow = 0f,
+            PlayerActionTriggers = [WorldEventPlayerActionKind.Mine],
+            PlayerActionTriggerChance = 1f,
+            MinDurationTicks = 600,
+            MaxDurationTicks = 600,
+            CooldownTicks = 300
+        };
+        var runtime = new LivingWorldRuntime(
+            19,
+            CreateProfile() with { WorldEvents = Array.Empty<WorldEventDefinition>() },
+            CreateBiomes(),
+            worldEvents: WorldEventDefinitionRegistry.Create([definition]));
+        _ = runtime.Capture(new TilePos(20, 40), 600, 0.8f);
+        Assert.True(runtime.TriggerPlayerAction(WorldEventPlayerActionKind.Mine, 1).Activated);
+        _ = runtime.Capture(new TilePos(20, 40), 720, 0.8f);
+        var before = runtime.CaptureWorldEventState()!;
+
+        Assert.True(runtime.AlignWorldEventClock(120));
+
+        var after = runtime.CaptureWorldEventState()!;
+        WorldEventRuntimeStateSnapshot.Validate(after);
+        Assert.Equal(120, after.Runtime.LastAdvancedTick);
+        Assert.Equal(
+            before.Runtime.EndTickExclusive - before.Runtime.LastAdvancedTick,
+            after.Runtime.EndTickExclusive - after.Runtime.LastAdvancedTick);
+        Assert.All(after.Journal.Entries, entry => Assert.InRange(entry.WorldTick, 0, 120));
+        Assert.False(runtime.AlignWorldEventClock(120));
+        Assert.True(runtime.Capture(new TilePos(20, 40), 120, 0.8f).IsWorldEventActive);
+    }
     [Fact]
     public void RestoreWorldEvents_DropsRemovedActiveDefinitionAndOrphanCooldowns()
     {

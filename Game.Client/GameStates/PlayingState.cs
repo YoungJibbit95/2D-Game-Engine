@@ -35,6 +35,7 @@ using Game.Core.Sessions;
 using Game.Core.Settings;
 using Game.Core.Time;
 using Game.Core.World;
+using Game.Core.Weather;
 using Game.Core.World.Generation;
 using Game.Core.World.Streaming;
 using Game.Core.World.TileEntities;
@@ -46,7 +47,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace Game.Client.GameStates;
 
-public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCaptureState, IClientGameplaySmokeTelemetryProvider
+public sealed partial class PlayingState : IGameState, ITextInputReceiver, IKeyboardCaptureState, IClientGameplaySmokeTelemetryProvider
 {
     private readonly InputManager _input = new();
     private readonly Camera2D _camera = new();
@@ -93,9 +94,13 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
     private readonly LoadedGameSession? _initialSession;
     private readonly bool _openConsoleOnInitialize;
     private readonly bool _openPauseOnInitialize;
+    private readonly bool _openCraftingOnInitialize;
     private readonly string? _forcedBiomeId;
     private readonly bool _suppressDebugOverlays;
     private readonly bool _scriptedTraversal;
+    private readonly double? _forcedTimeOfDay;
+    private readonly WeatherKind? _forcedWeather;
+    private readonly float _forcedWeatherIntensity;
 
     private LoadedGameSession? _session;
     private Func<int, int>? _backgroundSurfaceHeightResolver;
@@ -143,6 +148,7 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
     private CompiledRenderGraphPlan _compiledRenderGraph;
     private bool _renderGraphConfigured;
     private bool _renderGraphLightingEnabled;
+    private bool _initialOverlayRequestApplied;
 
     public PlayingState(
         GameStateManager states,
@@ -151,15 +157,30 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
         bool openPauseOnInitialize = false,
         string? forcedBiomeId = null,
         bool suppressDebugOverlays = false,
-        bool scriptedTraversal = false)
+        bool scriptedTraversal = false,
+        double? forcedTimeOfDay = null,
+        WeatherKind? forcedWeather = null,
+        float forcedWeatherIntensity = 0.75f,
+        bool openCraftingOnInitialize = false)
     {
+        if (openCraftingOnInitialize && (openConsoleOnInitialize || openPauseOnInitialize))
+        {
+            throw new ArgumentException(
+                "Crafting cannot be opened initially together with the console or pause menu.",
+                nameof(openCraftingOnInitialize));
+        }
+
         _states = states;
         _initialSession = loadedSession;
         _openConsoleOnInitialize = openConsoleOnInitialize;
         _openPauseOnInitialize = openPauseOnInitialize;
+        _openCraftingOnInitialize = openCraftingOnInitialize;
         _forcedBiomeId = forcedBiomeId;
         _suppressDebugOverlays = suppressDebugOverlays;
         _scriptedTraversal = scriptedTraversal;
+        _forcedTimeOfDay = forcedTimeOfDay;
+        _forcedWeather = forcedWeather;
+        _forcedWeatherIntensity = Math.Clamp(forcedWeatherIntensity, 0f, 1f);
         _entityFactory = new EntityFactory(_collisionResolver);
         _audio = new AudioManager(_soundEffects);
         _pauseMenu = new PauseMenuOverlay(
@@ -241,6 +262,7 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
         _player = session.Player;
         _entities = session.Entities;
         _events = session.Events;
+        InitializeDeveloperCommandRouting();
         _eventJournal?.Dispose();
         _eventJournal = new GameEventJournal(_events, capacity: 256);
         _feedbackRouter?.Dispose();
@@ -256,16 +278,17 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
         _farmPlots = session.FarmPlots ?? new FarmPlotManager();
         _equipmentLoadout = session.EquipmentLoadout ?? new EquipmentLoadout();
         ApplyForcedBiomeSpawn();
+        if (_forcedTimeOfDay is { } forcedTimeOfDay)
+        {
+            _worldTime.SetTimeNormalized(forcedTimeOfDay);
+        }
+
+        if (_forcedWeather is { } forcedWeather)
+        {
+            _simulation.LivingWorld.SetWeatherOverride(forcedWeather, _forcedWeatherIntensity);
+        }
         _characterEditorOverlay.SetAppearance(_content, session.CharacterAppearance ?? new CharacterAppearance());
         _selectedHotbarSlot = _inventory.SelectedHotbarSlot;
-        if (_openConsoleOnInitialize)
-        {
-            _debugConsole.State.Open();
-        }
-        if (_openPauseOnInitialize)
-        {
-            _pauseMenu.Open();
-        }
         _streaming.CancelPendingJobs();
         _streaming = new ChunkStreamingService(generator: session.InfiniteChunkGenerator);
         _hasStreamingViewKey = false;
@@ -274,6 +297,35 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
         _camera.Position = new Vector2(_player.Body.Center.X, _player.Body.Center.Y);
         _camera.Zoom = _pauseMenu.Settings.Gameplay.CameraZoom;
         _camera.Recalculate(_lastViewportBounds);
+        ApplyInitialOverlayRequest();
+    }
+
+    internal bool IsCraftingOverlayOpen => _craftingOverlay.IsOpen;
+
+    internal bool InitialOverlayRequestApplied => _initialOverlayRequestApplied;
+
+    private void ApplyInitialOverlayRequest()
+    {
+        if (_initialOverlayRequestApplied)
+        {
+            return;
+        }
+
+        _initialOverlayRequestApplied = true;
+        if (_openConsoleOnInitialize)
+        {
+            _debugConsole.State.Open();
+        }
+
+        if (_openPauseOnInitialize)
+        {
+            _pauseMenu.Open();
+        }
+
+        if (_openCraftingOnInitialize && !_craftingOverlay.IsOpen)
+        {
+            _craftingOverlay.Toggle();
+        }
     }
 
     private void ApplyForcedBiomeSpawn()
@@ -471,7 +523,7 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
 
         UpdatePlayerAnimation();
         DrainFeedbackCues();
-        _particles.Update(fixedDeltaSeconds);
+        _particles.Update(fixedDeltaSeconds, _world);
     }
 
     public void LateUpdate(double deltaSeconds)
@@ -571,7 +623,12 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
             UpdateEngineDebugSnapshot(deltaSeconds, settings);
         }
         _camera.Zoom = settings.Gameplay.CameraZoom;
-        _camera.Follow(GetCameraTarget(settings), _lastViewportBounds, smoothing: 0.18f);
+        _camera.Follow(
+            GetCameraTarget(),
+            _lastViewportBounds,
+            smoothing: 0.2f,
+            deltaSeconds: (float)deltaSeconds,
+            lookAheadLimitPixels: settings.Gameplay.CameraLookAheadPixels);
         using (_states.Performance.Measure("Client.StreamingUpdate", 1.5))
         {
             EnsureVisibleChunks(deltaSeconds);
@@ -590,6 +647,13 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
         if (consoleHandled)
         {
             SuppressGameplayInput();
+            return;
+        }
+
+        if (_input.IsKeyPressed(Keys.Escape) && TryDismissTopmostGameplayOverlay())
+        {
+            SuppressGameplayInput();
+            UpdateAutosave((float)deltaSeconds, settings);
             return;
         }
 
@@ -627,7 +691,7 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
             _content is not null &&
             _world is not null &&
             _player is not null &&
-            _craftingOverlay.Update(_input, _inventory, _content, _world, _player, settings))
+            _craftingOverlay.Update(_input, _inventory, _content, _world, _player, settings, deltaSeconds))
         {
             SuppressGameplayInput();
             UpdateAutosave((float)deltaSeconds, settings);
@@ -685,14 +749,17 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
 
         using (context.Performance.Measure("Render.Background", 1.25))
         {
-            _backgroundRenderer.Draw(
-                context,
-                _textures,
-                _camera,
-                _world!,
-                frame.WorldTime.IsNight,
-                frame.LivingWorld,
-                _backgroundSurfaceHeightResolver);
+            if (_developerBackgroundEnabled)
+            {
+                _backgroundRenderer.Draw(
+                    context,
+                    _textures,
+                    _camera,
+                    _world!,
+                    (float)frame.WorldTime.NormalizedTimeOfDay,
+                    ResolveDeveloperPresentation(frame.LivingWorld),
+                    _backgroundSurfaceHeightResolver);
+            }
         }
     }
 
@@ -726,11 +793,16 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
         }
     }
 
-    private void DrawLightingPass(RenderContext context, GameSettings settings)
+    private void DrawLightingPass(RenderContext context, GameFrameSnapshot frame, GameSettings settings)
     {
         using (context.Performance.Measure("Render.Lighting", 2.5))
         {
-            _lightingRenderer.Draw(context, _world!, _camera, settings.Rendering.LightingBlendStrength);
+            _lightingRenderer.Draw(
+                context,
+                _world!,
+                _camera,
+                settings.Rendering.LightingBlendStrength,
+                frame.LivingWorld.SurfaceTileY > 0 ? frame.LivingWorld.SurfaceTileY : null);
         }
     }
 
@@ -799,7 +871,7 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
                 _characterEditorOverlay.Draw(context, _content, _textures, settings);
             }
 
-            _gameplayFeedback.Draw(context, _camera, _player, settings);
+            _gameplayFeedback.Draw(context, _camera, _player, _textures, settings);
         }
     }
 
@@ -953,7 +1025,7 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
                 DrawParticlePass(context, settings);
                 break;
             case 4:
-                DrawLightingPass(context, settings);
+                DrawLightingPass(context, frame, settings);
                 break;
             case 5:
                 DrawAtmospherePass(context);
@@ -1027,6 +1099,7 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
     {
         _craftingOverlay.CraftingResolved -= OnCraftingResolved;
         _streaming.CancelPendingJobs();
+        DisposeDeveloperCommandRouting();
         _eventJournal?.Dispose();
         _feedbackRouter?.Dispose();
         _session?.Dispose();
@@ -1067,18 +1140,15 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
         }
     }
 
-    private Vector2 GetCameraTarget(GameSettings settings)
+    private Vector2 GetCameraTarget()
     {
         if (_frameSnapshot is not { } frame)
         {
             return Vector2.Zero;
         }
 
-        var lookAhead = settings.Gameplay.CameraLookAheadPixels;
-        var velocity = frame.Player.Velocity;
-        var offsetX = Math.Abs(velocity.X) < 1f ? 0f : MathF.Sign(velocity.X) * lookAhead;
         return new Vector2(
-            frame.Player.Bounds.X + frame.Player.Bounds.Width * 0.5f + offsetX,
+            frame.Player.Bounds.X + frame.Player.Bounds.Width * 0.5f,
             frame.Player.Bounds.Y + frame.Player.Bounds.Height * 0.5f);
     }
 
@@ -1350,6 +1420,8 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
         return new PlayerCommand(
             MoveAxis: 1f,
             WantsJump: tick % 90 is 0 or 1,
+            WantsFly: false,
+            WantsGlide: false,
             WantsGuard: false,
             GuardFacing: System.Numerics.Vector2.UnitX);
     }
@@ -1473,6 +1545,28 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
         _pendingItemUse = PlayerItemUseRequest.Inactive;
         _hasPendingItemUse = false;
         _gameplayFeedback.CancelMining();
+    }
+
+    private bool TryDismissTopmostGameplayOverlay()
+    {
+        var target = GameplayOverlayDismissalPolicy.ResolveTopmost(
+            _characterEditorOverlay.IsOpen,
+            _craftingOverlay.IsOpen,
+            _inventoryOverlay.IsOpen);
+        switch (target)
+        {
+            case GameplayOverlayKind.CharacterEditor:
+                _characterEditorOverlay.Close();
+                return true;
+            case GameplayOverlayKind.Crafting:
+                _craftingOverlay.Close();
+                return true;
+            case GameplayOverlayKind.Inventory:
+                _inventoryOverlay.Close();
+                return true;
+            default:
+                return false;
+        }
     }
 
     private TilePos? ResolveInteractionTarget(Vector2 mouseWorld, float reachPixels)
@@ -1614,13 +1708,15 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
             2);
         var lighting = _lightingRenderer.LastTelemetry;
         var reflections = _screenSpaceEffects.LastTelemetry;
+        var temporalLighting = _lightingRenderer.LastTemporalTelemetry;
+        var reflectionLighting = _lightingRenderer.LastReflectionTelemetry;
         var atlas = _tilemapRenderer.AtlasTelemetry;
         var blur = _screenSpaceEffects.LastBackdropBlurPlan;
         var graph = _compiledRenderGraph.Telemetry;
         var presentationBudget = _presentationFrameBudget.CaptureTelemetry();
         context.DebugText.Draw(
             new Vector2(12, 418),
-            $"LIGHT {lighting.Quality} {lighting.MaskSize.X}x{lighting.MaskSize.Y} RAYS:{lighting.RaysCast} OCC:{lighting.OccluderSamples} PTS:{lighting.PointLightsUsed} UP:{_lightingRenderer.LastTextureUploadCount} REFL:{reflections.SurfaceCount} ATLAS:{atlas.PageCount}/{atlas.TextureBucketsSaved} BLUR:{blur.TargetSize.X}x{blur.TargetSize.Y} RG:{graph.ExecutedPasses}/{graph.TransientAliasSlots} PB:{presentationBudget.ConsumedUnits}/{presentationBudget.MaximumUnits} D:{presentationBudget.DeferredWorkCount}",
+            $"LIGHT {lighting.Quality} {lighting.MaskSize.X}x{lighting.MaskSize.Y} RAYS:{lighting.RaysCast} OCC:{lighting.OccluderSamples} PTS:{lighting.PointLightsUsed} UP:{_lightingRenderer.LastTextureUploadCount} TEMP:{temporalLighting.ReprojectedPixels}/{temporalLighting.DisocclusionRejectedPixels} REFL:{reflections.SurfaceCount}/{reflectionLighting.PixelsShaded} ATLAS:{atlas.PageCount}/{atlas.TextureBucketsSaved} BLUR:{blur.TargetSize.X}x{blur.TargetSize.Y} RG:{graph.ExecutedPasses}/{graph.TransientAliasSlots} PB:{presentationBudget.ConsumedUnits}/{presentationBudget.MaximumUnits} D:{presentationBudget.DeferredWorkCount}",
             Color.LightGray,
             2);
         if (_soundscape is not null)
@@ -1684,27 +1780,42 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
             return;
         }
 
+        var livingWorld = ResolveDeveloperPresentation(frame.LivingWorld);
         var lightingQuality = _lightingRenderer.Quality;
         if (prepareLighting)
         {
             using (_states.Performance.Measure("Presentation.LightingPrepare", 2.0))
             {
-                var lightTelemetry = VisibleLightCollector.CollectTileLights(
+                var lightCapacity = Math.Min(
+                    _visibleLights.Length,
+                    lightingQuality.Budget.MaxPointLights);
+                var dynamicTelemetry = VisibleLightCollector.CollectEntityLights(
+                    frame.Entities,
+                    _camera.VisibleWorldRect,
+                    lightingQuality,
+                    _visibleLights.AsSpan(0, lightCapacity));
+                var tileTelemetry = VisibleLightCollector.CollectTileLights(
                     _world,
                     _content.Tiles,
                     _camera.VisibleWorldRect,
                     lightingQuality,
-                    _visibleLights);
+                    _visibleLights.AsSpan(
+                        dynamicTelemetry.LightsCollected,
+                        lightCapacity - dynamicTelemetry.LightsCollected));
+                var visibleLightCount =
+                    dynamicTelemetry.LightsCollected + tileTelemetry.LightsCollected;
                 _lightingRenderer.PrepareFrame(
                     _world,
                     _camera,
                     _lastViewportBounds,
                     frame.WorldTime,
-                    frame.LivingWorld,
+                    livingWorld,
                     settings.Rendering,
                     frame.TickNumber,
-                    _visibleLights.AsSpan(0, lightTelemetry.LightsCollected),
-                    _states.Performance);
+                    _visibleLights.AsSpan(0, visibleLightCount),
+                    _states.Performance,
+                    frame.LivingWorld.SurfaceTileY > 0 ? frame.LivingWorld.SurfaceTileY : null,
+                    _backgroundSurfaceHeightResolver);
             }
         }
 
@@ -1731,7 +1842,7 @@ public sealed class PlayingState : IGameState, ITextInputReceiver, IKeyboardCapt
                     _world,
                     _camera,
                     frame.WorldTime,
-                    frame.LivingWorld,
+                    livingWorld,
                     settings.Rendering,
                     _lastViewportBounds,
                     lightingQuality.Tier,

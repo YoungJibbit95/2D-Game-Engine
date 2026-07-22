@@ -74,6 +74,12 @@ public sealed record BiomeWeatherProfile
 
     public int FogWeight { get; init; } = 10;
 
+    public int SnowWeight { get; init; }
+
+    public int BlizzardWeight { get; init; }
+
+    public bool AllowsFrozenPrecipitation { get; init; }
+
     public int MinDurationTicks { get; init; } = 1_800;
 
     public int MaxDurationTicks { get; init; } = 5_400;

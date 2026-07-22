@@ -181,6 +181,35 @@ public sealed class World
         return TrySetTile(x, y, TileInstance.Air);
     }
 
+    public void SetWall(int x, int y, ushort wallId)
+    {
+        if (!TrySetWall(x, y, wallId))
+        {
+            EnsureInBounds(x, y);
+        }
+    }
+
+    public bool TrySetWall(int x, int y, ushort wallId)
+    {
+        if (!IsInBounds(x, y))
+        {
+            return false;
+        }
+
+        var tile = GetTile(x, y);
+        tile.WallId = wallId;
+        if (wallId == 0)
+        {
+            tile.Flags &= ~TileFlags.HasWall;
+        }
+        else
+        {
+            tile.Flags |= TileFlags.HasWall;
+        }
+
+        return SetTileCore(x, y, tile);
+    }
+
     public TileEditBatchResult ApplyTileEdits(
         IEnumerable<TileEdit> edits,
         int dirtyPaddingTiles = 1)

@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "waveId": "flying_wildlife_polish_v1",
+  "preview": "art_direction/flying_wildlife_polish_v1_contact_sheet.png",
+  "previewDimensions": [
+    720,
+    420
+  ],
+  "nativeSheetDimensions": [
+    64,
+    16
+  ],
+  "nativeFrameDimensions": [
+    16,
+    16
+  ],
+  "frameOrder": [
+    "flight_0",
+    "flight_1",
+    "flight_2",
+    "flight_3"
+  ],
+  "scale": 6,
+  "resampling": "nearest-neighbor",
+  "spriteIds": [
+    "entities/critters/meadow_butterfly",
+    "entities/critters/forest_moth",
+    "entities/critters/cave_glowbug"
+  ],
+  "generatorSha256": "708625c82c75d0a3a8f7873472825b064a296d11c86c9bc3a95f3c318857ca6f"
+}

@@ -1,0 +1,653 @@
+{
+  "schemaVersion": 2,
+  "generatorVersion": "2.0.0",
+  "styleId": "yjse-pixel-v1",
+  "styleEffectiveDate": "2026-07-10",
+  "auditTimestampUtc": "2026-07-22T09:01:41.758653+00:00",
+  "validationPolicy": {
+    "duplicateContentHashesAllowed": false,
+    "transparentCornersRequired": true,
+    "standaloneRecommendedUniqueColorMaximum": 16,
+    "smallWorldSpriteRecommendedUniqueColorMaximum": 32,
+    "productionStyleIssuesAreHard": [
+      "opaque_corner",
+      "palette_over_recommended",
+      "style_palette_mismatch",
+      "weak_dark_silhouette"
+    ]
+  },
+  "scope": {
+    "scanRoot": "assets/BackgroundFeaturesV7",
+    "manifestEntries": 8,
+    "uniqueManifestPaths": 8,
+    "pngFilesOnDisk": 8,
+    "manifestPathsMissingOnDisk": [],
+    "unmanifestedPngPaths": [],
+    "generationBriefs": {
+      "briefFiles": 16,
+      "uniqueBriefIds": 264,
+      "missingBriefIds": [],
+      "dimensionMismatchIds": [],
+      "duplicateBriefIds": []
+    }
+  },
+  "summary": {
+    "qualityTiers": {
+      "pass": 8
+    },
+    "issueCounts": {
+      "style_palette_mismatch": 8
+    },
+    "duplicateGroupCount": 0,
+    "sourceAliasGroupCount": 0,
+    "dimensionMismatchCount": 0,
+    "missingFileCount": 0,
+    "hardIssueAssetCount": 0,
+    "hardIssueCount": 0
+  },
+  "hardScopeIssues": [],
+  "duplicateGroups": [],
+  "sourceAliasGroups": [],
+  "assets": [
+    {
+      "id": "world/backgrounds/features_v7/forest_mountains",
+      "path": "assets/BackgroundFeaturesV7/forest_mountains.png",
+      "sourceAliasOf": null,
+      "sourceAliasValid": null,
+      "category": "Background",
+      "declaredSize": [
+        1024,
+        256
+      ],
+      "atlasId": "backgrounds",
+      "origin": [
+        0,
+        255
+      ],
+      "renderLayer": "background.ultra-far",
+      "license": "YjsE-Project-Owned",
+      "provenance": "background_features_v7_provenance.json; deterministic code-authored binary-alpha pixel plane",
+      "tags": [
+        "world",
+        "background",
+        "parallax",
+        "feature-plane",
+        "forest",
+        "mountains",
+        "binary-alpha",
+        "seam-safe",
+        "runtime-active",
+        "version-7"
+      ],
+      "issues": [
+        "style_palette_mismatch"
+      ],
+      "frameCount": 0,
+      "frameContractValid": true,
+      "exists": true,
+      "actualSize": [
+        1024,
+        256
+      ],
+      "dimensionsMatch": true,
+      "sourceMode": "RGBA",
+      "sourceHasAlpha": true,
+      "hasTransparentPixels": true,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "partialAlphaPixels": 0,
+      "cornerAlphaValues": [
+        0,
+        0,
+        255,
+        255
+      ],
+      "transparentCorners": false,
+      "transparentCornersRequired": false,
+      "visibleBounds": [
+        0,
+        132,
+        1024,
+        256
+      ],
+      "opaquePixelCount": 102923,
+      "occupancyRatio": 0.3926,
+      "uniqueOpaqueColors": 3,
+      "recommendedUniqueColorMaximum": null,
+      "outOfStyleOpaquePixels": 102923,
+      "stylePaletteComplianceRatio": 0.0,
+      "darkBoundaryRatio": 0.5566,
+      "contentSha256": "dc009a5fabc916db529f0be8f41cb07e180180fee667d662ce04b0041b477c0f",
+      "readabilityScore": 85,
+      "qualityTier": "pass",
+      "hardIssues": []
+    },
+    {
+      "id": "world/backgrounds/features_v7/forest_floating_islands",
+      "path": "assets/BackgroundFeaturesV7/forest_floating_islands.png",
+      "sourceAliasOf": null,
+      "sourceAliasValid": null,
+      "category": "Background",
+      "declaredSize": [
+        1024,
+        256
+      ],
+      "atlasId": "backgrounds",
+      "origin": [
+        0,
+        255
+      ],
+      "renderLayer": "background.far-features",
+      "license": "YjsE-Project-Owned",
+      "provenance": "background_features_v7_provenance.json; deterministic code-authored binary-alpha pixel plane",
+      "tags": [
+        "world",
+        "background",
+        "parallax",
+        "feature-plane",
+        "forest",
+        "floating-islands",
+        "binary-alpha",
+        "seam-safe",
+        "runtime-active",
+        "version-7"
+      ],
+      "issues": [
+        "style_palette_mismatch"
+      ],
+      "frameCount": 0,
+      "frameContractValid": true,
+      "exists": true,
+      "actualSize": [
+        1024,
+        256
+      ],
+      "dimensionsMatch": true,
+      "sourceMode": "RGBA",
+      "sourceHasAlpha": true,
+      "hasTransparentPixels": true,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "partialAlphaPixels": 0,
+      "cornerAlphaValues": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "transparentCorners": true,
+      "transparentCornersRequired": false,
+      "visibleBounds": [
+        95,
+        31,
+        919,
+        162
+      ],
+      "opaquePixelCount": 20360,
+      "occupancyRatio": 0.0777,
+      "uniqueOpaqueColors": 5,
+      "recommendedUniqueColorMaximum": null,
+      "outOfStyleOpaquePixels": 20360,
+      "stylePaletteComplianceRatio": 0.0,
+      "darkBoundaryRatio": 0.4864,
+      "contentSha256": "da9137c87250a7ad230e4614863ef033f6f25c3164f42dd1af9c9cb1747487a7",
+      "readabilityScore": 85,
+      "qualityTier": "pass",
+      "hardIssues": []
+    },
+    {
+      "id": "world/backgrounds/features_v7/amber_mountains",
+      "path": "assets/BackgroundFeaturesV7/amber_mountains.png",
+      "sourceAliasOf": null,
+      "sourceAliasValid": null,
+      "category": "Background",
+      "declaredSize": [
+        1024,
+        256
+      ],
+      "atlasId": "backgrounds",
+      "origin": [
+        0,
+        255
+      ],
+      "renderLayer": "background.ultra-far",
+      "license": "YjsE-Project-Owned",
+      "provenance": "background_features_v7_provenance.json; deterministic code-authored binary-alpha pixel plane",
+      "tags": [
+        "world",
+        "background",
+        "parallax",
+        "feature-plane",
+        "amber",
+        "mountains",
+        "binary-alpha",
+        "seam-safe",
+        "runtime-active",
+        "version-7"
+      ],
+      "issues": [
+        "style_palette_mismatch"
+      ],
+      "frameCount": 0,
+      "frameContractValid": true,
+      "exists": true,
+      "actualSize": [
+        1024,
+        256
+      ],
+      "dimensionsMatch": true,
+      "sourceMode": "RGBA",
+      "sourceHasAlpha": true,
+      "hasTransparentPixels": true,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "partialAlphaPixels": 0,
+      "cornerAlphaValues": [
+        0,
+        0,
+        255,
+        255
+      ],
+      "transparentCorners": false,
+      "transparentCornersRequired": false,
+      "visibleBounds": [
+        0,
+        128,
+        1024,
+        256
+      ],
+      "opaquePixelCount": 103008,
+      "occupancyRatio": 0.3929,
+      "uniqueOpaqueColors": 3,
+      "recommendedUniqueColorMaximum": null,
+      "outOfStyleOpaquePixels": 103008,
+      "stylePaletteComplianceRatio": 0.0,
+      "darkBoundaryRatio": 0.4342,
+      "contentSha256": "a1cb82f3403a9abe7b27065d20b11f96bc56d26bd4c2db281d4f8b080d893cd0",
+      "readabilityScore": 85,
+      "qualityTier": "pass",
+      "hardIssues": []
+    },
+    {
+      "id": "world/backgrounds/features_v7/amber_floating_islands",
+      "path": "assets/BackgroundFeaturesV7/amber_floating_islands.png",
+      "sourceAliasOf": null,
+      "sourceAliasValid": null,
+      "category": "Background",
+      "declaredSize": [
+        1024,
+        256
+      ],
+      "atlasId": "backgrounds",
+      "origin": [
+        0,
+        255
+      ],
+      "renderLayer": "background.far-features",
+      "license": "YjsE-Project-Owned",
+      "provenance": "background_features_v7_provenance.json; deterministic code-authored binary-alpha pixel plane",
+      "tags": [
+        "world",
+        "background",
+        "parallax",
+        "feature-plane",
+        "amber",
+        "floating-islands",
+        "binary-alpha",
+        "seam-safe",
+        "runtime-active",
+        "version-7"
+      ],
+      "issues": [
+        "style_palette_mismatch"
+      ],
+      "frameCount": 0,
+      "frameContractValid": true,
+      "exists": true,
+      "actualSize": [
+        1024,
+        256
+      ],
+      "dimensionsMatch": true,
+      "sourceMode": "RGBA",
+      "sourceHasAlpha": true,
+      "hasTransparentPixels": true,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "partialAlphaPixels": 0,
+      "cornerAlphaValues": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "transparentCorners": true,
+      "transparentCornersRequired": false,
+      "visibleBounds": [
+        95,
+        31,
+        919,
+        162
+      ],
+      "opaquePixelCount": 20722,
+      "occupancyRatio": 0.079,
+      "uniqueOpaqueColors": 5,
+      "recommendedUniqueColorMaximum": null,
+      "outOfStyleOpaquePixels": 20722,
+      "stylePaletteComplianceRatio": 0.0,
+      "darkBoundaryRatio": 0.4768,
+      "contentSha256": "009731541be5d182f9649ee76c5996f71661466614cbc6937d4c0d7ee7feebe5",
+      "readabilityScore": 85,
+      "qualityTier": "pass",
+      "hardIssues": []
+    },
+    {
+      "id": "world/backgrounds/features_v7/twilight_mountains",
+      "path": "assets/BackgroundFeaturesV7/twilight_mountains.png",
+      "sourceAliasOf": null,
+      "sourceAliasValid": null,
+      "category": "Background",
+      "declaredSize": [
+        1024,
+        256
+      ],
+      "atlasId": "backgrounds",
+      "origin": [
+        0,
+        255
+      ],
+      "renderLayer": "background.ultra-far",
+      "license": "YjsE-Project-Owned",
+      "provenance": "background_features_v7_provenance.json; deterministic code-authored binary-alpha pixel plane",
+      "tags": [
+        "world",
+        "background",
+        "parallax",
+        "feature-plane",
+        "twilight",
+        "mountains",
+        "binary-alpha",
+        "seam-safe",
+        "runtime-active",
+        "version-7"
+      ],
+      "issues": [
+        "style_palette_mismatch"
+      ],
+      "frameCount": 0,
+      "frameContractValid": true,
+      "exists": true,
+      "actualSize": [
+        1024,
+        256
+      ],
+      "dimensionsMatch": true,
+      "sourceMode": "RGBA",
+      "sourceHasAlpha": true,
+      "hasTransparentPixels": true,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "partialAlphaPixels": 0,
+      "cornerAlphaValues": [
+        0,
+        0,
+        255,
+        255
+      ],
+      "transparentCorners": false,
+      "transparentCornersRequired": false,
+      "visibleBounds": [
+        0,
+        128,
+        1024,
+        256
+      ],
+      "opaquePixelCount": 104128,
+      "occupancyRatio": 0.3972,
+      "uniqueOpaqueColors": 3,
+      "recommendedUniqueColorMaximum": null,
+      "outOfStyleOpaquePixels": 104128,
+      "stylePaletteComplianceRatio": 0.0,
+      "darkBoundaryRatio": 0.5683,
+      "contentSha256": "8f8e0a2374d10459074b1a283843765b8419cc2db3bfb4fe5bff6a8e831a3f76",
+      "readabilityScore": 85,
+      "qualityTier": "pass",
+      "hardIssues": []
+    },
+    {
+      "id": "world/backgrounds/features_v7/twilight_floating_islands",
+      "path": "assets/BackgroundFeaturesV7/twilight_floating_islands.png",
+      "sourceAliasOf": null,
+      "sourceAliasValid": null,
+      "category": "Background",
+      "declaredSize": [
+        1024,
+        256
+      ],
+      "atlasId": "backgrounds",
+      "origin": [
+        0,
+        255
+      ],
+      "renderLayer": "background.far-features",
+      "license": "YjsE-Project-Owned",
+      "provenance": "background_features_v7_provenance.json; deterministic code-authored binary-alpha pixel plane",
+      "tags": [
+        "world",
+        "background",
+        "parallax",
+        "feature-plane",
+        "twilight",
+        "floating-islands",
+        "binary-alpha",
+        "seam-safe",
+        "runtime-active",
+        "version-7"
+      ],
+      "issues": [
+        "style_palette_mismatch"
+      ],
+      "frameCount": 0,
+      "frameContractValid": true,
+      "exists": true,
+      "actualSize": [
+        1024,
+        256
+      ],
+      "dimensionsMatch": true,
+      "sourceMode": "RGBA",
+      "sourceHasAlpha": true,
+      "hasTransparentPixels": true,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "partialAlphaPixels": 0,
+      "cornerAlphaValues": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "transparentCorners": true,
+      "transparentCornersRequired": false,
+      "visibleBounds": [
+        95,
+        31,
+        919,
+        162
+      ],
+      "opaquePixelCount": 20299,
+      "occupancyRatio": 0.0774,
+      "uniqueOpaqueColors": 5,
+      "recommendedUniqueColorMaximum": null,
+      "outOfStyleOpaquePixels": 20299,
+      "stylePaletteComplianceRatio": 0.0,
+      "darkBoundaryRatio": 0.4868,
+      "contentSha256": "0a332a1a5e8345adffc5a53a66c3a2e8a693e4754715d80faaa94aefaef82690",
+      "readabilityScore": 85,
+      "qualityTier": "pass",
+      "hardIssues": []
+    },
+    {
+      "id": "world/backgrounds/features_v7/crystal_mountains",
+      "path": "assets/BackgroundFeaturesV7/crystal_mountains.png",
+      "sourceAliasOf": null,
+      "sourceAliasValid": null,
+      "category": "Background",
+      "declaredSize": [
+        1024,
+        256
+      ],
+      "atlasId": "backgrounds",
+      "origin": [
+        0,
+        255
+      ],
+      "renderLayer": "background.ultra-far",
+      "license": "YjsE-Project-Owned",
+      "provenance": "background_features_v7_provenance.json; deterministic code-authored binary-alpha pixel plane",
+      "tags": [
+        "world",
+        "background",
+        "parallax",
+        "feature-plane",
+        "crystal",
+        "mountains",
+        "binary-alpha",
+        "seam-safe",
+        "runtime-active",
+        "version-7"
+      ],
+      "issues": [
+        "style_palette_mismatch"
+      ],
+      "frameCount": 0,
+      "frameContractValid": true,
+      "exists": true,
+      "actualSize": [
+        1024,
+        256
+      ],
+      "dimensionsMatch": true,
+      "sourceMode": "RGBA",
+      "sourceHasAlpha": true,
+      "hasTransparentPixels": true,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "partialAlphaPixels": 0,
+      "cornerAlphaValues": [
+        0,
+        0,
+        255,
+        255
+      ],
+      "transparentCorners": false,
+      "transparentCornersRequired": false,
+      "visibleBounds": [
+        0,
+        132,
+        1024,
+        256
+      ],
+      "opaquePixelCount": 102764,
+      "occupancyRatio": 0.392,
+      "uniqueOpaqueColors": 3,
+      "recommendedUniqueColorMaximum": null,
+      "outOfStyleOpaquePixels": 102764,
+      "stylePaletteComplianceRatio": 0.0,
+      "darkBoundaryRatio": 1.0,
+      "contentSha256": "87122bbc6c23149b2400c59cba2aec4f707e9eb77bce72e3c6235586c6a4e2ab",
+      "readabilityScore": 85,
+      "qualityTier": "pass",
+      "hardIssues": []
+    },
+    {
+      "id": "world/backgrounds/features_v7/crystal_floating_islands",
+      "path": "assets/BackgroundFeaturesV7/crystal_floating_islands.png",
+      "sourceAliasOf": null,
+      "sourceAliasValid": null,
+      "category": "Background",
+      "declaredSize": [
+        1024,
+        256
+      ],
+      "atlasId": "backgrounds",
+      "origin": [
+        0,
+        255
+      ],
+      "renderLayer": "background.far-features",
+      "license": "YjsE-Project-Owned",
+      "provenance": "background_features_v7_provenance.json; deterministic code-authored binary-alpha pixel plane",
+      "tags": [
+        "world",
+        "background",
+        "parallax",
+        "feature-plane",
+        "crystal",
+        "floating-islands",
+        "binary-alpha",
+        "seam-safe",
+        "runtime-active",
+        "version-7"
+      ],
+      "issues": [
+        "style_palette_mismatch"
+      ],
+      "frameCount": 0,
+      "frameContractValid": true,
+      "exists": true,
+      "actualSize": [
+        1024,
+        256
+      ],
+      "dimensionsMatch": true,
+      "sourceMode": "RGBA",
+      "sourceHasAlpha": true,
+      "hasTransparentPixels": true,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "partialAlphaPixels": 0,
+      "cornerAlphaValues": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "transparentCorners": true,
+      "transparentCornersRequired": false,
+      "visibleBounds": [
+        95,
+        31,
+        919,
+        162
+      ],
+      "opaquePixelCount": 20337,
+      "occupancyRatio": 0.0776,
+      "uniqueOpaqueColors": 5,
+      "recommendedUniqueColorMaximum": null,
+      "outOfStyleOpaquePixels": 20337,
+      "stylePaletteComplianceRatio": 0.0,
+      "darkBoundaryRatio": 0.4883,
+      "contentSha256": "55c81f2e0704f595e968051bbb5dfae1c7137166537633a0b99dd84776dbcdf8",
+      "readabilityScore": 85,
+      "qualityTier": "pass",
+      "hardIssues": []
+    }
+  ]
+}

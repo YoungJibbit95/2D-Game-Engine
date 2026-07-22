@@ -15,13 +15,13 @@ public sealed class PhysicsBody
 
     public bool OnGround { get; set; }
 
-    public bool CollidesWithTiles { get; init; } = true;
+    public bool CollidesWithTiles { get; set; } = true;
 
     public PhysicsBodyType BodyType { get; init; } = PhysicsBodyType.Dynamic;
 
     public PhysicsCollisionLayer CollisionLayer { get; init; } = PhysicsCollisionLayer.Default;
 
-    public PhysicsCollisionLayer CollisionMask { get; init; } = PhysicsCollisionLayer.All;
+    public PhysicsCollisionLayer CollisionMask { get; set; } = PhysicsCollisionLayer.All;
 
     public PhysicsMaterial Material { get; init; } = PhysicsMaterial.Legacy;
 
@@ -32,7 +32,9 @@ public sealed class PhysicsBody
     /// </summary>
     public long DeterministicOrder { get; set; }
 
-    public float Mass { get; init; } = 1f;
+    public float Mass { get; set; } = 1f;
+
+    public float KnockbackResistance { get; set; }
 
     public float GravityScale { get; set; } = 1f;
 
@@ -70,6 +72,50 @@ public sealed class PhysicsBody
         {
             Velocity += impulse * InverseMass;
         }
+    }
+
+
+    public Vector2 ApplyKnockback(
+        Vector2 direction,
+        float impulseMagnitude,
+        float maximumVelocityChange = 720f)
+    {
+        if (BodyType != PhysicsBodyType.Dynamic ||
+            !IsFinite(direction) ||
+            direction.LengthSquared() <= float.Epsilon ||
+            !float.IsFinite(impulseMagnitude) ||
+            impulseMagnitude <= 0f ||
+            !float.IsFinite(maximumVelocityChange) ||
+            maximumVelocityChange <= 0f)
+        {
+            return Vector2.Zero;
+        }
+
+        var inverseMass = InverseMass;
+        if (!float.IsFinite(inverseMass) || inverseMass <= 0f)
+        {
+            return Vector2.Zero;
+        }
+
+        var resistance = float.IsFinite(KnockbackResistance)
+            ? Math.Clamp(KnockbackResistance, 0f, 1f)
+            : 1f;
+        var requestedVelocityChange = impulseMagnitude * inverseMass * (1f - resistance);
+        if (!float.IsFinite(requestedVelocityChange) || requestedVelocityChange <= 0f)
+        {
+            return Vector2.Zero;
+        }
+
+        var appliedVelocityChange = Math.Min(requestedVelocityChange, maximumVelocityChange);
+        var length = Math.Sqrt(
+            (double)direction.X * direction.X +
+            (double)direction.Y * direction.Y);
+        var scale = appliedVelocityChange / length;
+        var velocityDelta = new Vector2(
+            (float)(direction.X * scale),
+            (float)(direction.Y * scale));
+        Velocity += velocityDelta;
+        return velocityDelta;
     }
 
     public void ClearForces()

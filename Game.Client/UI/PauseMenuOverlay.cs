@@ -73,6 +73,21 @@ public sealed class PauseMenuOverlay
 
     public GameSettings Settings { get; private set; }
 
+    public void ApplyRuntimeSettings(GameSettings settings)
+    {
+        ArgumentNullException.ThrowIfNull(settings);
+        var validation = new GameSettingsValidator().Validate(settings);
+        if (!validation.IsValid)
+        {
+            var issue = validation.Issues[0];
+            throw new InvalidDataException($"{issue.Path}: {issue.Message}");
+        }
+
+        Settings = settings;
+        _settingsChanged(settings);
+        _status = "RUNTIME SETTINGS APPLIED";
+    }
+
     public void Open()
     {
         IsOpen = true;
@@ -439,6 +454,8 @@ public sealed class PauseMenuOverlay
             Key("MOVE LEFT", () => Settings.Input.KeyBindings.MoveLeft, value => SetKeyBindings(k => k with { MoveLeft = value })),
             Key("MOVE RIGHT", () => Settings.Input.KeyBindings.MoveRight, value => SetKeyBindings(k => k with { MoveRight = value })),
             Key("JUMP", () => Settings.Input.KeyBindings.Jump, value => SetKeyBindings(k => k with { Jump = value })),
+            Key("FLY", () => Settings.Input.KeyBindings.Fly, value => SetKeyBindings(k => k with { Fly = value })),
+            Key("GLIDE", () => Settings.Input.KeyBindings.Glide, value => SetKeyBindings(k => k with { Glide = value })),
             Key("PRIMARY USE", () => Settings.Input.KeyBindings.AttackPrimary, value => SetKeyBindings(k => k with { AttackPrimary = value })),
             Key("SECONDARY USE", () => Settings.Input.KeyBindings.AttackSecondary, value => SetKeyBindings(k => k with { AttackSecondary = value })),
             Key("INVENTORY", () => Settings.Input.KeyBindings.OpenInventory, value => SetKeyBindings(k => k with { OpenInventory = value })),
@@ -1412,6 +1429,8 @@ public sealed class PauseMenuOverlay
         yield return ("MOVE LEFT", bindings.MoveLeft);
         yield return ("MOVE RIGHT", bindings.MoveRight);
         yield return ("JUMP", bindings.Jump);
+        yield return ("FLY", bindings.Fly);
+        yield return ("GLIDE", bindings.Glide);
         yield return ("PRIMARY USE", bindings.AttackPrimary);
         yield return ("SECONDARY USE", bindings.AttackSecondary);
         yield return ("INVENTORY", bindings.OpenInventory);

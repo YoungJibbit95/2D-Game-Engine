@@ -1,5 +1,6 @@
 using Game.Client.Rendering.Effects;
 using Game.Client.Rendering.Lighting;
+using Game.Core;
 using Game.Core.Runtime;
 using Game.Core.Settings;
 using Game.Core.World;
@@ -113,13 +114,23 @@ public sealed class PixelAtmosphereRenderer
         in WorldTimeFrameSnapshot time,
         in LivingWorldFrameSnapshot livingWorld)
     {
-        var depth = livingWorld.IsUnderground
-            ? Math.Clamp(0.22f + (1f - livingWorld.AmbientLight) * 0.78f, 0.22f, 1f)
-            : 0f;
-        var night = time.IsNight ? 1f : 0f;
+        var surfaceTileY = livingWorld.SurfaceTileY > 0
+            ? livingWorld.SurfaceTileY
+            : world.Metadata.SpawnTile.Y;
+        var cameraTileY = camera.Position.Y / GameConstants.TileSize;
+        var depthProgress = Math.Clamp((cameraTileY - surfaceTileY - 4f) / 52f, 0f, 1f);
+        var depth = depthProgress * depthProgress * (3f - 2f * depthProgress);
+        if (livingWorld.IsUnderground &&
+            (!string.IsNullOrWhiteSpace(livingWorld.SubBiomeId) ||
+             !string.IsNullOrWhiteSpace(livingWorld.CaveProfileId)))
+        {
+            depth = Math.Max(depth, 0.28f);
+        }
+
+        var night = SolarIlluminationCurve.ResolveNightBlend((float)time.NormalizedTimeOfDay);
         var daylightTint = TileRayCastShadowMaskBuilder.ResolveDaylightColor((float)time.NormalizedTimeOfDay);
-        var surfaceGrade = Color.Lerp(new Color(30, 52, 78), new Color(18, 27, 58), night);
-        surfaceGrade = Color.Lerp(surfaceGrade, daylightTint, time.IsNight ? 0.04f : 0.12f);
+        var surfaceGrade = Color.Lerp(new Color(30, 52, 78), new Color(24, 38, 78), night);
+        surfaceGrade = Color.Lerp(surfaceGrade, daylightTint, MathHelper.Lerp(0.12f, 0.055f, night));
         var biomeGrade = ResolveBiomeGrade(livingWorld.BiomeId, livingWorld.SubBiomeId);
         surfaceGrade = Color.Lerp(surfaceGrade, biomeGrade, 0.2f);
         var deepGrade = Color.Lerp(new Color(25, 31, 48), new Color(35, 20, 48), depth);
@@ -128,6 +139,8 @@ public sealed class PixelAtmosphereRenderer
             Game.Core.Weather.WeatherKind.Fog => livingWorld.WeatherIntensity * 0.18f,
             Game.Core.Weather.WeatherKind.Rain => livingWorld.WeatherIntensity * 0.08f,
             Game.Core.Weather.WeatherKind.Storm => livingWorld.WeatherIntensity * 0.12f,
+            Game.Core.Weather.WeatherKind.Snow => livingWorld.WeatherIntensity * 0.025f,
+            Game.Core.Weather.WeatherKind.Blizzard => livingWorld.WeatherIntensity * 0.065f,
             _ => 0f
         };
         var eventGrade = livingWorld.IsWorldEventActive
@@ -139,7 +152,7 @@ public sealed class PixelAtmosphereRenderer
                 new Color(104, 53, 116),
                 eventGrade),
             GradeStrength: Math.Clamp(
-                0.08f + night * 0.08f + depth * 0.13f +
+                0.07f + night * 0.055f + depth * 0.13f +
                 (1f - livingWorld.AmbientLight) * 0.04f,
                 0f,
                 0.34f),

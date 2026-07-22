@@ -77,6 +77,70 @@ public sealed class TileRayCastShadowMaskBuilderTests
     }
 
     [Fact]
+    public void ResolveTileSampleOcclusion_UsesCollisionShapeAtNativePixelPrecision()
+    {
+        var full = TileInstance.FromTileId(1);
+        var actuated = TileInstance.FromTileId(1, TileFlags.IsActuated);
+        var platform = TileInstance.FromTileId(1, TileFlags.Platform);
+        var halfBlock = TileInstance.FromTileId(1, TileFlags.HalfBlock);
+        var ascendingLeft = TileInstance.FromTileId(1, TileFlags.SlopeAscendingLeft);
+        var ascendingRight = TileInstance.FromTileId(1, TileFlags.SlopeAscendingRight);
+
+        Assert.False(TileRayCastShadowMaskBuilder.ResolveTileSampleOcclusion(TileInstance.Air, 5d, 5d));
+        Assert.False(TileRayCastShadowMaskBuilder.ResolveTileSampleOcclusion(actuated, 5d, 5d));
+        Assert.True(TileRayCastShadowMaskBuilder.ResolveTileSampleOcclusion(full, 15.9d, 0d));
+
+        Assert.True(TileRayCastShadowMaskBuilder.ResolveTileSampleOcclusion(platform, 4d, 2.999d));
+        Assert.False(TileRayCastShadowMaskBuilder.ResolveTileSampleOcclusion(platform, 4d, 3d));
+        Assert.True(TileRayCastShadowMaskBuilder.ResolveTileSampleOcclusion(platform, -12d, -14d));
+        Assert.False(TileRayCastShadowMaskBuilder.ResolveTileSampleOcclusion(platform, -12d, -13d));
+
+        Assert.False(TileRayCastShadowMaskBuilder.ResolveTileSampleOcclusion(halfBlock, 4d, 7.999d));
+        Assert.True(TileRayCastShadowMaskBuilder.ResolveTileSampleOcclusion(halfBlock, 4d, 8d));
+        Assert.True(TileRayCastShadowMaskBuilder.ResolveTileSampleOcclusion(halfBlock, -12d, -8d));
+
+        Assert.False(TileRayCastShadowMaskBuilder.ResolveTileSampleOcclusion(ascendingLeft, 6d, 5.999d));
+        Assert.True(TileRayCastShadowMaskBuilder.ResolveTileSampleOcclusion(ascendingLeft, 6d, 6d));
+        Assert.False(TileRayCastShadowMaskBuilder.ResolveTileSampleOcclusion(ascendingLeft, -10d, -11d));
+        Assert.True(TileRayCastShadowMaskBuilder.ResolveTileSampleOcclusion(ascendingLeft, -10d, -10d));
+
+        Assert.False(TileRayCastShadowMaskBuilder.ResolveTileSampleOcclusion(ascendingRight, 6d, 9.999d));
+        Assert.True(TileRayCastShadowMaskBuilder.ResolveTileSampleOcclusion(ascendingRight, 6d, 10d));
+        Assert.False(TileRayCastShadowMaskBuilder.ResolveTileSampleOcclusion(ascendingRight, -10d, -7d));
+        Assert.True(TileRayCastShadowMaskBuilder.ResolveTileSampleOcclusion(ascendingRight, -10d, -6d));
+    }
+
+    [Fact]
+    public void Build_ActuatingOccluderOpensPointLightRayOnNextFrame()
+    {
+        var world = new World(16, 8, WorldMetadata.CreateDefault(97));
+        world.SetTile(8, 4, TileInstance.FromTileId(1));
+        var profile = CreateProfile(16, 8);
+        var buffers = new Buffers(profile.MaskPixelCount);
+        var lights = new[]
+        {
+            new ScreenSpaceLight(
+                new Vector2(4.5f * 16f, 4.5f * 16f),
+                14f * 16f,
+                Color.Red,
+                1f,
+                1f,
+                CastsShadows: true,
+                StableId: 97,
+                FlickerAmount: 0f)
+        };
+
+        _ = Build(world, profile, CreateFrame(), lights, buffers);
+        var blocked = buffers.Red[4 * 16 + 12];
+
+        world.SetTile(8, 4, TileInstance.FromTileId(1, TileFlags.IsActuated));
+        _ = Build(world, profile, CreateFrame(), lights, buffers);
+        var opened = buffers.Red[4 * 16 + 12];
+
+        Assert.True(opened > blocked + 0.05f);
+    }
+
+    [Fact]
     public void ResolveDaylightColor_IsWarmAtSunriseAndNeutralAtNoon()
     {
         var sunrise = TileRayCastShadowMaskBuilder.ResolveDaylightColor(0.27f);
@@ -93,7 +157,7 @@ public sealed class TileRayCastShadowMaskBuilderTests
         var twilight = TileRayCastShadowMaskBuilder.ResolveSkyIllumination(0.213f);
         var noon = TileRayCastShadowMaskBuilder.ResolveSkyIllumination(0.5f);
 
-        Assert.InRange(midnight, 0.11f, 0.14f);
+        Assert.InRange(midnight, 0.19f, 0.22f);
         Assert.InRange(twilight, 0.35f, 0.55f);
         Assert.InRange(noon, 0.99f, 1f);
     }
@@ -173,6 +237,144 @@ public sealed class TileRayCastShadowMaskBuilderTests
     }
 
     [Fact]
+    public void Build_SurfaceGeometryKeepsOpenSkyReadableBeforeTileLightPropagation()
+    {
+        var world = new World(16, 8, WorldMetadata.CreateDefault(91));
+        for (var y = 3; y < world.HeightTiles; y++)
+        {
+            for (var x = 0; x < world.WidthTiles; x++)
+            {
+                world.SetTile(x, y, TileInstance.FromTileId(1));
+            }
+        }
+
+        var profile = CreateProfile(16, 8);
+        var buffers = new Buffers(profile.MaskPixelCount);
+        _ = Build(
+            world,
+            profile,
+            CreateFrame(),
+            Array.Empty<ScreenSpaceLight>(),
+            buffers,
+            surfaceTileY: 3);
+
+        Assert.InRange(buffers.Shadow[16 + 4], 0f, 0.12f);
+        Assert.InRange(buffers.Shadow[3 * 16 + 4], 0f, 0.25f);
+        Assert.InRange(buffers.Shadow[6 * 16 + 4], 0.55f, 0.86f);
+    }
+
+    [Fact]
+    public void Build_UsesColumnLocalSurfaceHeightAcrossHills()
+    {
+        var world = new World(16, 8, WorldMetadata.CreateDefault(93));
+        for (var x = 0; x < world.WidthTiles; x++)
+        {
+            var surfaceY = x < 8 ? 3 : 6;
+            for (var y = surfaceY; y < world.HeightTiles; y++)
+            {
+                world.SetTile(x, y, TileInstance.FromTileId(1));
+            }
+        }
+
+        var profile = CreateProfile(16, 8);
+        var buffers = new Buffers(profile.MaskPixelCount);
+        _ = Build(
+            world,
+            profile,
+            CreateFrame(),
+            Array.Empty<ScreenSpaceLight>(),
+            buffers,
+            surfaceTileY: 3,
+            surfaceHeightResolver: static tileX => tileX < 8 ? 3 : 6);
+
+        Assert.InRange(buffers.Shadow[4 * 16 + 12], 0f, 0.2f);
+        Assert.InRange(buffers.Shadow[7 * 16 + 12], 0.5f, 0.9f);
+    }
+
+    [Fact]
+    public void Build_DiffuseSkyEntersRoomThroughOpenPortalWithoutCrossingWalls()
+    {
+        var world = new World(16, 10, WorldMetadata.CreateDefault(95));
+        for (var x = 0; x < world.WidthTiles; x++)
+        {
+            world.SetTile(x, 3, TileInstance.FromTileId(1));
+            world.SetTile(x, 9, TileInstance.FromTileId(1));
+        }
+
+        for (var y = 3; y < world.HeightTiles; y++)
+        {
+            world.SetTile(8, y, TileInstance.FromTileId(1));
+        }
+
+        var profile = CreateProfile(16, 10);
+        var buffers = new Buffers(profile.MaskPixelCount);
+        _ = Build(
+            world,
+            profile,
+            CreateFrame(),
+            Array.Empty<ScreenSpaceLight>(),
+            buffers,
+            surfaceTileY: 3,
+            surfaceHeightResolver: static _ => 3);
+        var sealedRoomShadow = buffers.Shadow[6 * 16 + 5];
+        var behindWallShadow = buffers.Shadow[6 * 16 + 12];
+
+        world.RemoveTile(3, 3);
+        _ = Build(
+            world,
+            profile,
+            CreateFrame(),
+            Array.Empty<ScreenSpaceLight>(),
+            buffers,
+            surfaceTileY: 3,
+            surfaceHeightResolver: static _ => 3);
+        var openRoomShadow = buffers.Shadow[6 * 16 + 5];
+        var stillBehindWallShadow = buffers.Shadow[6 * 16 + 12];
+
+        Assert.True(openRoomShadow < sealedRoomShadow - 0.08f);
+        Assert.True(stillBehindWallShadow > openRoomShadow + 0.12f);
+        Assert.InRange(Math.Abs(stillBehindWallShadow - behindWallShadow), 0f, 0.08f);
+    }
+
+    [Fact]
+    public void Build_MinedSurfaceShaftReceivesSunlightOnNextFrame()
+    {
+        var world = new World(16, 8, WorldMetadata.CreateDefault(92));
+        for (var y = 3; y < world.HeightTiles; y++)
+        {
+            for (var x = 0; x < world.WidthTiles; x++)
+            {
+                world.SetTile(x, y, TileInstance.FromTileId(1));
+            }
+        }
+
+        var profile = CreateProfile(16, 8);
+        var buffers = new Buffers(profile.MaskPixelCount);
+        _ = Build(
+            world,
+            profile,
+            CreateFrame(),
+            Array.Empty<ScreenSpaceLight>(),
+            buffers,
+            surfaceTileY: 3);
+        var closed = buffers.Shadow[4 * 16 + 8];
+
+        world.RemoveTile(8, 3);
+        world.RemoveTile(8, 4);
+        _ = Build(
+            world,
+            profile,
+            CreateFrame(),
+            Array.Empty<ScreenSpaceLight>(),
+            buffers,
+            surfaceTileY: 3);
+        var opened = buffers.Shadow[4 * 16 + 8];
+
+        Assert.True(opened < closed - 0.35f);
+        Assert.InRange(opened, 0f, 0.2f);
+    }
+
+    [Fact]
     public void Build_DaytimeAtmosphereDoesNotBleachBuriedTerrain()
     {
         var world = new World(16, 8, WorldMetadata.CreateDefault(80));
@@ -197,6 +399,34 @@ public sealed class TileRayCastShadowMaskBuilderTests
 
         Assert.InRange(buffers.Shadow[16 + 4], 0f, 0.15f);
         Assert.InRange(buffers.Shadow[6 * 16 + 4], 0.55f, 0.9f);
+    }
+
+    [Fact]
+    public void Build_HeavyWeatherDimsDirectSunWithoutBlackingOutOpenSurface()
+    {
+        var world = new World(16, 8, WorldMetadata.CreateDefault(94));
+        for (var y = 3; y < world.HeightTiles; y++)
+        {
+            for (var x = 0; x < world.WidthTiles; x++)
+            {
+                world.SetTile(x, y, TileInstance.FromTileId(1));
+            }
+        }
+
+        var profile = CreateProfile(16, 8);
+        var buffers = new Buffers(profile.MaskPixelCount);
+        _ = Build(
+            world,
+            profile,
+            CreateFrame() with { WeatherOcclusion = 0.9f },
+            Array.Empty<ScreenSpaceLight>(),
+            buffers,
+            surfaceTileY: 3);
+
+        var openSky = buffers.Shadow[16 + 4];
+        var buried = buffers.Shadow[6 * 16 + 4];
+        Assert.InRange(openSky, 0.05f, 0.42f);
+        Assert.True(buried > openSky + 0.3f);
     }
 
     [Fact]
@@ -244,6 +474,44 @@ public sealed class TileRayCastShadowMaskBuilderTests
     }
 
     [Fact]
+    public void Build_LocalSurfacePortalPathHasZeroSteadyStateAllocation()
+    {
+        var world = new World(16, 8, WorldMetadata.CreateDefault(96));
+        for (var x = 0; x < world.WidthTiles; x++)
+        {
+            world.SetTile(x, x < 8 ? 3 : 5, TileInstance.FromTileId(1));
+        }
+
+        var profile = CreateProfile(16, 8);
+        var buffers = new Buffers(profile.MaskPixelCount);
+        var frame = CreateFrame();
+        Func<int, int> surfaceResolver = static tileX => tileX < 8 ? 3 : 5;
+        _ = Build(
+            world,
+            profile,
+            frame,
+            Array.Empty<ScreenSpaceLight>(),
+            buffers,
+            surfaceTileY: 3,
+            surfaceHeightResolver: surfaceResolver);
+
+        var before = GC.GetAllocatedBytesForCurrentThread();
+        for (var iteration = 0; iteration < 100; iteration++)
+        {
+            _ = Build(
+                world,
+                profile,
+                frame,
+                Array.Empty<ScreenSpaceLight>(),
+                buffers,
+                surfaceTileY: 3,
+                surfaceHeightResolver: surfaceResolver);
+        }
+
+        Assert.Equal(0, GC.GetAllocatedBytesForCurrentThread() - before);
+    }
+
+    [Fact]
     public void Build_SoftShadowProfileUsesBoundedMultiRayVisibility()
     {
         var world = new World(16, 8, WorldMetadata.CreateDefault(101));
@@ -271,6 +539,37 @@ public sealed class TileRayCastShadowMaskBuilderTests
             1,
             profile.MaskPixelCount + telemetry.MaximumPointShadowRays);
         Assert.True(telemetry.OccluderSamples > 0);
+    }
+
+    [Fact]
+    public void ResolvePointRayVisibility_SupercoverBlocksDiagonalCornerLeak()
+    {
+        var tileSamples = new float[5 * 5];
+        tileSamples[1 * 5 + 2] = 2f;
+        var plan = new LightingRaySamplePlan(
+            PointShadowSamples: 1,
+            EndpointSpreadMaskPixels: 0,
+            MaxStepsPerRay: 16,
+            MaximumPointShadowRays: 1,
+            WasBudgetClamped: false);
+        var rays = 0L;
+        var samples = 0L;
+
+        var visibility = TileRayCastShadowMaskBuilder.ResolvePointRayVisibility(
+            tileSamples,
+            width: 5,
+            height: 5,
+            originX: 0,
+            originY: 0,
+            lightX: 4,
+            lightY: 4,
+            plan,
+            ref rays,
+            ref samples);
+
+        Assert.Equal(0f, visibility);
+        Assert.Equal(1, rays);
+        Assert.True(samples > 0);
     }
 
     [Fact]
@@ -368,11 +667,13 @@ public sealed class TileRayCastShadowMaskBuilderTests
         PresentationQualityProfile profile,
         LightingFrameParameters frame,
         ScreenSpaceLight[] lights,
-        Buffers buffers)
+        Buffers buffers,
+        int? surfaceTileY = null,
+        Func<int, int>? surfaceHeightResolver = null)
     {
         return TileRayCastShadowMaskBuilder.Build(
             world,
-            new Rectangle(0, 0, 16 * 16, 8 * 16),
+            new Rectangle(0, 0, world.WidthTiles * 16, world.HeightTiles * 16),
             profile,
             frame,
             lights,
@@ -381,7 +682,9 @@ public sealed class TileRayCastShadowMaskBuilderTests
             buffers.Green,
             buffers.Blue,
             buffers.Bloom,
-            buffers.Scratch);
+            buffers.Scratch,
+            surfaceTileY,
+            surfaceHeightResolver);
     }
 
     private static PresentationQualityProfile CreateProfile(int width, int height)

@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Numerics;
+using System.Runtime.InteropServices;
 using Game.Core;
 using Game.Core.Physics;
 using Game.Core.World;
@@ -493,7 +494,7 @@ public sealed class PhysicsWorldTests
         var left = CreateFastBody(new Vector2(0, 20), new Vector2(1_000, 0), order: 10);
         var right = CreateFastBody(new Vector2(100, 20), new Vector2(-1_000, 0), order: 20);
         PhysicsBody[] bodies = [left, right];
-        var contacts = new PhysicsBodyContact[1];
+        var contacts = new PhysicsContinuousBodyContact[1];
         var telemetry = StepContinuousBatch(
             CreateBodyCollisionWorld(2, 8),
             world,
@@ -521,7 +522,7 @@ public sealed class PhysicsWorldTests
         var middle = CreateFastBody(new Vector2(50, 20), Vector2.Zero, order: 20);
         var receiver = CreateFastBody(new Vector2(60, 20), Vector2.Zero, order: 30);
         PhysicsBody[] bodies = [striker, middle, receiver];
-        var contacts = new PhysicsBodyContact[3];
+        var contacts = new PhysicsContinuousBodyContact[3];
 
         var telemetry = StepContinuousBatch(
             CreateBodyCollisionWorld(3, 16),
@@ -545,13 +546,124 @@ public sealed class PhysicsWorldTests
     }
 
     [Fact]
+    public void StepWithContinuousBodyCollisions_PassLimitFreezesUnresolvedCandidateChain()
+    {
+        var world = CreateWorld(64, 32);
+        PhysicsBody[] bodies =
+        [
+            CreateFastBody(new Vector2(0, 20), new Vector2(1_000, 0), order: 10),
+            CreateFastBody(new Vector2(50, 20), Vector2.Zero, order: 20),
+            CreateFastBody(new Vector2(60, 20), Vector2.Zero, order: 30)
+        ];
+        var results = new PhysicsMoveResult[3];
+        var physics = CreateBodyCollisionWorld(3, 16, maximumToiPasses: 1);
+
+        var telemetry = physics.StepWithContinuousBodyCollisions(
+            world,
+            bodies,
+            0.1f,
+            results,
+            Span<PhysicsContact>.Empty,
+            new int[3],
+            new PhysicsBodyPair[3],
+            new PhysicsContinuousBodyContact[3],
+            new PhysicsContinuousContactCandidate[3],
+            new PhysicsBodySweepState[3]);
+
+        Assert.True(telemetry.ContinuousBodyToiPassLimitReached);
+        Assert.Equal(3, telemetry.ContinuousBodiesFrozen);
+        Assert.All(results, result => Assert.True(result.IsContinuousMotionBlocked));
+        Assert.Equal(40f, bodies[0].Position.X, precision: 3);
+        Assert.Equal(50f, bodies[1].Position.X, precision: 3);
+        Assert.Equal(60f, bodies[2].Position.X, precision: 3);
+        Assert.True(bodies[0].Position.X + bodies[0].Size.X <= bodies[1].Position.X);
+        Assert.True(bodies[1].Position.X + bodies[1].Size.X <= bodies[2].Position.X);
+    }
+
+    [Fact]
+    public void StepWithContinuousBodyCollisions_RejectsOverlappingOutputAndScratchBeforeMutation()
+    {
+        var world = CreateWorld(64, 32);
+        PhysicsBody[] bodies =
+        [
+            CreateFastBody(new Vector2(0, 20), new Vector2(1_000, 0), order: 10),
+            CreateFastBody(new Vector2(100, 20), new Vector2(-1_000, 0), order: 20)
+        ];
+        var originalPositions = new[] { bodies[0].Position, bodies[1].Position };
+        var originalVelocities = new[] { bodies[0].Velocity, bodies[1].Velocity };
+        Span<byte> sharedStorage = stackalloc byte[256];
+        var outputs = MemoryMarshal.Cast<byte, PhysicsContinuousBodyContact>(sharedStorage)[..1];
+        var scratch = MemoryMarshal.Cast<byte, PhysicsContinuousContactCandidate>(sharedStorage)[..1];
+        ArgumentException? error = null;
+
+        try
+        {
+            CreateBodyCollisionWorld(2, 8).StepWithContinuousBodyCollisions(
+                world,
+                bodies,
+                0.1f,
+                new PhysicsMoveResult[2],
+                Span<PhysicsContact>.Empty,
+                new int[2],
+                new PhysicsBodyPair[1],
+                outputs,
+                scratch,
+                new PhysicsBodySweepState[2]);
+        }
+        catch (ArgumentException exception)
+        {
+            error = exception;
+        }
+
+        Assert.NotNull(error);
+        Assert.Contains("must not overlap", error.Message, StringComparison.Ordinal);
+        Assert.Equal(originalPositions[0], bodies[0].Position);
+        Assert.Equal(originalPositions[1], bodies[1].Position);
+        Assert.Equal(originalVelocities[0], bodies[0].Velocity);
+        Assert.Equal(originalVelocities[1], bodies[1].Velocity);
+    }
+
+    [Fact]
+    public void PhysicsBodyContact_PreservesSevenFieldDeconstructionAndValueEquality()
+    {
+        var contact = new PhysicsBodyContact(
+            1,
+            2,
+            new Vector2(3, 4),
+            Vector2.UnitX,
+            5f,
+            6f,
+            7f);
+        var equal = new PhysicsBodyContact(
+            1,
+            2,
+            new Vector2(3, 4),
+            Vector2.UnitX,
+            5f,
+            6f,
+            7f);
+
+        var (bodyA, bodyB, point, normal, penetration, normalImpulse, tangentImpulse) = contact;
+
+        Assert.Equal(1, bodyA);
+        Assert.Equal(2, bodyB);
+        Assert.Equal(new Vector2(3, 4), point);
+        Assert.Equal(Vector2.UnitX, normal);
+        Assert.Equal(5f, penetration);
+        Assert.Equal(6f, normalImpulse);
+        Assert.Equal(7f, tangentImpulse);
+        Assert.Equal(equal, contact);
+        Assert.Equal(equal.GetHashCode(), contact.GetHashCode());
+    }
+
+    [Fact]
     public void StepWithContinuousBodyCollisions_TouchingAtZeroUsesDirectedNormalOnlyWhenApproaching()
     {
         var world = CreateWorld(64, 32);
         var approaching = CreateFastBody(new Vector2(0, 20), new Vector2(100, 0), order: 10);
         var target = CreateFastBody(new Vector2(10, 20), Vector2.Zero, order: 20, kinematic: true);
         PhysicsBody[] bodies = [approaching, target];
-        var contacts = new PhysicsBodyContact[1];
+        var contacts = new PhysicsContinuousBodyContact[1];
 
         var telemetry = StepContinuousBatch(
             CreateBodyCollisionWorld(2, 8),
@@ -573,7 +685,7 @@ public sealed class PhysicsWorldTests
             world,
             bodies,
             0.1f,
-            new PhysicsBodyContact[1]);
+            new PhysicsContinuousBodyContact[1]);
 
         Assert.Equal(0, telemetry.BodyPairsResolved);
         Assert.Equal(-10f, separating.Position.X, precision: 3);
@@ -602,7 +714,7 @@ public sealed class PhysicsWorldTests
             world,
             bodies,
             0.1f,
-            new PhysicsBodyContact[1]);
+            new PhysicsContinuousBodyContact[1]);
 
         Assert.Equal(-1_000f, dynamicBody.Velocity.X, precision: 3);
         Assert.Equal(Vector2.Zero, kinematicBody.Velocity);
@@ -624,7 +736,7 @@ public sealed class PhysicsWorldTests
             world,
             bodies,
             0.1f,
-            new PhysicsBodyContact[1]);
+            new PhysicsContinuousBodyContact[1]);
 
         Assert.Equal(0, telemetry.BodyPairsFound);
         Assert.Equal(100f, dynamicBody.Position.X, precision: 3);
@@ -645,8 +757,8 @@ public sealed class PhysicsWorldTests
         var secondHigh = CreateFastBody(new Vector2(origin + 100, 20), new Vector2(-1_000, 0), order: 20);
         var physics = CreateBodyCollisionWorld(2, 8);
 
-        StepContinuousBatch(physics, world, [firstLow, firstHigh], 0.1f, new PhysicsBodyContact[1]);
-        StepContinuousBatch(physics, world, [secondHigh, secondLow], 0.1f, new PhysicsBodyContact[1]);
+        StepContinuousBatch(physics, world, [firstLow, firstHigh], 0.1f, new PhysicsContinuousBodyContact[1]);
+        StepContinuousBatch(physics, world, [secondHigh, secondLow], 0.1f, new PhysicsContinuousBodyContact[1]);
 
         Assert.Equal(firstLow.Position, secondLow.Position);
         Assert.Equal(firstHigh.Position, secondHigh.Position);
@@ -678,8 +790,8 @@ public sealed class PhysicsWorldTests
                 Span<PhysicsContact>.Empty,
                 new int[3],
                 new PhysicsBodyPair[1],
-                new PhysicsBodyContact[1],
-                new PhysicsBodyContact[1],
+                new PhysicsContinuousBodyContact[1],
+                new PhysicsContinuousContactCandidate[1],
                 new PhysicsBodySweepState[3]));
 
         Assert.Contains("never deferred", error.Message, StringComparison.Ordinal);
@@ -706,7 +818,7 @@ public sealed class PhysicsWorldTests
             world,
             bodies,
             0.1f,
-            new PhysicsBodyContact[1]);
+            new PhysicsContinuousBodyContact[1]);
 
         Assert.Equal(38f, fastBody.Position.X, precision: 3);
         Assert.Equal(0f, fastBody.Velocity.X, precision: 3);
@@ -731,8 +843,8 @@ public sealed class PhysicsWorldTests
         var results = new PhysicsMoveResult[bodyCount];
         var sortedIndices = new int[bodyCount];
         var pairs = new PhysicsBodyPair[bodyCount];
-        var bodyContacts = new PhysicsBodyContact[pairs.Length];
-        var toiContacts = new PhysicsBodyContact[pairs.Length];
+        var bodyContacts = new PhysicsContinuousBodyContact[pairs.Length];
+        var toiContacts = new PhysicsContinuousContactCandidate[pairs.Length];
         var sweepStates = new PhysicsBodySweepState[bodyCount];
         var physics = CreateBodyCollisionWorld(bodyCount, bodyCount * 8);
 
@@ -801,8 +913,8 @@ public sealed class PhysicsWorldTests
         var results = new PhysicsMoveResult[bodyCount];
         var sortedIndices = new int[bodyCount];
         var pairs = new PhysicsBodyPair[pairCount];
-        var bodyContacts = new PhysicsBodyContact[pairCount];
-        var toiContacts = new PhysicsBodyContact[pairCount];
+        var bodyContacts = new PhysicsContinuousBodyContact[pairCount];
+        var toiContacts = new PhysicsContinuousContactCandidate[pairCount];
         var sweepStates = new PhysicsBodySweepState[bodyCount];
         var physics = CreateBodyCollisionWorld(bodyCount, pairCount);
         for (var warmup = 0; warmup < 4; warmup++)
@@ -1031,9 +1143,13 @@ public sealed class PhysicsWorldTests
         };
     }
 
-    private static PhysicsWorld CreateBodyCollisionWorld(int maximumBodies, int maximumPairTests)
+    private static PhysicsWorld CreateBodyCollisionWorld(
+        int maximumBodies,
+        int maximumPairTests,
+        int maximumToiPasses = 4)
     {
         return new PhysicsWorld(
+            collisionResolver: null,
             settings: new PhysicsStepSettings(
                 Vector2.Zero,
                 1f,
@@ -1043,7 +1159,8 @@ public sealed class PhysicsWorldTests
             broadphaseSettings: new PhysicsBroadphaseSettings(
                 maximumBodies,
                 maximumPairTests,
-                false));
+                false),
+            continuousSettings: new PhysicsContinuousCollisionSettings(maximumToiPasses));
     }
 
     private static PhysicsBody CreateOrderedOverlapBody(long order)
@@ -1119,7 +1236,7 @@ public sealed class PhysicsWorldTests
         World world,
         PhysicsBody[] bodies,
         float deltaSeconds,
-        PhysicsBodyContact[] bodyContacts)
+        PhysicsContinuousBodyContact[] bodyContacts)
     {
         return physics.StepWithContinuousBodyCollisions(
             world,
@@ -1130,7 +1247,7 @@ public sealed class PhysicsWorldTests
             new int[bodies.Length],
             new PhysicsBodyPair[bodyContacts.Length],
             bodyContacts,
-            new PhysicsBodyContact[bodyContacts.Length],
+            new PhysicsContinuousContactCandidate[bodyContacts.Length],
             new PhysicsBodySweepState[bodies.Length]);
     }
 

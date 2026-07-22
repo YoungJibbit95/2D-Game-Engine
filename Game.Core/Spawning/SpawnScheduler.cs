@@ -305,6 +305,8 @@ public sealed class SpawnScheduler
                 continue;
             }
 
+            var source = GetSource(activitySources, singleSource, sourceIndex);
+            _ingressController.Track(result.Entity!, source, resolvedOptions);
             spawned++;
             activeEnemies++;
         }
@@ -448,6 +450,7 @@ public sealed class SpawnScheduler
                 }
 
                 result.Entity!.AssignSpawnEncounter(plan.Definition.Id);
+                _ingressController.Track(result.Entity, source, encounterOptions);
                 spawned++;
                 activeEnemies++;
             }

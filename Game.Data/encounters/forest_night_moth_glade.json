@@ -1,0 +1,19 @@
+{
+  "id": "forest_night_moth_glade",
+  "biomeIds": ["forest"],
+  "verticalLayerIds": ["surface"],
+  "time": "night",
+  "weight": 1.1,
+  "minDistanceTiles": 20,
+  "maxDistanceTiles": 44,
+  "cooldownSeconds": 5.5,
+  "maxActiveGlobal": 16,
+  "populationRegionSizeTiles": 88,
+  "maxActiveInRegion": 7,
+  "minRoleSelections": 2,
+  "maxRoleSelections": 2,
+  "roles": [
+    { "id": "moths", "spawnRuleId": "forest_night_moth", "weight": 1.6, "minCount": 2, "maxCount": 4 },
+    { "id": "lanterns", "spawnRuleId": "forest_night_firefly", "weight": 1.2, "minCount": 2, "maxCount": 3 }
+  ]
+}

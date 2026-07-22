@@ -1,0 +1,26 @@
+{
+  "id": "frostglass_scepter",
+  "displayName": "Frostglass Scepter",
+  "description": "A crystal focus that fires quick shards and leaves enemies arcane-chilled.",
+  "rarity": "Rare",
+  "value": 690,
+  "category": "Weapon",
+  "sortPriority": 81,
+  "type": "WeaponMagic",
+  "texture": "items/adventure_v1/frostglass_scepter",
+  "maxStack": 1,
+  "useTime": 0.34,
+  "damage": 14,
+  "knockback": 1.6,
+  "manaCost": 8,
+  "actions": [
+    {
+      "kind": "Cast",
+      "projectile": "ice_shard",
+      "projectileSpeedMultiplier": 1.08,
+      "manaRegenerationDelaySeconds": 0.9,
+      "manaRefundPolicy": "BeforeEffect"
+    }
+  ],
+  "tags": ["weapon", "magic", "ice", "adventure-arsenal-v1"]
+}

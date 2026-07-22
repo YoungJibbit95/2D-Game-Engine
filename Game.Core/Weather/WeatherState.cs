@@ -8,7 +8,9 @@ public enum WeatherKind
     Clear,
     Rain,
     Storm,
-    Fog
+    Fog,
+    Snow,
+    Blizzard
 }
 
 public readonly record struct WeatherState(
@@ -82,10 +84,14 @@ public sealed class DeterministicWeatherSystem
             throw new ArgumentOutOfRangeException(nameof(worldTick), "Weather snapshots cannot advance backwards.");
         }
 
-        var currentSnapshot = snapshot;
+        var currentSnapshot = string.Equals(snapshot.BiomeId, biome.Id, StringComparison.OrdinalIgnoreCase)
+            ? NormalizeSnapshotForBiome(biome, snapshot)
+            : snapshot;
         if (!string.Equals(snapshot.BiomeId, biome.Id, StringComparison.OrdinalIgnoreCase))
         {
-            var previous = ResolveTransition(snapshot, snapshot.LastAdvancedTick).Sample;
+            var previous = BiomeWeatherEligibility.Normalize(
+                biome.Weather,
+                ResolveTransition(snapshot, snapshot.LastAdvancedTick).Sample);
             var current = CreatePeriod(biome, sequence: 0, snapshot.LastAdvancedTick, previous.Kind);
             currentSnapshot = new WeatherSystemSnapshot(
                 WeatherSystemSnapshot.CurrentFormatVersion,
@@ -208,36 +214,31 @@ public sealed class DeterministicWeatherSystem
             biome.Weather,
             DeterministicCoordinateHash.Hash(_seed, sequence, salt: salt + 1),
             previousKind);
-        var intensity = kind == WeatherKind.Clear
-            ? 0f
-            : (float)(0.25d + DeterministicCoordinateHash.Unit(_seed, sequence, salt: salt + 2) * 0.75d);
+        var intensityUnit = DeterministicCoordinateHash.Unit(_seed, sequence, salt: salt + 2);
+        var intensity = kind switch
+        {
+            WeatherKind.Clear => 0f,
+            WeatherKind.Blizzard => (float)(0.6d + intensityUnit * 0.4d),
+            _ => (float)(0.25d + intensityUnit * 0.75d)
+        };
         var windSign = DeterministicCoordinateHash.Unit(_seed, sequence, salt: salt + 3) < 0.5d ? -1f : 1f;
-        var wind = windSign * (float)DeterministicCoordinateHash.Unit(_seed, sequence, salt: salt + 4);
-        var cloudCover = kind switch
+        var windUnit = (float)DeterministicCoordinateHash.Unit(_seed, sequence, salt: salt + 4);
+        var windMagnitude = kind switch
         {
-            WeatherKind.Clear => intensity * 0.1f,
-            WeatherKind.Fog => 0.55f + intensity * 0.25f,
-            WeatherKind.Rain => 0.65f + intensity * 0.25f,
-            WeatherKind.Storm => 0.85f + intensity * 0.15f,
-            _ => 0f
+            WeatherKind.Snow => windUnit * 0.72f,
+            WeatherKind.Blizzard => 0.58f + windUnit * 0.42f,
+            _ => windUnit
         };
-        var visibility = kind switch
-        {
-            WeatherKind.Fog => 1f - intensity * 0.7f,
-            WeatherKind.Storm => 1f - intensity * 0.45f,
-            WeatherKind.Rain => 1f - intensity * 0.25f,
-            _ => 1f
-        };
-
-        return new WeatherState(
+        var state = new WeatherState(
             kind,
             startTick,
             SaturatingAdd(startTick, duration),
             intensity,
-            wind,
-            Math.Clamp(cloudCover, 0f, 1f),
-            Math.Clamp(visibility, 0.15f, 1f),
-            Math.Clamp(1f - cloudCover * 0.45f, 0.45f, 1f));
+            windSign * windMagnitude,
+            0f,
+            1f,
+            1f);
+        return WeatherAtmosphere.Apply(state, kind);
     }
 
     private static WeatherState Blend(WeatherState from, WeatherState to, float progress)
@@ -260,12 +261,14 @@ public sealed class DeterministicWeatherSystem
         ulong hash,
         WeatherKind? excludedKind)
     {
-        Span<int> weights = stackalloc int[4]
+        Span<int> weights = stackalloc int[6]
         {
             profile.ClearWeight,
             profile.RainWeight,
             profile.StormWeight,
-            profile.FogWeight
+            profile.FogWeight,
+            profile.AllowsFrozenPrecipitation ? profile.SnowWeight : 0,
+            profile.AllowsFrozenPrecipitation ? profile.BlizzardWeight : 0
         };
         var excludedIndex = excludedKind.HasValue ? (int)excludedKind.Value : -1;
         var totalWithoutExcluded = 0L;
@@ -296,6 +299,17 @@ public sealed class DeterministicWeatherSystem
         }
 
         return WeatherKind.Clear;
+    }
+
+    private static WeatherSystemSnapshot NormalizeSnapshotForBiome(
+        BiomeDefinition biome,
+        WeatherSystemSnapshot snapshot)
+    {
+        return snapshot with
+        {
+            Previous = BiomeWeatherEligibility.Normalize(biome.Weather, snapshot.Previous),
+            Current = BiomeWeatherEligibility.Normalize(biome.Weather, snapshot.Current)
+        };
     }
 
     private static float Lerp(float from, float to, float progress)
@@ -346,6 +360,7 @@ public sealed class AmbientStateService
         float daylight)
     {
         ArgumentNullException.ThrowIfNull(biome);
+        weather = BiomeWeatherEligibility.Normalize(biome.Weather, weather);
         var soundscape = subBiome?.SoundscapeId ??
             (isCave ? biome.Ambient.CaveSoundscapeId : biome.Ambient.SurfaceSoundscapeId);
         var light = biome.Ambient.BaseLight * weather.AmbientLightMultiplier;

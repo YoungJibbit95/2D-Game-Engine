@@ -1,0 +1,122 @@
+{
+  "sprites": [
+    {
+      "id": "items/double_jump_boots",
+      "path": "assets/MobilityAccessories/items/double_jump_boots.png",
+      "category": "Item",
+      "width": 32,
+      "height": 32,
+      "pixelsPerUnit": 16,
+      "atlasId": "mobility.accessories",
+      "originX": 16,
+      "originY": 16,
+      "renderLayer": "items",
+      "license": "YjsE-Project-Owned",
+      "provenance": "mobility_accessories_v1; deterministic Pillow generator; mobility_accessories_provenance.json",
+      "tags": [
+        "production-sample",
+        "runtime-preloaded",
+        "item",
+        "accessory",
+        "mobility",
+        "double-jump"
+      ]
+    },
+    {
+      "id": "items/skyward_wings",
+      "path": "assets/MobilityAccessories/items/skyward_wings.png",
+      "category": "Item",
+      "width": 32,
+      "height": 32,
+      "pixelsPerUnit": 16,
+      "atlasId": "mobility.accessories",
+      "originX": 16,
+      "originY": 16,
+      "renderLayer": "items",
+      "license": "YjsE-Project-Owned",
+      "provenance": "mobility_accessories_v1; deterministic Pillow generator; mobility_accessories_provenance.json",
+      "tags": [
+        "production-sample",
+        "runtime-preloaded",
+        "item",
+        "accessory",
+        "mobility",
+        "flight"
+      ]
+    },
+    {
+      "id": "items/ether_glider",
+      "path": "assets/MobilityAccessories/items/ether_glider.png",
+      "category": "Item",
+      "width": 32,
+      "height": 32,
+      "pixelsPerUnit": 16,
+      "atlasId": "mobility.accessories",
+      "originX": 16,
+      "originY": 16,
+      "renderLayer": "items",
+      "license": "YjsE-Project-Owned",
+      "provenance": "mobility_accessories_v1; deterministic Pillow generator; mobility_accessories_provenance.json",
+      "tags": [
+        "production-sample",
+        "runtime-preloaded",
+        "item",
+        "accessory",
+        "mobility",
+        "glide"
+      ]
+    },
+    {
+      "id": "ui/mobility_abilities",
+      "path": "assets/MobilityAccessories/ui/mobility_abilities.png",
+      "category": "UI",
+      "width": 48,
+      "height": 16,
+      "pixelsPerUnit": 16,
+      "atlasId": "ui.mobility",
+      "originX": 8,
+      "originY": 8,
+      "renderLayer": "ui.icon.ability",
+      "license": "YjsE-Project-Owned",
+      "provenance": "mobility_accessories_v1; deterministic Pillow generator; mobility_accessories_provenance.json",
+      "frames": [
+        {
+          "id": "double_jump",
+          "x": 0,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8
+        },
+        {
+          "id": "flight",
+          "x": 16,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8
+        },
+        {
+          "id": "glide",
+          "x": 32,
+          "y": 0,
+          "width": 16,
+          "height": 16,
+          "originX": 8,
+          "originY": 8
+        }
+      ],
+      "tags": [
+        "production-sample",
+        "runtime-preloaded",
+        "ui",
+        "hud",
+        "ability",
+        "mobility",
+        "sprite-sheet"
+      ]
+    }
+  ]
+}

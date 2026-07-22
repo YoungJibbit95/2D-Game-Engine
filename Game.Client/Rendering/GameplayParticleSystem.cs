@@ -1,5 +1,6 @@
 using Game.Client.Rendering.Effects;
 using Game.Core.Feedback;
+using Game.Core.Particles;
 using Game.Core.Runtime;
 using Game.Core.Settings;
 using Game.Core.Weather;
@@ -19,15 +20,27 @@ public readonly record struct AmbientParticleFrame(
 public sealed class GameplayParticleSystem
 {
     private const int AbsoluteCapacity = ParticleQualityBudget.AbsoluteMaximumParticles;
+    private const int PhysicalCapacity = 384;
+    private const float PhysicalGravity = 100f;
     private readonly ParticleState[] _particles = new ParticleState[AbsoluteCapacity];
+    private readonly ParticlePhysicsWorld _physicalParticles = new(PhysicalCapacity);
+    private readonly ParticleState[] _physicalVisuals = new ParticleState[PhysicalCapacity];
+    private readonly ParticleSnapshot[] _physicalSnapshots = new ParticleSnapshot[PhysicalCapacity];
+    private readonly ParticlePhysicsEvent[] _physicalEvents = new ParticlePhysicsEvent[64];
+    private readonly WorldParticleCollisionAdapter _particleCollision = new();
     private int _count;
     private int _replacementCursor;
+    private int _physicalSnapshotCount;
     private uint _randomState = 0x59E3A1C7u;
     private long _lastAmbientTick = -1;
 
-    public int ActiveCount => _count;
+    public int ActiveCount => _count + _physicalParticles.ActiveCount;
 
     public int Capacity => AbsoluteCapacity;
+
+    public int PhysicalParticleCount => _physicalParticles.ActiveCount;
+
+    public ParticleStepResult LastPhysicsStep { get; private set; }
 
     public int LastDrawPrimitiveCount { get; private set; }
 
@@ -81,7 +94,7 @@ public sealed class GameplayParticleSystem
             var velocity = new System.Numerics.Vector2(
                 MathF.Cos(angle) * speed,
                 MathF.Sin(angle) * speed - 15f);
-            Add(
+            AddFeedbackParticle(
                 new ParticleState(
                     cue.WorldPosition,
                     velocity,
@@ -95,7 +108,8 @@ public sealed class GameplayParticleSystem
                     NextUnit() * MathF.Tau,
                     buoyant ? 3.5f : 0.8f,
                     4f + NextUnit() * 5f),
-                maximum);
+                maximum,
+                cue.Kind);
         }
     }
 
@@ -120,16 +134,21 @@ public sealed class GameplayParticleSystem
 
         var living = frame.LivingWorld;
         var quality = Math.Clamp(frame.Quality, 1, 3);
-        var weatherBaseCount = living.Weather switch
+        var weatherKind = WeatherParticlePresentation.Resolve(living);
+        var weatherBaseCount = weatherKind switch
         {
-            WeatherKind.Storm => quality * 4,
-            WeatherKind.Rain => quality * 3,
-            WeatherKind.Fog => quality,
+            WeatherParticlePresentationKind.Blizzard => quality * 5,
+            WeatherParticlePresentationKind.Storm => quality * 4,
+            WeatherParticlePresentationKind.Rain or WeatherParticlePresentationKind.Snow => quality * 3,
+            WeatherParticlePresentationKind.Fog => quality,
             _ => 0
         };
+        var weatherIntensity = float.IsFinite(living.WeatherIntensity)
+            ? Math.Clamp(living.WeatherIntensity, 0f, 1f)
+            : 0f;
         var weatherCount = Math.Min(
             budget.MaximumAmbientEmissionsPerTick,
-            (int)MathF.Ceiling(weatherBaseCount * Math.Clamp(living.WeatherIntensity, 0.2f, 1f)));
+            (int)MathF.Ceiling(weatherBaseCount * weatherIntensity));
         var emitted = 0;
         for (var index = 0; index < weatherCount; index++)
         {
@@ -160,14 +179,52 @@ public sealed class GameplayParticleSystem
         EmitFallingLeaves(frame, budget.MaximumAmbientEmissionsPerTick - emitted, maximum);
     }
 
-    public void Update(float deltaSeconds)
+    public void Update(float deltaSeconds, World? world = null)
     {
-        if (!float.IsFinite(deltaSeconds) || deltaSeconds <= 0f || _count == 0)
+        if (!float.IsFinite(deltaSeconds) || deltaSeconds <= 0f || ActiveCount == 0)
         {
             return;
         }
 
         deltaSeconds = Math.Min(deltaSeconds, 0.25f);
+        if (_physicalParticles.ActiveCount > 0)
+        {
+            _particleCollision.World = world;
+            LastPhysicsStep = _physicalParticles.Step(
+                deltaSeconds,
+                new ParticleForces(
+                    new System.Numerics.Vector2(0f, PhysicalGravity),
+                    System.Numerics.Vector2.Zero),
+                new ParticleStepBudget(
+                    PhysicalCapacity,
+                    PhysicalCapacity * 48,
+                    MaximumCollisionsPerParticle: 3),
+                world is null ? null : _particleCollision,
+                _physicalEvents);
+            _particleCollision.World = null;
+            _physicalSnapshotCount = _physicalParticles.CopyActiveParticles(_physicalSnapshots);
+            for (var index = 0; index < _physicalSnapshotCount; index++)
+            {
+                ref readonly var snapshot = ref _physicalSnapshots[index];
+                if ((uint)snapshot.Handle.Slot >= (uint)_physicalVisuals.Length)
+                {
+                    continue;
+                }
+
+                ref var visual = ref _physicalVisuals[snapshot.Handle.Slot];
+                visual.Position = snapshot.Position;
+                visual.Velocity = snapshot.Velocity;
+                visual.Age = snapshot.AgeSeconds;
+                visual.Lifetime = snapshot.LifetimeSeconds;
+                visual.Phase += visual.AnimationSpeed * deltaSeconds;
+            }
+        }
+        else
+        {
+            _physicalSnapshotCount = 0;
+            LastPhysicsStep = default;
+        }
+
         for (var index = _count - 1; index >= 0; index--)
         {
             ref var particle = ref _particles[index];
@@ -185,7 +242,6 @@ public sealed class GameplayParticleSystem
             particle.Phase += particle.AnimationSpeed * deltaSeconds;
         }
     }
-
     public void Draw(RenderContext context, Camera2D camera, GameSettings settings)
     {
         ArgumentNullException.ThrowIfNull(camera);
@@ -207,63 +263,100 @@ public sealed class GameplayParticleSystem
                 break;
             }
 
-            ref readonly var particle = ref _particles[index];
-            var screen = camera.WorldToScreen(
-                new Vector2(particle.Position.X, particle.Position.Y),
-                context.ViewportBounds);
-            if (screen.X < context.ViewportBounds.Left - 32f ||
-                screen.X > context.ViewportBounds.Right + 32f ||
-                screen.Y < context.ViewportBounds.Top - 32f ||
-                screen.Y > context.ViewportBounds.Bottom + 32f)
+            DrawParticleState(context, camera, in _particles[index], budget.MaximumDrawPrimitives);
+        }
+
+        for (var index = 0; index < _physicalSnapshotCount; index++)
+        {
+            if (LastDrawPrimitiveCount >= budget.MaximumDrawPrimitives)
+            {
+                break;
+            }
+
+            var slot = _physicalSnapshots[index].Handle.Slot;
+            if ((uint)slot >= (uint)_physicalVisuals.Length)
             {
                 continue;
             }
 
-            var animation = ParticleAnimationPlanner.Sample(
-                particle.Age,
-                particle.Lifetime,
-                particle.Phase,
-                particle.Pulse,
-                particle.SwayAmplitude);
-            if (animation.Opacity <= 0.001f)
-            {
-                continue;
-            }
-
-            LastVisibleParticleCount++;
-            var width = Math.Max(1, (int)MathF.Round(particle.Size * animation.Scale * camera.Zoom));
-            var height = particle.Shape == ParticleShape.Streak
-                ? Math.Max(width + 2, (int)MathF.Round(particle.Size * 3.4f * camera.Zoom))
-                : width;
-            var bounds = new Rectangle(
-                SaturatingRound(screen.X + animation.Sway),
-                SaturatingRound(screen.Y),
-                width,
-                height);
-            var remaining = budget.MaximumDrawPrimitives - LastDrawPrimitiveCount;
-            if (particle.Shape == ParticleShape.Leaf &&
-                DrawProceduralLeaf(context, screen, camera.Zoom, particle, animation, remaining) is var leafPrimitives &&
-                leafPrimitives > 0)
-            {
-                LastDrawPrimitiveCount += leafPrimitives;
-                continue;
-            }
-
-            LastDrawPrimitiveCount += DrawParticle(
-                context,
-                bounds,
-                particle.Color * animation.Opacity,
-                particle.Shape,
-                remaining);
+            DrawParticleState(context, camera, in _physicalVisuals[slot], budget.MaximumDrawPrimitives);
         }
     }
 
+    private void DrawParticleState(
+        RenderContext context,
+        Camera2D camera,
+        in ParticleState particle,
+        int maximumDrawPrimitives)
+    {
+        var screen = camera.WorldToScreen(
+            new Vector2(particle.Position.X, particle.Position.Y),
+            context.ViewportBounds);
+        if (screen.X < context.ViewportBounds.Left - 32f ||
+            screen.X > context.ViewportBounds.Right + 32f ||
+            screen.Y < context.ViewportBounds.Top - 32f ||
+            screen.Y > context.ViewportBounds.Bottom + 32f)
+        {
+            return;
+        }
+
+        var animation = ParticleAnimationPlanner.Sample(
+            particle.Age,
+            particle.Lifetime,
+            particle.Phase,
+            particle.Pulse,
+            particle.SwayAmplitude);
+        if (animation.Opacity <= 0.001f)
+        {
+            return;
+        }
+
+        LastVisibleParticleCount++;
+        var width = Math.Max(1, (int)MathF.Round(particle.Size * animation.Scale * camera.Zoom));
+        var height = particle.Shape == ParticleShape.Streak
+            ? Math.Max(width + 2, (int)MathF.Round(particle.Size * 3.4f * camera.Zoom))
+            : width;
+        var bounds = new Rectangle(
+            SaturatingRound(screen.X + animation.Sway),
+            SaturatingRound(screen.Y),
+            width,
+            height);
+        if (particle.Shape is ParticleShape.Dot or ParticleShape.Streak &&
+            !WeatherParticlePresentation.TryClipToViewport(
+                bounds,
+                context.ViewportBounds,
+                out bounds))
+        {
+            return;
+        }
+
+        var remaining = maximumDrawPrimitives - LastDrawPrimitiveCount;
+        if (particle.Shape == ParticleShape.Leaf &&
+            DrawProceduralLeaf(context, screen, camera.Zoom, particle, animation, remaining) is var leafPrimitives &&
+            leafPrimitives > 0)
+        {
+            LastDrawPrimitiveCount += leafPrimitives;
+            return;
+        }
+
+        LastDrawPrimitiveCount += DrawParticle(
+            context,
+            bounds,
+            particle.Color * animation.Opacity,
+            particle.Shape,
+            remaining);
+    }
     public void Clear()
     {
         Array.Clear(_particles, 0, _count);
+        Array.Clear(_physicalVisuals);
+        Array.Clear(_physicalSnapshots);
+        _physicalParticles.Clear();
         _count = 0;
         _replacementCursor = 0;
+        _physicalSnapshotCount = 0;
         _lastAmbientTick = -1;
+        LastPhysicsStep = default;
         LastDrawPrimitiveCount = 0;
         LastVisibleParticleCount = 0;
     }
@@ -284,12 +377,30 @@ public sealed class GameplayParticleSystem
             Mix(ref hash, unchecked((uint)BitConverter.SingleToInt32Bits(particle.Phase)));
         }
 
+        var physicalCount = _physicalParticles.CopyActiveParticles(_physicalSnapshots);
+        Mix(ref hash, (ulong)physicalCount);
+        for (var index = 0; index < physicalCount; index++)
+        {
+            ref readonly var snapshot = ref _physicalSnapshots[index];
+            Mix(ref hash, unchecked((uint)BitConverter.SingleToInt32Bits(snapshot.Position.X)));
+            Mix(ref hash, unchecked((uint)BitConverter.SingleToInt32Bits(snapshot.Position.Y)));
+            Mix(ref hash, unchecked((uint)BitConverter.SingleToInt32Bits(snapshot.Velocity.X)));
+            Mix(ref hash, unchecked((uint)BitConverter.SingleToInt32Bits(snapshot.Velocity.Y)));
+            Mix(ref hash, unchecked((uint)BitConverter.SingleToInt32Bits(snapshot.AgeSeconds)));
+        }
+
         return hash;
     }
 
     private void EmitWeatherParticle(in AmbientParticleFrame frame, int index, int maximum)
     {
         var living = frame.LivingWorld;
+        var kind = WeatherParticlePresentation.Resolve(living);
+        if (kind == WeatherParticlePresentationKind.None)
+        {
+            return;
+        }
+
         var x = SampleRange(
             frame.TickNumber,
             index,
@@ -303,13 +414,13 @@ public sealed class GameplayParticleSystem
             (long)frame.VisibleWorld.Y - 24L,
             (long)frame.VisibleWorld.Y + Math.Max(1, frame.VisibleWorld.Height / 3));
         var wind = float.IsFinite(living.Wind) ? Math.Clamp(living.Wind, -1f, 1f) : 0f;
-        if (living.Weather == WeatherKind.Fog)
+        if (kind == WeatherParticlePresentationKind.Fog)
         {
             Add(
                 new ParticleState(
                     new System.Numerics.Vector2(x, y),
                     new System.Numerics.Vector2(8f + wind * 16f, -2f),
-                    new Color(170, 190, 196, 74),
+                    WeatherParticlePresentation.PremultiplyAlpha(new Color(170, 190, 196), 74f / 255f),
                     1.8f,
                     2.2f,
                     0f,
@@ -323,12 +434,40 @@ public sealed class GameplayParticleSystem
             return;
         }
 
-        var storm = living.Weather == WeatherKind.Storm;
+        if (kind is WeatherParticlePresentationKind.Snow or WeatherParticlePresentationKind.Blizzard)
+        {
+            var variation = SampleUnit(frame.TickNumber, index, 0x8CB92BA7u);
+            var blizzard = kind == WeatherParticlePresentationKind.Blizzard;
+            Add(
+                new ParticleState(
+                    new System.Numerics.Vector2(x, y),
+                    new System.Numerics.Vector2(
+                        wind * (blizzard ? 88f : 24f),
+                        (blizzard ? 96f : 34f) + variation * (blizzard ? 48f : 24f)),
+                    WeatherParticlePresentation.PremultiplyAlpha(
+                        new Color(232, 241, 248),
+                        (blizzard ? 0.56f : 0.48f) + variation * 0.16f),
+                    blizzard ? 1.35f : 2.8f + variation,
+                    blizzard ? 0.75f + variation * 0.45f : 1.1f + variation * 1.2f,
+                    blizzard ? 0f : 5f,
+                    blizzard ? ParticleShape.Streak : ParticleShape.Dot,
+                    0.2f,
+                    0.08f,
+                    SampleUnit(frame.TickNumber, index, 0xD4E12C77u) * MathF.Tau,
+                    4f + variation * 3f,
+                    1.2f + variation),
+                maximum);
+            return;
+        }
+
+        var storm = kind == WeatherParticlePresentationKind.Storm;
         Add(
             new ParticleState(
                 new System.Numerics.Vector2(x, y),
                 new System.Numerics.Vector2(wind * (storm ? 90f : 55f), storm ? 330f : 245f),
-                new Color(145, 190, 218, storm ? 190 : 150),
+                WeatherParticlePresentation.PremultiplyAlpha(
+                    new Color(145, 190, 218),
+                    (storm ? 190f : 150f) / 255f),
                 storm ? 0.72f : 0.9f,
                 storm ? 1.4f : 1f,
                 0f,
@@ -340,7 +479,6 @@ public sealed class GameplayParticleSystem
                 0f),
             maximum);
     }
-
     private void EmitBiomeParticle(
         in AmbientParticleFrame frame,
         AmbientParticleKind kind,
@@ -456,9 +594,65 @@ public sealed class GameplayParticleSystem
         }
     }
 
+    private void AddFeedbackParticle(
+        in ParticleState particle,
+        int maximum,
+        GameplayFeedbackCueKind cueKind)
+    {
+        if (cueKind is GameplayFeedbackCueKind.TileBroken or
+            GameplayFeedbackCueKind.MeleeHit or
+            GameplayFeedbackCueKind.ProjectileHit &&
+            TryAddPhysicalParticle(particle, maximum))
+        {
+            return;
+        }
+
+        Add(particle, maximum);
+    }
+
+    private bool TryAddPhysicalParticle(in ParticleState particle, int maximum)
+    {
+        if (ActiveCount >= maximum || _physicalParticles.AvailableCapacity <= 0)
+        {
+            return false;
+        }
+
+        var command = new ParticleSpawnCommand
+        {
+            Position = particle.Position,
+            Velocity = particle.Velocity,
+            LifetimeSeconds = particle.Lifetime,
+            Radius = Math.Max(0.75f, particle.Size * 0.35f),
+            GravityScale = particle.Gravity / PhysicalGravity,
+            LinearDrag = particle.Drag,
+            Restitution = 0.28f,
+            Friction = 0.58f,
+            SleepSpeed = 5f,
+            SleepDelaySeconds = 0.08f,
+            Seed = _randomState,
+            Sequence = unchecked((ulong)(uint)ActiveCount << 32) | _randomState,
+            UserData = (int)particle.Shape,
+            Flags = ParticleSimulationFlags.CollideWithTiles |
+                ParticleSimulationFlags.AllowSleep
+        };
+        if (!_physicalParticles.TrySpawn(command, out var handle))
+        {
+            return false;
+        }
+
+        _physicalVisuals[handle.Slot] = particle;
+        return true;
+    }
+
     private void Add(in ParticleState particle, int maximum)
     {
-        if (_count < maximum)
+        var visualMaximum = Math.Max(0, maximum - _physicalParticles.ActiveCount);
+        if (visualMaximum == 0)
+        {
+            return;
+        }
+
+        if (_count < visualMaximum)
         {
             _particles[_count++] = particle;
             return;
@@ -466,12 +660,11 @@ public sealed class GameplayParticleSystem
 
         _particles[_replacementCursor] = particle;
         _replacementCursor++;
-        if (_replacementCursor >= maximum)
+        if (_replacementCursor >= visualMaximum)
         {
             _replacementCursor = 0;
         }
     }
-
     private void RemoveAtSwapBack(int index)
     {
         _count--;
@@ -489,6 +682,21 @@ public sealed class GameplayParticleSystem
 
     private void TrimToBudget(int maximum)
     {
+        maximum = Math.Clamp(maximum, 0, AbsoluteCapacity);
+        if (ActiveCount <= maximum)
+        {
+            return;
+        }
+
+        if (_physicalParticles.ActiveCount > 0)
+        {
+            _physicalParticles.Clear();
+            Array.Clear(_physicalVisuals);
+            Array.Clear(_physicalSnapshots);
+            _physicalSnapshotCount = 0;
+            LastPhysicsStep = default;
+        }
+
         if (_count <= maximum)
         {
             return;
@@ -498,7 +706,6 @@ public sealed class GameplayParticleSystem
         _count = maximum;
         _replacementCursor = 0;
     }
-
     private float NextUnit()
     {
         var value = _randomState;
@@ -707,6 +914,29 @@ public sealed class GameplayParticleSystem
         hash *= 1099511628211UL;
     }
 
+    private sealed class WorldParticleCollisionAdapter : IParticleTileCollisionAdapter
+    {
+        public World? World { get; set; }
+
+        public float TileSize => Game.Core.GameConstants.TileSize;
+
+        public bool TryGetCollider(int tileX, int tileY, out ParticleTileCollider collider)
+        {
+            if (World is not null &&
+                World.TryGetTile(tileX, tileY, out var tile) &&
+                tile.CollisionShape == TileCollisionShape.FullBlock)
+            {
+                collider = new ParticleTileCollider(
+                    IsSolid: true,
+                    Restitution: 0.12f,
+                    Friction: 0.68f);
+                return true;
+            }
+
+            collider = default;
+            return false;
+        }
+    }
     private enum AmbientParticleKind
     {
         None,

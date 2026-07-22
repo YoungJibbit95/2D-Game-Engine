@@ -2,6 +2,7 @@ using Game.Core.Equipment;
 using Game.Core.Data;
 using Game.Core.Combat;
 using Game.Core.Effects;
+using Game.Core.Movement;
 
 namespace Game.Core.Items;
 
@@ -64,6 +65,16 @@ public sealed record ItemDefinition
     public float ManaCostReduction { get; init; }
 
     public float ManaRegenBonus { get; init; }
+
+    public MobilityAbilityDefinition? Mobility { get; init; }
+
+    public bool CanDoubleJump { get; init; }
+
+    public bool CanWallJump { get; init; }
+
+    public bool CanFly { get; init; }
+
+    public bool CanGlide { get; init; }
 
     public int ManaCost { get; init; }
 

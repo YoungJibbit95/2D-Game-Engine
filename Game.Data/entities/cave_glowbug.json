@@ -1,0 +1,41 @@
+{
+  "id": "cave_glowbug",
+  "displayName": "Cave Glowbug",
+  "texture": "entities/critters/cave_glowbug",
+  "maxHealth": 4,
+  "width": 8,
+  "height": 7,
+  "faction": "friendly",
+  "movementMode": "flying",
+  "tags": ["critter", "glowbug", "cave", "underground", "cavern", "cave_wildlife"],
+  "contactDamage": 0,
+  "contactKnockback": 0,
+  "attackDamage": 0,
+  "despawn": {
+    "mode": "whenIdle",
+    "spawnProtectionSeconds": 7,
+    "damageProtectionSeconds": 12
+  },
+  "ai": {
+    "kind": "wander",
+    "detectionRange": 72,
+    "loseTargetRange": 120,
+    "moveSpeed": 26,
+    "fleeSpeed": 64,
+    "patrolRadius": 88,
+    "returnHomeDistance": 136,
+    "flockRadius": 96,
+    "flockWeight": 0.82,
+    "minFlockSize": 3,
+    "perceptionMemorySeconds": 1.5,
+    "decisionInterval": 0.8,
+    "idleChance": 0.1,
+    "activityPeriod": "any",
+    "dayMoveSpeedMultiplier": 1.0,
+    "nightMoveSpeedMultiplier": 1.0,
+    "perchWhenInactive": false,
+    "requiresLineOfSight": false,
+    "avoidLedges": false,
+    "avoidLiquid": true
+  }
+}

@@ -25,7 +25,8 @@ public enum ParallaxVerticalFillMode : byte
 public enum ParallaxProjectionMode : byte
 {
     ViewportBackdrop,
-    DistantHorizonBand
+    DistantHorizonBand,
+    FullscreenDepthPlane
 }
 
 public enum ParallaxDepthPlane : byte
@@ -62,6 +63,8 @@ public readonly record struct ParallaxLayerDescriptor(
 
     public Color TopFillColor { get; init; } = Color.Transparent;
 
+    public Color BottomFillColor { get; init; } = Color.Transparent;
+
     public bool FeatherTop { get; init; }
 }
 
@@ -81,6 +84,27 @@ public static class ParallaxLayerPlanner
     public static ParallaxSceneProfile Build(
         in LivingWorldFrameSnapshot livingWorld,
         bool isNight,
+        float cameraDepthPixels,
+        float surfaceParallax,
+        float caveParallax,
+        string defaultSurfaceSpriteId,
+        string defaultCaveSpriteId,
+        Span<ParallaxLayerDescriptor> destination)
+    {
+        return Build(
+            livingWorld,
+            isNight ? 0f : 0.5f,
+            cameraDepthPixels,
+            surfaceParallax,
+            caveParallax,
+            defaultSurfaceSpriteId,
+            defaultCaveSpriteId,
+            destination);
+    }
+
+    public static ParallaxSceneProfile Build(
+        in LivingWorldFrameSnapshot livingWorld,
+        float normalizedTimeOfDay,
         float cameraDepthPixels,
         float surfaceParallax,
         float caveParallax,
@@ -112,7 +136,9 @@ public static class ParallaxLayerPlanner
         var surfaceIsComposite = IsCompositePanorama(surface);
         var caveIsComposite = IsCompositePanorama(cave);
         var defaultCaveIsComposite = IsCompositePanorama(defaultCaveSpriteId);
-        var surfaceAlternate = ResolveSurfaceAlternateSpriteId(livingWorld.BiomeId, isNight, surface);
+        var nightBlend = SolarIlluminationCurve.ResolveNightBlend(normalizedTimeOfDay);
+        var useNightVariant = nightBlend >= 0.52f;
+        var surfaceAlternate = ResolveSurfaceAlternateSpriteId(livingWorld.BiomeId, useNightVariant, surface);
         var caveAlternate = ResolveCaveAlternateSpriteId(livingWorld.SubBiomeId, livingWorld.CaveProfileId, cave);
         var landmark = ResolveLandmark(livingWorld.BiomeId, livingWorld.SubBiomeId, livingWorld.CaveProfileId);
         var baseSeed = BuildVariationSeed(livingWorld);
@@ -120,15 +146,20 @@ public static class ParallaxLayerPlanner
         var storm = livingWorld.Weather == Game.Core.Weather.WeatherKind.Storm
             ? livingWorld.WeatherIntensity
             : 0f;
-        var surfaceTint = Color.Lerp(ResolveSurfaceTint(livingWorld.BiomeId), new Color(145, 160, 176), storm * 0.42f);
+        var surfaceTint = Color.Lerp(
+            ResolveSurfaceTint(livingWorld.BiomeId),
+            new Color(112, 132, 168),
+            nightBlend * 0.72f);
+        surfaceTint = Color.Lerp(surfaceTint, new Color(145, 160, 176), storm * 0.42f);
         var caveTint = Color.Lerp(Color.White, ResolveCaveTint(livingWorld.SubBiomeId, livingWorld.CaveProfileId), 0.34f + deep * 0.2f);
         var count = 0;
 
         if (underground < 0.995f && surfaceIsComposite)
         {
-            AddAuthoredDepthStack(
+            AddAuthoredSurfaceDepthStack(
                 destination,
                 ref count,
+                livingWorld.BiomeId,
                 ResolveAuthoredFarSpriteId(surface, livingWorld.BiomeId, livingWorld.SubBiomeId, false),
                 ResolveAuthoredMidSpriteId(surface, livingWorld.BiomeId, livingWorld.SubBiomeId, false),
                 ResolveAuthoredNearSpriteId(surface, livingWorld.BiomeId, livingWorld.SubBiomeId, false),
@@ -140,7 +171,7 @@ public static class ParallaxLayerPlanner
         }
         else if (underground < 0.995f)
         {
-            var distant = isNight && !hasSurfacePresentation && Is(livingWorld.BiomeId, "forest")
+            var distant = useNightVariant && !hasSurfacePresentation && Is(livingWorld.BiomeId, "forest")
                 ? "world/backgrounds/night_forest_parallax_layer"
                 : surfaceAlternate;
             AddLayer(
@@ -345,7 +376,7 @@ public static class ParallaxLayerPlanner
             }
         }
 
-        var palette = ResolveSkyPalette(livingWorld, isNight, underground, deep);
+        var palette = ResolveSkyPalette(livingWorld, nightBlend, underground, deep);
         return new ParallaxSceneProfile(
             underground,
             deep,
@@ -400,13 +431,20 @@ public static class ParallaxLayerPlanner
         ParallaxProjectionMode projectionMode = ParallaxProjectionMode.ViewportBackdrop,
         ParallaxDepthPlane depthPlane = ParallaxDepthPlane.Unspecified,
         Color? topFillColor = null,
-        bool featherTop = false)
+        bool featherTop = false,
+        ParallaxVerticalFillMode? verticalFillMode = null,
+        Color? bottomFillColor = null)
     {
         if (count >= destination.Length || opacity <= 0.001f)
         {
             return;
         }
 
+        var resolvedFillMode = projectionMode == ParallaxProjectionMode.FullscreenDepthPlane
+            ? ParallaxVerticalFillMode.None
+            : preserveAuthoredRepeat
+                ? verticalFillMode ?? ParallaxVerticalFillMode.ExtendOuterEdges
+                : ParallaxVerticalFillMode.None;
         destination[count++] = new ParallaxLayerDescriptor(
             spriteId,
             Is(spriteId, alternateSpriteId) ? null : alternateSpriteId,
@@ -423,19 +461,96 @@ public static class ParallaxLayerPlanner
             Math.Clamp(landmarkPeriod, 0, 16),
             variationSeed,
             preserveAuthoredRepeat,
-            preserveAuthoredRepeat
-                ? ParallaxVerticalFillMode.ExtendOuterEdges
-                : ParallaxVerticalFillMode.None,
+            resolvedFillMode,
             tint,
             landmarkTint)
         {
             ProjectionMode = projectionMode,
             DepthPlane = depthPlane,
-            TopFillColor = preserveAuthoredRepeat
+            TopFillColor = resolvedFillMode == ParallaxVerticalFillMode.ExtendOuterEdges
                 ? topFillColor ?? ResolveAuthoredTopFillColor(spriteId)
+                : Color.Transparent,
+            BottomFillColor = projectionMode != ParallaxProjectionMode.FullscreenDepthPlane &&
+                (resolvedFillMode is ParallaxVerticalFillMode.ExtendBottomEdge or
+                    ParallaxVerticalFillMode.ExtendOuterEdges)
+                ? bottomFillColor ?? ResolveAuthoredBottomFillColor(spriteId)
                 : Color.Transparent,
             FeatherTop = featherTop
         };
+    }
+
+    private static void AddAuthoredSurfaceDepthStack(
+        Span<ParallaxLayerDescriptor> destination,
+        ref int count,
+        string? biomeId,
+        string farSpriteId,
+        string midSpriteId,
+        string nearSpriteId,
+        float baseHorizontalParallax,
+        float opacity,
+        uint variationSeed,
+        Color environmentTint,
+        Color topFillColor)
+    {
+        AddLayer(
+            destination,
+            ref count,
+            ResolveMountainFeatureSpriteId(biomeId, farSpriteId),
+            null,
+            null,
+            0,
+            ParallaxLandmarkStyle.None,
+            baseHorizontalParallax * 0.035f,
+            0.0012f,
+            opacity * 0.62f,
+            -18,
+            1f,
+            0f,
+            5,
+            0,
+            Mix(variationSeed, 0xA24BAED5u),
+            true,
+            Color.Lerp(Color.White, environmentTint, 0.18f),
+            Color.White,
+            ParallaxProjectionMode.FullscreenDepthPlane,
+            ParallaxDepthPlane.Far,
+            Color.Transparent,
+            verticalFillMode: ParallaxVerticalFillMode.None);
+        AddLayer(
+            destination,
+            ref count,
+            ResolveFloatingIslandFeatureSpriteId(biomeId, farSpriteId),
+            null,
+            null,
+            0,
+            ParallaxLandmarkStyle.None,
+            baseHorizontalParallax * 0.11f,
+            0.004f,
+            opacity * 0.78f,
+            -5,
+            1f,
+            0f,
+            8,
+            0,
+            Mix(variationSeed, 0x9FB21C65u),
+            true,
+            Color.Lerp(Color.White, environmentTint, 0.08f),
+            Color.White,
+            ParallaxProjectionMode.FullscreenDepthPlane,
+            ParallaxDepthPlane.Mid,
+            Color.Transparent,
+            verticalFillMode: ParallaxVerticalFillMode.None);
+        AddAuthoredDepthStack(
+            destination,
+            ref count,
+            farSpriteId,
+            midSpriteId,
+            nearSpriteId,
+            baseHorizontalParallax,
+            opacity,
+            variationSeed,
+            environmentTint,
+            topFillColor);
     }
 
     private static void AddAuthoredDepthStack(
@@ -450,10 +565,6 @@ public static class ParallaxLayerPlanner
         Color environmentTint,
         Color topFillColor)
     {
-        // The procedural sky gradient already covers the complete viewport. Leaving
-        // the Far plane transparent above its authored pixels avoids replacing that
-        // gradient with a flat rectangle and removes the visible panorama top seam.
-        var distantTopFill = Color.Transparent;
         AddLayer(
             destination,
             ref count,
@@ -472,12 +583,13 @@ public static class ParallaxLayerPlanner
             0,
             Mix(variationSeed, 0x2C1B3C6Du),
             true,
-            Color.Lerp(Color.White, environmentTint, 0.1f),
+            Color.Lerp(Color.White, environmentTint, 0.22f),
             Color.White,
-            ParallaxProjectionMode.DistantHorizonBand,
+            ParallaxProjectionMode.FullscreenDepthPlane,
             ParallaxDepthPlane.Far,
-            distantTopFill,
-            featherTop: !Contains(farSpriteId, "depth_v6"));
+            Color.Transparent,
+            featherTop: false,
+            verticalFillMode: ParallaxVerticalFillMode.None);
         AddLayer(
             destination,
             ref count,
@@ -498,9 +610,10 @@ public static class ParallaxLayerPlanner
             true,
             Color.Lerp(Color.White, environmentTint, 0.14f),
             Color.White,
-            ParallaxProjectionMode.DistantHorizonBand,
+            ParallaxProjectionMode.FullscreenDepthPlane,
             ParallaxDepthPlane.Mid,
-            Color.Transparent);
+            Color.Transparent,
+            verticalFillMode: ParallaxVerticalFillMode.None);
         AddLayer(
             destination,
             ref count,
@@ -521,9 +634,44 @@ public static class ParallaxLayerPlanner
             true,
             Color.Lerp(Color.White, environmentTint, 0.22f),
             Color.White,
-            ParallaxProjectionMode.DistantHorizonBand,
+            ParallaxProjectionMode.FullscreenDepthPlane,
             ParallaxDepthPlane.Near,
-            Color.Transparent);
+            Color.Transparent,
+            verticalFillMode: ParallaxVerticalFillMode.None);
+    }
+
+    private static string ResolveMountainFeatureSpriteId(string? biomeId, string farSpriteId)
+    {
+        if (Contains(farSpriteId, "amber") || Is(biomeId, "amber_grove"))
+        {
+            return "world/backgrounds/features_v7/amber_mountains";
+        }
+
+        if (Contains(farSpriteId, "twilight") || Contains(farSpriteId, "marsh") || Is(biomeId, "twilight_marsh"))
+        {
+            return "world/backgrounds/features_v7/twilight_mountains";
+        }
+
+        return Contains(farSpriteId, "crystal") || Contains(biomeId, "crystal")
+            ? "world/backgrounds/features_v7/crystal_mountains"
+            : "world/backgrounds/features_v7/forest_mountains";
+    }
+
+    private static string ResolveFloatingIslandFeatureSpriteId(string? biomeId, string farSpriteId)
+    {
+        if (Contains(farSpriteId, "amber") || Is(biomeId, "amber_grove"))
+        {
+            return "world/backgrounds/features_v7/amber_floating_islands";
+        }
+
+        if (Contains(farSpriteId, "twilight") || Contains(farSpriteId, "marsh") || Is(biomeId, "twilight_marsh"))
+        {
+            return "world/backgrounds/features_v7/twilight_floating_islands";
+        }
+
+        return Contains(farSpriteId, "crystal") || Contains(biomeId, "crystal")
+            ? "world/backgrounds/features_v7/crystal_floating_islands"
+            : "world/backgrounds/features_v7/forest_floating_islands";
     }
 
     private static Color ScaleColor(Color color, float scale)
@@ -639,6 +787,36 @@ public static class ParallaxLayerPlanner
         return Contains(primary, "forest") || Is(biomeId, "forest") || Is(biomeId, "meadow")
             ? "world/backgrounds/depth_v6/forest_near"
             : "world/backgrounds/forest_parallax_layer_v3";
+    }
+
+    internal static Color ResolveAuthoredBottomFillColor(string spriteId)
+    {
+        if (Contains(spriteId, "amber"))
+        {
+            return new Color(64, 49, 42);
+        }
+
+        if (Contains(spriteId, "twilight") || Contains(spriteId, "marsh"))
+        {
+            return new Color(31, 38, 58);
+        }
+
+        if (Contains(spriteId, "crystal"))
+        {
+            return new Color(17, 25, 52);
+        }
+
+        if (Contains(spriteId, "forest") || Contains(spriteId, "meadow"))
+        {
+            return new Color(42, 61, 54);
+        }
+
+        if (Contains(spriteId, "cave") || Contains(spriteId, "depth"))
+        {
+            return new Color(20, 26, 39);
+        }
+
+        return new Color(42, 61, 54);
     }
 
     internal static Color ResolveAuthoredTopFillColor(string spriteId)
@@ -791,12 +969,12 @@ public static class ParallaxLayerPlanner
 
     private static SkyPalette ResolveSkyPalette(
         in LivingWorldFrameSnapshot livingWorld,
-        bool isNight,
+        float nightBlend,
         float underground,
         float deep)
     {
         var surface = ResolveSurfacePalette(livingWorld.BiomeId);
-        var night = isNight ? 0.82f : 0f;
+        var night = Math.Clamp(nightBlend, 0f, 0.82f);
         var nightTop = Color.Lerp(surface.Top, new Color(12, 19, 42), night);
         var nightMiddle = Color.Lerp(surface.Middle, new Color(24, 30, 57), night);
         var nightBottom = Color.Lerp(surface.Bottom, new Color(38, 39, 63), night);

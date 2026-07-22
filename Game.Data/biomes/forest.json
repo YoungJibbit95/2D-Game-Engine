@@ -8,7 +8,7 @@
     "trunkTile": "oak_trunk",
     "canopyTile": "oak_leaves"
   },
-  "enemySpawnTable": "forest_day_squirrel",
+  "enemySpawnTable": "forest_boar",
   "isRegionalBiome": true,
   "selectionWeight": 4,
   "climate": {
@@ -43,7 +43,7 @@
     "fogDensity": 0.08
   },
   "spawning": {
-    "surfaceDayTableId": "forest_day_squirrel",
+    "surfaceDayTableId": "forest_boar",
     "surfaceNightTableId": "forest_night_firefly",
     "caveTableId": "underground_bat",
     "densityMultiplier": 1.05,

@@ -74,6 +74,17 @@
       "allowedBiomeIds": ["meadow"]
     },
     {
+      "id": "frostwood_pine_groves",
+      "kind": "tree_cluster",
+      "chancePerRegion": 0.86,
+      "minCount": 3,
+      "maxCount": 7,
+      "minTileY": 50,
+      "maxTileY": 66,
+      "minSpacingTiles": 14,
+      "allowedBiomeIds": ["frostwood"]
+    },
+    {
       "id": "amber_grove_workshops",
       "kind": "structure_cluster",
       "chancePerRegion": 0.55,

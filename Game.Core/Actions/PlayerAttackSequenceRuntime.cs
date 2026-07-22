@@ -29,6 +29,11 @@ internal sealed class PlayerAttackSequenceRuntime : IAttackStartGate
     private ulong _materializedProjectileAttackInstanceId;
     private ulong _lastGateInputSequence;
     private AttackInputFailure _lastGateFailure;
+    private ManaSpendResult _frameManaSpend;
+    private ManaReservationFinalizationResult _frameManaFinalization;
+    private ManaReservationHandle _pendingManaReservation;
+    private ManaSpendResult _pendingManaSpend;
+    private ManaRefundPolicy _pendingManaRefundPolicy;
 
     public PlayerAttackSequenceRuntime(MeleeAttackSystem melee, ProjectileFactory projectiles)
     {
@@ -63,6 +68,8 @@ internal sealed class PlayerAttackSequenceRuntime : IAttackStartGate
         _resourceGuard = guard;
         _lastGateInputSequence = 0;
         _lastGateFailure = AttackInputFailure.None;
+        _frameManaSpend = ManaSpendResult.None;
+        _frameManaFinalization = ManaReservationFinalizationResult.None;
 
         var queuedInput = default(AttackInputResult);
         var attemptedKind = requestedAction is null
@@ -97,12 +104,13 @@ internal sealed class PlayerAttackSequenceRuntime : IAttackStartGate
 
         var projectile = MaterializeActiveProjectile(content, player, entities);
         var melee = ResolveActiveMelee(content, player, entities, events);
+        FinalizePendingManaAfterAdvance(player);
         CaptureSnapshot();
         ClearResources();
 
         if (requestFailure != GameplayActionFailureReason.None)
         {
-            return PlayerItemUseResult.BlockedResult(attemptedKind, requestFailure);
+            return AttachManaFeedback(PlayerItemUseResult.BlockedResult(attemptedKind, requestFailure));
         }
 
         if (!requestActive)
@@ -112,15 +120,17 @@ internal sealed class PlayerAttackSequenceRuntime : IAttackStartGate
 
         if (!queuedInput.Accepted)
         {
-            return PlayerItemUseResult.BlockedResult(
+            return AttachManaFeedback(PlayerItemUseResult.BlockedResult(
                 attemptedKind,
-                MapFailure(queuedInput.Failure));
+                MapFailure(queuedInput.Failure)));
         }
 
         if (_lastGateInputSequence == queuedInput.Command.Sequence &&
             _lastGateFailure != AttackInputFailure.None)
         {
-            return PlayerItemUseResult.BlockedResult(attemptedKind, MapFailure(_lastGateFailure));
+            return AttachManaFeedback(PlayerItemUseResult.BlockedResult(
+                attemptedKind,
+                MapFailure(_lastGateFailure)));
         }
 
         var started = ContainsEvent(
@@ -137,15 +147,17 @@ internal sealed class PlayerAttackSequenceRuntime : IAttackStartGate
             {
                 Status = PlayerItemUseStatus.Succeeded,
                 AttemptedKind = attemptedKind,
-                SuccessReason = GameplayActionSuccessReason.ActionStarted
+                SuccessReason = GameplayActionSuccessReason.ActionStarted,
+                ManaSpend = _frameManaSpend,
+                ManaFinalization = _frameManaFinalization
             };
         }
 
         if (ContainsEvent(AttackRuntimeEventKind.InputRejected, queuedInput.Command.Sequence))
         {
-            return PlayerItemUseResult.BlockedResult(
+            return AttachManaFeedback(PlayerItemUseResult.BlockedResult(
                 attemptedKind,
-                MapFailure(FindInputFailure(queuedInput.Command.Sequence)));
+                MapFailure(FindInputFailure(queuedInput.Command.Sequence))));
         }
 
         return CreateProgressResult(attemptedKind, melee, projectile);
@@ -156,7 +168,7 @@ internal sealed class PlayerAttackSequenceRuntime : IAttackStartGate
         _lastGateInputSequence = request.InputSequence;
         var player = _resourcePlayer;
         var inventory = _resourceInventory;
-        if (player is null || inventory is null)
+        if (player is null || inventory is null || _pendingManaReservation.IsValid)
         {
             return _lastGateFailure = AttackInputFailure.LockedOut;
         }
@@ -170,37 +182,52 @@ internal sealed class PlayerAttackSequenceRuntime : IAttackStartGate
             return _lastGateFailure = AttackInputFailure.InsufficientStamina;
         }
 
-        if (player.Mana < manaCost)
-        {
-            return _lastGateFailure = AttackInputFailure.InsufficientMana;
-        }
-
         if (request.Cost.Ammo > 0 &&
             CountRemovableItems(inventory, request.Cost.AmmoItemId!) < request.Cost.Ammo)
         {
             return _lastGateFailure = AttackInputFailure.InsufficientAmmo;
         }
 
+        var manaSpend = player.ManaComponent.TryReserve(
+            manaCost,
+            _action?.ManaRegenerationDelaySeconds ?? ManaComponent.DefaultRegenerationDelaySeconds);
+        _frameManaSpend = manaSpend;
+        if (!manaSpend.Succeeded)
+        {
+            return _lastGateFailure = MapManaSpendFailure(manaSpend.Status);
+        }
+
         if (request.Cost.Ammo > 0 &&
             !inventory.RemoveItem(request.Cost.AmmoItemId!, request.Cost.Ammo))
         {
+            _frameManaFinalization = player.ManaComponent.FinalizeWithRefund(
+                manaSpend.Reservation,
+                ManaRefundPolicy.Always,
+                ManaRefundReason.ResourceCommitFailed);
             return _lastGateFailure = AttackInputFailure.InsufficientAmmo;
-        }
-
-        if (!player.ManaComponent.TrySpend(manaCost))
-        {
-            throw new InvalidOperationException("Validated attack mana could not be spent atomically.");
         }
 
         if (request.Cost.Stamina > 0 &&
             _resourceGuard!.SpendStamina(request.Cost.Stamina) != request.Cost.Stamina)
         {
-            throw new InvalidOperationException("Validated attack stamina could not be spent atomically.");
+            if (request.Cost.Ammo > 0 &&
+                !inventory.AddItem(new ItemStack(request.Cost.AmmoItemId!, request.Cost.Ammo)))
+            {
+                throw new InvalidOperationException("Attack resource rollback could not restore removed ammunition.");
+            }
+
+            _frameManaFinalization = player.ManaComponent.FinalizeWithRefund(
+                manaSpend.Reservation,
+                ManaRefundPolicy.Always,
+                ManaRefundReason.ResourceCommitFailed);
+            return _lastGateFailure = AttackInputFailure.InsufficientStamina;
         }
 
+        _pendingManaReservation = manaSpend.Reservation;
+        _pendingManaSpend = manaSpend;
+        _pendingManaRefundPolicy = _action?.ManaRefundPolicy ?? ManaRefundPolicy.BeforeEffect;
         return _lastGateFailure = AttackInputFailure.None;
     }
-
     private GameplayActionFailureReason PrepareInput(
         GameContentDatabase content,
         ItemDefinition? requestedItem,
@@ -300,26 +327,35 @@ internal sealed class PlayerAttackSequenceRuntime : IAttackStartGate
             return null;
         }
 
-        var direction = _activeTarget - player.Body.Center;
-        var damageMultiplier = action.Kind == ItemActionKind.Cast
-            ? player.Stats.MagicDamageMultiplier
-            : player.Stats.RangedDamageMultiplier;
-        var damage = Math.Max(
-            1,
-            (int)MathF.Round((definition.Damage + _item.Damage) * damageMultiplier));
-        var projectile = _projectiles.Create(
-            definition,
-            player.Body.Center,
-            direction,
-            player.Id == 0 ? null : player.Id,
-            damageOverride: damage,
-            damageTypeOverride: action.Kind == ItemActionKind.Cast ? DamageType.Magic : null);
-        projectile.Velocity *= action.ProjectileSpeedMultiplier;
-        entities.Add(projectile);
-        _materializedProjectileAttackInstanceId = sequencer.AttackInstanceId;
-        return projectile;
+        try
+        {
+            var runtimeDefinition = action.Kind == ItemActionKind.Cast
+                ? MagicAttackResolver.ResolveProjectile(definition, _item, player.Stats)
+                : definition with
+                {
+                    Damage = Math.Max(
+                        1,
+                        (int)MathF.Round(
+                            (definition.Damage + _item.Damage) *
+                            player.Stats.RangedDamageMultiplier))
+                };
+            var direction = _activeTarget - player.Body.Center;
+            var projectile = _projectiles.Create(
+                runtimeDefinition,
+                player.Body.Center,
+                direction,
+                player.Id == 0 ? null : player.Id);
+            projectile.Velocity *= action.ProjectileSpeedMultiplier;
+            entities.Add(projectile);
+            _materializedProjectileAttackInstanceId = sequencer.AttackInstanceId;
+            return projectile;
+        }
+        catch
+        {
+            RefundPendingMana(player, ManaRefundReason.MaterializationFailed);
+            throw;
+        }
     }
-
     private MeleeAttackResult ResolveActiveMelee(
         GameContentDatabase content,
         PlayerEntity player,
@@ -375,6 +411,88 @@ internal sealed class PlayerAttackSequenceRuntime : IAttackStartGate
         return new MeleeAttackResult(true, hits, deaths, 0, effects);
     }
 
+    private void FinalizePendingManaAfterAdvance(PlayerEntity player)
+    {
+        if (!_pendingManaReservation.IsValid)
+        {
+            return;
+        }
+
+        if (TryFindEvent(AttackRuntimeEventKind.AttackCancelled, out var cancelled))
+        {
+            var reason = cancelled.PreviousPhase == AttackRuntimePhase.Startup
+                ? ManaRefundReason.CancelledBeforeEffect
+                : ManaRefundReason.CancelledAfterEffect;
+            RefundPendingMana(player, reason);
+            return;
+        }
+
+        if (_sequencer?.Phase == AttackRuntimePhase.Active)
+        {
+            _frameManaFinalization = player.ManaComponent.Commit(_pendingManaReservation);
+            if (_frameManaFinalization.Status != ManaReservationFinalizationStatus.Committed)
+            {
+                throw new InvalidOperationException("An active attack could not commit its reserved mana.");
+            }
+
+            _frameManaSpend = _pendingManaSpend with
+            {
+                Status = ManaSpendStatus.Spent,
+                Reservation = default,
+                CurrentMana = player.Mana
+            };
+            ClearPendingMana();
+            return;
+        }
+
+        if (_sequencer?.Phase is AttackRuntimePhase.Idle or AttackRuntimePhase.Cooldown)
+        {
+            RefundPendingMana(player, ManaRefundReason.RuntimeReset);
+        }
+    }
+
+    private void RefundPendingMana(PlayerEntity player, ManaRefundReason reason)
+    {
+        if (!_pendingManaReservation.IsValid)
+        {
+            return;
+        }
+
+        _frameManaFinalization = player.ManaComponent.FinalizeWithRefund(
+            _pendingManaReservation,
+            _pendingManaRefundPolicy,
+            reason);
+        _frameManaSpend = _pendingManaSpend with
+        {
+            Status = ManaSpendStatus.Spent,
+            Reservation = default,
+            CurrentMana = player.Mana
+        };
+        ClearPendingMana();
+    }
+
+    private void ClearPendingMana()
+    {
+        _pendingManaReservation = default;
+        _pendingManaSpend = ManaSpendResult.None;
+        _pendingManaRefundPolicy = ManaRefundPolicy.None;
+    }
+
+    private bool TryFindEvent(AttackRuntimeEventKind kind, out AttackRuntimeEvent found)
+    {
+        var buffer = _events!;
+        for (var index = 0; index < buffer.Count; index++)
+        {
+            if (buffer[index].Kind == kind)
+            {
+                found = buffer[index];
+                return true;
+            }
+        }
+
+        found = default;
+        return false;
+    }
     private void CaptureSnapshot()
     {
         var sequencer = _sequencer!;
@@ -432,7 +550,7 @@ internal sealed class PlayerAttackSequenceRuntime : IAttackStartGate
         return AttackInputFailure.LockedOut;
     }
 
-    private static PlayerItemUseResult CreateProgressResult(
+    private PlayerItemUseResult CreateProgressResult(
         PlayerItemUseKind kind,
         MeleeAttackResult melee,
         ProjectileEntity? projectile)
@@ -446,10 +564,20 @@ internal sealed class PlayerAttackSequenceRuntime : IAttackStartGate
         {
             Status = PlayerItemUseStatus.InProgress,
             AttemptedKind = kind,
-            SuccessReason = GameplayActionSuccessReason.ActionProgressed
+            SuccessReason = GameplayActionSuccessReason.ActionProgressed,
+            ManaSpend = _frameManaSpend,
+            ManaFinalization = _frameManaFinalization
         };
     }
 
+    private PlayerItemUseResult AttachManaFeedback(PlayerItemUseResult result)
+    {
+        return result with
+        {
+            ManaSpend = _frameManaSpend,
+            ManaFinalization = _frameManaFinalization
+        };
+    }
     private static long CountRemovableItems(PlayerInventory inventory, string itemId)
     {
         var count = 0L;
@@ -472,6 +600,14 @@ internal sealed class PlayerAttackSequenceRuntime : IAttackStartGate
         return count;
     }
 
+    private static AttackInputFailure MapManaSpendFailure(ManaSpendStatus status)
+    {
+        return status switch
+        {
+            ManaSpendStatus.InsufficientMana => AttackInputFailure.InsufficientMana,
+            _ => AttackInputFailure.LockedOut
+        };
+    }
     private static GameplayActionFailureReason MapFailure(AttackInputFailure failure)
     {
         return failure switch

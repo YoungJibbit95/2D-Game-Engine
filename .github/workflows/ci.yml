@@ -172,15 +172,22 @@ jobs:
           --logger "trx;LogFileName=negative-x.trx"
           --results-directory "artifacts/test-results/${{ matrix.os }}/${{ matrix.configuration }}"
 
-      - name: Run full test suite
+      - name: Run functional test suite
         run: >-
-          dotnet test YjsE.sln
+          dotnet test Game.Tests/Game.Tests.csproj
           --configuration ${{ matrix.configuration }}
           --no-build
           --no-restore
           --nologo
-          --logger "trx;LogFileName=full.trx"
+          --filter "FullyQualifiedName!~Game.Tests.PerformanceTests&FullyQualifiedName!~EntityReliabilityPerformanceTests&FullyQualifiedName!~ParticlePhysicsPerformanceTests&FullyQualifiedName!~SpawnReliabilityPerformanceTests&FullyQualifiedName!~RenderPassGraphPerformanceTests&FullyQualifiedName!~TransientRenderTargetPoolPerformanceTests"
+          --logger "trx;LogFileName=functional.trx"
           --results-directory "artifacts/test-results/${{ matrix.os }}/${{ matrix.configuration }}"
+
+      - name: Run isolated Release performance classes
+        if: matrix.configuration == 'Release'
+        shell: pwsh
+        run: |
+          & ./tools/run_isolated_performance_tests.ps1 -Configuration Release
 
       - name: Run quick performance harness
         if: matrix.configuration == 'Release'

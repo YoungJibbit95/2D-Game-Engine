@@ -1,0 +1,23 @@
+{
+  "id": "twilight_marsh_wisp",
+  "entityId": "prism_wisp",
+  "biomeId": "twilight_marsh",
+  "time": "any",
+  "habitats": ["surface", "openAir", "waterEdge"],
+  "minTileY": 0,
+  "chance": 0.32,
+  "weight": 0.55,
+  "dayWeight": 0.75,
+  "nightWeight": 1.35,
+  "weatherWeights": { "none": 1.0, "Clear": 0.8, "Fog": 1.35, "Rain": 1.2, "Storm": 0.85 },
+  "habitatWeights": { "Surface": 0.85, "OpenAir": 1.15, "WaterEdge": 1.45 },
+  "maxActive": 4,
+  "populationGroup": "marsh-hostiles",
+  "maxActiveInGroup": 6,
+  "populationRegionSizeTiles": 80,
+  "maxActiveInRegion": 2,
+  "maxActiveInHabitat": 3,
+  "localPopulationRadiusTiles": 36,
+  "maxActiveInLocalArea": 2,
+  "cooldownSeconds": 8.0
+}

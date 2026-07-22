@@ -1,3 +1,5 @@
+using Game.Core.Combat;
+
 namespace Game.Core.Items;
 
 public sealed record ItemActionDefinition
@@ -15,6 +17,10 @@ public sealed record ItemActionDefinition
     public float ProjectileSpeedMultiplier { get; init; } = 1f;
 
     public float ReachPixels { get; init; }
+
+    public float? ManaRegenerationDelaySeconds { get; init; }
+
+    public ManaRefundPolicy ManaRefundPolicy { get; init; } = ManaRefundPolicy.BeforeEffect;
 
     public static ItemActionDefinition Create(ItemActionKind kind)
     {

@@ -55,6 +55,7 @@ internal static class ReflectionRadianceMapBuilder
         var surfaceCount = Math.Min(surfaces.Length, profile.Budget.MaxReflectionSurfaces);
         var daylight = TileRayCastShadowMaskBuilder.ResolveDaylightColor(frame.NormalizedTimeOfDay);
         var skyIllumination = TileRayCastShadowMaskBuilder.ResolveSkyIllumination(frame.NormalizedTimeOfDay);
+        var animationTick = frame.FrameIndex / 6L;
         var pixelsShaded = 0;
         var radianceSamples = 0;
         for (var surfaceIndex = 0; surfaceIndex < surfaceCount; surfaceIndex++)
@@ -86,6 +87,8 @@ internal static class ReflectionRadianceMapBuilder
             var surfaceTintGreen = surface.Tint.G / 255f;
             var surfaceTintBlue = surface.Tint.B / 255f;
             var materialFactor = surface.Kind == ReflectionSurfaceKind.Water ? 1f : 0.58f;
+            var baseReflectance = surface.Kind == ReflectionSurfaceKind.Water ? 0.02f : 0.08f;
+            var absorption = surface.Kind == ReflectionSurfaceKind.Water ? 0.38f : 0.72f;
             var strength = Math.Clamp(surface.Reflectivity, 0f, 1f) *
                 reflectionStrength *
                 materialFactor;
@@ -94,15 +97,24 @@ internal static class ReflectionRadianceMapBuilder
             {
                 var strip = Math.Min(strips - 1, (y - minY) / rowStep);
                 var sourceY = Math.Max(0, minY - 1 - strip * 2);
-                var depthFade = 1f - strip / (float)Math.Max(1, strips) * 0.34f;
+                var normalizedDepth = (strip + 0.5f) / Math.Max(1f, strips);
+                var viewCosine = Math.Clamp(0.18f + normalizedDepth * 0.34f, 0.05f, 0.95f);
+                var fresnel = ResolveFresnelReflectance(baseReflectance, viewCosine);
+                var depthTransmission = MathF.Exp(-absorption * normalizedDepth);
+                var opticalScale = (0.48f + fresnel * 0.52f) * depthTransmission;
                 for (var x = minX; x <= maxX; x++)
                 {
-                    var sourceIndex = sourceY * profile.MaskSize.X + x;
+                    var wave = ResolveTriangleWave(surface.Phase, x, strip, animationTick);
+                    var sourceOffset = surface.Kind == ReflectionSurfaceKind.Water
+                        ? ResolveWaterRefractionOffset(wave)
+                        : 0;
+                    var sourceX = Math.Clamp(x + sourceOffset, minX, maxX);
+                    var sourceIndex = sourceY * profile.MaskSize.X + sourceX;
                     var destinationIndex = y * profile.MaskSize.X + x;
                     var skyVisibility = 1f - Math.Clamp(shadow[sourceIndex], 0f, 1f);
                     var skyRadiance = (0.045f + skyVisibility * 0.115f) * skyIllumination;
-                    var ripple = ResolveStableRipple(surface.Phase, x, strip);
-                    var scale = strength * depthFade * ripple;
+                    var ripple = 0.92f + wave * 0.08f;
+                    var scale = strength * opticalScale * ripple;
                     var red = (lightRed[sourceIndex] * 0.68f + daylight.R / 255f * skyRadiance) *
                         surfaceTintRed * scale;
                     var green = (lightGreen[sourceIndex] * 0.68f + daylight.G / 255f * skyRadiance) *
@@ -127,6 +139,14 @@ internal static class ReflectionRadianceMapBuilder
             surfaces.Length > surfaceCount);
     }
 
+    internal static float ResolveFresnelReflectance(float baseReflectance, float viewCosine)
+    {
+        var f0 = ClampFinite(baseReflectance, 0f, 1f, 0.02f);
+        var cosine = ClampFinite(viewCosine, 0f, 1f, 1f);
+        var grazing = 1f - cosine;
+        return f0 + (1f - f0) * grazing * grazing * grazing * grazing * grazing;
+    }
+
     private static Color AdditiveColor(Color current, float red, float green, float blue)
     {
         return new Color(
@@ -136,13 +156,35 @@ internal static class ReflectionRadianceMapBuilder
             1f);
     }
 
-    private static float ResolveStableRipple(uint phase, int x, int strip)
+    private static float ResolveTriangleWave(uint phase, int x, int strip, long animationTick)
     {
-        var value = phase ^ unchecked((uint)x * 0x9E3779B9u) ^ unchecked((uint)strip * 0x85EBCA6Bu);
-        value ^= value >> 16;
-        value *= 0x7FEB352Du;
-        value ^= value >> 15;
-        return 0.84f + (value & 255u) / 255f * 0.16f;
+        const int period = 12;
+        const int halfPeriod = period / 2;
+        var phaseStep = (int)(phase % period);
+        var animationStep = (int)(animationTick % period);
+        if (animationStep < 0)
+        {
+            animationStep += period;
+        }
+
+        var position = (phaseStep + x + strip * 2 + animationStep) % period;
+        if (position < 0)
+        {
+            position += period;
+        }
+
+        var triangle = position <= halfPeriod ? position : period - position;
+        return triangle / (float)halfPeriod * 2f - 1f;
+    }
+
+    private static int ResolveWaterRefractionOffset(float wave)
+    {
+        return wave switch
+        {
+            <= -0.34f => -1,
+            >= 0.34f => 1,
+            _ => 0
+        };
     }
 
     private static int ScreenToMaskFloor(int value, int start, int length, int count)

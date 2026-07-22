@@ -11,5 +11,9 @@ public enum TileFlags : ushort
     HasWall = 1 << 4,
     HasLiquid = 1 << 5,
     IsActuated = 1 << 6,
-    IsNatural = 1 << 7
+    IsNatural = 1 << 7,
+    /// <summary>Upward-facing slope whose surface rises toward positive X.</summary>
+    SlopeAscendingRight = 1 << 8,
+    /// <summary>Upward-facing slope whose surface rises toward negative X.</summary>
+    SlopeAscendingLeft = 1 << 9
 }

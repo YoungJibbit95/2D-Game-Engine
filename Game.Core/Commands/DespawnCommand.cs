@@ -14,6 +14,7 @@ public sealed class DespawnCommand : TypedConsoleCommand
                     "target",
                     CommandArgumentType.Identifier,
                     description: "#instanceId, entity definition id, or all.",
+                    choices: new[] { "all" },
                     suggestionSource: CommandSuggestionSource.LoadedEntities),
                 new CommandArgumentSpecification(
                     "count",
@@ -22,7 +23,9 @@ public sealed class DespawnCommand : TypedConsoleCommand
                     "Maximum number to despawn.",
                     minimum: 1)
             },
-            examples: new[] { "/despawn #12", "/despawn slime 5", "/despawn all" }))
+            examples: new[] { "/despawn #12", "/despawn slime 5", "/despawn all" },
+            category: CommandCategory.Entities,
+            searchTerms: new[] { "entity", "mob", "enemy", "remove" }))
     {
     }
 

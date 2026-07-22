@@ -1,4 +1,5 @@
 using Game.Core.Physics;
+using GameWorld = Game.Core.World.World;
 
 namespace Game.Core.Entities;
 
@@ -54,5 +55,18 @@ internal interface IEntityPhysicsParticipant
 
     TileCollisionSettings CollisionSettings { get; }
 
-    void SynchronizePhysicsState();
+    /// <summary>
+    /// Synchronizes authoritative entity state from one completed physics step.
+    /// <paramref name="tileContacts"/> is a transient, caller-owned slice containing
+    /// only this body's written contacts and must not be retained by the participant.
+    /// </summary>
+    void SynchronizePhysicsState(
+        GameWorld world,
+        in PhysicsMoveResult moveResult,
+        ReadOnlySpan<PhysicsContact> tileContacts);
+}
+
+internal interface IContinuousCollisionPhysicsParticipant : IEntityPhysicsParticipant
+{
+    bool UseContinuousCollision { get; }
 }

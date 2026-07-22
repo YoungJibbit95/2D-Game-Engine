@@ -253,7 +253,7 @@ public sealed class ParallaxCompositionPlannerTests
     [InlineData(3440, 1440, 1, -8_192f)]
     [InlineData(5120, 1440, 1, -24_987_654.75f)]
     [InlineData(7680, 2160, 2, 24_987_654.75f)]
-    public void Build_AuthoredNativeRepeatsRemainContiguousAndUnmodified(
+    public void Build_FullscreenAuthoredRepeatsRemainContiguousAtNegativeAndUltrawideCoordinates(
         int viewportWidth,
         int viewportHeight,
         int pixelScale,
@@ -267,7 +267,7 @@ public sealed class ParallaxCompositionPlannerTests
             VerticalJitter = 0,
             LandmarkPeriod = 0,
             PreserveAuthoredRepeat = true,
-            ProjectionMode = ParallaxProjectionMode.DistantHorizonBand
+            ProjectionMode = ParallaxProjectionMode.FullscreenDepthPlane
         };
         var commands = new ParallaxCompositionCommand[ParallaxCompositionPlanner.MaximumCommandCount];
         var viewport = new Rectangle(0, 0, viewportWidth, viewportHeight);
@@ -296,6 +296,8 @@ public sealed class ParallaxCompositionPlannerTests
             Assert.Equal(repeatWidth, command.Bounds.Width);
             Assert.Equal(repeatHeight, command.Bounds.Height);
             Assert.Equal(4f, command.Bounds.Width / (float)command.Bounds.Height);
+            Assert.True(command.Bounds.Right > viewport.Left);
+            Assert.True(command.Bounds.Left < viewport.Right);
             if (!firstRepeat)
             {
                 Assert.Equal(previousRight, command.Bounds.Left);

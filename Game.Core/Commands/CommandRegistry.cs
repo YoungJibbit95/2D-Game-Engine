@@ -14,7 +14,16 @@ public sealed class CommandRegistry
         registry.Register(new RemoveItemCommand());
         registry.Register(new ClearInventoryCommand());
         registry.Register(new TimeCommand());
+        registry.Register(new WeatherCommand());
+        registry.Register(new BiomeCommand());
+        registry.Register(new DeveloperSaveCommand());
+        registry.Register(new RenderingFeatureCommand());
+        registry.Register(new LightingDebugCommand());
+        registry.Register(new GameRuleCommand());
+        registry.Register(new PlayerResourceCommand("health", DeveloperTools.PlayerResourceKind.Health));
+        registry.Register(new PlayerResourceCommand("mana", DeveloperTools.PlayerResourceKind.Mana));
         registry.Register(new SpawnCommand());
+        registry.Register(new SpawnProjectileCommand());
         registry.Register(new DespawnCommand());
         registry.Register(new TeleportCommand());
         registry.Register(new PositionCommand());
@@ -34,11 +43,18 @@ public sealed class CommandRegistry
     public void Register(IConsoleCommand command)
     {
         ArgumentNullException.ThrowIfNull(command);
-        AddName(command.Name, command);
 
-        foreach (var alias in command.Aliases)
+        var pendingNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        ValidateName(command.Name, pendingNames);
+        for (var index = 0; index < command.Aliases.Count; index++)
         {
-            AddName(alias, command);
+            ValidateName(command.Aliases[index], pendingNames);
+        }
+
+        _byName.Add(command.Name, command);
+        for (var index = 0; index < command.Aliases.Count; index++)
+        {
+            _byName.Add(command.Aliases[index], command);
         }
 
         _commands.Add(command);
@@ -58,18 +74,21 @@ public sealed class CommandRegistry
             : new CommandSpecification(command.Name, command.Description, aliases: command.Aliases);
     }
 
-    private void AddName(string name, IConsoleCommand command)
+    private void ValidateName(string name, ISet<string> pendingNames)
     {
         if (string.IsNullOrWhiteSpace(name))
         {
             throw new ArgumentException("Command names and aliases must not be empty.", nameof(name));
         }
 
+        if (!pendingNames.Add(name))
+        {
+            throw new InvalidOperationException($"Command '{name}' declares a duplicate name or alias.");
+        }
+
         if (_byName.ContainsKey(name))
         {
             throw new InvalidOperationException($"A command named '{name}' is already registered.");
         }
-
-        _byName.Add(name, command);
     }
 }

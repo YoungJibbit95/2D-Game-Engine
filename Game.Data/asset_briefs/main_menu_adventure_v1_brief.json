@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "scope": "main_menu_adventure_v1",
+  "assetId": "ui/main_menu/adventure/v1",
+  "outputPath": "assets/MainMenuAdventureV1/main_menu_adventure_v1.png",
+  "width": 1672,
+  "height": 941,
+  "requirements": [
+    "No baked title, text, menu buttons, logo, border or watermark.",
+    "Preserve a full-bleed 16:9-compatible composition under centered aspect-fill cropping.",
+    "Runtime performs no file IO or resource creation in Draw."
+  ],
+  "globalStyle": "High-detail side-view fantasy sandbox pixel art with crisp clustered pixels, layered atmospheric depth and warm practical lights.",
+  "globalNegativePrompt": "text, logo, UI panel, watermark, photorealism, vector art, smooth 3D render, giant character, blank central rectangle",
+  "globalRequirements": [
+    "No baked title, text, menu buttons, logo, border or watermark.",
+    "Preserve a full-bleed 16:9-compatible composition under centered aspect-fill cropping.",
+    "Runtime must load the PNG only during MainMenuState.LoadContent and dispose it when the state exits.",
+    "Runtime draw uses the existing PointClamp sampler and performs no file IO or resource creation in Draw.",
+    "Code-native ambient animation must honor reduced-motion and animation-speed settings.",
+    "A procedural fallback remains available when the file is absent."
+  ],
+  "briefs": [
+    {
+      "spriteId": "ui/main_menu/adventure/v1",
+      "outputPath": "assets/MainMenuAdventureV1/main_menu_adventure_v1.png",
+      "width": 1672,
+      "height": 941,
+      "subject": "Full-screen main-menu backdrop behind code-native navigation, title, focus states and animated ambient accents.",
+      "prompt": "Create a full-bleed magical dusk valley framed by massive inhabited trees, with three prominent floating islands, layered blue-green mountains, terraced jungle ruins, waterfalls, foreground vegetation and a naturally calm center-left navigation area.",
+      "background": "opaque",
+      "requirements": [
+        "Massive ancient trees and inhabited treehouse platforms frame the far left and right edges.",
+        "Three prominent floating islands occupy the upper middle and carry foliage, dangling roots and waterfalls.",
+        "A deep blue-green mountain valley and overgrown terraced ruin city fill the middle and lower distance.",
+        "The sky transitions from deep violet-blue to coral-gold dusk and contains restrained stars.",
+        "The center-left remains naturally dark enough for a narrow vertical menu without becoming an empty rectangle."
+      ],
+      "tags": [
+        "ui",
+        "main-menu",
+        "background",
+        "pixel-art",
+        "adventure",
+        "runtime-active",
+        "production-sample"
+      ]
+    }
+  ]
+}

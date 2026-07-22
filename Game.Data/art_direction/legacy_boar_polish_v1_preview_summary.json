@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "waveId": "legacy_boar_polish_v1",
+  "preview": "art_direction/legacy_boar_polish_v1_contact_sheet.png",
+  "previewDimensions": [
+    720,
+    336
+  ],
+  "nativeSheetDimensions": [
+    128,
+    32
+  ],
+  "nativeFrameDimensions": [
+    32,
+    32
+  ],
+  "frameOrder": [
+    "idle",
+    "windup",
+    "charge",
+    "attack"
+  ],
+  "scale": 3,
+  "resampling": "nearest-neighbor",
+  "spriteIds": [
+    "entities/enemies/forest_boar",
+    "entities/enemies/forest_boar_elite"
+  ],
+  "generatorSha256": "43861d7cc0f13df5d4ddae26e1ca392ba7cbcca4ef905b5aa4f40b045735613d"
+}

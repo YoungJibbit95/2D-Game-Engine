@@ -24,7 +24,7 @@ public static class MiningInteractionCandidateFactory
         ArgumentNullException.ThrowIfNull(world);
         ArgumentNullException.ThrowIfNull(tiles);
         if (!world.IsInBounds(target.X, target.Y) ||
-            !world.TryGetTile(target.X, target.Y, out var tile) || tile.IsAir)
+            !world.TryGetTile(target.X, target.Y, out var tile) || (tile.IsAir && tile.WallId == 0))
         {
             return new MiningInteractionCandidateResult(
                 false,
@@ -32,7 +32,8 @@ public static class MiningInteractionCandidateFactory
                 GameplayActionFailureReason.InvalidTarget);
         }
 
-        var definition = tiles.GetByNumericId(tile.TileId);
+        var minedTileId = tile.IsAir ? tile.WallId : tile.TileId;
+        var definition = tiles.GetByNumericId(minedTileId);
         if (toolPower < definition.MiningPowerRequired)
         {
             return new MiningInteractionCandidateResult(

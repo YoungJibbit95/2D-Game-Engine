@@ -101,12 +101,56 @@ internal sealed class SpawnIngressController
             : (long)visibleTiles.Right * GameConstants.TileSize - 0.5f;
         var current = actor.Body.Position;
         var nextX = MoveTowards(current.X, targetX, distance);
-        if (nextX == current.X || !IsBodyClear(world, nextX, current.Y, actor.Body.Size.X, actor.Body.Size.Y))
+        if (nextX == current.X ||
+            !TryResolveAdvanceHeight(
+                world,
+                nextX,
+                current.Y,
+                actor.Body.Size.X,
+                actor.Body.Size.Y,
+                out var nextY))
         {
             return;
         }
 
-        actor.Body.Position = new System.Numerics.Vector2(nextX, current.Y);
+        actor.Body.Position = new System.Numerics.Vector2(nextX, nextY);
+    }
+
+    private static bool TryResolveAdvanceHeight(
+        World.World world,
+        float x,
+        float currentY,
+        float width,
+        float height,
+        out float resolvedY)
+    {
+        if (IsBodyClear(world, x, currentY, width, height))
+        {
+            resolvedY = currentY;
+            return true;
+        }
+
+        const int maximumStepTiles = 4;
+        for (var offsetTiles = 1; offsetTiles <= maximumStepTiles; offsetTiles++)
+        {
+            var offset = offsetTiles * GameConstants.TileSize;
+            var upwardY = currentY - offset;
+            if (IsBodyClear(world, x, upwardY, width, height))
+            {
+                resolvedY = upwardY;
+                return true;
+            }
+
+            var downwardY = currentY + offset;
+            if (IsBodyClear(world, x, downwardY, width, height))
+            {
+                resolvedY = downwardY;
+                return true;
+            }
+        }
+
+        resolvedY = currentY;
+        return false;
     }
 
     private static bool IsBodyClear(World.World world, float x, float y, float width, float height)

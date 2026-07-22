@@ -1,0 +1,116 @@
+{
+  "schemaVersion": 1,
+  "waveId": "flying_wildlife_polish_v1",
+  "generatedOn": "2026-07-22",
+  "sourceType": "checked-in deterministic native-pixel generator",
+  "externalDownloads": false,
+  "modelGeneratedSource": false,
+  "generator": {
+    "path": "art_direction/tools/generate_flying_wildlife_polish_v1.py",
+    "version": "1.0.0",
+    "sha256": "708625c82c75d0a3a8f7873472825b064a296d11c86c9bc3a95f3c318857ca6f",
+    "runtime": "Python 3 plus Pillow from art_direction/requirements.txt",
+    "method": "Direct final-size pixel primitives constrained to yjse-pixel-v1; no hidden source art or manual raster edits."
+  },
+  "manifest": "assets/sprites.json",
+  "brief": "asset_briefs/production_wave_03_briefs.json",
+  "preview": "art_direction/flying_wildlife_polish_v1_contact_sheet.png",
+  "assets": [
+    {
+      "spriteId": "entities/critters/meadow_butterfly",
+      "entityId": "meadow_butterfly",
+      "path": "sprites/entities/critters/meadow_butterfly.png",
+      "sha256": "2fff637a0068db644bf013ff0994f0801cfa1e18a79d891cc4d63956f428bf65",
+      "dimensions": [
+        64,
+        16
+      ],
+      "frameDimensions": [
+        16,
+        16
+      ],
+      "frames": [
+        "flight_0",
+        "flight_1",
+        "flight_2",
+        "flight_3"
+      ],
+      "origin": [
+        8,
+        8
+      ],
+      "alphaValues": [
+        0,
+        255
+      ],
+      "generator": "art_direction/tools/generate_flying_wildlife_polish_v1.py",
+      "method": "deterministic native-size Pillow pixel primitives",
+      "license": "YjsE-Project-Owned",
+      "runtimeConsumer": "EntityDefinition texture plus RuntimeEntityAnimationProfile source rectangles through ClientTextureRegistry"
+    },
+    {
+      "spriteId": "entities/critters/forest_moth",
+      "entityId": "forest_moth",
+      "path": "sprites/entities/critters/forest_moth.png",
+      "sha256": "4691ab5d102cedbb366fec6020efde206c843930e67285de33d31c69e11d3e30",
+      "dimensions": [
+        64,
+        16
+      ],
+      "frameDimensions": [
+        16,
+        16
+      ],
+      "frames": [
+        "flight_0",
+        "flight_1",
+        "flight_2",
+        "flight_3"
+      ],
+      "origin": [
+        8,
+        8
+      ],
+      "alphaValues": [
+        0,
+        255
+      ],
+      "generator": "art_direction/tools/generate_flying_wildlife_polish_v1.py",
+      "method": "deterministic native-size Pillow pixel primitives",
+      "license": "YjsE-Project-Owned",
+      "runtimeConsumer": "EntityDefinition texture plus RuntimeEntityAnimationProfile source rectangles through ClientTextureRegistry"
+    },
+    {
+      "spriteId": "entities/critters/cave_glowbug",
+      "entityId": "cave_glowbug",
+      "path": "sprites/entities/critters/cave_glowbug.png",
+      "sha256": "1a5cd59146752f030691d31b376f7d6523eb67dfdf28b4394bdc9fd362a42b96",
+      "dimensions": [
+        64,
+        16
+      ],
+      "frameDimensions": [
+        16,
+        16
+      ],
+      "frames": [
+        "flight_0",
+        "flight_1",
+        "flight_2",
+        "flight_3"
+      ],
+      "origin": [
+        8,
+        8
+      ],
+      "alphaValues": [
+        0,
+        255
+      ],
+      "generator": "art_direction/tools/generate_flying_wildlife_polish_v1.py",
+      "method": "deterministic native-size Pillow pixel primitives",
+      "license": "YjsE-Project-Owned",
+      "runtimeConsumer": "EntityDefinition texture plus RuntimeEntityAnimationProfile source rectangles through ClientTextureRegistry"
+    }
+  ]
+}

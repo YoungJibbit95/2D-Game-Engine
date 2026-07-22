@@ -613,7 +613,7 @@ Character and topdown controllers previously lived in `Game.Core.Physics`, while
 
 - Player control and physical integration have one explicit boundary.
 - Static, kinematic and dynamic bodies share one renderer-neutral contract.
-- Player, enemies and dropped items now use explicit PhysicsWorld integration without moving CharacterController policy into Physics. Dynamic/kinematic body pairs use mutual masks and deterministic material impulses. The topdown tile path, one-way platforms, slopes and joints remain separate additions.
+- Player, enemies and dropped items now use explicit PhysicsWorld integration without moving CharacterController policy into Physics. Dynamic/kinematic body pairs use mutual masks and deterministic material impulses. The topdown tile path, inverted/ceiling slopes and joints remain separate additions.
 - Moving the public topdown types from `Game.Core.Physics` to `Game.Core.Movement` is a source-level breaking namespace change for external consumers.
 
 ### Validation
@@ -683,9 +683,270 @@ Tile animation frames are packed once during content configuration into CPU-bake
 
 - Pass dependencies and invalid graphs fail before rendering, while pass execution remains allocation-free.
 - Tile atlas pages reduce tile texture buckets without changing registry ownership of non-tile resources; a general multi-category atlas and active-biome residency remain future work.
-- Render-graph alias slots are currently planning/telemetry contracts. A physical transient render-target pool still needs to map compatible descriptors onto those slots.
+- Screen-space scene/ping/pong alias slots now map to a fixed-capacity physical transient-target pool with descriptor, generation, lifetime and device/resize validation. Pool ownership is still local to `ScreenSpaceEffectsRenderer`; lifting the same contract to all Playing graph resources remains future work.
 - MonoGame submission counters remain CPU-side framework evidence; backend GPU timestamps are still unavailable.
 
 ### Validation
 
 Graph tests cover cycles, missing producers, phase violations, multiple writers, culling, lifetimes, deterministic aliasing and stale plans. A representative 15-pass Release graph compiles/queries/executes at 33-56 microseconds p50 and 56-78 microseconds p95 with 0 B. Two identical actors reduce estimated texture switches from 4 to 2; a 200-actor alternating fixture reduces them from 400 to 201 at 0 B. The final 1920x1080 Release traversal records 6.061 ms average, 6.061 ms p95, 6.070 ms p99 and 0.574 ms CPU Draw across 600 measured frames, with 0 invalid resources. The prepared High blur plan reduces estimated 1080p sample work from 16,588,800 to 6,220,800 samples per capture (62.5%).
+
+## ADR-0024: Budget AI Decisions Without Deferring Authoritative Physics
+
+Status: `verified`
+
+### Context
+
+Every active enemy previously performed a complete behavior decision on every 60 Hz tick. Spatial indexing removed global scans, but decision cost still grew linearly with actor count and competed with physics, status and lifecycle work. Simply lowering the whole entity update rate would make collisions, knockback, damage and death timing incorrect.
+
+### Decision
+
+`EntityAiDecisionScheduler` uses fixed-capacity caller-owned arrays and a bounded top-K heap to select behavior work. Nearby and engaged actors retain full-rate decisions; mid/far actors use deterministic cadence tickets. Age-first priority prevents starvation and tick/entity-ID ties make overload replayable. Deferred actors accumulate decision elapsed time, while health, status, lifecycle and central Physics continue on every authoritative tick. The scheduler never reapplies cached velocity, so impulses and collision response remain authoritative.
+
+### Consequences
+
+- Large passive populations spend CPU according to a configured decision budget rather than actor count alone.
+- Visual/behavior updates can be less frequent at distance without reducing collision or damage fidelity.
+- Perception and navigation remain synchronous inside selected decisions; future jobs must preserve deterministic publish order and bounded storage.
+
+### Validation
+
+The AI/entity scope passes 38/38 in Debug and Release, covering cadence, priority, fairness, elapsed-time preservation, lifecycle exclusion, manager transfer and physics-every-tick behavior. Isolated Release measurements reduce 500 actors from 0.995 to 0.371 ms average with 0.886 ms p99 and 0 B/tick, and 2,000 actors from 4.557 to 1.378 ms average with 3.132 ms p99 and 0 B/tick.
+
+## ADR-0025: Use Bounded Fail-Closed TOI For Continuous Body Collisions
+
+Status: `verified`
+
+### Context
+
+Swept tile collision protected fast bodies from terrain, but discrete body-pair overlap could still tunnel when small or fast bodies crossed within one fixed step. An unbounded event solver or hidden allocations would trade correctness for unpredictable frame time.
+
+### Decision
+
+`PhysicsWorld.StepWithContinuousBodyCollisions` accepts caller-owned result, tile-contact, pair, continuous-contact, candidate, sort and sweep-state storage. Swept broadphase generates candidates, deterministic TOI ordering resolves tiles before body pairs, and bounded re-query passes propagate impulse chains. Revision tracking invalidates stale candidates after velocity, position or tile response changes. Capacity and overlapping-span errors fail before mutation. If the configured pass limit leaves unresolved candidates, affected bodies freeze for the unchecked remainder and explicit telemetry reports the fail-closed event instead of advancing through geometry.
+
+`EntityManager` retains ownership of the fixed contact array after the step. It derives a bounded read-only slice from each body's fixed slot and `ContactsWritten`, then passes that transient slice through the physics-participant synchronization contract. Projectile runtime synchronization therefore cannot inspect a neighboring body's stale contacts or retain contact storage; it resolves a supplied authoritative contact first and otherwise performs its deterministic exact tile sweep without allocating a second contact collection.
+
+### Consequences
+
+- Fast dynamic/kinematic bodies can opt into continuous body-pair collision without garbage collection or unbounded solver work.
+- Pass and storage limits are visible correctness limits rather than silent tunneling paths.
+- Physics participants receive only their own written tile contacts, and the span lifetime makes caller ownership explicit at the API boundary.
+- The general runtime still chooses which fast movers use the more expensive continuous step; settled populations retain the discrete path.
+
+### Validation
+
+The Physics scope passes 38/38 in Debug and Release, including negative coordinates, masks/materials, tile-before-body ordering, touching-at-zero, three-body impulse chains, stale-candidate invalidation, pass-limit freezing, span overlap and positional ABI compatibility. A focused projectile/entity/combat Release scope passes 59/59, including neighbor-contact isolation and continuous fast-pair routing. Isolated Release measurements are 0.665 ms/step at 0 B for 500 fast bodies and 6.311 ms/step at 0 B for a dense 128-body/8,128-pair fixture; the 500-projectile synchronization fixture remains 0 B across 180 ticks with 0.562 ms median-run p99 across three fresh processes.
+
+## ADR-0026: Derive Bounded Tile Collision Shapes From Stable Tile Flags
+
+Status: `verified`
+
+### Context
+
+The tile ABI already reserved platform, half-block and generic slope flags, but most collision paths still treated every solid tile as a full AABB. Adding renderer-specific polygons or allocating per-tile shape objects would break the renderer-neutral Physics boundary and make dense collision cost depend on authored content.
+
+### Decision
+
+`TileInstance.CollisionShape` derives one value-type contract from the persisted `ushort` flags: empty/actuated, full block, one-way platform, half block and the two upward-facing slope orientations. The legacy generic slope bit maps to ascending-right, while contradictory orientation bits fail closed as a full block. `TileCollisionResolver` handles upward-facing partial floors through its existing bounded tile-test budget and caller-owned contact span. Falling and supported bodies land on the authored surface, horizontal motion follows it, the high side remains a wall and upward motion passes through; no second collision world or shape allocation is introduced.
+
+Clients that only support full-tile particle colliders must query the same shape contract and accept `FullBlock` only. This prevents a half block, platform, slope or actuated tile from silently becoming a full particle AABB while richer particle shapes remain unimplemented.
+
+### Consequences
+
+- Existing tile/save flag widths remain compatible; no save-format migration is required.
+- Floor slopes and half blocks produce deterministic points and normals through the existing contact result.
+- Inverted/ceiling slopes, arbitrary polygons and authored partial-tile rendering/content tools remain explicit later slices.
+- Tile-test exhaustion remains fail-closed and visible through the established movement telemetry.
+
+### Validation
+
+The focused resolver scope passes 26/26 in Release, including legacy flag mapping, ambiguous-orientation fail-closed behavior, one-way compatibility, both slope orientations, half-block landing, slope following, high-side blocking, upward pass-through and 0 B across 1,000 caller-storage moves. The gameplay-particle scope passes 9/9 and proves that unsupported partial shapes behave like empty particle space while full blocks still collide. The integrated functional suites pass 1,576/1,576 in Debug and Release; all timing-sensitive Release contracts pass inside the complete suite.
+
+## ADR-0027: Separate Solar Transport From Temporal Presentation
+
+Status: `verified`
+
+### Context
+
+Per-pixel directional ray marching made mask cost proportional to ray length, amplified camera jitter at tile boundaries and encouraged stale-light fallbacks that could black out open terrain. A single brightness term also could not distinguish direct sun from diffuse sky energy or weather attenuation.
+
+### Decision
+
+`Game.Core.Lighting.SolarRadianceModel` resolves renderer-neutral sun direction, elevation, direct irradiance, diffuse irradiance and night/weather attenuation. The client samples visible tile geometry into packed caller-owned buffers once, transports directional occlusion through O(mask-pixel) scanlines, applies local AO and finite shadow decay, and uses bounded supercover rays for point emitters. High quality may spread three endpoint samples for fractional penumbra; Medium uses one.
+
+`LightingTemporalStabilizer` reprojects history in world-mask coordinates and rejects samples whose occlusion/depth classification changed. Mining, placement, streamed materialization and unload continue to dirty authoritative light/chunk state; temporal history cannot hide a newly opened shaft. Dynamic entity/projectile emitters enter through one bounded visible-light collector. Wet-surface radiance uses bounded Beer-Lambert absorption and Schlick weighting over the prepared reflection surface plan.
+
+This contract is deterministic CPU 2D ray transport plus screen-space reflection. It must not be advertised as hardware ray tracing or full path tracing.
+
+### Consequences
+
+- Open sky, cave mouths and enclosed rooms can use separate direct/diffuse terms without scanning the whole world.
+- Camera movement reuses stable history without smearing across mined or newly occluded edges.
+- Material transmission, normal maps, cached room/portal skylight solving and backend GPU timestamps remain explicit later work.
+- Draw performs no world sampling, ray construction or texture creation.
+
+### Validation
+
+Focused solar, shaft, stale-light, temporal-disocclusion, dynamic-light, reflection and allocation contracts pass inside both 1,576-test suites. The 104x58 Release fixture averages about 1.05 ms at 0 B. A 600-frame 1920x1080 traversal averages 0.602 ms for mask construction and 0.207 ms for temporal stabilization, both at 0 B; total lighting preparation averages 1.505 ms.
+
+## ADR-0028: Keep Physical Particles Renderer-Neutral And Capacity-Bounded
+
+Status: `verified`
+
+### Context
+
+Client-only visual particles had useful art behavior but no reusable collision/force contract, while putting particle simulation into gameplay entities would duplicate authority and make high counts expensive. An engine intended for several 2D genres needs deterministic debris, sparks, weather-adjacent effects and hit feedback without allocating one object per particle.
+
+### Decision
+
+`Game.Core.Particles.ParticlePhysicsWorld` owns a preallocated slot pool with generation-safe handles, deterministic spawn admission, semi-implicit Euler integration, gravity/wind/drag, swept circle-versus-tile collision, depenetration, restitution, friction, work budgets, fairness, snapshots and bounded collision/expiration events. Spawn/update storage never grows during a step. Unsupported partial tile shapes are treated as empty until the particle collider explicitly supports them; only the shared `FullBlock` collision shape may become a full particle AABB.
+
+`Game.Client.Rendering.GameplayParticleSystem` remains presentation-only. Tile-break, melee-hit and projectile-hit cues may spawn physical debris and consume snapshots/events, but they cannot create damage, loot, world edits or a second live gameplay simulation. Existing ambient and decorative paths retain their independent fixed visual budget.
+
+### Consequences
+
+- The same Core pool can support sideview, topdown and tool/editor previews without MonoGame types.
+- Capacity, collision checks, event count and snapshot count are explicit limits rather than hidden collection growth.
+- GPU particle expansion can later consume the same spawn/snapshot contract; it is not required for correctness.
+- Rich slope/platform/liquid particle collision remains separate from the current full-block adapter.
+
+### Validation
+
+Core contracts cover deterministic replay, generation-safe reuse, forces, tunneling prevention, bounce/friction, budgets, fairness and 0 B steady execution. Client tests prove tile-break and combat feedback use authoritative world geometry without becoming gameplay authority. A 10,000-active-particle Release fixture records 0.181/0.300/0.475 ms p50/p95/p99 and 0 B.
+
+## ADR-0029: Project Authored Backgrounds Horizontally But Never Vertically
+
+Status: verified
+
+### Context
+
+Biome panoramas are finite illustrations with an authored horizon, ground silhouette and transparent lower boundary. Treating them as generic fill textures caused the last source row to stretch or repeat into world depth, producing the vertical color bars captured in Forest and ultrawide scenes.
+
+### Decision
+
+Parallax composition separates horizontal coverage from vertical coverage. A plane may repeat on X using floor-division-safe world anchors, but preserves source aspect and receives one finite destination rectangle on Y. Any uncovered lower region is transparent and falls through to the cave/atmosphere presentation; neither clamping nor a terminal-row fill is permitted. Projection, scale and crop are deterministic for negative X, ultrawide viewports and camera-height changes.
+
+### Consequences
+
+- Authored horizons remain stable and cannot smear into underground space.
+- Deep-world presentation is owned by cave/atmosphere layers instead of accidental panorama pixels.
+- Every future plane must declare useful source dimensions and transparent coverage.
+- Biome art still needs enough distinct planes to avoid obvious horizontal repetition.
+
+### Validation
+
+Projection and regression matrices cover aspect ratios from compact through 3440x1440, negative X, high/low camera positions and transparent source bottoms. Day, night, Frostwood and ultrawide smokes show no vertical repeat or bottom cutoff.
+
+## ADR-0030: Gate Weather By Resolved Biome Capability
+
+Status: verified
+
+### Context
+
+A global precipitation state allowed snow in every biome, while an opaque weather overlay turned a large part of the viewport gray or white. Weather is world state, but the visible precipitation type must remain compatible with the resolved regional biome and its vertical layer.
+
+### Decision
+
+Weather definitions distinguish rain, snow and blizzard, and living-world resolution evaluates biome eligibility before publishing the frame snapshot. Frozen precipitation requires an explicit compatible profile such as Frostwood. The client consumes bounded premultiplied particle commands clipped to the viewport; it may not simulate a second weather state or draw a fullscreen snow-color rectangle.
+
+### Consequences
+
+- Forest and warm/cave regions cannot display snow solely because a global random roll selected it.
+- New biomes opt into precipitation through data rather than client conditionals.
+- Accumulation, melt and snow depth remain future authoritative surface-state features.
+- Weather particles share explicit capacity and culling budgets.
+
+### Validation
+
+Core transition/eligibility suites and client presentation matrices cover clear, rain, snow and blizzard across compatible/incompatible biomes. The Frostwood smoke contains sparse flakes and snow/ice terrain without the former opaque band.
+
+## ADR-0031: Cache Local Surface Resolution For Visible Lighting
+
+Status: verified
+
+### Context
+
+Correct skylight needs the local terrain surface for each visible column. The first correct implementation called the regional planner for every mask column, repeatedly constructing cave, feature and structure plans and causing a periodic 425,984-byte lighting-preparation allocation plus avoidable CPU cost.
+
+### Decision
+
+InfiniteWorldChunkGenerator exposes a surface-height resolver that retains the current WorldRegionPlan and uses a bounded 2,048-entry direct-mapped tile-X cache. Cache keys include the complete signed coordinate, so negative X and hash collisions are safe. A miss computes the exact planner height; a hit returns it without allocation. Lighting combines that local surface with direct solar, diffuse portal and lunar terms. Buffers remain caller/renderer-owned and reusable.
+
+### Consequences
+
+- Visible-column queries no longer regenerate regional plans.
+- Memory is fixed and independent of traversal distance.
+- Collisions only reduce hit rate; they cannot return a different coordinate's height.
+- Generator/profile replacement must create a new resolver rather than mutate one in place.
+
+### Validation
+
+Parity tests compare cached and direct planner results across region boundaries and negative X. Repeated warmed queries allocate 0 B. The final V8 smoke records 0 B light-mask construction, 1.563 ms average mask time and 1.971 ms average total lighting preparation.
+
+## ADR-0032: Rebase Restored World-Event Time Relatively
+
+Status: verified
+
+### Context
+
+World time and event sidecars can be saved or restored independently, and developer commands may rewind time. Advancing an event executor whose last tick is ahead of the restored simulation tick previously threw and crashed a night smoke.
+
+### Decision
+
+LivingWorldRuntime owns AlignWorldEventClock. When the authoritative clock moves backward, it shifts the executor's last tick, active-event start/end, cooldown deadlines and journal timestamps by the same delta. Remaining duration and cooldown progress are preserved. Last presentation context is invalidated so weather, light and event modifiers resolve again on the next authoritative capture.
+
+### Consequences
+
+- Save compatibility remains additive; no sidecar schema change is required.
+- Rewinding time does not restart, truncate or duplicate an active event.
+- All callers use the runtime boundary instead of editing executor fields.
+- Forward time progression retains existing phase and exact-once semantics.
+
+### Validation
+
+Runtime and simulation-constructor tests cover active duration, cooldown, journal timestamps and an event sidecar ahead of simulation time. The previously crashing night smoke completes successfully.
+
+## ADR-0033: Route Developer Actions As Typed Intents
+
+Status: verified
+
+### Context
+
+A useful in-game developer surface needs autocomplete and broad mutation commands, but letting UI widgets modify World, Player or rendering fields directly would duplicate gameplay authority and make commands difficult to test or host outside MonoGame.
+
+### Decision
+
+Core command specifications own names, categories, arguments, validation, help, examples and typed result intents. The client command palette owns pointer/keyboard interaction, filtering, completion, history and presentation only. PlayingState maps accepted intents onto authoritative session services and explicit client rendering/settings adapters. Item/entity/biome suggestions come from loaded registries rather than hard-coded UI lists.
+
+### Consequences
+
+- Command parsing and domain validation remain renderer-neutral.
+- The same registry can drive an editor, remote admin shell or test host.
+- UI cannot silently create a second gameplay simulation.
+- New mutation families require an intent, handler and regression test.
+
+### Validation
+
+Parser, suggestion, help, adapter, layout and Playing routing suites cover command and content completion, history/output navigation, world/time/weather/biome, inventory, spawn, rules, health/mana, projectile, rendering, lighting and profiler families.
+
+## ADR-0034: Separate Functional Correctness From Isolated Performance Acceptance
+
+Status: `implemented-unverified`
+
+### Context
+
+A complete Debug or Release suite shares one long-lived testhost. On the current Windows host, unrelated setup can leave scheduler or process-state residue that produces non-repeatable p99 pauses in later timing tests. Re-running affected classes in fresh processes passes at unchanged thresholds and 0 B. Treating the combined host as the only performance gate therefore conflates functional regressions with host scheduling variance; loosening budgets would hide real regressions.
+
+### Decision
+
+CI runs the same complete functional partition in Debug and Release with all timing classes excluded. Release then uses `tools/run_isolated_performance_tests.ps1` to discover every performance test class and run each class in a fresh `dotnet test` process. High-variance p99 fixtures measure seven independently warmed windows and gate the median while requiring every window to remain allocation-free. Numeric budgets are unchanged. Combined Debug/Release runs remain useful diagnostic evidence, but they are not the authoritative timing acceptance process.
+
+### Consequences
+
+- Functional failures cannot be masked by timing filters, and timing failures retain their original budgets.
+- Each timing class starts without accumulated testhost state; this costs additional CI process startup time.
+- Hosted Windows and Ubuntu behavior remains `implemented-unverified` until the committed workflow runs there.
+
+### Validation
+
+The local functional partition passes 1,710/1,710 in Debug and Release. The discovery script finds 21 classes containing 39 tests, and all pass in fresh Release processes. The combat-query, dense-scene and AI scheduling gates also pass together across their seven-window medians with unchanged p99 ceilings and 0 B requirements. Combined-host timing outliers remain recorded as diagnostics; no threshold was raised.

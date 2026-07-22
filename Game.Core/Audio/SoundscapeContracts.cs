@@ -229,6 +229,8 @@ public sealed class SoundscapeResolver
             WeatherKind.Rain => definition.RainLoopId,
             WeatherKind.Storm => definition.StormLoopId ?? definition.RainLoopId,
             WeatherKind.Fog => definition.FogLoopId,
+            WeatherKind.Snow => definition.RainLoopId,
+            WeatherKind.Blizzard => definition.StormLoopId ?? definition.RainLoopId,
             _ => null
         };
     }
@@ -239,6 +241,8 @@ public sealed class SoundscapeResolver
         {
             WeatherKind.Rain => definition.RainStartStingerId,
             WeatherKind.Storm => definition.StormStartStingerId ?? definition.RainStartStingerId,
+            WeatherKind.Snow => definition.RainStartStingerId,
+            WeatherKind.Blizzard => definition.StormStartStingerId ?? definition.RainStartStingerId,
             _ => null
         };
     }

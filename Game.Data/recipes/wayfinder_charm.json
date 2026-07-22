@@ -1,0 +1,12 @@
+{
+  "id": "wayfinder_charm",
+  "result": { "itemId": "wayfinder_charm", "count": 1 },
+  "ingredients": [
+    { "itemId": "copper_ore", "count": 8 },
+    { "itemId": "wood", "count": 4 },
+    { "itemId": "mana_crystal", "count": 1 }
+  ],
+  "station": "workbench",
+  "category": "accessories",
+  "sortOrder": 78
+}

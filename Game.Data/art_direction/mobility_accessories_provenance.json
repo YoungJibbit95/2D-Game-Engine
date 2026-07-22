@@ -1,0 +1,99 @@
+{
+  "schemaVersion": 1,
+  "waveId": "mobility_accessories_v1",
+  "generatedOn": "2026-07-22",
+  "sourceType": "checked-in deterministic pixel generator",
+  "externalDownloads": false,
+  "modelGeneratedSource": false,
+  "generator": {
+    "path": "assets/MobilityAccessories/tools/generate_mobility_accessories.py",
+    "sha256": "2a4027e1f01736741400296577d2f1cce369173b489a07ca9bfab24e83c47944",
+    "runtime": "Python 3 plus Pillow from art_direction/requirements.txt",
+    "method": "Direct final-size Pillow primitives constrained to yjse-pixel-v1; no hidden source art or manual raster edits."
+  },
+  "manifest": "assets/mobility_accessories.sprites.json",
+  "brief": "asset_briefs/mobility_accessories_briefs.json",
+  "preview": "art_direction/mobility_accessories_contact_sheet.png",
+  "assets": [
+    {
+      "spriteId": "items/double_jump_boots",
+      "itemId": "double_jump_boots",
+      "path": "assets/MobilityAccessories/items/double_jump_boots.png",
+      "sha256": "bab3b73aca82032abe0bb29e3f032c48791d7e4c86ff537c55be61b9af566d4a",
+      "dimensions": [
+        32,
+        32
+      ],
+      "alphaValues": [
+        0,
+        255
+      ],
+      "generator": "assets/MobilityAccessories/tools/generate_mobility_accessories.py",
+      "method": "deterministic Pillow pixel primitives at final runtime dimensions",
+      "license": "YjsE-Project-Owned",
+      "runtimeConsumer": "ItemDefinition texture reference through SpriteAssetRegistry and ClientTextureRegistry"
+    },
+    {
+      "spriteId": "items/skyward_wings",
+      "itemId": "skyward_wings",
+      "path": "assets/MobilityAccessories/items/skyward_wings.png",
+      "sha256": "aa883f7dd6282f31e965818db7b965e6d96b7976313c737398aca95c3c1793d5",
+      "dimensions": [
+        32,
+        32
+      ],
+      "alphaValues": [
+        0,
+        255
+      ],
+      "generator": "assets/MobilityAccessories/tools/generate_mobility_accessories.py",
+      "method": "deterministic Pillow pixel primitives at final runtime dimensions",
+      "license": "YjsE-Project-Owned",
+      "runtimeConsumer": "ItemDefinition texture reference through SpriteAssetRegistry and ClientTextureRegistry"
+    },
+    {
+      "spriteId": "items/ether_glider",
+      "itemId": "ether_glider",
+      "path": "assets/MobilityAccessories/items/ether_glider.png",
+      "sha256": "7f0dd2adcc6156e499dba2f1b8b1bfcc3f878b0eb077dac5ca81345232c25c53",
+      "dimensions": [
+        32,
+        32
+      ],
+      "alphaValues": [
+        0,
+        255
+      ],
+      "generator": "assets/MobilityAccessories/tools/generate_mobility_accessories.py",
+      "method": "deterministic Pillow pixel primitives at final runtime dimensions",
+      "license": "YjsE-Project-Owned",
+      "runtimeConsumer": "ItemDefinition texture reference through SpriteAssetRegistry and ClientTextureRegistry"
+    },
+    {
+      "spriteId": "ui/mobility_abilities",
+      "path": "assets/MobilityAccessories/ui/mobility_abilities.png",
+      "sha256": "df30aed0a0d498e4b4d70cbcea8f5555c5757adc3756636b89689fd4b309e5f3",
+      "dimensions": [
+        48,
+        16
+      ],
+      "frameDimensions": [
+        16,
+        16
+      ],
+      "frames": [
+        "double_jump",
+        "flight",
+        "glide"
+      ],
+      "alphaValues": [
+        0,
+        255
+      ],
+      "generator": "assets/MobilityAccessories/tools/generate_mobility_accessories.py",
+      "method": "deterministic Pillow pixel primitives at final runtime dimensions; one shared texture",
+      "license": "YjsE-Project-Owned",
+      "runtimeConsumer": "GameplayFeedbackOverlay through MobilityAbilityDockPlanner and ClientTextureRegistry"
+    }
+  ]
+}

@@ -147,11 +147,13 @@ public sealed class LightingSystem
             return 56;
         }
 
-        var time = normalizedTimeOfDay - Math.Floor(normalizedTimeOfDay);
-        var solar = Math.Sin((time - 0.25d) * Math.Tau);
-        var daylight = Math.Clamp((solar + 0.18d) / 1.18d, 0d, 1d);
-        daylight = daylight * daylight * (3d - 2d * daylight);
-        return (byte)Math.Clamp((int)Math.Round(56d + daylight * 199d), 0, 255);
+        var radiance = SolarRadianceModel.Evaluate(normalizedTimeOfDay);
+        var daylight = Math.Clamp(
+            (radiance.DiffuseIrradiance - SolarRadianceModel.NightDiffuseFloor) /
+            (1f - SolarRadianceModel.NightDiffuseFloor),
+            0f,
+            1f);
+        return (byte)Math.Clamp((int)Math.Round(56f + daylight * 199f), 0, 255);
     }
 
     private LightingUpdateResult RecalculateDirtyCore(

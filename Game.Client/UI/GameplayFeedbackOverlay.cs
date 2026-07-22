@@ -14,6 +14,8 @@ public sealed class GameplayFeedbackOverlay
 {
     private readonly ActiveStatusEffect[] _visibleStatusEffects =
         new ActiveStatusEffect[StatusEffectDockPlanner.MaximumCandidateCount];
+    private readonly MobilityAbilityPresentation[] _visibleMobilityAbilities =
+        new MobilityAbilityPresentation[MobilityAbilityDockPlanner.MaximumAbilityCount];
     private MiningResult? _mining;
     private float _cooldownRemaining;
     private float _cooldownDuration;
@@ -83,6 +85,7 @@ public sealed class GameplayFeedbackOverlay
         RenderContext context,
         Camera2D camera,
         PlayerEntity? player,
+        ClientTextureRegistry? textures,
         GameSettings settings)
     {
         var palette = UiTheme.Resolve(settings);
@@ -92,11 +95,132 @@ public sealed class GameplayFeedbackOverlay
         var statusCount = Math.Min(
             plannedStatusCount,
             PixelGameplayFeedbackLayoutPlanner.MaximumVisibleStatusEffects);
+        var mobilityCount = player is null
+            ? 0
+            : MobilityAbilityDockPlanner.Build(player.Stats, _visibleMobilityAbilities);
         var layout = PixelGameplayFeedbackLayoutPlanner.Resolve(context.ViewportBounds, statusCount);
+        var mobilityLayout = MobilityAbilityDockPlanner.ResolveLayout(
+            context.ViewportBounds,
+            layout.StatusDock,
+            layout.Density,
+            mobilityCount);
         DrawMiningProgress(context, camera, palette, settings);
         DrawCooldown(context, palette, settings, layout.CooldownTrack);
         DrawMessage(context, palette, settings, layout.MessagePanel);
+        DrawMobilityAbilities(context, textures, palette, settings, mobilityLayout, mobilityCount);
         DrawStatusEffects(context, palette, settings, layout, statusCount);
+    }
+
+    private void DrawMobilityAbilities(
+        RenderContext context,
+        ClientTextureRegistry? textures,
+        UiPalette palette,
+        GameSettings settings,
+        in PixelMobilityDockLayout layout,
+        int count)
+    {
+        if (count <= 0 || layout.Dock.IsEmpty)
+        {
+            return;
+        }
+
+        PixelUiPrimitives.DrawGlassSurface(
+            context,
+            layout.Dock,
+            palette,
+            settings.Ui.HudOpacity * 0.8f,
+            settings);
+        for (var index = 0; index < count; index++)
+        {
+            var ability = _visibleMobilityAbilities[index];
+            var bounds = layout.Slot(index);
+            var color = ability.Kind switch
+            {
+                MobilityAbilityKind.DoubleJump => new Color(91, 164, 244),
+                MobilityAbilityKind.Flight => new Color(145, 215, 255),
+                _ => new Color(114, 195, 174)
+            };
+            UiTheme.DrawRoundedRectangle(
+                context,
+                bounds,
+                UiTheme.WithAlpha(palette.SurfaceRaised, settings.Ui.HudOpacity * 0.94f),
+                5);
+            UiTheme.DrawRoundedBorder(
+                context,
+                bounds,
+                UiTheme.WithAlpha(color, 0.88f),
+                5,
+                1);
+
+            var icon = new Rectangle(
+                bounds.X + 4,
+                bounds.Y + 4,
+                Math.Max(0, bounds.Width - 8),
+                Math.Max(0, bounds.Height - 8));
+            if (!ItemIconRenderer.TryDrawSprite(
+                context,
+                textures,
+                ability.SpriteId,
+                icon,
+                settings.Ui.HudOpacity,
+                ability.FrameIndex))
+            {
+                DrawMobilityFallback(context, icon, ability.Kind, color);
+            }
+
+            context.SpriteBatch.Draw(
+                context.Pixel,
+                new Rectangle(bounds.X + 5, bounds.Bottom - 3, Math.Max(0, bounds.Width - 10), 1),
+                UiTheme.WithAlpha(color, 0.9f));
+        }
+    }
+
+    private static void DrawMobilityFallback(
+        RenderContext context,
+        Rectangle bounds,
+        MobilityAbilityKind kind,
+        Color color)
+    {
+        var unit = Math.Max(1, Math.Min(bounds.Width, bounds.Height) / 6);
+        var centerX = bounds.Center.X;
+        var centerY = bounds.Center.Y;
+        switch (kind)
+        {
+            case MobilityAbilityKind.DoubleJump:
+                context.SpriteBatch.Draw(
+                    context.Pixel,
+                    new Rectangle(centerX - unit * 2, centerY, unit * 3, unit * 2),
+                    color);
+                context.SpriteBatch.Draw(
+                    context.Pixel,
+                    new Rectangle(centerX, centerY - unit * 2, unit, unit * 2),
+                    color);
+                break;
+            case MobilityAbilityKind.Flight:
+                context.SpriteBatch.Draw(
+                    context.Pixel,
+                    new Rectangle(centerX - unit * 3, centerY - unit, unit * 2, unit * 2),
+                    color);
+                context.SpriteBatch.Draw(
+                    context.Pixel,
+                    new Rectangle(centerX + unit, centerY - unit, unit * 2, unit * 2),
+                    color);
+                context.SpriteBatch.Draw(
+                    context.Pixel,
+                    new Rectangle(centerX, centerY - unit * 2, unit, unit * 4),
+                    color);
+                break;
+            default:
+                context.SpriteBatch.Draw(
+                    context.Pixel,
+                    new Rectangle(centerX - unit * 3, centerY - unit, unit * 6, unit),
+                    color);
+                context.SpriteBatch.Draw(
+                    context.Pixel,
+                    new Rectangle(centerX - unit, centerY, unit * 2, unit * 2),
+                    color);
+                break;
+        }
     }
 
     private void DrawMiningProgress(

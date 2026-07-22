@@ -23,7 +23,7 @@ public sealed class InteractionTargetingSystem
         ArgumentNullException.ThrowIfNull(world);
 
         var end = ClampToReach(actorCenterWorld, aimWorldPosition, reachPixels);
-        var hit = _queries.RaycastTiles(world, actorCenterWorld, end, static tile => !tile.IsAir);
+        var hit = _queries.RaycastTiles(world, actorCenterWorld, end, static tile => !tile.IsAir || tile.WallId != 0);
         return hit.Hit
             ? new InteractionTarget(true, hit.TilePosition)
             : InteractionTarget.None;

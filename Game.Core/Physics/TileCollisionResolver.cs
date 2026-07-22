@@ -8,6 +8,7 @@ public sealed class TileCollisionResolver
 {
     // Must remain larger than one float ULP at the engine's validated far-travel range.
     private const float ContactEpsilon = 0.01f;
+    private const float SlopeNormalComponent = 0.70710677f;
     private readonly TileCollisionSettings _settings;
 
     public TileCollisionResolver(TileCollisionSettings? settings = null)
@@ -121,6 +122,14 @@ public sealed class TileCollisionResolver
         var substeps = Math.Min(requiredSubsteps, _settings.MaxSubsteps);
         if (substeps == 0)
         {
+            ResolvePartialFloor(
+                world,
+                body,
+                body.Position,
+                Vector2.Zero,
+                material,
+                ref counters,
+                ref writer);
             return CreateResult(
                 body,
                 startPosition,
@@ -136,9 +145,21 @@ public sealed class TileCollisionResolver
 
         for (var substep = 0; substep < substeps; substep++)
         {
+            var substepStartPosition = body.Position;
             var displacement = body.Velocity * substepSeconds;
             MoveX(world, body, displacement.X, material, ref counters, ref writer);
             MoveY(world, body, displacement.Y, material, ref counters, ref writer);
+            if (!counters.BudgetExhausted)
+            {
+                ResolvePartialFloor(
+                    world,
+                    body,
+                    substepStartPosition,
+                    displacement,
+                    material,
+                    ref counters,
+                    ref writer);
+            }
             counters.Substeps++;
 
             if (counters.BudgetExhausted)
@@ -410,7 +431,15 @@ public sealed class TileCollisionResolver
             {
                 for (var tileY = (long)minTileY; tileY <= maxTileY; tileY++)
                 {
-                    if (!TryTestTile(world, tileX, tileY, ref counters, out var blocking))
+                    if (!TryTestTile(
+                        world,
+                        tileX,
+                        tileY,
+                        ref counters,
+                        TileCollisionAxis.Horizontal,
+                        body,
+                        0f,
+                        out var blocking))
                     {
                         StopAtBudget(body, startPosition, horizontal: true, ref counters);
                         return;
@@ -447,7 +476,15 @@ public sealed class TileCollisionResolver
             {
                 for (var tileY = (long)minTileY; tileY <= maxTileY; tileY++)
                 {
-                    if (!TryTestTile(world, tileX, tileY, ref counters, out var blocking))
+                    if (!TryTestTile(
+                        world,
+                        tileX,
+                        tileY,
+                        ref counters,
+                        TileCollisionAxis.Horizontal,
+                        body,
+                        0f,
+                        out var blocking))
                     {
                         StopAtBudget(body, startPosition, horizontal: true, ref counters);
                         return;
@@ -508,7 +545,15 @@ public sealed class TileCollisionResolver
             {
                 for (var tileX = (long)minTileX; tileX <= maxTileX; tileX++)
                 {
-                    if (!TryTestTile(world, tileX, tileY, ref counters, out var blocking))
+                    if (!TryTestTile(
+                        world,
+                        tileX,
+                        tileY,
+                        ref counters,
+                        TileCollisionAxis.Vertical,
+                        body,
+                        amount,
+                        out var blocking))
                     {
                         StopAtBudget(body, startPosition, horizontal: false, ref counters);
                         return;
@@ -548,7 +593,15 @@ public sealed class TileCollisionResolver
             {
                 for (var tileX = (long)minTileX; tileX <= maxTileX; tileX++)
                 {
-                    if (!TryTestTile(world, tileX, tileY, ref counters, out var blocking))
+                    if (!TryTestTile(
+                        world,
+                        tileX,
+                        tileY,
+                        ref counters,
+                        TileCollisionAxis.Vertical,
+                        body,
+                        amount,
+                        out var blocking))
                     {
                         StopAtBudget(body, startPosition, horizontal: false, ref counters);
                         return;
@@ -581,11 +634,204 @@ public sealed class TileCollisionResolver
         body.Position = candidatePosition;
     }
 
+    private void ResolvePartialFloor(
+        GameWorld world,
+        PhysicsBody body,
+        Vector2 previousPosition,
+        Vector2 requestedDisplacement,
+        PhysicsMaterial material,
+        ref MoveCounters counters,
+        ref ContactWriter writer)
+    {
+        if (counters.BudgetExhausted ||
+            body.Velocity.Y < -ContactEpsilon ||
+            requestedDisplacement.Y < -ContactEpsilon)
+        {
+            return;
+        }
+
+        var previousBounds = GetBodyBounds(body, previousPosition);
+        var currentBounds = GetBodyBounds(body, body.Position);
+        var minTileX = PixelToTile(currentBounds.Left);
+        var maxTileX = PixelToTile(InsideEdge(currentBounds.Right));
+        var minBottom = MathF.Min(previousBounds.Bottom, currentBounds.Bottom) - ContactEpsilon;
+        var maxBottom = MathF.Max(previousBounds.Bottom, currentBounds.Bottom) + ContactEpsilon;
+        var minTileY = PixelToTile(minBottom);
+        var maxTileY = PixelToTile(maxBottom);
+        var best = default(PartialFloorCandidate);
+
+        for (var tileY = (long)minTileY; tileY <= maxTileY; tileY++)
+        {
+            for (var tileX = (long)minTileX; tileX <= maxTileX; tileX++)
+            {
+                if (!TryReadTile(world, tileX, tileY, ref counters, out var tile))
+                {
+                    body.Position = previousPosition;
+                    body.Velocity = Vector2.Zero;
+                    return;
+                }
+
+                var shape = tile.CollisionShape;
+                if (shape is not (TileCollisionShape.HalfBlock or
+                    TileCollisionShape.SlopeAscendingLeft or
+                    TileCollisionShape.SlopeAscendingRight))
+                {
+                    continue;
+                }
+
+                var currentSampleX = ResolveFloorSampleX(shape, currentBounds, (int)tileX);
+                var previousSampleX = ResolveFloorSampleX(shape, previousBounds, (int)tileX);
+                var surfaceY = ResolveFloorSurfaceY(shape, (int)tileX, (int)tileY, currentSampleX);
+                var previousSurfaceY = ResolveFloorSurfaceY(shape, (int)tileX, (int)tileY, previousSampleX);
+                var wasSupported = MathF.Abs(previousBounds.Bottom - previousSurfaceY) <= ContactEpsilon * 2f;
+                var crossedSurface = previousBounds.Bottom <= previousSurfaceY + ContactEpsilon &&
+                    currentBounds.Bottom >= surfaceY - ContactEpsilon;
+                var maximumFollowDistance = MathF.Abs(requestedDisplacement.X) +
+                    MathF.Abs(requestedDisplacement.Y) + ContactEpsilon;
+                var followsDescendingSlope = wasSupported &&
+                    currentBounds.Bottom < surfaceY &&
+                    surfaceY - currentBounds.Bottom <= maximumFollowDistance;
+                var recoversInitialOverlap = requestedDisplacement == Vector2.Zero &&
+                    currentBounds.Top < surfaceY &&
+                    currentBounds.Bottom >= surfaceY - ContactEpsilon;
+                if (!crossedSurface && !followsDescendingSlope && !recoversInitialOverlap)
+                {
+                    continue;
+                }
+
+                var resolvedY = surfaceY - body.Size.Y;
+                if (!best.IsValid || resolvedY < best.ResolvedY)
+                {
+                    best = new PartialFloorCandidate(
+                        (int)tileX,
+                        (int)tileY,
+                        currentSampleX,
+                        surfaceY,
+                        resolvedY,
+                        ResolveFloorNormal(shape),
+                        true);
+                }
+            }
+        }
+
+        if (!best.IsValid)
+        {
+            return;
+        }
+
+        body.Position = new Vector2(body.Position.X, best.ResolvedY);
+        body.Velocity = new Vector2(
+            body.Velocity.X * (1f - material.Friction),
+            ResolveBounce(body.Velocity.Y, material.Restitution));
+        body.OnGround = true;
+        counters.Flags |= PhysicsContactFlags.Ground;
+        writer.Add(new PhysicsContact(
+            best.TileX,
+            best.TileY,
+            new Vector2(best.SampleX, best.SurfaceY),
+            best.Normal,
+            requestedDisplacement.Y != 0f
+                ? ResolveTravelFraction(previousPosition.Y, body.Position.Y, requestedDisplacement.Y)
+                : ResolveTravelFraction(previousPosition.X, body.Position.X, requestedDisplacement.X),
+            PhysicsContactFlags.Ground));
+    }
+
+    private bool TryReadTile(
+        GameWorld world,
+        long tileX,
+        long tileY,
+        ref MoveCounters counters,
+        out TileInstance tile)
+    {
+        if (counters.TilesTested >= _settings.MaxTileTests ||
+            tileX is < int.MinValue or > int.MaxValue ||
+            tileY is < int.MinValue or > int.MaxValue)
+        {
+            counters.BudgetExhausted = true;
+            counters.Flags |= PhysicsContactFlags.WorkBudgetExhausted;
+            tile = TileInstance.Air;
+            return false;
+        }
+
+        counters.TilesTested++;
+        if (!world.TryGetTile((int)tileX, (int)tileY, out tile))
+        {
+            tile = TileInstance.Air;
+        }
+
+        return true;
+    }
+
+    private static float ResolveFloorSampleX(
+        TileCollisionShape shape,
+        BodyBounds bounds,
+        int tileX)
+    {
+        var tileLeft = (float)((long)tileX * GameConstants.TileSize);
+        var tileRight = tileLeft + GameConstants.TileSize;
+        return shape == TileCollisionShape.SlopeAscendingRight
+            ? Math.Clamp(InsideEdge(bounds.Right), tileLeft, InsideEdge(tileRight))
+            : Math.Clamp(bounds.Left, tileLeft, InsideEdge(tileRight));
+    }
+
+    private static float ResolveFloorSurfaceY(
+        TileCollisionShape shape,
+        int tileX,
+        int tileY,
+        float sampleX)
+    {
+        var tileLeft = (float)((long)tileX * GameConstants.TileSize);
+        var tileTop = (float)((long)tileY * GameConstants.TileSize);
+        var localX = Math.Clamp(sampleX - tileLeft, 0f, GameConstants.TileSize);
+        return shape switch
+        {
+            TileCollisionShape.HalfBlock => tileTop + GameConstants.TileSize * 0.5f,
+            TileCollisionShape.SlopeAscendingLeft => tileTop + localX,
+            TileCollisionShape.SlopeAscendingRight => tileTop + GameConstants.TileSize - localX,
+            _ => tileTop
+        };
+    }
+
+    private static Vector2 ResolveFloorNormal(TileCollisionShape shape)
+    {
+        return shape switch
+        {
+            TileCollisionShape.SlopeAscendingLeft => new Vector2(
+                SlopeNormalComponent,
+                -SlopeNormalComponent),
+            TileCollisionShape.SlopeAscendingRight => new Vector2(
+                -SlopeNormalComponent,
+                -SlopeNormalComponent),
+            _ => -Vector2.UnitY
+        };
+    }
+
     private bool TryTestTile(
         GameWorld world,
         long tileX,
         long tileY,
         ref MoveCounters counters,
+        out bool blocking)
+    {
+        return TryTestTile(
+            world,
+            tileX,
+            tileY,
+            ref counters,
+            TileCollisionAxis.Any,
+            null,
+            0f,
+            out blocking);
+    }
+
+    private bool TryTestTile(
+        GameWorld world,
+        long tileX,
+        long tileY,
+        ref MoveCounters counters,
+        TileCollisionAxis axis,
+        PhysicsBody? body,
+        float verticalDisplacement,
         out bool blocking)
     {
         if (counters.TilesTested >= _settings.MaxTileTests ||
@@ -599,7 +845,7 @@ public sealed class TileCollisionResolver
         }
 
         counters.TilesTested++;
-        blocking = IsBlocking(world, (int)tileX, (int)tileY);
+        blocking = IsBlocking(world, (int)tileX, (int)tileY, axis, body, verticalDisplacement);
         return true;
     }
 
@@ -650,7 +896,65 @@ public sealed class TileCollisionResolver
 
     private static bool IsBlocking(GameWorld world, int tileX, int tileY)
     {
-        return !world.TryGetTile(tileX, tileY, out var tile) || tile.IsSolid;
+        return IsBlocking(world, tileX, tileY, TileCollisionAxis.Any, body: null, 0f);
+    }
+
+    private static bool IsBlocking(
+        GameWorld world,
+        int tileX,
+        int tileY,
+        TileCollisionAxis axis,
+        PhysicsBody? body,
+        float verticalDisplacement)
+    {
+        if (!world.TryGetTile(tileX, tileY, out var tile))
+        {
+            return true;
+        }
+
+        var shape = tile.CollisionShape;
+        if (shape == TileCollisionShape.Empty)
+        {
+            return body is not null &&
+                (body.CollisionLayer & PhysicsCollisionLayer.Projectile) == PhysicsCollisionLayer.Projectile &&
+                tile.WallId != 0;
+        }
+
+        if (shape == TileCollisionShape.OneWayPlatform)
+        {
+            return axis == TileCollisionAxis.Vertical &&
+                   body is not null &&
+                   verticalDisplacement > 0f &&
+                   body.Position.Y + body.Size.Y <= tileY * (float)GameConstants.TileSize + ContactEpsilon;
+        }
+
+        if (shape == TileCollisionShape.HalfBlock)
+        {
+            if (axis != TileCollisionAxis.Horizontal || body is null)
+            {
+                return false;
+            }
+
+            var halfBlockSurface = tileY * (float)GameConstants.TileSize + GameConstants.TileSize * 0.5f;
+            return body.Position.Y + body.Size.Y > halfBlockSurface + ContactEpsilon;
+        }
+
+        if (shape is TileCollisionShape.SlopeAscendingLeft or TileCollisionShape.SlopeAscendingRight)
+        {
+            if (axis != TileCollisionAxis.Horizontal || body is null)
+            {
+                return false;
+            }
+
+            var approachesHighSide = shape == TileCollisionShape.SlopeAscendingRight
+                ? body.Velocity.X < 0f
+                : body.Velocity.X > 0f;
+            var tileTop = tileY * (float)GameConstants.TileSize;
+            return approachesHighSide &&
+                body.Position.Y + body.Size.Y > tileTop + ContactEpsilon;
+        }
+
+        return true;
     }
 
     private static int PixelToTile(float pixel)
@@ -710,6 +1014,13 @@ public sealed class TileCollisionResolver
         return float.IsFinite(value.X) && float.IsFinite(value.Y);
     }
 
+    private enum TileCollisionAxis
+    {
+        Any,
+        Horizontal,
+        Vertical
+    }
+
     private struct MoveCounters
     {
         public PhysicsContactFlags Flags;
@@ -750,6 +1061,15 @@ public sealed class TileCollisionResolver
         PhysicsContactFlags Flags,
         Vector2 Normal,
         float DistanceSquared,
+        bool IsValid);
+
+    private readonly record struct PartialFloorCandidate(
+        int TileX,
+        int TileY,
+        float SampleX,
+        float SurfaceY,
+        float ResolvedY,
+        Vector2 Normal,
         bool IsValid);
 
     private readonly record struct BodyBounds(float Left, float Top, float Right, float Bottom);

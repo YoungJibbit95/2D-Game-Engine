@@ -19,6 +19,8 @@ public readonly record struct ReplayVector2(float X, float Y)
 public readonly record struct ReplayPlayerCommand(
     float MoveAxis,
     bool WantsJump,
+    bool WantsFly,
+    bool WantsGlide,
     bool WantsGuard,
     ReplayVector2 GuardFacing)
 {
@@ -27,6 +29,8 @@ public readonly record struct ReplayPlayerCommand(
         return new ReplayPlayerCommand(
             command.MoveAxis,
             command.WantsJump,
+            command.WantsFly,
+            command.WantsGlide,
             command.WantsGuard,
             new ReplayVector2(command.GuardFacing.X, command.GuardFacing.Y));
     }
@@ -37,6 +41,8 @@ public readonly record struct ReplayPlayerCommand(
         return new PlayerCommand(
             MoveAxis,
             WantsJump,
+            WantsFly,
+            WantsGlide,
             WantsGuard,
             new System.Numerics.Vector2(GuardFacing.X, GuardFacing.Y));
     }

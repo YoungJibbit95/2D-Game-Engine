@@ -16,9 +16,17 @@ public sealed class TimeCommand : TypedConsoleCommand
                     false,
                     "Time action.",
                     new[] { "status", "day", "noon", "night", "midnight", "set" }),
-                new CommandArgumentSpecification("normalizedTime", CommandArgumentType.Number, false, "Normalized day time.")
+                new CommandArgumentSpecification(
+                    "normalizedTime",
+                    CommandArgumentType.Number,
+                    false,
+                    "Normalized day time.",
+                    minimum: 0,
+                    maximum: 1)
             },
-            examples: new[] { "/time", "/time day", "/time set 0.5" }))
+            examples: new[] { "/time", "/time day", "/time set 0.5" },
+            category: CommandCategory.Environment,
+            searchTerms: new[] { "day", "night", "clock", "sun" }))
     {
     }
 
@@ -27,7 +35,7 @@ public sealed class TimeCommand : TypedConsoleCommand
         var arguments = typedArguments.Raw;
         if (context.WorldTime is null)
         {
-            return CommandResult.Failure("World time is required for /time.");
+            return CommandResult.Failure("missing_world_time", "World time is required for /time.");
         }
 
         if (arguments.Count >= 2 && !arguments[0].Equals("set", StringComparison.OrdinalIgnoreCase))
@@ -47,11 +55,11 @@ public sealed class TimeCommand : TypedConsoleCommand
             case "day":
             case "noon":
                 context.WorldTime.SetDay();
-                return CommandResult.Success("Time set to day.");
+                return CommandResult.Success("time_set", "Time set to day.");
             case "night":
             case "midnight":
                 context.WorldTime.SetNight();
-                return CommandResult.Success("Time set to night.");
+                return CommandResult.Success("time_set", "Time set to night.");
             case "status":
                 return CommandResult.Success(
                     "time_status",
@@ -59,7 +67,7 @@ public sealed class TimeCommand : TypedConsoleCommand
             case "set":
                 return SetTime(context, arguments);
             default:
-                return CommandResult.Failure("Usage: /time <day|night|set> [normalizedTime]");
+                return CommandResult.Failure("invalid_time_action", "Usage: /time <day|night|set> [normalizedTime]");
         }
     }
 
@@ -67,15 +75,15 @@ public sealed class TimeCommand : TypedConsoleCommand
     {
         if (arguments.Count < 2)
         {
-            return CommandResult.Failure("Usage: /time set <normalizedTime>");
+            return CommandResult.Failure("missing_argument", "Usage: /time set <normalizedTime>");
         }
 
         if (!double.TryParse(arguments[1], NumberStyles.Float, CultureInfo.InvariantCulture, out var normalized))
         {
-            return CommandResult.Failure("Normalized time must be a number.");
+            return CommandResult.Failure("invalid_argument", "Normalized time must be a finite number from 0 to 1.");
         }
 
         context.WorldTime!.SetTimeNormalized(normalized);
-        return CommandResult.Success($"Time set to {context.WorldTime.NormalizedTimeOfDay:0.###}.");
+        return CommandResult.Success("time_set", $"Time set to {context.WorldTime.NormalizedTimeOfDay:0.###}.");
     }
 }

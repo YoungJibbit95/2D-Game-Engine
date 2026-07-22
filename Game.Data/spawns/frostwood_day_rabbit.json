@@ -1,0 +1,20 @@
+{
+  "id": "frostwood_day_rabbit",
+  "entityId": "rabbit",
+  "biomeId": "frostwood",
+  "time": "day",
+  "habitats": ["surface"],
+  "minTileY": 0,
+  "maxTileY": 84,
+  "chance": 0.2,
+  "weight": 1.0,
+  "maxActive": 5,
+  "populationGroup": "frostwood-day-critters",
+  "maxActiveInGroup": 7,
+  "populationRegionSizeTiles": 96,
+  "maxActiveInRegion": 4,
+  "maxActiveInHabitat": 5,
+  "localPopulationRadiusTiles": 40,
+  "maxActiveInLocalArea": 3,
+  "cooldownSeconds": 3.0
+}

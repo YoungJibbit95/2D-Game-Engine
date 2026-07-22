@@ -1,0 +1,12 @@
+{
+  "id": "ambercore_pickaxe",
+  "result": { "itemId": "ambercore_pickaxe", "count": 1 },
+  "ingredients": [
+    { "itemId": "amberstone_block", "count": 12 },
+    { "itemId": "iron_ore", "count": 10 },
+    { "itemId": "amberwood_plank_block", "count": 4 }
+  ],
+  "station": "anvil",
+  "category": "tools",
+  "sortOrder": 83
+}

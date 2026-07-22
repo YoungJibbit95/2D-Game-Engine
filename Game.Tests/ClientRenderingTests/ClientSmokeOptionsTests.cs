@@ -1,4 +1,5 @@
 using Game.Client.Diagnostics;
+using Game.Core.Weather;
 using Xunit;
 
 namespace Game.Tests.ClientRenderingTests;
@@ -48,6 +49,9 @@ public sealed class ClientSmokeOptionsTests
     [InlineData("--timeout-seconds")]
     [InlineData("--start-state")]
     [InlineData("--scene-biome")]
+    [InlineData("--scene-time")]
+    [InlineData("--scene-weather")]
+    [InlineData("--scene-weather-intensity")]
     [InlineData("--resolution")]
     [InlineData("--warmup-frames")]
     [InlineData("--frame-limit")]
@@ -91,6 +95,32 @@ public sealed class ClientSmokeOptionsTests
             ["--smoke", "--start-state", "main-menu", "--open-pause"]));
     }
 
+    [Fact]
+    public void Parse_AllowsOpenedCraftingPlayingSmoke()
+    {
+        var options = ClientSmokeOptions.Parse(
+            ["--smoke", "--start-state", "playing", "--open-crafting"]);
+
+        Assert.NotNull(options);
+        Assert.True(options.OpenCrafting);
+    }
+
+    [Fact]
+    public void Parse_RejectsOpenedCraftingOutsidePlayingSmoke()
+    {
+        Assert.Throws<ArgumentException>(() => ClientSmokeOptions.Parse(
+            ["--smoke", "--start-state", "main-menu", "--open-crafting"]));
+    }
+
+    [Theory]
+    [InlineData("--open-pause")]
+    [InlineData("--open-console")]
+    public void Parse_RejectsOpenedCraftingWithExclusiveOverlay(string conflictingOption)
+    {
+        Assert.Throws<ArgumentException>(() => ClientSmokeOptions.Parse(
+            ["--smoke", "--start-state", "playing", "--open-crafting", conflictingOption]));
+    }
+
     [Theory]
     [InlineData("meadow", "meadow")]
     [InlineData("forest", "forest")]
@@ -125,6 +155,71 @@ public sealed class ClientSmokeOptionsTests
             ["--smoke", "--start-state", "main-menu", "--scene-biome", "forest"]));
     }
 
+    [Theory]
+    [InlineData("midnight", 0d)]
+    [InlineData("dawn", 0.25d)]
+    [InlineData("day", 0.5d)]
+    [InlineData("dusk", 0.75d)]
+    [InlineData("0.625", 0.625d)]
+    public void Parse_AllowsDeterministicPlayingSceneTime(string value, double expected)
+    {
+        var options = Assert.IsType<ClientSmokeOptions>(ClientSmokeOptions.Parse(
+            ["--smoke", "--start-state", "playing", "--scene-time", value]));
+
+        Assert.Equal(expected, options.ForcedTimeOfDay);
+    }
+
+    [Theory]
+    [InlineData("-0.1")]
+    [InlineData("1")]
+    [InlineData("later")]
+    public void Parse_RejectsInvalidSceneTime(string value)
+    {
+        Assert.Throws<ArgumentException>(() => ClientSmokeOptions.Parse(
+            ["--smoke", "--start-state", "playing", "--scene-time", value]));
+    }
+
+    [Fact]
+    public void Parse_RejectsForcedTimeOutsidePlayingSmoke()
+    {
+        Assert.Throws<ArgumentException>(() => ClientSmokeOptions.Parse(
+            ["--smoke", "--scene-time", "day"]));
+    }
+
+    [Theory]
+    [InlineData("clear", WeatherKind.Clear)]
+    [InlineData("rain", WeatherKind.Rain)]
+    [InlineData("snow", WeatherKind.Snow)]
+    [InlineData("blizzard", WeatherKind.Blizzard)]
+    public void Parse_AllowsDeterministicPlayingSceneWeather(string value, WeatherKind expected)
+    {
+        var options = Assert.IsType<ClientSmokeOptions>(ClientSmokeOptions.Parse(
+        [
+            "--smoke",
+            "--start-state", "playing",
+            "--scene-weather", value,
+            "--scene-weather-intensity", "0.625"
+        ]));
+
+        Assert.Equal(expected, options.ForcedWeather);
+        Assert.Equal(0.625f, options.ForcedWeatherIntensity, 3);
+    }
+
+    [Theory]
+    [InlineData("hail")]
+    [InlineData("snowstorm")]
+    public void Parse_RejectsUnknownSceneWeather(string value)
+    {
+        Assert.Throws<ArgumentException>(() => ClientSmokeOptions.Parse(
+            ["--smoke", "--start-state", "playing", "--scene-weather", value]));
+    }
+
+    [Fact]
+    public void Parse_RejectsWeatherIntensityWithoutWeather()
+    {
+        Assert.Throws<ArgumentException>(() => ClientSmokeOptions.Parse(
+            ["--smoke", "--start-state", "playing", "--scene-weather-intensity", "0.5"]));
+    }
     [Fact]
     public void Parse_AllowsRepresentativeResolutionAndWarmupWindow()
     {

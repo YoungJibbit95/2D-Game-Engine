@@ -1,0 +1,13 @@
+{
+  "id": "snow",
+  "numericId": 21,
+  "displayName": "Snow Block",
+  "texture": "tiles/snow_autotile",
+  "solid": true,
+  "blocksLight": true,
+  "hardness": 0.8,
+  "miningPowerRequired": 0,
+  "dropItem": "dirt_block",
+  "mergeGroup": "frozen_soil",
+  "tags": ["snow", "frozen", "natural", "mineable"]
+}

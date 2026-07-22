@@ -199,6 +199,8 @@ public sealed class GameSettingsValidator
         ValidateBinding(input.KeyBindings.MoveLeft, "input.keyBindings.moveLeft", result);
         ValidateBinding(input.KeyBindings.MoveRight, "input.keyBindings.moveRight", result);
         ValidateBinding(input.KeyBindings.Jump, "input.keyBindings.jump", result);
+        ValidateBinding(input.KeyBindings.Fly, "input.keyBindings.fly", result);
+        ValidateBinding(input.KeyBindings.Glide, "input.keyBindings.glide", result);
         ValidateBinding(input.KeyBindings.AttackPrimary, "input.keyBindings.attackPrimary", result);
         ValidateBinding(input.KeyBindings.AttackSecondary, "input.keyBindings.attackSecondary", result);
         ValidateBinding(input.KeyBindings.OpenInventory, "input.keyBindings.openInventory", result);

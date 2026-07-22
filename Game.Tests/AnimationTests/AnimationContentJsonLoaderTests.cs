@@ -35,7 +35,13 @@ public sealed class AnimationContentJsonLoaderTests
             character.Rig.Layers,
             layer => Assert.Equal(new System.Numerics.Vector2(12f, 40f), layer.Pivot));
         Assert.Equal(8, character.StateMachine.Definition.Layers.Single().States.Count);
-        Assert.Equal(14, result.Registry.Entities.Count);
+        Assert.Equal(17, result.Registry.Entities.Count);
+        Assert.Equal(
+            new[] { "cave_glowbug", "forest_moth", "meadow_butterfly" },
+            result.Registry.Entities
+                .Where(profile => profile.Id is "cave_glowbug" or "forest_moth" or "meadow_butterfly")
+                .Select(profile => profile.Id)
+                .ToArray());
         Assert.Equal(16, result.Registry.Clips.Count);
     }
 

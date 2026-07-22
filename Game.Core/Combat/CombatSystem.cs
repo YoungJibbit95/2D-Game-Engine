@@ -6,8 +6,10 @@ using Game.Core.Inventory;
 using Game.Core.Loot;
 using Game.Core.Physics;
 using Game.Core.Projectiles;
+using Game.Core.Tiles;
 using Game.Core.World;
 using System.Numerics;
+using GameWorld = Game.Core.World.World;
 
 namespace Game.Core.Combat;
 
@@ -35,8 +37,29 @@ public sealed class CombatSystem
         return ResolveProjectileHits(
             entities,
             lootTables,
-            projectiles: null,
             statusEffects: null,
+            world: null,
+            tiles: null,
+            events,
+            lootContext,
+            workspace ?? _compatibilityWorkspace);
+    }
+
+    public CombatResolutionResult ResolveProjectileHits(
+        EntityManager entities,
+        GameContentDatabase content,
+        GameWorld world,
+        GameEventBus? events = null,
+        LootKillContext? lootContext = null,
+        CombatQueryWorkspace? workspace = null)
+    {
+        ArgumentNullException.ThrowIfNull(content);
+        return ResolveProjectileHits(
+            entities,
+            content.LootTables,
+            content.StatusEffects,
+            world,
+            content.Tiles,
             events,
             lootContext,
             workspace ?? _compatibilityWorkspace);
@@ -53,8 +76,9 @@ public sealed class CombatSystem
         return ResolveProjectileHits(
             entities,
             content.LootTables,
-            content.Projectiles,
             content.StatusEffects,
+            null,
+            null,
             events,
             lootContext,
             workspace ?? _compatibilityWorkspace);
@@ -63,8 +87,9 @@ public sealed class CombatSystem
     private CombatResolutionResult ResolveProjectileHits(
         EntityManager entities,
         LootTableRegistry lootTables,
-        ProjectileRegistry? projectiles,
         StatusEffectRegistry? statusEffects,
+        GameWorld? world,
+        TileRegistry? tiles,
         GameEventBus? events,
         LootKillContext? lootContext,
         CombatQueryWorkspace workspace)
@@ -83,83 +108,104 @@ public sealed class CombatSystem
 
         for (var projectileIndex = 0; projectileIndex < entities.Entities.Count; projectileIndex++)
         {
-            if (entities.Entities[projectileIndex] is not ProjectileEntity { IsActive: true } projectile)
+            if (entities.Entities[projectileIndex] is not ProjectileEntity projectile)
             {
                 continue;
             }
 
-            var sweptBounds = BuildProjectileSweptBounds(projectile);
-            entities.QueryInto(sweptBounds, candidates);
-            workspace.BeginProjectile();
-            for (var enemyIndex = 0; enemyIndex < candidates.Count; enemyIndex++)
+            var hasTileCollision = projectile.TryConsumeLatestTileCollisionResult(
+                out var tileCollision,
+                out var incomingTileVelocity);
+            var canResolveHistoricalTileSweep = hasTileCollision &&
+                                                tileCollision.TerminationReason ==
+                                                ProjectileTerminationReason.TileCollision;
+            var tileReached = hasTileCollision;
+            if (projectile.IsActive || canResolveHistoricalTileSweep)
             {
-                if (candidates[enemyIndex] is not EnemyEntity { IsActive: true } enemy)
+                var sweptBounds = BuildProjectileSweptBounds(projectile);
+                entities.QueryInto(sweptBounds, candidates);
+                workspace.BeginProjectile();
+                for (var enemyIndex = 0; enemyIndex < candidates.Count; enemyIndex++)
                 {
-                    continue;
+                    if (candidates[enemyIndex] is not EnemyEntity { IsActive: true } enemy ||
+                        !TryGetProjectileSweepTime(projectile, enemy.Bounds, out var timeOfImpact))
+                    {
+                        continue;
+                    }
+
+                    projectileHitCandidates.Add(new ProjectileHitCandidate(enemy, timeOfImpact));
                 }
 
-                if (!TryGetProjectileSweepTime(projectile, enemy.Bounds, out var timeOfImpact))
+                projectileHitCandidates.Sort(ProjectileHitCandidateComparer.Instance);
+                for (var enemyIndex = 0; enemyIndex < projectileHitCandidates.Count; enemyIndex++)
                 {
-                    continue;
-                }
+                    var enemy = projectileHitCandidates[enemyIndex].Enemy;
+                    if (!enemy.IsActive)
+                    {
+                        continue;
+                    }
 
-                projectileHitCandidates.Add(new ProjectileHitCandidate(enemy, timeOfImpact));
+                    var entityCollision = new ProjectileEntityCollision(enemy.Id, enemy.Faction);
+                    var collision = hasTileCollision
+                        ? projectile.ResolveEntityCollisionBeforeTile(
+                            entityCollision,
+                            incomingTileVelocity)
+                        : projectile.ResolveEntityCollision(entityCollision);
+                    if (!collision.Accepted || collision.DamageRequest is not { } damageRequest)
+                    {
+                        continue;
+                    }
+
+                    projectileHits++;
+                    var damageApplied = enemy.ApplyDamage(new DamageInfo(
+                        damageRequest.BaseDamage,
+                        damageRequest.DamageType,
+                        damageRequest.SourceEntityId,
+                        damageRequest.ImpactDirection,
+                        damageRequest.KnockbackForce));
+                    events?.Publish(new ProjectileHitEvent(
+                        projectile.Id,
+                        enemy.Id,
+                        damageRequest.BaseDamage));
+                    if (damageApplied && statusEffects is not null)
+                    {
+                        var effectResult = _statusEffects.ApplyDetailed(
+                            enemy.StatusEffects,
+                            statusEffects,
+                            damageRequest.StatusEffects);
+                        effectsApplied += effectResult.AppliedCount;
+                        PublishStatusEffects(
+                            events,
+                            enemy.Id,
+                            StatusEffectSourceKind.Projectile,
+                            projectile.ProjectileId,
+                            effectResult);
+                    }
+
+                    if (damageApplied && enemy.Health.IsDead)
+                    {
+                        enemy.IsActive = false;
+                        enemyDeaths++;
+                        events?.Publish(new EntityDiedEvent(enemy.Id, enemy.DefinitionId));
+                        droppedItems += AddLootDrops(enemy, lootTables, pendingDrops, lootContext);
+                    }
+
+                    if (collision.Decision == ProjectileEntityCollisionDecision.HitAndStopped)
+                    {
+                        tileReached = false;
+                        break;
+                    }
+
+                    if (!projectile.IsActive && !hasTileCollision)
+                    {
+                        break;
+                    }
+                }
             }
 
-            projectileHitCandidates.Sort(ProjectileHitCandidateComparer.Instance);
-            for (var enemyIndex = 0; enemyIndex < projectileHitCandidates.Count; enemyIndex++)
+            if (tileReached && world is not null && tiles is not null)
             {
-                var enemy = projectileHitCandidates[enemyIndex].Enemy;
-                if (!enemy.IsActive)
-                {
-                    continue;
-                }
-
-                var collision = projectile.ResolveEntityCollision(
-                    new ProjectileEntityCollision(enemy.Id, enemy.Faction));
-                if (!collision.Accepted || collision.DamageRequest is not { } damageRequest)
-                {
-                    continue;
-                }
-
-                projectileHits++;
-                var damageApplied = enemy.ApplyDamage(new DamageInfo(
-                    damageRequest.BaseDamage,
-                    damageRequest.DamageType,
-                    damageRequest.SourceEntityId,
-                    damageRequest.ImpactDirection,
-                    damageRequest.KnockbackForce));
-                events?.Publish(new ProjectileHitEvent(projectile.Id, enemy.Id, damageRequest.BaseDamage));
-                if (damageApplied &&
-                    projectiles is not null &&
-                    statusEffects is not null &&
-                    projectiles.TryGetById(projectile.ProjectileId, out var projectileDefinition))
-                {
-                    var effectResult = _statusEffects.ApplyDetailed(
-                        enemy.StatusEffects,
-                        statusEffects,
-                        projectileDefinition.OnHitEffects);
-                    effectsApplied += effectResult.AppliedCount;
-                    PublishStatusEffects(
-                        events,
-                        enemy.Id,
-                        StatusEffectSourceKind.Projectile,
-                        projectile.ProjectileId,
-                        effectResult);
-                }
-
-                if (damageApplied && enemy.Health.IsDead)
-                {
-                    enemy.IsActive = false;
-                    enemyDeaths++;
-                    events?.Publish(new EntityDiedEvent(enemy.Id, enemy.DefinitionId));
-                    droppedItems += AddLootDrops(enemy, lootTables, pendingDrops, lootContext);
-                }
-
-                if (!projectile.IsActive)
-                {
-                    break;
-                }
+                ResolveProjectileTileCollision(projectile, tileCollision, world, tiles, events);
             }
         }
 
@@ -170,7 +216,6 @@ public sealed class CombatSystem
 
         return new CombatResolutionResult(projectileHits, enemyDeaths, droppedItems, effectsApplied);
     }
-
     private static RectI BuildProjectileSweptBounds(ProjectileEntity projectile)
     {
         var current = projectile.Bounds;
@@ -255,6 +300,154 @@ public sealed class CombatSystem
         return entry <= exit && exit >= 0d && entry <= 1d;
     }
 
+    private static void ResolveProjectileTileCollision(
+        ProjectileEntity projectile,
+        in ProjectileTileCollisionResult collision,
+        GameWorld world,
+        TileRegistry tiles,
+        GameEventBus? events)
+    {
+        if (collision.Decision == ProjectileTileCollisionDecision.IgnoredByDefinition ||
+            !TryResolveMineableTile(world, collision, out var tileX, out var tileY, out var minedTileId))
+        {
+            return;
+        }
+
+        var tile = world.GetTile(tileX, tileY);
+        var definition = tiles.GetByNumericId(minedTileId);
+        if (projectile.Damage < definition.MiningPowerRequired)
+        {
+            return;
+        }
+
+        if (tile.IsAir)
+        {
+            world.SetWall(tileX, tileY, 0);
+        }
+        else
+        {
+            world.RemoveTile(tileX, tileY);
+        }
+
+        var drop = string.IsNullOrWhiteSpace(definition.DropItemId)
+            ? ItemStack.Empty
+            : new ItemStack(definition.DropItemId, 1);
+        events?.Publish(new TileMinedEvent(new TilePos(tileX, tileY), minedTileId, drop));
+    }
+
+    private static bool TryResolveMineableTile(
+        GameWorld world,
+        in ProjectileTileCollisionResult collision,
+        out int tileX,
+        out int tileY,
+        out ushort minedTileId)
+    {
+        tileX = 0;
+        tileY = 0;
+        minedTileId = 0;
+
+        if (collision.TileX is { } explicitTileX &&
+            collision.TileY is { } explicitTileY &&
+            TryGetMineableTile(world, explicitTileX, explicitTileY, out tileX, out tileY, out minedTileId))
+        {
+            return true;
+        }
+
+        if (TryResolveMineableTile(world, collision.Position, out tileX, out tileY, out minedTileId))
+        {
+            return true;
+        }
+
+        if (collision.Velocity == Vector2.Zero)
+        {
+            return false;
+        }
+
+        var normalizedVelocity = Vector2.Normalize(collision.Velocity);
+        var probeDistance = GameConstants.TileSize * 0.5f;
+        for (var step = 1; step <= 3; step++)
+        {
+            var distance = step * probeDistance;
+            if (TryResolveMineableTile(
+                world,
+                collision.Position + normalizedVelocity * -distance,
+                out tileX,
+                out tileY,
+                out minedTileId))
+            {
+                return true;
+            }
+
+            if (TryResolveMineableTile(
+                world,
+                collision.Position + normalizedVelocity * distance,
+                out tileX,
+                out tileY,
+                out minedTileId))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static bool TryResolveMineableTile(
+        GameWorld world,
+        Vector2 worldPosition,
+        out int tileX,
+        out int tileY,
+        out ushort minedTileId)
+    {
+        tileX = 0;
+        tileY = 0;
+        minedTileId = 0;
+
+        var center = CoordinateUtils.WorldToTile(worldPosition.X, worldPosition.Y);
+        for (var offsetY = -1; offsetY <= 1; offsetY++)
+        {
+            for (var offsetX = -1; offsetX <= 1; offsetX++)
+            {
+                if (TryGetMineableTile(world, center.X + offsetX, center.Y + offsetY, out tileX, out tileY, out minedTileId))
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private static bool TryGetMineableTile(
+        GameWorld world,
+        int tileX,
+        int tileY,
+        out int resolvedTileX,
+        out int resolvedTileY,
+        out ushort minedTileId)
+    {
+        resolvedTileX = 0;
+        resolvedTileY = 0;
+        minedTileId = 0;
+
+        if (!world.IsInBounds(tileX, tileY) ||
+            !world.TryGetTile(tileX, tileY, out var tile) ||
+            (tile.IsAir && tile.WallId == 0))
+        {
+            return false;
+        }
+
+        minedTileId = tile.IsAir ? tile.WallId : tile.TileId;
+        if (minedTileId == 0)
+        {
+            return false;
+        }
+
+        resolvedTileX = tileX;
+        resolvedTileY = tileY;
+        return true;
+    }
+
     private static int SaturatingFloor(float value)
     {
         var floored = Math.Floor(value);
@@ -278,6 +471,17 @@ public sealed class CombatSystem
         {
             var time = left.TimeOfImpact.CompareTo(right.TimeOfImpact);
             return time != 0 ? time : left.Enemy.Id.CompareTo(right.Enemy.Id);
+        }
+    }
+
+    private sealed class PlayerProjectileHitCandidateComparer : IComparer<PlayerProjectileHitCandidate>
+    {
+        public static PlayerProjectileHitCandidateComparer Instance { get; } = new();
+
+        public int Compare(PlayerProjectileHitCandidate left, PlayerProjectileHitCandidate right)
+        {
+            var time = left.TimeOfImpact.CompareTo(right.TimeOfImpact);
+            return time != 0 ? time : left.Projectile.Id.CompareTo(right.Projectile.Id);
         }
     }
 
@@ -475,32 +679,25 @@ public sealed class CombatSystem
             return ContactDamageResult.None;
         }
 
-        var candidates = (workspace ?? _compatibilityWorkspace).Candidates;
-        entities.QueryInto(player.Bounds, candidates);
-        for (var index = 0; index < candidates.Count; index++)
+        var queryWorkspace = workspace ?? _compatibilityWorkspace;
+        var projectileResult = ResolveSweptProjectileDamageAgainstPlayer(
+            player,
+            entities,
+            content,
+            guard,
+            damageResolver,
+            invulnerabilitySeconds,
+            mitigation,
+            policy,
+            events,
+            queryWorkspace);
+        if (projectileResult.ContactHits > 0)
         {
-            if (candidates[index] is not ProjectileEntity { IsActive: true } projectile ||
-                !projectile.Bounds.Intersects(player.Bounds))
-            {
-                continue;
-            }
-
-            var projectileResult = ResolveProjectileCandidate(
-                player,
-                projectile,
-                content,
-                guard,
-                damageResolver,
-                invulnerabilitySeconds,
-                mitigation,
-                policy,
-                events);
-            if (projectileResult.ContactHits > 0)
-            {
-                return projectileResult;
-            }
+            return projectileResult;
         }
 
+        var candidates = queryWorkspace.Candidates;
+        entities.QueryInto(player.Bounds, candidates);
         for (var index = 0; index < candidates.Count; index++)
         {
             if (candidates[index] is not EnemyEntity { IsActive: true } enemy ||
@@ -547,19 +744,51 @@ public sealed class CombatSystem
             return ContactDamageResult.None;
         }
 
-        var candidates = (workspace ?? _compatibilityWorkspace).Candidates;
-        entities.QueryInto(player.Bounds, candidates);
-        for (var index = 0; index < candidates.Count; index++)
+        return ResolveSweptProjectileDamageAgainstPlayer(
+            player,
+            entities,
+            content,
+            guard,
+            damageResolver,
+            invulnerabilitySeconds,
+            mitigation,
+            policy,
+            events,
+            workspace ?? _compatibilityWorkspace);
+    }
+
+    private ContactDamageResult ResolveSweptProjectileDamageAgainstPlayer(
+        PlayerEntity player,
+        EntityManager entities,
+        GameContentDatabase content,
+        GuardRuntimeState guard,
+        CombatDamageResolver damageResolver,
+        float invulnerabilitySeconds,
+        DamageMitigationProfile? mitigation,
+        CombatResolutionPolicy? policy,
+        GameEventBus? events,
+        CombatQueryWorkspace workspace)
+    {
+        workspace.BeginPlayerProjectileResolution();
+        var candidates = workspace.PlayerProjectileHits;
+        for (var index = 0; index < entities.Entities.Count; index++)
         {
-            if (candidates[index] is not ProjectileEntity { IsActive: true } projectile ||
-                !projectile.Bounds.Intersects(player.Bounds))
+            if (entities.Entities[index] is not ProjectileEntity { IsActive: true } projectile ||
+                !CanProjectileTargetPlayer(projectile, player, policy) ||
+                !TryGetProjectileSweepTime(projectile, player.Bounds, out var timeOfImpact))
             {
                 continue;
             }
 
+            candidates.Add(new PlayerProjectileHitCandidate(projectile, timeOfImpact));
+        }
+
+        candidates.Sort(PlayerProjectileHitCandidateComparer.Instance);
+        for (var index = 0; index < candidates.Count; index++)
+        {
             var result = ResolveProjectileCandidate(
                 player,
-                projectile,
+                candidates[index].Projectile,
                 content,
                 guard,
                 damageResolver,
@@ -574,6 +803,25 @@ public sealed class CombatSystem
         }
 
         return ContactDamageResult.None;
+    }
+
+    private static bool CanProjectileTargetPlayer(
+        ProjectileEntity projectile,
+        PlayerEntity player,
+        CombatResolutionPolicy? policy)
+    {
+        if (projectile.OwnerEntityId == player.Id)
+        {
+            return false;
+        }
+
+        if (projectile.OwnerFaction != EntityFaction.Friendly)
+        {
+            return true;
+        }
+
+        return projectile.Definition.FriendlyFire &&
+               policy is { FriendlyFireEnabled: true };
     }
 
     private ContactDamageResult ResolveEnemyContactCandidate(

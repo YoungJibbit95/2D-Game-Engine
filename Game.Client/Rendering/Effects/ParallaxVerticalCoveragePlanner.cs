@@ -2,10 +2,6 @@ using Microsoft.Xna.Framework;
 
 namespace Game.Client.Rendering.Effects;
 
-public readonly record struct ParallaxVerticalCoverageCommand(
-    Rectangle Bounds,
-    Rectangle SourceRectangle);
-
 public static class ParallaxVerticalCoveragePlanner
 {
     public static bool TryBuildTopFill(
@@ -34,38 +30,18 @@ public static class ParallaxVerticalCoveragePlanner
         return true;
     }
 
-    public static bool TryBuildBottomEdgeExtension(
+    public static bool CoversViewportVertically(
         in Rectangle layerBounds,
-        in Rectangle sourceRectangle,
-        in Rectangle viewport,
-        out ParallaxVerticalCoverageCommand command)
+        in Rectangle viewport)
     {
-        command = default;
         if (layerBounds.Width <= 0 ||
             layerBounds.Height <= 0 ||
-            sourceRectangle.Width <= 0 ||
-            sourceRectangle.Height <= 0 ||
             viewport.Width <= 0 ||
-            viewport.Height <= 0 ||
-            layerBounds.Bottom >= viewport.Bottom)
+            viewport.Height <= 0)
         {
             return false;
         }
 
-        var extensionTop = Math.Clamp(layerBounds.Bottom - 1, viewport.Top, viewport.Bottom);
-        var extensionHeight = viewport.Bottom - extensionTop;
-        if (extensionHeight <= 0)
-        {
-            return false;
-        }
-
-        command = new ParallaxVerticalCoverageCommand(
-            new Rectangle(layerBounds.X, extensionTop, layerBounds.Width, extensionHeight),
-            new Rectangle(
-                sourceRectangle.X + sourceRectangle.Width / 2,
-                sourceRectangle.Bottom - 1,
-                1,
-                1));
-        return true;
+        return layerBounds.Top <= viewport.Top && layerBounds.Bottom >= viewport.Bottom;
     }
 }

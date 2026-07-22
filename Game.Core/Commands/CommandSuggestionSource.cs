@@ -5,5 +5,11 @@ public enum CommandSuggestionSource
     None,
     Items,
     Entities,
-    LoadedEntities
+    LoadedEntities,
+    Biomes,
+    Projectiles,
+    WorldEvents,
+    Commands,
+    GameRuleValues,
+    GameEvents
 }

@@ -1,5 +1,7 @@
 using Game.Core.Data;
 using Game.Core.Combat;
+using Game.Core.Equipment;
+using Game.Core.Inventory;
 using Game.Core.Items;
 using Xunit;
 
@@ -170,6 +172,95 @@ public sealed class ItemRegistryTests
         Assert.False(definition.CanFavorite);
         Assert.False(definition.CanTrash);
     }
+
+    [Fact]
+    public void Loader_ReadsMobilityAbilityFields()
+    {
+        const string json = """
+        {
+          "id": "double_jump_boots",
+          "displayName": "Double Jump Boots",
+          "description": "A relic that allows a second leap in midair.",
+          "type": "Accessory",
+          "rarity": "Rare",
+          "value": 420,
+          "category": "Equipment",
+          "sortPriority": 68,
+          "texture": "items/mining_charm",
+          "maxStack": 1,
+          "canDoubleJump": true,
+          "canFly": true,
+          "canGlide": true
+        }
+        """;
+
+        var definition = new ItemDefinitionJsonLoader().LoadDefinitionFromJson(json);
+
+        Assert.True(definition.CanDoubleJump);
+        Assert.True(definition.CanFly);
+        Assert.True(definition.CanGlide);
+        Assert.Equal(ItemType.Accessory, definition.Type);
+        Assert.Equal("double_jump_boots", definition.Id);
+    }
+    [Fact]
+    public void EquipmentStatCalculator_AggregatesDataDrivenMobilityCapabilities()
+    {
+        var items = ItemRegistry.Create(
+        [
+            new ItemDefinition
+            {
+                Id = "double_jump_boots",
+                DisplayName = "Double Jump Boots",
+                Type = ItemType.Accessory,
+                TexturePath = "items/double_jump_boots",
+                MaxStack = 1,
+                CanDoubleJump = true
+            },
+            new ItemDefinition
+            {
+                Id = "skyward_wings",
+                DisplayName = "Skyward Wings",
+                Type = ItemType.Accessory,
+                TexturePath = "items/skyward_wings",
+                MaxStack = 1,
+                CanFly = true
+            },
+            new ItemDefinition
+            {
+                Id = "ether_glider",
+                DisplayName = "Ether Glider",
+                Type = ItemType.Accessory,
+                TexturePath = "items/ether_glider",
+                MaxStack = 1,
+                CanGlide = true
+            }
+        ]);
+        var loadout = new EquipmentLoadout();
+
+        Assert.True(loadout.TryEquip(
+            new ItemStack("double_jump_boots", 1),
+            items,
+            EquipmentSlotType.Accessory1).Success);
+        Assert.True(loadout.TryEquip(
+            new ItemStack("skyward_wings", 1),
+            items,
+            EquipmentSlotType.Accessory2).Success);
+        Assert.True(loadout.TryEquip(
+            new ItemStack("ether_glider", 1),
+            items,
+            EquipmentSlotType.Accessory3).Success);
+
+        var stats = new EquipmentStatCalculator().Calculate(PlayerStatBlock.Base, loadout, items);
+
+        Assert.True(stats.CanDoubleJump);
+        Assert.True(stats.CanFly);
+        Assert.True(stats.CanGlide);
+
+        loadout.Unequip(EquipmentSlotType.Accessory2);
+        var withoutWings = new EquipmentStatCalculator().Calculate(PlayerStatBlock.Base, loadout, items);
+        Assert.False(withoutWings.CanFly);
+    }
+
 
     [Fact]
     public void Create_RejectsNegativeItemValue()

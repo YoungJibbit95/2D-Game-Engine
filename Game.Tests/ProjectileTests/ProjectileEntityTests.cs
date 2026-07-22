@@ -174,6 +174,55 @@ public sealed class ProjectileEntityTests
     }
 
     [Fact]
+    public void Entity_UpdateUsesExactTileSweepBeyondLegacySamplingLimit()
+    {
+        var world = new World(8_192, 16, WorldMetadata.CreateDefault(seed: 1));
+        world.SetTile(50, 0, KnownTileIds.Stone);
+        var projectile = new ProjectileEntity(
+            new ProjectileDefinition
+            {
+                Id = "extreme-speed-test",
+                TexturePath = "projectiles/extreme-speed-test",
+                Speed = 1_000_000,
+                Damage = 1,
+                CollisionRadius = 2,
+                Lifetime = 1
+            },
+            Vector2.Zero,
+            new Vector2(1_000_000, 0));
+
+        projectile.Update(world, 0.1f);
+
+        Assert.False(projectile.IsActive);
+        Assert.True(projectile.TryConsumeLatestTileCollisionResult(out var collision));
+        Assert.Equal(ProjectileTileCollisionDecision.Destroyed, collision.Decision);
+        Assert.Equal(50, collision.TileX);
+        Assert.Equal(0, collision.TileY);
+        Assert.Equal(KnownTileIds.Stone, collision.TileId);
+        Assert.InRange(projectile.Position.X, 795.9f, 796.1f);
+    }
+
+    [Fact]
+    public void Entity_UpdateDoesNotRehitTouchingTileWhileMovingAway()
+    {
+        var world = new World(16, 16, WorldMetadata.CreateDefault(seed: 1));
+        world.SetTile(1, 0, KnownTileIds.Stone);
+        var projectile = new ProjectileEntity(
+            CreateDefinition() with
+            {
+                Speed = 40
+            },
+            new Vector2(32, 0),
+            new Vector2(40, 0));
+
+        projectile.Update(world, 0.1f);
+
+        Assert.True(projectile.IsActive);
+        Assert.False(projectile.HasPendingTileCollisionResult);
+        Assert.True(projectile.Position.X > 32f);
+    }
+
+    [Fact]
     public void LegacyConstructor_UsesSameRuntimeStateAndPreservesPublicContract()
     {
         var projectile = new ProjectileEntity(

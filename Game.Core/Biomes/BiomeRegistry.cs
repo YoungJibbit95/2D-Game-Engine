@@ -134,12 +134,22 @@ public sealed class BiomeRegistry
         }
 
         var weatherWeight = (long)definition.Weather.ClearWeight + definition.Weather.RainWeight +
-            definition.Weather.StormWeight + definition.Weather.FogWeight;
+            definition.Weather.StormWeight + definition.Weather.FogWeight +
+            definition.Weather.SnowWeight + definition.Weather.BlizzardWeight;
         if (definition.Weather.ClearWeight < 0 || definition.Weather.RainWeight < 0 ||
-            definition.Weather.StormWeight < 0 || definition.Weather.FogWeight < 0 || weatherWeight <= 0)
+            definition.Weather.StormWeight < 0 || definition.Weather.FogWeight < 0 ||
+            definition.Weather.SnowWeight < 0 || definition.Weather.BlizzardWeight < 0 ||
+            weatherWeight <= 0)
         {
             throw new RegistryValidationException(
                 $"Biome '{definition.Id}' weather weights must be non-negative with a positive total.");
+        }
+
+        if (!definition.Weather.AllowsFrozenPrecipitation &&
+            (definition.Weather.SnowWeight > 0 || definition.Weather.BlizzardWeight > 0))
+        {
+            throw new RegistryValidationException(
+                $"Biome '{definition.Id}' must explicitly allow frozen precipitation before assigning snow or blizzard weight.");
         }
 
         if (definition.Weather.MinDurationTicks <= 0 ||

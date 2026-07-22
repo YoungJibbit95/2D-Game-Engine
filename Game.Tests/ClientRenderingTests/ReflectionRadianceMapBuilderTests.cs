@@ -53,6 +53,81 @@ public sealed class ReflectionRadianceMapBuilderTests
     }
 
     [Fact]
+    public void Build_WaterAnimationIsDeterministicAndAdvancesEverySixFrames()
+    {
+        var viewport = new Rectangle(0, 0, 160, 80);
+        var profile = CreateProfile(viewport, width: 10, height: 5);
+        var red = new float[profile.MaskPixelCount];
+        var green = new float[profile.MaskPixelCount];
+        var blue = new float[profile.MaskPixelCount];
+        var shadow = new float[profile.MaskPixelCount];
+        for (var x = 2; x <= 7; x++)
+        {
+            red[2 * profile.MaskSize.X + x] = (x - 1) / 6f;
+            blue[2 * profile.MaskSize.X + x] = (8 - x) / 6f;
+        }
+
+        var surfaces = new[]
+        {
+            new WaterReflectionSurface(
+                new Rectangle(32, 48, 96, 16),
+                ReflectionSurfaceKind.Water,
+                Color.White,
+                Reflectivity: 1f,
+                Phase: 19)
+        };
+        var first = new Color[profile.MaskPixelCount];
+        var repeated = new Color[profile.MaskPixelCount];
+        var advanced = new Color[profile.MaskPixelCount];
+
+        _ = ReflectionRadianceMapBuilder.Build(
+            viewport, profile, CreateFrame(), surfaces, red, green, blue, shadow, 1f, first);
+        _ = ReflectionRadianceMapBuilder.Build(
+            viewport, profile, CreateFrame(), surfaces, red, green, blue, shadow, 1f, repeated);
+        _ = ReflectionRadianceMapBuilder.Build(
+            viewport,
+            profile,
+            CreateFrame() with { FrameIndex = CreateFrame().FrameIndex + 6 },
+            surfaces,
+            red,
+            green,
+            blue,
+            shadow,
+            1f,
+            advanced);
+
+        Assert.True(first.AsSpan().SequenceEqual(repeated));
+        Assert.False(first.AsSpan().SequenceEqual(advanced));
+    }
+
+    [Fact]
+    public void Build_WetSurfaceSamplesWithoutHorizontalRefraction()
+    {
+        var viewport = new Rectangle(0, 0, 160, 80);
+        var profile = CreateProfile(viewport, width: 10, height: 5);
+        var red = new float[profile.MaskPixelCount];
+        var values = new float[profile.MaskPixelCount];
+        red[2 * profile.MaskSize.X + 4] = 1f;
+        var destination = new Color[profile.MaskPixelCount];
+        var surfaces = new[]
+        {
+            new WaterReflectionSurface(
+                new Rectangle(32, 48, 96, 16),
+                ReflectionSurfaceKind.WetSolid,
+                Color.White,
+                Reflectivity: 1f,
+                Phase: 19)
+        };
+
+        _ = ReflectionRadianceMapBuilder.Build(
+            viewport, profile, CreateFrame(), surfaces, red, values, values, values, 1f, destination);
+
+        var row = 3 * profile.MaskSize.X;
+        Assert.True(destination[row + 4].R > destination[row + 3].R + 10);
+        Assert.True(destination[row + 4].R > destination[row + 5].R + 10);
+    }
+
+    [Fact]
     public void Build_ClearsStaleDataAndClampsSurfaceCount()
     {
         var viewport = new Rectangle(0, 0, 64, 64);
@@ -129,6 +204,19 @@ public sealed class ReflectionRadianceMapBuilderTests
         }
 
         Assert.Equal(0, GC.GetAllocatedBytesForCurrentThread() - before);
+    }
+
+    [Fact]
+    public void ResolveFresnelReflectance_IncreasesTowardGrazingAngles()
+    {
+        var normalIncidence = ReflectionRadianceMapBuilder.ResolveFresnelReflectance(0.02f, 1f);
+        var oblique = ReflectionRadianceMapBuilder.ResolveFresnelReflectance(0.02f, 0.4f);
+        var grazing = ReflectionRadianceMapBuilder.ResolveFresnelReflectance(0.02f, 0.05f);
+
+        Assert.InRange(normalIncidence, 0.019f, 0.021f);
+        Assert.True(oblique > normalIncidence);
+        Assert.True(grazing > oblique);
+        Assert.InRange(grazing, 0f, 1f);
     }
 
     private static PresentationQualityProfile CreateProfile(Rectangle viewport, int width, int height)

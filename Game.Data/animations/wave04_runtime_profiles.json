@@ -360,6 +360,51 @@
         ]
       },
       {
+        "id": "meadow_butterfly",
+        "kind": "Enemy",
+        "spriteId": "entities/critters/meadow_butterfly",
+        "bindings": ["entities/critters/meadow_butterfly", "meadow_butterfly"],
+        "motionStyle": "Bob, WingFlap",
+        "isFlying": true,
+        "displayScale": 1.0,
+        "castsShadow": false,
+        "bobAmplitude": 1.4,
+        "animations": [
+          { "state": "Idle", "startFrame": 0, "frameCount": 4, "ticksPerFrame": 8, "playback": "PingPong" },
+          { "state": "Fly", "startFrame": 0, "frameCount": 4, "ticksPerFrame": 3 }
+        ]
+      },
+      {
+        "id": "forest_moth",
+        "kind": "Enemy",
+        "spriteId": "entities/critters/forest_moth",
+        "bindings": ["entities/critters/forest_moth", "forest_moth"],
+        "motionStyle": "Bob, WingFlap",
+        "isFlying": true,
+        "displayScale": 1.0,
+        "castsShadow": false,
+        "bobAmplitude": 1.2,
+        "animations": [
+          { "state": "Idle", "startFrame": 0, "frameCount": 4, "ticksPerFrame": 9, "playback": "PingPong" },
+          { "state": "Fly", "startFrame": 0, "frameCount": 4, "ticksPerFrame": 4 }
+        ]
+      },
+      {
+        "id": "cave_glowbug",
+        "kind": "Enemy",
+        "spriteId": "entities/critters/cave_glowbug",
+        "bindings": ["entities/critters/cave_glowbug", "cave_glowbug"],
+        "motionStyle": "Bob, WingFlap",
+        "isFlying": true,
+        "displayScale": 0.9,
+        "castsShadow": false,
+        "bobAmplitude": 1.0,
+        "animations": [
+          { "state": "Idle", "startFrame": 0, "frameCount": 4, "ticksPerFrame": 8, "playback": "PingPong" },
+          { "state": "Fly", "startFrame": 0, "frameCount": 4, "ticksPerFrame": 3 }
+        ]
+      },
+      {
         "id": "bat",
         "kind": "Enemy",
         "spriteId": "entities/enemies/bat",
