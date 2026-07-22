@@ -1,0 +1,329 @@
+{
+  "schemaVersion": 2,
+  "generatorVersion": "2.0.0",
+  "styleId": "yjse-pixel-v1",
+  "styleEffectiveDate": "2026-07-10",
+  "auditTimestampUtc": "2026-07-22T10:12:41.168408+00:00",
+  "validationPolicy": {
+    "duplicateContentHashesAllowed": false,
+    "transparentCornersRequired": true,
+    "standaloneRecommendedUniqueColorMaximum": 16,
+    "smallWorldSpriteRecommendedUniqueColorMaximum": 32,
+    "productionStyleIssuesAreHard": [
+      "opaque_corner",
+      "palette_over_recommended",
+      "style_palette_mismatch",
+      "weak_dark_silhouette"
+    ]
+  },
+  "scope": {
+    "scanRoot": "assets/AdventureArsenalV1",
+    "manifestEntries": 4,
+    "uniqueManifestPaths": 4,
+    "pngFilesOnDisk": 4,
+    "manifestPathsMissingOnDisk": [],
+    "unmanifestedPngPaths": [],
+    "generationBriefs": {
+      "briefFiles": 17,
+      "uniqueBriefIds": 268,
+      "missingBriefIds": [],
+      "dimensionMismatchIds": [],
+      "duplicateBriefIds": []
+    }
+  },
+  "summary": {
+    "qualityTiers": {
+      "pass": 4
+    },
+    "issueCounts": {},
+    "duplicateGroupCount": 0,
+    "sourceAliasGroupCount": 0,
+    "dimensionMismatchCount": 0,
+    "missingFileCount": 0,
+    "hardIssueAssetCount": 0,
+    "hardIssueCount": 0
+  },
+  "hardScopeIssues": [],
+  "duplicateGroups": [],
+  "sourceAliasGroups": [],
+  "assets": [
+    {
+      "id": "items/adventure_v1/cinderbloom_staff",
+      "path": "assets/AdventureArsenalV1/items/cinderbloom_staff.png",
+      "sourceAliasOf": null,
+      "sourceAliasValid": null,
+      "category": "Item",
+      "declaredSize": [
+        32,
+        32
+      ],
+      "atlasId": "items.adventure_arsenal_v1",
+      "origin": [
+        16,
+        16
+      ],
+      "renderLayer": "items",
+      "license": "YjsE-Project-Owned",
+      "provenance": "adventure_arsenal_v1; deterministic native-pixel generator; adventure_arsenal_v1_provenance.json",
+      "tags": [
+        "production-sample",
+        "runtime-preloaded",
+        "item",
+        "weapon",
+        "magic",
+        "fire",
+        "native-32px"
+      ],
+      "issues": [],
+      "frameCount": 0,
+      "frameContractValid": true,
+      "exists": true,
+      "actualSize": [
+        32,
+        32
+      ],
+      "dimensionsMatch": true,
+      "sourceMode": "RGBA",
+      "sourceHasAlpha": true,
+      "hasTransparentPixels": true,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "partialAlphaPixels": 0,
+      "cornerAlphaValues": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "transparentCorners": true,
+      "transparentCornersRequired": true,
+      "visibleBounds": [
+        4,
+        2,
+        27,
+        30
+      ],
+      "opaquePixelCount": 205,
+      "occupancyRatio": 0.2002,
+      "uniqueOpaqueColors": 9,
+      "recommendedUniqueColorMaximum": 16,
+      "outOfStyleOpaquePixels": 0,
+      "stylePaletteComplianceRatio": 1.0,
+      "darkBoundaryRatio": 0.98,
+      "contentSha256": "9b42be006cae19011a1ce22f888b0af13404d175d7d1fa8626c5eadb28b7844f",
+      "readabilityScore": 100,
+      "qualityTier": "pass",
+      "hardIssues": []
+    },
+    {
+      "id": "items/adventure_v1/frostglass_scepter",
+      "path": "assets/AdventureArsenalV1/items/frostglass_scepter.png",
+      "sourceAliasOf": null,
+      "sourceAliasValid": null,
+      "category": "Item",
+      "declaredSize": [
+        32,
+        32
+      ],
+      "atlasId": "items.adventure_arsenal_v1",
+      "origin": [
+        16,
+        16
+      ],
+      "renderLayer": "items",
+      "license": "YjsE-Project-Owned",
+      "provenance": "adventure_arsenal_v1; deterministic native-pixel generator; adventure_arsenal_v1_provenance.json",
+      "tags": [
+        "production-sample",
+        "runtime-preloaded",
+        "item",
+        "weapon",
+        "magic",
+        "ice",
+        "native-32px"
+      ],
+      "issues": [],
+      "frameCount": 0,
+      "frameContractValid": true,
+      "exists": true,
+      "actualSize": [
+        32,
+        32
+      ],
+      "dimensionsMatch": true,
+      "sourceMode": "RGBA",
+      "sourceHasAlpha": true,
+      "hasTransparentPixels": true,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "partialAlphaPixels": 0,
+      "cornerAlphaValues": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "transparentCorners": true,
+      "transparentCornersRequired": true,
+      "visibleBounds": [
+        9,
+        2,
+        24,
+        30
+      ],
+      "opaquePixelCount": 217,
+      "occupancyRatio": 0.2119,
+      "uniqueOpaqueColors": 6,
+      "recommendedUniqueColorMaximum": 16,
+      "outOfStyleOpaquePixels": 0,
+      "stylePaletteComplianceRatio": 1.0,
+      "darkBoundaryRatio": 0.9072,
+      "contentSha256": "5e865a5aeb2b3d75599507112744b8d2bdda122730f6f0d3d18d2009b050fccb",
+      "readabilityScore": 100,
+      "qualityTier": "pass",
+      "hardIssues": []
+    },
+    {
+      "id": "items/adventure_v1/ambercore_pickaxe",
+      "path": "assets/AdventureArsenalV1/items/ambercore_pickaxe.png",
+      "sourceAliasOf": null,
+      "sourceAliasValid": null,
+      "category": "Item",
+      "declaredSize": [
+        32,
+        32
+      ],
+      "atlasId": "items.adventure_arsenal_v1",
+      "origin": [
+        16,
+        16
+      ],
+      "renderLayer": "items",
+      "license": "YjsE-Project-Owned",
+      "provenance": "adventure_arsenal_v1; deterministic native-pixel generator; adventure_arsenal_v1_provenance.json",
+      "tags": [
+        "production-sample",
+        "runtime-preloaded",
+        "item",
+        "tool",
+        "pickaxe",
+        "native-32px"
+      ],
+      "issues": [],
+      "frameCount": 0,
+      "frameContractValid": true,
+      "exists": true,
+      "actualSize": [
+        32,
+        32
+      ],
+      "dimensionsMatch": true,
+      "sourceMode": "RGBA",
+      "sourceHasAlpha": true,
+      "hasTransparentPixels": true,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "partialAlphaPixels": 0,
+      "cornerAlphaValues": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "transparentCorners": true,
+      "transparentCornersRequired": true,
+      "visibleBounds": [
+        3,
+        2,
+        29,
+        30
+      ],
+      "opaquePixelCount": 330,
+      "occupancyRatio": 0.3223,
+      "uniqueOpaqueColors": 9,
+      "recommendedUniqueColorMaximum": 16,
+      "outOfStyleOpaquePixels": 0,
+      "stylePaletteComplianceRatio": 1.0,
+      "darkBoundaryRatio": 0.9846,
+      "contentSha256": "27811da6c2692ddeb04374876ccc525739a80caa7e97f92152336e5a759414b5",
+      "readabilityScore": 100,
+      "qualityTier": "pass",
+      "hardIssues": []
+    },
+    {
+      "id": "items/adventure_v1/wayfinder_charm",
+      "path": "assets/AdventureArsenalV1/items/wayfinder_charm.png",
+      "sourceAliasOf": null,
+      "sourceAliasValid": null,
+      "category": "Item",
+      "declaredSize": [
+        32,
+        32
+      ],
+      "atlasId": "items.adventure_arsenal_v1",
+      "origin": [
+        16,
+        16
+      ],
+      "renderLayer": "items",
+      "license": "YjsE-Project-Owned",
+      "provenance": "adventure_arsenal_v1; deterministic native-pixel generator; adventure_arsenal_v1_provenance.json",
+      "tags": [
+        "production-sample",
+        "runtime-preloaded",
+        "item",
+        "accessory",
+        "exploration",
+        "native-32px"
+      ],
+      "issues": [],
+      "frameCount": 0,
+      "frameContractValid": true,
+      "exists": true,
+      "actualSize": [
+        32,
+        32
+      ],
+      "dimensionsMatch": true,
+      "sourceMode": "RGBA",
+      "sourceHasAlpha": true,
+      "hasTransparentPixels": true,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "partialAlphaPixels": 0,
+      "cornerAlphaValues": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "transparentCorners": true,
+      "transparentCornersRequired": true,
+      "visibleBounds": [
+        5,
+        2,
+        28,
+        29
+      ],
+      "opaquePixelCount": 445,
+      "occupancyRatio": 0.4346,
+      "uniqueOpaqueColors": 10,
+      "recommendedUniqueColorMaximum": 16,
+      "outOfStyleOpaquePixels": 0,
+      "stylePaletteComplianceRatio": 1.0,
+      "darkBoundaryRatio": 1.0,
+      "contentSha256": "54e65a375bdf148e497045543b78cdb0c07bed134bb6798d260eb9c0a376fc37",
+      "readabilityScore": 100,
+      "qualityTier": "pass",
+      "hardIssues": []
+    }
+  ]
+}

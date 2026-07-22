@@ -1,0 +1,12 @@
+{
+  "id": "frostglass_scepter",
+  "result": { "itemId": "frostglass_scepter", "count": 1 },
+  "ingredients": [
+    { "itemId": "iron_ore", "count": 10 },
+    { "itemId": "amberstone_block", "count": 6 },
+    { "itemId": "mana_crystal", "count": 1 }
+  ],
+  "station": "anvil",
+  "category": "weapons",
+  "sortOrder": 81
+}

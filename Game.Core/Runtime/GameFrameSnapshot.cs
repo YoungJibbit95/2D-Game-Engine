@@ -84,6 +84,8 @@ public readonly record struct LivingWorldFrameSnapshot(
     float WorldEventIntensity,
     LivingWorldPresentationFrameSnapshot Presentation)
 {
+    public bool AllowsFrozenPrecipitation { get; init; }
+
     public int SurfaceTileY { get; init; }
 
     public string? WorldEventPhaseId { get; init; }

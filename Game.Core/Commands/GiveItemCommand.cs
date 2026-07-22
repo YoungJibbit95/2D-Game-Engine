@@ -23,7 +23,9 @@ public sealed class GiveItemCommand : TypedConsoleCommand
                     minimum: 1)
             },
             aliases: new[] { "item" },
-            examples: new[] { "/give gel", "/give gel 25" }))
+            examples: new[] { "/give gel", "/give gel 25" },
+            category: CommandCategory.Inventory,
+            searchTerms: new[] { "item", "inventory", "grant" }))
     {
     }
 
@@ -31,18 +33,18 @@ public sealed class GiveItemCommand : TypedConsoleCommand
     {
         if (context.Content is null)
         {
-            return CommandResult.Failure("Content database is required for /give.");
+            return CommandResult.Failure("missing_content", "Content database is required for /give.");
         }
 
         if (context.PlayerInventory is null && context.PlayerLoadoutInventory is null)
         {
-            return CommandResult.Failure("Player inventory is required for /give.");
+            return CommandResult.Failure("missing_inventory", "Player inventory is required for /give.");
         }
 
         var itemId = arguments.GetString("itemId");
         if (!context.Content.Items.TryGetById(itemId, out _))
         {
-            return CommandResult.Failure($"Unknown item '{itemId}'.");
+            return CommandResult.Failure("unknown_item", $"Unknown item '{itemId}'.");
         }
 
         var count = arguments.Has("count") ? arguments.GetInt32("count") : 1;
@@ -52,19 +54,19 @@ public sealed class GiveItemCommand : TypedConsoleCommand
         {
             if (!context.PlayerLoadoutInventory.CanAddItem(stack))
             {
-                return CommandResult.Failure($"Inventory cannot fit {count}x {itemId}.");
+                return CommandResult.Failure("inventory_full", $"Inventory cannot fit {count}x {itemId}.");
             }
 
             context.PlayerLoadoutInventory.AddItem(stack);
-            return CommandResult.Success($"Gave {count}x {itemId}.");
+            return CommandResult.Success("item_granted", $"Gave {count}x {itemId}.");
         }
 
         if (!context.PlayerInventory!.CanAddItem(stack))
         {
-            return CommandResult.Failure($"Inventory cannot fit {count}x {itemId}.");
+            return CommandResult.Failure("inventory_full", $"Inventory cannot fit {count}x {itemId}.");
         }
 
         context.PlayerInventory.AddItem(stack);
-        return CommandResult.Success($"Gave {count}x {itemId}.");
+        return CommandResult.Success("item_granted", $"Gave {count}x {itemId}.");
     }
 }

@@ -6769,14 +6769,14 @@
       "originY": 31,
       "renderLayer": "world.entity",
       "license": "YjsE-Project-Owned",
-      "provenance": "wave_02_creatures_biomes_character_props; deterministic Pillow pixel primitives; wave_02_provenance.json",
+      "provenance": "legacy_boar_polish_v1; deterministic native-size Pillow pixel primitives; legacy_boar_polish_v1_provenance.json",
       "frames": [
         { "id": "idle", "x": 0, "y": 0, "width": 32, "height": 32, "originX": 16, "originY": 31 },
         { "id": "windup", "x": 32, "y": 0, "width": 32, "height": 32, "originX": 16, "originY": 31 },
         { "id": "charge", "x": 64, "y": 0, "width": 32, "height": 32, "originX": 16, "originY": 31 },
         { "id": "attack", "x": 96, "y": 0, "width": 32, "height": 32, "originX": 16, "originY": 31 }
       ],
-      "tags": ["entity", "enemy", "forest", "animated", "production-sample", "runtime-preloaded"]
+      "tags": ["entity", "enemy", "forest", "animated", "native-32px", "legacy-polish-v1", "production-sample", "runtime-preloaded"]
     },
     {
       "id": "entities/enemies/cave_spider",
@@ -6851,14 +6851,14 @@
       "originY": 8,
       "renderLayer": "world.entity.ambient",
       "license": "YjsE-Project-Owned",
-      "provenance": "wave_03_player_biome_production; deterministic Pillow pixel primitives; wave_03_provenance.json",
+      "provenance": "flying_wildlife_polish_v1; deterministic native-size Pillow pixel primitives; flying_wildlife_polish_v1_provenance.json",
       "frames": [
         { "id": "flight_0", "x": 0, "y": 0, "width": 16, "height": 16, "originX": 8, "originY": 8 },
         { "id": "flight_1", "x": 16, "y": 0, "width": 16, "height": 16, "originX": 8, "originY": 8 },
         { "id": "flight_2", "x": 32, "y": 0, "width": 16, "height": 16, "originX": 8, "originY": 8 },
         { "id": "flight_3", "x": 48, "y": 0, "width": 16, "height": 16, "originX": 8, "originY": 8 }
       ],
-      "tags": ["entity", "critter", "ambient", "meadow", "animated", "production-sample", "runtime-preloaded"]
+      "tags": ["entity", "critter", "ambient", "meadow", "animated", "native-16px", "wildlife-polish-v1", "production-sample", "runtime-preloaded"]
     },
     {
       "id": "entities/critters/forest_moth",
@@ -6871,14 +6871,14 @@
       "originY": 8,
       "renderLayer": "world.entity.ambient",
       "license": "YjsE-Project-Owned",
-      "provenance": "wave_03_player_biome_production; deterministic Pillow pixel primitives; wave_03_provenance.json",
+      "provenance": "flying_wildlife_polish_v1; deterministic native-size Pillow pixel primitives; flying_wildlife_polish_v1_provenance.json",
       "frames": [
         { "id": "flight_0", "x": 0, "y": 0, "width": 16, "height": 16, "originX": 8, "originY": 8 },
         { "id": "flight_1", "x": 16, "y": 0, "width": 16, "height": 16, "originX": 8, "originY": 8 },
         { "id": "flight_2", "x": 32, "y": 0, "width": 16, "height": 16, "originX": 8, "originY": 8 },
         { "id": "flight_3", "x": 48, "y": 0, "width": 16, "height": 16, "originX": 8, "originY": 8 }
       ],
-      "tags": ["entity", "critter", "ambient", "forest", "animated", "production-sample", "runtime-preloaded"]
+      "tags": ["entity", "critter", "ambient", "forest", "animated", "native-16px", "wildlife-polish-v1", "production-sample", "runtime-preloaded"]
     },
     {
       "id": "entities/critters/cave_glowbug",
@@ -6891,14 +6891,14 @@
       "originY": 8,
       "renderLayer": "world.entity.ambient",
       "license": "YjsE-Project-Owned",
-      "provenance": "wave_03_player_biome_production; deterministic Pillow pixel primitives; wave_03_provenance.json",
+      "provenance": "flying_wildlife_polish_v1; deterministic native-size Pillow pixel primitives; flying_wildlife_polish_v1_provenance.json",
       "frames": [
         { "id": "flight_0", "x": 0, "y": 0, "width": 16, "height": 16, "originX": 8, "originY": 8 },
         { "id": "flight_1", "x": 16, "y": 0, "width": 16, "height": 16, "originX": 8, "originY": 8 },
         { "id": "flight_2", "x": 32, "y": 0, "width": 16, "height": 16, "originX": 8, "originY": 8 },
         { "id": "flight_3", "x": 48, "y": 0, "width": 16, "height": 16, "originX": 8, "originY": 8 }
       ],
-      "tags": ["entity", "critter", "ambient", "cave", "animated", "production-sample", "runtime-preloaded"]
+      "tags": ["entity", "critter", "ambient", "cave", "animated", "native-16px", "wildlife-polish-v1", "production-sample", "runtime-preloaded"]
     },
     {
       "id": "particles/meadow_pollen",
@@ -6991,14 +6991,14 @@
       "originY": 31,
       "renderLayer": "world.entity",
       "license": "YjsE-Project-Owned",
-      "provenance": "wave_03_player_biome_production; deterministic Pillow pixel primitives; wave_03_provenance.json",
+      "provenance": "legacy_boar_polish_v1; deterministic native-size Pillow pixel primitives; legacy_boar_polish_v1_provenance.json",
       "frames": [
         { "id": "idle", "x": 0, "y": 0, "width": 32, "height": 32, "originX": 16, "originY": 31 },
         { "id": "windup", "x": 32, "y": 0, "width": 32, "height": 32, "originX": 16, "originY": 31 },
         { "id": "charge", "x": 64, "y": 0, "width": 32, "height": 32, "originX": 16, "originY": 31 },
         { "id": "attack", "x": 96, "y": 0, "width": 32, "height": 32, "originX": 16, "originY": 31 }
       ],
-      "tags": ["entity", "enemy", "elite", "forest", "animated", "production-sample", "runtime-preloaded"]
+      "tags": ["entity", "enemy", "elite", "forest", "animated", "native-32px", "legacy-polish-v1", "production-sample", "runtime-preloaded"]
     },
     {
       "id": "entities/enemies/cave_spider_elite",

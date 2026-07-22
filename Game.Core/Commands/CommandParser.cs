@@ -6,7 +6,13 @@ public sealed class CommandParser
 {
     public bool TryParse(string? input, out ParsedCommand parsedCommand)
     {
+        return TryParse(input, out parsedCommand, out _);
+    }
+
+    public bool TryParse(string? input, out ParsedCommand parsedCommand, out string? error)
+    {
         parsedCommand = new ParsedCommand(string.Empty, Array.Empty<string>());
+        error = null;
 
         if (string.IsNullOrWhiteSpace(input))
         {
@@ -24,7 +30,12 @@ public sealed class CommandParser
             return false;
         }
 
-        var tokens = Tokenize(commandText);
+        if (!TryTokenize(commandText, out var tokens))
+        {
+            error = "Unterminated quoted argument.";
+            return false;
+        }
+
         if (tokens.Count == 0)
         {
             return false;
@@ -34,9 +45,9 @@ public sealed class CommandParser
         return true;
     }
 
-    private static List<string> Tokenize(string text)
+    private static bool TryTokenize(string text, out List<string> tokens)
     {
-        var tokens = new List<string>();
+        tokens = new List<string>();
         var current = new StringBuilder();
         var inQuotes = false;
 
@@ -65,8 +76,13 @@ public sealed class CommandParser
             current.Append(character);
         }
 
+        if (inQuotes)
+        {
+            return false;
+        }
+
         FlushToken(tokens, current);
-        return tokens;
+        return true;
     }
 
     private static void FlushToken(List<string> tokens, StringBuilder current)

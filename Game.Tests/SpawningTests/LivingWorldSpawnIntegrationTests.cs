@@ -92,7 +92,11 @@ public sealed class LivingWorldSpawnIntegrationTests : IDisposable
         var totalSpawned = 0;
         var spawnedOutsideView = 0;
         var observedVisibleIngress = false;
+        var observedFriendlyActor = false;
+        var observedHostileActor = false;
         var observedActorIds = new HashSet<int>();
+        var observedActorDefinitions = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var observedBiomes = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
         foreach (var rule in session.Content.SpawnRules.Definitions)
         {
@@ -105,6 +109,7 @@ public sealed class LivingWorldSpawnIntegrationTests : IDisposable
         for (var tick = 0; tick < 60 * 90; tick++)
         {
             var result = session.Simulation.Tick(PlayerCommand.None, 1f / 60f);
+            observedBiomes.Add(result.Snapshot.LivingWorld.BiomeId);
             totalAttempts += result.Spawning.Attempts;
             totalSpawned += result.Spawning.Spawned;
             for (var index = 0; index < session.Entities.Entities.Count; index++)
@@ -116,6 +121,9 @@ public sealed class LivingWorldSpawnIntegrationTests : IDisposable
 
                 var actorTile = CoordinateUtils.WorldToTile(actor.Body.Center.X, actor.Body.Center.Y);
                 observedVisibleIngress |= initialVisible.Contains(actorTile.X, actorTile.Y);
+                observedFriendlyActor |= actor.Faction == EntityFaction.Friendly;
+                observedHostileActor |= actor.Faction == EntityFaction.Hostile;
+                observedActorDefinitions.Add(actor.DefinitionId);
                 if (!observedActorIds.Add(actor.Id))
                 {
                     continue;
@@ -135,8 +143,13 @@ public sealed class LivingWorldSpawnIntegrationTests : IDisposable
         Assert.True(totalAttempts > 0, "The real session never attempted population maintenance.");
         Assert.True(totalSpawned > 0, $"Spawn attempts={totalAttempts}, but no actor was accepted.");
         Assert.True(spawnedOutsideView > 0, "No accepted actor originated outside the initial viewport.");
-        Assert.Contains(actors, actor => actor.Faction == EntityFaction.Friendly);
-        Assert.Contains(actors, actor => actor.Faction == EntityFaction.Hostile);
+        Assert.True(observedFriendlyActor, "No friendly actor populated the session during the observation window.");
+        Assert.True(
+            observedHostileActor,
+            $"No hostile actor populated the session during the observation window. " +
+            $"Biomes=[{string.Join(", ", observedBiomes)}], " +
+            $"actors=[{string.Join(", ", observedActorDefinitions)}], " +
+            $"attempts={totalAttempts}, spawned={totalSpawned}.");
         Assert.True(observedVisibleIngress, "No offscreen actor reached the visible activity area.");
     }
 

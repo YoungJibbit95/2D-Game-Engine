@@ -139,6 +139,9 @@ public sealed class PlayerAttackSequenceIntegrationTests
 
         Assert.True(accepted.ItemUse.Success);
         Assert.Equal(0, acceptedPlayer.Mana);
+        Assert.Equal(ManaSpendStatus.Spent, accepted.ItemUse.ManaSpend.Status);
+        Assert.Equal(ManaReservationFinalizationStatus.Committed, accepted.ItemUse.ManaFinalization.Status);
+        Assert.Equal(0, acceptedPlayer.ManaComponent.OpenReservationCount);
         Assert.Equal(DamageType.Magic, Assert.Single(accepted.Snapshot.Entities).DamageType);
 
         var rejectedPlayer = new PlayerEntity(
@@ -157,7 +160,61 @@ public sealed class PlayerAttackSequenceIntegrationTests
         Assert.True(rejected.ItemUse.Blocked);
         Assert.Equal(Game.Core.Events.GameplayActionFailureReason.InsufficientMana, rejected.ItemUse.FailureReason);
         Assert.Equal(5, rejectedPlayer.Mana);
+        Assert.Equal(ManaSpendStatus.InsufficientMana, rejected.ItemUse.ManaSpend.Status);
+        Assert.Equal(0, rejectedPlayer.ManaComponent.OpenReservationCount);
         Assert.Empty(rejected.Snapshot.Entities);
+    }
+
+    [Fact]
+    public void MagicSequence_MaterializedWandProjectileAppliesMagicDamageThroughSimulation()
+    {
+        var sequence = CreateProjectileSequence(
+            "wand.cast.damage",
+            new AttackResourceCost(Mana: 6),
+            startupTicks: 0,
+            eventCapacity: 8);
+        var weapon = CreateWeapon(
+            "damage_wand",
+            ItemType.WeaponMagic,
+            ItemActionKind.Cast,
+            sequence.Id,
+            projectileId: "magic_projectile");
+        var content = CreateContent([weapon], [sequence]);
+        var player = new PlayerEntity(
+            new Vector2(32, 32),
+            new TileCollisionResolver(),
+            maxMana: 20,
+            currentMana: 6);
+        var inventory = new PlayerInventory(content.Items);
+        inventory.Hotbar.Slots[0].SetStack(new ItemStack(weapon.Id, 1));
+        var entities = new EntityManager(spatialCellSize: 16);
+        var enemy = new EnemyEntity(
+            "magic_target",
+            new Vector2(41, 40),
+            new Vector2(16, 16),
+            new HealthComponent(20),
+            NullAiBehavior.Instance,
+            new TileCollisionResolver(),
+            contactDamage: 0,
+            movementMode: EntityMovementMode.Flying);
+        entities.Add(enemy);
+        using var simulation = CreateSimulation(content, player, inventory, entities);
+        simulation.World.SetWall(2, 2, 1);
+
+        var result = simulation.Tick(
+            PlayerCommand.None,
+            FixedDelta,
+            new PlayerItemUseRequest(
+                true,
+                TilePos.Zero,
+                player.Body.Center + Vector2.UnitX * 80));
+
+        Assert.Equal(1, result.Combat.ProjectileHits);
+        Assert.Equal(13, enemy.Health.Current);
+        Assert.Equal(DamageType.Magic, enemy.LastDamage?.Type);
+        Assert.Equal(0, player.Mana);
+        Assert.Equal(ManaReservationFinalizationStatus.Committed, result.ItemUse.ManaFinalization.Status);
+        Assert.Equal((ushort)1, simulation.World.GetTile(2, 2).WallId);
     }
 
     [Fact]

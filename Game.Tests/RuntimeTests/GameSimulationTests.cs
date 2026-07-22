@@ -148,6 +148,40 @@ public sealed class GameSimulationTests
     }
 
     [Fact]
+    public void Constructor_RebasesRestoredWorldEventsToPersistedWorldClock()
+    {
+        var content = CreateContent();
+        var world = new World(16, 16, WorldMetadata.CreateDefault(seed: 1));
+        var livingWorld = LivingWorldRuntime.CreateDefault(
+            world.Metadata.Seed,
+            world.HeightTiles,
+            surfaceBaseY: 6,
+            biomes: content.Biomes,
+            worldEvents: content.WorldEvents);
+        livingWorld.RestoreWorldEvents(new WorldEventRuntimeSnapshot
+        {
+            LastAdvancedTick = 900,
+            RegionIndex = 0,
+            BiomeId = "forest",
+            Status = WorldEventRuntimeStatus.Inactive
+        });
+
+        using var simulation = new GameSimulation(
+            content,
+            world,
+            new BiomeMap("forest"),
+            new PlayerEntity(new Vector2(32, 32), new TileCollisionResolver()),
+            new PlayerInventory(content.Items),
+            spawnOptions: new SpawnSchedulerOptions { MaxTotalActiveEnemies = 0 },
+            livingWorld: livingWorld);
+
+        Assert.Equal(0, simulation.TickNumber);
+        Assert.Equal(0, simulation.LatestSnapshot.TickNumber);
+        Assert.Equal(0, simulation.LivingWorld.WorldEventSnapshot!.LastAdvancedTick);
+        Assert.Equal(1, simulation.Tick(PlayerCommand.None, 0.016f).TickNumber);
+    }
+
+    [Fact]
     public void PhaseTelemetry_DisabledPathDoesNotCollectSamples()
     {
         using var simulation = CreateSimulation();

@@ -6,7 +6,7 @@
   "generator": "OpenAI built-in image generation tool, default mode",
   "sourceRuntimeCapture": "../artifacts/polish-final-forest-1080p.png",
   "sourceRole": "problem reference only; not an edit target or raster source",
-  "brief": "asset_briefs/tree_v3_visual_direction_brief.json",
+  "brief": "art_direction/tree_v3_visual_direction_brief.json",
   "license": "YjsE-Project-Owned",
   "runtimeLoaded": false
 }

@@ -1,0 +1,13 @@
+{
+  "id": "firebolt",
+  "texture": "projectiles/firebolt",
+  "speed": 310,
+  "damage": 9,
+  "damageType": "Magic",
+  "gravity": -0.015,
+  "dragPerSecond": 0.04,
+  "pierce": 1,
+  "collisionRadius": 3.0,
+  "knockback": 2.2,
+  "lifetime": 2.8
+}

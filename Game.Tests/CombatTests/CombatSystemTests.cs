@@ -1,3 +1,4 @@
+using Game.Core;
 using Game.Core.Combat;
 using Game.Core.Entities;
 using Game.Core.Events;
@@ -13,6 +14,7 @@ using Game.Core.Projectiles;
 using Game.Core.Randomness;
 using Game.Core.Spawning;
 using Game.Core.Tiles;
+using Game.Core.World;
 using System.Numerics;
 using Xunit;
 
@@ -55,16 +57,68 @@ public sealed class CombatSystemTests
     [Fact]
     public void ResolveProjectileHits_WithContentAppliesProjectileStatusEffects()
     {
+        var content = CreateContent();
         var entities = new EntityManager(spatialCellSize: 16);
         var enemy = CreateEnemy(health: 20);
-        var projectile = new ProjectileEntity("poison_arrow", new Vector2(0, 0), Vector2.Zero, 1, 0, 0, 5);
+        var projectile = new ProjectileEntity(
+            content.Projectiles.GetById("poison_arrow"),
+            Vector2.Zero,
+            Vector2.Zero);
         entities.Add(enemy);
         entities.Add(projectile);
 
-        var result = CreateCombatSystem().ResolveProjectileHits(entities, CreateContent(), events: null);
+        var result = CreateCombatSystem().ResolveProjectileHits(entities, content, events: null);
 
         Assert.Equal(1, result.StatusEffectsApplied);
         Assert.True(enemy.StatusEffects.HasEffect("poisoned"));
+    }
+
+    [Fact]
+    public void ResolveProjectileHits_AppliesRuntimeStatusEffectInsteadOfRegistryDefinition()
+    {
+        var registeredDefinition = new ProjectileDefinition
+        {
+            Id = "runtime-effect-projectile",
+            TexturePath = "projectiles/runtime-effect-projectile",
+            Speed = 0,
+            Damage = 1,
+            Lifetime = 5
+        };
+        var content = CreateContent(
+            projectiles: ProjectileRegistry.Create(new[] { registeredDefinition }));
+        var runtimeDefinition = registeredDefinition with
+        {
+            OnHitEffects = new[]
+            {
+                new StatusEffectApplication { EffectId = "poisoned" }
+            }
+        };
+        var entities = new EntityManager(spatialCellSize: 16);
+        var enemy = CreateEnemy(health: 20);
+        var projectile = new ProjectileEntity(runtimeDefinition, Vector2.Zero, Vector2.Zero);
+        entities.Add(enemy);
+        entities.Add(projectile);
+        var events = new GameEventBus();
+        var statusEffectEvents = 0;
+        StatusEffectAppliedEvent? published = null;
+        events.Subscribe<StatusEffectAppliedEvent>(gameEvent =>
+        {
+            statusEffectEvents++;
+            published = gameEvent;
+        });
+        var combat = CreateCombatSystem();
+
+        var first = combat.ResolveProjectileHits(entities, content, events);
+        var second = combat.ResolveProjectileHits(entities, content, events);
+
+        Assert.Equal(1, first.StatusEffectsApplied);
+        Assert.Equal(0, second.StatusEffectsApplied);
+        Assert.True(enemy.StatusEffects.HasEffect("poisoned"));
+        Assert.Equal(1, statusEffectEvents);
+        Assert.NotNull(published);
+        Assert.Equal(StatusEffectSourceKind.Projectile, published.SourceKind);
+        Assert.Equal(runtimeDefinition.Id, published.SourceId);
+        Assert.Equal(enemy.Id, published.TargetEntityId);
     }
 
     [Fact]
@@ -138,6 +192,191 @@ public sealed class CombatSystemTests
         Assert.Equal(1, result.ProjectileHits);
         Assert.Equal(15, nearEnemy.Health.Current);
         Assert.Equal(20, farEnemy.Health.Current);
+    }
+
+    [Fact]
+    public void ResolveProjectileHits_EnemyBeforeSolidTileWinsImpactOrdering()
+    {
+        var tiles = TileRegistry.Create(new[]
+        {
+            new TileDefinition
+            {
+                NumericId = KnownTileIds.Stone,
+                Id = "stone",
+                DisplayName = "Stone",
+                TexturePath = "tiles/stone",
+                Solid = true,
+                BlocksLight = true,
+                Hardness = 1,
+                MiningPowerRequired = 0
+            }
+        });
+        var content = CreateContent(tiles);
+        var world = new World(16, 16, WorldMetadata.CreateDefault(seed: 2));
+        world.SetTile(4, 0, KnownTileIds.Stone);
+        var entities = new EntityManager(spatialCellSize: 16);
+        var enemy = CreateEnemy(health: 20);
+        enemy.Body.Position = new Vector2(32, 0);
+        var projectile = new ProjectileEntity(
+            new ProjectileDefinition
+            {
+                Id = "fast-magic-bolt",
+                TexturePath = "projectiles/fast-magic-bolt",
+                Speed = 240,
+                Damage = 7,
+                DamageType = DamageType.Magic,
+                Lifetime = 5
+            },
+            Vector2.Zero,
+            new Vector2(240, 0));
+        entities.Add(enemy);
+        entities.Add(projectile);
+
+        projectile.Update(world, 0.5f);
+        var result = CreateCombatSystem().ResolveProjectileHits(
+            entities,
+            content,
+            world);
+
+        Assert.Equal(1, result.ProjectileHits);
+        Assert.Equal(13, enemy.Health.Current);
+        Assert.Equal(DamageType.Magic, enemy.LastDamage?.Type);
+        Assert.False(projectile.IsActive);
+        Assert.Equal(ProjectileTerminationReason.EntityHit, projectile.RuntimeState.TerminationReason);
+        Assert.Equal(KnownTileIds.Stone, world.GetTile(4, 0).TileId);
+    }
+
+    [Fact]
+    public void ResolveProjectileHits_MinesHitTileAndPublishesTileMinedEvent()
+    {
+        var tiles = TileRegistry.Create(new[]
+        {
+            new TileDefinition
+            {
+                NumericId = KnownTileIds.Stone,
+                Id = "stone",
+                DisplayName = "Stone",
+                TexturePath = "tiles/stone",
+                Solid = true,
+                BlocksLight = true,
+                EmittedLight = 0,
+                LightRadius = 0,
+                Hardness = 1,
+                MiningPowerRequired = 0
+            }
+        });
+        var content = CreateContent(tiles);
+        var world = new World(16, 16, WorldMetadata.CreateDefault(seed: 2));
+        world.SetTile(1, 0, KnownTileIds.Stone);
+
+        var bus = new GameEventBus();
+        var minedPosition = new TilePos(-1, -1);
+        bus.Subscribe<TileMinedEvent>(gameEvent => minedPosition = gameEvent.Position);
+
+        var entities = new EntityManager(spatialCellSize: 16);
+        var projectile = new ProjectileEntity("arrow", new Vector2(0, 0), new Vector2(40, 0), 1, 0, 0, 5);
+        entities.Add(projectile);
+
+        entities.UpdateAll(world, 0.5f);
+        var result = CreateCombatSystem().ResolveProjectileHits(entities, content, world, bus);
+
+        Assert.Equal(new TilePos(1, 0), minedPosition);
+        Assert.Equal(KnownTileIds.Air, world.GetTile(1, 0).TileId);
+        Assert.Equal(0, result.ProjectileHits);
+        Assert.False(projectile.IsActive);
+    }
+
+    [Fact]
+    public void ResolveProjectileHits_BackgroundWallDoesNotBlockOrMineProjectile()
+    {
+        var tiles = TileRegistry.Create(new[]
+        {
+            new TileDefinition
+            {
+                NumericId = KnownTileIds.Stone,
+                Id = "stone",
+                DisplayName = "Stone",
+                TexturePath = "tiles/stone",
+                Solid = true,
+                BlocksLight = true,
+                EmittedLight = 0,
+                LightRadius = 0,
+                Hardness = 1,
+                MiningPowerRequired = 0
+            }
+        });
+        var content = CreateContent(tiles);
+        var world = new World(16, 16, WorldMetadata.CreateDefault(seed: 2));
+        world.SetTile(1, 0, KnownTileIds.Air);
+        world.SetWall(1, 0, KnownTileIds.Stone);
+
+        var bus = new GameEventBus();
+        var minedPosition = new TilePos(-1, -1);
+        bus.Subscribe<TileMinedEvent>(gameEvent => minedPosition = gameEvent.Position);
+
+        var entities = new EntityManager(spatialCellSize: 16);
+        var projectile = new ProjectileEntity("arrow", new Vector2(0, 0), new Vector2(40, 0), 1, 0, 0, 5);
+        entities.Add(projectile);
+
+        entities.UpdateAll(world, 0.5f);
+        var result = CreateCombatSystem().ResolveProjectileHits(entities, content, world, bus);
+
+        Assert.Equal(new TilePos(-1, -1), minedPosition);
+        Assert.Equal(KnownTileIds.Stone, world.GetTile(1, 0).WallId);
+        Assert.Equal(KnownTileIds.Air, world.GetTile(1, 0).TileId);
+        Assert.Equal(0, result.ProjectileHits);
+        Assert.True(projectile.IsActive);
+        Assert.True(projectile.Position.X > Game.Core.GameConstants.TileSize);
+    }
+
+    [Fact]
+    public void ResolveProjectileHits_MinesTileAfterContinuousPhysicsCollision()
+    {
+        var tiles = TileRegistry.Create(new[]
+        {
+            new TileDefinition
+            {
+                NumericId = KnownTileIds.Stone,
+                Id = "stone",
+                DisplayName = "Stone",
+                TexturePath = "tiles/stone",
+                Solid = true,
+                BlocksLight = true,
+                EmittedLight = 0,
+                LightRadius = 0,
+                Hardness = 1,
+                MiningPowerRequired = 0
+            }
+        });
+        var content = CreateContent(tiles);
+        var world = new World(16, 16, WorldMetadata.CreateDefault(seed: 2));
+        world.SetTile(1, 0, KnownTileIds.Stone);
+        var entities = new EntityManager(spatialCellSize: 16);
+        var projectile = new ProjectileEntity(
+            new ProjectileDefinition
+            {
+                Id = "high-speed-stone-hitter",
+                TexturePath = "projectiles/arrow",
+                Speed = 1_200,
+                Damage = 1,
+                Lifetime = 5
+            },
+            new Vector2(0, 8),
+            new Vector2(1_200, 0),
+            ownerEntityId: 7);
+        entities.Add(projectile);
+
+        var bus = new GameEventBus();
+        var tileMinedCount = 0;
+        bus.Subscribe<TileMinedEvent>(_ => tileMinedCount++);
+
+        entities.UpdateAll(world, 0.1f);
+        var result = CreateCombatSystem().ResolveProjectileHits(entities, content, world, bus);
+
+        Assert.Equal(1, tileMinedCount);
+        Assert.Equal(KnownTileIds.Air, world.GetTile(1, 0).TileId);
+        Assert.Equal(0, result.ProjectileHits);
+        Assert.False(projectile.IsActive);
     }
 
     [Fact]
@@ -322,6 +561,93 @@ public sealed class CombatSystemTests
     }
 
     [Fact]
+    public void ResolveProjectileDamageAgainstPlayer_SweepsFastMagicWandProjectilePastPlayer()
+    {
+        var entities = new EntityManager(spatialCellSize: 16);
+        var player = new PlayerEntity(new Vector2(96, 0), new TileCollisionResolver());
+        var projectile = new ProjectileEntity(
+            new ProjectileDefinition
+            {
+                Id = "wand-arc",
+                TexturePath = "projectiles/wand-arc",
+                Speed = 1_000,
+                Damage = 11,
+                DamageType = DamageType.Magic,
+                Lifetime = 5
+            },
+            Vector2.Zero,
+            new Vector2(1_000, 0),
+            ownerEntityId: 99,
+            ownerFaction: EntityFaction.Hostile);
+        projectile.AdvanceRuntime(0.2f);
+        entities.Add(projectile);
+
+        var result = CreateCombatSystem().ResolveProjectileDamageAgainstPlayer(
+            player,
+            entities,
+            CreateContent(),
+            new GuardRuntimeState(new GuardDefinition()),
+            CreateDamageResolver());
+
+        Assert.Equal(1, result.ContactHits);
+        Assert.Equal(11, result.DamageApplied);
+        Assert.Equal(89, player.Health);
+        Assert.False(projectile.IsActive);
+    }
+
+    [Fact]
+    public void ResolveProjectileDamageAgainstPlayer_OwnerImmunityDoesNotConsumeEnemyHit()
+    {
+        var entities = new EntityManager(spatialCellSize: 16);
+        var player = new PlayerEntity(new Vector2(96, 0), new TileCollisionResolver());
+        entities.Add(player);
+        var enemy = CreateEnemy(health: 20);
+        enemy.Body.Position = new Vector2(96, 0);
+        entities.Add(enemy);
+        var projectile = new ProjectileEntity(
+            new ProjectileDefinition
+            {
+                Id = "returning-wand-arc",
+                TexturePath = "projectiles/returning-wand-arc",
+                Speed = 1_000,
+                Damage = 6,
+                DamageType = DamageType.Magic,
+                Pierce = 0,
+                FriendlyFire = true,
+                Lifetime = 5
+            },
+            Vector2.Zero,
+            new Vector2(1_000, 0),
+            ownerEntityId: player.Id,
+            ownerFaction: EntityFaction.Friendly);
+        projectile.AdvanceRuntime(0.2f);
+        entities.Add(projectile);
+
+        var playerResult = CreateCombatSystem().ResolveProjectileDamageAgainstPlayer(
+            player,
+            entities,
+            CreateContent(),
+            new GuardRuntimeState(new GuardDefinition()),
+            CreateDamageResolver(),
+            policy: new CombatResolutionPolicy
+            {
+                FriendlyFireEnabled = true
+            });
+
+        Assert.Equal(ContactDamageResult.None, playerResult);
+        Assert.True(projectile.IsActive);
+        Assert.Equal(0, projectile.Pierce);
+
+        var enemyResult = CreateCombatSystem().ResolveProjectileHits(
+            entities,
+            CreateLootTables());
+
+        Assert.Equal(1, enemyResult.ProjectileHits);
+        Assert.Equal(14, enemy.Health.Current);
+        Assert.False(projectile.IsActive);
+    }
+
+    [Fact]
     public void ResolvePlayerDamage_HandlesProjectileAndContactThroughCombinedEntryPoint()
     {
         var entities = new EntityManager(spatialCellSize: 16);
@@ -395,15 +721,17 @@ public sealed class CombatSystemTests
         });
     }
 
-    private static GameContentDatabase CreateContent()
+    private static GameContentDatabase CreateContent(
+        TileRegistry? tiles = null,
+        ProjectileRegistry? projectiles = null)
     {
         return new GameContentDatabase(
-            TileRegistry.Create(Array.Empty<TileDefinition>()),
+            tiles ?? TileRegistry.Create(Array.Empty<TileDefinition>()),
             ItemRegistry.Create(Array.Empty<ItemDefinition>()),
             RecipeRegistry.Create(Array.Empty<RecipeDefinition>()),
             CreateLootTables(),
             BiomeRegistry.Create(Array.Empty<BiomeDefinition>()),
-            ProjectileRegistry.Create(new[]
+            projectiles ?? ProjectileRegistry.Create(new[]
             {
                 new ProjectileDefinition
                 {

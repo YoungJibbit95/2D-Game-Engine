@@ -1,0 +1,8 @@
+{
+  "id": "arcane_chill",
+  "displayName": "Arcane Chill",
+  "kind": "Debuff",
+  "durationSeconds": 3.0,
+  "tickIntervalSeconds": 1.0,
+  "movementSpeedBonus": -0.12
+}

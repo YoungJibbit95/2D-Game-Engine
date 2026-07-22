@@ -17,7 +17,9 @@
     {
       "kind": "Cast",
       "projectile": "arcane_mote",
-      "projectileSpeedMultiplier": 0.94
+      "projectileSpeedMultiplier": 0.94,
+      "manaRegenerationDelaySeconds": 1.1,
+      "manaRefundPolicy": "BeforeEffect"
     }
   ],
   "tags": ["item", "weapon", "magic", "book"]

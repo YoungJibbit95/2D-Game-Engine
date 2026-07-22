@@ -238,64 +238,58 @@ public sealed class ParallaxViewportLayoutPlannerTests
     [InlineData(1280, 720)]
     [InlineData(1920, 1080)]
     [InlineData(2560, 1440)]
-    [InlineData(3840, 2160)]
-    public void Build_DepthStackOrdersSkyToTerrainAndOuterFillsCoverViewport(int width, int height)
+    [InlineData(3440, 1440)]
+    [InlineData(5120, 1440)]
+    [InlineData(7680, 2160)]
+    public void Build_FullscreenDepthStackPreservesAspectAndCoversViewportWithoutEdgeFill(
+        int width,
+        int height)
     {
-        var viewport = new Rectangle(0, 0, width, height);
+        var viewport = new Rectangle(-320, 73, width, height);
         var planes = new[]
         {
-            (ParallaxDepthPlane.Far, 1536, 384, 0.5f, -8),
-            (ParallaxDepthPlane.Mid, 1024, 256, 0.68f, 0),
-            (ParallaxDepthPlane.Near, 512, 128, 0.92f, 8)
+            (ParallaxDepthPlane.Far, 1536, 384, 0.5f, -8, -40_000f),
+            (ParallaxDepthPlane.Mid, 1024, 256, 0.68f, 0, 0f),
+            (ParallaxDepthPlane.Near, 512, 128, 0.92f, 8, 40_000f)
         };
-        var previousHorizon = float.MinValue;
 
         foreach (var plane in planes)
         {
-            var horizon = ParallaxViewportLayoutPlanner.ResolveDistantSurfaceHorizon(
-                viewport,
-                terrainEnvelopeDepthPixels: 192f,
-                plane.Item1);
             var layout = ParallaxViewportLayoutPlanner.Build(
                 plane.Item2,
                 plane.Item3,
                 viewport,
-                horizon,
-                undergroundBlend: 0f,
+                surfaceHorizon: viewport.Top - 50_000f,
+                undergroundBlend: 0.73f,
                 plane.Item5,
-                verticalScroll: 0f,
+                plane.Item6,
                 plane.Item4,
                 coverViewport: false,
-                ParallaxProjectionMode.DistantHorizonBand,
+                ParallaxProjectionMode.FullscreenDepthPlane,
                 plane.Item1);
             var bounds = new Rectangle(viewport.X, layout.Y, layout.Width, layout.Height);
+            var differentZoomHorizon = ParallaxViewportLayoutPlanner.Build(
+                plane.Item2,
+                plane.Item3,
+                viewport,
+                surfaceHorizon: viewport.Bottom + 50_000f,
+                undergroundBlend: 0f,
+                plane.Item5,
+                plane.Item6,
+                plane.Item4,
+                coverViewport: true,
+                ParallaxProjectionMode.FullscreenDepthPlane,
+                plane.Item1);
 
-            Assert.True(layout.Horizon > previousHorizon);
-            Assert.True(layout.Y + layout.Height < viewport.Bottom);
-            if (layout.Y > viewport.Top)
-            {
-                Assert.True(ParallaxVerticalCoveragePlanner.TryBuildTopFill(bounds, viewport, out var topFill));
-                Assert.Equal(viewport.Top, topFill.Top);
-            }
-            else
-            {
-                Assert.True(bounds.Top <= viewport.Top);
-                Assert.False(ParallaxVerticalCoveragePlanner.TryBuildTopFill(bounds, viewport, out _));
-            }
-            if (bounds.Bottom < viewport.Bottom)
-            {
-                Assert.True(ParallaxVerticalCoveragePlanner.TryBuildBottomEdgeExtension(
-                    bounds,
-                    new Rectangle(0, 0, plane.Item2, plane.Item3),
-                    viewport,
-                    out var bottomFill));
-                Assert.Equal(viewport.Bottom, bottomFill.Bounds.Bottom);
-            }
-            else
-            {
-                Assert.True(bounds.Bottom >= viewport.Bottom);
-            }
-            previousHorizon = layout.Horizon;
+            Assert.True(ParallaxVerticalCoveragePlanner.CoversViewportVertically(bounds, viewport));
+            Assert.False(ParallaxVerticalCoveragePlanner.TryBuildTopFill(bounds, viewport, out _));
+            Assert.Equal(0f, layout.Scale % 1f);
+            Assert.Equal(layout.Scale, layout.Width / (float)plane.Item2);
+            Assert.Equal(layout.Scale, layout.Height / (float)plane.Item3);
+            Assert.Equal((long)layout.Width * plane.Item3, (long)layout.Height * plane.Item2);
+            Assert.Equal(layout.Width, differentZoomHorizon.Width);
+            Assert.Equal(layout.Height, differentZoomHorizon.Height);
+            Assert.Equal(layout.Y, differentZoomHorizon.Y);
         }
     }
 }

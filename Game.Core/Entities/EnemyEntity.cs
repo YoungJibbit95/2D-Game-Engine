@@ -136,7 +136,7 @@ public sealed class EnemyEntity : Entity, IEntityPhysicsParticipant
             LastDamage = damage;
             if (damage.KnockbackForce > 0 && damage.KnockbackDirection != Vector2.Zero)
             {
-                Body.Velocity += Vector2.Normalize(damage.KnockbackDirection) * damage.KnockbackForce;
+                Body.ApplyKnockback(damage.KnockbackDirection, damage.KnockbackForce);
             }
 
             _despawnProtectionRemaining = Math.Max(
@@ -296,7 +296,10 @@ public sealed class EnemyEntity : Entity, IEntityPhysicsParticipant
         _lastAiDecisionStep = -1;
     }
 
-    void IEntityPhysicsParticipant.SynchronizePhysicsState()
+    void IEntityPhysicsParticipant.SynchronizePhysicsState(
+        GameWorld world,
+        in PhysicsMoveResult moveResult,
+        ReadOnlySpan<PhysicsContact> tileContacts)
     {
         SynchronizePhysicsState();
     }

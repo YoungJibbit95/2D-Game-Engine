@@ -1,0 +1,20 @@
+{
+  "id": "ice_shard",
+  "texture": "projectiles/ice_shard",
+  "speed": 285,
+  "damage": 8,
+  "damageType": "Magic",
+  "gravity": 0.0,
+  "dragPerSecond": 0.02,
+  "pierce": 2,
+  "collisionRadius": 2.5,
+  "knockback": 1.5,
+  "lifetime": 3.2,
+  "onHitEffects": [
+    {
+      "effect": "arcane_chill",
+      "chance": 0.5,
+      "durationSeconds": 3.0
+    }
+  ]
+}

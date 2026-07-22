@@ -15,7 +15,6 @@ namespace Game.Client.UI;
 
 public sealed class CraftingOverlay
 {
-    private const int RowHeight = 29;
     private const int VisibleRecipeRows = 10;
     private const int MaxSearchLength = 48;
     private const int MaxRequestedQuantity = 999;
@@ -30,9 +29,10 @@ public sealed class CraftingOverlay
     private readonly CraftingSystem _crafting;
     private readonly CraftingStationLocator _stations;
     private readonly RecipeSearchService _recipeSearch;
-    private readonly List<RecipeHitZone> _recipeHitZones = new();
-    private readonly List<CategoryHitZone> _categoryHitZones = new();
-    private readonly List<VisibilityHitZone> _visibilityHitZones = new();
+    private readonly HitZoneBuffer<int> _recipeHitZones = new(32);
+    private readonly HitZoneBuffer<int> _categoryHitZones = new(CategoryFilters.Length);
+    private readonly HitZoneBuffer<RecipeVisibilityMode> _visibilityHitZones = new(VisibilityModes.Length);
+    private readonly UiGamepadNavigator _gamepad = new();
     private Rectangle _searchBounds;
     private Rectangle _decreaseQuantityBounds;
     private Rectangle _increaseQuantityBounds;
@@ -59,6 +59,7 @@ public sealed class CraftingOverlay
     private int _lastCategoryIndex;
     private RecipeVisibilityMode _lastVisibilityMode;
     private string _lastSearchQuery = string.Empty;
+    private Point _mousePosition;
 
     public CraftingOverlay()
         : this(new CraftingSystem(), new CraftingStationLocator(), new RecipeSearchService(), new RecipeTrackingState())
@@ -99,6 +100,7 @@ public sealed class CraftingOverlay
         IsSearchFocused = false;
         _focusArea = CraftingFocusArea.Recipes;
         _status = IsOpen ? "READY" : null;
+        _gamepad.Reset();
     }
 
     public void Close()
@@ -107,6 +109,7 @@ public sealed class CraftingOverlay
         IsSearchFocused = false;
         _focusArea = CraftingFocusArea.Recipes;
         _status = null;
+        _gamepad.Reset();
     }
 
     public void SetSearchQuery(string? query)
@@ -149,7 +152,8 @@ public sealed class CraftingOverlay
         GameContentDatabase content,
         World world,
         PlayerEntity player,
-        GameSettings settings)
+        GameSettings settings,
+        double deltaSeconds = 0)
     {
         ArgumentNullException.ThrowIfNull(input);
         ArgumentNullException.ThrowIfNull(inventory);
@@ -157,6 +161,7 @@ public sealed class CraftingOverlay
         ArgumentNullException.ThrowIfNull(world);
         ArgumentNullException.ThrowIfNull(player);
         ArgumentNullException.ThrowIfNull(settings);
+        _mousePosition = input.MousePosition;
 
         if (input.IsBindingPressed(settings.Input.KeyBindings.OpenCrafting))
         {
@@ -174,6 +179,20 @@ public sealed class CraftingOverlay
             return false;
         }
 
+        _gamepad.Update(deltaSeconds);
+        if (IsSearchFocused && _gamepad.CancelPressed)
+        {
+            IsSearchFocused = false;
+            _focusArea = CraftingFocusArea.Search;
+            return true;
+        }
+
+        if (input.IsKeyPressed(Keys.Escape) || _gamepad.CancelPressed)
+        {
+            Close();
+            return true;
+        }
+
         if (IsSearchFocused)
         {
             UpdateFocusedSearch(input);
@@ -182,7 +201,7 @@ public sealed class CraftingOverlay
             return true;
         }
 
-        if (input.IsKeyPressed(Keys.Escape) || input.IsBindingPressed(settings.Input.KeyBindings.OpenInventory))
+        if (input.IsBindingPressed(settings.Input.KeyBindings.OpenInventory))
         {
             Close();
             return true;
@@ -191,11 +210,6 @@ public sealed class CraftingOverlay
         RefreshResults(inventory, content, world, player, settings);
         UpdateFocus(input);
         UpdateMouse(input);
-
-        if ((input.IsKeyPressed(Keys.Enter) || input.IsKeyPressed(Keys.Space)) && _focusArea == CraftingFocusArea.Recipes)
-        {
-            CraftSelected();
-        }
 
         return true;
     }
@@ -208,36 +222,36 @@ public sealed class CraftingOverlay
         }
 
         var palette = UiTheme.Resolve(settings);
-        context.SpriteBatch.Draw(context.Pixel, context.ViewportBounds, UiTheme.WithAlpha(palette.Backdrop, settings.Ui.MenuBackdropOpacity * 0.9f));
-
-        var panelWidth = Math.Min(900, Math.Max(320, context.ViewportBounds.Width - 32));
-        var panelHeight = Math.Min(540, Math.Max(300, context.ViewportBounds.Height - 32));
-        var panel = new Rectangle(
-            context.ViewportBounds.Width / 2 - panelWidth / 2,
-            Math.Max(16, context.ViewportBounds.Height / 2 - panelHeight / 2),
-            panelWidth,
-            panelHeight);
-
-        UiTheme.DrawPanel(context, panel, palette, settings.Ui.PanelOpacity);
-        DrawHeader(context, palette, panel, textures);
-
-        var categoryBounds = new Rectangle(panel.X + 16, panel.Y + 58, panel.Width - 32, 28);
-        DrawCategoryTabs(context, palette, categoryBounds);
-
-        var contentTop = categoryBounds.Bottom + 10;
-        var contentBottom = panel.Bottom - 42;
-        var listWidth = Math.Clamp((int)MathF.Round(panel.Width * 0.40f), 270, 356);
-        var listBounds = new Rectangle(panel.X + 16, contentTop, listWidth, contentBottom - contentTop);
-        var detailBounds = new Rectangle(listBounds.Right + 12, contentTop, panel.Right - listBounds.Right - 28, listBounds.Height);
-        DrawRecipeList(context, palette, listBounds, content.Items, textures);
-        DrawRecipeDetails(context, palette, detailBounds, content.Items, textures);
+        var layout = PixelCraftingLayoutPlanner.Resolve(context.ViewportBounds);
+        UiTheme.DrawBackdrop(context, palette, settings.Ui.MenuBackdropOpacity * 0.9f, settings);
+        UiTheme.DrawPanel(context, layout.Panel, palette, settings.Ui.PanelOpacity);
+        UiTheme.DrawHeader(context, layout.Header, palette, settings: settings);
+        DrawHeader(context, palette, layout, textures);
+        DrawCategoryTabs(context, palette, layout.Categories);
+        DrawRecipeList(context, palette, layout, content.Items, textures);
+        DrawRecipeDetails(context, palette, layout, content.Items, textures);
 
         if (!string.IsNullOrWhiteSpace(_status))
         {
             context.DebugText.Draw(
-                new Vector2(panel.X + 18, panel.Bottom - 25),
-                AbbreviateText(_status, Math.Max(24, panel.Width / 8)),
+                new Vector2(layout.StatusBar.X, layout.StatusBar.Y + Math.Max(1, (layout.StatusBar.Height - 7) / 2)),
+                AbbreviateText(_status, Math.Max(3, layout.StatusBar.Width / 8)),
                 LastCraftResult?.IsSuccess == false ? palette.Danger : palette.Warning,
+                1);
+        }
+
+        if (settings.Ui.ShowControlHints && layout.StatusBar.Width >= 220)
+        {
+            var hint = layout.Density == PixelUiDensity.Compact
+                ? "TAB MOVE  ENTER USE  ESC CLOSE"
+                : "TAB/SHOULDERS MOVE   ARROWS ADJUST   ENTER/A USE   ESC/B CLOSE";
+            var shown = AbbreviateText(hint, Math.Max(4, (layout.StatusBar.Width - 96) / 6));
+            context.DebugText.Draw(
+                new Vector2(
+                    Math.Max(layout.StatusBar.X, layout.StatusBar.Right - shown.Length * 6),
+                    layout.StatusBar.Y + Math.Max(1, (layout.StatusBar.Height - 7) / 2)),
+                shown,
+                palette.TextMuted,
                 1);
         }
     }
@@ -245,42 +259,65 @@ public sealed class CraftingOverlay
     private void DrawHeader(
         RenderContext context,
         UiPalette palette,
-        Rectangle panel,
+        in PixelCraftingLayout layout,
         ClientTextureRegistry? textures)
     {
-        var iconBounds = new Rectangle(panel.X + 16, panel.Y + 10, 32, 32);
+        var title = layout.Title;
+        var iconSize = layout.Density == PixelUiDensity.Compact ? 22 : 32;
+        var iconBounds = new Rectangle(
+            title.X,
+            title.Y + Math.Max(0, (title.Height - iconSize) / 2),
+            Math.Min(iconSize, title.Width),
+            Math.Min(iconSize, title.Height));
         var drewIcon = ItemIconRenderer.TryDrawSprite(context, textures, "ui/crafting_hammer", iconBounds);
         context.DebugText.Draw(
-            new Vector2(panel.X + (drewIcon ? 54 : 18), panel.Y + (drewIcon ? 21 : 18)),
-            drewIcon ? "CRAFT" : "CRAFTING",
+            new Vector2(
+                title.X + (drewIcon ? iconBounds.Width + 5 : 2),
+                title.Y + Math.Max(2, (title.Height - 7) / 2)),
+            layout.Density == PixelUiDensity.Compact ? "CRAFT" : "CRAFTING",
             palette.Accent,
-            2);
+            1);
 
-        var visibilityWidth = Math.Min(230, Math.Max(168, panel.Width / 4));
-        var searchX = panel.X + 144;
-        var searchWidth = Math.Max(120, panel.Right - visibilityWidth - searchX - 30);
-        _searchBounds = new Rectangle(searchX, panel.Y + 12, searchWidth, 34);
-        UiTheme.DrawButton(context, _searchBounds, palette, selected: IsSearchFocused || _focusArea == CraftingFocusArea.Search, hovered: _searchBounds.Contains(Mouse.GetState().Position));
-        var searchText = SearchQuery.Length == 0 ? "SEARCH RECIPES" : AbbreviateText(SearchQuery, Math.Max(10, searchWidth / 8));
+        _searchBounds = layout.Search;
+        UiTheme.DrawButton(
+            context,
+            _searchBounds,
+            palette,
+            selected: IsSearchFocused || _focusArea == CraftingFocusArea.Search,
+            hovered: _searchBounds.Contains(_mousePosition));
+        var searchText = SearchQuery.Length == 0
+            ? "SEARCH"
+            : AbbreviateText(SearchQuery, Math.Max(3, (_searchBounds.Width - 18) / 8));
         var searchColor = SearchQuery.Length == 0 ? palette.TextMuted : palette.Text;
-        context.DebugText.Draw(new Vector2(_searchBounds.X + 10, _searchBounds.Y + 11), searchText + (IsSearchFocused ? "_" : string.Empty), searchColor, 1);
+        context.DebugText.Draw(
+            new Vector2(_searchBounds.X + 7, _searchBounds.Y + Math.Max(2, (_searchBounds.Height - 7) / 2)),
+            searchText + (IsSearchFocused ? "_" : string.Empty),
+            searchColor,
+            1);
 
         _visibilityHitZones.Clear();
-        var visibilityX = panel.Right - visibilityWidth - 16;
-        var segmentWidth = visibilityWidth / VisibilityModes.Length;
+        var visibility = layout.Visibility;
+        var gap = layout.Density == PixelUiDensity.Compact ? 2 : 3;
+        var segmentWidth = Math.Max(1, (visibility.Width - gap * (VisibilityModes.Length - 1)) / VisibilityModes.Length);
         for (var index = 0; index < VisibilityModes.Length; index++)
         {
-            var bounds = new Rectangle(visibilityX + index * segmentWidth, panel.Y + 12, segmentWidth - 3, 34);
+            var x = visibility.X + index * (segmentWidth + gap);
+            var width = index == VisibilityModes.Length - 1 ? Math.Max(1, visibility.Right - x) : segmentWidth;
+            var bounds = new Rectangle(x, visibility.Y, width, visibility.Height);
             var mode = VisibilityModes[index];
             var selected = mode == VisibilityMode;
-            UiTheme.DrawButton(context, bounds, palette, selected, bounds.Contains(Mouse.GetState().Position));
-            context.DebugText.Draw(new Vector2(bounds.X + 8, bounds.Y + 11), VisibilityLabel(mode), selected ? palette.Text : palette.TextMuted, 1);
-            _visibilityHitZones.Add(new VisibilityHitZone(bounds, mode));
+            UiTheme.DrawButton(context, bounds, palette, selected, bounds.Contains(_mousePosition));
+            context.DebugText.Draw(
+                new Vector2(bounds.X + 4, bounds.Y + Math.Max(2, (bounds.Height - 7) / 2)),
+                AbbreviateText(VisibilityLabel(mode), Math.Max(2, (bounds.Width - 7) / 8)),
+                selected ? palette.Text : palette.TextMuted,
+                1);
+            _visibilityHitZones.Add(bounds, mode);
         }
 
         if (_focusArea == CraftingFocusArea.Visibility)
         {
-            UiTheme.DrawFocusFrame(context, new Rectangle(visibilityX - 2, panel.Y + 10, visibilityWidth + 2, 38), palette);
+            UiTheme.DrawFocusFrame(context, new Rectangle(visibility.X - 2, visibility.Y - 2, visibility.Width + 4, visibility.Height + 4), palette);
         }
     }
 
@@ -353,7 +390,7 @@ public sealed class CraftingOverlay
 
     private void UpdateFocusedSearch(InputManager input)
     {
-        if (input.IsKeyPressed(Keys.Escape) || input.IsKeyPressed(Keys.Enter))
+        if (input.IsKeyPressed(Keys.Enter) || _gamepad.ConfirmPressed)
         {
             IsSearchFocused = false;
             return;
@@ -372,101 +409,88 @@ public sealed class CraftingOverlay
 
     private void UpdateFocus(InputManager input)
     {
-        if (input.IsKeyPressed(Keys.Tab))
+        var shiftDown = input.IsKeyDown(Keys.LeftShift) || input.IsKeyDown(Keys.RightShift);
+        var tabPressed = input.IsKeyPressed(Keys.Tab);
+        var navigationInput = new CraftingNavigationInput(
+            Up: input.IsKeyPressed(Keys.Up) || input.IsKeyPressed(Keys.W) || input.ScrollDelta > 0 || _gamepad.UpPressed,
+            Down: input.IsKeyPressed(Keys.Down) || input.IsKeyPressed(Keys.S) || input.ScrollDelta < 0 || _gamepad.DownPressed,
+            Left: input.IsKeyPressed(Keys.Left) || input.IsKeyPressed(Keys.A) || input.IsKeyPressed(Keys.OemMinus) || _gamepad.LeftPressed,
+            Right: input.IsKeyPressed(Keys.Right) || input.IsKeyPressed(Keys.D) || input.IsKeyPressed(Keys.OemPlus) || _gamepad.RightPressed,
+            Confirm: input.IsKeyPressed(Keys.Enter) || input.IsKeyPressed(Keys.Space) || _gamepad.ConfirmPressed,
+            Cancel: false,
+            PreviousFocus: tabPressed && shiftDown || _gamepad.PreviousTabPressed,
+            NextFocus: tabPressed && !shiftDown || _gamepad.NextTabPressed);
+        var intent = CraftingNavigationPlanner.Resolve(_focusArea, navigationInput);
+        if (intent.Focus != _focusArea)
         {
-            var direction = input.IsKeyDown(Keys.LeftShift) || input.IsKeyDown(Keys.RightShift) ? -1 : 1;
-            var count = Enum.GetValues<CraftingFocusArea>().Length;
-            _focusArea = (CraftingFocusArea)(((int)_focusArea + direction + count) % count);
+            _focusArea = intent.Focus;
             IsSearchFocused = false;
             return;
         }
 
-        var activate = input.IsKeyPressed(Keys.Enter) || input.IsKeyPressed(Keys.Space);
-        if (_focusArea == CraftingFocusArea.Search && activate)
+        if (intent.RecipeDelta != 0 && _lastResults.Count > 0)
         {
-            IsSearchFocused = true;
+            SelectIndex(Math.Clamp(_selectedIndex + intent.RecipeDelta, 0, _lastResults.Count - 1));
+            EnsureSelectionVisible();
             return;
         }
 
-        if (_focusArea == CraftingFocusArea.Visibility)
+        if (intent.ValueDelta != 0)
         {
-            var direction = HorizontalDirection(input);
-            if (direction != 0)
-            {
-                var index = Array.IndexOf(VisibilityModes, VisibilityMode);
-                SetVisibilityMode(VisibilityModes[(index + direction + VisibilityModes.Length) % VisibilityModes.Length]);
-            }
-
+            AdjustFocusedValue(intent.ValueDelta);
             return;
         }
 
-        if (_focusArea == CraftingFocusArea.Category)
+        if (intent.Activate)
         {
-            var direction = HorizontalDirection(input);
-            if (direction != 0)
-            {
-                _categoryIndex = (_categoryIndex + direction + CategoryFilters.Length) % CategoryFilters.Length;
-                ResetSelection();
-                _status = $"CATEGORY {CategoryFilters[_categoryIndex]}";
-            }
-
-            return;
+            ActivateFocusedArea();
         }
-
-        if (_focusArea == CraftingFocusArea.Quantity)
-        {
-            var direction = HorizontalDirection(input);
-            if (direction != 0)
-            {
-                AdjustQuantity(direction);
-            }
-            else if (activate)
-            {
-                SetMaximumQuantity();
-            }
-
-            return;
-        }
-
-        if (_focusArea == CraftingFocusArea.Pin && activate)
-        {
-            ToggleSelectedPin();
-            return;
-        }
-
-        if (_focusArea == CraftingFocusArea.Craft && activate)
-        {
-            CraftSelected();
-            return;
-        }
-
-        if (_focusArea != CraftingFocusArea.Recipes || _lastResults.Count == 0)
-        {
-            return;
-        }
-
-        if (input.IsKeyPressed(Keys.Down) || input.IsKeyPressed(Keys.S) || input.ScrollDelta < 0)
-        {
-            SelectIndex(Math.Min(_lastResults.Count - 1, _selectedIndex + 1));
-        }
-        else if (input.IsKeyPressed(Keys.Up) || input.IsKeyPressed(Keys.W) || input.ScrollDelta > 0)
-        {
-            SelectIndex(Math.Max(0, _selectedIndex - 1));
-        }
-
-        EnsureSelectionVisible();
     }
 
-    private static int HorizontalDirection(InputManager input)
+    private void AdjustFocusedValue(int direction)
     {
-        if (input.IsKeyPressed(Keys.Left) || input.IsKeyPressed(Keys.A) || input.IsKeyPressed(Keys.OemMinus))
+        if (_focusArea == CraftingFocusArea.Visibility)
         {
-            return -1;
+            var index = Array.IndexOf(VisibilityModes, VisibilityMode);
+            SetVisibilityMode(VisibilityModes[(index + direction + VisibilityModes.Length) % VisibilityModes.Length]);
+            _status = $"SHOW {VisibilityLabel(VisibilityMode)}";
         }
+        else if (_focusArea == CraftingFocusArea.Category)
+        {
+            _categoryIndex = (_categoryIndex + direction + CategoryFilters.Length) % CategoryFilters.Length;
+            ResetSelection();
+            _status = $"CATEGORY {CategoryFilters[_categoryIndex]}";
+        }
+        else if (_focusArea == CraftingFocusArea.Quantity)
+        {
+            AdjustQuantity(direction);
+        }
+    }
 
-        return input.IsKeyPressed(Keys.Right) || input.IsKeyPressed(Keys.D) || input.IsKeyPressed(Keys.OemPlus)
-            ? 1
-            : 0;
+    private void ActivateFocusedArea()
+    {
+        switch (_focusArea)
+        {
+            case CraftingFocusArea.Search:
+                IsSearchFocused = true;
+                break;
+            case CraftingFocusArea.Visibility:
+                AdjustFocusedValue(1);
+                break;
+            case CraftingFocusArea.Category:
+                AdjustFocusedValue(1);
+                break;
+            case CraftingFocusArea.Recipes:
+            case CraftingFocusArea.Craft:
+                CraftSelected();
+                break;
+            case CraftingFocusArea.Quantity:
+                SetMaximumQuantity();
+                break;
+            case CraftingFocusArea.Pin:
+                ToggleSelectedPin();
+                break;
+        }
     }
 
     private void UpdateMouse(InputManager input)
@@ -484,30 +508,30 @@ public sealed class CraftingOverlay
         }
 
         IsSearchFocused = false;
-        var visibility = _visibilityHitZones.LastOrDefault(zone => zone.Bounds.Contains(input.MousePosition));
-        if (visibility is not null)
+        var visibility = _visibilityHitZones.FindTopmost(input.MousePosition);
+        if (visibility is { } visibilityZone)
         {
             _focusArea = CraftingFocusArea.Visibility;
-            SetVisibilityMode(visibility.Mode);
-            _status = $"SHOW {VisibilityLabel(visibility.Mode)}";
+            SetVisibilityMode(visibilityZone.Value);
+            _status = $"SHOW {VisibilityLabel(visibilityZone.Value)}";
             return;
         }
 
-        var category = _categoryHitZones.LastOrDefault(zone => zone.Bounds.Contains(input.MousePosition));
-        if (category is not null)
+        var category = _categoryHitZones.FindTopmost(input.MousePosition);
+        if (category is { } categoryZone)
         {
             _focusArea = CraftingFocusArea.Category;
-            _categoryIndex = category.Index;
+            _categoryIndex = categoryZone.Value;
             ResetSelection();
             _status = $"CATEGORY {CategoryFilters[_categoryIndex]}";
             return;
         }
 
-        var recipe = _recipeHitZones.LastOrDefault(zone => zone.Bounds.Contains(input.MousePosition));
-        if (recipe is not null)
+        var recipe = _recipeHitZones.FindTopmost(input.MousePosition);
+        if (recipe is { } recipeZone)
         {
             _focusArea = CraftingFocusArea.Recipes;
-            SelectIndex(recipe.Index);
+            SelectIndex(recipeZone.Value);
             return;
         }
 
@@ -541,15 +565,15 @@ public sealed class CraftingOverlay
     private void DrawCategoryTabs(RenderContext context, UiPalette palette, Rectangle bounds)
     {
         _categoryHitZones.Clear();
-        var gap = 5;
-        var tabWidth = Math.Max(52, (bounds.Width - gap * (CategoryFilters.Length - 1)) / CategoryFilters.Length);
+        var gap = bounds.Width < 520 ? 2 : 5;
+        var tabWidth = Math.Max(1, (bounds.Width - gap * (CategoryFilters.Length - 1)) / CategoryFilters.Length);
         for (var index = 0; index < CategoryFilters.Length; index++)
         {
             var tab = new Rectangle(bounds.X + index * (tabWidth + gap), bounds.Y, tabWidth, bounds.Height);
             var selected = index == _categoryIndex;
-            UiTheme.DrawButton(context, tab, palette, selected, tab.Contains(Mouse.GetState().Position));
+            UiTheme.DrawButton(context, tab, palette, selected, tab.Contains(_mousePosition));
             context.DebugText.Draw(new Vector2(tab.X + 7, tab.Y + 9), AbbreviateText(CategoryFilters[index], Math.Max(4, tabWidth / 8)), selected ? palette.Text : palette.TextMuted, 1);
-            _categoryHitZones.Add(new CategoryHitZone(tab, index));
+            _categoryHitZones.Add(tab, index);
         }
 
         if (_focusArea == CraftingFocusArea.Category)
@@ -561,23 +585,57 @@ public sealed class CraftingOverlay
     private void DrawRecipeList(
         RenderContext context,
         UiPalette palette,
-        Rectangle bounds,
+        in PixelCraftingLayout layout,
         IItemDefinitionProvider items,
         ClientTextureRegistry? textures)
     {
+        var bounds = layout.RecipeList;
         context.SpriteBatch.Draw(context.Pixel, bounds, UiTheme.WithAlpha(palette.Surface, 0.78f));
         UiTheme.DrawBorder(context, bounds, UiTheme.WithAlpha(palette.SurfaceHover, 0.9f), 1);
-        context.DebugText.Draw(new Vector2(bounds.X + 10, bounds.Y + 9), $"RECIPES  {_lastResults.Count}", palette.Text, 1);
+        context.DebugText.Draw(
+            new Vector2(layout.RecipeHeader.X + 6, layout.RecipeHeader.Y + Math.Max(2, (layout.RecipeHeader.Height - 7) / 2)),
+            layout.Density == PixelUiDensity.Compact ? "RECIPES" : "RECIPE LIST",
+            palette.Text,
+            1);
+        var positionLabel = _lastResults.Count == 0
+            ? "0"
+            : $"{_selectedIndex + 1}/{_lastResults.Count}";
+        context.DebugText.Draw(
+            new Vector2(
+                Math.Max(layout.RecipeHeader.X + 52, layout.RecipeHeader.Right - positionLabel.Length * 6 - 5),
+                layout.RecipeHeader.Y + Math.Max(2, (layout.RecipeHeader.Height - 7) / 2)),
+            positionLabel,
+            palette.TextMuted,
+            1);
 
         _recipeHitZones.Clear();
         if (_lastResults.Count == 0)
         {
-            context.DebugText.Draw(new Vector2(bounds.X + 12, bounds.Y + 42), "NO MATCHING RECIPES", palette.TextMuted, 1);
+            var emptyText = layout.RecipeRows.Width >= 104 ? "NO MATCHING RECIPES" : "NO RECIPES";
+            context.DebugText.Draw(
+                new Vector2(layout.RecipeRows.X + 4, layout.RecipeRows.Y + 7),
+                AbbreviateText(emptyText, Math.Max(3, layout.RecipeRows.Width / 6)),
+                palette.TextMuted,
+                1);
+            if (layout.RecipeRows.Height >= 30)
+            {
+                context.DebugText.Draw(
+                    new Vector2(layout.RecipeRows.X + 4, layout.RecipeRows.Y + 22),
+                    AbbreviateText("CHANGE FILTER OR SEARCH", Math.Max(3, layout.RecipeRows.Width / 6)),
+                    palette.Warning,
+                    1);
+            }
+
             return;
         }
 
-        var startY = bounds.Y + 31;
-        _visibleRecipeRows = Math.Max(1, (bounds.Height - 50) / RowHeight);
+        var rowHeight = layout.Density switch
+        {
+            PixelUiDensity.Compact => 24,
+            PixelUiDensity.Expanded => 34,
+            _ => 30
+        };
+        _visibleRecipeRows = Math.Max(1, layout.RecipeRows.Height / rowHeight);
         _scroll = Math.Clamp(_scroll, 0, Math.Max(0, _lastResults.Count - _visibleRecipeRows));
         EnsureSelectionVisible();
         var end = Math.Min(_lastResults.Count, _scroll + _visibleRecipeRows);
@@ -585,48 +643,85 @@ public sealed class CraftingOverlay
         {
             var row = index - _scroll;
             var result = _lastResults[index];
-            var rowBounds = new Rectangle(bounds.X + 6, startY + row * RowHeight, bounds.Width - 12, RowHeight - 3);
+            var rowBounds = new Rectangle(
+                layout.RecipeRows.X,
+                layout.RecipeRows.Y + row * rowHeight,
+                layout.RecipeRows.Width,
+                Math.Max(1, rowHeight - 3));
             var selected = index == _selectedIndex;
-            UiTheme.DrawButton(context, rowBounds, palette, selected, rowBounds.Contains(Mouse.GetState().Position), result.IsKnown);
+            UiTheme.DrawButton(context, rowBounds, palette, selected, rowBounds.Contains(_mousePosition), result.IsKnown);
             if (selected && _focusArea == CraftingFocusArea.Recipes)
             {
                 UiTheme.DrawFocusFrame(context, rowBounds, palette);
             }
 
             var item = items.GetById(result.Recipe.Result.ItemId);
-            var iconBounds = new Rectangle(rowBounds.X + 4, rowBounds.Y + 3, 20, 20);
-            ItemIconRenderer.TryDrawSprite(context, textures, item.TexturePath, iconBounds, result.CanCraft ? 1f : 0.45f);
+            var iconSize = Math.Max(10, Math.Min(20, rowBounds.Height - 4));
+            var iconBounds = new Rectangle(rowBounds.X + 3, rowBounds.Y + 2, iconSize, iconSize);
+            var availability = CraftingAvailabilityPresenter.Resolve(result);
+            ItemIconRenderer.TryDrawSprite(
+                context,
+                textures,
+                item.TexturePath,
+                iconBounds,
+                availability.CanCraft ? 1f : 0.48f);
             var pinned = TrackingState.IsPinned(result.Recipe.Id);
-            var namePrefix = pinned ? "PIN " : string.Empty;
-            context.DebugText.Draw(
-                new Vector2(rowBounds.X + 29, rowBounds.Y + 7),
-                namePrefix + AbbreviateText(item.DisplayName, Math.Max(10, (bounds.Width - 124) / 8)),
-                result.CanCraft ? palette.Text : palette.TextMuted,
-                1);
-            context.DebugText.Draw(
-                new Vector2(rowBounds.Right - 66, rowBounds.Y + 7),
-                result.MaxCraftable > 0 ? $"MAX {result.MaxCraftable}" : FailureLabel(result),
-                result.CanCraft ? palette.Warning : palette.Danger,
-                1);
-            _recipeHitZones.Add(new RecipeHitZone(rowBounds, index));
-        }
+            if (pinned)
+            {
+                context.DebugText.Draw(
+                    new Vector2(iconBounds.Right + 2, rowBounds.Y + Math.Max(2, (rowBounds.Height - 7) / 2)),
+                    "*",
+                    palette.Warning,
+                    1);
+            }
 
-        context.DebugText.Draw(new Vector2(bounds.X + 10, bounds.Bottom - 17), $"{_selectedIndex + 1}/{_lastResults.Count}", palette.TextMuted, 1);
+            var nameX = iconBounds.Right + (pinned ? 10 : 4);
+            var availabilityLabel = availability.CanCraft && result.MaxCraftable > 0
+                ? $"x{result.MaxCraftable}"
+                : availability.CompactLabel;
+            var stateWidth = availabilityLabel.Length * 6 + 6;
+            var maximumNameCharacters = Math.Max(2, (rowBounds.Right - nameX - stateWidth) / 6);
+            context.DebugText.Draw(
+                new Vector2(nameX, rowBounds.Y + Math.Max(2, (rowBounds.Height - 7) / 2)),
+                AbbreviateText(item.DisplayName, maximumNameCharacters),
+                availability.CanCraft ? palette.Text : palette.TextMuted,
+                1);
+            context.DebugText.Draw(
+                new Vector2(rowBounds.Right - stateWidth + 3, rowBounds.Y + Math.Max(2, (rowBounds.Height - 7) / 2)),
+                availabilityLabel,
+                AvailabilityColor(palette, availability),
+                1);
+            _recipeHitZones.Add(rowBounds, index);
+        }
     }
 
     private void DrawRecipeDetails(
         RenderContext context,
         UiPalette palette,
-        Rectangle bounds,
+        in PixelCraftingLayout layout,
         IItemDefinitionProvider items,
         ClientTextureRegistry? textures)
     {
+        var bounds = layout.Details;
         context.SpriteBatch.Draw(context.Pixel, bounds, UiTheme.WithAlpha(palette.Surface, 0.78f));
         UiTheme.DrawBorder(context, bounds, UiTheme.WithAlpha(palette.SurfaceHover, 0.9f), 1);
         var result = SelectedResult();
         if (result is null || _selectedPlan is null)
         {
-            context.DebugText.Draw(new Vector2(bounds.X + 12, bounds.Y + 12), "SELECT A RECIPE", palette.TextMuted, 1);
+            context.DebugText.Draw(
+                new Vector2(layout.DetailsHeader.X + 4, layout.DetailsHeader.Y + 5),
+                layout.CompactDetails ? "SELECT RECIPE" : "SELECT A RECIPE TO VIEW DETAILS",
+                palette.TextMuted,
+                1);
+            if (layout.IngredientList.Height >= 20)
+            {
+                context.DebugText.Draw(
+                    new Vector2(layout.IngredientList.X + 3, layout.IngredientList.Y + 4),
+                    "MATERIALS AND ACTIONS APPEAR HERE",
+                    palette.TextMuted,
+                    1);
+            }
+
             ClearActionBounds();
             return;
         }
@@ -634,77 +729,179 @@ public sealed class CraftingOverlay
         var recipe = result.Recipe;
         var plan = _selectedPlan;
         var item = items.GetById(recipe.Result.ItemId);
-        var resultIcon = new Rectangle(bounds.X + 12, bounds.Y + 12, 46, 46);
-        UiTheme.DrawSlot(context, resultIcon, palette, selected: true, hovered: false);
-        ItemIconRenderer.DrawItemStack(context, textures, items, recipe.Result, resultIcon, palette);
-        context.DebugText.Draw(new Vector2(bounds.X + 68, bounds.Y + 11), AbbreviateText(item.DisplayName, Math.Max(14, (bounds.Width - 160) / 8)), palette.Text, 2);
-        context.DebugText.Draw(new Vector2(bounds.X + 68, bounds.Y + 36), $"{recipe.Result.Count} PER CRAFT  MAX {plan.MaxCraftable}", palette.Warning, 1);
+        var availability = CraftingAvailabilityPresenter.Resolve(plan);
+        var availabilityColor = AvailabilityColor(palette, availability);
+        var header = layout.DetailsHeader;
+        var resultIconSize = layout.CompactDetails ? 28 : 46;
+        resultIconSize = Math.Min(resultIconSize, Math.Max(0, header.Height - 8));
+        var resultIcon = new Rectangle(header.X, header.Y + 4, resultIconSize, resultIconSize);
+        if (!resultIcon.IsEmpty)
+        {
+            UiTheme.DrawSlot(context, resultIcon, palette, selected: true, hovered: false);
+            ItemIconRenderer.DrawItemStack(context, textures, items, recipe.Result, resultIcon, palette);
+        }
 
-        _pinButtonBounds = new Rectangle(bounds.Right - 78, bounds.Y + 12, 66, 28);
+        var pinWidth = Math.Min(layout.CompactDetails ? 46 : 68, Math.Max(0, header.Width / 3));
+        var pinHeight = Math.Min(layout.CompactDetails ? 20 : 26, header.Height);
+        _pinButtonBounds = new Rectangle(header.Right - pinWidth, header.Y + 3, pinWidth, pinHeight);
         var pinned = TrackingState.IsPinned(recipe.Id);
-        UiTheme.DrawButton(context, _pinButtonBounds, palette, pinned, _pinButtonBounds.Contains(Mouse.GetState().Position));
+        UiTheme.DrawButton(context, _pinButtonBounds, palette, pinned, _pinButtonBounds.Contains(_mousePosition));
         if (_focusArea == CraftingFocusArea.Pin)
         {
             UiTheme.DrawFocusFrame(context, _pinButtonBounds, palette);
         }
-        context.DebugText.Draw(new Vector2(_pinButtonBounds.X + 10, _pinButtonBounds.Y + 9), pinned ? "UNPIN" : "PIN", pinned ? palette.Text : palette.TextMuted, 1);
+        var pinLabel = pinned ? (layout.CompactDetails ? "ON" : "PINNED") : "PIN";
+        context.DebugText.Draw(
+            new Vector2(_pinButtonBounds.X + 5, _pinButtonBounds.Y + Math.Max(2, (_pinButtonBounds.Height - 7) / 2)),
+            pinLabel,
+            pinned ? palette.Text : palette.TextMuted,
+            1);
 
-        var y = bounds.Y + 70;
-        var stationLabel = recipe.Station is null ? "HAND CRAFT" : recipe.Station.ToUpperInvariant();
-        context.DebugText.Draw(new Vector2(bounds.X + 12, y), $"STATION  {stationLabel}", result.HasStation ? palette.Text : palette.Danger, 1);
-        y += 17;
-        var nearby = _lastContext?.AvailableStations.Count > 0
-            ? string.Join("  ", _lastContext.AvailableStations.OrderBy(value => value).Take(3)).ToUpperInvariant()
-            : "NONE";
-        context.DebugText.Draw(new Vector2(bounds.X + 12, y), "NEARBY  " + AbbreviateText(nearby, Math.Max(16, bounds.Width / 8 - 10)), palette.TextMuted, 1);
-
-        y += 25;
-        context.DebugText.Draw(new Vector2(bounds.X + 12, y), $"INGREDIENTS  PLAN {plan.ActualQuantity}/{plan.DesiredQuantity}", palette.Text, 1);
-        y += 18;
-        var maxIngredientRows = Math.Max(1, (bounds.Bottom - 126 - y) / 29);
-        foreach (var ingredient in plan.Ingredients.Take(maxIngredientRows))
+        var nameX = resultIcon.Right + 7;
+        var nameRight = Math.Max(nameX, _pinButtonBounds.X - 4);
+        var nameScale = layout.CompactDetails ? 1 : 2;
+        context.DebugText.Draw(
+            new Vector2(nameX, header.Y + 5),
+            AbbreviateText(item.DisplayName, Math.Max(2, (nameRight - nameX) / (6 * nameScale))),
+            palette.Text,
+            nameScale);
+        var stateY = header.Y + (layout.CompactDetails ? 21 : 35);
+        context.DebugText.Draw(
+            new Vector2(nameX, stateY),
+            AbbreviateText(availability.Label, Math.Max(3, (header.Right - nameX) / 6)),
+            availabilityColor,
+            1);
+        if (header.Height >= (layout.CompactDetails ? 44 : 60))
         {
+            context.DebugText.Draw(
+                new Vector2(nameX, stateY + 14),
+                $"MAX {plan.MaxCraftable}   OUTPUT {recipe.Result.Count} EACH",
+                palette.TextMuted,
+                1);
+        }
+
+        var ingredientBounds = layout.IngredientList;
+        if (ingredientBounds.IsEmpty)
+        {
+            DrawQuantityControls(context, palette, layout.ActionBar, plan);
+            return;
+        }
+
+        var y = ingredientBounds.Y;
+        var stationLabel = recipe.Station is null ? "HAND CRAFT" : recipe.Station.ToUpperInvariant();
+        context.DebugText.Draw(
+            new Vector2(ingredientBounds.X + 2, y + 2),
+            AbbreviateText(
+                result.HasStation ? $"STATION  {stationLabel}" : $"MISSING STATION  {stationLabel}",
+                Math.Max(3, ingredientBounds.Width / 6)),
+            result.HasStation ? palette.TextMuted : palette.Danger,
+            1);
+        y += layout.CompactDetails ? 15 : 18;
+        if (y + 7 < ingredientBounds.Bottom)
+        {
+            context.DebugText.Draw(
+                new Vector2(ingredientBounds.X + 2, y),
+                plan.Ingredients.Count == 0 ? "NO MATERIALS REQUIRED" : "MATERIALS",
+                palette.Text,
+                1);
+            y += layout.CompactDetails ? 13 : 17;
+        }
+
+        if (availability.State == CraftingAvailabilityState.Locked)
+        {
+            if (y + 7 < ingredientBounds.Bottom)
+            {
+                context.DebugText.Draw(
+                    new Vector2(ingredientBounds.X + 2, y),
+                    AbbreviateText("DISCOVER THIS RECIPE TO VIEW REQUIREMENTS", Math.Max(3, ingredientBounds.Width / 6)),
+                    palette.Warning,
+                    1);
+            }
+
+            DrawQuantityControls(context, palette, layout.ActionBar, plan);
+            return;
+        }
+
+        var ingredientRowHeight = layout.CompactDetails ? 19 : 27;
+        var maxIngredientRows = Math.Max(0, (ingredientBounds.Bottom - y) / ingredientRowHeight);
+        var visibleIngredientRows = Math.Min(plan.Ingredients.Count, maxIngredientRows);
+        for (var ingredientIndex = 0; ingredientIndex < visibleIngredientRows; ingredientIndex++)
+        {
+            var ingredient = plan.Ingredients[ingredientIndex];
             var ingredientItem = items.GetById(ingredient.ItemId);
             var enough = ingredient.Available >= ingredient.DesiredTotal;
-            var rowBounds = new Rectangle(bounds.X + 12, y, bounds.Width - 24, 25);
+            var rowBounds = new Rectangle(
+                ingredientBounds.X,
+                y,
+                ingredientBounds.Width,
+                Math.Max(1, ingredientRowHeight - 3));
             context.SpriteBatch.Draw(context.Pixel, rowBounds, UiTheme.WithAlpha(enough ? palette.SurfaceRaised : palette.Danger, enough ? 0.55f : 0.16f));
-            ItemIconRenderer.TryDrawSprite(context, textures, ingredientItem.TexturePath, new Rectangle(rowBounds.X + 3, rowBounds.Y + 3, 19, 19), enough ? 0.95f : 0.5f);
-            var ingredientText = $"{AbbreviateText(ingredientItem.DisplayName, Math.Max(10, (bounds.Width - 190) / 8))}  {ingredient.Available}/{ingredient.DesiredTotal}  ({ingredient.PerCraft} EACH)";
-            context.DebugText.Draw(new Vector2(rowBounds.X + 28, rowBounds.Y + 7), ingredientText, enough ? palette.TextMuted : palette.Danger, 1);
-            y += 29;
+            var iconSize = Math.Max(8, Math.Min(19, rowBounds.Height - 4));
+            ItemIconRenderer.TryDrawSprite(
+                context,
+                textures,
+                ingredientItem.TexturePath,
+                new Rectangle(rowBounds.X + 2, rowBounds.Y + 2, iconSize, iconSize),
+                enough ? 0.95f : 0.5f);
+            var itemNameX = rowBounds.X + iconSize + 6;
+            var quantityLabel = enough
+                ? $"{ingredient.Available}/{ingredient.DesiredTotal}"
+                : $"{ingredient.Available}/{ingredient.DesiredTotal}  MISS {ingredient.MissingForDesired}";
+            var quantityWidth = quantityLabel.Length * 6 + 4;
+            context.DebugText.Draw(
+                new Vector2(itemNameX, rowBounds.Y + Math.Max(2, (rowBounds.Height - 7) / 2)),
+                AbbreviateText(ingredientItem.DisplayName, Math.Max(2, (rowBounds.Right - itemNameX - quantityWidth) / 6)),
+                enough ? palette.TextMuted : palette.Danger,
+                1);
+            context.DebugText.Draw(
+                new Vector2(Math.Max(itemNameX, rowBounds.Right - quantityWidth), rowBounds.Y + Math.Max(2, (rowBounds.Height - 7) / 2)),
+                quantityLabel,
+                enough ? palette.Text : palette.Danger,
+                1);
+            y += ingredientRowHeight;
         }
 
         if (plan.Ingredients.Count > maxIngredientRows)
         {
-            context.DebugText.Draw(new Vector2(bounds.X + 14, y), $"+{plan.Ingredients.Count - maxIngredientRows} MORE", palette.TextMuted, 1);
+            context.DebugText.Draw(
+                new Vector2(ingredientBounds.X + 2, Math.Min(y, ingredientBounds.Bottom - 7)),
+                $"+{plan.Ingredients.Count - maxIngredientRows} MORE",
+                palette.TextMuted,
+                1);
         }
 
-        var summaryY = bounds.Bottom - 88;
-        var outputText = $"OUTPUT {plan.OutputCapacity.ActualItemCount}  CAP {plan.OutputCapacity.MaxItemCount}";
-        context.DebugText.Draw(new Vector2(bounds.X + 12, summaryY), outputText, plan.CanCraft ? palette.Warning : palette.Danger, 1);
-        context.DebugText.Draw(new Vector2(bounds.X + 12, summaryY + 16), PlanStatus(plan), plan.CanCraft ? palette.TextMuted : palette.Danger, 1);
-
-        DrawQuantityControls(context, palette, bounds, plan);
+        DrawQuantityControls(context, palette, layout.ActionBar, plan);
     }
 
     private void DrawQuantityControls(RenderContext context, UiPalette palette, Rectangle bounds, CraftingBatchPlan plan)
     {
-        var y = bounds.Bottom - 38;
-        _decreaseQuantityBounds = new Rectangle(bounds.X + 12, y, 30, 28);
-        var quantityBounds = new Rectangle(_decreaseQuantityBounds.Right + 4, y, 48, 28);
-        _increaseQuantityBounds = new Rectangle(quantityBounds.Right + 4, y, 30, 28);
-        _maximumQuantityBounds = new Rectangle(_increaseQuantityBounds.Right + 6, y, 48, 28);
-        _craftButtonBounds = new Rectangle(_maximumQuantityBounds.Right + 8, y, Math.Max(78, bounds.Right - _maximumQuantityBounds.Right - 20), 28);
+        var controls = PixelCraftingActionLayoutPlanner.Resolve(bounds);
+        _decreaseQuantityBounds = controls.Decrease;
+        var quantityBounds = controls.Quantity;
+        _increaseQuantityBounds = controls.Increase;
+        _maximumQuantityBounds = controls.Maximum;
+        _craftButtonBounds = controls.Craft;
+        if (controls.IsEmpty)
+        {
+            return;
+        }
 
-        UiTheme.DrawButton(context, _decreaseQuantityBounds, palette, selected: false, hovered: _decreaseQuantityBounds.Contains(Mouse.GetState().Position), enabled: _requestedQuantity > 1);
+        UiTheme.DrawButton(context, _decreaseQuantityBounds, palette, selected: false, hovered: _decreaseQuantityBounds.Contains(_mousePosition), enabled: _requestedQuantity > 1);
         UiTheme.DrawButton(context, quantityBounds, palette, selected: true, hovered: false);
-        UiTheme.DrawButton(context, _increaseQuantityBounds, palette, selected: false, hovered: _increaseQuantityBounds.Contains(Mouse.GetState().Position), enabled: _requestedQuantity < MaxRequestedQuantity);
-        UiTheme.DrawButton(context, _maximumQuantityBounds, palette, selected: _requestedQuantity == Math.Max(1, plan.MaxCraftable), hovered: _maximumQuantityBounds.Contains(Mouse.GetState().Position));
-        UiTheme.DrawButton(context, _craftButtonBounds, palette, selected: plan.CanCraft, hovered: _craftButtonBounds.Contains(Mouse.GetState().Position), enabled: plan.CanCraft);
+        UiTheme.DrawButton(context, _increaseQuantityBounds, palette, selected: false, hovered: _increaseQuantityBounds.Contains(_mousePosition), enabled: _requestedQuantity < MaxRequestedQuantity);
+        UiTheme.DrawButton(context, _maximumQuantityBounds, palette, selected: _requestedQuantity == Math.Max(1, plan.MaxCraftable), hovered: _maximumQuantityBounds.Contains(_mousePosition));
+        UiTheme.DrawButton(context, _craftButtonBounds, palette, selected: plan.CanCraft, hovered: _craftButtonBounds.Contains(_mousePosition), enabled: plan.CanCraft);
 
         if (_focusArea == CraftingFocusArea.Quantity)
         {
-            UiTheme.DrawFocusFrame(context, new Rectangle(_decreaseQuantityBounds.X - 2, y - 2, _maximumQuantityBounds.Right - _decreaseQuantityBounds.X + 4, 32), palette);
+            UiTheme.DrawFocusFrame(
+                context,
+                new Rectangle(
+                    _decreaseQuantityBounds.X - 2,
+                    bounds.Y - 2,
+                    _maximumQuantityBounds.Right - _decreaseQuantityBounds.X + 4,
+                    bounds.Height + 4),
+                palette);
         }
 
         if (_focusArea == CraftingFocusArea.Craft)
@@ -712,11 +909,24 @@ public sealed class CraftingOverlay
             UiTheme.DrawFocusFrame(context, _craftButtonBounds, palette);
         }
 
-        context.DebugText.Draw(new Vector2(_decreaseQuantityBounds.X + 11, y + 9), "-", _requestedQuantity > 1 ? palette.Text : palette.TextMuted, 1);
-        context.DebugText.Draw(new Vector2(quantityBounds.X + 8, y + 9), _requestedQuantity.ToString(), palette.Text, 1);
-        context.DebugText.Draw(new Vector2(_increaseQuantityBounds.X + 10, y + 9), "+", _requestedQuantity < MaxRequestedQuantity ? palette.Text : palette.TextMuted, 1);
-        context.DebugText.Draw(new Vector2(_maximumQuantityBounds.X + 9, y + 9), "MAX", palette.TextMuted, 1);
-        context.DebugText.Draw(new Vector2(_craftButtonBounds.X + 10, y + 9), plan.ActualQuantity > 1 ? $"CRAFT {plan.ActualQuantity}" : "CRAFT", plan.CanCraft ? palette.Text : palette.TextMuted, 1);
+        var textY = bounds.Y + Math.Max(2, (bounds.Height - 7) / 2);
+        context.DebugText.Draw(new Vector2(_decreaseQuantityBounds.Center.X - 3, textY), "-", _requestedQuantity > 1 ? palette.Text : palette.TextMuted, 1);
+        var quantityLabel = _requestedQuantity.ToString(System.Globalization.CultureInfo.InvariantCulture);
+        context.DebugText.Draw(new Vector2(quantityBounds.Center.X - quantityLabel.Length * 3, textY), quantityLabel, palette.Text, 1);
+        context.DebugText.Draw(new Vector2(_increaseQuantityBounds.Center.X - 3, textY), "+", _requestedQuantity < MaxRequestedQuantity ? palette.Text : palette.TextMuted, 1);
+        context.DebugText.Draw(
+            new Vector2(_maximumQuantityBounds.Center.X - 9, textY),
+            _maximumQuantityBounds.Width >= 22 ? "MAX" : "M",
+            palette.TextMuted,
+            1);
+        var craftLabel = plan.ActualQuantity > 1 && _craftButtonBounds.Width >= 72
+            ? $"CRAFT {plan.ActualQuantity}"
+            : "CRAFT";
+        context.DebugText.Draw(
+            new Vector2(_craftButtonBounds.Center.X - craftLabel.Length * 3, textY),
+            craftLabel,
+            plan.CanCraft ? palette.Text : palette.TextMuted,
+            1);
     }
 
     private void SelectIndex(int index)
@@ -883,6 +1093,20 @@ public sealed class CraftingOverlay
                 : FailureLabel(plan.PrimaryFailureReason);
     }
 
+    private static Color AvailabilityColor(
+        UiPalette palette,
+        in CraftingAvailabilityPresentation availability)
+    {
+        return availability.State switch
+        {
+            CraftingAvailabilityState.Craftable => palette.Accent,
+            CraftingAvailabilityState.Partial => palette.Warning,
+            CraftingAvailabilityState.Empty => palette.TextMuted,
+            CraftingAvailabilityState.Locked => palette.TextMuted,
+            _ => palette.Danger
+        };
+    }
+
     private static string FailureLabel(CraftingQueryResult result)
     {
         var reason = result.FailureReasons.FirstOrDefault();
@@ -930,20 +1154,4 @@ public sealed class CraftingOverlay
         return value[..Math.Max(1, maxLength)];
     }
 
-    private sealed record RecipeHitZone(Rectangle Bounds, int Index);
-
-    private sealed record CategoryHitZone(Rectangle Bounds, int Index);
-
-    private sealed record VisibilityHitZone(Rectangle Bounds, RecipeVisibilityMode Mode);
-
-    private enum CraftingFocusArea
-    {
-        Search,
-        Visibility,
-        Category,
-        Recipes,
-        Quantity,
-        Pin,
-        Craft
-    }
 }

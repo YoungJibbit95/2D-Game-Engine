@@ -2,7 +2,7 @@ namespace Game.Core.World.Generation;
 
 public sealed class InfiniteWorldChunkGenerator
 {
-    internal const int TreeCenterExclusionRadius = TreeSilhouettePlanner.MaximumHalfWidth;
+    internal const int TreeCenterExclusionRadius = TreeSilhouettePlanner.MaximumHalfWidth * 2;
 
     private readonly Func<int, INoiseService> _noiseFactory;
     private readonly WorldRegionPlanner? _regionalPlanner;
@@ -121,15 +121,39 @@ public sealed class InfiniteWorldChunkGenerator
     {
         ArgumentNullException.ThrowIfNull(profile);
         var noise = _noiseFactory(seed);
-        return tileX => ComputeSurfaceHeight(
-            profile,
-            noise,
-            seed,
-            tileX,
-            _regionalPlanner?.PlanAtTileX(tileX),
-            _generationVersion);
-    }
+        var regionalPlanner = _regionalPlanner;
+        WorldRegionPlan? cachedRegion = null;
+        const int cacheCapacity = 2_048;
+        var cachedTileXs = new int[cacheCapacity];
+        var cachedHeights = new int[cacheCapacity];
+        var cacheEntries = new byte[cacheCapacity];
+        return tileX =>
+        {
+            var cacheIndex = tileX & (cacheCapacity - 1);
+            if (cacheEntries[cacheIndex] != 0 && cachedTileXs[cacheIndex] == tileX)
+            {
+                return cachedHeights[cacheIndex];
+            }
 
+            if (regionalPlanner is not null &&
+                (cachedRegion is null || !cachedRegion.ContainsTileX(tileX)))
+            {
+                cachedRegion = regionalPlanner.PlanAtTileX(tileX);
+            }
+
+            var height = ComputeSurfaceHeight(
+                profile,
+                noise,
+                seed,
+                tileX,
+                cachedRegion,
+                _generationVersion);
+            cachedTileXs[cacheIndex] = tileX;
+            cachedHeights[cacheIndex] = height;
+            cacheEntries[cacheIndex] = 1;
+            return height;
+        };
+    }
     private void FillTiles(
         WorldGenerationProfile profile,
         int seed,

@@ -54,6 +54,7 @@ public sealed class GameSimulation : IDisposable
 
     private readonly CombatSystem _combat;
     private readonly CombatDamageResolver _combatDamageResolver;
+    private CombatResolutionPolicy _combatPolicy = new();
     private readonly EntityAttackSystem _entityAttacks;
     private readonly EntityDeathLifecycle _entityDeaths;
     private readonly ItemPickupSystem _pickup;
@@ -71,6 +72,7 @@ public sealed class GameSimulation : IDisposable
     private readonly PlayerItemUseSystem _itemUse;
     private readonly LightingSystem _lighting;
     private readonly EquipmentStatCalculator _equipmentStats;
+    private readonly MobilityAbilityLoadoutResolver _mobilityAbilities = new();
     private readonly LivingWorldRuntime _livingWorld;
     private readonly Random _farmingRandom;
     private readonly DeterministicRandomStream _deathKeys;
@@ -291,6 +293,10 @@ public sealed class GameSimulation : IDisposable
         ArgumentNullException.ThrowIfNull(options);
         ValidateOptions(options);
         _options = options;
+        _combatPolicy = new CombatResolutionPolicy
+        {
+            FriendlyFireEnabled = options.FriendlyFireEnabled
+        };
         _runtimeSpawnOptions = ResolveSpawnOptions(_spawnOptions, options);
         _phaseTelemetry.SetEnabled(options.EnablePhaseTelemetry);
     }
@@ -352,7 +358,7 @@ public sealed class GameSimulation : IDisposable
         using (_phaseTelemetry.Measure(GameSimulationPhase.WorldTimeAndFarming))
         {
             var previousDay = Time.Day;
-            Time.Update(deltaSeconds);
+            Time.Update(deltaSeconds * _options.WorldTimeRateMultiplier);
             daysAdvanced = Math.Max(0, Time.Day - previousDay);
             farming = AdvanceFarmingDays(previousDay, daysAdvanced);
         }
@@ -372,7 +378,21 @@ public sealed class GameSimulation : IDisposable
         using (_phaseTelemetry.Measure(GameSimulationPhase.Player))
         {
             var equipmentStats = _equipmentStats.Calculate(PlayerStatBlock.Base, EquipmentLoadout, Content.Items);
+            equipmentStats = equipmentStats with
+            {
+                MiningSpeedMultiplier = equipmentStats.MiningSpeedMultiplier * _options.PlayerMiningSpeedMultiplier,
+                ManaCostMultiplier = equipmentStats.ManaCostMultiplier * _options.PlayerManaCostMultiplier
+            };
             Player.ApplyStats(Player.StatusEffects.ApplyStatModifiers(equipmentStats));
+            Player.ApplyMobilityAbilities(
+                _mobilityAbilities.Resolve(
+                    EquipmentLoadout,
+                    Content.Items));
+            Player.ApplyDeveloperOptions(
+                _options.PlayerInvulnerable,
+                _options.PlayerNoClip,
+                _options.PlayerFreeFlight,
+                _options.PlayerMovementSpeedMultiplier);
             if (!Player.HealthComponent.IsDead)
             {
                 Player.Update(World, deltaSeconds);
@@ -424,6 +444,7 @@ public sealed class GameSimulation : IDisposable
             combat = _combat.ResolveProjectileHits(
                 Entities,
                 Content,
+                World,
                 Events,
                 eventLootContext,
                 _combatQueryWorkspace);
@@ -435,6 +456,7 @@ public sealed class GameSimulation : IDisposable
                     Content,
                     PlayerGuard,
                     _combatDamageResolver,
+                    policy: _combatPolicy,
                     events: Events,
                     workspace: _combatQueryWorkspace);
         }
@@ -1119,6 +1141,16 @@ public sealed class GameSimulation : IDisposable
         {
             throw new ArgumentOutOfRangeException(nameof(options), "Spawn options must be finite, non-negative, and ordered.");
         }
+
+        if (!float.IsFinite(options.WorldTimeRateMultiplier) || options.WorldTimeRateMultiplier < 0f ||
+            !float.IsFinite(options.PlayerMovementSpeedMultiplier) || options.PlayerMovementSpeedMultiplier <= 0f ||
+            !float.IsFinite(options.PlayerMiningSpeedMultiplier) || options.PlayerMiningSpeedMultiplier <= 0f ||
+            !float.IsFinite(options.PlayerManaCostMultiplier) || options.PlayerManaCostMultiplier < 0f)
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(options),
+                "Developer rule multipliers must be finite; movement/mining must be positive and time/mana must be non-negative.");
+        }
     }
 
     private static SpawnSchedulerOptions ResolveSpawnOptions(
@@ -1171,6 +1203,8 @@ public sealed class GameSimulation : IDisposable
             Game.Core.Weather.WeatherKind.Rain => "rain",
             Game.Core.Weather.WeatherKind.Storm => "storm",
             Game.Core.Weather.WeatherKind.Fog => "fog",
+            Game.Core.Weather.WeatherKind.Snow => "snow",
+            Game.Core.Weather.WeatherKind.Blizzard => "blizzard",
             _ => "clear"
         };
     }

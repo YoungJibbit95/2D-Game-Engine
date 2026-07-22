@@ -108,15 +108,17 @@ public sealed class InteractionQueryService
     {
         ArgumentNullException.ThrowIfNull(world);
         var position = CoordinateUtils.WorldToTile(aimWorldPosition);
-        if (!world.TryGetTile(position.X, position.Y, out var tile) || tile.IsAir)
+        if (!world.TryGetTile(position.X, position.Y, out var tile) || (tile.IsAir && tile.WallId == 0))
         {
             return null;
         }
 
+        var minedTileId = tile.IsAir ? tile.WallId : tile.TileId;
+        var candidateId = $"tile:{minedTileId}";
         return InteractionCandidate.AtTile(
             InteractionTargetKind.Tile,
             position,
-            $"tile:{tile.TileId}",
+            candidateId,
             requiredHoldTicks: requiredHoldTicks);
     }
 

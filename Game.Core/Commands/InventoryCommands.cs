@@ -24,7 +24,9 @@ public sealed class RemoveItemCommand : TypedConsoleCommand
                     minimum: 1)
             },
             aliases: new[] { "take" },
-            examples: new[] { "/remove gel", "/remove gel 10" }))
+            examples: new[] { "/remove gel", "/remove gel 10" },
+            category: CommandCategory.Inventory,
+            searchTerms: new[] { "item", "inventory", "take" }))
     {
     }
 
@@ -77,7 +79,9 @@ public sealed class ClearInventoryCommand : TypedConsoleCommand
                     description: "Inventory target to clear.")
             },
             aliases: new[] { "clearinventory" },
-            examples: new[] { "/clear inventory" }))
+            examples: new[] { "/clear inventory" },
+            category: CommandCategory.Inventory,
+            searchTerms: new[] { "item", "inventory", "empty" }))
     {
     }
 

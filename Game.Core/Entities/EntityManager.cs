@@ -32,6 +32,9 @@ public sealed class EntityManager
     private int[] _physicsSortedBodyIndices = Array.Empty<int>();
     private PhysicsBodyPair[] _physicsBodyPairs = Array.Empty<PhysicsBodyPair>();
     private PhysicsBodyContact[] _physicsBodyContacts = Array.Empty<PhysicsBodyContact>();
+    private PhysicsContinuousBodyContact[] _physicsContinuousBodyContacts = Array.Empty<PhysicsContinuousBodyContact>();
+    private PhysicsContinuousContactCandidate[] _physicsContinuousContactCandidates = Array.Empty<PhysicsContinuousContactCandidate>();
+    private PhysicsBodySweepState[] _physicsBodySweepStates = Array.Empty<PhysicsBodySweepState>();
     private readonly int _maximumPhysicsBodyPairs;
     private int _nextEntityId = 1;
     private int _nextHomingProjectileOrdinal;
@@ -49,6 +52,8 @@ public sealed class EntityManager
     public EntityAiSchedulingTelemetry AiSchedulingTelemetryLastUpdate { get; private set; }
 
     public EntityAiSchedulingOptions AiSchedulingOptions => _aiDecisionScheduler.Options;
+
+    internal EntitySpatialIndexTelemetry SpatialIndexTelemetry => _spatialGrid.Telemetry;
 
     public EntityManager(
         int spatialCellSize = GameConstants.PixelsPerChunk,
@@ -224,23 +229,27 @@ public sealed class EntityManager
                 droppedItem.PreparePhysicsUpdate(deltaSeconds);
                 QueuePhysicsBody(droppedItem, ref physicsBodyCount);
             }
-            else if (entity.IsActive)
+            else if (entity is ProjectileEntity { IsActive: true } projectile)
             {
-                if (entity is ProjectileEntity projectile)
+                if (RequiresHoming(projectile))
                 {
-                    if (RequiresHoming(projectile))
+                    var offset = (homingOrdinal - firstHomingOrdinal + homingProjectileCount) % homingProjectileCount;
+                    if (offset < homingQueryBudget)
                     {
-                        var offset = (homingOrdinal - firstHomingOrdinal + homingProjectileCount) % homingProjectileCount;
-                        if (offset < homingQueryBudget)
-                        {
-                            PrepareProjectileHomingTargets(projectile, player);
-                            HomingQueriesPreparedLastUpdate++;
-                        }
-
-                        homingOrdinal++;
+                        PrepareProjectileHomingTargets(projectile, player);
+                        HomingQueriesPreparedLastUpdate++;
                     }
+
+                    homingOrdinal++;
                 }
 
+                if (projectile.PreparePhysicsUpdate(deltaSeconds))
+                {
+                    QueuePhysicsBody(projectile, ref physicsBodyCount);
+                }
+            }
+            else if (entity.IsActive)
+            {
                 entity.Update(world, deltaSeconds);
             }
         }
@@ -253,7 +262,9 @@ public sealed class EntityManager
 
         for (var index = _entities.Count - 1; index >= 0; index--)
         {
-            if (!_entities[index].IsActive)
+            if (!_entities[index].IsActive &&
+                (_entities[index] is not ProjectileEntity projectile ||
+                 !projectile.HasPendingTileCollisionResult))
             {
                 RemoveAt(index);
             }
@@ -382,20 +393,59 @@ public sealed class EntityManager
             return;
         }
 
+        var contactsPerBody = _physicsWorld.Settings.ContactsPerBody;
+        var useContinuous = false;
+        for (var index = 0; index < bodyCount; index++)
+        {
+            useContinuous = _physicsParticipants[index] is IContinuousCollisionPhysicsParticipant continuous
+                && continuous.UseContinuousCollision;
+            if (useContinuous)
+            {
+                break;
+            }
+        }
+
         try
         {
-            PhysicsTelemetryLastUpdate = _physicsWorld.StepWithBodyCollisions(
-                world,
-                _physicsBodies.AsSpan(0, bodyCount),
-                deltaSeconds,
-                _physicsResults.AsSpan(0, bodyCount),
-                _physicsContacts.AsSpan(0, bodyCount * _physicsWorld.Settings.ContactsPerBody),
-                _physicsSortedBodyIndices.AsSpan(0, bodyCount),
-                _physicsBodyPairs,
-                _physicsBodyContacts);
+            if (useContinuous)
+            {
+                PhysicsTelemetryLastUpdate = _physicsWorld.StepWithContinuousBodyCollisions(
+                    world,
+                    _physicsBodies.AsSpan(0, bodyCount),
+                    deltaSeconds,
+                    _physicsResults.AsSpan(0, bodyCount),
+                    _physicsContacts.AsSpan(0, bodyCount * contactsPerBody),
+                    _physicsSortedBodyIndices.AsSpan(0, bodyCount),
+                    _physicsBodyPairs,
+                    _physicsContinuousBodyContacts,
+                    _physicsContinuousContactCandidates,
+                    _physicsBodySweepStates);
+            }
+            else
+            {
+                PhysicsTelemetryLastUpdate = _physicsWorld.StepWithBodyCollisions(
+                    world,
+                    _physicsBodies.AsSpan(0, bodyCount),
+                    deltaSeconds,
+                    _physicsResults.AsSpan(0, bodyCount),
+                    _physicsContacts.AsSpan(0, bodyCount * contactsPerBody),
+                    _physicsSortedBodyIndices.AsSpan(0, bodyCount),
+                    _physicsBodyPairs,
+                    _physicsBodyContacts);
+            }
+
+            var contacts = _physicsContacts.AsSpan(0, bodyCount * contactsPerBody);
             for (var index = 0; index < bodyCount; index++)
             {
-                _physicsParticipants[index].SynchronizePhysicsState();
+                ref readonly var moveResult = ref _physicsResults[index];
+                _physicsParticipants[index].SynchronizePhysicsState(
+                    world,
+                    in moveResult,
+                    ReadOnlyTileContacts(
+                        contacts,
+                        index,
+                        contactsPerBody,
+                        moveResult.ContactsWritten));
             }
         }
         finally
@@ -403,6 +453,33 @@ public sealed class EntityManager
             Array.Clear(_physicsBodies, 0, bodyCount);
             Array.Clear(_physicsParticipants, 0, bodyCount);
         }
+    }
+
+    internal static ReadOnlySpan<PhysicsContact> ReadOnlyTileContacts(
+        ReadOnlySpan<PhysicsContact> contacts,
+        int bodyIndex,
+        int contactsPerBody,
+        int contactsWritten)
+    {
+        if (bodyIndex < 0 ||
+            contactsPerBody <= 0 ||
+            contactsWritten <= 0 ||
+            contacts.IsEmpty)
+        {
+            return ReadOnlySpan<PhysicsContact>.Empty;
+        }
+
+        var contactOffset = (long)bodyIndex * contactsPerBody;
+        if (contactOffset < 0 || contactOffset >= contacts.Length)
+        {
+            return ReadOnlySpan<PhysicsContact>.Empty;
+        }
+
+        var offset = (int)contactOffset;
+        var available = Math.Min(contactsPerBody, contacts.Length - offset);
+        return contacts.Slice(
+            offset,
+            Math.Min(contactsWritten, available));
     }
 
     private void EnsurePhysicsCapacity(int requiredCapacity)
@@ -429,6 +506,13 @@ public sealed class EntityManager
         {
             Array.Resize(ref _physicsBodyPairs, requiredBodyPairs);
             Array.Resize(ref _physicsBodyContacts, requiredBodyPairs);
+            Array.Resize(ref _physicsContinuousBodyContacts, requiredBodyPairs);
+            Array.Resize(ref _physicsContinuousContactCandidates, requiredBodyPairs);
+        }
+
+        if (capacity > _physicsBodySweepStates.Length)
+        {
+            Array.Resize(ref _physicsBodySweepStates, capacity);
         }
     }
 

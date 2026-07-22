@@ -1,0 +1,64 @@
+{
+  "sprites": [
+    {
+      "id": "items/adventure_v1/cinderbloom_staff",
+      "path": "assets/AdventureArsenalV1/items/cinderbloom_staff.png",
+      "category": "Item",
+      "width": 32,
+      "height": 32,
+      "pixelsPerUnit": 16,
+      "atlasId": "items.adventure_arsenal_v1",
+      "originX": 16,
+      "originY": 16,
+      "renderLayer": "items",
+      "license": "YjsE-Project-Owned",
+      "provenance": "adventure_arsenal_v1; deterministic native-pixel generator; adventure_arsenal_v1_provenance.json",
+      "tags": ["production-sample", "runtime-preloaded", "item", "weapon", "magic", "fire", "native-32px"]
+    },
+    {
+      "id": "items/adventure_v1/frostglass_scepter",
+      "path": "assets/AdventureArsenalV1/items/frostglass_scepter.png",
+      "category": "Item",
+      "width": 32,
+      "height": 32,
+      "pixelsPerUnit": 16,
+      "atlasId": "items.adventure_arsenal_v1",
+      "originX": 16,
+      "originY": 16,
+      "renderLayer": "items",
+      "license": "YjsE-Project-Owned",
+      "provenance": "adventure_arsenal_v1; deterministic native-pixel generator; adventure_arsenal_v1_provenance.json",
+      "tags": ["production-sample", "runtime-preloaded", "item", "weapon", "magic", "ice", "native-32px"]
+    },
+    {
+      "id": "items/adventure_v1/ambercore_pickaxe",
+      "path": "assets/AdventureArsenalV1/items/ambercore_pickaxe.png",
+      "category": "Item",
+      "width": 32,
+      "height": 32,
+      "pixelsPerUnit": 16,
+      "atlasId": "items.adventure_arsenal_v1",
+      "originX": 16,
+      "originY": 16,
+      "renderLayer": "items",
+      "license": "YjsE-Project-Owned",
+      "provenance": "adventure_arsenal_v1; deterministic native-pixel generator; adventure_arsenal_v1_provenance.json",
+      "tags": ["production-sample", "runtime-preloaded", "item", "tool", "pickaxe", "native-32px"]
+    },
+    {
+      "id": "items/adventure_v1/wayfinder_charm",
+      "path": "assets/AdventureArsenalV1/items/wayfinder_charm.png",
+      "category": "Item",
+      "width": 32,
+      "height": 32,
+      "pixelsPerUnit": 16,
+      "atlasId": "items.adventure_arsenal_v1",
+      "originX": 16,
+      "originY": 16,
+      "renderLayer": "items",
+      "license": "YjsE-Project-Owned",
+      "provenance": "adventure_arsenal_v1; deterministic native-pixel generator; adventure_arsenal_v1_provenance.json",
+      "tags": ["production-sample", "runtime-preloaded", "item", "accessory", "exploration", "native-32px"]
+    }
+  ]
+}

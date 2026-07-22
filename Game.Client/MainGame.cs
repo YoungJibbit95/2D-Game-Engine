@@ -119,9 +119,13 @@ public sealed class MainGame : Microsoft.Xna.Framework.Game
                 _states,
                 openConsoleOnInitialize: _smokeOptions.OpenConsole,
                 openPauseOnInitialize: _smokeOptions.OpenPause,
+                openCraftingOnInitialize: _smokeOptions.OpenCrafting,
                 forcedBiomeId: _smokeOptions.ForcedBiomeId,
                 suppressDebugOverlays: !_smokeOptions.IncludeDebugOverlays,
-                scriptedTraversal: _smokeOptions.ScriptedTraversal),
+                scriptedTraversal: _smokeOptions.ScriptedTraversal,
+                forcedTimeOfDay: _smokeOptions.ForcedTimeOfDay,
+                forcedWeather: _smokeOptions.ForcedWeather,
+                forcedWeatherIntensity: _smokeOptions.ForcedWeatherIntensity),
             _ => menu
         };
     }

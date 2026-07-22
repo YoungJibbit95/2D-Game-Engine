@@ -14,6 +14,16 @@ public sealed record CommandArgumentSpecification
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(name);
 
+        if (minimum is { } minimumValue && !double.IsFinite(minimumValue))
+        {
+            throw new ArgumentOutOfRangeException(nameof(minimum), minimum, "Argument minimum must be finite.");
+        }
+
+        if (maximum is { } maximumValue && !double.IsFinite(maximumValue))
+        {
+            throw new ArgumentOutOfRangeException(nameof(maximum), maximum, "Argument maximum must be finite.");
+        }
+
         if (minimum > maximum)
         {
             throw new ArgumentException("Argument minimum must not exceed its maximum.", nameof(minimum));
@@ -31,6 +41,20 @@ public sealed record CommandArgumentSpecification
         if (type == CommandArgumentType.Choice && Choices.Count == 0)
         {
             throw new ArgumentException("Choice arguments require at least one choice.", nameof(choices));
+        }
+
+        var uniqueChoices = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        for (var index = 0; index < Choices.Count; index++)
+        {
+            if (string.IsNullOrWhiteSpace(Choices[index]))
+            {
+                throw new ArgumentException("Argument choices must not be empty.", nameof(choices));
+            }
+
+            if (!uniqueChoices.Add(Choices[index]))
+            {
+                throw new ArgumentException($"Duplicate argument choice '{Choices[index]}'.", nameof(choices));
+            }
         }
     }
 

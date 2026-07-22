@@ -376,14 +376,13 @@ ASSETS = {
     "sprites/world/backgrounds/forest_parallax_layer.png": draw_forest_background,
     "sprites/world/backgrounds/cave_parallax_layer.png": draw_cave_background,
     "sprites/world/backgrounds/meadow_parallax_layer.png": draw_meadow_background,
-    "sprites/entities/critters/meadow_butterfly.png": lambda: draw_flying_ambient("meadow"),
-    "sprites/entities/critters/forest_moth.png": lambda: draw_flying_ambient("forest"),
-    "sprites/entities/critters/cave_glowbug.png": lambda: draw_flying_ambient("cave"),
+    # The three flying-wildlife sheets are now owned by
+    # generate_flying_wildlife_polish_v1.py at unchanged runtime paths.
     "sprites/particles/meadow_pollen.png": lambda: draw_particle_sheet("meadow"),
     "sprites/particles/forest_leaf_drift.png": lambda: draw_particle_sheet("forest"),
     "sprites/particles/cave_dust.png": lambda: draw_particle_sheet("cave"),
     "sprites/entities/enemies/meadow_slime_elite.png": draw_meadow_elite,
-    "sprites/entities/enemies/forest_boar_elite.png": draw_forest_elite,
+    # forest_boar_elite.png is now owned by generate_legacy_boar_polish_v1.py.
     "sprites/entities/enemies/cave_spider_elite.png": draw_cave_elite,
     "sprites/ui/biomes/meadow.png": lambda: draw_biome_icon("meadow"),
     "sprites/ui/biomes/forest.png": lambda: draw_biome_icon("forest"),

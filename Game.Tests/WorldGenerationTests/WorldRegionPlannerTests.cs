@@ -1,4 +1,5 @@
 using Game.Core.Biomes;
+using Game.Core.World;
 using Game.Core.World.Generation;
 using Xunit;
 
@@ -38,7 +39,7 @@ public sealed class WorldRegionPlannerTests
         var region = planner.PlanRegion(-4);
         var surface = planner.ResolveBiome(region, region.StartTileX, profile.SurfaceBaseY);
 
-        Assert.Contains(surface.Biome.Id, new[] { "amber_grove", "forest", "meadow", "twilight_marsh" });
+        Assert.Contains(surface.Biome.Id, new[] { "amber_grove", "forest", "frostwood", "meadow", "twilight_marsh" });
         Assert.Equal("surface", surface.LayerId);
         Assert.False(surface.IsCave);
 
@@ -65,6 +66,97 @@ public sealed class WorldRegionPlannerTests
         Assert.NotEmpty(runtime.Resources.ResourceTableIds);
     }
 
+    [Fact]
+    public void FrostwoodRegion_UsesFrozenMaterialsAndPlansRegionalPineGroves()
+    {
+        var (regionalProfile, biomes, structures) = LoadContracts();
+        const int seed = 44_911;
+        var planner = new WorldRegionPlanner(seed, regionalProfile, biomes, structures);
+        var frostRegions = Enumerable.Range(-128, 257)
+            .Select(index => planner.PlanRegion(index))
+            .Where(region => region.Biome.Id == "frostwood")
+            .ToArray();
+        Assert.NotEmpty(frostRegions);
+        var region = frostRegions[0];
+        Assert.Contains(
+            frostRegions.SelectMany(candidate => candidate.Features),
+            feature => feature.DefinitionId == "frostwood_pine_groves" &&
+                feature.BiomeId == "frostwood");
+
+        var tileX = checked((int)(region.StartTileX +
+            (region.EndTileXInclusive - region.StartTileX) / 2));
+        var profile = WorldGenerationProfile.Small with
+        {
+            TreeAttempts = 0,
+            WaterPocketAttempts = 0,
+            Ores = Array.Empty<OreGenerationDefinition>()
+        };
+        var generator = new InfiniteWorldChunkGenerator(regionalPlanner: planner);
+        var surfaceY = generator.GetSurfaceHeightAt(profile, seed, tileX);
+        var surfacePosition = new TilePos(tileX, surfaceY);
+        var belowPosition = new TilePos(tileX, surfaceY + 1);
+        var surfaceChunk = generator.GenerateChunk(
+            profile,
+            seed,
+            CoordinateUtils.TileToChunk(surfacePosition));
+        var belowChunkPosition = CoordinateUtils.TileToChunk(belowPosition);
+        var belowChunk = belowChunkPosition == surfaceChunk.Position
+            ? surfaceChunk
+            : generator.GenerateChunk(profile, seed, belowChunkPosition);
+        var surfaceLocal = CoordinateUtils.LocalTileInChunk(surfacePosition);
+        var belowLocal = CoordinateUtils.LocalTileInChunk(belowPosition);
+
+        Assert.Equal(KnownTileIds.Snow, surfaceChunk.GetTile(surfaceLocal.X, surfaceLocal.Y).TileId);
+        Assert.Equal(KnownTileIds.Ice, belowChunk.GetTile(belowLocal.X, belowLocal.Y).TileId);
+    }
+    [Fact]
+    public void SurfaceHeightResolver_ReusesRegionalPlanWithoutSteadyStateAllocations()
+    {
+        var (regionalProfile, biomes, structures) = LoadContracts();
+        const int seed = 44_911;
+        var planner = new WorldRegionPlanner(seed, regionalProfile, biomes, structures);
+        var generator = new InfiniteWorldChunkGenerator(regionalPlanner: planner);
+        var surfaceProfile = WorldGenerationProfile.Small with
+        {
+            TreeAttempts = 0,
+            WaterPocketAttempts = 0,
+            Ores = Array.Empty<OreGenerationDefinition>()
+        };
+        var resolver = generator.CreateSurfaceHeightResolver(surfaceProfile, seed);
+        var region = planner.PlanRegion(0);
+        var startX = checked((int)region.StartTileX);
+        var sampleCount = Math.Min(64, checked((int)(region.EndTileXInclusive - region.StartTileX + 1)));
+
+        for (var offset = 0; offset < sampleCount; offset++)
+        {
+            var tileX = startX + offset;
+            Assert.Equal(
+                generator.GetSurfaceHeightAt(surfaceProfile, seed, tileX),
+                resolver(tileX));
+        }
+
+        for (var iteration = 0; iteration < 8; iteration++)
+        {
+            for (var offset = 0; offset < sampleCount; offset++)
+            {
+                _ = resolver(startX + offset);
+            }
+        }
+
+        var before = GC.GetAllocatedBytesForCurrentThread();
+        var checksum = 0;
+        for (var iteration = 0; iteration < 128; iteration++)
+        {
+            for (var offset = 0; offset < sampleCount; offset++)
+            {
+                checksum += resolver(startX + offset);
+            }
+        }
+
+        var allocated = GC.GetAllocatedBytesForCurrentThread() - before;
+        GC.KeepAlive(checksum);
+        Assert.Equal(0, allocated);
+    }
     [Fact]
     public void StructurePlans_AreDeterministicAndRespectResolvedProfileFilters()
     {

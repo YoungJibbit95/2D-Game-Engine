@@ -75,30 +75,48 @@ public sealed class TreeSilhouettePlannerTests
     }
 
     [Fact]
-    public void CurrentVersion_UsesThreeOrFourBroadSeparatedCrownPads()
+    public void CurrentVersion_UsesDenseOverlappingCrownLobesWithoutABoxSilhouette()
     {
         for (var variation = 0; variation < TreeSilhouettePlanner.VariationCount; variation++)
         {
             var components = CaptureLeafComponents(height: 9, variation);
             var leafCount = components.Sum(component => component.Count);
 
-            Assert.InRange(components.Count, 3, 4);
-            Assert.InRange(leafCount, 22, 34);
-            foreach (var component in components)
-            {
-                var width = component.Max(cell => cell.X) - component.Min(cell => cell.X) + 1;
-                var height = component.Max(cell => cell.Y) - component.Min(cell => cell.Y) + 1;
-                Assert.InRange(component.Count, 5, 9);
-                Assert.InRange(width, 3, 5);
-                Assert.InRange(height, 2, 3);
-            }
+            Assert.InRange(components.Count, 1, 2);
+            Assert.InRange(leafCount, 38, 58);
 
-            // Even the fullest silhouette keeps most of its bounding field open.
-            // This rejects a return to the old monolithic canopy wall while allowing
-            // each individual crown pad to have a useful, leafy interior.
+            var upperCoreCount = Enumerable.Range(-3, 7)
+                .SelectMany(dx => Enumerable.Range(-2, 4).Select(dy => (dx, dy)))
+                .Count(cell => TreeSilhouettePlanner.Classify(
+                    cell.dx,
+                    cell.dy,
+                    height: 9,
+                    variation) == TreeSilhouetteCell.Leaves);
+            Assert.InRange(upperCoreCount, 17, 26);
+
+            // A dense crown should fill substantially more of its authored field
+            // than V4, but irregular bites must keep it far away from a solid box.
             var fieldArea = (TreeSilhouettePlanner.MaximumHalfWidth * 2 + 1) *
                 (TreeSilhouettePlanner.TopPadding + 7);
-            Assert.True(leafCount * 4 < fieldArea);
+            Assert.True(
+                leafCount * 4 >= fieldArea,
+                $"Variation {variation} is too sparse at {leafCount}/{fieldArea} crown cells.");
+            Assert.True(
+                leafCount * 2 < fieldArea,
+                $"Variation {variation} is too box-like at {leafCount}/{fieldArea} crown cells.");
+
+            for (var dy = -TreeSilhouettePlanner.TopPadding; dy <= 3; dy++)
+            {
+                var rowLeafCount = Enumerable.Range(
+                        -TreeSilhouettePlanner.MaximumHalfWidth,
+                        TreeSilhouettePlanner.MaximumHalfWidth * 2 + 1)
+                    .Count(dx => TreeSilhouettePlanner.Classify(
+                        dx,
+                        dy,
+                        height: 9,
+                        variation) == TreeSilhouetteCell.Leaves);
+                Assert.True(rowLeafCount < TreeSilhouettePlanner.MaximumHalfWidth * 2 + 1);
+            }
         }
     }
 
@@ -196,7 +214,10 @@ public sealed class TreeSilhouettePlannerTests
         var edgeCount = trunk.Sum(cell =>
             (trunk.Contains((cell.X + 1, cell.Y)) ? 1 : 0) +
             (trunk.Contains((cell.X, cell.Y + 1)) ? 1 : 0));
-        Assert.Equal(trunk.Count - 1, edgeCount);
+        Assert.True(
+            edgeCount == trunk.Count - 1,
+            $"Variation {variation}, height {height} contains a trunk loop: {edgeCount} edges for {trunk.Count} cells: " +
+            string.Join(",", trunk.OrderBy(cell => cell.Y).ThenBy(cell => cell.X)));
     }
 
     private static void AssertTreeConnected(int height, int variation)

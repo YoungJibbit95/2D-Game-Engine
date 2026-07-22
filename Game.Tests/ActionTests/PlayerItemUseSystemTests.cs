@@ -174,9 +174,66 @@ public sealed class PlayerItemUseSystemTests
 
         Assert.Equal(PlayerItemUseKind.Cast, result.Kind);
         Assert.Equal(6, player.Mana);
+        Assert.Equal(ManaSpendStatus.Spent, result.ManaSpend.Status);
+        Assert.Equal(ManaReservationFinalizationStatus.Committed, result.ManaFinalization.Status);
+        Assert.Equal(0, player.ManaComponent.OpenReservationCount);
         var projectile = Assert.IsType<ProjectileEntity>(Assert.Single(entities.Entities));
         Assert.Equal(DamageType.Magic, projectile.DamageType);
         Assert.Equal(7, projectile.Damage);
+        Assert.Equal(1.4f, projectile.Definition.Knockback);
+    }
+
+    [Fact]
+    public void UseSelectedItem_MagicProjectileCrossesBackgroundWallsAndDamagesEnemy()
+    {
+        var content = CreateContent();
+        var world = new World(16, 16, WorldMetadata.CreateDefault(seed: 1));
+        for (var tileX = 0; tileX <= 4; tileX++)
+        {
+            world.SetWall(tileX, 0, KnownTileIds.Dirt);
+        }
+
+        var player = new PlayerEntity(
+            Vector2.Zero,
+            new TileCollisionResolver(),
+            maxMana: 20,
+            currentMana: 12);
+        var inventory = new PlayerInventory(content.Items);
+        inventory.Hotbar.Slots[0].SetStack(new ItemStack("spark_wand", 1));
+        var entities = new EntityManager(spatialCellSize: 16);
+        var enemy = new EntityFactory(new TileCollisionResolver()).CreateEnemy(
+            CreateSlimeDefinition(),
+            new Vector2(40, 0),
+            currentHealth: 20);
+        entities.Add(enemy);
+
+        var useResult = new PlayerItemUseSystem().UseSelectedItem(
+            world,
+            content,
+            player,
+            inventory,
+            entities,
+            TilePos.Zero,
+            player.Body.Center + new Vector2(80, 0),
+            0.1f);
+        var projectile = Assert.IsType<ProjectileEntity>(useResult.Projectile);
+
+        projectile.Update(world, 0.2f);
+        var combatResult = new CombatSystem(
+            new LootRoller(new Random(1)),
+            new TileCollisionResolver()).ResolveProjectileHits(
+                entities,
+                content,
+                world);
+
+        Assert.Equal(1, combatResult.ProjectileHits);
+        Assert.Equal(13, enemy.Health.Current);
+        Assert.Equal(DamageType.Magic, enemy.LastDamage?.Type);
+        Assert.Equal(6, player.Mana);
+        for (var tileX = 0; tileX <= 4; tileX++)
+        {
+            Assert.Equal(KnownTileIds.Dirt, world.GetTile(tileX, 0).WallId);
+        }
     }
 
     [Fact]
@@ -303,6 +360,7 @@ public sealed class PlayerItemUseSystemTests
                     MaxStack = 1,
                     UseTime = 0.35f,
                     Damage = 3,
+                    Knockback = 1.4f,
                     ManaCost = 6,
                     Actions = new[]
                     {

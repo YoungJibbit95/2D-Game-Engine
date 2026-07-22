@@ -2635,14 +2635,16 @@
       "outputPath": "sprites/entities/enemies/forest_boar.png",
       "width": 128,
       "height": 32,
-      "subject": "four-frame forest boar enemy sheet",
-      "prompt": "Deterministic stocky forest boar with readable mane and tusk: idle, pawing windup, charge, attack.",
+      "subject": "native four-frame forest boar enemy polish sheet",
+      "prompt": "YjsE yjse-pixel-v1 native 32x32 forest boar frames with a bristled back, weight-forward anatomy, readable eye and tusk, clustered fur planes, and strongly separated idle, pawing windup, low charge, and upward tusk attack silhouettes.",
       "requirements": [
         "Export exactly 128x32 with four 32x32 frames in one horizontal row.",
         "Keep every hoof line on the shared ground pivot at (16,31), with binary alpha and a dark one-pixel silhouette.",
-        "Use only the yjse-pixel-v1 palette; no cast shadow or background."
+        "Use only the yjse-pixel-v1 palette; no cast shadow or background.",
+        "Frame order is idle, windup, charge, attack; each frame must retain a distinct readable outer silhouette at native 1x scale.",
+        "Runtime targets: entities/forest_boar.json and the forest_boar RuntimeEntityAnimationProfile."
       ],
-      "tags": ["entity", "enemy", "forest", "animated", "wave-02"]
+      "tags": ["entity", "enemy", "forest", "animated", "native-32px", "legacy-polish-v1"]
     },
     {
       "spriteId": "entities/enemies/cave_spider",

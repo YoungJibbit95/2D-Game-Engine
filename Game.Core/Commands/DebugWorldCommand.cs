@@ -15,7 +15,7 @@ public sealed class DebugWorldCommand : TypedConsoleCommand
                 new CommandArgumentSpecification(
                     "view",
                     CommandArgumentType.Choice,
-                    choices: new[] { "world", "overlay", "collisions", "ai", "streaming" },
+                    choices: new[] { "world", "overlay", "collisions", "ai", "streaming", "lighting", "shadows", "reflections", "particles", "background", "combat", "spawns" },
                     description: "Debug view or world summary."),
                 new CommandArgumentSpecification(
                     "value",
@@ -24,7 +24,10 @@ public sealed class DebugWorldCommand : TypedConsoleCommand
                     "Optional on, off, or toggle state.")
             },
             aliases: new[] { "dbg" },
-            examples: new[] { "/debug world", "/debug collisions on" }))
+            examples: new[] { "/debug world", "/debug collisions on" },
+            category: CommandCategory.Diagnostics,
+            searchTerms: new[] { "overlay", "visualize", "world", "collision", "ai" },
+            requestIntentType: typeof(Game.Core.DeveloperTools.SetDebugViewIntent)))
     {
     }
 
@@ -49,12 +52,12 @@ public sealed class DebugWorldCommand : TypedConsoleCommand
 
         if (context.World is null)
         {
-            return CommandResult.Failure("World is required for /debug world.");
+            return CommandResult.Failure("missing_world", "World is required for /debug world.");
         }
 
         if (context.EntityManager is null)
         {
-            return CommandResult.Failure("Entity manager is required for /debug world.");
+            return CommandResult.Failure("missing_entities", "Entity manager is required for /debug world.");
         }
 
         var snapshot = _snapshots.Build(context.World, context.EntityManager, context.WorldTime);

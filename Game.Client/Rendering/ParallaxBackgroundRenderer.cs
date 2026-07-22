@@ -36,7 +36,7 @@ public sealed class ParallaxBackgroundRenderer
         ClientTextureRegistry? textures,
         Camera2D camera,
         World world,
-        bool isNight,
+        float normalizedTimeOfDay,
         LivingWorldFrameSnapshot livingWorld,
         Func<int, int>? surfaceHeightResolver = null)
     {
@@ -54,13 +54,14 @@ public sealed class ParallaxBackgroundRenderer
         var cameraDepth = camera.Position.Y - localSurfaceY;
         var scene = ParallaxLayerPlanner.Build(
             livingWorld,
-            isNight,
+            normalizedTimeOfDay,
             cameraDepth,
             SurfaceParallax,
             CaveParallax,
             SurfaceSpriteId,
             CaveSpriteId,
             _layers);
+        var isNight = SolarIlluminationCurve.ResolveNightBlend(normalizedTimeOfDay) >= 0.52f;
         LastDetailCommandCount = ParallaxDetailPlanner.Build(
             livingWorld,
             scene,
@@ -152,6 +153,19 @@ public sealed class ParallaxBackgroundRenderer
             layer.PreserveAuthoredRepeat && coverViewport,
             layer.ProjectionMode,
             layer.DepthPlane);
+        var layoutBounds = new Rectangle(
+            context.ViewportBounds.X,
+            layout.Y,
+            layout.Width,
+            layout.Height);
+        if (layer.ProjectionMode == ParallaxProjectionMode.FullscreenDepthPlane &&
+            !ParallaxVerticalCoveragePlanner.CoversViewportVertically(
+                layoutBounds,
+                context.ViewportBounds))
+        {
+            return false;
+        }
+
         var tint = layer.Tint * alpha;
         SpriteTexture? alternate = null;
         if (!string.IsNullOrWhiteSpace(layer.AlternateSpriteId))
@@ -181,10 +195,11 @@ public sealed class ParallaxBackgroundRenderer
             layout.Height,
             layout.Y,
             _commands);
-        if (layer.VerticalFillMode == ParallaxVerticalFillMode.ExtendOuterEdges &&
+        if (layer.ProjectionMode != ParallaxProjectionMode.FullscreenDepthPlane &&
+            layer.VerticalFillMode == ParallaxVerticalFillMode.ExtendOuterEdges &&
             layer.TopFillColor.A > 0 &&
             ParallaxVerticalCoveragePlanner.TryBuildTopFill(
-                new Rectangle(context.ViewportBounds.X, layout.Y, layout.Width, layout.Height),
+                layoutBounds,
                 context.ViewportBounds,
                 out var topFillBounds))
         {
@@ -214,24 +229,6 @@ public sealed class ParallaxBackgroundRenderer
                 effects,
                 featherTop: layer.FeatherTop &&
                     command.Bounds.Y > context.ViewportBounds.Y);
-            if ((layer.VerticalFillMode is ParallaxVerticalFillMode.ExtendBottomEdge or
-                    ParallaxVerticalFillMode.ExtendOuterEdges) &&
-                ParallaxVerticalCoveragePlanner.TryBuildBottomEdgeExtension(
-                    command.Bounds,
-                    repeat.SourceRectangle,
-                    context.ViewportBounds,
-                    out var verticalCoverage))
-            {
-                context.SpriteBatch.Draw(
-                    repeat.Texture,
-                    verticalCoverage.Bounds,
-                    verticalCoverage.SourceRectangle,
-                    tint,
-                    0f,
-                    Vector2.Zero,
-                    effects,
-                    0f);
-            }
         }
 
         return true;
@@ -588,65 +585,65 @@ public sealed class ParallaxBackgroundRenderer
         float undergroundBlend,
         in LivingWorldFrameSnapshot livingWorld)
     {
-        var surfaceVisibility = 1f - undergroundBlend;
-        var intensity = Math.Clamp(livingWorld.WeatherIntensity * surfaceVisibility, 0f, 1f);
+        var surfaceVisibility = 1f - Math.Clamp(undergroundBlend, 0f, 1f);
+        var rawIntensity = livingWorld.WeatherIntensity * surfaceVisibility;
+        var intensity = float.IsFinite(rawIntensity) ? Math.Clamp(rawIntensity, 0f, 1f) : 0f;
         if (intensity <= 0.001f)
         {
             return;
         }
 
-        if (livingWorld.Weather == Game.Core.Weather.WeatherKind.Fog)
+        var kind = WeatherParticlePresentation.Resolve(livingWorld);
+        if (kind == WeatherParticlePresentationKind.Fog)
         {
-            var bandHeight = Math.Max(16, context.ViewportBounds.Height / 8);
-            for (var band = 0; band < 4; band++)
+            var bandHeight = Math.Max(16, context.ViewportBounds.Height / 12);
+            for (var band = 0; band < 3; band++)
             {
                 var drift = MathF.Sin(
                     (float)context.Time.TotalSeconds * (0.09f + band * 0.02f) +
                     camera.Position.X * 0.0005f +
                     band) * 18f;
-                var y = context.ViewportBounds.Y + context.ViewportBounds.Height / 4 + band * bandHeight;
-                context.SpriteBatch.Draw(
-                    context.Pixel,
-                    new Rectangle(
-                        context.ViewportBounds.X + SaturatingRound(drift) - 24,
-                        y,
-                        context.ViewportBounds.Width + 48,
-                        bandHeight),
-                    new Color(170, 190, 196, Math.Clamp((int)(intensity * 34f), 0, 255)));
+                var y = context.ViewportBounds.Y +
+                    context.ViewportBounds.Height / 4 +
+                    band * bandHeight * 2;
+                var bounds = new Rectangle(
+                    context.ViewportBounds.X + SaturatingRound(drift) - 24,
+                    y,
+                    context.ViewportBounds.Width + 48,
+                    bandHeight);
+                if (WeatherParticlePresentation.TryClipToViewport(
+                        bounds,
+                        context.ViewportBounds,
+                        out var clipped))
+                {
+                    context.SpriteBatch.Draw(
+                        context.Pixel,
+                        clipped,
+                        WeatherParticlePresentation.PremultiplyAlpha(
+                            new Color(170, 190, 196),
+                            intensity * (0.055f + band * 0.008f)));
+                }
             }
 
             return;
         }
 
-        if (livingWorld.Weather is not (Game.Core.Weather.WeatherKind.Rain or Game.Core.Weather.WeatherKind.Storm))
+        var primitiveCount = WeatherParticlePresentation.ResolveDepthPrimitiveCount(kind, intensity);
+        for (var index = 0; index < primitiveCount; index++)
         {
-            return;
-        }
-
-        var streaks = livingWorld.Weather == Game.Core.Weather.WeatherKind.Storm ? 30 : 18;
-        var windOffset = SaturatingRound(livingWorld.Wind * 6f);
-        var frame = (int)Math.Floor(context.Time.TotalSeconds * 24d);
-        for (var index = 0; index < streaks; index++)
-        {
-            var x = PositiveModulo(index * 97 + frame * 5, Math.Max(1, context.ViewportBounds.Width + 48)) - 24;
-            var y = PositiveModulo(index * 53 + frame * 11, Math.Max(1, context.ViewportBounds.Height + 64)) - 64;
-            context.SpriteBatch.Draw(
-                context.Pixel,
-                new Rectangle(
-                    context.ViewportBounds.X + x + windOffset,
-                    context.ViewportBounds.Y + y,
-                    1,
-                    livingWorld.Weather == Game.Core.Weather.WeatherKind.Storm ? 14 : 9),
-                new Color(154, 192, 215, Math.Clamp((int)(intensity * 92f), 0, 255)));
+            if (WeatherParticlePresentation.TryBuildDepthPrimitive(
+                    kind,
+                    context.ViewportBounds,
+                    context.Time.TotalSeconds,
+                    livingWorld.Wind,
+                    intensity,
+                    index,
+                    out var primitive))
+            {
+                context.SpriteBatch.Draw(context.Pixel, primitive.Bounds, primitive.Color);
+            }
         }
     }
-
-    private static int PositiveModulo(int value, int modulo)
-    {
-        var remainder = value % modulo;
-        return remainder < 0 ? remainder + modulo : remainder;
-    }
-
     private static int SaturatingRound(float value)
     {
         if (!float.IsFinite(value))

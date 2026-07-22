@@ -1,4 +1,6 @@
 using Game.Client.Rendering.Effects;
+using Game.Core.Combat;
+using Game.Core.Runtime;
 using Game.Core;
 using Game.Core.Tiles;
 using Game.Core.World;
@@ -9,6 +11,11 @@ namespace Game.Client.Rendering.Lighting;
 public readonly record struct VisibleLightCollectionTelemetry(
     int LightsCollected,
     int TilesSampled,
+    bool WasBudgetClamped);
+
+public readonly record struct DynamicLightCollectionTelemetry(
+    int LightsCollected,
+    int EntitiesInspected,
     bool WasBudgetClamped);
 
 public static class VisibleLightCollector
@@ -113,6 +120,79 @@ public static class VisibleLightCollector
         return string.Equals(definition.Id, "torch", StringComparison.OrdinalIgnoreCase)
             ? new Color(255, 164, 82)
             : new Color(255, 214, 156);
+    }
+    public static DynamicLightCollectionTelemetry CollectEntityLights(
+        IReadOnlyList<EntityFrameSnapshot> entities,
+        Rectangle visibleWorld,
+        in PresentationQualityProfile quality,
+        Span<ScreenSpaceLight> destination)
+    {
+        ArgumentNullException.ThrowIfNull(entities);
+        var maximumLights = Math.Min(destination.Length, quality.Budget.MaxPointLights);
+        if (maximumLights == 0 || visibleWorld.IsEmpty)
+        {
+            return default;
+        }
+
+        var count = 0;
+        var inspected = 0;
+        for (var index = 0; index < entities.Count; index++)
+        {
+            var entity = entities[index];
+            inspected++;
+            if (!entity.IsActive ||
+                entity.Kind != EntityFrameKind.Projectile ||
+                entity.DamageType is not (DamageType.Magic or DamageType.Fire))
+            {
+                continue;
+            }
+
+            var bounds = entity.Bounds;
+            if (bounds.Right <= visibleWorld.Left ||
+                bounds.Left >= visibleWorld.Right ||
+                bounds.Bottom <= visibleWorld.Top ||
+                bounds.Top >= visibleWorld.Bottom)
+            {
+                continue;
+            }
+
+            var isFire = entity.DamageType == DamageType.Fire;
+            var speed = entity.Velocity.Length();
+            var motionBoost = Math.Clamp(speed / 720f, 0f, 0.18f);
+            var stableId = ResolveStableId(entity.Id, entity.ContentId);
+            destination[count++] = new ScreenSpaceLight(
+                new Vector2(
+                    bounds.X + bounds.Width * 0.5f,
+                    bounds.Y + bounds.Height * 0.5f),
+                RadiusPixels: (isFire ? 92f : 112f) * (1f + motionBoost),
+                Color: isFire
+                    ? new Color(255, 122, 54)
+                    : new Color(126, 172, 255),
+                Intensity: isFire ? 0.82f : 0.9f,
+                EmissiveStrength: isFire ? 0.92f : 1.05f,
+                CastsShadows: true,
+                StableId: stableId,
+                FlickerAmount: isFire ? 0.06f : 0.015f);
+            if (count == maximumLights)
+            {
+                return new DynamicLightCollectionTelemetry(count, inspected, index + 1 < entities.Count);
+            }
+        }
+
+        return new DynamicLightCollectionTelemetry(count, inspected, false);
+    }
+
+
+    private static uint ResolveStableId(int entityId, string contentId)
+    {
+        var hash = 2166136261u ^ unchecked((uint)entityId);
+        for (var index = 0; index < contentId.Length; index++)
+        {
+            hash ^= char.ToUpperInvariant(contentId[index]);
+            hash *= 16777619u;
+        }
+
+        return hash;
     }
 
     private static int WorldPixelToTile(long worldPixel)

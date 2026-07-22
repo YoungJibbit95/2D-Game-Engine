@@ -1,0 +1,19 @@
+{
+  "id": "deep_cave_glow_garden",
+  "biomeIds": ["deep_cave"],
+  "verticalLayerIds": ["underground", "cavern"],
+  "time": "any",
+  "weight": 1.05,
+  "minDistanceTiles": 18,
+  "maxDistanceTiles": 40,
+  "cooldownSeconds": 7.0,
+  "maxActiveGlobal": 14,
+  "populationRegionSizeTiles": 80,
+  "maxActiveInRegion": 6,
+  "minRoleSelections": 2,
+  "maxRoleSelections": 2,
+  "roles": [
+    { "id": "glowbugs", "spawnRuleId": "deep_cave_glowbug", "weight": 1.7, "minCount": 3, "maxCount": 4 },
+    { "id": "scouts", "spawnRuleId": "deep_cave_bat_scout", "weight": 0.75, "minCount": 1, "maxCount": 1 }
+  ]
+}

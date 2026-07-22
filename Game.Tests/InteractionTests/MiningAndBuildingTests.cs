@@ -1,3 +1,4 @@
+using Game.Core.Events;
 using Game.Core.Interaction;
 using Game.Core.Inventory;
 using Game.Core.Items;
@@ -23,10 +24,72 @@ public sealed class MiningAndBuildingTests
         var strong = new MiningSystem().Update(
             strongWorld, CreateTiles(), new TilePos(2, 2), new Vector2(40, 40), 96, 50, 0.1f);
 
-        Assert.InRange(weak.Progress, 0.159f, 0.161f);
+        Assert.InRange(weak.Progress, 0.639f, 0.641f);
         Assert.True(strong.Progress > weak.Progress);
         Assert.InRange(strong.Progress / weak.Progress, 1.49f, 1.51f);
     }
+    [Fact]
+    public void MiningSystem_UsesQuarterDurationFactorAndClampsCatchUpDelta()
+    {
+        var world = CreateWorld();
+        world.SetTile(2, 2, KnownTileIds.Dirt);
+        var hardTiles = TileRegistry.Create(
+        [
+            new TileDefinition
+            {
+                NumericId = KnownTileIds.Dirt,
+                Id = "dirt",
+                DisplayName = "Dirt",
+                TexturePath = "tiles/dirt",
+                Solid = true,
+                BlocksLight = true,
+                Hardness = 10f,
+                DropItemId = "dirt_block"
+            }
+        ]);
+
+        var result = new MiningSystem().Update(
+            world,
+            hardTiles,
+            new TilePos(2, 2),
+            new Vector2(40, 40),
+            96,
+            0,
+            30f);
+
+        Assert.Equal(0.25f, MiningSystem.GlobalDurationFactor);
+        Assert.True(result.InProgress);
+        Assert.InRange(result.Progress, 0.159f, 0.161f);
+        Assert.False(world.GetTile(2, 2).IsAir);
+    }
+
+    [Theory]
+    [InlineData(float.NaN)]
+    [InlineData(float.PositiveInfinity)]
+    [InlineData(0f)]
+    [InlineData(-0.1f)]
+    public void MiningSystem_RejectsInvalidDeltaWithoutChangingWorld(float deltaSeconds)
+    {
+        var world = CreateWorld();
+        world.SetTile(2, 2, KnownTileIds.Dirt);
+        var mining = new MiningSystem();
+
+        var result = mining.Update(
+            world,
+            CreateTiles(),
+            new TilePos(2, 2),
+            new Vector2(40, 40),
+            96,
+            0,
+            deltaSeconds);
+
+        Assert.True(result.Blocked);
+        Assert.Equal(GameplayActionFailureReason.InvalidTarget, result.FailureReason);
+        Assert.Equal(KnownTileIds.Dirt, world.GetTile(2, 2).TileId);
+        Assert.Null(mining.CurrentTarget);
+        Assert.Equal(0f, mining.Progress);
+    }
+
 
     [Fact]
     public void MiningSystem_RemovesTileAndReturnsDropAfterProgressCompletes()
@@ -40,6 +103,21 @@ public sealed class MiningAndBuildingTests
         Assert.True(result.Completed);
         Assert.True(world.GetTile(2, 2).IsAir);
         Assert.Equal(new ItemStack("dirt_block", 1), result.DroppedItem);
+    }
+
+    [Fact]
+    public void MiningSystem_RemovesWallAndReturnsDropAfterProgressCompletes()
+    {
+        var world = CreateWorld();
+        world.SetWall(2, 2, KnownTileIds.Stone);
+        var mining = new MiningSystem();
+
+        var result = mining.Update(world, CreateTiles(), new TilePos(2, 2), new Vector2(40, 40), 96, 0, 2f);
+
+        Assert.True(result.Completed);
+        Assert.Equal(KnownTileIds.Air, world.GetTile(2, 2).TileId);
+        Assert.Equal(0, world.GetTile(2, 2).WallId);
+        Assert.Equal(new ItemStack("stone_block", 1), result.DroppedItem);
     }
 
     [Fact]

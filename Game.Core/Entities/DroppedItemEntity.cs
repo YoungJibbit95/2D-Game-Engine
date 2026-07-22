@@ -74,7 +74,10 @@ public sealed class DroppedItemEntity : Entity, IEntityPhysicsParticipant
             Body.Velocity.Y);
     }
 
-    void IEntityPhysicsParticipant.SynchronizePhysicsState()
+    void IEntityPhysicsParticipant.SynchronizePhysicsState(
+        GameWorld world,
+        in PhysicsMoveResult moveResult,
+        ReadOnlySpan<PhysicsContact> tileContacts)
     {
         SynchronizePhysicsState();
     }

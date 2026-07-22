@@ -1,0 +1,23 @@
+{
+  "id": "skyward_wings",
+  "displayName": "Skyward Wings",
+  "description": "Worn winglets that grant controlled ascent and hover while flight is held.",
+  "rarity": "Epic",
+  "value": 980,
+  "category": "Equipment",
+  "sortPriority": 64,
+  "type": "Accessory",
+  "texture": "items/skyward_wings",
+  "maxStack": 1,
+  "mobility": {
+    "flightDurationSeconds": 2.4,
+    "flightVerticalSpeedMultiplier": 1.08,
+    "flightAccelerationMultiplier": 1.1
+  },
+  "tags": [
+    "equipment",
+    "accessory",
+    "mobility",
+    "flight"
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "asset": "art_direction/generated_sources/tree_canopy_v4_concept_source.png",
+  "dimensions": [1254, 1254],
+  "sha256": "260d92f3b9e91eec992be64881878569e5106a883ee8b684aaf7473f3fc4ac49",
+  "generator": "OpenAI built-in image generation tool, default mode",
+  "generationMode": "Prompt-only concept generation after the Windows sandbox could not attach the reviewed local contact sheets.",
+  "reviewedReferences": [
+    "art_direction/tree_trunks_v3_contact_sheet.png",
+    "art_direction/loose_foliage_v2_contact_sheet.png"
+  ],
+  "referenceUse": "Art-direction comparison only. Runtime pixels must be original deterministic native-size output and must not be sampled, traced, or resized from this concept.",
+  "designIntent": "Three original mature side-view sandbox tree species with 2-3 tile visual trunk mass, root flare, readable major branches, broad 85-92% filled overlapping crowns, and only a few intentional branch-fork apertures.",
+  "license": "YjsE-Project-Owned",
+  "runtimeLoaded": false
+}

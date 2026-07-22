@@ -1,0 +1,23 @@
+{
+  "id": "ether_glider",
+  "displayName": "Ether Glider",
+  "description": "A light glider for controlled slow descents.",
+  "rarity": "Rare",
+  "value": 760,
+  "category": "Equipment",
+  "sortPriority": 66,
+  "type": "Accessory",
+  "texture": "items/ether_glider",
+  "maxStack": 1,
+  "mobility": {
+    "glideEnabled": true,
+    "glideGravityScale": 0.18,
+    "glideTerminalVelocity": 105.0
+  },
+  "tags": [
+    "equipment",
+    "accessory",
+    "mobility",
+    "glide"
+  ]
+}

@@ -1,0 +1,95 @@
+{
+  "id": "frostwood",
+  "displayName": "Frostwood",
+  "surfaceTile": "snow",
+  "undergroundTile": "ice",
+  "treeType": "frost_pine",
+  "treeMaterial": {
+    "trunkTile": "oak_trunk",
+    "canopyTile": "oak_leaves"
+  },
+  "enemySpawnTable": "frostwood_day_rabbit",
+  "isRegionalBiome": true,
+  "selectionWeight": 2,
+  "climate": {
+    "temperature": 0.08,
+    "humidity": 0.62
+  },
+  "terrain": {
+    "elevationMultiplier": 1.24,
+    "soilDepthMultiplier": 0.92,
+    "caveDensityMultiplier": 0.96,
+    "featureDensityMultiplier": 1.18
+  },
+  "weather": {
+    "clearWeight": 38,
+    "rainWeight": 0,
+    "stormWeight": 0,
+    "fogWeight": 6,
+    "snowWeight": 48,
+    "blizzardWeight": 8,
+    "allowsFrozenPrecipitation": true,
+    "minDurationTicks": 1800,
+    "maxDurationTicks": 4800,
+    "transitionDurationTicks": 240
+  },
+  "ambient": {
+    "surfaceSoundscapeId": "forest_day",
+    "caveSoundscapeId": "forest_cave",
+    "baseLight": 1.0,
+    "baseVisibility": 0.96
+  },
+  "lighting": {
+    "colorGradeId": "crystal_cyan",
+    "skyLightMultiplier": 1.08,
+    "emissiveLightMultiplier": 1.04,
+    "fogDensity": 0.08
+  },
+  "spawning": {
+    "surfaceDayTableId": "frostwood_day_rabbit",
+    "surfaceNightTableId": "frostwood_night_bat",
+    "caveTableId": "frostwood_cave_bat",
+    "densityMultiplier": 0.92,
+    "habitatTags": ["frostwood", "snow", "surface", "cold"]
+  },
+  "resources": {
+    "oreDensityMultiplier": 1.08,
+    "vegetationDensityMultiplier": 0.72,
+    "forageDensityMultiplier": 0.58,
+    "resourceTableIds": ["frozen_soil", "frostwood_timber"]
+  },
+  "presentation": {
+    "backgroundSpriteId": "world/backgrounds/forest_parallax_layer_v5",
+    "ambientParticleSpriteId": "effects/weather/snow_flurry",
+    "ambientCritterSpriteId": "entities/critters/rabbit",
+    "biomeIconSpriteId": "ui/biomes/forest",
+    "eliteSpriteId": "entities/enemies/forest_boar_elite",
+    "ambientParticleDensity": 0.36,
+    "surfaceReflectionStrength": 0.42,
+    "windResponse": 1.4
+  },
+  "subBiomes": [
+    {
+      "id": "icefield",
+      "displayName": "Icefield",
+      "selectionWeight": 2,
+      "temperatureOffset": -0.04,
+      "humidityOffset": -0.08,
+      "elevationMultiplier": 1.08,
+      "caveDensityMultiplier": 0.9,
+      "surfaceFeatureSetId": "frost_spires",
+      "soundscapeId": "forest_day"
+    },
+    {
+      "id": "snowy_grove",
+      "displayName": "Snowy Grove",
+      "selectionWeight": 3,
+      "temperatureOffset": 0.02,
+      "humidityOffset": 0.06,
+      "elevationMultiplier": 0.96,
+      "caveDensityMultiplier": 1.05,
+      "surfaceFeatureSetId": "frost_pines",
+      "soundscapeId": "forest_day"
+    }
+  ]
+}

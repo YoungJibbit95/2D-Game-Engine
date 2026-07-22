@@ -250,6 +250,240 @@ public sealed class TileCollisionResolverTests
         Assert.Equal(1, result.TilesTested);
     }
 
+    [Fact]
+    public void MoveDetailed_LandsOnOneWayPlatformFromAbove()
+    {
+        var world = CreateWorld();
+        world.SetTile(1, 10, TileInstance.FromTileId(KnownTileIds.Dirt, TileFlags.Platform));
+        var body = new PhysicsBody
+        {
+            Position = new Vector2(GameConstants.TileSize, 9 * GameConstants.TileSize),
+            Size = new Vector2(10, 10),
+            Velocity = new Vector2(0, 120)
+        };
+
+        new TileCollisionResolver().Move(world, body, 1f);
+
+        Assert.Equal(10 * GameConstants.TileSize - body.Size.Y, body.Position.Y);
+        Assert.Equal(0, body.Velocity.Y);
+        Assert.True(body.OnGround);
+    }
+
+    [Fact]
+    public void MoveDetailed_PassesThroughOneWayPlatformWhenMovingUpOrSideways()
+    {
+        var world = CreateWorld();
+        world.SetTile(1, 10, TileInstance.FromTileId(KnownTileIds.Dirt, TileFlags.Platform));
+
+        var movingUp = new PhysicsBody
+        {
+            Position = new Vector2(GameConstants.TileSize, 11 * GameConstants.TileSize + 1f),
+            Size = new Vector2(10, 10),
+            Velocity = new Vector2(0, -120)
+        };
+        new TileCollisionResolver().Move(world, movingUp, 1f);
+
+        Assert.Equal(11 * GameConstants.TileSize + 1f - 120f, movingUp.Position.Y);
+
+        var movingSideways = new PhysicsBody
+        {
+            Position = new Vector2(0f, 10 * GameConstants.TileSize + 5f),
+            Size = new Vector2(10, 10),
+            Velocity = new Vector2(120, 0)
+        };
+        new TileCollisionResolver().Move(world, movingSideways, 1f);
+
+        Assert.Equal(120f, movingSideways.Position.X);
+    }
+
+    [Fact]
+    public void MoveDetailed_InitialPlatformOverlapDoesNotDepenetrateOrCancelUpwardMotion()
+    {
+        var world = CreateWorld();
+        world.SetTile(1, 10, TileInstance.FromTileId(KnownTileIds.Dirt, TileFlags.Platform));
+        var body = new PhysicsBody
+        {
+            Position = new Vector2(GameConstants.TileSize, 10 * GameConstants.TileSize + 4f),
+            Size = new Vector2(10, 10),
+            Velocity = new Vector2(0, -40)
+        };
+        var contacts = new PhysicsContact[4];
+
+        var result = new TileCollisionResolver().MoveDetailed(world, body, 1f, contacts);
+
+        Assert.Equal(10 * GameConstants.TileSize - 36f, body.Position.Y, precision: 3);
+        Assert.Equal(-40f, body.Velocity.Y);
+        Assert.False(body.OnGround);
+        Assert.Equal(
+            PhysicsContactFlags.None,
+            result.ContactFlags &
+            (PhysicsContactFlags.InitialOverlapRecovered | PhysicsContactFlags.InitialOverlapUnresolved));
+        Assert.Equal(0, result.ContactsWritten);
+    }
+
+    [Theory]
+    [InlineData(TileFlags.Slope, TileCollisionShape.SlopeAscendingRight)]
+    [InlineData(TileFlags.SlopeAscendingRight, TileCollisionShape.SlopeAscendingRight)]
+    [InlineData(TileFlags.SlopeAscendingLeft, TileCollisionShape.SlopeAscendingLeft)]
+    [InlineData(TileFlags.HalfBlock, TileCollisionShape.HalfBlock)]
+    [InlineData(TileFlags.Platform, TileCollisionShape.OneWayPlatform)]
+    public void TileInstance_ResolvesPartialCollisionShapeContract(
+        TileFlags flags,
+        TileCollisionShape expected)
+    {
+        var tile = TileInstance.FromTileId(KnownTileIds.Dirt, flags);
+
+        Assert.Equal(expected, tile.CollisionShape);
+    }
+
+    [Fact]
+    public void TileInstance_AmbiguousSlopeOrientationFailsClosedAsFullBlock()
+    {
+        var tile = TileInstance.FromTileId(
+            KnownTileIds.Dirt,
+            TileFlags.SlopeAscendingLeft | TileFlags.SlopeAscendingRight);
+
+        Assert.Equal(TileCollisionShape.FullBlock, tile.CollisionShape);
+    }
+
+    [Theory]
+    [InlineData(TileFlags.SlopeAscendingRight, 160f, -0.70710677f)]
+    [InlineData(TileFlags.SlopeAscendingLeft, 152f, 0.70710677f)]
+    [InlineData(TileFlags.HalfBlock, 160f, 0f)]
+    public void MoveDetailed_FallingBodyLandsOnAuthoredPartialFloor(
+        TileFlags flags,
+        float expectedY,
+        float expectedNormalX)
+    {
+        var world = CreateWorld();
+        world.SetTile(4, 10, TileInstance.FromTileId(KnownTileIds.Dirt, flags));
+        var body = new PhysicsBody
+        {
+            Position = new Vector2(4 * GameConstants.TileSize, 140f),
+            Size = new Vector2(8f, 8f),
+            Velocity = new Vector2(0f, 40f)
+        };
+        Span<PhysicsContact> contacts = stackalloc PhysicsContact[8];
+
+        var result = new TileCollisionResolver().MoveDetailed(world, body, 1f, contacts);
+
+        Assert.Equal(expectedY, body.Position.Y, precision: 3);
+        Assert.Equal(0f, body.Velocity.Y);
+        Assert.True(body.OnGround);
+        Assert.True((result.ContactFlags & PhysicsContactFlags.Ground) != 0);
+        Assert.True(result.ContactsWritten >= 1);
+        Assert.Equal(expectedNormalX, contacts[0].Normal.X, precision: 5);
+        Assert.True(contacts[0].Normal.Y < -0.7f || expectedNormalX == 0f);
+    }
+
+    [Fact]
+    public void MoveDetailed_HorizontalMotionFollowsAscendingSlopeWithoutPenetration()
+    {
+        var world = CreateWorld();
+        world.SetTile(
+            4,
+            10,
+            TileInstance.FromTileId(KnownTileIds.Dirt, TileFlags.SlopeAscendingRight));
+        var body = new PhysicsBody
+        {
+            Position = new Vector2(4 * GameConstants.TileSize, 168f),
+            Size = new Vector2(4f, 4f),
+            Velocity = new Vector2(8f, 0f)
+        };
+
+        var result = new TileCollisionResolver().MoveDetailed(
+            world,
+            body,
+            0.5f,
+            Span<PhysicsContact>.Empty);
+
+        Assert.Equal(4 * GameConstants.TileSize + 4f, body.Position.X, precision: 3);
+        Assert.Equal(164f, body.Position.Y, precision: 3);
+        Assert.True(body.OnGround);
+        Assert.True((result.ContactFlags & PhysicsContactFlags.Ground) != 0);
+    }
+
+    [Fact]
+    public void MoveDetailed_HighSideOfSlopeRemainsAHorizontalBarrier()
+    {
+        var world = CreateWorld();
+        world.SetTile(
+            4,
+            10,
+            TileInstance.FromTileId(KnownTileIds.Dirt, TileFlags.SlopeAscendingRight));
+        var body = new PhysicsBody
+        {
+            Position = new Vector2(5 * GameConstants.TileSize, 160f),
+            Size = new Vector2(4f, 4f),
+            Velocity = new Vector2(-16f, 0f)
+        };
+
+        var result = new TileCollisionResolver().MoveDetailed(
+            world,
+            body,
+            0.5f,
+            Span<PhysicsContact>.Empty);
+
+        Assert.Equal(5 * GameConstants.TileSize, body.Position.X);
+        Assert.Equal(0f, body.Velocity.X);
+        Assert.True((result.ContactFlags & PhysicsContactFlags.LeftWall) != 0);
+    }
+
+    [Fact]
+    public void MoveDetailed_UpwardMotionPassesThroughFloorSlope()
+    {
+        var world = CreateWorld();
+        world.SetTile(
+            4,
+            10,
+            TileInstance.FromTileId(KnownTileIds.Dirt, TileFlags.SlopeAscendingLeft));
+        var body = new PhysicsBody
+        {
+            Position = new Vector2(4 * GameConstants.TileSize, 176f),
+            Size = new Vector2(8f, 8f),
+            Velocity = new Vector2(0f, -32f)
+        };
+
+        var result = new TileCollisionResolver().MoveDetailed(
+            world,
+            body,
+            1f,
+            Span<PhysicsContact>.Empty);
+
+        Assert.Equal(144f, body.Position.Y, precision: 3);
+        Assert.Equal(-32f, body.Velocity.Y);
+        Assert.False(result.Collided);
+    }
+
+    [Fact]
+    public void MoveDetailed_PartialFloorSupportReusesCallerStorageWithoutAllocation()
+    {
+        var world = CreateWorld();
+        world.SetTile(
+            4,
+            10,
+            TileInstance.FromTileId(KnownTileIds.Dirt, TileFlags.SlopeAscendingRight));
+        var resolver = new TileCollisionResolver();
+        var body = new PhysicsBody
+        {
+            Position = new Vector2(4 * GameConstants.TileSize, 140f),
+            Size = new Vector2(8f, 8f),
+            Velocity = new Vector2(0f, 40f)
+        };
+        Span<PhysicsContact> contacts = stackalloc PhysicsContact[8];
+        _ = resolver.MoveDetailed(world, body, 1f, contacts);
+
+        var before = GC.GetAllocatedBytesForCurrentThread();
+        for (var iteration = 0; iteration < 1_000; iteration++)
+        {
+            body.Position = new Vector2(4 * GameConstants.TileSize, 140f);
+            body.Velocity = new Vector2(0f, 40f);
+            _ = resolver.MoveDetailed(world, body, 1f, contacts);
+        }
+
+        Assert.Equal(0, GC.GetAllocatedBytesForCurrentThread() - before);
+    }
+
     private static void AssertBodyDoesNotIntersectSolidTile(World world, PhysicsBody body)
     {
         var minTileX = (int)Math.Floor(body.Position.X / GameConstants.TileSize);

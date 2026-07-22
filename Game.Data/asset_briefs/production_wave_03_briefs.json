@@ -15,33 +15,48 @@
       "outputPath": "sprites/entities/critters/meadow_butterfly.png",
       "width": 64,
       "height": 16,
-      "subject": "four-frame meadow butterfly ambient mob",
-      "prompt": "Friendly butterfly with broad pink-gold wings and a compact readable body, four alternating wing poses.",
-      "requirements": ["Four 16x16 frames: flight_0 through flight_3.", "Visual center stays at origin 8,8."],
+      "subject": "native four-frame meadow butterfly wildlife polish sheet",
+      "prompt": "YjsE yjse-pixel-v1 side-view meadow butterfly at native 16x16: broad asymmetric pink wing planes, warm gold body, readable head and antennae, and four clearly separated raised-to-lowered wing phases without scaling a smaller source.",
+      "requirements": [
+        "Export exactly 64x16 with four native 16x16 frames: flight_0 through flight_3.",
+        "Visual center stays registered to origin (8,8), with binary alpha and transparent sheet corners.",
+        "Every flight frame must have a distinct wing silhouette while preserving the body and facing direction.",
+        "Runtime targets: entities/meadow_butterfly.json and the meadow_butterfly RuntimeEntityAnimationProfile."
+      ],
       "palette": ["#1b1826", "#e58b91", "#f0c35a", "#fff1a6"],
-      "tags": ["entity", "critter", "ambient", "meadow", "animated", "runtime-preloaded"]
+      "tags": ["entity", "critter", "ambient", "meadow", "animated", "native-16px", "wildlife-polish-v1", "runtime-preloaded"]
     },
     {
       "spriteId": "entities/critters/forest_moth",
       "outputPath": "sprites/entities/critters/forest_moth.png",
       "width": 64,
       "height": 16,
-      "subject": "four-frame forest moth ambient mob",
-      "prompt": "Leaf-green forest moth with warm eye-catching body light and alternating wing poses.",
-      "requirements": ["Four 16x16 frames: flight_0 through flight_3.", "Visual center stays at origin 8,8."],
+      "subject": "native four-frame forest moth wildlife polish sheet",
+      "prompt": "YjsE yjse-pixel-v1 side-view forest moth at native 16x16: angular leaf-green wings, dark fuzzy body, restrained amber head accents, antennae, and four readable flap phases distinct from the meadow butterfly.",
+      "requirements": [
+        "Export exactly 64x16 with four native 16x16 frames: flight_0 through flight_3.",
+        "Visual center stays registered to origin (8,8), with binary alpha and transparent sheet corners.",
+        "Use angular leaf-like wing edges and a heavier body so the moth is distinguishable at 1x scale.",
+        "Runtime targets: entities/forest_moth.json and the forest_moth RuntimeEntityAnimationProfile."
+      ],
       "palette": ["#1b1826", "#35614a", "#7fba68", "#f0c35a"],
-      "tags": ["entity", "critter", "ambient", "forest", "animated", "runtime-preloaded"]
+      "tags": ["entity", "critter", "ambient", "forest", "animated", "native-16px", "wildlife-polish-v1", "runtime-preloaded"]
     },
     {
       "spriteId": "entities/critters/cave_glowbug",
       "outputPath": "sprites/entities/critters/cave_glowbug.png",
       "width": 64,
       "height": 16,
-      "subject": "four-frame cave glowbug ambient mob",
-      "prompt": "Tiny blue crystal cave insect with a contained bright abdomen and alternating wing poses.",
-      "requirements": ["Four 16x16 frames: flight_0 through flight_3.", "No soft glow outside alpha."],
+      "subject": "native four-frame cave glowbug wildlife polish sheet",
+      "prompt": "YjsE yjse-pixel-v1 side-view cave glowbug at native 16x16: compact dark crystal thorax, contained cyan abdomen light, hard translucent-looking blue wing planes rendered with opaque palette clusters, head and antennae, and four distinct flight phases.",
+      "requirements": [
+        "Export exactly 64x16 with four native 16x16 frames: flight_0 through flight_3.",
+        "Keep the visual center registered to origin (8,8), binary alpha and transparent sheet corners.",
+        "Contain all luminance inside the outlined abdomen; no soft glow or partial alpha outside the silhouette.",
+        "Runtime targets: entities/cave_glowbug.json and the cave_glowbug RuntimeEntityAnimationProfile."
+      ],
       "palette": ["#1b1826", "#5367c8", "#78b7e3", "#b9efff"],
-      "tags": ["entity", "critter", "ambient", "cave", "animated", "runtime-preloaded"]
+      "tags": ["entity", "critter", "ambient", "cave", "animated", "native-16px", "wildlife-polish-v1", "runtime-preloaded"]
     },
     {
       "spriteId": "particles/meadow_pollen",
@@ -92,11 +107,16 @@
       "outputPath": "sprites/entities/enemies/forest_boar_elite.png",
       "width": 128,
       "height": 32,
-      "subject": "four-frame forest boar elite mob",
-      "prompt": "Existing boar mob language upgraded with leaf armor and a stronger crown silhouette.",
-      "requirements": ["Four 32x32 frames matching forest_boar order.", "Ground origin remains 16,31."],
+      "subject": "native four-frame armored forest boar elite polish sheet",
+      "prompt": "YjsE yjse-pixel-v1 elite counterpart to the polished native forest boar: preserve the exact body, eye, tusk, hoof and action registration while adding layered green leaf plates, readable crown spikes, and restrained bright leaf-tip accents.",
+      "requirements": [
+        "Export exactly 128x32 with four 32x32 frames matching forest_boar order: idle, windup, charge, attack.",
+        "Ground origin remains (16,31); binary alpha, transparent corners and a continuous dark silhouette are mandatory.",
+        "Armor must follow each action pose without covering the eye, tusk, hoof line or charge silhouette.",
+        "Runtime targets: forest biome eliteSpriteId and the forest_boar_elite RuntimeEntityAnimationProfile."
+      ],
       "palette": ["#1b1826", "#8b5a34", "#35614a", "#b8d47a"],
-      "tags": ["entity", "enemy", "elite", "forest", "animated", "runtime-preloaded"]
+      "tags": ["entity", "enemy", "elite", "forest", "animated", "native-32px", "legacy-polish-v1", "runtime-preloaded"]
     },
     {
       "spriteId": "entities/enemies/cave_spider_elite",

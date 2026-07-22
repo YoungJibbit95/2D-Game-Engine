@@ -19,7 +19,10 @@ public sealed class DeveloperMovementModeCommand : TypedConsoleCommand
                     "Optional on, off, or toggle state.")
             },
             aliases: aliases,
-            examples: new[] { $"/{name}", $"/{name} on" }))
+            examples: new[] { $"/{name}", $"/{name} on" },
+            category: CommandCategory.Movement,
+            searchTerms: new[] { "player", "movement", "cheat" },
+            requestIntentType: typeof(SetDeveloperMovementModeIntent)))
     {
         _mode = mode;
     }
@@ -45,9 +48,13 @@ public sealed class SpeedCommand : TypedConsoleCommand
                 new CommandArgumentSpecification(
                     "multiplier",
                     CommandArgumentType.Text,
-                    description: "Multiplier from 0.1 to 20, or reset.")
+                    description: "Multiplier from 0.1 to 20, or reset.",
+                    choices: new[] { "reset" })
             },
-            examples: new[] { "/speed 2", "/speed reset" }))
+            examples: new[] { "/speed 2", "/speed reset" },
+            category: CommandCategory.Movement,
+            searchTerms: new[] { "player", "movement", "multiplier" },
+            requestIntentType: typeof(SetDeveloperSpeedIntent)))
     {
     }
 

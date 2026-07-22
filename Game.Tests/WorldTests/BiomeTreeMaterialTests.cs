@@ -14,6 +14,8 @@ public sealed class BiomeTreeMaterialTests
         var content = new GameContentLoader().LoadFromRoot(FindGameDataRoot());
         AssertMaterial(content, "forest", "normal_tree", KnownTileIds.OakTrunk, KnownTileIds.OakLeaves,
             "tiles/loose_oak_leaves_v2a_autotile");
+        AssertMaterial(content, "frostwood", "frost_pine", KnownTileIds.OakTrunk, KnownTileIds.OakLeaves,
+            "tiles/loose_oak_leaves_v2a_autotile");
         AssertMaterial(content, "amber_grove", "amber_tree", KnownTileIds.LivingWood, KnownTileIds.AutumnLeaves,
             "tiles/loose_autumn_leaves_v2a_autotile");
         AssertMaterial(content, "twilight_marsh", "mangrove_tree", KnownTileIds.MangroveRoot, KnownTileIds.MarshLeaves,
@@ -24,6 +26,8 @@ public sealed class BiomeTreeMaterialTests
         Assert.Equal((ushort)18, KnownTileIds.LivingWood);
         Assert.Equal((ushort)19, KnownTileIds.AutumnLeaves);
         Assert.Equal((ushort)20, KnownTileIds.MarshLeaves);
+        Assert.Equal((ushort)21, KnownTileIds.Snow);
+        Assert.Equal((ushort)22, KnownTileIds.Ice);
     }
 
     [Fact]

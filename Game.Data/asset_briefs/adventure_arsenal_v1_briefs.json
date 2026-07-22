@@ -1,0 +1,62 @@
+{
+  "version": 1,
+  "scope": "adventure_arsenal_v1",
+  "globalStyle": "YjsE yjse-pixel-v1 crisp 32x32 inventory pixel art; binary alpha; top-left light; hard clusters.",
+  "globalNegativePrompt": "blur, partial alpha, antialiasing, gradients, noise dithering, soft glow, watermark, logo, text, copied game art",
+  "globalRequirements": [
+    "Export exact 32x32 manifest dimensions with two transparent edge pixels.",
+    "Use only colors declared in Game.Data/art_direction/yjse_pixel_style.json.",
+    "Preserve distinct silhouettes for both magic weapons, the tool and the accessory.",
+    "Keep every icon readable at native scale and in a 16-pixel inventory slot."
+  ],
+  "briefs": [
+    {
+      "spriteId": "items/adventure_v1/cinderbloom_staff",
+      "outputPath": "assets/AdventureArsenalV1/items/cinderbloom_staff.png",
+      "width": 32,
+      "height": 32,
+      "subject": "Charred amberwood fire staff with copper bands and a contained cinder blossom",
+      "prompt": "YjsE yjse-pixel-v1 32x32 inventory weapon: a strong rising diagonal charred staff, copper collar and compact red-gold cinder blossom head. Continuous dark outline, restrained three-quarter view, no glow outside the silhouette.",
+      "negativePrompt": "blur, partial alpha, antialiasing, gradient, soft aura, text, logo, watermark, copied game art",
+      "requirements": ["Exactly 32x32 RGBA with binary alpha.", "At least two transparent pixels on every edge.", "Continuous #1b1826 outer boundary.", "Runtime target: cinderbloom_staff item definition."],
+      "palette": ["#1b1826", "#352319", "#5a3825", "#8b5a34", "#5b2b22", "#8f4531", "#c56d3e", "#a52b46", "#e5484d", "#f0c35a", "#fff1a6"],
+      "tags": ["item", "weapon", "magic", "fire", "production-sample"]
+    },
+    {
+      "spriteId": "items/adventure_v1/frostglass_scepter",
+      "outputPath": "assets/AdventureArsenalV1/items/frostglass_scepter.png",
+      "width": 32,
+      "height": 32,
+      "subject": "Upright silver-blue scepter crowned by a forked frostglass crystal",
+      "prompt": "YjsE yjse-pixel-v1 32x32 inventory weapon: mostly upright silver-blue scepter with a forked angular frostglass crown and compact mana core. Continuous dark outline, hard crystal facets, no soft glow.",
+      "negativePrompt": "blur, partial alpha, antialiasing, gradient, soft aura, text, logo, watermark, copied game art",
+      "requirements": ["Exactly 32x32 RGBA with binary alpha.", "At least two transparent pixels on every edge.", "Continuous #1b1826 outer boundary.", "Runtime target: frostglass_scepter item definition."],
+      "palette": ["#1b1826", "#2a2635", "#4a4555", "#716a7b", "#aaa2b0", "#20244f", "#353c86", "#5367c8", "#78b7e3", "#b9efff"],
+      "tags": ["item", "weapon", "magic", "ice", "production-sample"]
+    },
+    {
+      "spriteId": "items/adventure_v1/ambercore_pickaxe",
+      "outputPath": "assets/AdventureArsenalV1/items/ambercore_pickaxe.png",
+      "width": 32,
+      "height": 32,
+      "subject": "Heavy deep-delving pickaxe with amberstone core and iron beak",
+      "prompt": "YjsE yjse-pixel-v1 32x32 inventory tool: a broad iron pick head on a strong descending wood handle, reinforced by a bright contained amberstone core. Continuous dark outline and immediately readable mining silhouette.",
+      "negativePrompt": "blur, partial alpha, antialiasing, gradient, text, logo, watermark, copied game art",
+      "requirements": ["Exactly 32x32 RGBA with binary alpha.", "At least two transparent pixels on every edge.", "Continuous #1b1826 outer boundary.", "Runtime target: ambercore_pickaxe item definition."],
+      "palette": ["#1b1826", "#352319", "#5a3825", "#8b5a34", "#c58b52", "#2a2635", "#4a4555", "#716a7b", "#aaa2b0", "#b97732", "#f0c35a", "#fff1a6"],
+      "tags": ["item", "tool", "pickaxe", "amberstone", "production-sample"]
+    },
+    {
+      "spriteId": "items/adventure_v1/wayfinder_charm",
+      "outputPath": "assets/AdventureArsenalV1/items/wayfinder_charm.png",
+      "width": 32,
+      "height": 32,
+      "subject": "Round copper surveyor compass charm with teal cardinal needle",
+      "prompt": "YjsE yjse-pixel-v1 32x32 inventory accessory: a round copper-rimmed wayfinder compass with hanging loop, dark inset dial and crisp teal-gold cardinal needle. Continuous dark outline and centered icon silhouette.",
+      "negativePrompt": "blur, partial alpha, antialiasing, gradient, text labels, logo, watermark, copied game art",
+      "requirements": ["Exactly 32x32 RGBA with binary alpha.", "At least two transparent pixels on every edge.", "Continuous #1b1826 outer boundary.", "Runtime target: wayfinder_charm item definition."],
+      "palette": ["#1b1826", "#2a2635", "#4a4555", "#5b2b22", "#8f4531", "#c56d3e", "#f0a35b", "#1f5c62", "#3d8d84", "#72c3ae", "#f4e9d8"],
+      "tags": ["item", "accessory", "exploration", "production-sample"]
+    }
+  ]
+}

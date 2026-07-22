@@ -16,10 +16,13 @@ public sealed class HelpCommand : TypedConsoleCommand
                     "command",
                     CommandArgumentType.Identifier,
                     isRequired: false,
-                    description: "Command name or alias.")
+                    description: "Command name or alias.",
+                    suggestionSource: CommandSuggestionSource.Commands)
             },
             aliases: new[] { "?" },
-            examples: new[] { "/help", "/help give" }))
+            examples: new[] { "/help", "/help give" },
+            category: CommandCategory.General,
+            searchTerms: new[] { "commands", "documentation", "usage" }))
     {
         _help = new CommandHelpService(registry);
     }

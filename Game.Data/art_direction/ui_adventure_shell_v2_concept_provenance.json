@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "asset": "art_direction/generated_sources/ui_adventure_shell_v2_concept_source.png",
+  "dimensions": [1672, 941],
+  "sha256": "ba7528ee18baecdfbcb5b0630ff4997b1ceb1a0e4af0475879cc44eeff7cd65c",
+  "generator": "OpenAI built-in image generation tool, default mode",
+  "designIntent": "Original coherent pixel-adventure UI art direction for a viewport-safe HUD, equipment-aware inventory, recipe-detail crafting workspace, and category-plus-preview settings shell using wood, brass, dark slate, cream text, and restrained teal accents.",
+  "referenceUse": "Layout and material reference only. Runtime UI remains code-native and uses existing fonts, primitives, 9-slice assets, focus states, and responsive planners.",
+  "license": "YjsE-Project-Owned",
+  "runtimeLoaded": false
+}

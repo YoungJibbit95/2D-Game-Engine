@@ -83,6 +83,29 @@ public sealed class ItemRegistry : IItemDefinitionProvider
             throw new RegistryValidationException($"Item '{definition.Id}' has a negative resource restore value.");
         }
 
+        if (definition.ManaCost < 0)
+        {
+            throw new RegistryValidationException($"Item '{definition.Id}' has a negative mana cost.");
+        }
+
+        if (definition.Damage < 0 || !float.IsFinite(definition.Knockback) || definition.Knockback < 0)
+        {
+            throw new RegistryValidationException($"Item '{definition.Id}' has invalid combat values.");
+        }
+
+        if (definition.Mobility is not null)
+        {
+            try
+            {
+                definition.Mobility.Validate();
+            }
+            catch (ArgumentOutOfRangeException exception)
+            {
+                throw new RegistryValidationException(
+                    $"Item '{definition.Id}' has invalid mobility tuning: {exception.ParamName}.");
+            }
+        }
+
         foreach (var action in definition.Actions)
         {
             ValidateAction(definition, action);
@@ -101,12 +124,12 @@ public sealed class ItemRegistry : IItemDefinitionProvider
                 throw new RegistryValidationException($"Item '{itemId}' has a status effect application without an effect id.");
             }
 
-            if (effect.Chance < 0)
+            if (!float.IsFinite(effect.Chance) || effect.Chance < 0 || effect.Chance > 1)
             {
                 throw new RegistryValidationException($"Item '{itemId}' has a status effect application with negative chance.");
             }
 
-            if (effect.DurationSeconds is <= 0)
+            if (effect.DurationSeconds is { } duration && (!float.IsFinite(duration) || duration <= 0))
             {
                 throw new RegistryValidationException($"Item '{itemId}' has a status effect application with non-positive duration override.");
             }
@@ -143,14 +166,21 @@ public sealed class ItemRegistry : IItemDefinitionProvider
             throw new RegistryValidationException($"Item '{item.Id}' has an action with a non-positive ammo cost.");
         }
 
-        if (action.ProjectileSpeedMultiplier <= 0)
+        if (!float.IsFinite(action.ProjectileSpeedMultiplier) || action.ProjectileSpeedMultiplier <= 0)
         {
             throw new RegistryValidationException($"Item '{item.Id}' has an action with a non-positive projectile speed multiplier.");
         }
 
-        if (action.ReachPixels < 0)
+        if (!float.IsFinite(action.ReachPixels) || action.ReachPixels < 0)
         {
             throw new RegistryValidationException($"Item '{item.Id}' has an action with a negative reach.");
+        }
+
+        if (action.ManaRegenerationDelaySeconds is { } manaDelay &&
+            (!float.IsFinite(manaDelay) || manaDelay < 0))
+        {
+            throw new RegistryValidationException(
+                $"Item '{item.Id}' has an invalid mana regeneration delay.");
         }
     }
 

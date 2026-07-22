@@ -1,0 +1,41 @@
+{
+  "id": "forest_moth",
+  "displayName": "Forest Moth",
+  "texture": "entities/critters/forest_moth",
+  "maxHealth": 3,
+  "width": 9,
+  "height": 7,
+  "faction": "friendly",
+  "movementMode": "flying",
+  "tags": ["critter", "moth", "forest", "surface", "nocturnal", "forest_wildlife"],
+  "contactDamage": 0,
+  "contactKnockback": 0,
+  "attackDamage": 0,
+  "despawn": {
+    "mode": "whenIdle",
+    "spawnProtectionSeconds": 6,
+    "damageProtectionSeconds": 10
+  },
+  "ai": {
+    "kind": "critter",
+    "detectionRange": 80,
+    "loseTargetRange": 128,
+    "moveSpeed": 30,
+    "fleeSpeed": 72,
+    "patrolRadius": 104,
+    "returnHomeDistance": 152,
+    "flockRadius": 88,
+    "flockWeight": 0.72,
+    "minFlockSize": 3,
+    "perceptionMemorySeconds": 1.6,
+    "decisionInterval": 0.75,
+    "idleChance": 0.16,
+    "activityPeriod": "night",
+    "dayMoveSpeedMultiplier": 0.2,
+    "nightMoveSpeedMultiplier": 1.15,
+    "perchWhenInactive": true,
+    "requiresLineOfSight": false,
+    "avoidLedges": false,
+    "avoidLiquid": true
+  }
+}

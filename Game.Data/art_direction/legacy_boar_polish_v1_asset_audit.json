@@ -1,0 +1,159 @@
+{
+  "schemaVersion": 1,
+  "scope": "legacy_boar_polish_v1",
+  "passed": true,
+  "nativeSheetDimensions": [
+    128,
+    32
+  ],
+  "nativeFrameDimensions": [
+    32,
+    32
+  ],
+  "sharedOrigin": [
+    16,
+    31
+  ],
+  "frameOrder": [
+    "idle",
+    "windup",
+    "charge",
+    "attack"
+  ],
+  "assets": [
+    {
+      "spriteId": "entities/enemies/forest_boar",
+      "path": "sprites/entities/enemies/forest_boar.png",
+      "dimensionsPass": true,
+      "frameContractPass": true,
+      "frameOrder": [
+        "idle",
+        "windup",
+        "charge",
+        "attack"
+      ],
+      "origin": [
+        16,
+        31
+      ],
+      "binaryAlphaPass": true,
+      "transparentCornersPass": true,
+      "palettePass": true,
+      "uniqueOpaqueColors": 8,
+      "distinctFrameContentPass": true,
+      "frames": [
+        {
+          "id": "idle",
+          "visibleBounds": [
+            1,
+            7,
+            32,
+            31
+          ],
+          "opaquePixelCount": 438,
+          "contentSha256": "f18fc8495a45f7d675965bcf88fab68e8bee46ec88f13ade204226ae7255ba3b"
+        },
+        {
+          "id": "windup",
+          "visibleBounds": [
+            1,
+            8,
+            32,
+            31
+          ],
+          "opaquePixelCount": 422,
+          "contentSha256": "47b063a52b2d2a0cae2672157994ddb5ee25fd5aba07643b00f1bd324c57c7a9"
+        },
+        {
+          "id": "charge",
+          "visibleBounds": [
+            0,
+            9,
+            32,
+            31
+          ],
+          "opaquePixelCount": 455,
+          "contentSha256": "c57658c679fef169f59ffab880f0f6209fa66f2c345cc60703f341d8b4fd1b9b"
+        },
+        {
+          "id": "attack",
+          "visibleBounds": [
+            0,
+            8,
+            32,
+            31
+          ],
+          "opaquePixelCount": 461,
+          "contentSha256": "c7ceaddd0e8f46640aab202626242ce1774869511320220d4371ca72b7a886d7"
+        }
+      ]
+    },
+    {
+      "spriteId": "entities/enemies/forest_boar_elite",
+      "path": "sprites/entities/enemies/forest_boar_elite.png",
+      "dimensionsPass": true,
+      "frameContractPass": true,
+      "frameOrder": [
+        "idle",
+        "windup",
+        "charge",
+        "attack"
+      ],
+      "origin": [
+        16,
+        31
+      ],
+      "binaryAlphaPass": true,
+      "transparentCornersPass": true,
+      "palettePass": true,
+      "uniqueOpaqueColors": 12,
+      "distinctFrameContentPass": true,
+      "frames": [
+        {
+          "id": "idle",
+          "visibleBounds": [
+            1,
+            5,
+            32,
+            31
+          ],
+          "opaquePixelCount": 452,
+          "contentSha256": "1a6c025edbddf74b2cded53d3a11c35689afd43ff88d8858f31a2c1501ab962d"
+        },
+        {
+          "id": "windup",
+          "visibleBounds": [
+            1,
+            6,
+            32,
+            31
+          ],
+          "opaquePixelCount": 435,
+          "contentSha256": "efc420fd600d094a1455316e988359f3220916da48abd722fe8b8f3e36d8f7f3"
+        },
+        {
+          "id": "charge",
+          "visibleBounds": [
+            0,
+            6,
+            32,
+            31
+          ],
+          "opaquePixelCount": 473,
+          "contentSha256": "be2f9633d0735f703133f16c58ca7ead5555fa595bb4bc34f6c2a79b25947870"
+        },
+        {
+          "id": "attack",
+          "visibleBounds": [
+            0,
+            6,
+            32,
+            31
+          ],
+          "opaquePixelCount": 480,
+          "contentSha256": "e1d54147f66663e7a6ce4cde6493ceaa1d8589cb1bb6f7ee32ec78a4a5054b55"
+        }
+      ]
+    }
+  ]
+}

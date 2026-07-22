@@ -1,0 +1,152 @@
+{
+  "version": 1,
+  "scope": "background_features_v7",
+  "generatedAt": "2026-07-22",
+  "generator": "Game.Data/art_direction/tools/generate_background_features_v7.py",
+  "generatorSha256": "e1bec1ff1fc0fde6f3484282ab34f87e6e76a8ea8dc873aafbc0775c12583941",
+  "sourceBrief": "asset_briefs/background_features_v7_briefs.json",
+  "manifest": "assets/background_features_v7.sprites.json",
+  "preview": "art_direction/background_features_v7_contact_sheet.png",
+  "previewSha256": "1e569b399ea55c059f18ae0a214170913273dbf6ad103810a98062a63fd57a4e",
+  "artDirectionConcept": "art_direction/generated_sources/parallax_worldscape_v7_concept_source.png",
+  "artDirectionConceptSha256": "8832d0634b02bb1fa728903dd32b608e88f7780f95875d5556cbc9bba7014e96",
+  "records": [
+    {
+      "spriteId": "world/backgrounds/features_v7/forest_mountains",
+      "path": "assets/BackgroundFeaturesV7/forest_mountains.png",
+      "sha256": "784dda2bee3077f34ec75e45bcc9b7e828fa6a1819d745e5a3d58372dbe8f894",
+      "dimensions": [
+        1024,
+        256
+      ],
+      "alphaValues": [
+        0,
+        255
+      ],
+      "horizontalComposition": "periodic edge-continuous ridge fields",
+      "method": "periodic multi-octave ridgeline polygons",
+      "license": "YjsE-Project-Owned",
+      "runtimeIdTarget": "world/backgrounds/features_v7/forest_mountains"
+    },
+    {
+      "spriteId": "world/backgrounds/features_v7/forest_floating_islands",
+      "path": "assets/BackgroundFeaturesV7/forest_floating_islands.png",
+      "sha256": "49a96c68713284635710d5231b534765dbe07b2190dc174fe87f22444f3017e8",
+      "dimensions": [
+        1024,
+        256
+      ],
+      "alphaValues": [
+        0,
+        255
+      ],
+      "horizontalComposition": "transparent edge gutters with sparse authored islands",
+      "method": "deterministic shelf, rock, root, foliage and waterfall primitives",
+      "license": "YjsE-Project-Owned",
+      "runtimeIdTarget": "world/backgrounds/features_v7/forest_floating_islands"
+    },
+    {
+      "spriteId": "world/backgrounds/features_v7/amber_mountains",
+      "path": "assets/BackgroundFeaturesV7/amber_mountains.png",
+      "sha256": "0b3da163f9594a2345a30fd27b12e5733bf830fc1024676904042c08b24f7316",
+      "dimensions": [
+        1024,
+        256
+      ],
+      "alphaValues": [
+        0,
+        255
+      ],
+      "horizontalComposition": "periodic edge-continuous ridge fields",
+      "method": "periodic multi-octave ridgeline polygons",
+      "license": "YjsE-Project-Owned",
+      "runtimeIdTarget": "world/backgrounds/features_v7/amber_mountains"
+    },
+    {
+      "spriteId": "world/backgrounds/features_v7/amber_floating_islands",
+      "path": "assets/BackgroundFeaturesV7/amber_floating_islands.png",
+      "sha256": "80a89a6799da3fbec4d41216950b0c3f0736742d4a5da6deca190d45fb5c9ef8",
+      "dimensions": [
+        1024,
+        256
+      ],
+      "alphaValues": [
+        0,
+        255
+      ],
+      "horizontalComposition": "transparent edge gutters with sparse authored islands",
+      "method": "deterministic shelf, rock, root, foliage and waterfall primitives",
+      "license": "YjsE-Project-Owned",
+      "runtimeIdTarget": "world/backgrounds/features_v7/amber_floating_islands"
+    },
+    {
+      "spriteId": "world/backgrounds/features_v7/twilight_mountains",
+      "path": "assets/BackgroundFeaturesV7/twilight_mountains.png",
+      "sha256": "dadc6ba23807353b3a98de2f32cad5a5061391d9f98c402050889a3b8622a30f",
+      "dimensions": [
+        1024,
+        256
+      ],
+      "alphaValues": [
+        0,
+        255
+      ],
+      "horizontalComposition": "periodic edge-continuous ridge fields",
+      "method": "periodic multi-octave ridgeline polygons",
+      "license": "YjsE-Project-Owned",
+      "runtimeIdTarget": "world/backgrounds/features_v7/twilight_mountains"
+    },
+    {
+      "spriteId": "world/backgrounds/features_v7/twilight_floating_islands",
+      "path": "assets/BackgroundFeaturesV7/twilight_floating_islands.png",
+      "sha256": "c77cd3e77299a1a02de9b2f4d7c5b190f24a9c766bb273b5d15109aae1138a7d",
+      "dimensions": [
+        1024,
+        256
+      ],
+      "alphaValues": [
+        0,
+        255
+      ],
+      "horizontalComposition": "transparent edge gutters with sparse authored islands",
+      "method": "deterministic shelf, rock, root, foliage and waterfall primitives",
+      "license": "YjsE-Project-Owned",
+      "runtimeIdTarget": "world/backgrounds/features_v7/twilight_floating_islands"
+    },
+    {
+      "spriteId": "world/backgrounds/features_v7/crystal_mountains",
+      "path": "assets/BackgroundFeaturesV7/crystal_mountains.png",
+      "sha256": "1e7d7d6d7d06f5284a84f03f83df4a30ff1892daddb78a479830c7110a651dee",
+      "dimensions": [
+        1024,
+        256
+      ],
+      "alphaValues": [
+        0,
+        255
+      ],
+      "horizontalComposition": "periodic edge-continuous ridge fields",
+      "method": "periodic multi-octave ridgeline polygons",
+      "license": "YjsE-Project-Owned",
+      "runtimeIdTarget": "world/backgrounds/features_v7/crystal_mountains"
+    },
+    {
+      "spriteId": "world/backgrounds/features_v7/crystal_floating_islands",
+      "path": "assets/BackgroundFeaturesV7/crystal_floating_islands.png",
+      "sha256": "cb1a7183b9595a57d8fbc364952172fb3c9715afd6498fbbdb1eb1c845a1d845",
+      "dimensions": [
+        1024,
+        256
+      ],
+      "alphaValues": [
+        0,
+        255
+      ],
+      "horizontalComposition": "transparent edge gutters with sparse authored islands",
+      "method": "deterministic shelf, rock, root, foliage and waterfall primitives",
+      "license": "YjsE-Project-Owned",
+      "runtimeIdTarget": "world/backgrounds/features_v7/crystal_floating_islands"
+    }
+  ]
+}
+

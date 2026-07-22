@@ -5,7 +5,7 @@
   "time": "day",
   "habitats": ["surface"],
   "minTileY": 0,
-  "chance": 0.16,
+  "chance": 1.0,
   "maxActive": 4,
   "populationGroup": "forest_hostiles",
   "maxActiveInGroup": 8,

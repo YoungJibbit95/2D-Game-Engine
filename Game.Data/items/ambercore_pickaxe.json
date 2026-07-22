@@ -1,0 +1,17 @@
+{
+  "id": "ambercore_pickaxe",
+  "displayName": "Ambercore Pickaxe",
+  "description": "A balanced deep-delving pick built around a reinforced amberstone core.",
+  "rarity": "Epic",
+  "value": 820,
+  "category": "Tool",
+  "sortPriority": 83,
+  "type": "ToolPickaxe",
+  "texture": "items/adventure_v1/ambercore_pickaxe",
+  "maxStack": 1,
+  "useTime": 0.18,
+  "toolPower": 82,
+  "damage": 13,
+  "knockback": 2.8,
+  "tags": ["tool", "pickaxe", "amberstone", "adventure-arsenal-v1"]
+}

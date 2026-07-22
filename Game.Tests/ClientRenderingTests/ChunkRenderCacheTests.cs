@@ -10,7 +10,7 @@ public sealed class ChunkRenderCacheTests
     private readonly TileRegistry _tiles = TileRegistry.Create(Array.Empty<TileDefinition>());
 
     [Fact]
-    public void TrimToLoadedChunks_RemovesOnlyChunksMissingFromWorld()
+    public void TrimToLoadedChunks_RemovesMissingChunkAndInvalidatesAdjacentDependencies()
     {
         var world = CreateWorld();
         var cache = new ChunkRenderCache();
@@ -26,8 +26,8 @@ public sealed class ChunkRenderCacheTests
 
         Assert.Equal(1, removed);
         Assert.Equal(2, cache.CachedChunkCount);
-        Assert.False(cache.GetOrBuild(world, _tiles, first).Rebuilt);
-        Assert.False(cache.GetOrBuild(world, _tiles, third).Rebuilt);
+        Assert.True(cache.GetOrBuild(world, _tiles, first).Rebuilt);
+        Assert.True(cache.GetOrBuild(world, _tiles, third).Rebuilt);
         Assert.True(cache.GetOrBuild(world, _tiles, unloaded).Rebuilt);
     }
 
@@ -172,24 +172,24 @@ public sealed class ChunkRenderCacheTests
         var world = CreateWorld();
         var cache = new ChunkRenderCache();
         var textureBuckets = new int[KnownTileIds.MarshLeaves + 1][];
-        textureBuckets[KnownTileIds.OakLeaves] = Enumerable.Range(1, 16).ToArray();
+        textureBuckets[KnownTileIds.Leaves] = Enumerable.Range(1, 16).ToArray();
         cache.ConfigureTextureBuckets(textureBuckets, textureBucketCount: 17);
         var tiles = TileRegistry.Create(
         [
             new TileDefinition
             {
-                NumericId = KnownTileIds.OakLeaves,
-                Id = "oak_leaves",
-                DisplayName = "Oak Leaves",
-                TexturePath = "tiles/oak_leaves",
+                NumericId = KnownTileIds.Leaves,
+                Id = "leaves",
+                DisplayName = "Leaves",
+                TexturePath = "tiles/leaves",
                 MergeGroup = "tree-canopy"
             }
         ]);
         var tileX = Enumerable.Range(2, 24).First(
-            x => TreeTileVisualSelector.ResolveTransform(world, x, 10, KnownTileIds.OakLeaves) ==
+            x => TreeTileVisualSelector.ResolveTransform(world, x, 10, KnownTileIds.Leaves) ==
                 TileVisualTransform.FlipHorizontal);
-        world.SetTile(tileX, 10, KnownTileIds.OakLeaves);
-        world.SetTile(tileX - 1, 10, KnownTileIds.OakLeaves);
+        world.SetTile(tileX, 10, KnownTileIds.Leaves);
+        world.SetTile(tileX - 1, 10, KnownTileIds.Leaves);
         var chunk = world.GetOrCreateChunk(new ChunkPos(0, 0));
 
         _ = cache.GetOrBuild(world, tiles, chunk);
@@ -204,6 +204,128 @@ public sealed class ChunkRenderCacheTests
         Assert.Contains(
             prepared.TileCommands[prepared.TextureBuckets[expectedBucket].StartIndex..prepared.TextureBuckets[expectedBucket].EndIndex],
             tile => tile.LocalX == command.LocalX && tile.LocalY == command.LocalY);
+    }
+
+    [Fact]
+    public void Rebuild_UsesCrossChunkTreeSocketsAndBoundaryDirtyFlags()
+    {
+        var world = CreateWorld();
+        var cache = new ChunkRenderCache();
+        var tiles = TileRegistry.Create(
+        [
+            new TileDefinition
+            {
+                NumericId = KnownTileIds.OakTrunk,
+                Id = "oak_trunk",
+                DisplayName = "Oak Trunk",
+                TexturePath = "tiles/oak_trunk",
+                MergeGroup = "tree-trunk"
+            },
+            new TileDefinition
+            {
+                NumericId = KnownTileIds.OakLeaves,
+                Id = "oak_leaves",
+                DisplayName = "Oak Leaves",
+                TexturePath = "tiles/oak_leaves",
+                MergeGroup = "tree-canopy"
+            }
+        ]);
+        world.SetTile(31, 10, KnownTileIds.OakTrunk);
+        world.SetTile(32, 10, KnownTileIds.OakLeaves);
+        var leftChunk = world.GetOrCreateChunk(new ChunkPos(0, 0));
+        var rightChunk = world.GetOrCreateChunk(new ChunkPos(1, 0));
+
+        var leftBuild = cache.GetOrBuild(world, tiles, leftChunk);
+        var rightBuild = cache.GetOrBuild(world, tiles, rightChunk);
+        var left = Assert.Single(leftBuild.Commands, command => command.LocalX == 31 && command.LocalY == 10);
+        var right = Assert.Single(rightBuild.Commands, command => command.LocalX == 0 && command.LocalY == 10);
+
+        Assert.Equal(AutoTileMask.Right, left.AutoTileMask & AutoTileMask.Right);
+        Assert.Equal(AutoTileMask.Left, right.AutoTileMask & AutoTileMask.Left);
+        Assert.False(leftChunk.NeedsMeshRebuild);
+        Assert.False(rightChunk.NeedsMeshRebuild);
+
+        world.SetTile(32, 10, KnownTileIds.Air);
+
+        Assert.True(leftChunk.NeedsMeshRebuild);
+        Assert.True(rightChunk.NeedsMeshRebuild);
+        var rebuiltLeft = cache.GetOrBuild(world, tiles, leftChunk);
+        var disconnected = Assert.Single(
+            rebuiltLeft.Commands,
+            command => command.LocalX == 31 && command.LocalY == 10);
+        Assert.Equal(AutoTileMask.None, disconnected.AutoTileMask & AutoTileMask.Right);
+        Assert.True(cache.GetOrBuild(world, tiles, rightChunk).Rebuilt);
+    }
+
+    [Fact]
+    public void Rebuild_InvalidatesCrossChunkTreeAnchorDependencyAfterSourceFlagWasCleared()
+    {
+        var world = CreateWorld();
+        var cache = new ChunkRenderCache();
+        for (var y = 10; y <= 19; y++)
+        {
+            world.SetTile(29, y, KnownTileIds.OakTrunk);
+        }
+
+        for (var y = 8; y <= 12; y++)
+        {
+            for (var x = 33; x <= 36; x++)
+            {
+                world.SetTile(x, y, KnownTileIds.OakLeaves);
+            }
+        }
+
+        var sourceChunk = world.GetOrCreateChunk(new ChunkPos(0, 0));
+        var dependentChunk = world.GetOrCreateChunk(new ChunkPos(1, 0));
+        _ = cache.GetOrBuild(world, _tiles, sourceChunk);
+        var initial = cache.GetOrBuild(world, _tiles, dependentChunk);
+        var tracked = initial.Commands.First(command =>
+            command.Tile.TileId == KnownTileIds.OakLeaves &&
+            command.VisualVariant != 0);
+
+        for (var y = 10; y <= 19; y++)
+        {
+            world.SetTile(29, y, KnownTileIds.Air);
+        }
+
+        Assert.False(dependentChunk.NeedsMeshRebuild);
+        Assert.True(cache.GetOrBuild(world, _tiles, sourceChunk).Rebuilt);
+        var rebuilt = cache.GetOrBuild(world, _tiles, dependentChunk);
+        var fallback = Assert.Single(
+            rebuilt.Commands,
+            command => command.LocalX == tracked.LocalX && command.LocalY == tracked.LocalY);
+
+        Assert.True(rebuilt.Rebuilt);
+        Assert.Equal(0, fallback.VisualVariant);
+    }
+
+    [Fact]
+    public void PreparedCacheHit_WithDependencyValidation_DoesNotAllocate()
+    {
+        var world = CreateWorld();
+        var cache = new ChunkRenderCache();
+        var chunk = world.GetOrCreateChunk(new ChunkPos(0, 0));
+        world.SetTile(0, 0, tileId: 1);
+        _ = cache.GetOrBuild(world, _tiles, chunk);
+        for (var warmup = 0; warmup < 256; warmup++)
+        {
+            _ = cache.GetOrBuild(world, _tiles, chunk);
+        }
+
+        var rebuilds = 0;
+        var checksum = 0;
+        var before = GC.GetAllocatedBytesForCurrentThread();
+        for (var iteration = 0; iteration < 10_000; iteration++)
+        {
+            var result = cache.GetOrBuild(world, _tiles, chunk);
+            rebuilds += result.Rebuilt ? 1 : 0;
+            checksum += result.Commands.Count;
+        }
+
+        var allocated = GC.GetAllocatedBytesForCurrentThread() - before;
+        Assert.Equal(0, rebuilds);
+        Assert.Equal(10_000, checksum);
+        Assert.Equal(0, allocated);
     }
 
     private static int[] CreateMaskBuckets(int bucketIndex)

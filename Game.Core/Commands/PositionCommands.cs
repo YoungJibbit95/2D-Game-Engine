@@ -15,7 +15,10 @@ public sealed class TeleportCommand : TypedConsoleCommand
                 new CommandArgumentSpecification("y", CommandArgumentType.Number, description: "World Y position.")
             },
             aliases: new[] { "teleport" },
-            examples: new[] { "/tp 128 64" }))
+            examples: new[] { "/tp 128 64" },
+            category: CommandCategory.Player,
+            searchTerms: new[] { "teleport", "move", "location" },
+            requestIntentType: typeof(TeleportPlayerIntent)))
     {
     }
 
@@ -35,7 +38,9 @@ public sealed class PositionCommand : TypedConsoleCommand
         : base(new CommandSpecification(
             "position",
             "Prints the current player world position.",
-            aliases: new[] { "pos" }))
+            aliases: new[] { "pos" },
+            category: CommandCategory.Player,
+            searchTerms: new[] { "coordinates", "location" }))
     {
     }
 

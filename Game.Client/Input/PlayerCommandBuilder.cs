@@ -26,6 +26,12 @@ public static class PlayerCommandBuilder
         }
 
         var jump = input.IsBindingDown(bindings.Jump);
-        return new PlayerCommand(moveAxis, jump);
+        var fly = input.IsBindingDown(bindings.Fly);
+        var glide = input.IsBindingDown(bindings.Glide);
+        return new PlayerCommand(
+            MoveAxis: moveAxis,
+            WantsJump: jump,
+            WantsFly: fly,
+            WantsGlide: glide);
     }
 }

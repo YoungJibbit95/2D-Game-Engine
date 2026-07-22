@@ -18,7 +18,9 @@
       "kind": "Cast",
       "attackSequence": "weapon.spark_wand.cast",
       "projectile": "spark_bolt",
-      "projectileSpeedMultiplier": 1.08
+      "projectileSpeedMultiplier": 1.08,
+      "manaRegenerationDelaySeconds": 0.95,
+      "manaRefundPolicy": "BeforeEffect"
     }
   ],
   "tags": ["item", "weapon", "magic", "starter"]

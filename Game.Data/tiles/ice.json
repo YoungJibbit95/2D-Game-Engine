@@ -1,0 +1,13 @@
+{
+  "id": "ice",
+  "numericId": 22,
+  "displayName": "Ice Block",
+  "texture": "tiles/ice_autotile",
+  "solid": true,
+  "blocksLight": true,
+  "hardness": 2.0,
+  "miningPowerRequired": 15,
+  "dropItem": "stone_block",
+  "mergeGroup": "frozen_stone",
+  "tags": ["ice", "frozen", "natural", "mineable"]
+}

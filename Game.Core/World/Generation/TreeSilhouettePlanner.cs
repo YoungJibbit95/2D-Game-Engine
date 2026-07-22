@@ -61,14 +61,17 @@ internal static class TreeSilhouettePlanner
         }
 
         var primaryDirection = (variation & 1) == 0 ? -1 : 1;
+        var upperStart = Math.Min(height - 2, 3 + ((variation >> 1) & 1));
         if (dx == 0)
         {
             return true;
         }
 
         // A single root spur plants the one-cell centerline without widening the
-        // whole trunk into a pillar.
-        if (height >= 9 && dyFromTop == height - 1 && dx == -primaryDirection)
+        // whole trunk into a pillar. It uses the side without an adjacent low branch,
+        // avoiding a two-by-two autotile loop at the base of short silhouettes.
+        var rootDirection = upperStart < height - 2 ? primaryDirection : -primaryDirection;
+        if (height >= 5 && dyFromTop == height - 1 && dx == rootDirection)
         {
             return true;
         }
@@ -76,20 +79,19 @@ internal static class TreeSilhouettePlanner
         // Two long, vertically staggered stair branches form the readable crown
         // skeleton. Each rise has an orthogonal elbow, so the apparent diagonal is
         // still one connected autotile path and never closes into a U-shaped loop.
-        var upperStart = Math.Min(height - 2, 3 + ((variation >> 1) & 1));
         if (IsBranch(
                 dx,
                 dyFromTop,
                 upperStart,
                 primaryDirection,
-                length: 4))
+                length: 3))
         {
             return true;
         }
 
         var middleLength = SecondaryBranchLength(variation);
-        var middleStart = Math.Min(height - 2, 5 + ((variation >> 2) & 1));
-        if (IsBranch(
+        var middleStart = Math.Min(height - 2, 4 + ((variation >> 2) & 1));
+        if (height >= 7 && IsBranch(
                 dx,
                 dyFromTop,
                 middleStart,
@@ -99,16 +101,7 @@ internal static class TreeSilhouettePlanner
             return true;
         }
 
-        // Some silhouettes carry one low accent crown. Its short branch remains
-        // well below the main pads, preserving a band of visible sky between them.
-        return HasAccentCrown(variation) &&
-            height >= 9 &&
-            IsBranch(
-                dx,
-                dyFromTop,
-                height - 1,
-                primaryDirection,
-                length: 3);
+        return false;
     }
 
     private static bool IsLeaf(int dx, int dyFromTop, int height, int variation)
@@ -120,39 +113,37 @@ internal static class TreeSilhouettePlanner
 
         var primaryDirection = (variation & 1) == 0 ? -1 : 1;
         var upperStart = Math.Min(height - 2, 3 + ((variation >> 1) & 1));
-        const int primaryLength = 4;
+        const int primaryLength = 3;
         var primaryTipY = BranchY(upperStart, primaryLength);
         var secondaryLength = SecondaryBranchLength(variation);
-        var middleStart = Math.Min(height - 2, 5 + ((variation >> 2) & 1));
+        var middleStart = Math.Min(height - 2, 4 + ((variation >> 2) & 1));
         var secondaryTipY = BranchY(middleStart, secondaryLength);
 
-        // V4 uses three clearly separated, asymmetric crown pads. Each pad is four
-        // tiles wide and three high at its silhouette bounds, with deterministic
-        // bites around the perimeter instead of square or diamond leaf blobs.
-        // The bottom row sits directly above its branch tip so every pad is attached.
-        var topCenterX = -primaryDirection;
-        if (InLooseCrownPad(
-                dx - topCenterX,
-                dyFromTop + 1,
-                variation: variation,
-                salt: 1))
+        // V5 follows the denser side-view sandbox language: a broad upper crown
+        // overlaps two branch-tip lobes instead of leaving three isolated pom-poms.
+        // Large-scale holes stay out of the cell geometry; native foliage pixels
+        // provide the smaller gaps without exposing sixteen-pixel windows.
+        var crownLean = ((variation >> 2) & 1) == 0 ? 0 : -primaryDirection;
+        if (InMainCrown(
+                dx - crownLean,
+                dyFromTop,
+                variation))
         {
             return true;
         }
 
         var primaryCenterX = primaryDirection * primaryLength;
-        if (InLooseCrownPad(
+        if (InBranchCrown(
                 dx - primaryCenterX,
                 dyFromTop - (primaryTipY - 1),
                 variation: variation,
-                salt: 4,
-                clippedMiddleSide: -primaryDirection))
+                salt: 4))
         {
             return true;
         }
 
         var secondaryCenterX = -primaryDirection * secondaryLength;
-        if (InLooseCrownPad(
+        if (height >= 7 && InBranchCrown(
                 dx - secondaryCenterX,
                 dyFromTop - (secondaryTipY - 1),
                 variation: variation,
@@ -161,16 +152,7 @@ internal static class TreeSilhouettePlanner
             return true;
         }
 
-        if (!HasAccentCrown(variation) || height < 9)
-        {
-            return false;
-        }
-
-        var accentTipY = BranchY(height - 1, step: 3);
-        return InAccentCrownPad(
-            dx - (primaryDirection * 3),
-            dyFromTop - (accentTipY - 1),
-            variation);
+        return false;
     }
 
     private static bool IsBranch(int dx, int dyFromTop, int startY, int direction, int length)
@@ -199,55 +181,78 @@ internal static class TreeSilhouettePlanner
             dyFromTop == BranchY(startY, step - 1);
     }
 
-    private static bool InLooseCrownPad(
+    private static bool InMainCrown(
         int dx,
         int dy,
-        int variation,
-        int salt,
-        int clippedMiddleSide = 0)
+        int variation)
     {
-        if (dy is < -2 or > 0 || Math.Abs(dx) > 2)
+        if (dy is < -3 or > 1 || Math.Abs(dx) > 3)
         {
             return false;
         }
 
-        if (dy == 0)
+        var lean = (variation & 1) == 0 ? -1 : 1;
+        if (dy == -3)
         {
-            return Math.Abs(dx) <= 1;
+            // A shifted three-cell cap prevents every crown from sharing the same
+            // flat top while retaining enough mass to read at camera distance.
+            return dx >= lean - 1 && dx <= lean + 1;
+        }
+
+        if (dy == -2)
+        {
+            return Math.Abs(dx) <= 2 || dx == lean * 3;
         }
 
         if (dy == -1)
         {
-            var clippedSide = clippedMiddleSide != 0
-                ? clippedMiddleSide
-                : (((variation + salt) & 1) == 0 ? -1 : 1);
-            return dx != clippedSide * 2;
+            return dx != -lean * 3;
         }
 
-        // The two-cell top cap shifts between variations, keeping a broad crown
-        // reading while avoiding a repeated three-by-five stamp.
-        var clippedTopSide = ((variation + salt * 3) & 1) == 0 ? -1 : 1;
-        return Math.Abs(dx) <= 1 && dx != clippedTopSide;
+        if (dy == 0)
+        {
+            var bittenSide = ((variation >> 1) & 1) == 0 ? -lean : lean;
+            return dx != bittenSide * 3;
+        }
+
+        // The lower skirt wraps the upper trunk but recedes sharply at both sides.
+        return Math.Abs(dx) <= 1 || dx == lean * 2;
     }
 
-    private static bool InAccentCrownPad(int dx, int dy, int variation)
+    private static bool InBranchCrown(
+        int dx,
+        int dy,
+        int variation,
+        int salt)
     {
-        if (dy is < -1 or > 0 || Math.Abs(dx) > 1)
+        if (dy is < -2 or > 1 || Math.Abs(dx) > 2)
         {
             return false;
         }
 
-        return dy == -1 || dx != (((variation >> 1) & 1) == 0 ? -1 : 1);
+        var lobeDirection = ((variation + salt) & 1) == 0 ? -1 : 1;
+        if (dy == -2)
+        {
+            return dx >= lobeDirection - 1 && dx <= lobeDirection + 1;
+        }
+
+        if (dy == -1)
+        {
+            return dx != -lobeDirection * 2;
+        }
+
+        if (dy == 0)
+        {
+            return dx != lobeDirection * 2;
+        }
+
+        // Keep the branch attachment buried in foliage while tapering the lobe.
+        return Math.Abs(dx) <= 1;
     }
 
     private static int SecondaryBranchLength(int variation)
     {
-        return 3 + ((variation >> 3) & 1);
-    }
-
-    private static bool HasAccentCrown(int variation)
-    {
-        return variation % 3 != 1;
+        return 2 + ((variation >> 3) & 1);
     }
 
     private static int BranchY(int startY, int step)

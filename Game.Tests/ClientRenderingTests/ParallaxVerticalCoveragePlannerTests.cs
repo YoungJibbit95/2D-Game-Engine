@@ -12,13 +12,14 @@ public sealed class ParallaxVerticalCoveragePlannerTests
     [InlineData(1280, 720, 54)]
     [InlineData(1920, 1080, 286)]
     [InlineData(3440, 1440, 501)]
-    public void Build_ExtendsAuthoredTopColorAcrossViewportWithoutTouchingPanorama(
+    public void Build_ExtendsLegacyTopColorWithoutSamplingPanoramaEdges(
         int width,
         int height,
         int layerTop)
     {
         var viewport = new Rectangle(0, 0, width, height);
         var layer = new Rectangle(-512, layerTop, 1536, 384);
+
         var built = ParallaxVerticalCoveragePlanner.TryBuildTopFill(
             layer,
             viewport,
@@ -32,135 +33,88 @@ public sealed class ParallaxVerticalCoveragePlannerTests
     }
 
     [Theory]
-    [InlineData(1280, 720, 420)]
-    [InlineData(1920, 1080, 640)]
-    [InlineData(2560, 1440, 462)]
-    public void Build_ExtendsOpaquePanoramaEdgeThroughViewportBottom(int width, int height, int layerBottom)
+    [InlineData(-256, -64, 2560, 1440)]
+    [InlineData(0, 0, 1920, 1080)]
+    [InlineData(320, 180, 3440, 1440)]
+    public void CoversViewportVertically_RequiresBothEdges(
+        int viewportX,
+        int viewportY,
+        int width,
+        int height)
     {
-        var viewport = new Rectangle(0, 0, width, height);
-        var layer = new Rectangle(-128, layerBottom - 384, width + 256, 384);
-        var source = new Rectangle(12, 20, 1536, 384);
+        var viewport = new Rectangle(viewportX, viewportY, width, height);
 
-        var built = ParallaxVerticalCoveragePlanner.TryBuildBottomEdgeExtension(
-            layer,
-            source,
+        Assert.True(ParallaxVerticalCoveragePlanner.CoversViewportVertically(
+            new Rectangle(viewportX - 512, viewportY - 32, width + 1024, height + 64),
+            viewport));
+        Assert.False(ParallaxVerticalCoveragePlanner.CoversViewportVertically(
+            new Rectangle(viewportX - 512, viewportY + 1, width + 1024, height),
+            viewport));
+        Assert.False(ParallaxVerticalCoveragePlanner.CoversViewportVertically(
+            new Rectangle(viewportX - 512, viewportY - 1, width + 1024, height),
+            viewport));
+    }
+
+    [Theory]
+    [InlineData(1280, 720, 1536, 384)]
+    [InlineData(1920, 1080, 1024, 256)]
+    [InlineData(3440, 1440, 512, 128)]
+    [InlineData(7680, 2160, 1024, 256)]
+    public void FullscreenLayout_CoversViewportWithoutTopOrBottomExtension(
+        int viewportWidth,
+        int viewportHeight,
+        int sourceWidth,
+        int sourceHeight)
+    {
+        var viewport = new Rectangle(-73, 41, viewportWidth, viewportHeight);
+        var layout = ParallaxViewportLayoutPlanner.Build(
+            sourceWidth,
+            sourceHeight,
             viewport,
-            out var command);
+            surfaceHorizon: -40_000f,
+            undergroundBlend: 1f,
+            verticalOffset: 24,
+            verticalScroll: -100_000f,
+            scaleMultiplier: 0.5f,
+            coverViewport: false,
+            ParallaxProjectionMode.FullscreenDepthPlane,
+            ParallaxDepthPlane.Far);
+        var layer = new Rectangle(viewport.X, layout.Y, layout.Width, layout.Height);
 
-        Assert.True(built);
-        Assert.Equal(layerBottom - 1, command.Bounds.Top);
-        Assert.Equal(viewport.Bottom, command.Bounds.Bottom);
-        Assert.Equal(layer.X, command.Bounds.X);
-        Assert.Equal(layer.Width, command.Bounds.Width);
-        Assert.Equal(source.X + source.Width / 2, command.SourceRectangle.X);
-        Assert.Equal(source.Bottom - 1, command.SourceRectangle.Y);
-        Assert.Equal(1, command.SourceRectangle.Width);
-        Assert.Equal(1, command.SourceRectangle.Height);
+        Assert.True(ParallaxVerticalCoveragePlanner.CoversViewportVertically(layer, viewport));
+        Assert.False(ParallaxVerticalCoveragePlanner.TryBuildTopFill(layer, viewport, out _));
+        Assert.True(layer.Top <= viewport.Top);
+        Assert.True(layer.Bottom >= viewport.Bottom);
     }
 
     [Fact]
-    public void Build_ClampsExtensionToViewportWhenPanoramaEndsAboveIt()
+    public void CoverageChecks_AreAllocationFreeInSteadyState()
     {
-        var viewport = new Rectangle(25, 40, 1280, 720);
-
-        var built = ParallaxVerticalCoveragePlanner.TryBuildBottomEdgeExtension(
-            new Rectangle(-100, -400, 1600, 200),
-            new Rectangle(0, 0, 512, 128),
-            viewport,
-            out var command);
-
-        Assert.True(built);
-        Assert.Equal(viewport.Top, command.Bounds.Top);
-        Assert.Equal(viewport.Bottom, command.Bounds.Bottom);
-    }
-
-    [Fact]
-    public void Build_DoesNothingWhenPanoramaAlreadyCoversViewportBottom()
-    {
-        var viewport = new Rectangle(0, 0, 1920, 1080);
-
-        Assert.False(ParallaxVerticalCoveragePlanner.TryBuildBottomEdgeExtension(
-            new Rectangle(0, -100, 1920, 1180),
-            new Rectangle(0, 0, 1536, 384),
-            viewport,
-            out _));
-        Assert.False(ParallaxVerticalCoveragePlanner.TryBuildBottomEdgeExtension(
-            new Rectangle(0, -100, 1920, 1200),
-            new Rectangle(0, 0, 1536, 384),
-            viewport,
-            out _));
-    }
-
-    [Fact]
-    public void Build_TopExtensionDoesNothingWhenPanoramaAlreadyCoversViewportTop()
-    {
-        var viewport = new Rectangle(0, 0, 1920, 1080);
-        Assert.False(ParallaxVerticalCoveragePlanner.TryBuildTopFill(
-            new Rectangle(-100, -1, 1536, 384),
-            viewport,
-            out _));
-        Assert.False(ParallaxVerticalCoveragePlanner.TryBuildTopFill(
-            new Rectangle(-100, -200, 1536, 384),
-            viewport,
-            out _));
-    }
-
-    [Fact]
-    public void Build_IsAllocationFreeInSteadyState()
-    {
-        var viewport = new Rectangle(0, 0, 2560, 1440);
-        var layer = new Rectangle(-320, -562, 3072, 1024);
-        var source = new Rectangle(0, 0, 1536, 384);
-        _ = ParallaxVerticalCoveragePlanner.TryBuildBottomEdgeExtension(
-            layer,
-            source,
-            viewport,
-            out var command);
+        var viewport = new Rectangle(-320, 40, 3440, 1440);
+        var layer = new Rectangle(-2048, -80, 8192, 1728);
+        _ = ParallaxVerticalCoveragePlanner.CoversViewportVertically(layer, viewport);
         var before = GC.GetAllocatedBytesForCurrentThread();
-        var allBuilt = true;
+        var covered = true;
 
         for (var iteration = 0; iteration < 10_000; iteration++)
         {
-            allBuilt &= ParallaxVerticalCoveragePlanner.TryBuildBottomEdgeExtension(
-                layer,
-                source,
-                viewport,
-                out command);
+            covered &= ParallaxVerticalCoveragePlanner.CoversViewportVertically(layer, viewport);
         }
 
-        var allocated = GC.GetAllocatedBytesForCurrentThread() - before;
-        Assert.True(allBuilt);
-        Assert.Equal(viewport.Bottom, command.Bounds.Bottom);
-        Assert.Equal(0, allocated);
+        Assert.True(covered);
+        Assert.Equal(0, GC.GetAllocatedBytesForCurrentThread() - before);
     }
 
     [Fact]
-    public void Build_TopExtensionIsAllocationFreeInSteadyState()
+    public void InvalidBoundsNeverClaimCoverage()
     {
-        var viewport = new Rectangle(0, 0, 3440, 1440);
-        var layer = new Rectangle(-320, 501, 1536, 384);
-        var bounds = Rectangle.Empty;
-        for (var warmup = 0; warmup < 1_000; warmup++)
-        {
-            _ = ParallaxVerticalCoveragePlanner.TryBuildTopFill(
-                layer,
-                viewport,
-                out bounds);
-        }
-        var before = GC.GetAllocatedBytesForCurrentThread();
-        var allBuilt = true;
+        var viewport = new Rectangle(0, 0, 1920, 1080);
 
-        for (var iteration = 0; iteration < 10_000; iteration++)
-        {
-            allBuilt &= ParallaxVerticalCoveragePlanner.TryBuildTopFill(
-                layer,
-                viewport,
-                out bounds);
-        }
-
-        var allocated = GC.GetAllocatedBytesForCurrentThread() - before;
-        Assert.True(allBuilt);
-        Assert.Equal(viewport.Top, bounds.Top);
-        Assert.Equal(0, allocated);
+        Assert.False(ParallaxVerticalCoveragePlanner.CoversViewportVertically(
+            Rectangle.Empty,
+            viewport));
+        Assert.False(ParallaxVerticalCoveragePlanner.CoversViewportVertically(
+            new Rectangle(0, 0, 1920, 1080),
+            Rectangle.Empty));
     }
 }

@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "assetId": "parallax_worldscape_v7_concept",
+  "generatedAt": "2026-07-22",
+  "mode": "built-in image generation",
+  "tool": "image_gen",
+  "sourcePath": "art_direction/generated_sources/parallax_worldscape_v7_concept_source.png",
+  "sourceSha256": "8832d0634b02bb1fa728903dd32b608e88f7780f95875d5556cbc9bba7014e96",
+  "purpose": "Art-direction reference for the fullscreen five-plane V7 worldscape; not loaded directly by the runtime.",
+  "prompt": "Use case: production art-direction concept for an original side-view pixel-art sandbox game's parallax worldscape. Create a wide 16:9 environment concept, no UI and no text. Show one cohesive lush fantasy forest at twilight filling the entire canvas edge-to-edge with no blank areas, hard horizontal cutoffs, flat gradient bands, or vignette. Clearly readable depth through at least five overlapping planes: atmospheric sky with small clouds and stars; very distant randomized mountain chains; sparse far floating islands with hanging roots and tiny waterfalls; middle-distance forests, ruins and mist pockets; richly silhouetted near trees, rocks and foliage. Strong Terraria-like readability and density as a genre reference but fully original shapes, palette and composition. Chunky high-detail pixel art, deliberate clusters, full canopies without random holes, nuanced teal/blue distance palette warming into moss green and amber near the camera. Design all planes to plausibly repeat horizontally while avoiding obvious mirrored symmetry, and leave a calm readable play-space band near the center/lower third. Crisp nearest-neighbor pixel aesthetic, no painterly blur, no 3D, no photorealism, no labels, no logo, no watermark."
+}
+

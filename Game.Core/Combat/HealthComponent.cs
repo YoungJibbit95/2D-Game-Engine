@@ -64,6 +64,14 @@ public sealed class HealthComponent
         Current = Math.Min(Max, Current + amount);
     }
 
+    public void SetCurrent(int currentHealth)
+    {
+        Current = Math.Clamp(currentHealth, 0, Max);
+        if (Current > 0)
+        {
+            InvulnerabilityTimeRemaining = 0f;
+        }
+    }
     public void SetMax(int maxHealth, bool preserveRatio = true)
     {
         if (maxHealth <= 0)

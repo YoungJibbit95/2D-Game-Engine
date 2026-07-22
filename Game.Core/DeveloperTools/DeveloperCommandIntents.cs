@@ -38,7 +38,14 @@ public enum DebugView
     Overlay,
     Collisions,
     Ai,
-    Streaming
+    Streaming,
+    Lighting,
+    Shadows,
+    Reflections,
+    Particles,
+    Background,
+    Combat,
+    Spawns
 }
 
 public sealed record SetDebugViewIntent(DebugView View, DeveloperToggle Value) : IDeveloperCommandIntent;
@@ -63,3 +70,79 @@ public enum EventDiagnosticsRequestKind
 public sealed record EventDiagnosticsRequestIntent(
     EventDiagnosticsRequestKind Kind,
     string? EventName) : IDeveloperCommandIntent;
+
+public enum WeatherOverrideRequestKind
+{
+    Status,
+    Set,
+    Reset
+}
+
+public sealed record WeatherOverrideRequestIntent(
+    WeatherOverrideRequestKind Kind,
+    string? WeatherId,
+    float? Intensity) : IDeveloperCommandIntent;
+
+public enum BiomeOverrideRequestKind
+{
+    Status,
+    Set,
+    Reset
+}
+
+public sealed record BiomeOverrideRequestIntent(
+    BiomeOverrideRequestKind Kind,
+    string? BiomeId) : IDeveloperCommandIntent;
+
+public enum DeveloperSaveMode
+{
+    Quick,
+    Full,
+    Checkpoint
+}
+
+public sealed record DeveloperSaveRequestIntent(DeveloperSaveMode Mode) : IDeveloperCommandIntent;
+
+public sealed record SetRenderingFeatureIntent(
+    string FeatureId,
+    DeveloperToggle Value) : IDeveloperCommandIntent;
+
+public sealed record SetLightingDebugViewIntent(
+    string ViewId,
+    DeveloperToggle Value) : IDeveloperCommandIntent;
+
+public enum GameRuleRequestKind
+{
+    Read,
+    Set,
+    Reset
+}
+
+public sealed record GameRuleRequestIntent(
+    GameRuleRequestKind Kind,
+    string RuleId,
+    string? Value) : IDeveloperCommandIntent;
+
+public enum PlayerResourceKind
+{
+    Health,
+    Mana
+}
+
+public enum PlayerResourceOperation
+{
+    Status,
+    Fill,
+    Set,
+    Add
+}
+
+public sealed record PlayerResourceRequestIntent(
+    PlayerResourceKind Resource,
+    PlayerResourceOperation Operation,
+    float? Amount) : IDeveloperCommandIntent;
+
+public sealed record SpawnProjectileRequestIntent(
+    string ProjectileId,
+    Vector2 Position,
+    Vector2 Direction) : IDeveloperCommandIntent;

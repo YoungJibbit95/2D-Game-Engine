@@ -2,6 +2,7 @@ using Game.Core.Equipment;
 using Game.Core.Data;
 using Game.Core.Combat;
 using Game.Core.Effects;
+using Game.Core.Movement;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -131,6 +132,16 @@ public sealed class ItemDefinitionJsonLoader
 
         public float ManaRegenBonus { get; init; }
 
+        public MobilityAbilityDefinition? Mobility { get; init; }
+
+        public bool CanDoubleJump { get; init; }
+
+        public bool CanWallJump { get; init; }
+
+        public bool CanFly { get; init; }
+
+        public bool CanGlide { get; init; }
+
         public int ManaCost { get; init; }
 
         public int ManaRestore { get; init; }
@@ -180,6 +191,11 @@ public sealed class ItemDefinitionJsonLoader
                 MagicDamageBonus = MagicDamageBonus,
                 ManaCostReduction = ManaCostReduction,
                 ManaRegenBonus = ManaRegenBonus,
+                Mobility = Mobility,
+                CanDoubleJump = CanDoubleJump || Mobility?.HasDoubleJump == true,
+                CanWallJump = CanWallJump || Mobility?.CanWallJump == true,
+                CanFly = CanFly || Mobility?.HasFlight == true,
+                CanGlide = CanGlide || Mobility?.HasGlide == true,
                 ManaCost = ManaCost,
                 ManaRestore = ManaRestore,
                 HealthRestore = HealthRestore,
@@ -219,6 +235,10 @@ public sealed class ItemDefinitionJsonLoader
 
         public float ReachPixels { get; init; }
 
+        public float? ManaRegenerationDelaySeconds { get; init; }
+
+        public ManaRefundPolicy ManaRefundPolicy { get; init; } = ManaRefundPolicy.BeforeEffect;
+
         public ItemActionDefinition ToDefinition()
         {
             return new ItemActionDefinition
@@ -229,7 +249,9 @@ public sealed class ItemDefinitionJsonLoader
                 AmmoItemId = AmmoItemId ?? Ammo,
                 AmmoCost = AmmoCost,
                 ProjectileSpeedMultiplier = ProjectileSpeedMultiplier,
-                ReachPixels = ReachPixels
+                ReachPixels = ReachPixels,
+                ManaRegenerationDelaySeconds = ManaRegenerationDelaySeconds,
+                ManaRefundPolicy = ManaRefundPolicy
             };
         }
     }

@@ -122,7 +122,7 @@ public sealed class CharacterEditorOverlay
         RebuildRows(content);
 
         var palette = UiTheme.Resolve(settings);
-        context.SpriteBatch.Draw(context.Pixel, context.ViewportBounds, UiTheme.WithAlpha(palette.Backdrop, settings.Ui.MenuBackdropOpacity * 0.86f));
+        UiTheme.DrawBackdrop(context, palette, settings.Ui.MenuBackdropOpacity * 0.86f, settings);
 
         var panelWidth = Math.Min(840, context.ViewportBounds.Width - 56);
         var panelHeight = Math.Min(500, context.ViewportBounds.Height - 56);
@@ -133,6 +133,7 @@ public sealed class CharacterEditorOverlay
             panelHeight);
 
         UiTheme.DrawPanel(context, panel, palette, settings.Ui.PanelOpacity);
+        UiTheme.DrawHeader(context, new Rectangle(panel.X + 1, panel.Y + 1, panel.Width - 2, 66), palette, settings: settings);
         context.DebugText.Draw(new Vector2(panel.X + 22, panel.Y + 18), "CHARACTER", palette.Accent, 3);
         context.DebugText.Draw(new Vector2(panel.X + 24, panel.Y + 50), "F2 ESC CLOSE   TAB/CLICK SECTION   UP/DOWN SELECT   LEFT/RIGHT CHANGE", palette.TextMuted, 1);
 

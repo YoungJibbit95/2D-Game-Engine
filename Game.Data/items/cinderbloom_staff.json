@@ -1,0 +1,26 @@
+{
+  "id": "cinderbloom_staff",
+  "displayName": "Cinderbloom Staff",
+  "description": "A charred amberwood focus that hurls stable blooms of living flame.",
+  "rarity": "Epic",
+  "value": 760,
+  "category": "Weapon",
+  "sortPriority": 82,
+  "type": "WeaponMagic",
+  "texture": "items/adventure_v1/cinderbloom_staff",
+  "maxStack": 1,
+  "useTime": 0.4,
+  "damage": 16,
+  "knockback": 2.2,
+  "manaCost": 9,
+  "actions": [
+    {
+      "kind": "Cast",
+      "projectile": "firebolt",
+      "projectileSpeedMultiplier": 1.0,
+      "manaRegenerationDelaySeconds": 1.05,
+      "manaRefundPolicy": "BeforeEffect"
+    }
+  ],
+  "tags": ["weapon", "magic", "fire", "adventure-arsenal-v1"]
+}

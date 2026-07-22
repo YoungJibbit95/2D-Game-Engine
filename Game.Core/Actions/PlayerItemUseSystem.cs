@@ -389,27 +389,61 @@ public sealed class PlayerItemUseSystem
         }
 
         var manaCost = Math.Max(0, (int)MathF.Ceiling(item.ManaCost * player.Stats.ManaCostMultiplier));
-        if (!player.ManaComponent.TrySpend(manaCost))
+        var manaSpend = player.ManaComponent.TryReserve(
+            manaCost,
+            action.ManaRegenerationDelaySeconds ?? ManaComponent.DefaultRegenerationDelaySeconds);
+        if (!manaSpend.Succeeded)
         {
-            return PlayerItemUseResult.BlockedResult(PlayerItemUseKind.Cast, GameplayActionFailureReason.InsufficientMana);
+            return PlayerItemUseResult.BlockedResult(
+                PlayerItemUseKind.Cast,
+                MapManaFailure(manaSpend.Status),
+                manaSpend: manaSpend);
         }
 
-        var damage = Math.Max(1, (int)MathF.Round((definition.Damage + item.Damage) * player.Stats.MagicDamageMultiplier));
-        var direction = targetWorldPosition - player.Body.Center;
-        var projectile = _projectiles.Create(
-            definition,
-            player.Body.Center,
-            direction,
-            player.Id == 0 ? null : player.Id,
-            damageOverride: damage,
-            damageTypeOverride: DamageType.Magic);
+        try
+        {
+            var runtimeDefinition = MagicAttackResolver.ResolveProjectile(definition, item, player.Stats);
+            var direction = targetWorldPosition - player.Body.Center;
+            var projectile = _projectiles.Create(
+                runtimeDefinition,
+                player.Body.Center,
+                direction,
+                player.Id == 0 ? null : player.Id);
 
-        projectile.Velocity *= action.ProjectileSpeedMultiplier;
-        entities.Add(projectile);
+            projectile.Velocity *= action.ProjectileSpeedMultiplier;
+            entities.Add(projectile);
 
-        return StartCooldown(new PlayerItemUseResult(PlayerItemUseKind.Cast, MiningResult.None, false, MeleeAttackResult.None, projectile), item);
+            var manaFinalization = player.ManaComponent.Commit(manaSpend.Reservation);
+            if (!manaFinalization.Finalized)
+            {
+                throw new InvalidOperationException("A materialized magic attack could not commit its reserved mana.");
+            }
+
+            var completedSpend = manaSpend.Status == ManaSpendStatus.Reserved
+                ? manaSpend with { Status = ManaSpendStatus.Spent, Reservation = default }
+                : manaSpend;
+            return StartCooldown(
+                new PlayerItemUseResult(
+                    PlayerItemUseKind.Cast,
+                    MiningResult.None,
+                    false,
+                    MeleeAttackResult.None,
+                    projectile)
+                {
+                    ManaSpend = completedSpend,
+                    ManaFinalization = manaFinalization
+                },
+                item);
+        }
+        catch
+        {
+            _ = player.ManaComponent.FinalizeWithRefund(
+                manaSpend.Reservation,
+                action.ManaRefundPolicy,
+                ManaRefundReason.MaterializationFailed);
+            throw;
+        }
     }
-
     private PlayerItemUseResult TryConsume(
         GameContentDatabase content,
         PlayerEntity player,
@@ -624,6 +658,15 @@ public sealed class PlayerItemUseSystem
         };
     }
 
+    private static GameplayActionFailureReason MapManaFailure(ManaSpendStatus status)
+    {
+        return status switch
+        {
+            ManaSpendStatus.InsufficientMana => GameplayActionFailureReason.InsufficientMana,
+            ManaSpendStatus.ReservationCapacityReached => GameplayActionFailureReason.ActorUnavailable,
+            _ => GameplayActionFailureReason.InvalidItem
+        };
+    }
     private static GameplayActionFailureReason MapFarmingFailure(FarmActionStatus status)
     {
         return status switch

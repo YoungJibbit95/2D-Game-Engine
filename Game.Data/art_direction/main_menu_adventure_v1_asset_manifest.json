@@ -1,0 +1,26 @@
+{
+  "version": 1,
+  "assetId": "ui/main_menu/adventure_v1",
+  "runtimePath": "assets/MainMenuAdventureV1/main_menu_adventure_v1.png",
+  "category": "UiBackground",
+  "dimensions": [1672, 941],
+  "format": "PNG RGBA",
+  "renderLayer": "ui.main-menu.background",
+  "scaling": "aspect-fill centered crop with point sampling",
+  "license": "YjsE-Project-Owned",
+  "brief": "asset_briefs/main_menu_adventure_v1_brief.json",
+  "provenance": "art_direction/main_menu_adventure_v1_provenance.json",
+  "preview": "art_direction/main_menu_adventure_v1_preview.png",
+  "runtimeOwner": "Game.Client.GameStates.MainMenuState",
+  "runtimeActive": true,
+  "tags": [
+    "ui",
+    "main-menu",
+    "background",
+    "pixel-art",
+    "adventure",
+    "floating-islands",
+    "treehouses",
+    "runtime-active"
+  ]
+}

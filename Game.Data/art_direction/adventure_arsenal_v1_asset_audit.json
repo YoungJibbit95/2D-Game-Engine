@@ -1,0 +1,79 @@
+{
+  "schemaVersion": 1,
+  "scope": "adventure_arsenal_v1",
+  "passed": true,
+  "nativeDimensions": [
+    32,
+    32
+  ],
+  "sharedOrigin": [
+    16,
+    16
+  ],
+  "assets": [
+    {
+      "spriteId": "items/adventure_v1/cinderbloom_staff",
+      "dimensionsPass": true,
+      "binaryAlphaPass": true,
+      "twoPixelTransparentMarginPass": true,
+      "transparentCornersPass": true,
+      "palettePass": true,
+      "recommendedColorCountPass": true,
+      "uniqueOpaqueColors": 9,
+      "visibleBounds": [
+        4,
+        2,
+        27,
+        30
+      ]
+    },
+    {
+      "spriteId": "items/adventure_v1/frostglass_scepter",
+      "dimensionsPass": true,
+      "binaryAlphaPass": true,
+      "twoPixelTransparentMarginPass": true,
+      "transparentCornersPass": true,
+      "palettePass": true,
+      "recommendedColorCountPass": true,
+      "uniqueOpaqueColors": 6,
+      "visibleBounds": [
+        9,
+        2,
+        24,
+        30
+      ]
+    },
+    {
+      "spriteId": "items/adventure_v1/ambercore_pickaxe",
+      "dimensionsPass": true,
+      "binaryAlphaPass": true,
+      "twoPixelTransparentMarginPass": true,
+      "transparentCornersPass": true,
+      "palettePass": true,
+      "recommendedColorCountPass": true,
+      "uniqueOpaqueColors": 9,
+      "visibleBounds": [
+        3,
+        2,
+        29,
+        30
+      ]
+    },
+    {
+      "spriteId": "items/adventure_v1/wayfinder_charm",
+      "dimensionsPass": true,
+      "binaryAlphaPass": true,
+      "twoPixelTransparentMarginPass": true,
+      "transparentCornersPass": true,
+      "palettePass": true,
+      "recommendedColorCountPass": true,
+      "uniqueOpaqueColors": 10,
+      "visibleBounds": [
+        5,
+        2,
+        28,
+        29
+      ]
+    }
+  ]
+}

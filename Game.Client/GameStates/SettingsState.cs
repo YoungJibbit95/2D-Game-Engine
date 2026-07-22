@@ -2,7 +2,6 @@ using Game.Client.Input;
 using Game.Client.Configuration;
 using Game.Client.Rendering;
 using Game.Client.UI;
-using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 
 namespace Game.Client.GameStates;
@@ -51,7 +50,8 @@ public sealed class SettingsState : IGameState
 
     public void Draw(RenderContext context)
     {
-        context.SpriteBatch.Draw(context.Pixel, context.ViewportBounds, new Color(12, 16, 23));
+        var palette = UiTheme.Resolve(_settingsMenu.Settings);
+        PixelMenuScene.Draw(context, palette, _settingsMenu.Settings, PixelMenuSceneMood.Workshop);
         _settingsMenu.Draw(context);
     }
 

@@ -87,7 +87,8 @@ public sealed class ProjectileRuntimeState
 
     public ProjectileMotionResult Advance(
         float deltaSeconds,
-        IReadOnlyList<ProjectileHomingTarget>? homingTargets = null)
+        IReadOnlyList<ProjectileHomingTarget>? homingTargets = null,
+        bool applyTranslation = true)
     {
         if (!float.IsFinite(deltaSeconds) || deltaSeconds < 0)
         {
@@ -116,7 +117,10 @@ public sealed class ProjectileRuntimeState
             Velocity *= MathF.Exp(-Definition.DragPerSecond * simulatedSeconds);
         }
 
-        Position += Velocity * simulatedSeconds;
+        if (applyTranslation)
+        {
+            Position += Velocity * simulatedSeconds;
+        }
         AgeSeconds += simulatedSeconds;
         var expired = deltaSeconds >= lifetimeRemaining;
         if (expired)
@@ -125,6 +129,16 @@ public sealed class ProjectileRuntimeState
         }
 
         return CreateMotionResult(homingTarget?.EntityId, expired);
+    }
+
+    public void SynchronizeWithPhysics(Vector2 position, Vector2 velocity)
+    {
+        ValidateFinite(position, nameof(position));
+        ValidateFinite(velocity, nameof(velocity));
+
+        PreviousPosition = Position;
+        Position = position;
+        Velocity = velocity;
     }
 
     public void BindInstanceId(ulong instanceId)
@@ -154,12 +168,12 @@ public sealed class ProjectileRuntimeState
         ValidateFinite(collision.SurfaceNormal, nameof(collision));
         if (!IsActive)
         {
-            return CreateTileResult(ProjectileTileCollisionDecision.IgnoredInactive);
+            return CreateTileResult(ProjectileTileCollisionDecision.IgnoredInactive, collision);
         }
 
         if (Definition.TileCollisionBehavior == ProjectileTileCollisionBehavior.Ignore)
         {
-            return CreateTileResult(ProjectileTileCollisionDecision.IgnoredByDefinition);
+            return CreateTileResult(ProjectileTileCollisionDecision.IgnoredByDefinition, collision);
         }
 
         if (Definition.TileCollisionBehavior == ProjectileTileCollisionBehavior.Bounce && RemainingBounces > 0)
@@ -173,22 +187,47 @@ public sealed class ProjectileRuntimeState
             Position = collision.ContactPoint + normal * (Definition.CollisionRadius + 0.001f);
             Velocity = Vector2.Reflect(Velocity, normal) * Definition.BounceRestitution;
             RemainingBounces--;
-            return CreateTileResult(ProjectileTileCollisionDecision.Bounced);
+            return CreateTileResult(ProjectileTileCollisionDecision.Bounced, collision);
         }
 
         Position = collision.ContactPoint;
         Terminate(ProjectileTerminationReason.TileCollision);
-        return CreateTileResult(ProjectileTileCollisionDecision.Destroyed);
+        return CreateTileResult(ProjectileTileCollisionDecision.Destroyed, collision);
     }
 
     public ProjectileEntityCollisionResult ResolveEntityCollision(ProjectileEntityCollision collision)
+    {
+        return ResolveEntityCollisionCore(
+            collision,
+            allowTerminalTileCollision: false,
+            impactVelocity: null);
+    }
+
+    internal ProjectileEntityCollisionResult ResolveEntityCollisionBeforeTile(
+        ProjectileEntityCollision collision,
+        Vector2 incomingVelocity)
+    {
+        ValidateFinite(incomingVelocity, nameof(incomingVelocity));
+        return ResolveEntityCollisionCore(
+            collision,
+            allowTerminalTileCollision: true,
+            impactVelocity: incomingVelocity);
+    }
+
+    private ProjectileEntityCollisionResult ResolveEntityCollisionCore(
+        ProjectileEntityCollision collision,
+        bool allowTerminalTileCollision,
+        Vector2? impactVelocity)
     {
         if (collision.TargetEntityId < 0)
         {
             throw new ArgumentOutOfRangeException(nameof(collision));
         }
 
-        if (!IsActive)
+        var resolvingBeforeTerminalTile = !IsActive &&
+                                          allowTerminalTileCollision &&
+                                          TerminationReason == ProjectileTerminationReason.TileCollision;
+        if (!IsActive && !resolvingBeforeTerminalTile)
         {
             return CreateEntityResult(ProjectileEntityCollisionDecision.IgnoredInactive, null);
         }
@@ -213,6 +252,7 @@ public sealed class ProjectileRuntimeState
             return CreateEntityResult(ProjectileEntityCollisionDecision.IgnoredAlreadyHit, null);
         }
 
+        var impactDirection = ResolveImpactDirection(impactVelocity);
         var damageRequest = new CombatDamageRequest
         {
             AttackInstanceId = InstanceId,
@@ -222,7 +262,7 @@ public sealed class ProjectileRuntimeState
             TargetFaction = collision.TargetFaction,
             BaseDamage = Definition.Damage,
             DamageType = Definition.DamageType,
-            ImpactDirection = Velocity,
+            ImpactDirection = impactDirection,
             KnockbackForce = Definition.Knockback,
             CriticalChance = Definition.CriticalChance,
             CriticalMultiplier = Definition.CriticalMultiplier,
@@ -239,6 +279,22 @@ public sealed class ProjectileRuntimeState
         return CreateEntityResult(ProjectileEntityCollisionDecision.Hit, damageRequest);
     }
 
+    private Vector2 ResolveImpactDirection(Vector2? impactVelocity = null)
+    {
+        var velocity = impactVelocity ?? Velocity;
+        if (velocity.LengthSquared() > float.Epsilon)
+        {
+            return velocity;
+        }
+
+        var movement = Position - PreviousPosition;
+        if (movement.LengthSquared() > float.Epsilon)
+        {
+            return movement;
+        }
+
+        return Vector2.UnitX;
+    }
     public void Terminate()
     {
         Terminate(ProjectileTerminationReason.ExplicitlyTerminated);
@@ -352,7 +408,9 @@ public sealed class ProjectileRuntimeState
             TerminationReason);
     }
 
-    private ProjectileTileCollisionResult CreateTileResult(ProjectileTileCollisionDecision decision)
+    private ProjectileTileCollisionResult CreateTileResult(
+        ProjectileTileCollisionDecision decision,
+        ProjectileTileCollision collision)
     {
         return new ProjectileTileCollisionResult(
             decision,
@@ -360,7 +418,10 @@ public sealed class ProjectileRuntimeState
             Velocity,
             RemainingBounces,
             IsActive,
-            TerminationReason);
+            TerminationReason,
+            collision.TileX,
+            collision.TileY,
+            collision.TileId);
     }
 
     private ProjectileEntityCollisionResult CreateEntityResult(

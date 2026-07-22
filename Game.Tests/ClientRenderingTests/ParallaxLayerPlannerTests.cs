@@ -10,7 +10,60 @@ namespace Game.Tests.ClientRenderingTests;
 public sealed class ParallaxLayerPlannerTests
 {
     [Fact]
-    public void Build_V3PanoramasCreateIndependentFarMidAndNearPlanes()
+    public void Build_TwilightPaletteChangesContinuouslyAcrossDayBoundary()
+    {
+        var beforeLayers = new ParallaxLayerDescriptor[ParallaxLayerPlanner.MaximumLayerCount];
+        var afterLayers = new ParallaxLayerDescriptor[ParallaxLayerPlanner.MaximumLayerCount];
+        var living = default(LivingWorldFrameSnapshot) with { BiomeId = "forest" };
+
+        var before = ParallaxLayerPlanner.Build(
+            living,
+            normalizedTimeOfDay: 0.249f,
+            cameraDepthPixels: 0f,
+            surfaceParallax: 0.18f,
+            caveParallax: 0.08f,
+            defaultSurfaceSpriteId: "world/backgrounds/forest_parallax_layer_v3",
+            defaultCaveSpriteId: "world/backgrounds/cave_parallax_layer_v3",
+            beforeLayers);
+        var after = ParallaxLayerPlanner.Build(
+            living,
+            normalizedTimeOfDay: 0.251f,
+            cameraDepthPixels: 0f,
+            surfaceParallax: 0.18f,
+            caveParallax: 0.08f,
+            defaultSurfaceSpriteId: "world/backgrounds/forest_parallax_layer_v3",
+            defaultCaveSpriteId: "world/backgrounds/cave_parallax_layer_v3",
+            afterLayers);
+
+        Assert.InRange(ColorDistance(before.SkyTop, after.SkyTop), 0f, 8f);
+        Assert.InRange(ColorDistance(beforeLayers[0].Tint, afterLayers[0].Tint), 0f, 8f);
+    }
+
+    [Fact]
+    public void Build_NoonPaletteIsBrighterThanMidnightWithoutChangingDepthStack()
+    {
+        var noonLayers = new ParallaxLayerDescriptor[ParallaxLayerPlanner.MaximumLayerCount];
+        var nightLayers = new ParallaxLayerDescriptor[ParallaxLayerPlanner.MaximumLayerCount];
+        var living = default(LivingWorldFrameSnapshot) with { BiomeId = "forest" };
+
+        var noon = ParallaxLayerPlanner.Build(
+            living, 0.5f, 0f, 0.18f, 0.08f,
+            "world/backgrounds/forest_parallax_layer_v3",
+            "world/backgrounds/cave_parallax_layer_v3",
+            noonLayers);
+        var midnight = ParallaxLayerPlanner.Build(
+            living, 0f, 0f, 0.18f, 0.08f,
+            "world/backgrounds/forest_parallax_layer_v3",
+            "world/backgrounds/cave_parallax_layer_v3",
+            nightLayers);
+
+        Assert.Equal(noon.LayerCount, midnight.LayerCount);
+        Assert.True(Brightness(noon.SkyTop) > Brightness(midnight.SkyTop) + 70f);
+        Assert.True(Brightness(noonLayers[4].Tint) > Brightness(nightLayers[4].Tint) + 8f);
+    }
+
+    [Fact]
+    public void Build_V3PanoramasCreateFiveFullscreenDepthPlanesWithoutEdgeFill()
     {
         var layers = new ParallaxLayerDescriptor[ParallaxLayerPlanner.MaximumLayerCount];
         var profile = ParallaxLayerPlanner.Build(
@@ -23,36 +76,45 @@ public sealed class ParallaxLayerPlannerTests
             defaultCaveSpriteId: "world/backgrounds/cave_parallax_layer_v3",
             layers);
 
-        Assert.True(Contains(layers, profile.LayerCount, "world/backgrounds/depth_v6/forest_far"));
-        Assert.Equal(3, profile.LayerCount);
+        Assert.Equal(5, profile.LayerCount);
         Assert.True(profile.AuthoredPanoramaActive);
-        Assert.Null(layers[0].AlternateSpriteId);
-        Assert.Equal(ParallaxLandmarkStyle.None, layers[0].LandmarkStyle);
-        Assert.True(layers[0].PreserveAuthoredRepeat);
-        Assert.Equal(ParallaxVerticalFillMode.ExtendOuterEdges, layers[0].VerticalFillMode);
-        Assert.Equal(ParallaxProjectionMode.DistantHorizonBand, layers[0].ProjectionMode);
-        Assert.NotEqual(Color.White, layers[0].Tint);
-        Assert.Equal(Color.Transparent, layers[0].TopFillColor);
-        Assert.Equal(ParallaxDepthPlane.Far, layers[0].DepthPlane);
-        Assert.False(layers[0].FeatherTop);
-        Assert.Equal(ParallaxDepthPlane.Mid, layers[1].DepthPlane);
-        Assert.Equal(ParallaxDepthPlane.Near, layers[2].DepthPlane);
-        Assert.InRange(layers[0].HorizontalParallax, 0.0143f, 0.0145f);
-        Assert.Equal(0.0025f, layers[0].VerticalParallax);
-        Assert.True(layers[0].HorizontalParallax < layers[1].HorizontalParallax);
-        Assert.True(layers[1].HorizontalParallax < layers[2].HorizontalParallax);
-        Assert.True(layers[0].ScaleMultiplier < layers[1].ScaleMultiplier);
-        Assert.True(layers[1].ScaleMultiplier < layers[2].ScaleMultiplier);
-        Assert.Equal("world/backgrounds/depth_v6/forest_mid", layers[1].SpriteId);
-        Assert.Equal("world/backgrounds/depth_v6/forest_near", layers[2].SpriteId);
-        Assert.Equal(0f, layers[0].RepeatOverlap);
-        Assert.Equal(0, layers[0].VerticalJitter);
-        Assert.DoesNotContain(
+        Assert.Equal("world/backgrounds/features_v7/forest_mountains", layers[0].SpriteId);
+        Assert.Equal("world/backgrounds/features_v7/forest_floating_islands", layers[1].SpriteId);
+        Assert.Equal("world/backgrounds/depth_v6/forest_far", layers[2].SpriteId);
+        Assert.Equal("world/backgrounds/depth_v6/forest_mid", layers[3].SpriteId);
+        Assert.Equal("world/backgrounds/depth_v6/forest_near", layers[4].SpriteId);
+        Assert.All(
             layers.AsSpan(0, profile.LayerCount).ToArray(),
-            layer => string.Equals(
-                layer.AlternateSpriteId,
-                "world/backgrounds/wave04/forest_parallax_layer",
-                StringComparison.OrdinalIgnoreCase));
+            layer => Assert.True(layer.PreserveAuthoredRepeat));
+        for (var index = 0; index < profile.LayerCount; index++)
+        {
+            Assert.Equal(ParallaxProjectionMode.FullscreenDepthPlane, layers[index].ProjectionMode);
+            Assert.Equal(ParallaxVerticalFillMode.None, layers[index].VerticalFillMode);
+            Assert.Equal(Color.Transparent, layers[index].TopFillColor);
+            Assert.Equal(Color.Transparent, layers[index].BottomFillColor);
+            Assert.Equal(ParallaxLandmarkStyle.None, layers[index].LandmarkStyle);
+        }
+
+        Assert.Equal(ParallaxVerticalFillMode.None, layers[0].VerticalFillMode);
+        Assert.Equal(ParallaxVerticalFillMode.None, layers[1].VerticalFillMode);
+        Assert.Equal(ParallaxVerticalFillMode.None, layers[2].VerticalFillMode);
+        Assert.Equal(ParallaxVerticalFillMode.None, layers[3].VerticalFillMode);
+        Assert.Equal(ParallaxVerticalFillMode.None, layers[4].VerticalFillMode);
+
+        Assert.Equal(ParallaxDepthPlane.Far, layers[0].DepthPlane);
+        Assert.Equal(ParallaxDepthPlane.Mid, layers[1].DepthPlane);
+        Assert.Equal(ParallaxDepthPlane.Far, layers[2].DepthPlane);
+        Assert.Equal(ParallaxDepthPlane.Mid, layers[3].DepthPlane);
+        Assert.Equal(ParallaxDepthPlane.Near, layers[4].DepthPlane);
+        Assert.Equal(1f, layers[0].ScaleMultiplier);
+        Assert.Equal(1f, layers[1].ScaleMultiplier);
+        Assert.Equal(0.5f, layers[2].ScaleMultiplier);
+        Assert.Equal(0.68f, layers[3].ScaleMultiplier);
+        Assert.Equal(0.92f, layers[4].ScaleMultiplier);
+        Assert.True(layers[0].HorizontalParallax < layers[2].HorizontalParallax);
+        Assert.True(layers[2].HorizontalParallax < layers[1].HorizontalParallax);
+        Assert.True(layers[1].HorizontalParallax < layers[3].HorizontalParallax);
+        Assert.True(layers[3].HorizontalParallax < layers[4].HorizontalParallax);
     }
 
     [Theory]
@@ -60,7 +122,7 @@ public sealed class ParallaxLayerPlannerTests
     [InlineData("world/backgrounds/forest_parallax_layer_v4")]
     [InlineData("world/backgrounds/forest_parallax_layer_v5")]
     [InlineData("world/backgrounds/forest_panorama")]
-    public void Build_CompositePanoramaUsesIndependentAuthoredDepthStack(string spriteId)
+    public void Build_CompositePanoramaUsesAuthoredDistanceFeatureAndDepthStack(string spriteId)
     {
         var layers = new ParallaxLayerDescriptor[ParallaxLayerPlanner.MaximumLayerCount];
 
@@ -78,22 +140,26 @@ public sealed class ParallaxLayerPlannerTests
             defaultCaveSpriteId: "world/backgrounds/cave_parallax_layer_v3",
             layers);
 
-        Assert.Equal(3, profile.LayerCount);
+        Assert.Equal(5, profile.LayerCount);
         Assert.True(profile.AuthoredPanoramaActive);
-        Assert.Equal("world/backgrounds/depth_v6/forest_far", layers[0].SpriteId);
+        Assert.Equal("world/backgrounds/features_v7/forest_mountains", layers[0].SpriteId);
+        Assert.Equal("world/backgrounds/features_v7/forest_floating_islands", layers[1].SpriteId);
+        Assert.Equal("world/backgrounds/depth_v6/forest_far", layers[2].SpriteId);
         Assert.Equal(0, Count(layers, profile.LayerCount, spriteId));
         for (var index = 0; index < profile.LayerCount; index++)
         {
-            Assert.True(layers[index].PreserveAuthoredRepeat);
-            Assert.Equal(ParallaxVerticalFillMode.ExtendOuterEdges, layers[index].VerticalFillMode);
-            Assert.Equal(ParallaxProjectionMode.DistantHorizonBand, layers[index].ProjectionMode);
+            Assert.Equal(ParallaxProjectionMode.FullscreenDepthPlane, layers[index].ProjectionMode);
             Assert.NotEqual(ParallaxDepthPlane.Unspecified, layers[index].DepthPlane);
+            Assert.Equal(ParallaxVerticalFillMode.None, layers[index].VerticalFillMode);
+            Assert.Equal(Color.Transparent, layers[index].TopFillColor);
+            Assert.Equal(Color.Transparent, layers[index].BottomFillColor);
         }
 
-        Assert.Equal(ParallaxDepthPlane.Far, layers[0].DepthPlane);
-        Assert.Equal(ParallaxDepthPlane.Mid, layers[1].DepthPlane);
-        Assert.Equal(ParallaxDepthPlane.Near, layers[2].DepthPlane);
-        Assert.NotEqual(Color.White, layers[0].Tint);
+        Assert.Equal(ParallaxVerticalFillMode.None, layers[0].VerticalFillMode);
+        Assert.Equal(ParallaxVerticalFillMode.None, layers[1].VerticalFillMode);
+        Assert.Equal(ParallaxVerticalFillMode.None, layers[2].VerticalFillMode);
+        Assert.Equal(ParallaxVerticalFillMode.None, layers[3].VerticalFillMode);
+        Assert.Equal(ParallaxVerticalFillMode.None, layers[4].VerticalFillMode);
     }
 
     [Fact]
@@ -107,15 +173,7 @@ public sealed class ParallaxLayerPlannerTests
             SubBiomeId = "crystal_depths",
             IsUnderground = true,
             Presentation = new LivingWorldPresentationFrameSnapshot(
-                spriteId,
-                null,
-                null,
-                null,
-                null,
-                0f,
-                0f,
-                0f,
-                0f)
+                spriteId, null, null, null, null, 0f, 0f, 0f, 0f)
         };
 
         var profile = ParallaxLayerPlanner.Build(
@@ -129,22 +187,22 @@ public sealed class ParallaxLayerPlannerTests
             layers);
 
         Assert.True(profile.AuthoredPanoramaActive);
-        Assert.Equal(0, Count(layers, profile.LayerCount, spriteId));
-        var layer = Find(layers, profile.LayerCount, "world/backgrounds/depth_v6/crystal_far");
-        Assert.True(layer.PreserveAuthoredRepeat);
-        Assert.Equal(ParallaxVerticalFillMode.ExtendOuterEdges, layer.VerticalFillMode);
-        Assert.Null(layer.AlternateSpriteId);
-        Assert.Equal(0f, layer.RepeatOverlap);
-        Assert.Equal(0, layer.VerticalJitter);
-        Assert.Equal(ParallaxLandmarkStyle.None, layer.LandmarkStyle);
-        Assert.NotEqual(Color.White, layer.Tint);
-        Assert.Equal(Color.Transparent, layer.TopFillColor);
         Assert.Equal(3, profile.LayerCount);
+        Assert.Equal("world/backgrounds/depth_v6/crystal_far", layers[0].SpriteId);
         Assert.Equal("world/backgrounds/depth_v6/crystal_mid", layers[1].SpriteId);
         Assert.Equal("world/backgrounds/depth_v6/crystal_near", layers[2].SpriteId);
-        Assert.Equal(ParallaxDepthPlane.Far, layers[0].DepthPlane);
-        Assert.Equal(ParallaxDepthPlane.Mid, layers[1].DepthPlane);
-        Assert.Equal(ParallaxDepthPlane.Near, layers[2].DepthPlane);
+        for (var index = 0; index < profile.LayerCount; index++)
+        {
+            Assert.True(layers[index].PreserveAuthoredRepeat);
+            Assert.Equal(ParallaxProjectionMode.FullscreenDepthPlane, layers[index].ProjectionMode);
+            Assert.Equal(ParallaxVerticalFillMode.None, layers[index].VerticalFillMode);
+            Assert.Equal(Color.Transparent, layers[index].TopFillColor);
+            Assert.Equal(Color.Transparent, layers[index].BottomFillColor);
+        }
+
+        Assert.Equal(ParallaxVerticalFillMode.None, layers[0].VerticalFillMode);
+        Assert.Equal(ParallaxVerticalFillMode.None, layers[1].VerticalFillMode);
+        Assert.Equal(ParallaxVerticalFillMode.None, layers[2].VerticalFillMode);
     }
 
     [Fact]
@@ -157,15 +215,7 @@ public sealed class ParallaxLayerPlannerTests
             BiomeId = "forest",
             IsUnderground = true,
             Presentation = new LivingWorldPresentationFrameSnapshot(
-                spriteId,
-                null,
-                null,
-                null,
-                null,
-                0f,
-                0f,
-                0f,
-                0f)
+                spriteId, null, null, null, null, 0f, 0f, 0f, 0f)
         };
 
         var profile = ParallaxLayerPlanner.Build(
@@ -178,9 +228,10 @@ public sealed class ParallaxLayerPlannerTests
             defaultCaveSpriteId: "world/backgrounds/cave_parallax_layer_v3",
             layers);
 
-        Assert.Equal(3, profile.LayerCount);
-        Assert.Equal("world/backgrounds/depth_v6/forest_far", layers[0].SpriteId);
-        Assert.True(layers[0].PreserveAuthoredRepeat);
+        Assert.Equal(5, profile.LayerCount);
+        Assert.Equal("world/backgrounds/features_v7/forest_mountains", layers[0].SpriteId);
+        Assert.Equal("world/backgrounds/depth_v6/forest_far", layers[2].SpriteId);
+        Assert.True(layers[2].PreserveAuthoredRepeat);
     }
 
     [Fact]
@@ -357,6 +408,19 @@ public sealed class ParallaxLayerPlannerTests
         }
 
         return matches;
+    }
+
+    private static float ColorDistance(Color left, Color right)
+    {
+        var red = left.R - right.R;
+        var green = left.G - right.G;
+        var blue = left.B - right.B;
+        return MathF.Sqrt(red * red + green * green + blue * blue);
+    }
+
+    private static float Brightness(Color color)
+    {
+        return color.R * 0.2126f + color.G * 0.7152f + color.B * 0.0722f;
     }
 
     private static ParallaxLayerDescriptor Find(

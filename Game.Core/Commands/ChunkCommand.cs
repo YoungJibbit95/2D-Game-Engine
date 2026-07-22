@@ -14,14 +14,23 @@ public sealed class ChunkCommand : TypedConsoleCommand
                 new CommandArgumentSpecification(
                     "action",
                     CommandArgumentType.Choice,
-                    choices: new[] { "info", "reload" },
-                    description: "Chunk action."),
+                    false,
+                    "Chunk action.",
+                    choices: new[] { "info", "reload" }),
                 new CommandArgumentSpecification("x", CommandArgumentType.Integer, false, "Chunk X coordinate."),
                 new CommandArgumentSpecification("y", CommandArgumentType.Integer, false, "Chunk Y coordinate."),
-                new CommandArgumentSpecification("force", CommandArgumentType.Boolean, false, "Force reload of dirty chunks.")
+                new CommandArgumentSpecification(
+                    "force",
+                    CommandArgumentType.Choice,
+                    false,
+                    "Force reload of dirty chunks.",
+                    choices: new[] { "off", "on", "false", "true", "0", "1" })
             },
             aliases: new[] { "chunks" },
-            examples: new[] { "/chunk info", "/chunk info -1 0", "/chunk reload 2 0 on" }))
+            examples: new[] { "/chunk", "/chunk info -1 0", "/chunk reload 2 0 on" },
+            category: CommandCategory.World,
+            searchTerms: new[] { "streaming", "region", "reload" },
+            requestIntentType: typeof(ReloadChunkIntent)))
     {
     }
 
@@ -33,9 +42,18 @@ public sealed class ChunkCommand : TypedConsoleCommand
             return CommandResult.Failure("invalid_chunk_position", positionResult.Error);
         }
 
-        return arguments.GetString("action").Equals("info", StringComparison.OrdinalIgnoreCase)
-            ? GetInfo(context, positionResult.Position)
-            : RequestReload(arguments, positionResult.Position);
+        var action = arguments.GetOptionalString("action") ?? "info";
+        if (action.Equals("info", StringComparison.OrdinalIgnoreCase))
+        {
+            if (arguments.Has("force"))
+            {
+                return CommandResult.Failure("too_many_arguments", "/chunk info does not accept force.");
+            }
+
+            return GetInfo(context, positionResult.Position);
+        }
+
+        return RequestReload(arguments, positionResult.Position);
     }
 
     private static CommandResult GetInfo(CommandContext context, ChunkPos? position)

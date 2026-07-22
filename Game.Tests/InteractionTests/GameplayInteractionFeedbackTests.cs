@@ -46,9 +46,9 @@ public sealed class GameplayInteractionFeedbackTests
         Assert.True(first.Started);
         Assert.Equal(new TilePos(2, 2), first.TilePosition);
         Assert.Equal(KnownTileIds.Dirt, first.TargetTileId);
-        Assert.InRange(first.Progress, 0.017f, 0.018f);
+        Assert.InRange(first.Progress, 0.070f, 0.071f);
         Assert.Equal(1, startedEvents);
-        Assert.Equal(1, progressEvents);
+        Assert.Equal(5, progressEvents);
 
         var completed = mining.Update(
             world,

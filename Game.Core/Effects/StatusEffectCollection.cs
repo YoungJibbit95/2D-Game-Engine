@@ -119,6 +119,10 @@ public sealed class StatusEffectCollection
         var magic = stats.MagicDamageMultiplier;
         var manaCost = stats.ManaCostMultiplier;
         var manaRegen = stats.ManaRegenMultiplier;
+        var canDoubleJump = stats.CanDoubleJump;
+        var canWallJump = stats.CanWallJump;
+        var canFly = stats.CanFly;
+        var canGlide = stats.CanGlide;
 
         foreach (var effect in _active.Values)
         {
@@ -141,7 +145,11 @@ public sealed class StatusEffectCollection
             MaxMana: Math.Max(0, maxMana),
             MagicDamageMultiplier: Math.Max(0.1f, magic),
             ManaCostMultiplier: Math.Clamp(manaCost, 0.1f, 3f),
-            ManaRegenMultiplier: Math.Max(0f, manaRegen));
+            ManaRegenMultiplier: Math.Max(0f, manaRegen),
+            CanDoubleJump: canDoubleJump,
+            CanWallJump: canWallJump,
+            CanFly: canFly,
+            CanGlide: canGlide);
     }
 
     private static void ApplyTicks(

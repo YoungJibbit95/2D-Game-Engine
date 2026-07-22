@@ -1,3 +1,4 @@
+
 using Game.Core.DeveloperTools;
 using System.Globalization;
 
@@ -14,10 +15,14 @@ public sealed class SpawnRateCommand : TypedConsoleCommand
                 new CommandArgumentSpecification(
                     "multiplier",
                     CommandArgumentType.Text,
-                    description: "Multiplier from 0 to 10, or reset.")
+                    description: "Multiplier from 0 to 10, or reset.",
+                    choices: new[] { "reset" })
             },
             aliases: new[] { "spawn-rate" },
-            examples: new[] { "/spawnrate 0", "/spawnrate 2", "/spawnrate reset" }))
+            examples: new[] { "/spawnrate 0", "/spawnrate 2", "/spawnrate reset" },
+            category: CommandCategory.Entities,
+            searchTerms: new[] { "entity", "mob", "density", "rule" },
+            requestIntentType: typeof(SetSpawnRateIntent)))
     {
     }
 
@@ -56,17 +61,21 @@ public sealed class PerformanceCommand : TypedConsoleCommand
                 new CommandArgumentSpecification(
                     "action",
                     CommandArgumentType.Choice,
-                    choices: new[] { "summary", "capture", "reset" },
-                    description: "Telemetry operation.")
+                    false,
+                    "Telemetry operation.",
+                    choices: new[] { "summary", "capture", "reset" })
             },
             aliases: new[] { "perf" },
-            examples: new[] { "/performance summary", "/perf capture" }))
+            examples: new[] { "/performance", "/performance summary", "/perf capture" },
+            category: CommandCategory.Diagnostics,
+            searchTerms: new[] { "profile", "fps", "telemetry", "capture" },
+            requestIntentType: typeof(PerformanceRequestIntent)))
     {
     }
 
     protected override CommandResult Execute(CommandContext context, CommandArguments arguments)
     {
-        var kind = Enum.Parse<PerformanceRequestKind>(arguments.GetString("action"), ignoreCase: true);
+        var kind = Enum.Parse<PerformanceRequestKind>(arguments.GetOptionalString("action") ?? "summary", ignoreCase: true);
         return CommandResult.Request(
             "performance_requested",
             $"Requested performance operation: {kind}.",
@@ -85,22 +94,27 @@ public sealed class EventDiagnosticsCommand : TypedConsoleCommand
                 new CommandArgumentSpecification(
                     "action",
                     CommandArgumentType.Choice,
-                    choices: new[] { "list", "watch", "unwatch", "clear" },
-                    description: "Event diagnostics operation."),
+                    false,
+                    "Event diagnostics operation.",
+                    choices: new[] { "list", "watch", "unwatch", "clear" }),
                 new CommandArgumentSpecification(
                     "eventName",
                     CommandArgumentType.Identifier,
                     false,
-                    "Event type name for watch or unwatch.")
+                    "Event type name for watch or unwatch.",
+                    suggestionSource: CommandSuggestionSource.GameEvents)
             },
             aliases: new[] { "events" },
-            examples: new[] { "/event list", "/event watch EntityDiedEvent", "/event clear" }))
+            examples: new[] { "/event", "/event list", "/event watch EntityDiedEvent", "/event clear" },
+            category: CommandCategory.Diagnostics,
+            searchTerms: new[] { "journal", "trace", "watch" },
+            requestIntentType: typeof(EventDiagnosticsRequestIntent)))
     {
     }
 
     protected override CommandResult Execute(CommandContext context, CommandArguments arguments)
     {
-        var kind = Enum.Parse<EventDiagnosticsRequestKind>(arguments.GetString("action"), ignoreCase: true);
+        var kind = Enum.Parse<EventDiagnosticsRequestKind>(arguments.GetOptionalString("action") ?? "list", ignoreCase: true);
         var eventName = arguments.GetOptionalString("eventName");
         if (kind is EventDiagnosticsRequestKind.Watch or EventDiagnosticsRequestKind.Unwatch && eventName is null)
         {

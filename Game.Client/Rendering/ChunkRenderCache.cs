@@ -7,10 +7,12 @@ namespace Game.Client.Rendering;
 public sealed class ChunkRenderCache
 {
     private readonly Dictionary<ChunkPos, CachedChunk> _chunks = new();
+    private readonly Dictionary<ChunkPos, ChunkDependencyRevision> _dependencyRevisions = new();
     private readonly List<TrimCandidate> _trimCandidates = new();
     private int[][] _textureBucketByTileMask = Array.Empty<int[]>();
     private int _textureBucketCount = 1;
     private long _useTick;
+    private ulong _nextDependencyRevision;
 
     public int CachedChunkCount => _chunks.Count;
 
@@ -91,16 +93,21 @@ public sealed class ChunkRenderCache
         ArgumentNullException.ThrowIfNull(tiles);
         ArgumentNullException.ThrowIfNull(chunk);
 
-        if (_chunks.TryGetValue(chunk.Position, out var cached) && !chunk.NeedsMeshRebuild)
+        var dependencyStamp = ObserveDependencyStamp(world, chunk.Position);
+        if (_chunks.TryGetValue(chunk.Position, out var cached) &&
+            ReferenceEquals(cached.SourceChunk, chunk) &&
+            !chunk.NeedsMeshRebuild &&
+            cached.DependencyStamp == dependencyStamp)
         {
             cached.LastUsedTick = ++_useTick;
             return new ChunkRenderCacheResult(cached.Commands, Rebuilt: false);
         }
 
-        var rebuilt = Build(world, tiles, chunk);
+        var rebuilt = Build(world, tiles, chunk, dependencyStamp);
         rebuilt.LastUsedTick = ++_useTick;
         _chunks[chunk.Position] = rebuilt;
         chunk.ClearMeshRebuildFlag();
+        MarkMeshClean(chunk);
         return new ChunkRenderCacheResult(rebuilt.Commands, Rebuilt: true);
     }
 
@@ -119,7 +126,22 @@ public sealed class ChunkRenderCache
             _trimCandidates.Add(new TrimCandidate(position, cached.LastUsedTick));
         }
 
-        return RemoveTrimCandidates(_trimCandidates.Count);
+        var removed = RemoveTrimCandidates(_trimCandidates.Count);
+        foreach (var (position, _) in _dependencyRevisions)
+        {
+            if (!loadedChunks.ContainsKey(position))
+            {
+                _trimCandidates.Add(new TrimCandidate(position, 0));
+            }
+        }
+
+        for (var index = 0; index < _trimCandidates.Count; index++)
+        {
+            _dependencyRevisions.Remove(_trimCandidates[index].Position);
+        }
+
+        _trimCandidates.Clear();
+        return removed;
     }
 
     public int TrimToBudget(int maxCachedChunks)
@@ -142,9 +164,15 @@ public sealed class ChunkRenderCache
     public void Clear()
     {
         _chunks.Clear();
+        _dependencyRevisions.Clear();
+        _nextDependencyRevision = 0;
     }
 
-    private CachedChunk Build(World world, TileRegistry tiles, Chunk chunk)
+    private CachedChunk Build(
+        World world,
+        TileRegistry tiles,
+        Chunk chunk,
+        ChunkDependencyStamp dependencyStamp)
     {
         var commands = new List<ChunkRenderCommand>(GameConstants.ChunkSize * GameConstants.ChunkSize / 2);
         var chunkBounds = CoordinateUtils.ChunkTileBounds(chunk.Position);
@@ -164,6 +192,12 @@ public sealed class ChunkRenderCache
                 var mask = tile.IsAir
                     ? AutoTileMask.None
                     : _autoTiles.ComputeAutoTileMask(world, tiles, tileX, tileY);
+                mask = TreeAutoTilePresentation.AddCompatibleMaterialConnections(
+                    world,
+                    tileX,
+                    tileY,
+                    tile.TileId,
+                    mask);
                 var visualVariant = TreeTileVisualSelector.Resolve(world, tileX, tileY, tile.TileId);
                 var visualTransform = TreeTileVisualSelector.ResolveTransform(world, tileX, tileY, tile.TileId);
                 commands.Add(new ChunkRenderCommand(localX, localY, tile, mask, visualVariant, visualTransform));
@@ -172,7 +206,50 @@ public sealed class ChunkRenderCache
 
         var commandArray = commands.ToArray();
         var preparedCommands = BuildPreparedCommands(commandArray);
-        return new CachedChunk(commandArray, preparedCommands);
+        return new CachedChunk(chunk, dependencyStamp, commandArray, preparedCommands);
+    }
+
+    private ChunkDependencyStamp ObserveDependencyStamp(World world, ChunkPos center)
+    {
+        return new ChunkDependencyStamp(
+            ObserveDependencyRevision(world, new ChunkPos(center.X - 1, center.Y - 1)),
+            ObserveDependencyRevision(world, new ChunkPos(center.X, center.Y - 1)),
+            ObserveDependencyRevision(world, new ChunkPos(center.X + 1, center.Y - 1)),
+            ObserveDependencyRevision(world, new ChunkPos(center.X - 1, center.Y)),
+            ObserveDependencyRevision(world, center),
+            ObserveDependencyRevision(world, new ChunkPos(center.X + 1, center.Y)),
+            ObserveDependencyRevision(world, new ChunkPos(center.X - 1, center.Y + 1)),
+            ObserveDependencyRevision(world, new ChunkPos(center.X, center.Y + 1)),
+            ObserveDependencyRevision(world, new ChunkPos(center.X + 1, center.Y + 1)));
+    }
+
+    private ulong ObserveDependencyRevision(World world, ChunkPos position)
+    {
+        world.Chunks.TryGetValue(position, out var chunk);
+        if (!_dependencyRevisions.TryGetValue(position, out var state))
+        {
+            state = new ChunkDependencyRevision();
+            _dependencyRevisions.Add(position, state);
+        }
+
+        var meshDirty = chunk?.NeedsMeshRebuild == true;
+        if (!ReferenceEquals(state.SourceChunk, chunk) || (meshDirty && !state.WasMeshDirty))
+        {
+            state.SourceChunk = chunk;
+            state.Revision = ++_nextDependencyRevision;
+        }
+
+        state.WasMeshDirty = meshDirty;
+        return state.Revision;
+    }
+
+    private void MarkMeshClean(Chunk chunk)
+    {
+        if (_dependencyRevisions.TryGetValue(chunk.Position, out var state) &&
+            ReferenceEquals(state.SourceChunk, chunk))
+        {
+            state.WasMeshDirty = false;
+        }
     }
 
     private PreparedChunkRenderCommands BuildPreparedCommands(ChunkRenderCommand[] commands)
@@ -260,15 +337,43 @@ public sealed class ChunkRenderCache
         }
     }
 
+    private readonly record struct ChunkDependencyStamp(
+        ulong TopLeft,
+        ulong Top,
+        ulong TopRight,
+        ulong Left,
+        ulong Center,
+        ulong Right,
+        ulong BottomLeft,
+        ulong Bottom,
+        ulong BottomRight);
+
+    private sealed class ChunkDependencyRevision
+    {
+        public Chunk? SourceChunk { get; set; }
+
+        public ulong Revision { get; set; }
+
+        public bool WasMeshDirty { get; set; }
+    }
+
     private sealed class CachedChunk
     {
         public CachedChunk(
+            Chunk sourceChunk,
+            ChunkDependencyStamp dependencyStamp,
             IReadOnlyList<ChunkRenderCommand> commands,
             PreparedChunkRenderCommands preparedCommands)
         {
+            SourceChunk = sourceChunk;
+            DependencyStamp = dependencyStamp;
             Commands = commands;
             PreparedCommands = preparedCommands;
         }
+
+        public Chunk SourceChunk { get; }
+
+        public ChunkDependencyStamp DependencyStamp { get; }
 
         public IReadOnlyList<ChunkRenderCommand> Commands { get; }
 

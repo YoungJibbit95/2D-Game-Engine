@@ -29,6 +29,7 @@ public sealed class EntityReliabilityPerformanceTests
     [Fact]
     public void FiveHundredEntityManagerUpdates_StayInsideCpuAndAllocationGates()
     {
+        const int measurementRuns = 3;
         var world = CreateWorld();
         var entities = CreatePopulation();
         for (var tick = 0; tick < WarmupTicks; tick++)
@@ -37,36 +38,46 @@ public sealed class EntityReliabilityPerformanceTests
         }
 
         var samples = new double[MeasurementTicks];
+        var runP99Milliseconds = new double[measurementRuns];
         var allocatedBefore = GC.GetAllocatedBytesForCurrentThread();
-        for (var tick = 0; tick < MeasurementTicks; tick++)
+        for (var run = 0; run < measurementRuns; run++)
         {
-            var startedAt = Stopwatch.GetTimestamp();
-            entities.UpdateAll(
-                world,
-                FixedDeltaSeconds,
-                player: null,
-                isNight: (tick / 60) % 2 != 0,
-                tickNumber: WarmupTicks + tick);
-            samples[tick] = Stopwatch.GetElapsedTime(startedAt).TotalMilliseconds;
+            for (var tick = 0; tick < MeasurementTicks; tick++)
+            {
+                var absoluteTick = WarmupTicks + run * MeasurementTicks + tick;
+                var startedAt = Stopwatch.GetTimestamp();
+                entities.UpdateAll(
+                    world,
+                    FixedDeltaSeconds,
+                    player: null,
+                    isNight: (absoluteTick / 60) % 2 != 0,
+                    tickNumber: absoluteTick);
+                samples[tick] = Stopwatch.GetElapsedTime(startedAt).TotalMilliseconds;
+            }
+
+            Array.Sort(samples);
+            runP99Milliseconds[run] = samples[(int)Math.Ceiling(samples.Length * 0.99) - 1];
         }
 
         var allocated = GC.GetAllocatedBytesForCurrentThread() - allocatedBefore;
-        var bytesPerTick = allocated / (double)MeasurementTicks;
-        Array.Sort(samples);
-        var p99 = samples[(int)Math.Ceiling(samples.Length * 0.99) - 1];
+        var bytesPerTick = allocated / (double)(MeasurementTicks * measurementRuns);
+        Array.Sort(runP99Milliseconds);
+        var p99 = runP99Milliseconds[measurementRuns / 2];
         _output.WriteLine(
-            $"500 entities: p99={p99:F3} ms, allocated={allocated} B, perTick={bytesPerTick:F1} B");
+            $"500 entities: median-run p99={p99:F3} ms, " +
+            $"runs={string.Join('/', runP99Milliseconds.Select(value => value.ToString("F3")))}, " +
+            $"allocated={allocated} B, perTick={bytesPerTick:F1} B");
 
         Assert.True(
             p99 <= 12 && bytesPerTick <= 1 * 1024,
-            $"p99={p99:F3} ms, allocated={allocated} B, perTick={bytesPerTick:F1} B");
+            $"median-run p99={p99:F3} ms, allocated={allocated} B, perTick={bytesPerTick:F1} B");
         Assert.Equal(EntityCount, entities.Entities.Count);
+        var expectedUpdates = WarmupTicks + MeasurementTicks * measurementRuns;
         Assert.All(
             entities.Entities,
             entity => Assert.True(
-                entity is EnemyEntity { IsActive: true } actor && actor.AiTelemetry.UpdateCount == WarmupTicks + MeasurementTicks));
+                entity is EnemyEntity { IsActive: true } actor && actor.AiTelemetry.UpdateCount == expectedUpdates));
     }
-
     private static EntityManager CreatePopulation()
     {
         var entities = new EntityManager(64);

@@ -36,6 +36,10 @@ public readonly record struct PlayerItemUseResult(
 
     public bool ConsumedItem { get; init; }
 
+    public ManaSpendResult ManaSpend { get; init; }
+
+    public ManaReservationFinalizationResult ManaFinalization { get; init; }
+
     public bool Success => Status == PlayerItemUseStatus.Succeeded ||
                            Status == PlayerItemUseStatus.NoAction && Kind != PlayerItemUseKind.None;
 
@@ -65,7 +69,9 @@ public readonly record struct PlayerItemUseResult(
         float cooldownRemaining = 0,
         float cooldownDuration = 0,
         MiningResult mining = default,
-        MeleeAttackResult melee = default)
+        MeleeAttackResult melee = default,
+        ManaSpendResult manaSpend = default,
+        ManaReservationFinalizationResult manaFinalization = default)
     {
         return None with
         {
@@ -76,7 +82,9 @@ public readonly record struct PlayerItemUseResult(
             CooldownDuration = Math.Max(0, cooldownDuration),
             ActionProgress = mining.Progress,
             Mining = mining,
-            Melee = melee
+            Melee = melee,
+            ManaSpend = manaSpend,
+            ManaFinalization = manaFinalization
         };
     }
 
