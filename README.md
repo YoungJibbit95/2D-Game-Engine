@@ -2,6 +2,14 @@
 
 YoungJibbit's Engine is a small MonoGame-based 2D sandbox action-adventure engine.
 
+<p align="center">
+  <img src="https://komarev.com/ghpvc/?username=YoungJibbit95-2D-Game-Engine&label=repository%20views&color=7aa2f7&style=flat" alt="Repository views" />
+  <img src="https://img.shields.io/github/last-commit/YoungJibbit95/2D-Game-Engine?style=flat&logo=git&color=7dcfff&labelColor=1a1b27" alt="Last commit" />
+  <img src="https://img.shields.io/github/stars/YoungJibbit95/2D-Game-Engine?style=flat&logo=github&color=e0af68&labelColor=1a1b27" alt="GitHub stars" />
+  <img src="https://img.shields.io/github/issues/YoungJibbit95/2D-Game-Engine?style=flat&logo=github&color=f7768e&labelColor=1a1b27" alt="Open issues" />
+  <img src="https://img.shields.io/github/repo-size/YoungJibbit95/2D-Game-Engine?style=flat&logo=github&color=bb9af7&labelColor=1a1b27" alt="Repository size" />
+</p>
+
 ## Projects
 
 - `Game.Core`: reusable engine and gameplay systems without MonoGame references.
