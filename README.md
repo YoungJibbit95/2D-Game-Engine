@@ -1,4 +1,6 @@
-# YjsE
+<p align="center">
+    # YjsE
+</p>
 
 <p align="center">
   <img src="https://komarev.com/ghpvc/?username=YoungJibbit95-2D-Game-Engine&label=repository%20views&color=7aa2f7&style=flat" alt="Repository views" />
