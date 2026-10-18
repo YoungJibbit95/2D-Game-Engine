@@ -24,6 +24,8 @@ PROBES = ("ProbeShadow", "ProbeRed", "ProbeGreen", "ProbeBlue", "ProbeBloom")
 FRAME_SCOPES = ("Simulation.FixedUpdate", "Frame.Update", "Frame.Draw")
 PREPARE_SCOPES = ("Presentation.LightingPrepare", "Presentation.LightingMaskCpu",
                   "Presentation.LightingGpuUpload")
+CACHE_COUNTERS = ("AmbientCacheHits", "PortalCacheHits", "CacheLookups", "CacheBypasses",
+                  "DependencySamples", "CacheCopyBytes", "CachePayloadBytes")
 
 
 def distribution(values):
@@ -69,6 +71,34 @@ def object_required(value, name):
     if not isinstance(value, dict) or not value:
         raise ValueError(f"nonempty {name} object is required")
     return value
+
+
+def validate_cache_frames(frames):
+    """Version-1 captures predate reuse counters; absence never implies zero hits."""
+    if not any(field in frame for frame in frames for field in CACHE_COUNTERS):
+        return False
+    for frame in frames:
+        if not all(field in frame for field in CACHE_COUNTERS):
+            raise ValueError("all seven prefix-cache counters are required on every measured frame")
+        for field in CACHE_COUNTERS:
+            integer(frame[field], field)
+        for field in CACHE_COUNTERS[:4]:
+            if frame[field] > 1:
+                raise ValueError(f"{field} must be zero or one per measured frame")
+        ambient, portal = frame["AmbientCacheHits"], frame["PortalCacheHits"]
+        lookups, bypasses = frame["CacheLookups"], frame["CacheBypasses"]
+        if portal > ambient or ambient > lookups:
+            raise ValueError("PortalCacheHits <= AmbientCacheHits <= CacheLookups is required")
+        if lookups + bypasses != frame["PrepareExecutions"]:
+            raise ValueError("CacheLookups + CacheBypasses must equal PrepareExecutions")
+        if lookups:
+            if frame["DependencySamples"] != frame["MaskWidth"] * frame["MaskHeight"]:
+                raise ValueError("a prefix-cache lookup must freshly validate every mask dependency sample")
+        elif frame["DependencySamples"] or frame["CacheCopyBytes"]:
+            raise ValueError("bypassed or unscheduled preparation must have zero cache dependency/copy work")
+        if ambient and not frame["CachePayloadBytes"]:
+            raise ValueError("a prefix-cache hit requires a positive CachePayloadBytes estimate")
+    return True
 
 
 def read_capture(path):
@@ -136,6 +166,7 @@ def read_capture(path):
             raise ValueError("UploadCalls requires lighting preparation in the same frame")
         if frame["UploadBytes"] != frame["UploadCalls"] * frame["MaskWidth"] * frame["MaskHeight"] * 4:
             raise ValueError("UploadBytes must equal UploadCalls * mask width * mask height * 4 (RGBA8)")
+    validate_cache_frames(frames)
     ordered_frame_ids = [frame["Frame"] for frame in frames]
     frame_ids = set(ordered_frame_ids)
     prepare_frame_ids = [frame["Frame"] for frame in frames if frame["PrepareExecutions"]]
@@ -207,6 +238,35 @@ def summarize_frames(frames):
             "camera_change_steps": sum((first["CameraX"], first["CameraY"], first["Zoom"]) !=
                                        (second["CameraX"], second["CameraY"], second["Zoom"])
                                        for first, second in zip(frames, frames[1:]))}
+
+
+def summarize_prefix_cache(frames):
+    if not validate_cache_frames(frames):
+        return {"available": False,
+                "interpretation": "Legacy capture omits all prefix-cache counters. Cache hits, misses and payload are unavailable; absence is not evidence of zero reuse."}
+    totals = {field: sum(frame[field] for frame in frames) for field in CACHE_COUNTERS[:-1]}
+    prepares = sum(frame["PrepareExecutions"] for frame in frames)
+    lookups = totals["CacheLookups"]
+
+    def ratio(numerator, denominator):
+        return numerator / denominator if denominator else None
+
+    return {"available": True, "measured_prepares": prepares, "totals": totals,
+            "misses_among_lookups": {"ambient": lookups - totals["AmbientCacheHits"],
+                                     "portal": lookups - totals["PortalCacheHits"]},
+            "ratios_per_prepare": {"lookups": ratio(lookups, prepares),
+                                   "bypasses": ratio(totals["CacheBypasses"], prepares),
+                                   "ambient_hits": ratio(totals["AmbientCacheHits"], prepares),
+                                   "portal_hits": ratio(totals["PortalCacheHits"], prepares)},
+            "ratios_per_lookup": {"ambient_hits": ratio(totals["AmbientCacheHits"], lookups),
+                                  "portal_hits": ratio(totals["PortalCacheHits"], lookups),
+                                  "ambient_misses": ratio(lookups - totals["AmbientCacheHits"], lookups),
+                                  "portal_misses": ratio(lookups - totals["PortalCacheHits"], lookups)},
+            "copy_bytes_per_measured_frame": totals["CacheCopyBytes"] / len(frames),
+            "copy_bytes_per_prepare": ratio(totals["CacheCopyBytes"], prepares),
+            "dependency_samples_per_lookup": ratio(totals["DependencySamples"], lookups),
+            "estimated_payload_bytes": distribution([frame["CachePayloadBytes"] for frame in frames]),
+            "interpretation": "Hits reuse only the raw ambient-occlusion/sky-portal prefix. Dependency samples are freshly validated and full lighting preparation continues; hits do not mean skipped frames, skipped temporal settling or GPU savings. Payload is a persistent source-derived CPU estimate, not bytes allocated each frame or measured VRAM. Undefined ratios are null."}
 
 
 def summarize_probes(frames):
@@ -282,6 +342,7 @@ def report(capture, output_dir):
                        "core_phase_telemetry": metadata.get("CorePhaseTelemetry"),
                        "raw_frame_interval_summary": metadata["FrameTiming"],
                        "frames": summarize_frames(diagnostics["Frames"]),
+                       "prefix_cache": summarize_prefix_cache(diagnostics["Frames"]),
                        "scopes": summarize_scopes(diagnostics),
                        "probes": summarize_probes(diagnostics["Frames"]),
                        "image": analyze_image(screenshot, output_dir, metadata), "valid": True})

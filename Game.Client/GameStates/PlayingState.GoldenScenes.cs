@@ -43,7 +43,11 @@ public sealed partial class PlayingState
                 : _pauseMenu.Settings.Debug,
             Gameplay = _pauseMenu.Settings.Gameplay with { MaxActiveEnemies = 0, CameraZoom = fixture.Zoom }
         });
-        _simulation.ConfigureOptions(_simulation.Options with { WorldTimeRateMultiplier = 0, PlayerInvulnerable = true });
+        _simulation.ConfigureOptions(_simulation.Options with
+        {
+            WorldTimeRateMultiplier = fixture.Diagnostic?.AdvanceWorldTime == true ? 1 : 0,
+            PlayerInvulnerable = true
+        });
         _goldenCamera = new Vector2(fixture.CameraX ?? _player.Body.Center.X, fixture.CameraY ?? _player.Body.Center.Y);
         if (Vector2.Distance(_goldenCamera, new Vector2(_player.Body.Center.X, _player.Body.Center.Y)) > 256)
         {
@@ -78,7 +82,8 @@ public sealed partial class PlayingState
         var definition = _content!.Projectiles.GetById(id) with
         {
             DamageType = damageType, Damage = 0, Speed = Math.Abs(velocityX),
-            Lifetime = _goldenFixture?.Diagnostic is null ? 60 : _goldenFixture.Frames / 60f + 5,
+            Lifetime = _goldenFixture?.Diagnostic is not { } diagnostic ? 60 :
+                diagnostic.DynamicLightLifetimeTicks > 0 ? diagnostic.DynamicLightLifetimeTicks / 60f : _goldenFixture.Frames / 60f + 5,
             Gravity = 0, DragPerSecond = 0, HomingTurnRateRadiansPerSecond = 0,
             TileCollisionBehavior = ProjectileTileCollisionBehavior.Ignore,
             EntityCollisionBehavior = ProjectileEntityCollisionBehavior.Ignore
@@ -91,6 +96,11 @@ public sealed partial class PlayingState
     private void UpdateGoldenFrame(double deltaSeconds)
     {
         _gameplayFeedback.Update((float)deltaSeconds);
+        if (_goldenFixture?.Diagnostic is { ForceDeviceResetInterval: > 0 } resetDiagnostic &&
+            ((_frameSnapshot?.TickNumber ?? 0) + 1) % resetDiagnostic.ForceDeviceResetInterval == 0)
+        {
+            _graphicsDevice!.Reset(_graphicsDevice.PresentationParameters);
+        }
         EnsurePresentationResources(_pauseMenu.Settings);
         _screenSpaceEffects.SetSceneCaptureRequired(false);
         var (position, zoom) = GoldenCameraAt((_frameSnapshot?.TickNumber ?? 0) + 1);
@@ -114,9 +124,10 @@ public sealed partial class PlayingState
             (_camera.Position, _camera.Zoom) == GoldenCameraAt(fixture.Frames) &&
             (fixture.BiomeId == "forest" ? frame.LivingWorld.BiomeId == "forest" : frame.LivingWorld.CaveProfileId == fixture.BiomeId) &&
             frame.LivingWorld.Weather == fixture.Weather &&
-            Math.Abs(frame.WorldTime.NormalizedTimeOfDay - fixture.TimeOfDay) < 1e-9 &&
+            Math.Abs(frame.WorldTime.NormalizedTimeOfDay - (fixture.TimeOfDay +
+                (fixture.Diagnostic?.AdvanceWorldTime == true ? frame.TickNumber * (double)(1f / 60f) / _worldTime.DayLengthSeconds : 0)) % 1) < 1e-9 &&
             (!fixture.DynamicLights || _goldenDynamicLightsCollected == (fixture.Diagnostic is { } diagnostic
-                ? Math.Min(diagnostic.DynamicLightCount, _lightingRenderer.Quality.Budget.MaxPointLights) : 2));
+                ? (diagnostic.DynamicLightLifetimeTicks > 0 ? 0 : Math.Min(diagnostic.DynamicLightCount, _lightingRenderer.Quality.Budget.MaxPointLights)) : 2));
     }
 
     internal void CaptureGoldenScene(Dictionary<string, object> data)

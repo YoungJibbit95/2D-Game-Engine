@@ -23,7 +23,8 @@ internal static class TileRayCastShadowMaskBuilder
         Span<float> bloom,
         Span<float> scratch,
         int? surfaceTileY = null,
-        Func<int, int>? surfaceHeightResolver = null)
+        Func<int, int>? surfaceHeightResolver = null,
+        LightingPreparationCache? preparationCache = null)
     {
         ArgumentNullException.ThrowIfNull(world);
         var pixelCount = profile.MaskPixelCount;
@@ -33,6 +34,7 @@ internal static class TileRayCastShadowMaskBuilder
         ValidateBuffer(lightBlue, pixelCount, nameof(lightBlue));
         ValidateBuffer(bloom, pixelCount, nameof(bloom));
         ValidateBuffer(scratch, pixelCount, nameof(scratch));
+        preparationCache?.BeginFrame();
 
         if (pixelCount == 0 || visibleWorld.Width <= 0 || visibleWorld.Height <= 0)
         {
@@ -63,13 +65,17 @@ internal static class TileRayCastShadowMaskBuilder
         var occluderSamples = 0L;
 
         PopulateTileSamples(world, visibleWorld, profile.MaskSize, scratch);
-        PopulateAmbientOcclusion(
-            scratch,
-            profile.MaskSize.X,
-            profile.MaskSize.Y,
-            profile.AmbientOcclusionRadius,
-            shadow,
-            ref occluderSamples);
+        if (preparationCache?.TryRestoreAmbient(world, visibleWorld, profile, scratch, shadow) != true)
+        {
+            PopulateAmbientOcclusion(
+                scratch,
+                profile.MaskSize.X,
+                profile.MaskSize.Y,
+                profile.AmbientOcclusionRadius,
+                shadow,
+                ref occluderSamples);
+            preparationCache?.StoreAmbient(shadow);
+        }
         var fallbackSurfaceY = surfaceTileY.HasValue
             ? Math.Clamp(surfaceTileY.Value, 0, Math.Max(0, world.HeightTiles - 1))
             : int.MinValue;
@@ -90,14 +96,18 @@ internal static class TileRayCastShadowMaskBuilder
         }
 
         var topTileY = WorldPixelToTile(visibleWorld.Top);
-        PopulateDiffuseSkyPortalVisibility(
-            scratch,
-            profile.MaskSize.X,
-            profile.MaskSize.Y,
-            visibleWorld,
-            localSurfaceByMaskX,
-            hasSurfaceModel,
-            lightRed);
+        if (preparationCache?.TryRestorePortals(hasSurfaceModel, localSurfaceByMaskX, lightRed) != true)
+        {
+            PopulateDiffuseSkyPortalVisibility(
+                scratch,
+                profile.MaskSize.X,
+                profile.MaskSize.Y,
+                visibleWorld,
+                localSurfaceByMaskX,
+                hasSurfaceModel,
+                lightRed);
+            preparationCache?.StorePortals(hasSurfaceModel, localSurfaceByMaskX, lightRed);
+        }
         Span<int> lightMaskX = stackalloc int[lightCount];
         Span<int> lightMaskY = stackalloc int[lightCount];
         for (var lightIndex = 0; lightIndex < lightCount; lightIndex++)
@@ -931,12 +941,12 @@ internal static class TileRayCastShadowMaskBuilder
         }
     }
 
-    private static double SampleCoordinate(int start, int length, int index, int count)
+    internal static double SampleCoordinate(int start, int length, int index, int count)
     {
         return start + (index + 0.5d) * length / count;
     }
 
-    private static int WorldPixelToTile(double worldPixel)
+    internal static int WorldPixelToTile(double worldPixel)
     {
         return SaturatingFloor(worldPixel / GameConstants.TileSize);
     }

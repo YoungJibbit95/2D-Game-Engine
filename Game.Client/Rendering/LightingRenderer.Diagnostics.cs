@@ -33,6 +33,13 @@ public sealed partial class LightingRenderer
             index < 0 ? 0 : _lightGreen[index], index < 0 ? 0 : _lightBlue[index],
             index < 0 ? 0 : _bloomValues[index],
             ResourcesPrepared ? (long)_quality.MaskPixelCount * 4 * (_reflectionMap is null ? 9 : 12) : 0,
-            index >= 0);
+            index >= 0,
+            prepared ? LastPreparationReuseTelemetry.AmbientHits : 0,
+            prepared ? LastPreparationReuseTelemetry.PortalHits : 0,
+            prepared ? LastPreparationReuseTelemetry.Lookups : 0,
+            prepared ? LastPreparationReuseTelemetry.Bypasses : 0,
+            prepared ? LastPreparationReuseTelemetry.DependencySamples : 0,
+            prepared ? LastPreparationReuseTelemetry.CopiedBytes : 0,
+            PreparationCachePayloadBytes);
     }
 }

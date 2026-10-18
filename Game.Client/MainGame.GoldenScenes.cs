@@ -89,6 +89,8 @@ public sealed partial class MainGame
             ["ClientAssemblySHA256"] = _goldenClientAssemblyHash,
             ["CoreAssemblySHA256"] = _goldenCoreAssemblyHash,
             ["GPUTime"] = "unknown",
+            ["LightingPreparationReuse"] = _states.CurrentState is PlayingState playing
+                ? (playing.LightingPreparationReuseEnabled ? "on" : "off") : "not-applicable",
             ["SoftwareFrameRateLimit"] = FramePacingPolicy.Resolve(_settings.Video).SoftwareFrameRateLimit.ToString(System.Globalization.CultureInfo.InvariantCulture),
             ["PresentationInterval"] = GraphicsDevice.PresentationParameters.PresentationInterval.ToString(),
             ["TimingPolicy"] = _smokeOptions.GoldenFixture.Diagnostic is null

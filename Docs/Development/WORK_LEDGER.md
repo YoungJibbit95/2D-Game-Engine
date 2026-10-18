@@ -2,9 +2,15 @@
 
 # YjsE Work Ledger
 
-Last updated: 2026-10-18 (PR-0C rendering/lighting diagnostic baseline)
+Last updated: 2026-10-18 (PR-0D dependency-safe lighting preparation reuse)
 
 ## Active Work
+
+- Current user-directed work is PR-0D after the human merge of PR-0C at `de83468aa7e5d19f43634ae1df6935299f9d83d2`; isolated worktree `F:\Coding\YJsE-PR-0D`, branch `codex/yjse-p0-004-lighting-reuse`. Original dirty checkout and separate art/tree streams remain untouched. Commit/push/PR authorization persists; no automatic merge.
+- Implemented one bounded raw AO/sky-portal prefix cache with exact freshly sampled Light/occlusion data, chunk-reference/absence and surface-column comparison; conservative world/session/camera/profile/resource invalidation. Public mutable arrays prevent trustworthy setter-only versions, so no partial revision scheme was introduced. Source/solar/weather/flicker math, temporal/history, encoding/upload and full Prepare cadence continue unchanged. Env/property fallback preserves the original path. Core/Data/original four references are unchanged.
+- Eleven focused cache regressions and the lifecycle-input contract cover dependency boundaries, bitwise five-plane parity, temporal settling, capacity and 0 B hit/miss work. Local Debug/Release zero-warning builds pass 1,749 ordinary + four isolated strict contracts per configuration; all 21 Release classes/39 tests, quick harness, style, Python 29+8+13+7 regressions, strict audits and unchanged previews pass. Initial real nine-scene ON/OFF comparisons are exact; actual advancing-clock/source-expiry/device-reset captures show three rebuilds and matching ON/OFF pixels. Repeated native calibration and hosted-head evidence govern completion; see `PR_0D_LIGHTING_PREPARATION_REUSE.md`. No performance gain or bloom/cave-line correction is claimed before measurements.
+
+### Previous PR-0C evidence
 
 - Current user-directed work is PR-0C after the human-reviewed merge of PR-0B at `38bea1c00dbedb93c570bf0472c0362746224316`. Isolated worktree `F:\Coding\YJsE-PR-0C`, branch `codex/yjse-p0-003-lighting-diagnostics`, [PR #8](https://github.com/YoungJibbit95/2D-Game-Engine/pull/8). Frozen executable/report source is `1ecfaaa4369a362001228239505fe2f435ac0d16`. Commits/push/PR are authorized; automatic merge is prohibited. Original `main` checkout and its pre-existing changes remain untouched.
 - Delivered bounded opt-in raw CPU/work/upload recording through the existing smoke runner, nine deterministic unpaced diagnostic fixtures, strict report/clipping artifacts and repeat checks. GPU execution/transfer completion stays unknown; `LightingGpuUpload` is CPU submission/copy/wait time. All four original Golden fixture/reference trees, Core, sample content, worldgen and lighting calculations remain unchanged. No candidate renderer/lighting implementation ships.
@@ -301,7 +307,7 @@ Raw local artifacts remain under ignored `artifacts/`, including `performance-li
 
 ## Exact Next Action
 
-Hand off PR-0C / [PR #8](https://github.com/YoungJibbit95/2D-Game-Engine/pull/8) for human review/manual integration after final-head normal checks pass. Review the native CPU/upload ranges, clipping/endpoint evidence and explicit unknowns in `PR_0C_RENDERING_LIGHTING_DIAGNOSTICS.md`, then accept or revise the decision in `PR_0C_LIGHTING_DECISION.md`. Do not merge automatically. After manual integration and a separate implementation instruction, start one medium-sized pixel-preserving preparation-reuse experiment: first add transient output/geometry/residency dependency versions with halo/source/sun/weather/session invalidation tests, then benchmark bounded reuse against these unchanged references. Keep chunk RGB/shader composition optional and separate; do not begin combined Renderer/Lighting/Worldgen replacement or replace Golden references automatically.
+Complete PR-0D's frozen-code native BEFORE/OFF/ON calibration and exact image/state comparison, record actual Prepare/Mask/Upload/frame/allocation/cache observations, then validate final-head Windows/Ubuntu Debug/Release CI and hand off for human review/manual integration. Preserve the original four references and separate art/tree streams. Do not merge automatically, infer GPU time from CPU scopes or describe this cache as a bloom/cave-artifact fix. The next implementation decision follows the measured results; no RGB/shader/worldgen rollout starts automatically.
 
 Historical Session 0 resume action (superseded by the user's Sprint 0 request):
 

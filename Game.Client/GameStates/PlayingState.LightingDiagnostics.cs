@@ -5,6 +5,7 @@ namespace Game.Client.GameStates;
 
 public sealed partial class PlayingState
 {
+    internal bool LightingPreparationReuseEnabled => _lightingRenderer.PreparationReuseEnabled;
     private long _diagnosticPrepares;
     private long _diagnosticUploads;
     private long _diagnosticUploadBytes;

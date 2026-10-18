@@ -78,6 +78,25 @@ public sealed class LightingDiagnosticTests
     }
 
     [Fact]
+    public void LifecycleInputsAreBoundedAndOmittedFromExistingFixtureIdentity()
+    {
+        var options = new LightingDiagnosticOptions();
+        using var json = JsonDocument.Parse(JsonSerializer.Serialize(options));
+        foreach (var field in new[] { "AdvanceWorldTime", "ForceDeviceResetInterval", "DynamicLightLifetimeTicks" })
+        {
+            Assert.False(json.RootElement.TryGetProperty(field, out _));
+        }
+        var fixture = new GoldenSceneFixture
+        {
+            SceneId = "reuse_lifecycle", Frames = 480, WarmupFrames = 120, DynamicLights = true,
+            Diagnostic = options with { AdvanceWorldTime = true, ForceDeviceResetInterval = 113, DynamicLightLifetimeTicks = 240 }
+        };
+        fixture.Validate();
+        Assert.Throws<InvalidDataException>(() => (fixture with { Diagnostic = fixture.Diagnostic with { ForceDeviceResetInterval = 59 } }).Validate());
+        Assert.Throws<InvalidDataException>(() => (fixture with { Diagnostic = fixture.Diagnostic with { DynamicLightLifetimeTicks = 421 } }).Validate());
+    }
+
+    [Fact]
     [Trait("Category", "StrictAllocation")]
     public void RecorderAddsNoSteadyStateAllocation()
     {

@@ -1,11 +1,15 @@
 
 # YjsE Capability Matrix
 
-Last updated: 2026-10-18 for PR-0C rendering/lighting diagnostic evidence
+Last updated: 2026-10-18 for PR-0D dependency-safe prefix reuse
 
 Capability status values are limited to `verified`, `implemented-unverified`, `partial`, `planned`, `blocked`, and `deprecated`. Local evidence is never presented as a hosted Windows/Ubuntu result.
 
 ## Validation Baseline
+
+- PR-0C is human-integrated at `de83468`; PR-0D is active in isolated `codex/yjse-p0-004-lighting-reuse`. Bounded exact-input AO/portal reuse is `partial` pending full native calibration and hosted-head gates; original source/temporal math, Core/Data and all four Golden reference trees remain unchanged. See `PR_0D_LIGHTING_PREPARATION_REUSE.md`. No performance or visual correction claim precedes measured evidence.
+
+Previous PR-0C evidence:
 
 - PR-0B is manually integrated in `master` at `38bea1c`. Current PR-0C uses isolated branch `codex/yjse-p0-003-lighting-diagnostics`; original checkout changes remain preserved. See [PR #8](https://github.com/YoungJibbit95/2D-Game-Engine/pull/8), `PR_0C_RENDERING_LIGHTING_DIAGNOSTICS.md` and `PR_0C_LIGHTING_DECISION.md`. Frozen implementation `1ecfaaa` passes complete [hosted run 39112516623](https://github.com/YoungJibbit95/2D-Game-Engine/actions/runs/39112516623): Website, Windows/Ubuntu Debug/Release, 1,738 ordinary + three strict allocation contracts per cell, unchanged 21 Release timing classes/39 tests per OS, original smokes/Goldens and nine diagnostic pairs per cell. Final PR-head checks remain authoritative.
 - Opt-in diagnostics retain the original four Golden fixtures/baselines, Core, content and worldgen byte-identically. Fifty-four native uncapped Release captures (nine scenarios, 1080p/1440p, three processes, 1,500 measured frames each) pass raw report/repeat contracts; twenty additional extrema captures form ten exact pairs. Versioned CPU/upload observations include actual DLL hashes, source fixture identities and uncertainties; GPU execution and physical bus traffic remain unknown. No candidate optimization is implemented or claimed faster.

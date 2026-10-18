@@ -58,7 +58,7 @@ public sealed partial class LightingRenderer : IDisposable
     private TextureUploadContentTracker _bloomContent;
     private TextureUploadContentTracker _reflectionContent;
 
-    public bool ResourcesPrepared => _shadowMap is not null;
+    public bool ResourcesPrepared => !_deviceResourcesInvalidated && _shadowMap is not null;
 
     public PresentationQualityProfile Quality => _quality;
 
@@ -182,6 +182,7 @@ public sealed partial class LightingRenderer : IDisposable
         _previousLightRed = new float[count];
         _previousLightGreen = new float[count];
         _previousLightBlue = new float[count];
+        CreatePreparationReuseResources(graphicsDevice);
     }
 
     public LightingBuildTelemetry PrepareFrame(
@@ -215,6 +216,7 @@ public sealed partial class LightingRenderer : IDisposable
 
         var visibleWorld = camera.VisibleWorldRect;
         DiagnosticPrepareExecutions++;
+        var preparationCache = PrepareReuseFrame(camera, viewport);
         using (performance?.Measure("Presentation.LightingMaskCpu", 1.25) ?? default)
         {
             LastTelemetry = TileRayCastShadowMaskBuilder.Build(
@@ -230,8 +232,11 @@ public sealed partial class LightingRenderer : IDisposable
                 _bloomValues,
                 _scratch,
                 surfaceTileY,
-                surfaceHeightResolver);
+                surfaceHeightResolver,
+                preparationCache);
         }
+        LastPreparationReuseTelemetry = preparationCache?.LastTelemetry ??
+            new LightingPreparationReuseTelemetry(0, 0, 0, 1, 0, 0, PreparationCachePayloadBytes);
 
         var canUseHistory = _hasLightingHistory &&
             frame.FrameIndex > _previousLightingFrameIndex &&
@@ -641,7 +646,7 @@ public sealed partial class LightingRenderer : IDisposable
         Rectangle viewport,
         in PresentationQualityProfile profile)
     {
-        return _shadowMap is { IsDisposed: false } &&
+        return !_deviceResourcesInvalidated && _shadowMap is { IsDisposed: false } &&
             _shadowUploadMap is { IsDisposed: false } &&
             _shadowSpareMap is { IsDisposed: false } &&
             (!_quality.EnableReflections ||
@@ -655,6 +660,7 @@ public sealed partial class LightingRenderer : IDisposable
 
     private void ReleaseResources()
     {
+        ReleasePreparationReuseResources();
         _shadowMap?.Dispose();
         _coloredLightMap?.Dispose();
         _bloomMap?.Dispose();

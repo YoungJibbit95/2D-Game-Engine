@@ -8,7 +8,10 @@ public readonly record struct LightingDiagnosticFrame(
     int MaskWidth, int MaskHeight, long RaysCast, long OccluderSamples, int PointLightsUsed,
     int ReprojectedPixels, int RejectedPixels, bool HistoryReset,
     float ProbeShadow, float ProbeRed, float ProbeGreen, float ProbeBlue, float ProbeBloom,
-    long EstimatedTextureBytes, bool ProbeAvailable = true);
+    long EstimatedTextureBytes, bool ProbeAvailable = true,
+    long AmbientCacheHits = 0, long PortalCacheHits = 0, long CacheLookups = 0,
+    long CacheBypasses = 0, long DependencySamples = 0, long CacheCopyBytes = 0,
+    long CachePayloadBytes = 0);
 
 public readonly record struct LightingDiagnosticSample(int Frame, double Milliseconds, long AllocatedBytes);
 public sealed record LightingDiagnosticScope(string Name, LightingDiagnosticSample[] Samples);
