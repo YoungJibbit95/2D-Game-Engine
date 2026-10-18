@@ -4,13 +4,19 @@
 from __future__ import annotations
 
 from hashlib import sha256
+from io import BytesIO
+import argparse
 import json
 from pathlib import Path
+import sys
 
 from PIL import Image, ImageDraw, ImageFont
 
 
 DATA_ROOT = Path(__file__).resolve().parents[3]
+sys.path.insert(0, str(DATA_ROOT / "art_direction" / "tools"))
+from preview_integrity import preview_contract_matches
+
 MANIFEST = DATA_ROOT / "assets" / "wave05_living_world.sprites.json"
 OUTPUT = DATA_ROOT / "art_direction" / "wave_05_living_world_preview.png"
 SUMMARY = DATA_ROOT / "art_direction" / "wave_05_living_world_preview_summary.json"
@@ -38,6 +44,10 @@ def checker(width: int, height: int, first, second) -> Image.Image:
 
 
 def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--check-existing", action="store_true",
+                        help="Check exact image pixels and all summary metadata without replacing references.")
+    args = parser.parse_args()
     payload = json.loads(MANIFEST.read_text(encoding="utf-8"))
     sprites = payload["sprites"]
     backgrounds = [entry for entry in sprites if entry["category"] == "Background"]
@@ -95,20 +105,29 @@ def main() -> None:
         y += ((len(entries) + 3) // 4) * 210 + 10
 
     used = canvas.crop((0, 0, canvas.width, min(canvas.height, y + 20)))
-    OUTPUT.parent.mkdir(parents=True, exist_ok=True)
-    used.save(OUTPUT, "PNG", optimize=False, compress_level=9)
+    encoded = BytesIO()
+    used.save(encoded, "PNG", optimize=False, compress_level=9)
+    generated_bytes = encoded.getvalue()
     summary = {
         "waveId": "wave_05_living_world_production",
         "preview": "art_direction/wave_05_living_world_preview.png",
         "dimensions": list(used.size),
-        "sha256": sha256(OUTPUT.read_bytes()).hexdigest(),
+        "sha256": sha256(generated_bytes).hexdigest(),
         "assetCount": len(sprites),
         "categoryCounts": {category: sum(entry["category"] == category for entry in sprites) for category in sorted({entry["category"] for entry in sprites})},
         "integerScales": [1, 2, 3, 4, 5],
         "backgroundFields": ["light", "dark"],
         "parallax": seam_records,
     }
-    SUMMARY.write_text(json.dumps(summary, indent=2) + "\n", encoding="utf-8")
+    if args.check_existing:
+        if not preview_contract_matches(generated_bytes, summary, OUTPUT.read_bytes(),
+                                        json.loads(SUMMARY.read_text(encoding="utf-8"))):
+            raise SystemExit("Wave05 preview pixels or summary metadata differ from the checked-in reference.")
+        print("Wave05 preview pixels and summary metadata match the checked-in reference.")
+    else:
+        OUTPUT.parent.mkdir(parents=True, exist_ok=True)
+        OUTPUT.write_bytes(generated_bytes)
+        SUMMARY.write_text(json.dumps(summary, indent=2) + "\n", encoding="utf-8")
     print(json.dumps(summary, indent=2))
 
 

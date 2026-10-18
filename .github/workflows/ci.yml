@@ -151,7 +151,7 @@ jobs:
         if: matrix.configuration == 'Debug'
         shell: pwsh
         run: |
-          python Game.Data/assets/Wave05/tools/build_wave05_preview.py
+          python Game.Data/assets/Wave05/tools/build_wave05_preview.py --check-existing
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           git diff --exit-code -- Game.Data/art_direction/wave_05_living_world_preview.png Game.Data/art_direction/wave_05_living_world_preview_summary.json
 

@@ -10,6 +10,7 @@ import json
 from pathlib import Path
 
 from PIL import Image, ImageDraw
+from preview_integrity import previews_match
 
 
 SPRITE_IDS = (
@@ -94,17 +95,6 @@ def build_preview(assets: list[tuple[str, Image.Image]]) -> Image.Image:
     return sheet
 
 
-def previews_match(generated_bytes: bytes, existing_bytes: bytes) -> bool:
-    # Pillow wheels can use different PNG/zlib encoders across operating systems.
-    # Keep exact image equality without making compression bytes a visual contract.
-    with Image.open(BytesIO(generated_bytes)) as generated, Image.open(BytesIO(existing_bytes)) as existing:
-        return (
-            generated.mode == existing.mode
-            and generated.size == existing.size
-            and generated.tobytes() == existing.tobytes()
-        )
-
-
 def main() -> None:
     args = parse_args()
     assets = load_assets(args.data_root, args.manifest)
@@ -127,7 +117,7 @@ def main() -> None:
         args.check_existing is not None
         and args.output.resolve() == args.check_existing.resolve()
     )
-    if matches_existing or not same_output_as_check:
+    if not same_output_as_check:
         args.output.parent.mkdir(parents=True, exist_ok=True)
         args.output.write_bytes(generated_bytes)
         print(f"wrote {args.output} ({preview.width}x{preview.height})")
