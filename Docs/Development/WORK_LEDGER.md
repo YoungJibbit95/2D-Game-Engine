@@ -13,6 +13,7 @@ Last updated: 2026-10-18 (PR-0A cross-platform asset integrity and release CI)
 - Added cross-platform case-sensitive audit/website regressions, respected mod SourceRoots and retained aliases. Five new regression cases failed on Windows before the fix and pass afterward. Runtime texture validation remains strict.
 - Published Main Menu, World Select and real Forest gameplay captures pass locally: 263 resources, 1,518 frames, zero invalid resources. Forest screenshot visually inspected. The wrapper verifies fresh PNG/JSON results, gameplay telemetry and process deadlines; native rendering code is unchanged.
 - Current gate commands, review, local artifacts, hosted CI and rollback are recorded in `PR_0A_ASSET_CI.md`. Older evidence below is historical and must not be mistaken for this branch's hosted result.
+- PR [#6](https://github.com/YoungJibbit95/2D-Game-Engine/pull/6) opened as draft; reviewed initial commit `88db61b`. Its first hosted run passed Website, Windows Debug and Ubuntu Release (including all three real Mesa smokes), but exposed Ubuntu's PNG-compression-only UI-preview mismatch. Exact image equality and five negative/positive Python fixtures correct that additional cross-platform gate; the checked-in image remains unchanged. Final hosted acceptance is still required.
 
 - Active epic: Epic 2 - Living Sandbox And Developer Experience
 - Active milestone: Milestone 5 - reduce authoritative snapshot/query costs and calibrate high-entity/streaming workloads

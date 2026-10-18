@@ -143,6 +143,10 @@ jobs:
           --output artifacts/ui-sample-preview.png
           --check-existing Game.Data/art_direction/ui_sample_preview.png
 
+      - name: Validate exact preview image comparison
+        if: matrix.configuration == 'Debug'
+        run: python -m unittest discover -s Game.Data/art_direction/tools -p test_ui_sample_preview.py
+
       - name: Verify deterministic Wave05 preview
         if: matrix.configuration == 'Debug'
         shell: pwsh

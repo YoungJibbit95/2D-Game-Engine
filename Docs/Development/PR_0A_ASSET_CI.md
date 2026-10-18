@@ -2,6 +2,7 @@
 
 Date: 2026-10-18. Branch: `codex/yjse-p0-001-asset-ci`.
 Base: `5ceb115420cc91ae2cdd36d0b63e4c8c476e05ee` (`origin/master`).
+Pull request: [#6](https://github.com/YoungJibbit95/2D-Game-Engine/pull/6). Initial reviewed implementation: `88db61b6d7fcbe7b28da9af2b516e2d2afb50ec2`.
 Integrator: Codex lead. Asset and CI investigators: two real read-only subagents; independent integrated-diff review uses the asset investigator. Only the lead writes this worktree.
 Authorization: feature branch, commits, push and PR explicitly permitted by the user; no merge or force-push.
 
@@ -14,6 +15,8 @@ All 268 authored sprites were checked against actual enumerated file names with 
 Historical failed engine CI, independently inspected: [run 31577193431](https://github.com/YoungJibbit95/2D-Game-Engine/actions/runs/31577193431). Ubuntu Release fails strict texture preload; Ubuntu Debug fails Wave05 audit; website fails source-file validation. Windows Release fails before frame 1 because the hosted system OpenGL lacks framebuffer-object extensions. These are baseline failures, not results of this PR.
 
 Current clean locked restore also fails `NU1902` for MessagePack 3.1.8. The minimal patch update to 3.1.9 and all four lockfiles retains warnings-as-errors. [Upstream advisory and patched version](https://github.com/advisories/GHSA-qhrr-8q5h-9q3h).
+
+The first PR CI uncovered an additional pre-existing cross-OS UI-preview problem previously hidden behind the failing asset audit. [Ubuntu Debug job](https://github.com/YoungJibbit95/2D-Game-Engine/actions/runs/39105463555/job/117610219690) generated a different PNG byte hash with Pillow 12.3.0. Its downloaded artifact has exactly the same RGB mode, 648x992 dimensions and every pixel as the checked-in preview (zero differing pixels). The UI preview gate now compares exact decoded mode/dimensions/pixels; PNG compression is not a visual contract. Five Python tests prove compression independence and rejection of a one-pixel change, different size/mode/alpha or invalid PNG. No reference image is replaced and no pixel tolerance or skip is introduced.
 
 ## Delivered behavior
 
@@ -42,7 +45,7 @@ Commands below run in the isolated worktree; detailed logs/TRX/JSON/images are u
 | Debug build / functional tests | pass | `dotnet build YjsE.sln -c Debug --no-restore --nologo --warnaserror`; workflow functional filter; 1,725/1,725; `artifacts/debug-build.log`, `test-results/debug-functional.trx` |
 | Release build / functional tests | pass | Same commands with Release; 1,725/1,725; `artifacts/release-build.log`, `test-results/release-functional.trx` |
 | Strict main / Wave05 audits | pass | Existing `audit_sprites.py --fail-on-hard-issues` commands, corrected `--scan-root assets/Wave05`; `artifacts/asset-audit*.json`: zero hard issues |
-| Deterministic previews | pass | Existing UI `--check-existing`; `python Game.Data/assets/Wave05/tools/build_wave05_preview.py` then `git diff --exit-code` on PNG/summary: unchanged |
+| Deterministic previews | pass locally | UI `--check-existing` compares exact decoded image; five Python regressions and actual Ubuntu artifact verified. Wave05 generator followed by `git diff --exit-code` on PNG/summary: unchanged |
 | Website | pass | `npm ci`, `npm run validate`; Node path fixture, Svelte check/build, 26 docs, 30 byte-exact source copies; `artifacts/website.log` |
 | Published GPU smokes | pass | `dotnet publish Game.Client/Game.Client.csproj -c Release --no-restore --output F:\Coding\YJsE-PR-0A-publish`; `tools/run_client_smokes.ps1`: three real native-GPU states, 263 resources / 1,518 frames / 0 invalid |
 | Missing-asset negative smoke | pass | Temporarily removed published `marsh_frog.png`; all three states rejected it with exit 1, despite older successful captures; restored the file in `finally`. `artifacts/client-smoke-negative.log` |
@@ -55,7 +58,7 @@ Visual evidence: 640x360, 30 frames with 10 warmup frames, 60 FPS cap. Forest/da
 
 ## Review, risk and rollback
 
-Independent read-only integrated-diff review: pass after correcting the review finding for null/empty/whitespace SourceRoots and adding corresponding regression cases. No open findings. Reviewer did not execute tests; test evidence above was executed by the lead. Hosted run links will be recorded after execution. Until required hosted gates pass, this is a draft candidate.
+Independent read-only integrated-diff review: pass for `88db61b` after correcting the review finding for null/empty/whitespace SourceRoots and adding corresponding regression cases. Follow-up UI-preview exact-pixel fix also reviewed with no findings. Reviewer did not execute tests; test evidence above was executed by the lead. Hosted run links will be recorded after execution. Until required hosted gates pass, this is a draft candidate.
 
 Mesa is a rolling distribution: action/installer are pinned but the signed package dependency closure is resolved at run time and recorded, not frozen as a distribution snapshot. A package/graphics failure must fail CI; there is no placeholder, skip or success fallback. Existing palette/silhouette review debt is unaffected. Save/load and negative-X behavior are covered by the unchanged full functional suite; renderer-neutral Core boundaries remain intact.
 
