@@ -45,10 +45,16 @@ public sealed partial class MainGame : Microsoft.Xna.Framework.Game
     private int _drawnFrames;
     private bool _clientDisposed;
     private long _previousDrawStartedAt;
+    private readonly LightingDiagnosticRecorder? _lightingDiagnosticRecorder;
 
     public MainGame(ClientSmokeOptions? smokeOptions = null)
     {
         _smokeOptions = smokeOptions;
+        if (smokeOptions?.GoldenFixture is { Diagnostic: not null } diagnosticFixture)
+        {
+            _lightingDiagnosticRecorder = new LightingDiagnosticRecorder(diagnosticFixture.Frames - diagnosticFixture.WarmupFrames);
+            _frameTimes = new FrameTimeTelemetryWindow(diagnosticFixture.Frames - diagnosticFixture.WarmupFrames);
+        }
         if (smokeOptions?.GoldenFixture is not null)
         {
             GoldenSceneFixture.RequireEmptyUserRoot(Environment.GetEnvironmentVariable(ClientPaths.UserDataRootEnvironmentVariable));
@@ -246,6 +252,15 @@ public sealed partial class MainGame : Microsoft.Xna.Framework.Game
 
         _rendererMetrics.EndFrame(RendererMetricCounters.Capture(GraphicsDevice.Metrics));
         _time.RecordDrawFrame();
+        if (_lightingDiagnosticRecorder is not null && _smokeOptions is { } diagnosticOptions &&
+            _drawnFrames >= diagnosticOptions.WarmupFrames && _states.CurrentState is PlayingState diagnosticState)
+        {
+            _lightingDiagnosticRecorder.Record(diagnosticState.CaptureLightingDiagnosticFrame(_drawnFrames + 1), _performance);
+        }
+        else if (_lightingDiagnosticRecorder is not null && _states.CurrentState is PlayingState warmingState)
+        {
+            warmingState.ResetLightingDiagnosticCounters(resetCorePhases: true);
+        }
         CaptureSmokeFrameWhenReady();
 
         base.Draw(gameTime);
@@ -441,6 +456,9 @@ public sealed partial class MainGame : Microsoft.Xna.Framework.Game
                 GoldenScene = CaptureGoldenScene(),
                 CaptureEnvironment = CaptureGoldenEnvironment(),
                 BenchmarkContext = CaptureBenchmarkContext(),
+                LightingDiagnostics = _lightingDiagnosticRecorder?.Capture(),
+                CorePhaseTelemetry = _lightingDiagnosticRecorder is not null && _states.CurrentState is PlayingState coreDiagnosticState
+                    ? coreDiagnosticState.CaptureCorePhaseTelemetry() : null,
                 FrameTiming = _frameTimes.Capture(),
                 RendererMetrics = _rendererMetrics.Capture(),
                 Gameplay = (_states.CurrentState as IClientGameplaySmokeTelemetryProvider)?

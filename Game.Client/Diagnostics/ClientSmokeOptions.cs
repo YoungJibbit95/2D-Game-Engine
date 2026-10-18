@@ -279,7 +279,7 @@ public sealed record ClientSmokeOptions(
         {
             GoldenFixture = fixture, StartState = fixture.StartState,
             Frames = fixture.Frames, WarmupFrames = fixture.WarmupFrames,
-            Width = fixture.Width, Height = fixture.Height, FrameRateLimit = 60,
+            Width = fixture.Width, Height = fixture.Height, FrameRateLimit = fixture.Diagnostic is null ? 60 : 0,
             ForcedBiomeId = fixture.StartState == ClientSmokeStartState.Playing ? fixture.BiomeId : null,
             ForcedTimeOfDay = fixture.TimeOfDay, ForcedWeather = fixture.Weather,
             ForcedWeatherIntensity = 0, UseConfiguredVideoSettings = false,
@@ -355,6 +355,10 @@ public sealed record ClientSmokeResult(
     public IReadOnlyDictionary<string, object>? GoldenScene { get; init; }
     public IReadOnlyDictionary<string, string>? CaptureEnvironment { get; init; }
     public IReadOnlyDictionary<string, string>? BenchmarkContext { get; init; }
+    [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public LightingDiagnosticCapture? LightingDiagnostics { get; init; }
+    [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public Game.Core.Runtime.SimulationPhaseTelemetrySnapshot? CorePhaseTelemetry { get; init; }
     public IReadOnlyList<PerformanceMetricSnapshot> PerformanceMetrics { get; init; } =
         Array.Empty<PerformanceMetricSnapshot>();
 

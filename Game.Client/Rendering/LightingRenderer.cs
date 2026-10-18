@@ -10,7 +10,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace Game.Client.Rendering;
 
-public sealed class LightingRenderer : IDisposable
+public sealed partial class LightingRenderer : IDisposable
 {
     private readonly PresentationPassDescriptor[] _passes =
         new PresentationPassDescriptor[PresentationPassPlanner.MaximumPassCount];
@@ -148,6 +148,7 @@ public sealed class LightingRenderer : IDisposable
         _quality = profile;
         _resourceViewport = viewport;
         var width = profile.MaskSize.X;
+        DiagnosticResourceRebuilds++;
         var height = profile.MaskSize.Y;
         _shadowMap = new Texture2D(graphicsDevice, width, height, false, SurfaceFormat.Color);
         _coloredLightMap = new Texture2D(graphicsDevice, width, height, false, SurfaceFormat.Color);
@@ -213,6 +214,7 @@ public sealed class LightingRenderer : IDisposable
         }
 
         var visibleWorld = camera.VisibleWorldRect;
+        DiagnosticPrepareExecutions++;
         using (performance?.Measure("Presentation.LightingMaskCpu", 1.25) ?? default)
         {
             LastTelemetry = TileRayCastShadowMaskBuilder.Build(
@@ -257,10 +259,13 @@ public sealed class LightingRenderer : IDisposable
             LastTemporalTelemetry = new LightingTemporalStabilizationTelemetry(0, 0, true);
         }
 
-        _shadowValues.AsSpan(0, _quality.MaskPixelCount).CopyTo(_previousShadowValues);
-        _lightRed.AsSpan(0, _quality.MaskPixelCount).CopyTo(_previousLightRed);
-        _lightGreen.AsSpan(0, _quality.MaskPixelCount).CopyTo(_previousLightGreen);
-        _lightBlue.AsSpan(0, _quality.MaskPixelCount).CopyTo(_previousLightBlue);
+        using (performance?.Measure("Presentation.LightingHistoryCopy", 0.1) ?? default)
+        {
+            _shadowValues.AsSpan(0, _quality.MaskPixelCount).CopyTo(_previousShadowValues);
+            _lightRed.AsSpan(0, _quality.MaskPixelCount).CopyTo(_previousLightRed);
+            _lightGreen.AsSpan(0, _quality.MaskPixelCount).CopyTo(_previousLightGreen);
+            _lightBlue.AsSpan(0, _quality.MaskPixelCount).CopyTo(_previousLightBlue);
+        }
         _previousVisibleWorld = visibleWorld;
         _previousLightingFrameIndex = frame.FrameIndex;
         _hasLightingHistory = true;
@@ -433,6 +438,8 @@ public sealed class LightingRenderer : IDisposable
         LastTextureUploadSkippedCount = uploadCandidateCount - LastTextureUploadCount;
         TotalTextureUploadCount += LastTextureUploadCount;
         TotalTextureUploadSkippedCount += LastTextureUploadSkippedCount;
+        DiagnosticUploadCalls += LastTextureUploadCount;
+        DiagnosticUploadBytes += LastTextureUploadCount * (long)_quality.MaskPixelCount * 4;
 
         _hasColoredLight = hasColoredLight;
         _hasBloom = hasBloom;

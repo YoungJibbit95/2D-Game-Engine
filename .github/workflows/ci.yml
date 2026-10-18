@@ -114,6 +114,9 @@ jobs:
       - name: Validate golden image comparison contracts
         run: python -m unittest discover -s tools -p test_golden_scene_compare.py
 
+      - name: Validate lighting diagnostic report contracts
+        run: python -m unittest discover -s tools -p test_lighting_diagnostic_report.py
+
       - name: Run strict sprite audit
         if: matrix.configuration == 'Debug'
         run: >-
@@ -275,6 +278,7 @@ jobs:
           Get-FileHash -Algorithm SHA256 -LiteralPath $env:SDL_OPENGL_LIBRARY, (Join-Path $mesaBin 'libgallium_wgl.dll')
           & ./tools/run_client_smokes.ps1 -PublishRoot '${{ runner.temp }}/yjse-client-publish' -OutputDirectory artifacts/client-smokes
           & ./tools/run_golden_scenes.ps1 -PublishRoot '${{ runner.temp }}/yjse-client-publish' -OutputDirectory artifacts/golden-scenes
+          & ./tools/run_lighting_diagnostics.ps1 -PublishRoot '${{ runner.temp }}/yjse-client-publish' -OutputDirectory artifacts/lighting-diagnostics
 
       - name: Run published client smokes on Ubuntu Mesa
         if: runner.os == 'Linux'
@@ -299,6 +303,18 @@ jobs:
           pwsh -NoProfile -File tools/run_golden_scenes.ps1
           -PublishRoot "${{ runner.temp }}/yjse-client-publish"
           -OutputDirectory artifacts/golden-scenes
+
+      - name: Run unpaced lighting diagnostics on Ubuntu Mesa
+        if: runner.os == 'Linux'
+        timeout-minutes: 8
+        env:
+          LIBGL_ALWAYS_SOFTWARE: "1"
+          SDL_AUDIODRIVER: dummy
+        run: >-
+          xvfb-run -a
+          pwsh -NoProfile -File tools/run_lighting_diagnostics.ps1
+          -PublishRoot "${{ runner.temp }}/yjse-client-publish"
+          -OutputDirectory artifacts/lighting-diagnostics
 
       - name: Upload test results
         if: always()
@@ -344,4 +360,12 @@ jobs:
         with:
           name: golden-scenes-${{ matrix.os }}-${{ matrix.configuration }}
           path: artifacts/golden-scenes/
+          if-no-files-found: warn
+
+      - name: Upload lighting diagnostic captures, traces and reports
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: lighting-diagnostics-${{ matrix.os }}-${{ matrix.configuration }}
+          path: artifacts/lighting-diagnostics/
           if-no-files-found: warn

@@ -24,6 +24,8 @@ public sealed record GoldenSceneFixture
     public float? CameraY { get; init; }
     public int Frames { get; init; } = 180;
     public int WarmupFrames { get; init; } = 60;
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public LightingDiagnosticOptions? Diagnostic { get; init; }
 
     public static GoldenSceneFixture Load(string path)
     {
@@ -43,15 +45,17 @@ public sealed record GoldenSceneFixture
             SceneId.Any(c => !char.IsAsciiLetterOrDigit(c) && c != '_') ||
             StartState is not (ClientSmokeStartState.Playing or ClientSmokeStartState.WorldSelect) ||
             !double.IsFinite(TimeOfDay) || TimeOfDay is < 0 or >= 1 || !Enum.IsDefined(Weather) ||
-            Width is < 640 or > 1920 || Height is < 360 or > 1080 ||
+            Width < 640 || Width > (Diagnostic is null ? 1920 : 2560) ||
+            Height < 360 || Height > (Diagnostic is null ? 1080 : 1440) ||
             !float.IsFinite(Zoom) || Zoom is < 1 or > 4 ||
             CameraX.HasValue != CameraY.HasValue ||
             (CameraX is { } x && !float.IsFinite(x)) || (CameraY is { } y && !float.IsFinite(y)) ||
-            Frames is < 120 or > 512 || WarmupFrames < 1 || Frames - WarmupFrames < 60 ||
+            Frames < 120 || Frames > (Diagnostic is null ? 512 : 4096) || WarmupFrames < 1 || Frames - WarmupFrames < 60 ||
             (StartState == ClientSmokeStartState.Playing && BiomeId is not ("forest" or "crystal_depths")))
         {
             throw new InvalidDataException("Invalid version, scene identity, state, camera, clock or sample window in golden fixture.");
         }
+        Diagnostic?.Validate(this);
     }
 
     public static void RequireEmptyUserRoot(string? root)
