@@ -1,5 +1,6 @@
 using Game.Client.Diagnostics;
 using Game.Client.GameStates;
+using Game.Client.Rendering.Performance;
 using Microsoft.Xna.Framework.Graphics;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
@@ -88,7 +89,11 @@ public sealed partial class MainGame
             ["ClientAssemblySHA256"] = _goldenClientAssemblyHash,
             ["CoreAssemblySHA256"] = _goldenCoreAssemblyHash,
             ["GPUTime"] = "unknown",
-            ["TimingPolicy"] = "Real Stopwatch; 60 FPS cap; frame nearest-rank p95/p99; profiler average is EMA; screenshot readback excluded from Draw"
+            ["SoftwareFrameRateLimit"] = FramePacingPolicy.Resolve(_settings.Video).SoftwareFrameRateLimit.ToString(System.Globalization.CultureInfo.InvariantCulture),
+            ["PresentationInterval"] = GraphicsDevice.PresentationParameters.PresentationInterval.ToString(),
+            ["TimingPolicy"] = _smokeOptions.GoldenFixture.Diagnostic is null
+                ? "Real Stopwatch; 60 FPS cap; frame nearest-rank p95/p99; profiler average is EMA; screenshot readback excluded from Draw"
+                : "Unpaced fixed-60Hz simulation workload; VSync/limiter disabled; real CPU Stopwatch samples; GPU unknown; readback/serialization outside timed CPU scopes"
         };
     }
 

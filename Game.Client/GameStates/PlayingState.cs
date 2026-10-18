@@ -749,7 +749,7 @@ public sealed partial class PlayingState : IGameState, ITextInputReceiver, IKeyb
         var frame = _frameSnapshot;
         _lastViewportBounds = context.ViewportBounds;
         var settings = _pauseMenu.Settings;
-        _camera.Zoom = _goldenFixture?.Zoom ?? settings.Gameplay.CameraZoom;
+        _camera.Zoom = _goldenFixture is null ? settings.Gameplay.CameraZoom : GoldenCameraAt(_frameSnapshot!.TickNumber).Zoom;
         _camera.Recalculate(context.ViewportBounds);
         var capturedScene = _screenSpaceEffects.BeginSceneCapture(
             context,
@@ -1806,13 +1806,20 @@ public sealed partial class PlayingState : IGameState, ITextInputReceiver, IKeyb
                 var lightCapacity = Math.Min(
                     _visibleLights.Length,
                     lightingQuality.Budget.MaxPointLights);
-                var dynamicTelemetry = VisibleLightCollector.CollectEntityLights(
+                DynamicLightCollectionTelemetry dynamicTelemetry;
+                using (_states.Performance.Measure("Presentation.LightEntities", 0.1))
+                {
+                    dynamicTelemetry = VisibleLightCollector.CollectEntityLights(
                     frame.Entities,
                     _camera.VisibleWorldRect,
                     lightingQuality,
                     _visibleLights.AsSpan(0, lightCapacity));
+                }
                 _goldenDynamicLightsCollected = dynamicTelemetry.LightsCollected;
-                var tileTelemetry = VisibleLightCollector.CollectTileLights(
+                VisibleLightCollectionTelemetry tileTelemetry;
+                using (_states.Performance.Measure("Presentation.LightTiles", 0.1))
+                {
+                    tileTelemetry = VisibleLightCollector.CollectTileLights(
                     _world,
                     _content.Tiles,
                     _camera.VisibleWorldRect,
@@ -1820,6 +1827,7 @@ public sealed partial class PlayingState : IGameState, ITextInputReceiver, IKeyb
                     _visibleLights.AsSpan(
                         dynamicTelemetry.LightsCollected,
                         lightCapacity - dynamicTelemetry.LightsCollected));
+                }
                 var visibleLightCount =
                     dynamicTelemetry.LightsCollected + tileTelemetry.LightsCollected;
                 _lightingRenderer.PrepareFrame(
