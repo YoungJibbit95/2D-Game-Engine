@@ -173,6 +173,7 @@ public sealed class GameplayParticleSystemTests
     }
 
     [Fact]
+    [Trait("Category", "StrictAllocation")]
     public void AmbientForestCanopy_RemainsAllocationFreeAfterWarmup()
     {
         var world = new Game.Core.World.World(

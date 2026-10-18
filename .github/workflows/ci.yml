@@ -185,9 +185,17 @@ jobs:
           --no-build
           --no-restore
           --nologo
-          --filter "FullyQualifiedName!~Game.Tests.PerformanceTests&FullyQualifiedName!~EntityReliabilityPerformanceTests&FullyQualifiedName!~ParticlePhysicsPerformanceTests&FullyQualifiedName!~SpawnReliabilityPerformanceTests&FullyQualifiedName!~RenderPassGraphPerformanceTests&FullyQualifiedName!~TransientRenderTargetPoolPerformanceTests"
+          --filter "FullyQualifiedName!~Game.Tests.PerformanceTests&FullyQualifiedName!~EntityReliabilityPerformanceTests&FullyQualifiedName!~ParticlePhysicsPerformanceTests&FullyQualifiedName!~SpawnReliabilityPerformanceTests&FullyQualifiedName!~RenderPassGraphPerformanceTests&FullyQualifiedName!~TransientRenderTargetPoolPerformanceTests&Category!=StrictAllocation"
           --logger "trx;LogFileName=functional.trx"
           --results-directory "artifacts/test-results/${{ matrix.os }}/${{ matrix.configuration }}"
+
+      - name: Run isolated strict allocation contracts
+        shell: pwsh
+        run: >-
+          ./tools/run_isolated_performance_tests.ps1
+          -Configuration ${{ matrix.configuration }}
+          -StrictAllocationOnly
+          -ResultsDirectory "artifacts/test-results/${{ matrix.os }}/${{ matrix.configuration }}/strict-allocation"
 
       - name: Run isolated Release performance classes
         if: matrix.configuration == 'Release'
