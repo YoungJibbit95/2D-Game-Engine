@@ -1,0 +1,17 @@
+{
+  "Version": 1,
+  "SceneId": "forest_night",
+  "StartState": "Playing",
+  "Seed": 1337,
+  "BiomeId": "forest",
+  "TimeOfDay": 0,
+  "Weather": "Clear",
+  "DynamicLights": true,
+  "Width": 960,
+  "Height": 540,
+  "Zoom": 2,
+  "Frames": 180,
+  "WarmupFrames": 60,
+  "CameraX": -1046522,
+  "CameraY": 926
+}

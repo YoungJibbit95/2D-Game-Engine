@@ -74,7 +74,6 @@ jobs:
           global-json-file: global.json
 
       - name: Install Python for asset audit
-        if: matrix.configuration == 'Debug'
         uses: actions/setup-python@v6
         with:
           python-version: "3.13"
@@ -110,8 +109,10 @@ jobs:
           --results-directory "artifacts/test-results/${{ matrix.os }}/${{ matrix.configuration }}"
 
       - name: Install sprite-audit dependencies
-        if: matrix.configuration == 'Debug'
         run: python -m pip install --disable-pip-version-check -r Game.Data/art_direction/requirements.txt
+
+      - name: Validate golden image comparison contracts
+        run: python -m unittest discover -s tools -p test_golden_scene_compare.py
 
       - name: Run strict sprite audit
         if: matrix.configuration == 'Debug'
@@ -184,9 +185,17 @@ jobs:
           --no-build
           --no-restore
           --nologo
-          --filter "FullyQualifiedName!~Game.Tests.PerformanceTests&FullyQualifiedName!~EntityReliabilityPerformanceTests&FullyQualifiedName!~ParticlePhysicsPerformanceTests&FullyQualifiedName!~SpawnReliabilityPerformanceTests&FullyQualifiedName!~RenderPassGraphPerformanceTests&FullyQualifiedName!~TransientRenderTargetPoolPerformanceTests"
+          --filter "FullyQualifiedName!~Game.Tests.PerformanceTests&FullyQualifiedName!~EntityReliabilityPerformanceTests&FullyQualifiedName!~ParticlePhysicsPerformanceTests&FullyQualifiedName!~SpawnReliabilityPerformanceTests&FullyQualifiedName!~RenderPassGraphPerformanceTests&FullyQualifiedName!~TransientRenderTargetPoolPerformanceTests&Category!=StrictAllocation"
           --logger "trx;LogFileName=functional.trx"
           --results-directory "artifacts/test-results/${{ matrix.os }}/${{ matrix.configuration }}"
+
+      - name: Run isolated strict allocation contracts
+        shell: pwsh
+        run: >-
+          ./tools/run_isolated_performance_tests.ps1
+          -Configuration ${{ matrix.configuration }}
+          -StrictAllocationOnly
+          -ResultsDirectory "artifacts/test-results/${{ matrix.os }}/${{ matrix.configuration }}/strict-allocation"
 
       - name: Run isolated Release performance classes
         if: matrix.configuration == 'Release'
@@ -207,16 +216,14 @@ jobs:
           --output artifacts/performance-quick.json
 
       - name: Publish isolated client smoke bundle
-        if: matrix.configuration == 'Release'
         run: >-
           dotnet publish Game.Client/Game.Client.csproj
-          --configuration Release
+          --configuration ${{ matrix.configuration }}
           --no-build
           --no-restore
           --output "${{ runner.temp }}/yjse-client-publish"
 
       - name: Verify published game project contract
-        if: matrix.configuration == 'Release'
         shell: pwsh
         run: |
           $publishRoot = "${{ runner.temp }}/yjse-client-publish"
@@ -234,13 +241,13 @@ jobs:
           }
 
       - name: Install virtual display
-        if: matrix.configuration == 'Release' && runner.os == 'Linux'
+        if: runner.os == 'Linux'
         run: sudo apt-get update && sudo apt-get install --yes xvfb
 
       # Hosted Windows exposes OpenGL 1.1 without FBOs. Use signed Mesa packages
       # only in the CI process; the published game keeps its native GPU path.
       - name: Install Windows software OpenGL for real render smokes
-        if: matrix.configuration == 'Release' && runner.os == 'Windows'
+        if: runner.os == 'Windows'
         id: msys2
         uses: msys2/setup-msys2@ec48f7c5447b3140e2b088413ae3a55687bccb6e # v2.33.0
         with:
@@ -252,8 +259,8 @@ jobs:
           install: mingw-w64-ucrt-x86_64-mesa
 
       - name: Run published client smokes on Windows Mesa
-        if: matrix.configuration == 'Release' && runner.os == 'Windows'
-        timeout-minutes: 5
+        if: runner.os == 'Windows'
+        timeout-minutes: 8
         shell: pwsh
         run: |
           $mesaBin = Join-Path '${{ steps.msys2.outputs.msys2-location }}' 'ucrt64/bin'
@@ -267,9 +274,10 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           Get-FileHash -Algorithm SHA256 -LiteralPath $env:SDL_OPENGL_LIBRARY, (Join-Path $mesaBin 'libgallium_wgl.dll')
           & ./tools/run_client_smokes.ps1 -PublishRoot '${{ runner.temp }}/yjse-client-publish' -OutputDirectory artifacts/client-smokes
+          & ./tools/run_golden_scenes.ps1 -PublishRoot '${{ runner.temp }}/yjse-client-publish' -OutputDirectory artifacts/golden-scenes
 
       - name: Run published client smokes on Ubuntu Mesa
-        if: matrix.configuration == 'Release' && runner.os == 'Linux'
+        if: runner.os == 'Linux'
         timeout-minutes: 5
         env:
           LIBGL_ALWAYS_SOFTWARE: "1"
@@ -279,6 +287,18 @@ jobs:
           pwsh -NoProfile -File tools/run_client_smokes.ps1
           -PublishRoot "${{ runner.temp }}/yjse-client-publish"
           -OutputDirectory artifacts/client-smokes
+
+      - name: Run golden scene fixtures on Ubuntu Mesa
+        if: runner.os == 'Linux'
+        timeout-minutes: 8
+        env:
+          LIBGL_ALWAYS_SOFTWARE: "1"
+          SDL_AUDIODRIVER: dummy
+        run: >-
+          xvfb-run -a
+          pwsh -NoProfile -File tools/run_golden_scenes.ps1
+          -PublishRoot "${{ runner.temp }}/yjse-client-publish"
+          -OutputDirectory artifacts/golden-scenes
 
       - name: Upload test results
         if: always()
@@ -309,11 +329,19 @@ jobs:
           if-no-files-found: warn
 
       - name: Upload client-smoke artifacts
-        if: always() && matrix.configuration == 'Release'
+        if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: client-smoke-${{ matrix.os }}
+          name: client-smoke-${{ matrix.os }}-${{ matrix.configuration }}
           path: |
             artifacts/client-smokes/
             artifacts/windows-mesa-packages.log
+          if-no-files-found: warn
+
+      - name: Upload golden captures, diffs and timing evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: golden-scenes-${{ matrix.os }}-${{ matrix.configuration }}
+          path: artifacts/golden-scenes/
           if-no-files-found: warn

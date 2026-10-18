@@ -26,7 +26,8 @@ public sealed record ClientSmokeOptions(
     double? ForcedTimeOfDay = null,
     WeatherKind? ForcedWeather = null,
     float ForcedWeatherIntensity = 0.75f,
-    bool OpenCrafting = false)
+    bool OpenCrafting = false,
+    GoldenSceneFixture? GoldenFixture = null)
 {
     public const int DefaultTimeoutSeconds = 20;
 
@@ -34,6 +35,10 @@ public sealed record ClientSmokeOptions(
     {
         if (!args.Contains("--smoke", StringComparer.OrdinalIgnoreCase))
         {
+            if (args.Contains("--golden-fixture", StringComparer.Ordinal))
+            {
+                throw new ArgumentException("--golden-fixture requires --smoke.");
+            }
             return null;
         }
 
@@ -245,7 +250,7 @@ public sealed record ClientSmokeOptions(
             throw new ArgumentException("--warmup-frames must be smaller than --frames.");
         }
 
-        return new ClientSmokeOptions(
+        var options = new ClientSmokeOptions(
             frames,
             output,
             timeoutSeconds,
@@ -264,6 +269,23 @@ public sealed record ClientSmokeOptions(
             forcedWeather,
             forcedWeatherIntensity,
             openCrafting);
+        var fixtureIndex = Array.IndexOf(args, "--golden-fixture");
+        if (fixtureIndex < 0)
+        {
+            return options;
+        }
+        var fixture = GoldenSceneFixture.Load(RequireValue(args, ref fixtureIndex, "--golden-fixture"));
+        return options with
+        {
+            GoldenFixture = fixture, StartState = fixture.StartState,
+            Frames = fixture.Frames, WarmupFrames = fixture.WarmupFrames,
+            Width = fixture.Width, Height = fixture.Height, FrameRateLimit = 60,
+            ForcedBiomeId = fixture.StartState == ClientSmokeStartState.Playing ? fixture.BiomeId : null,
+            ForcedTimeOfDay = fixture.TimeOfDay, ForcedWeather = fixture.Weather,
+            ForcedWeatherIntensity = 0, UseConfiguredVideoSettings = false,
+            OpenConsole = false, OpenPause = false, OpenCrafting = false,
+            IncludeDebugOverlays = false, ScriptedTraversal = false
+        };
     }
 
     private static string NormalizeContentId(string value, string option)
@@ -330,6 +352,9 @@ public sealed record ClientSmokeResult(
     string? ScreenshotPath,
     string? Failure)
 {
+    public IReadOnlyDictionary<string, object>? GoldenScene { get; init; }
+    public IReadOnlyDictionary<string, string>? CaptureEnvironment { get; init; }
+    public IReadOnlyDictionary<string, string>? BenchmarkContext { get; init; }
     public IReadOnlyList<PerformanceMetricSnapshot> PerformanceMetrics { get; init; } =
         Array.Empty<PerformanceMetricSnapshot>();
 

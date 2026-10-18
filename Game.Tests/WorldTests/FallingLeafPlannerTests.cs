@@ -44,6 +44,7 @@ public sealed class FallingLeafPlannerTests
     }
 
     [Fact]
+    [Trait("Category", "StrictAllocation")]
     public void Plan_RemainsAllocationFreeWithCallerOwnedBuffer()
     {
         var world = CreateCanopyWorld();

@@ -98,6 +98,9 @@ public sealed partial class PlayingState : IGameState, ITextInputReceiver, IKeyb
     private readonly string? _forcedBiomeId;
     private readonly bool _suppressDebugOverlays;
     private readonly bool _scriptedTraversal;
+    private readonly GoldenSceneFixture? _goldenFixture;
+    private Vector2 _goldenCamera;
+    private int _goldenDynamicLightsCollected;
     private readonly double? _forcedTimeOfDay;
     private readonly WeatherKind? _forcedWeather;
     private readonly float _forcedWeatherIntensity;
@@ -161,7 +164,8 @@ public sealed partial class PlayingState : IGameState, ITextInputReceiver, IKeyb
         double? forcedTimeOfDay = null,
         WeatherKind? forcedWeather = null,
         float forcedWeatherIntensity = 0.75f,
-        bool openCraftingOnInitialize = false)
+        bool openCraftingOnInitialize = false,
+        GoldenSceneFixture? goldenFixture = null)
     {
         if (openCraftingOnInitialize && (openConsoleOnInitialize || openPauseOnInitialize))
         {
@@ -171,6 +175,11 @@ public sealed partial class PlayingState : IGameState, ITextInputReceiver, IKeyb
         }
 
         _states = states;
+        _goldenFixture = goldenFixture;
+        if (goldenFixture is not null)
+        {
+            _lastViewportBounds = new Rectangle(0, 0, goldenFixture.Width, goldenFixture.Height);
+        }
         _initialSession = loadedSession;
         _openConsoleOnInitialize = openConsoleOnInitialize;
         _openPauseOnInitialize = openPauseOnInitialize;
@@ -243,7 +252,9 @@ public sealed partial class PlayingState : IGameState, ITextInputReceiver, IKeyb
 
     public void Initialize()
     {
-        var session = _initialSession ?? WorldSessionFactory.CreateSingleplayer(seed: 1337, worldName: "Debug World");
+        var session = _initialSession ?? (_goldenFixture is null
+            ? WorldSessionFactory.CreateSingleplayer(seed: 1337, worldName: "Debug World")
+            : CreateGoldenSession());
         _session = session;
         _simulation = session.Simulation;
         _frameSnapshot = _simulation.LatestSnapshot;
@@ -297,6 +308,7 @@ public sealed partial class PlayingState : IGameState, ITextInputReceiver, IKeyb
         _camera.Position = new Vector2(_player.Body.Center.X, _player.Body.Center.Y);
         _camera.Zoom = _pauseMenu.Settings.Gameplay.CameraZoom;
         _camera.Recalculate(_lastViewportBounds);
+        InitializeGoldenScene();
         ApplyInitialOverlayRequest();
     }
 
@@ -613,6 +625,11 @@ public sealed partial class PlayingState : IGameState, ITextInputReceiver, IKeyb
 
     public void Update(double deltaSeconds)
     {
+        if (_goldenFixture is not null)
+        {
+            UpdateGoldenFrame(deltaSeconds);
+            return;
+        }
         _input.Update();
         _gameplayFeedback.Update((float)deltaSeconds);
         var settings = _pauseMenu.Settings;
@@ -732,7 +749,7 @@ public sealed partial class PlayingState : IGameState, ITextInputReceiver, IKeyb
         var frame = _frameSnapshot;
         _lastViewportBounds = context.ViewportBounds;
         var settings = _pauseMenu.Settings;
-        _camera.Zoom = settings.Gameplay.CameraZoom;
+        _camera.Zoom = _goldenFixture?.Zoom ?? settings.Gameplay.CameraZoom;
         _camera.Recalculate(context.ViewportBounds);
         var capturedScene = _screenSpaceEffects.BeginSceneCapture(
             context,
@@ -1794,6 +1811,7 @@ public sealed partial class PlayingState : IGameState, ITextInputReceiver, IKeyb
                     _camera.VisibleWorldRect,
                     lightingQuality,
                     _visibleLights.AsSpan(0, lightCapacity));
+                _goldenDynamicLightsCollected = dynamicTelemetry.LightsCollected;
                 var tileTelemetry = VisibleLightCollector.CollectTileLights(
                     _world,
                     _content.Tiles,

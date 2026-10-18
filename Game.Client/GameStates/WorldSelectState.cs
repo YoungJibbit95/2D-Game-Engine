@@ -28,11 +28,13 @@ public sealed class WorldSelectState : IGameState
     private bool _focusVisible = true;
     private UiTypographyTokens _typography = UiTheme.Contract.Typography;
     private string _worldSummaryLabel = "NO LOCAL WORLDS";
+    private readonly bool _goldenFixture;
 
-    public WorldSelectState(GameStateManager states, IGameState backState)
+    public WorldSelectState(GameStateManager states, IGameState backState, bool goldenFixture = false)
     {
         _states = states;
         _backState = backState;
+        _goldenFixture = goldenFixture;
     }
 
     public string Name => "WorldSelect";
@@ -59,6 +61,11 @@ public sealed class WorldSelectState : IGameState
 
     public void Update(double deltaSeconds)
     {
+        if (_goldenFixture)
+        {
+            _introAnimation.Update((float)deltaSeconds, _settings.Ui.AnimationSpeed);
+            return;
+        }
         _input.Update();
         _gamepad.Update(deltaSeconds);
         _pointer.Update(_input.MousePosition, _input.IsLeftMouseDown, _hitRegions);

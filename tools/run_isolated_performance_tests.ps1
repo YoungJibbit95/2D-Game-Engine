@@ -1,7 +1,9 @@
 [CmdletBinding()]
 param(
     [ValidateSet('Debug', 'Release')]
-    [string] $Configuration = 'Release'
+    [string] $Configuration = 'Release',
+    [switch] $StrictAllocationOnly,
+    [string] $ResultsDirectory = 'artifacts/test-results/strict-allocation'
 )
 
 $ErrorActionPreference = 'Stop'
@@ -12,6 +14,47 @@ $performanceDirectory = [System.IO.Path]::GetFullPath(
 Push-Location $repositoryRoot
 try
 {
+    if ($StrictAllocationOnly)
+    {
+        # Keep strict zero-byte assertions and their warmups unchanged. Discover
+        # every tagged case, then measure each in its own fresh test process.
+        $discovered = & dotnet test Game.Tests/Game.Tests.csproj `
+            --configuration $Configuration --no-build --no-restore --nologo `
+            --list-tests --filter 'Category=StrictAllocation'
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+        $testNames = @($discovered | ForEach-Object { $_.Trim() } |
+            Where-Object { $_.StartsWith('Game.Tests.', [StringComparison]::Ordinal) } |
+            Sort-Object -Unique)
+        if ($testNames.Count -eq 0) { throw 'No strict allocation tests discovered.' }
+        $runRoot = Join-Path ([System.IO.Path]::GetFullPath($ResultsDirectory)) ([Guid]::NewGuid().ToString('N'))
+        New-Item -ItemType Directory -Path $runRoot -Force | Out-Null
+        $passedCases = 0
+        foreach ($testName in $testNames)
+        {
+            if ($testName -notmatch '^Game\.Tests\.[A-Za-z0-9_.]+$')
+            {
+                throw "Strict allocation discovery requires a fully qualified Fact name: $testName"
+            }
+            Write-Host "STRICT_ALLOCATION_CASE $testName"
+            $trxName = "allocation-$passedCases.trx"
+            & dotnet test Game.Tests/Game.Tests.csproj `
+                --configuration $Configuration --no-build --no-restore --nologo `
+                --filter "FullyQualifiedName=$testName" `
+                --logger "trx;LogFileName=$trxName" --results-directory $runRoot
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+            [xml] $report = Get-Content -LiteralPath (Join-Path $runRoot $trxName) -Raw
+            $counters = $report.TestRun.ResultSummary.Counters
+            if ([int]$counters.total -ne 1 -or [int]$counters.executed -ne 1 -or
+                [int]$counters.passed -ne 1 -or [int]$counters.failed -ne 0)
+            {
+                throw "Expected exactly one executed, passing allocation contract: $testName"
+            }
+            $passedCases++
+        }
+        Write-Host "STRICT_ALLOCATION_CASES_PASSED=$passedCases"
+        return
+    }
+
     $paths = @()
     $paths += Get-ChildItem -LiteralPath $performanceDirectory -Filter '*Tests.cs' -File
     $paths += Get-ChildItem -LiteralPath (Join-Path $repositoryRoot 'Game.Tests') `

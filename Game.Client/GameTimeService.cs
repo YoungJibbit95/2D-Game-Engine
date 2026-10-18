@@ -15,8 +15,17 @@ public sealed class GameTimeService
 
     public void BeginFrame(GameTime gameTime)
     {
-        FrameDeltaSeconds = gameTime.ElapsedGameTime.TotalSeconds;
-        TotalSeconds = gameTime.TotalGameTime.TotalSeconds;
+        BeginFrame(gameTime.ElapsedGameTime.TotalSeconds, gameTime.TotalGameTime.TotalSeconds);
+    }
+
+    public void BeginFrame(double deltaSeconds, double totalSeconds)
+    {
+        if (!double.IsFinite(deltaSeconds) || deltaSeconds < 0 || !double.IsFinite(totalSeconds) || totalSeconds < 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(deltaSeconds));
+        }
+        FrameDeltaSeconds = deltaSeconds;
+        TotalSeconds = totalSeconds;
         _fpsWindowSeconds += FrameDeltaSeconds;
     }
 

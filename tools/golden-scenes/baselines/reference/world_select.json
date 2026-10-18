@@ -1,0 +1,110 @@
+{
+  "Passed": true,
+  "CapturedFrame": 180,
+  "Width": 960,
+  "Height": 540,
+  "GoldenScene": {
+    "Fixture": {
+      "Version": 1,
+      "SceneId": "world_select",
+      "StartState": 1,
+      "Seed": 1337,
+      "BiomeId": "forest",
+      "TimeOfDay": 0.5,
+      "Weather": 0,
+      "DynamicLights": false,
+      "Width": 960,
+      "Height": 540,
+      "Zoom": 2,
+      "CameraX": null,
+      "CameraY": null,
+      "Frames": 180,
+      "WarmupFrames": 60
+    },
+    "PresentationFrame": 180,
+    "SimulationTick": 0,
+    "ContentFingerprint": "8F9CC78330B80DADE79EA897544BD4ECA4219E2D4B94F94567AB0A0BF1E082B0",
+    "SettingsFingerprint": "A6E4406B9A8F7A706E9E0A75497853BABFC626BEE5983B1A23DF587CDBADD85A"
+  },
+  "CaptureEnvironment": {
+    "OS": "Windows",
+    "Runtime": ".NET 8.0.28",
+    "Architecture": "X64",
+    "MonoGame": "3.8.4.1",
+    "GraphicsProfile": "Reach",
+    "Renderer": "NVIDIA GeForce RTX 3070 Ti/PCIe/SSE2",
+    "DriverIdentity": "NVIDIA GeForce RTX 3070 Ti:32.0.16.1692"
+  },
+  "BenchmarkContext": {
+    "OSDescription": "Microsoft Windows 10.0.26100",
+    "CPU": "AMD Ryzen 5 5500                               ",
+    "LogicalProcessors": "12",
+    "Configuration": "Release",
+    "CheckoutRevision": "9385ed33bbdfc78d40501c1379b4b429086c0a60",
+    "ClientAssemblyVersion": "1.0.0+9385ed33bbdfc78d40501c1379b4b429086c0a60",
+    "CoreAssemblyVersion": "1.0.0+9385ed33bbdfc78d40501c1379b4b429086c0a60",
+    "ClientAssemblySHA256": "0B4A38B77BF37808CADC7DF6EE9C6C38805028391D37E6ABA154C6430075382C",
+    "CoreAssemblySHA256": "4DF43049026D90AB8C07CAA0ED5D9CEFE11D51D1F9618CB7A8A0CF8C0AFEF251",
+    "GPUTime": "unknown",
+    "TimingPolicy": "Real Stopwatch; 60 FPS cap; frame nearest-rank p95/p99; profiler average is EMA; screenshot readback excluded from Draw"
+  },
+  "FrameTiming": {
+    "SampleCount": 120,
+    "Capacity": 512,
+    "TotalSamples": 120,
+    "AverageMilliseconds": 16.666664166666653,
+    "P95Milliseconds": 16.6673,
+    "P99Milliseconds": 16.6675,
+    "MaximumMilliseconds": 16.6676,
+    "OverBudget120HzCount": 120,
+    "OverBudget144HzCount": 120,
+    "OverBudget165HzCount": 120,
+    "OverBudget120HzRatio": 1,
+    "OverBudget144HzRatio": 1,
+    "OverBudget165HzRatio": 1
+  },
+  "PerformanceMetrics": [
+    {
+      "Name": "Simulation.FixedUpdate",
+      "SampleCount": 120,
+      "LastMilliseconds": 0.0006,
+      "AverageMilliseconds": 0.0002085059610558784,
+      "PeakMilliseconds": 0.0014,
+      "LastAllocatedBytes": 0,
+      "AverageAllocatedBytes": 0,
+      "BudgetMilliseconds": 6,
+      "IsOverBudget": false,
+      "BudgetUsage": 9.999999999999999e-05
+    },
+    {
+      "Name": "Frame.Update",
+      "SampleCount": 120,
+      "LastMilliseconds": 0.0026,
+      "AverageMilliseconds": 0.0018540068262743238,
+      "PeakMilliseconds": 0.1418,
+      "LastAllocatedBytes": 0,
+      "AverageAllocatedBytes": 0.0005740881809775197,
+      "BudgetMilliseconds": 8,
+      "IsOverBudget": false,
+      "BudgetUsage": 0.000325
+    },
+    {
+      "Name": "Frame.Draw",
+      "SampleCount": 120,
+      "LastMilliseconds": 0.3373,
+      "AverageMilliseconds": 0.32847600682387984,
+      "PeakMilliseconds": 0.9315,
+      "LastAllocatedBytes": 40,
+      "AverageAllocatedBytes": 40.00028704409049,
+      "BudgetMilliseconds": 16.67,
+      "IsOverBudget": false,
+      "BudgetUsage": 0.020233953209358127
+    }
+  ],
+  "BaselineArtifact": {
+    "Version": 1,
+    "SourceRevision": "9385ed33bbdfc78d40501c1379b4b429086c0a60",
+    "PNG_SHA256": "072f881cff769a126af107d264d0d2048a87a3e89ade7107f65b1c4becc22b25",
+    "Capture": "Candidate of two exact fresh-process captures; selected CPU scopes retained without changing values."
+  }
+}

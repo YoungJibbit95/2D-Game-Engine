@@ -10,6 +10,7 @@ public static class ClientPaths
     public const string GameRootEnvironmentVariable = "YJSE_GAME_ROOT";
     public const string GameDataEnvironmentVariable = "YJSE_GAME_DATA";
     public const string ModsRootEnvironmentVariable = "YJSE_MODS_ROOT";
+    public const string UserDataRootEnvironmentVariable = "YJSE_USER_DATA_ROOT";
 
     public static string SettingsPath()
     {
@@ -18,7 +19,10 @@ public static class ClientPaths
 
     public static string AppDataRoot()
     {
-        var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+        var overrideRoot = Environment.GetEnvironmentVariable(UserDataRootEnvironmentVariable);
+        var appData = string.IsNullOrWhiteSpace(overrideRoot)
+            ? Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)
+            : Path.GetFullPath(overrideRoot);
         var projectId = TryLoadGameProjectManifest()?.Id ?? AppName;
         return Path.Combine(appData, AppName, SanitizePathSegment(projectId));
     }
