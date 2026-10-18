@@ -1,0 +1,17 @@
+{
+  "Version": 1,
+  "SceneId": "forest_day",
+  "StartState": "Playing",
+  "Seed": 1337,
+  "BiomeId": "forest",
+  "TimeOfDay": 0.5,
+  "Weather": "Clear",
+  "DynamicLights": false,
+  "Width": 960,
+  "Height": 540,
+  "Zoom": 2,
+  "Frames": 180,
+  "WarmupFrames": 60,
+  "CameraX": -1046522,
+  "CameraY": 926
+}

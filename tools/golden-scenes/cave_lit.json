@@ -1,0 +1,17 @@
+{
+  "Version": 1,
+  "SceneId": "cave_lit",
+  "StartState": "Playing",
+  "Seed": 1337,
+  "BiomeId": "crystal_depths",
+  "TimeOfDay": 0.5,
+  "Weather": "Clear",
+  "DynamicLights": true,
+  "Width": 960,
+  "Height": 540,
+  "Zoom": 2,
+  "Frames": 180,
+  "WarmupFrames": 60,
+  "CameraX": -1045562,
+  "CameraY": 1886
+}

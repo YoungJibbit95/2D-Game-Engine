@@ -51,6 +51,8 @@ class GoldenSceneCompareTests(unittest.TestCase):
         self.assertFalse(result["accepted"])
         self.assertEqual(1, result["maximum_absolute_channel_error"])
         self.assertAlmostEqual(1 / 400, result["differing_pixel_fraction"])
+        self.assertEqual(1, result["differing_pixel_count"])
+        self.assertEqual((4, 5, 5, 6), result["difference_bounds"])
         with Image.open(self.output / "diff.png") as diff:
             self.assertEqual((8, 0, 0), diff.getpixel((4, 5)))
         with Image.open(self.output / "preview.png") as preview:

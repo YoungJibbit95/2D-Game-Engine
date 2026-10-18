@@ -2,7 +2,8 @@
 param(
     [Parameter(Mandatory)] [string] $PublishRoot,
     [Parameter(Mandatory)] [string] $OutputDirectory,
-    [ValidateRange(1, 300)] [int] $TimeoutSeconds = 60
+    [ValidateRange(1, 300)] [int] $TimeoutSeconds = 60,
+    [string] $GoldenFixture
 )
 
 $ErrorActionPreference = 'Stop'
@@ -17,7 +18,13 @@ New-Item -ItemType Directory -Force -Path $outputPath | Out-Null
 $runPath = Join-Path $outputPath ([Guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $runPath | Out-Null
 $failures = @()
-foreach ($state in @('main-menu', 'world-select', 'playing')) {
+$states = @('main-menu', 'world-select', 'playing')
+if ($GoldenFixture) {
+    $fixturePath = (Resolve-Path -LiteralPath $GoldenFixture).Path
+    $fixture = Get-Content -LiteralPath $fixturePath -Raw | ConvertFrom-Json
+    $states = @($(if ($fixture.StartState -eq 'WorldSelect') { 'world-select' } else { 'playing' }))
+}
+foreach ($state in $states) {
     $capture = Join-Path $runPath "client-smoke-$state.png"
     $startInfo = [System.Diagnostics.ProcessStartInfo]::new('dotnet')
     $startInfo.WorkingDirectory = $publishPath
@@ -28,10 +35,17 @@ foreach ($state in @('main-menu', 'world-select', 'playing')) {
     $startInfo.Environment['YJSE_GAME_ROOT'] = $publishPath
     $startInfo.Environment.Remove('YJSE_GAME_DATA') | Out-Null
     $startInfo.Environment.Remove('YJSE_MODS_ROOT') | Out-Null
+    if ($GoldenFixture) {
+        $startInfo.Environment['YJSE_USER_DATA_ROOT'] = Join-Path $runPath 'user-data'
+    }
     foreach ($argument in @($clientPath, '--smoke', '--start-state', $state,
         '--frames', '30', '--warmup-frames', '10', '--frame-limit', '60',
         '--timeout-seconds', "$TimeoutSeconds", '--output', $capture)) {
         $startInfo.ArgumentList.Add($argument)
+    }
+    if ($GoldenFixture) {
+        $startInfo.ArgumentList.Add('--golden-fixture')
+        $startInfo.ArgumentList.Add($fixturePath)
     }
     if ($state -eq 'playing') {
         $startInfo.ArgumentList.Add('--scene-biome')

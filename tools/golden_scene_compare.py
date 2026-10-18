@@ -103,6 +103,8 @@ def compare(reference, candidate, output_dir, mode="exact", reference_metadata=N
                        "maximum_absolute_channel_error": max(maximum.getextrema()),
                        "mean_absolute_channel_error": sum(ImageStat.Stat(delta).mean) / 4,
                        "differing_pixel_fraction": 1 - histogram[0] / count,
+                       "differing_pixel_count": count - histogram[0],
+                       "difference_bounds": maximum.getbbox(),
                        "over_threshold_pixel_fraction": sum(histogram[channel_threshold + 1:]) / count})
         # Alpha-only regressions must also be visible. RGB channels show amplified
         # absolute error, with alpha error raised into each channel when larger.
@@ -127,7 +129,7 @@ def compare(reference, candidate, output_dir, mode="exact", reference_metadata=N
         result["candidate_environment"] = second["CaptureEnvironment"]
         for label, metadata in (("reference", first), ("candidate", second)):
             result[f"{label}_diagnostics"] = {key: metadata[key] for key in
-                ("FrameTiming", "PerformanceMetrics", "GraphicsAdapterDescription") if key in metadata}
+                ("FrameTiming", "PerformanceMetrics", "GraphicsAdapterDescription", "BenchmarkContext") if key in metadata}
         if result["fixture_differences"]:
             result["errors"].append("GoldenScene fixture mismatch; pixels are not comparable")
         if mode == "exact" and result["environment_differences"]:

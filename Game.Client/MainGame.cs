@@ -15,7 +15,7 @@ using Microsoft.Xna.Framework.Input;
 
 namespace Game.Client;
 
-public sealed class MainGame : Microsoft.Xna.Framework.Game
+public sealed partial class MainGame : Microsoft.Xna.Framework.Game
 {
     private readonly GraphicsDeviceManager _graphics;
     private readonly GameStateManager _states;
@@ -49,6 +49,14 @@ public sealed class MainGame : Microsoft.Xna.Framework.Game
     public MainGame(ClientSmokeOptions? smokeOptions = null)
     {
         _smokeOptions = smokeOptions;
+        if (smokeOptions?.GoldenFixture is not null)
+        {
+            GoldenSceneFixture.RequireEmptyUserRoot(Environment.GetEnvironmentVariable(ClientPaths.UserDataRootEnvironmentVariable));
+            if (string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("YJSE_RENDER_ENVIRONMENT")))
+            {
+                throw new InvalidDataException("Golden scenes require an identified renderer/driver; use tools/run_golden_scenes.ps1.");
+            }
+        }
         _settingsService = new GameSettingsService();
         _settings = LoadSettings();
         if (_smokeOptions is { UseConfiguredVideoSettings: false })
@@ -114,7 +122,7 @@ public sealed class MainGame : Microsoft.Xna.Framework.Game
         var menu = new MainMenuState(_states, _states.RequestExit);
         return _smokeOptions?.StartState switch
         {
-            ClientSmokeStartState.WorldSelect => new WorldSelectState(_states, menu),
+            ClientSmokeStartState.WorldSelect => new WorldSelectState(_states, menu, _smokeOptions.GoldenFixture is not null),
             ClientSmokeStartState.Playing => new PlayingState(
                 _states,
                 openConsoleOnInitialize: _smokeOptions.OpenConsole,
@@ -125,7 +133,8 @@ public sealed class MainGame : Microsoft.Xna.Framework.Game
                 scriptedTraversal: _smokeOptions.ScriptedTraversal,
                 forcedTimeOfDay: _smokeOptions.ForcedTimeOfDay,
                 forcedWeather: _smokeOptions.ForcedWeather,
-                forcedWeatherIntensity: _smokeOptions.ForcedWeatherIntensity),
+                forcedWeatherIntensity: _smokeOptions.ForcedWeatherIntensity,
+                goldenFixture: _smokeOptions.GoldenFixture),
             _ => menu
         };
     }
@@ -155,13 +164,32 @@ public sealed class MainGame : Microsoft.Xna.Framework.Game
 
     protected override void Update(GameTime gameTime)
     {
-        _time.BeginFrame(gameTime);
+        if (_smokeOptions?.GoldenFixture is not null)
+        {
+            if (_goldenUpdatedFrame == _drawnFrames)
+            {
+                return;
+            }
+            _goldenUpdatedFrame = _drawnFrames;
+            _time.BeginFrame(1d / 60d, (_drawnFrames + 1) / 60d);
+        }
+        else
+        {
+            _time.BeginFrame(gameTime);
+        }
         _performance.BeginFrame();
 
         using (_performance.Measure("Frame.Update", 8.0))
         {
             _states.Update(_time.FrameDeltaSeconds);
-            _fixedUpdateRunner.Run(_time.FrameDeltaSeconds, FixedUpdate);
+            if (_smokeOptions?.GoldenFixture is not null)
+            {
+                FixedUpdate(1f / 60f);
+            }
+            else
+            {
+                _fixedUpdateRunner.Run(_time.FrameDeltaSeconds, FixedUpdate);
+            }
             using (_performance.Measure("Presentation.LateUpdate", 4.0))
             {
                 _states.LateUpdate(_time.FrameDeltaSeconds);
@@ -205,7 +233,10 @@ public sealed class MainGame : Microsoft.Xna.Framework.Game
         using (_performance.Measure("Frame.Draw", 16.67))
         {
             _states.Draw(context);
-            DrawSmokeAssetSample(context);
+            if (_smokeOptions?.GoldenFixture is null)
+            {
+                DrawSmokeAssetSample(context);
+            }
             DrawDebugOverlay(context);
             using (_performance.Measure("Render.FinalFlush", 2.0))
             {
@@ -372,9 +403,10 @@ public sealed class MainGame : Microsoft.Xna.Framework.Game
                 explicitPlaceholderAssetCount == 0;
             var passed = nonBlack >= minimumNonBlackPixels &&
                 colors.Count >= 4 &&
-                renderedSprites.Length == SmokeSpriteIds.Length &&
                 validatedSourceSprites.Length == SmokeSpriteIds.Length &&
-                visibleTargetSprites.Length == SmokeSpriteIds.Length &&
+                (_smokeOptions.GoldenFixture is not null ||
+                    (renderedSprites.Length == SmokeSpriteIds.Length && visibleTargetSprites.Length == SmokeSpriteIds.Length)) &&
+                GoldenSceneContractPassed() &&
                 textureContractPassed;
             TrySetSmokeResult(new ClientSmokeResult(
                 passed,
@@ -406,6 +438,9 @@ public sealed class MainGame : Microsoft.Xna.Framework.Game
                       $"and {expectedFrameCount} preloaded texture frames without explicit asset placeholders.")
             {
                 PerformanceMetrics = _performance.Snapshot(),
+                GoldenScene = CaptureGoldenScene(),
+                CaptureEnvironment = CaptureGoldenEnvironment(),
+                BenchmarkContext = CaptureBenchmarkContext(),
                 FrameTiming = _frameTimes.Capture(),
                 RendererMetrics = _rendererMetrics.Capture(),
                 Gameplay = (_states.CurrentState as IClientGameplaySmokeTelemetryProvider)?
@@ -454,6 +489,10 @@ public sealed class MainGame : Microsoft.Xna.Framework.Game
 
     private Rectangle GetSmokePanelBounds(Rectangle viewportBounds)
     {
+        if (_smokeOptions?.GoldenFixture is not null)
+        {
+            return Rectangle.Empty;
+        }
         var x = string.Equals(_states.CurrentStateName, "Playing", StringComparison.Ordinal)
             ? viewportBounds.Left + 12
             : viewportBounds.Right - 190;
@@ -471,6 +510,11 @@ public sealed class MainGame : Microsoft.Xna.Framework.Game
 
         var project = new GameProjectContentLoader().Load(activePaths.ProjectRoot);
         _smokeProjectId = project.Manifest.Id;
+        if (_smokeOptions?.GoldenFixture is not null)
+        {
+            _goldenContentFingerprint = GoldenSceneFixture.ContentFingerprint(project.Paths.ContentRoot);
+            FingerprintGoldenAssemblies();
+        }
         _smokeProjectManifestPath = project.Paths.ManifestPath;
         if (project.Content.Report.HasErrors)
         {
@@ -617,6 +661,10 @@ public sealed class MainGame : Microsoft.Xna.Framework.Game
 
     private void OnTextInput(object? sender, TextInputEventArgs e)
     {
+        if (_smokeOptions?.GoldenFixture is not null)
+        {
+            return;
+        }
         if (_states.CurrentState is ITextInputReceiver receiver)
         {
             receiver.OnTextInput(e.Character);
