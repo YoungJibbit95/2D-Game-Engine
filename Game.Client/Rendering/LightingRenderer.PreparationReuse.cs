@@ -7,8 +7,9 @@ namespace Game.Client.Rendering;
 public sealed partial class LightingRenderer
 {
     public const string DisablePreparationReuseEnvironmentVariable = "YJSE_DISABLE_LIGHTING_PREPARATION_REUSE";
-    private bool _preparationReuseEnabled = !string.Equals(
-        Environment.GetEnvironmentVariable(DisablePreparationReuseEnvironmentVariable), "1", StringComparison.Ordinal);
+    // Mixed frame/motion evidence: require an explicit opt-in; preserve the original default.
+    private bool _preparationReuseEnabled = string.Equals(
+        Environment.GetEnvironmentVariable(DisablePreparationReuseEnvironmentVariable), "0", StringComparison.Ordinal);
     private LightingPreparationCache? _preparationCache;
     private GraphicsDevice? _preparationDevice;
     private bool _deviceResourcesInvalidated;

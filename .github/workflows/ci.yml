@@ -280,6 +280,7 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           Get-FileHash -Algorithm SHA256 -LiteralPath $env:SDL_OPENGL_LIBRARY, (Join-Path $mesaBin 'libgallium_wgl.dll')
           & ./tools/run_client_smokes.ps1 -PublishRoot '${{ runner.temp }}/yjse-client-publish' -OutputDirectory artifacts/client-smokes
+          $env:YJSE_DISABLE_LIGHTING_PREPARATION_REUSE = '0'
           & ./tools/run_golden_scenes.ps1 -PublishRoot '${{ runner.temp }}/yjse-client-publish' -OutputDirectory artifacts/golden-scenes
           & ./tools/run_lighting_diagnostics.ps1 -PublishRoot '${{ runner.temp }}/yjse-client-publish' -OutputDirectory artifacts/lighting-diagnostics -PreparationReuse on -CompareReuseFallback -IncludeReuseLifecycle
 
@@ -301,6 +302,7 @@ jobs:
         env:
           LIBGL_ALWAYS_SOFTWARE: "1"
           SDL_AUDIODRIVER: dummy
+          YJSE_DISABLE_LIGHTING_PREPARATION_REUSE: "0"
         run: >-
           xvfb-run -a
           pwsh -NoProfile -File tools/run_golden_scenes.ps1

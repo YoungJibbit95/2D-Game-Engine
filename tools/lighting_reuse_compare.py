@@ -3,7 +3,9 @@
 Each root is one completed nine-scene, three-process diagnostic run. CPU ranges
 describe separate processes; they are not pooled percentiles, confidence bounds
 or evidence of a statistically significant speedup. Approved references are never
-updated. Genuine GPU time remains unknown.
+updated. Calibration requires Release, a reported software cap of 0 and an Immediate
+presentation interval. These attest requested pacing; external pacing and genuine
+GPU time remain unknown.
 """
 
 import argparse
@@ -146,14 +148,22 @@ def load_role(role, root):
         benchmark = capture["BenchmarkContext"]
         if role != "before" and benchmark.get("LightingPreparationReuse") != role:
             raise ValueError(f"{role}: BenchmarkContext.LightingPreparationReuse must be '{role}'")
+        if benchmark.get("Configuration") != "Release":
+            raise ValueError(f"{role}: calibration requires Configuration 'Release'")
+        if benchmark.get("SoftwareFrameRateLimit") != "0" or benchmark.get("PresentationInterval") != "Immediate":
+            raise ValueError(f"{role}: calibration requires reported requested pacing SoftwareFrameRateLimit '0' and PresentationInterval 'Immediate'")
         current_binary = {field: required_string(benchmark, field) for field in BINARY_FIELDS}
         current_common = {"CPU": required_string(benchmark, "CPU"),
                           "Configuration": required_string(benchmark, "Configuration"),
+                          "OSDescription": required_string(benchmark, "OSDescription"),
+                          "LogicalProcessors": required_string(benchmark, "LogicalProcessors"),
+                          "SoftwareFrameRateLimit": benchmark["SoftwareFrameRateLimit"],
+                          "PresentationInterval": benchmark["PresentationInterval"],
                           "CaptureEnvironment": capture["CaptureEnvironment"]}
         if binary is not None and current_binary != binary:
             raise ValueError(f"{role}: loaded binary versions/hashes changed within the role")
         if common is not None and current_common != common:
-            raise ValueError(f"{role}: CPU/configuration/render environment changed within the role")
+            raise ValueError(f"{role}: CPU/OS/logical processors/configuration/render environment changed within the role")
         binary, common = current_binary, current_common
         loaded[key] = {"capture": capture, "capture_path": capture_path,
                        "signature": {"GoldenScene": capture["GoldenScene"],
@@ -177,7 +187,7 @@ def export(before_root, off_root, on_root, output_dir):
     roles = {role: load_role(role, Path(root)) for role, root in
              (("before", before_root), ("off", off_root), ("on", on_root))}
     if any(roles[role]["common"] != roles["before"]["common"] for role in ("off", "on")):
-        raise ValueError("all roles must share CPU, configuration and controlled render environment")
+        raise ValueError("all roles must share CPU, OS, logical processor count, configuration and controlled render environment")
     if roles["off"]["binary"] != roles["on"]["binary"]:
         raise ValueError("OFF and ON must use identical loaded binary versions/hashes")
     rows, groups = [], []
@@ -224,7 +234,7 @@ def export(before_root, off_root, on_root, output_dir):
     dossier = {"schema_version": 1, "gpu_time": "unknown", "common_environment": roles["before"]["common"],
                "roles": {role: {key: roles[role][key] for key in ("binary", "root")} for role in ROLES},
                "process_observations": len(rows), "groups": groups, "exact_comparisons": comparisons,
-               "interpretation": "Three independent process observations per role/scene. Ranges of per-process means/p95/p99 are not pooled percentiles, confidence intervals or statistical significance. Inclusive CPU scopes overlap. CPU upload time includes unknown driver/GPU waits; genuine GPU time is unknown. Range overlap is descriptive only and does not establish speedup or equivalence. These frozen-clock workloads do not prove live advancing-time benefit. Cache hits reuse only AO/sky-portal preparation; remaining lighting, temporal processing and uploads still execute. Legacy cache counters remain unavailable. Upload bytes and cache payload are source-derived logical quantities, not measured bus traffic or VRAM. The diagnostic runner independently checks exact repeats; this dossier compares the first process of each role per scene and preserves approved references."}
+               "interpretation": "Three independent process observations per role/scene. Ranges of per-process means/p95/p99 are not pooled percentiles, confidence intervals or statistical significance. Inclusive CPU scopes overlap. CPU upload time includes unknown driver/GPU waits; genuine GPU time is unknown. Software cap 0 and Immediate presentation are reported requested pacing, not proof that external driver/OS pacing or waits are absent. Range overlap is descriptive only and does not establish speedup or equivalence. These frozen-clock workloads do not prove live advancing-time benefit. Cache hits reuse only AO/sky-portal preparation; remaining lighting, temporal processing and uploads still execute. Legacy cache counters remain unavailable. Upload bytes and cache payload are source-derived logical quantities, not measured bus traffic or VRAM. The diagnostic runner independently checks exact repeats; this dossier compares the first process of each role per scene and preserves approved references."}
     output_dir.mkdir(parents=True, exist_ok=True)
     with (output_dir / "per_process.csv").open("w", newline="", encoding="utf-8") as stream:
         writer = csv.DictWriter(stream, fieldnames=list(rows[0]))

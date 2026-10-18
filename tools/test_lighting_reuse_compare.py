@@ -67,6 +67,8 @@ class LightingReuseCompareTests(unittest.TestCase):
                        for frame in range(181, 185)]} for name in FRAME_SCOPES)
         binary = "old" if role == "before" else "candidate"
         benchmark = {"CPU": "controlled-cpu", "Configuration": "Release",
+                     "OSDescription": "controlled-os-build", "LogicalProcessors": "12",
+                     "SoftwareFrameRateLimit": "0", "PresentationInterval": "Immediate",
                      "ClientAssemblyVersion": binary, "CoreAssemblyVersion": binary,
                      "ClientAssemblySHA256": hashlib.sha256((binary + "client").encode()).hexdigest(),
                      "CoreAssemblySHA256": hashlib.sha256((binary + "core").encode()).hexdigest()}
@@ -151,6 +153,8 @@ class LightingReuseCompareTests(unittest.TestCase):
     def test_binary_and_render_environment_mixing_fail(self):
         for field, value in (("ClientAssemblySHA256", "other-client"),
                              ("CoreAssemblyVersion", "other-core"), ("CPU", "other-cpu"),
+                             ("OSDescription", "different-os-build"), ("LogicalProcessors", "24"),
+                             ("SoftwareFrameRateLimit", "60"), ("PresentationInterval", "One"),
                              ("Configuration", "Debug"), ("LightingPreparationReuse", "off")):
             with self.subTest(field=field):
                 capture = self.capture("on", SCENES[0], 1)

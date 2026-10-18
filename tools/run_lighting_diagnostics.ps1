@@ -65,7 +65,7 @@ $results = @()
 $fallbackResults = @()
 $failures = @()
 $actualMode = if ($PreparationReuse -eq 'inherit') {
-    if ($env:YJSE_DISABLE_LIGHTING_PREPARATION_REUSE -eq '1') { 'off' } else { 'on' }
+    if ($env:YJSE_DISABLE_LIGHTING_PREPARATION_REUSE -ceq '0') { 'on' } else { 'off' }
 } else { $PreparationReuse }
 foreach ($scenario in $scenarios) {
     $name, $source, $cameraPath, $lightCount, $disableBloom = $scenario
