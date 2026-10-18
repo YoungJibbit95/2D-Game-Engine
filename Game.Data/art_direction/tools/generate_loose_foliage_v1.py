@@ -11,7 +11,7 @@ from PIL import Image
 
 
 ROOT = Path(__file__).resolve().parents[2]
-OUTPUT = ROOT / "Assets" / "LooseFoliageV1"
+OUTPUT = ROOT / "assets" / "LooseFoliageV1"
 PREVIEW = ROOT / "art_direction" / "loose_foliage_v1_contact_sheet.png"
 PROVENANCE = ROOT / "art_direction" / "loose_foliage_v1_provenance.json"
 

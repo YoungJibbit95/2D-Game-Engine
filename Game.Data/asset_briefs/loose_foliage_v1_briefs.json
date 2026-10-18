@@ -6,7 +6,7 @@
   "briefs": [
     {
       "spriteId": "tiles/loose_oak_leaves_v1_autotile",
-      "outputPath": "Assets/LooseFoliageV1/loose_oak_leaves_v1_autotile.png",
+      "outputPath": "assets/LooseFoliageV1/loose_oak_leaves_v1_autotile.png",
       "width": 256,
       "height": 16,
       "subject": "Loose Oak Leaf Canopy",
@@ -21,7 +21,7 @@
     },
     {
       "spriteId": "tiles/loose_autumn_leaves_v1_autotile",
-      "outputPath": "Assets/LooseFoliageV1/loose_autumn_leaves_v1_autotile.png",
+      "outputPath": "assets/LooseFoliageV1/loose_autumn_leaves_v1_autotile.png",
       "width": 256,
       "height": 16,
       "subject": "Loose Autumn Leaf Canopy",
@@ -36,7 +36,7 @@
     },
     {
       "spriteId": "tiles/loose_marsh_leaves_v1_autotile",
-      "outputPath": "Assets/LooseFoliageV1/loose_marsh_leaves_v1_autotile.png",
+      "outputPath": "assets/LooseFoliageV1/loose_marsh_leaves_v1_autotile.png",
       "width": 256,
       "height": 16,
       "subject": "Loose Marsh Leaf Canopy",

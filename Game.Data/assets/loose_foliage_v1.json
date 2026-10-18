@@ -2,7 +2,7 @@
   "sprites": [
     {
       "id": "tiles/loose_oak_leaves_v1_autotile",
-      "path": "Assets/LooseFoliageV1/loose_oak_leaves_v1_autotile.png",
+      "path": "assets/LooseFoliageV1/loose_oak_leaves_v1_autotile.png",
       "category": "Tile",
       "width": 256,
       "height": 16,
@@ -31,7 +31,7 @@
     },
     {
       "id": "tiles/loose_autumn_leaves_v1_autotile",
-      "path": "Assets/LooseFoliageV1/loose_autumn_leaves_v1_autotile.png",
+      "path": "assets/LooseFoliageV1/loose_autumn_leaves_v1_autotile.png",
       "category": "Tile",
       "width": 256,
       "height": 16,
@@ -60,7 +60,7 @@
     },
     {
       "id": "tiles/loose_marsh_leaves_v1_autotile",
-      "path": "Assets/LooseFoliageV1/loose_marsh_leaves_v1_autotile.png",
+      "path": "assets/LooseFoliageV1/loose_marsh_leaves_v1_autotile.png",
       "category": "Tile",
       "width": 256,
       "height": 16,

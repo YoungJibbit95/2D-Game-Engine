@@ -130,7 +130,7 @@ jobs:
           --data-root Game.Data
           --manifest Game.Data/assets/wave05_living_world.sprites.json
           --style Game.Data/art_direction/yjse_pixel_style.json
-          --scan-root Assets/Wave05
+          --scan-root assets/Wave05
           --output artifacts/asset-audit-wave05.json
           --fail-on-hard-issues
 
@@ -143,11 +143,16 @@ jobs:
           --output artifacts/ui-sample-preview.png
           --check-existing Game.Data/art_direction/ui_sample_preview.png
 
+      - name: Validate exact preview image comparison
+        if: matrix.configuration == 'Debug'
+        run: python -m unittest discover -s Game.Data/art_direction/tools -p test_ui_sample_preview.py
+
       - name: Verify deterministic Wave05 preview
         if: matrix.configuration == 'Debug'
         shell: pwsh
         run: |
-          python Game.Data/Assets/Wave05/tools/build_wave05_preview.py
+          python Game.Data/assets/Wave05/tools/build_wave05_preview.py --check-existing
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           git diff --exit-code -- Game.Data/art_direction/wave_05_living_world_preview.png Game.Data/art_direction/wave_05_living_world_preview_summary.json
 
       - name: Validate content and cross-references
@@ -232,31 +237,48 @@ jobs:
         if: matrix.configuration == 'Release' && runner.os == 'Linux'
         run: sudo apt-get update && sudo apt-get install --yes xvfb
 
-      - name: Run client nonblank smoke on Windows
+      # Hosted Windows exposes OpenGL 1.1 without FBOs. Use signed Mesa packages
+      # only in the CI process; the published game keeps its native GPU path.
+      - name: Install Windows software OpenGL for real render smokes
         if: matrix.configuration == 'Release' && runner.os == 'Windows'
-        timeout-minutes: 2
-        working-directory: ${{ runner.temp }}/yjse-client-publish
-        run: >-
-          dotnet Game.Client.dll
-          --smoke
-          --frames 3
-          --timeout-seconds 30
-          --output "${{ github.workspace }}/artifacts/client-smoke.png"
+        id: msys2
+        uses: msys2/setup-msys2@ec48f7c5447b3140e2b088413ae3a55687bccb6e # v2.33.0
+        with:
+          msystem: UCRT64
+          release: true
+          update: true
+          cache: false
+          location: ${{ runner.temp }}
+          install: mingw-w64-ucrt-x86_64-mesa
 
-      - name: Run client nonblank smoke on Ubuntu
+      - name: Run published client smokes on Windows Mesa
+        if: matrix.configuration == 'Release' && runner.os == 'Windows'
+        timeout-minutes: 5
+        shell: pwsh
+        run: |
+          $mesaBin = Join-Path '${{ steps.msys2.outputs.msys2-location }}' 'ucrt64/bin'
+          $env:SDL_OPENGL_LIBRARY = Join-Path $mesaBin 'opengl32.dll'
+          if (-not (Test-Path -LiteralPath $env:SDL_OPENGL_LIBRARY -PathType Leaf)) { throw 'Mesa OpenGL library is missing.' }
+          if (-not (Test-Path -LiteralPath (Join-Path $mesaBin 'libgallium_wgl.dll') -PathType Leaf)) { throw 'Mesa Gallium library is missing.' }
+          $env:PATH = "$mesaBin;$env:PATH"
+          $env:GALLIUM_DRIVER = 'llvmpipe'
+          $env:LIBGL_ALWAYS_SOFTWARE = '1'
+          & '${{ steps.msys2.outputs.msys2-location }}/usr/bin/pacman.exe' -Q | Set-Content artifacts/windows-mesa-packages.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          Get-FileHash -Algorithm SHA256 -LiteralPath $env:SDL_OPENGL_LIBRARY, (Join-Path $mesaBin 'libgallium_wgl.dll')
+          & ./tools/run_client_smokes.ps1 -PublishRoot '${{ runner.temp }}/yjse-client-publish' -OutputDirectory artifacts/client-smokes
+
+      - name: Run published client smokes on Ubuntu Mesa
         if: matrix.configuration == 'Release' && runner.os == 'Linux'
-        timeout-minutes: 2
-        working-directory: ${{ runner.temp }}/yjse-client-publish
+        timeout-minutes: 5
         env:
           LIBGL_ALWAYS_SOFTWARE: "1"
           SDL_AUDIODRIVER: dummy
         run: >-
           xvfb-run -a
-          dotnet Game.Client.dll
-          --smoke
-          --frames 3
-          --timeout-seconds 30
-          --output "${{ github.workspace }}/artifacts/client-smoke.png"
+          pwsh -NoProfile -File tools/run_client_smokes.ps1
+          -PublishRoot "${{ runner.temp }}/yjse-client-publish"
+          -OutputDirectory artifacts/client-smokes
 
       - name: Upload test results
         if: always()
@@ -291,5 +313,7 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: client-smoke-${{ matrix.os }}
-          path: artifacts/client-smoke.*
+          path: |
+            artifacts/client-smokes/
+            artifacts/windows-mesa-packages.log
           if-no-files-found: warn

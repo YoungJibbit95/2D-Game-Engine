@@ -2,7 +2,7 @@
   "sprites": [
     {
       "id": "tiles/oak_trunk_v3_autotile",
-      "path": "Assets/TreeTrunksV3/world/tiles/oak_trunk_v3_autotile.png",
+      "path": "assets/TreeTrunksV3/world/tiles/oak_trunk_v3_autotile.png",
       "category": "Tile",
       "width": 256,
       "height": 16,
@@ -154,7 +154,7 @@
     },
     {
       "id": "tiles/living_wood_v3_autotile",
-      "path": "Assets/TreeTrunksV3/world/tiles/living_wood_v3_autotile.png",
+      "path": "assets/TreeTrunksV3/world/tiles/living_wood_v3_autotile.png",
       "category": "Tile",
       "width": 256,
       "height": 16,
@@ -306,7 +306,7 @@
     },
     {
       "id": "tiles/mangrove_trunk_v3_autotile",
-      "path": "Assets/TreeTrunksV3/world/tiles/mangrove_trunk_v3_autotile.png",
+      "path": "assets/TreeTrunksV3/world/tiles/mangrove_trunk_v3_autotile.png",
       "category": "Tile",
       "width": 256,
       "height": 16,

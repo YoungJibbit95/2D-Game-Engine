@@ -8,7 +8,7 @@
       "meta": "Wave 05 / regional biome",
       "alt": "Goldener Pixelart-Wald mit Amberbaeumen und warmen Lichtschichten",
       "localPath": "assets/wave05/world/amber-grove.png",
-      "sourcePath": "Game.Data/Assets/Wave05/backgrounds/amber_grove_parallax.png"
+      "sourcePath": "Game.Data/assets/Wave05/backgrounds/amber_grove_parallax.png"
     },
     {
       "id": "wave05-twilight-marsh",
@@ -18,7 +18,7 @@
       "meta": "Wave 05 / regional biome",
       "alt": "Dunkler Pixelart-Sumpf mit Mangroven, Nebel und tuerkisen Lichtakzenten",
       "localPath": "assets/wave05/world/twilight-marsh.png",
-      "sourcePath": "Game.Data/Assets/Wave05/backgrounds/twilight_marsh_parallax.png"
+      "sourcePath": "Game.Data/assets/Wave05/backgrounds/twilight_marsh_parallax.png"
     },
     {
       "id": "wave05-mangrove-root",
@@ -27,7 +27,7 @@
       "meta": "16 connected masks",
       "alt": "Pixelart-Autotile-Streifen fuer passierbare Mangrovenwurzeln",
       "localPath": "assets/wave05/world/mangrove-root-autotile.png",
-      "sourcePath": "Game.Data/Assets/Wave05/world/mangrove_root_autotile.png"
+      "sourcePath": "Game.Data/assets/Wave05/world/mangrove_root_autotile.png"
     },
     {
       "id": "wave05-amberstone",
@@ -36,7 +36,7 @@
       "meta": "16 connected masks",
       "alt": "Pixelart-Autotile-Streifen fuer Amberstein",
       "localPath": "assets/wave05/world/amberstone-autotile.png",
-      "sourcePath": "Game.Data/Assets/Wave05/world/amberstone_autotile.png"
+      "sourcePath": "Game.Data/assets/Wave05/world/amberstone_autotile.png"
     },
     {
       "id": "wave05-marsh-frog",
@@ -45,7 +45,7 @@
       "meta": "Friendly water-edge actor",
       "alt": "Animierter Pixelart-Sumpffrosch",
       "localPath": "assets/wave05/entities/marsh-frog.png",
-      "sourcePath": "Game.Data/Assets/Wave05/entities/marsh_frog.png"
+      "sourcePath": "Game.Data/assets/Wave05/entities/marsh_frog.png"
     },
     {
       "id": "wave05-canopy-owl",
@@ -54,7 +54,7 @@
       "meta": "Flying grove actor",
       "alt": "Animierte Pixelart-Baumkroneneule",
       "localPath": "assets/wave05/entities/canopy-owl.png",
-      "sourcePath": "Game.Data/Assets/Wave05/entities/canopy_owl.png"
+      "sourcePath": "Game.Data/assets/Wave05/entities/canopy_owl.png"
     },
     {
       "id": "wave05-amber-beetle",
@@ -63,7 +63,7 @@
       "meta": "Hostile ground actor",
       "alt": "Animierter Pixelart-Amberkaefer",
       "localPath": "assets/wave05/entities/amber-beetle.png",
-      "sourcePath": "Game.Data/Assets/Wave05/entities/amber_beetle.png"
+      "sourcePath": "Game.Data/assets/Wave05/entities/amber_beetle.png"
     },
     {
       "id": "wave05-prism-wisp",
@@ -72,7 +72,7 @@
       "meta": "Flying hostile actor",
       "alt": "Animiertes Pixelart-Prismenlicht",
       "localPath": "assets/wave05/entities/prism-wisp.png",
-      "sourcePath": "Game.Data/Assets/Wave05/entities/prism_wisp.png"
+      "sourcePath": "Game.Data/assets/Wave05/entities/prism_wisp.png"
     },
     {
       "id": "wave05-sunsteel-pickaxe",
@@ -81,7 +81,7 @@
       "meta": "Tool item",
       "alt": "Pixelart-Sonnenstahlspitzhacke",
       "localPath": "assets/wave05/items/sunsteel-pickaxe.png",
-      "sourcePath": "Game.Data/Assets/Wave05/items/sunsteel_pickaxe.png"
+      "sourcePath": "Game.Data/assets/Wave05/items/sunsteel_pickaxe.png"
     },
     {
       "id": "wave05-mirror-shield",
@@ -90,7 +90,7 @@
       "meta": "Guard item",
       "alt": "Pixelart-Spiegelschild",
       "localPath": "assets/wave05/items/mirror-shield.png",
-      "sourcePath": "Game.Data/Assets/Wave05/items/mirror_shield.png"
+      "sourcePath": "Game.Data/assets/Wave05/items/mirror_shield.png"
     },
     {
       "id": "wave05-ui-building",
@@ -99,7 +99,7 @@
       "meta": "Wave 05 UI",
       "alt": "Pixelart-Symbol fuer das Bausystem",
       "localPath": "assets/wave05/ui/building.png",
-      "sourcePath": "Game.Data/Assets/Wave05/ui/building.png"
+      "sourcePath": "Game.Data/assets/Wave05/ui/building.png"
     },
     {
       "id": "wave05-ui-quest",
@@ -108,7 +108,7 @@
       "meta": "Wave 05 UI",
       "alt": "Pixelart-Symbol fuer Weltaktivitaeten",
       "localPath": "assets/wave05/ui/quest.png",
-      "sourcePath": "Game.Data/Assets/Wave05/ui/quest.png"
+      "sourcePath": "Game.Data/assets/Wave05/ui/quest.png"
     },
     {
       "id": "wave04-meadow",

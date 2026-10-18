@@ -2,7 +2,7 @@
   "sprites": [
     {
       "id": "world/backgrounds/wave05/twilight_marsh",
-      "path": "Assets/Wave05/backgrounds/twilight_marsh_parallax.png",
+      "path": "assets/Wave05/backgrounds/twilight_marsh_parallax.png",
       "category": "Background",
       "width": 512,
       "height": 128,
@@ -26,7 +26,7 @@
     },
     {
       "id": "world/backgrounds/wave05/amber_grove",
-      "path": "Assets/Wave05/backgrounds/amber_grove_parallax.png",
+      "path": "assets/Wave05/backgrounds/amber_grove_parallax.png",
       "category": "Background",
       "width": 512,
       "height": 128,
@@ -50,7 +50,7 @@
     },
     {
       "id": "world/wave05/mangrove_root_autotile",
-      "path": "Assets/Wave05/world/mangrove_root_autotile.png",
+      "path": "assets/Wave05/world/mangrove_root_autotile.png",
       "category": "Tile",
       "width": 256,
       "height": 16,
@@ -236,7 +236,7 @@
     },
     {
       "id": "world/wave05/marsh_moss_autotile",
-      "path": "Assets/Wave05/world/marsh_moss_autotile.png",
+      "path": "assets/Wave05/world/marsh_moss_autotile.png",
       "category": "Tile",
       "width": 256,
       "height": 16,
@@ -422,7 +422,7 @@
     },
     {
       "id": "world/wave05/amberwood_plank_autotile",
-      "path": "Assets/Wave05/world/amberwood_plank_autotile.png",
+      "path": "assets/Wave05/world/amberwood_plank_autotile.png",
       "category": "Tile",
       "width": 256,
       "height": 16,
@@ -608,7 +608,7 @@
     },
     {
       "id": "world/wave05/amberstone_autotile",
-      "path": "Assets/Wave05/world/amberstone_autotile.png",
+      "path": "assets/Wave05/world/amberstone_autotile.png",
       "category": "Tile",
       "width": 256,
       "height": 16,
@@ -794,7 +794,7 @@
     },
     {
       "id": "world/wave05/hanging_lantern_chain",
-      "path": "Assets/Wave05/world/hanging_lantern_chain.png",
+      "path": "assets/Wave05/world/hanging_lantern_chain.png",
       "category": "WorldObject",
       "width": 64,
       "height": 32,
@@ -856,7 +856,7 @@
     },
     {
       "id": "world/wave05/amber_workshop_set",
-      "path": "Assets/Wave05/world/amber_workshop_set.png",
+      "path": "assets/Wave05/world/amber_workshop_set.png",
       "category": "WorldObject",
       "width": 128,
       "height": 32,
@@ -918,7 +918,7 @@
     },
     {
       "id": "items/wave05/sunsteel_pickaxe",
-      "path": "Assets/Wave05/items/sunsteel_pickaxe.png",
+      "path": "assets/Wave05/items/sunsteel_pickaxe.png",
       "category": "Tool",
       "width": 32,
       "height": 32,
@@ -941,7 +941,7 @@
     },
     {
       "id": "items/wave05/prism_axe",
-      "path": "Assets/Wave05/items/prism_axe.png",
+      "path": "assets/Wave05/items/prism_axe.png",
       "category": "Tool",
       "width": 32,
       "height": 32,
@@ -964,7 +964,7 @@
     },
     {
       "id": "items/wave05/glimmer_rod",
-      "path": "Assets/Wave05/items/glimmer_rod.png",
+      "path": "assets/Wave05/items/glimmer_rod.png",
       "category": "Tool",
       "width": 32,
       "height": 32,
@@ -987,7 +987,7 @@
     },
     {
       "id": "items/wave05/thornblade",
-      "path": "Assets/Wave05/items/thornblade.png",
+      "path": "assets/Wave05/items/thornblade.png",
       "category": "Weapon",
       "width": 32,
       "height": 32,
@@ -1010,7 +1010,7 @@
     },
     {
       "id": "items/wave05/mirror_shield",
-      "path": "Assets/Wave05/items/mirror_shield.png",
+      "path": "assets/Wave05/items/mirror_shield.png",
       "category": "Weapon",
       "width": 32,
       "height": 32,
@@ -1033,7 +1033,7 @@
     },
     {
       "id": "items/wave05/flare_bow",
-      "path": "Assets/Wave05/items/flare_bow.png",
+      "path": "assets/Wave05/items/flare_bow.png",
       "category": "Weapon",
       "width": 32,
       "height": 32,
@@ -1056,7 +1056,7 @@
     },
     {
       "id": "entities/wave05/marsh_frog",
-      "path": "Assets/Wave05/entities/marsh_frog.png",
+      "path": "assets/Wave05/entities/marsh_frog.png",
       "category": "Entity",
       "width": 256,
       "height": 32,
@@ -1162,7 +1162,7 @@
     },
     {
       "id": "entities/wave05/canopy_owl",
-      "path": "Assets/Wave05/entities/canopy_owl.png",
+      "path": "assets/Wave05/entities/canopy_owl.png",
       "category": "Entity",
       "width": 256,
       "height": 32,
@@ -1268,7 +1268,7 @@
     },
     {
       "id": "entities/wave05/amber_beetle",
-      "path": "Assets/Wave05/entities/amber_beetle.png",
+      "path": "assets/Wave05/entities/amber_beetle.png",
       "category": "Entity",
       "width": 256,
       "height": 32,
@@ -1374,7 +1374,7 @@
     },
     {
       "id": "entities/wave05/prism_wisp",
-      "path": "Assets/Wave05/entities/prism_wisp.png",
+      "path": "assets/Wave05/entities/prism_wisp.png",
       "category": "Entity",
       "width": 256,
       "height": 32,
@@ -1480,7 +1480,7 @@
     },
     {
       "id": "ui/wave05/glass_panel_9slice",
-      "path": "Assets/Wave05/ui/glass_panel_9slice.png",
+      "path": "assets/Wave05/ui/glass_panel_9slice.png",
       "category": "UI",
       "width": 48,
       "height": 48,
@@ -1586,7 +1586,7 @@
     },
     {
       "id": "ui/wave05/brass_modal_9slice",
-      "path": "Assets/Wave05/ui/brass_modal_9slice.png",
+      "path": "assets/Wave05/ui/brass_modal_9slice.png",
       "category": "UI",
       "width": 48,
       "height": 48,
@@ -1692,7 +1692,7 @@
     },
     {
       "id": "ui/wave05/quest",
-      "path": "Assets/Wave05/ui/quest.png",
+      "path": "assets/Wave05/ui/quest.png",
       "category": "UI",
       "width": 32,
       "height": 32,
@@ -1715,7 +1715,7 @@
     },
     {
       "id": "ui/wave05/combat",
-      "path": "Assets/Wave05/ui/combat.png",
+      "path": "assets/Wave05/ui/combat.png",
       "category": "UI",
       "width": 32,
       "height": 32,
@@ -1738,7 +1738,7 @@
     },
     {
       "id": "ui/wave05/social",
-      "path": "Assets/Wave05/ui/social.png",
+      "path": "assets/Wave05/ui/social.png",
       "category": "UI",
       "width": 32,
       "height": 32,
@@ -1761,7 +1761,7 @@
     },
     {
       "id": "ui/wave05/building",
-      "path": "Assets/Wave05/ui/building.png",
+      "path": "assets/Wave05/ui/building.png",
       "category": "UI",
       "width": 32,
       "height": 32,

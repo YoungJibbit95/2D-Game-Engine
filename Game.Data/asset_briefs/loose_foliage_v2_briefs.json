@@ -15,7 +15,7 @@
   "briefs": [
     {
       "spriteId": "tiles/loose_oak_leaves_v2a_autotile",
-      "outputPath": "Assets/LooseFoliageV2/loose_oak_leaves_v2a_autotile.png",
+      "outputPath": "assets/LooseFoliageV2/loose_oak_leaves_v2a_autotile.png",
       "width": 256,
       "height": 16,
       "subject": "Connected Oak Crown Mass V2A",
@@ -24,7 +24,7 @@
     },
     {
       "spriteId": "tiles/loose_oak_leaves_v2b_autotile",
-      "outputPath": "Assets/LooseFoliageV2/loose_oak_leaves_v2b_autotile.png",
+      "outputPath": "assets/LooseFoliageV2/loose_oak_leaves_v2b_autotile.png",
       "width": 256,
       "height": 16,
       "subject": "Connected Oak Crown Mass V2B",
@@ -33,7 +33,7 @@
     },
     {
       "spriteId": "tiles/loose_oak_leaves_v2c_autotile",
-      "outputPath": "Assets/LooseFoliageV2/loose_oak_leaves_v2c_autotile.png",
+      "outputPath": "assets/LooseFoliageV2/loose_oak_leaves_v2c_autotile.png",
       "width": 256,
       "height": 16,
       "subject": "Connected Oak Crown Mass V2C",
@@ -42,7 +42,7 @@
     },
     {
       "spriteId": "tiles/loose_autumn_leaves_v2a_autotile",
-      "outputPath": "Assets/LooseFoliageV2/loose_autumn_leaves_v2a_autotile.png",
+      "outputPath": "assets/LooseFoliageV2/loose_autumn_leaves_v2a_autotile.png",
       "width": 256,
       "height": 16,
       "subject": "Connected Autumn Crown Mass V2A",
@@ -51,7 +51,7 @@
     },
     {
       "spriteId": "tiles/loose_autumn_leaves_v2b_autotile",
-      "outputPath": "Assets/LooseFoliageV2/loose_autumn_leaves_v2b_autotile.png",
+      "outputPath": "assets/LooseFoliageV2/loose_autumn_leaves_v2b_autotile.png",
       "width": 256,
       "height": 16,
       "subject": "Connected Autumn Crown Mass V2B",
@@ -60,7 +60,7 @@
     },
     {
       "spriteId": "tiles/loose_autumn_leaves_v2c_autotile",
-      "outputPath": "Assets/LooseFoliageV2/loose_autumn_leaves_v2c_autotile.png",
+      "outputPath": "assets/LooseFoliageV2/loose_autumn_leaves_v2c_autotile.png",
       "width": 256,
       "height": 16,
       "subject": "Connected Autumn Crown Mass V2C",
@@ -69,7 +69,7 @@
     },
     {
       "spriteId": "tiles/loose_marsh_leaves_v2a_autotile",
-      "outputPath": "Assets/LooseFoliageV2/loose_marsh_leaves_v2a_autotile.png",
+      "outputPath": "assets/LooseFoliageV2/loose_marsh_leaves_v2a_autotile.png",
       "width": 256,
       "height": 16,
       "subject": "Connected Marsh Crown Mass V2A",
@@ -78,7 +78,7 @@
     },
     {
       "spriteId": "tiles/loose_marsh_leaves_v2b_autotile",
-      "outputPath": "Assets/LooseFoliageV2/loose_marsh_leaves_v2b_autotile.png",
+      "outputPath": "assets/LooseFoliageV2/loose_marsh_leaves_v2b_autotile.png",
       "width": 256,
       "height": 16,
       "subject": "Connected Marsh Crown Mass V2B",
@@ -87,7 +87,7 @@
     },
     {
       "spriteId": "tiles/loose_marsh_leaves_v2c_autotile",
-      "outputPath": "Assets/LooseFoliageV2/loose_marsh_leaves_v2c_autotile.png",
+      "outputPath": "assets/LooseFoliageV2/loose_marsh_leaves_v2c_autotile.png",
       "width": 256,
       "height": 16,
       "subject": "Connected Marsh Crown Mass V2C",

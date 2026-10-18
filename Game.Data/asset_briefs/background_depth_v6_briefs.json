@@ -11,7 +11,7 @@
   "briefs": [
     {
       "spriteId": "world/backgrounds/depth_v6/forest_far",
-      "outputPath": "Assets/BackgroundDepthV6/forest_far.png",
+      "outputPath": "assets/BackgroundDepthV6/forest_far.png",
       "width": 1536,
       "height": 384,
       "subject": "forest far",
@@ -36,7 +36,7 @@
     },
     {
       "spriteId": "world/backgrounds/depth_v6/forest_mid",
-      "outputPath": "Assets/BackgroundDepthV6/forest_mid.png",
+      "outputPath": "assets/BackgroundDepthV6/forest_mid.png",
       "width": 1024,
       "height": 256,
       "subject": "forest mid",
@@ -61,7 +61,7 @@
     },
     {
       "spriteId": "world/backgrounds/depth_v6/forest_near",
-      "outputPath": "Assets/BackgroundDepthV6/forest_near.png",
+      "outputPath": "assets/BackgroundDepthV6/forest_near.png",
       "width": 512,
       "height": 128,
       "subject": "forest near",
@@ -86,7 +86,7 @@
     },
     {
       "spriteId": "world/backgrounds/depth_v6/amber_far",
-      "outputPath": "Assets/BackgroundDepthV6/amber_far.png",
+      "outputPath": "assets/BackgroundDepthV6/amber_far.png",
       "width": 1536,
       "height": 384,
       "subject": "amber far",
@@ -111,7 +111,7 @@
     },
     {
       "spriteId": "world/backgrounds/depth_v6/amber_mid",
-      "outputPath": "Assets/BackgroundDepthV6/amber_mid.png",
+      "outputPath": "assets/BackgroundDepthV6/amber_mid.png",
       "width": 1024,
       "height": 256,
       "subject": "amber mid",
@@ -136,7 +136,7 @@
     },
     {
       "spriteId": "world/backgrounds/depth_v6/amber_near",
-      "outputPath": "Assets/BackgroundDepthV6/amber_near.png",
+      "outputPath": "assets/BackgroundDepthV6/amber_near.png",
       "width": 512,
       "height": 128,
       "subject": "amber near",
@@ -161,7 +161,7 @@
     },
     {
       "spriteId": "world/backgrounds/depth_v6/twilight_far",
-      "outputPath": "Assets/BackgroundDepthV6/twilight_far.png",
+      "outputPath": "assets/BackgroundDepthV6/twilight_far.png",
       "width": 1536,
       "height": 384,
       "subject": "twilight far",
@@ -186,7 +186,7 @@
     },
     {
       "spriteId": "world/backgrounds/depth_v6/twilight_mid",
-      "outputPath": "Assets/BackgroundDepthV6/twilight_mid.png",
+      "outputPath": "assets/BackgroundDepthV6/twilight_mid.png",
       "width": 1024,
       "height": 256,
       "subject": "twilight mid",
@@ -211,7 +211,7 @@
     },
     {
       "spriteId": "world/backgrounds/depth_v6/twilight_near",
-      "outputPath": "Assets/BackgroundDepthV6/twilight_near.png",
+      "outputPath": "assets/BackgroundDepthV6/twilight_near.png",
       "width": 512,
       "height": 128,
       "subject": "twilight near",
@@ -236,7 +236,7 @@
     },
     {
       "spriteId": "world/backgrounds/depth_v6/crystal_far",
-      "outputPath": "Assets/BackgroundDepthV6/crystal_far.png",
+      "outputPath": "assets/BackgroundDepthV6/crystal_far.png",
       "width": 1536,
       "height": 384,
       "subject": "crystal far",
@@ -261,7 +261,7 @@
     },
     {
       "spriteId": "world/backgrounds/depth_v6/crystal_mid",
-      "outputPath": "Assets/BackgroundDepthV6/crystal_mid.png",
+      "outputPath": "assets/BackgroundDepthV6/crystal_mid.png",
       "width": 1024,
       "height": 256,
       "subject": "crystal mid",
@@ -286,7 +286,7 @@
     },
     {
       "spriteId": "world/backgrounds/depth_v6/crystal_near",
-      "outputPath": "Assets/BackgroundDepthV6/crystal_near.png",
+      "outputPath": "assets/BackgroundDepthV6/crystal_near.png",
       "width": 512,
       "height": 128,
       "subject": "crystal near",

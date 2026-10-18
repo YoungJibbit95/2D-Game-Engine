@@ -2,7 +2,7 @@
   "sprites": [
     {
       "id": "world/tiles/polish_v1/forest_grass_loam_autotile",
-      "path": "Assets/TerrainPolishV1/world/tiles/forest_grass_loam_autotile.png",
+      "path": "assets/TerrainPolishV1/world/tiles/forest_grass_loam_autotile.png",
       "category": "Tile",
       "width": 256,
       "height": 16,
@@ -185,7 +185,7 @@
     },
     {
       "id": "world/tiles/polish_v1/forest_loam_autotile",
-      "path": "Assets/TerrainPolishV1/world/tiles/forest_loam_autotile.png",
+      "path": "assets/TerrainPolishV1/world/tiles/forest_loam_autotile.png",
       "category": "Tile",
       "width": 256,
       "height": 16,
@@ -368,7 +368,7 @@
     },
     {
       "id": "world/tiles/polish_v1/layered_stone_autotile",
-      "path": "Assets/TerrainPolishV1/world/tiles/layered_stone_autotile.png",
+      "path": "assets/TerrainPolishV1/world/tiles/layered_stone_autotile.png",
       "category": "Tile",
       "width": 256,
       "height": 16,
@@ -551,7 +551,7 @@
     },
     {
       "id": "world/tiles/polish_v1/amberstone_autotile",
-      "path": "Assets/TerrainPolishV1/world/tiles/amberstone_autotile.png",
+      "path": "assets/TerrainPolishV1/world/tiles/amberstone_autotile.png",
       "category": "Tile",
       "width": 256,
       "height": 16,
@@ -734,7 +734,7 @@
     },
     {
       "id": "world/tiles/polish_v1/marsh_moss_autotile",
-      "path": "Assets/TerrainPolishV1/world/tiles/marsh_moss_autotile.png",
+      "path": "assets/TerrainPolishV1/world/tiles/marsh_moss_autotile.png",
       "category": "Tile",
       "width": 256,
       "height": 16,
@@ -917,7 +917,7 @@
     },
     {
       "id": "world/tiles/polish_v1/amberwood_plank_autotile",
-      "path": "Assets/TerrainPolishV1/world/tiles/amberwood_plank_autotile.png",
+      "path": "assets/TerrainPolishV1/world/tiles/amberwood_plank_autotile.png",
       "category": "Tile",
       "width": 256,
       "height": 16,

@@ -12,7 +12,7 @@
   "briefs": [
     {
       "spriteId": "world/backgrounds/wave05/twilight_marsh",
-      "outputPath": "Assets/Wave05/backgrounds/twilight_marsh_parallax.png",
+      "outputPath": "assets/Wave05/backgrounds/twilight_marsh_parallax.png",
       "width": 512,
       "height": 128,
       "subject": "Seam-safe twilight marsh parallax scene",
@@ -86,7 +86,7 @@
     },
     {
       "spriteId": "world/backgrounds/wave05/amber_grove",
-      "outputPath": "Assets/Wave05/backgrounds/amber_grove_parallax.png",
+      "outputPath": "assets/Wave05/backgrounds/amber_grove_parallax.png",
       "width": 512,
       "height": 128,
       "subject": "Seam-safe amber grove parallax scene",
@@ -160,7 +160,7 @@
     },
     {
       "spriteId": "world/wave05/mangrove_root_autotile",
-      "outputPath": "Assets/Wave05/world/mangrove_root_autotile.png",
+      "outputPath": "assets/Wave05/world/mangrove_root_autotile.png",
       "width": 256,
       "height": 16,
       "subject": "Connectable mangrove root material",
@@ -234,7 +234,7 @@
     },
     {
       "spriteId": "world/wave05/marsh_moss_autotile",
-      "outputPath": "Assets/Wave05/world/marsh_moss_autotile.png",
+      "outputPath": "assets/Wave05/world/marsh_moss_autotile.png",
       "width": 256,
       "height": 16,
       "subject": "Connectable marsh moss material",
@@ -308,7 +308,7 @@
     },
     {
       "spriteId": "world/wave05/amberwood_plank_autotile",
-      "outputPath": "Assets/Wave05/world/amberwood_plank_autotile.png",
+      "outputPath": "assets/Wave05/world/amberwood_plank_autotile.png",
       "width": 256,
       "height": 16,
       "subject": "Connectable amberwood plank material",
@@ -382,7 +382,7 @@
     },
     {
       "spriteId": "world/wave05/amberstone_autotile",
-      "outputPath": "Assets/Wave05/world/amberstone_autotile.png",
+      "outputPath": "assets/Wave05/world/amberstone_autotile.png",
       "width": 256,
       "height": 16,
       "subject": "Connectable amberstone material",
@@ -456,7 +456,7 @@
     },
     {
       "spriteId": "world/wave05/hanging_lantern_chain",
-      "outputPath": "Assets/Wave05/world/hanging_lantern_chain.png",
+      "outputPath": "assets/Wave05/world/hanging_lantern_chain.png",
       "width": 64,
       "height": 32,
       "subject": "Four-piece connectable hanging lantern chain",
@@ -530,7 +530,7 @@
     },
     {
       "spriteId": "world/wave05/amber_workshop_set",
-      "outputPath": "Assets/Wave05/world/amber_workshop_set.png",
+      "outputPath": "assets/Wave05/world/amber_workshop_set.png",
       "width": 128,
       "height": 32,
       "subject": "Modular amberwood workshop furniture set",
@@ -604,7 +604,7 @@
     },
     {
       "spriteId": "items/wave05/sunsteel_pickaxe",
-      "outputPath": "Assets/Wave05/items/sunsteel_pickaxe.png",
+      "outputPath": "assets/Wave05/items/sunsteel_pickaxe.png",
       "width": 32,
       "height": 32,
       "subject": "Sunsteel Pickaxe",
@@ -677,7 +677,7 @@
     },
     {
       "spriteId": "items/wave05/prism_axe",
-      "outputPath": "Assets/Wave05/items/prism_axe.png",
+      "outputPath": "assets/Wave05/items/prism_axe.png",
       "width": 32,
       "height": 32,
       "subject": "Prism Axe",
@@ -750,7 +750,7 @@
     },
     {
       "spriteId": "items/wave05/glimmer_rod",
-      "outputPath": "Assets/Wave05/items/glimmer_rod.png",
+      "outputPath": "assets/Wave05/items/glimmer_rod.png",
       "width": 32,
       "height": 32,
       "subject": "Glimmer Rod",
@@ -823,7 +823,7 @@
     },
     {
       "spriteId": "items/wave05/thornblade",
-      "outputPath": "Assets/Wave05/items/thornblade.png",
+      "outputPath": "assets/Wave05/items/thornblade.png",
       "width": 32,
       "height": 32,
       "subject": "Thornblade",
@@ -896,7 +896,7 @@
     },
     {
       "spriteId": "items/wave05/mirror_shield",
-      "outputPath": "Assets/Wave05/items/mirror_shield.png",
+      "outputPath": "assets/Wave05/items/mirror_shield.png",
       "width": 32,
       "height": 32,
       "subject": "Mirror Shield",
@@ -969,7 +969,7 @@
     },
     {
       "spriteId": "items/wave05/flare_bow",
-      "outputPath": "Assets/Wave05/items/flare_bow.png",
+      "outputPath": "assets/Wave05/items/flare_bow.png",
       "width": 32,
       "height": 32,
       "subject": "Flare Bow",
@@ -1042,7 +1042,7 @@
     },
     {
       "spriteId": "entities/wave05/marsh_frog",
-      "outputPath": "Assets/Wave05/entities/marsh_frog.png",
+      "outputPath": "assets/Wave05/entities/marsh_frog.png",
       "width": 256,
       "height": 32,
       "subject": "Eight-frame animated marsh frog",
@@ -1116,7 +1116,7 @@
     },
     {
       "spriteId": "entities/wave05/canopy_owl",
-      "outputPath": "Assets/Wave05/entities/canopy_owl.png",
+      "outputPath": "assets/Wave05/entities/canopy_owl.png",
       "width": 256,
       "height": 32,
       "subject": "Eight-frame animated canopy owl",
@@ -1190,7 +1190,7 @@
     },
     {
       "spriteId": "entities/wave05/amber_beetle",
-      "outputPath": "Assets/Wave05/entities/amber_beetle.png",
+      "outputPath": "assets/Wave05/entities/amber_beetle.png",
       "width": 256,
       "height": 32,
       "subject": "Eight-frame animated amber beetle",
@@ -1264,7 +1264,7 @@
     },
     {
       "spriteId": "entities/wave05/prism_wisp",
-      "outputPath": "Assets/Wave05/entities/prism_wisp.png",
+      "outputPath": "assets/Wave05/entities/prism_wisp.png",
       "width": 256,
       "height": 32,
       "subject": "Eight-frame animated prism wisp",
@@ -1338,7 +1338,7 @@
     },
     {
       "spriteId": "ui/wave05/glass_panel_9slice",
-      "outputPath": "Assets/Wave05/ui/glass_panel_9slice.png",
+      "outputPath": "assets/Wave05/ui/glass_panel_9slice.png",
       "width": 48,
       "height": 48,
       "subject": "Modern glass-and-teal pixel nine-slice",
@@ -1411,7 +1411,7 @@
     },
     {
       "spriteId": "ui/wave05/brass_modal_9slice",
-      "outputPath": "Assets/Wave05/ui/brass_modal_9slice.png",
+      "outputPath": "assets/Wave05/ui/brass_modal_9slice.png",
       "width": 48,
       "height": 48,
       "subject": "Modern brass-and-wood pixel nine-slice",
@@ -1484,7 +1484,7 @@
     },
     {
       "spriteId": "ui/wave05/quest",
-      "outputPath": "Assets/Wave05/ui/quest.png",
+      "outputPath": "assets/Wave05/ui/quest.png",
       "width": 32,
       "height": 32,
       "subject": "Readable quest menu icon",
@@ -1557,7 +1557,7 @@
     },
     {
       "spriteId": "ui/wave05/combat",
-      "outputPath": "Assets/Wave05/ui/combat.png",
+      "outputPath": "assets/Wave05/ui/combat.png",
       "width": 32,
       "height": 32,
       "subject": "Readable combat menu icon",
@@ -1630,7 +1630,7 @@
     },
     {
       "spriteId": "ui/wave05/social",
-      "outputPath": "Assets/Wave05/ui/social.png",
+      "outputPath": "assets/Wave05/ui/social.png",
       "width": 32,
       "height": 32,
       "subject": "Readable social menu icon",
@@ -1703,7 +1703,7 @@
     },
     {
       "spriteId": "ui/wave05/building",
-      "outputPath": "Assets/Wave05/ui/building.png",
+      "outputPath": "assets/Wave05/ui/building.png",
       "width": 32,
       "height": 32,
       "subject": "Readable building menu icon",

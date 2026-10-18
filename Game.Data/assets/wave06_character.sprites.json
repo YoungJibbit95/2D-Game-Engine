@@ -2,7 +2,7 @@
   "sprites": [
     {
       "id": "entities/player/character_v2_wave06/body",
-      "path": "Assets/Wave06Character/player_body_actions.png",
+      "path": "assets/Wave06Character/player_body_actions.png",
       "category": "Entity",
       "width": 384,
       "height": 40,
@@ -173,7 +173,7 @@
     },
     {
       "id": "entities/player/character_v2_wave06/clothes",
-      "path": "Assets/Wave06Character/player_clothes_actions.png",
+      "path": "assets/Wave06Character/player_clothes_actions.png",
       "category": "Entity",
       "width": 384,
       "height": 40,
@@ -344,7 +344,7 @@
     },
     {
       "id": "entities/player/character_v2_wave06/hair",
-      "path": "Assets/Wave06Character/player_hair_actions.png",
+      "path": "assets/Wave06Character/player_hair_actions.png",
       "category": "Entity",
       "width": 384,
       "height": 40,
@@ -515,7 +515,7 @@
     },
     {
       "id": "entities/player/character_v2_wave06/armor",
-      "path": "Assets/Wave06Character/player_armor_actions.png",
+      "path": "assets/Wave06Character/player_armor_actions.png",
       "category": "Entity",
       "width": 384,
       "height": 40,
@@ -686,7 +686,7 @@
     },
     {
       "id": "entities/player/character_v2_wave06/equipment",
-      "path": "Assets/Wave06Character/player_equipment_actions.png",
+      "path": "assets/Wave06Character/player_equipment_actions.png",
       "category": "Entity",
       "width": 384,
       "height": 40,

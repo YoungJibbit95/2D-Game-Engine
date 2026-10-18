@@ -14,7 +14,7 @@ from generate_wave_02_assets import C, image
 
 ROOT = Path(__file__).resolve().parents[2]
 SOURCE = ROOT / "art_direction" / "generated_sources" / "wave_06_character_source.png"
-OUTPUT_ROOT = ROOT / "Assets" / "Wave06Character"
+OUTPUT_ROOT = ROOT / "assets" / "Wave06Character"
 MANIFEST = ROOT / "assets" / "wave06_character.sprites.json"
 BRIEFS = ROOT / "asset_briefs" / "production_wave_06_character_briefs.json"
 PROVENANCE = ROOT / "art_direction" / "wave_06_character_provenance.json"
@@ -55,7 +55,7 @@ POSES = [
 ]
 LAYERS = ("body", "clothes", "hair", "armor", "equipment")
 LAYER_PATHS = {
-    layer: f"Assets/Wave06Character/player_{layer}_actions.png"
+    layer: f"assets/Wave06Character/player_{layer}_actions.png"
     for layer in LAYERS
 }
 SOURCE_PROMPT = """Use case: stylized-concept

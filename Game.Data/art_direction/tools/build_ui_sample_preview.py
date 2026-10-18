@@ -10,6 +10,7 @@ import json
 from pathlib import Path
 
 from PIL import Image, ImageDraw
+from preview_integrity import previews_match
 
 
 SPRITE_IDS = (
@@ -32,7 +33,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--check-existing",
         type=Path,
-        help="Fail with exit code 2 when the generated PNG differs from this file.",
+        help="Fail with exit code 2 when image mode, dimensions or any pixel differs from this file.",
     )
     return parser.parse_args()
 
@@ -110,13 +111,13 @@ def main() -> None:
             matches_existing = False
         else:
             existing_bytes = args.check_existing.read_bytes()
-            matches_existing = existing_bytes == generated_bytes
+            matches_existing = previews_match(generated_bytes, existing_bytes)
 
     same_output_as_check = (
         args.check_existing is not None
         and args.output.resolve() == args.check_existing.resolve()
     )
-    if matches_existing or not same_output_as_check:
+    if not same_output_as_check:
         args.output.parent.mkdir(parents=True, exist_ok=True)
         args.output.write_bytes(generated_bytes)
         print(f"wrote {args.output} ({preview.width}x{preview.height})")

@@ -13,11 +13,11 @@ from PIL import Image, ImageDraw
 
 
 DATA_ROOT = Path(__file__).resolve().parents[3]
-WAVE_ROOT = DATA_ROOT / "Assets" / "Wave05"
+WAVE_ROOT = DATA_ROOT / "assets" / "Wave05"
 MANIFEST_PATH = DATA_ROOT / "assets" / "wave05_living_world.sprites.json"
 BRIEF_PATH = DATA_ROOT / "asset_briefs" / "production_wave_05_living_world_briefs.json"
 PROVENANCE_PATH = DATA_ROOT / "art_direction" / "wave_05_living_world_provenance.json"
-GENERATOR_RELATIVE = "Assets/Wave05/tools/generate_wave05_assets.py"
+GENERATOR_RELATIVE = "assets/Wave05/tools/generate_wave05_assets.py"
 WAVE_ID = "wave_05_living_world_production"
 
 C = {
@@ -424,7 +424,7 @@ def specs() -> tuple[AssetSpec, ...]:
 def manifest_entry(spec: AssetSpec) -> dict:
     entry = {
         "id": spec.sprite_id,
-        "path": f"Assets/Wave05/{spec.relative_path}",
+        "path": f"assets/Wave05/{spec.relative_path}",
         "category": spec.category,
         "width": spec.size[0],
         "height": spec.size[1],
@@ -446,7 +446,7 @@ def brief_entry(spec: AssetSpec) -> dict:
     frame_note = f"Preserve {len(spec.frames)} declared source rectangles and origins." if spec.frames else "Render as one exact source rectangle."
     return {
         "spriteId": spec.sprite_id,
-        "outputPath": f"Assets/Wave05/{spec.relative_path}",
+        "outputPath": f"assets/Wave05/{spec.relative_path}",
         "width": spec.size[0],
         "height": spec.size[1],
         "subject": spec.subject,
@@ -485,7 +485,7 @@ def main() -> None:
         image.save(output, "PNG", optimize=False, compress_level=9)
         generated.append({
             "spriteId": spec.sprite_id,
-            "path": f"Assets/Wave05/{spec.relative_path}",
+            "path": f"assets/Wave05/{spec.relative_path}",
             "sha256": sha256(output.read_bytes()).hexdigest(),
             "dimensions": list(spec.size),
             "frameCount": len(spec.frames),

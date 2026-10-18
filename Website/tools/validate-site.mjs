@@ -3,6 +3,7 @@ import { readFile, readdir, stat } from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
 import { fileURLToPath } from "node:url";
+import { readExactFile } from "./read-exact-file.mjs";
 
 const toolsRoot = path.dirname(fileURLToPath(import.meta.url));
 const websiteRoot = path.resolve(toolsRoot, "..");
@@ -169,7 +170,9 @@ async function validateAssets(data) {
       continue;
     }
     try {
-      const [localBytes, sourceBytes] = await Promise.all([readFile(local), readFile(source)]);
+      const [localBytes, sourceBytes] = await Promise.all([
+        readExactFile(staticRoot, local), readExactFile(repositoryRoot, source)
+      ]);
       if (createHash("sha256").update(localBytes).digest("hex") !== createHash("sha256").update(sourceBytes).digest("hex")) {
         fail(`asset '${asset.id}': website copy differs from '${asset.sourcePath}'`);
       } else checkedProvenanceCopies++;
@@ -187,10 +190,10 @@ async function validateWave05SourceContract(data) {
     checkedWave05Frames = (manifest.sprites || []).reduce((total, sprite) => total + (sprite.frames?.length ?? 0), 0);
     if (checkedWave05Assets !== 24) fail(`Wave 05 manifest: expected 24 assets, found ${checkedWave05Assets}`);
     if (checkedWave05Frames !== 122) fail(`Wave 05 manifest: expected 122 frames, found ${checkedWave05Frames}`);
-    const sourcePaths = new Set((manifest.sprites || []).map((sprite) => `Game.Data/${String(sprite.path || "").replaceAll("\\", "/")}`.toLowerCase()));
+    const sourcePaths = new Set((manifest.sprites || []).map((sprite) => `Game.Data/${String(sprite.path || "").replaceAll("\\", "/")}`));
     const websiteAssets = (data?.assets || []).filter((asset) => asset.localPath?.startsWith("assets/wave05/"));
     for (const asset of websiteAssets) {
-      if (!sourcePaths.has(String(asset.sourcePath).toLowerCase())) fail(`asset '${asset.id}': source not declared by Wave 05 manifest`);
+      if (!sourcePaths.has(String(asset.sourcePath))) fail(`asset '${asset.id}': source not declared by Wave 05 manifest`);
     }
   } catch (error) {
     fail(`Wave 05 source manifest: invalid or missing (${error.message})`);

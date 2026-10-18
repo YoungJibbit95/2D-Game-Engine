@@ -11,7 +11,7 @@ from PIL import Image, ImageDraw
 
 
 ROOT = Path(__file__).resolve().parents[2]
-OUTPUT = ROOT / "Assets" / "BackgroundDepthV6"
+OUTPUT = ROOT / "assets" / "BackgroundDepthV6"
 MANIFEST = ROOT / "assets" / "background_depth_v6.sprites.json"
 BRIEFS = ROOT / "asset_briefs" / "background_depth_v6_briefs.json"
 PROVENANCE = ROOT / "art_direction" / "background_depth_v6_provenance.json"
@@ -135,7 +135,7 @@ def main() -> None:
     previews = []
     for name, sprite_id, source_relative, size, fade_start, fade_end in SPECS:
         source_path = ROOT / source_relative
-        output_relative = f"Assets/BackgroundDepthV6/{name}.png"
+        output_relative = f"assets/BackgroundDepthV6/{name}.png"
         output_path = ROOT / output_relative
         plane = build_plane(name, source_path, size, fade_start, fade_end)
         plane.save(output_path, format="PNG", optimize=False, compress_level=9)

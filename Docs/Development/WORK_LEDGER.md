@@ -2,9 +2,19 @@
 
 # YjsE Work Ledger
 
-Last updated: 2026-07-22 (Session 0 integration baseline, subsystem audits and isolated performance acceptance)
+Last updated: 2026-10-18 (PR-0A cross-platform asset integrity and release CI)
 
 ## Active Work
+
+- User-directed active work supersedes the historical Session 0 work package below: Sprint 0 / PR-0A, cross-platform asset integrity and reliable published-client smokes.
+- Branch: `codex/yjse-p0-001-asset-ci`, clean remote base `5ceb115420cc91ae2cdd36d0b63e4c8c476e05ee`, isolated worktree `F:\Coding\YJsE-PR-0A`. Original checkout `F:\Coding\2D Pixel Game Engine` remains on `main` / `164795ae74b9928fa1c608adeadfe6f1396aeea1`; all 96 modified tracked files and 185 untracked files are preserved.
+- Explicit user authorization permits feature-branch commits, push and PR creation; merge, force-push and direct changes to `master` remain prohibited.
+- Reproduced 62 case-incorrect sprite paths across seven manifests, matching brief/generator paths, twelve website sources, two workflow paths and a current `NU1902` locked-restore failure. Fixed references and MessagePack 3.1.8 -> 3.1.9 with all four lockfiles, keeping warnings-as-errors.
+- Added cross-platform case-sensitive audit/website regressions, respected mod SourceRoots and retained aliases. Five new regression cases failed on Windows before the fix and pass afterward. Runtime texture validation remains strict.
+- Published Main Menu, World Select and real Forest gameplay captures pass locally: 263 resources, 1,518 frames, zero invalid resources. Forest screenshot visually inspected. The wrapper verifies fresh PNG/JSON results, gameplay telemetry and process deadlines; native rendering code is unchanged.
+- Current gate commands, review, local artifacts, hosted CI and rollback are recorded in `PR_0A_ASSET_CI.md`. Older evidence below is historical and must not be mistaken for this branch's hosted result.
+- PR [#6](https://github.com/YoungJibbit95/2D-Game-Engine/pull/6) opened as draft; reviewed initial commit `88db61b`. Hosted Windows and Ubuntu Release, Website and Windows Debug passed. Both OS families rendered all three real Mesa smokes; downloaded Forest captures were visually inspected. Ubuntu Debug exposed PNG-compression-only mismatches in UI and Wave05 previews. Shared exact image equality, complete Wave05 summary/hash validation and seven Python fixtures correct those cross-platform gates without changing checked-in images. Final complete-matrix acceptance is still required.
+- PR-0A implementation completed at `3d70e36b3fb361cfacb3984fe4d08f74f5b5127f`. [Complete CI run 39105931841](https://github.com/YoungJibbit95/2D-Game-Engine/actions/runs/39105931841) passes Website and Windows/Ubuntu Debug/Release on that same code revision. All four functional partitions pass 1,725/1,725; both Release jobs pass all 21 timing classes / 39 tests, quick harness and all three real published-client smokes. Both Debug jobs pass strict audits, seven Python preview regressions and unchanged image/summary contracts. Independent reviews of the integrated code and preview follow-up have no open findings. The earlier failed runs above are diagnosis history, superseded by this complete green run.
 
 - Active epic: Epic 2 - Living Sandbox And Developer Experience
 - Active milestone: Milestone 5 - reduce authoritative snapshot/query costs and calibrate high-entity/streaming workloads
@@ -271,6 +281,10 @@ Raw local artifacts remain under ignored `artifacts/`, including `performance-li
 - Audio mixer/soundscape routing is active, but no production sound files exist, so missing-asset telemetry rather than audible content is the expected fallback.
 
 ## Exact Next Action
+
+Hand off PR-0A / [PR #6](https://github.com/YoungJibbit95/2D-Game-Engine/pull/6) for human review and an explicit integration decision; do not merge automatically. Implementation `3d70e36` has a complete green Windows/Ubuntu matrix (run 39105931841); the final documentation-only revision must retain its normal PR checks. After PR-0A integration, the next separate PR is PR-0B: reproducible Golden Scene captures and visual/benchmark fixtures. Renderer V2, Lighting V2 and Worldgen V2 remain subsequent independently measured PRs.
+
+Historical Session 0 resume action (superseded by the user's Sprint 0 request):
 
 Add deterministic Inventory opening to the existing smoke hook and capture compact/regular/expanded Inventory, Crafting, Settings and Developer Menu at 720p/1080p/1440p. Then author Frostwood-specific background planes, trees, vegetation and structures instead of recoloring generic Forest planes, and run a long 1080p/1440p all-biome lighting/weather/performance matrix. Continue the combined dense-scene fixture with scheduled AI, continuous bodies, projectiles and physical particles while preserving zero-allocation hot paths and the hosted/CI truth gates.
 
