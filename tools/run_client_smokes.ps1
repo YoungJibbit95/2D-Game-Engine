@@ -3,7 +3,8 @@ param(
     [Parameter(Mandatory)] [string] $PublishRoot,
     [Parameter(Mandatory)] [string] $OutputDirectory,
     [ValidateRange(1, 300)] [int] $TimeoutSeconds = 60,
-    [string] $GoldenFixture
+    [string] $GoldenFixture,
+    [ValidateSet('inherit', 'on', 'off')] [string] $PreparationReuse = 'inherit'
 )
 
 $ErrorActionPreference = 'Stop'
@@ -35,6 +36,9 @@ foreach ($state in $states) {
     $startInfo.Environment['YJSE_GAME_ROOT'] = $publishPath
     $startInfo.Environment.Remove('YJSE_GAME_DATA') | Out-Null
     $startInfo.Environment.Remove('YJSE_MODS_ROOT') | Out-Null
+    if ($PreparationReuse -ne 'inherit') {
+        $startInfo.Environment['YJSE_DISABLE_LIGHTING_PREPARATION_REUSE'] = if ($PreparationReuse -eq 'off') { '1' } else { '0' }
+    }
     if ($GoldenFixture) {
         $startInfo.Environment['YJSE_USER_DATA_ROOT'] = Join-Path $runPath 'user-data'
     }

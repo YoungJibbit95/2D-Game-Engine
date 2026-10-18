@@ -970,3 +970,25 @@ The preferred next experiment is pixel-preserving geometry/light-output versioni
 ### Consequences and validation
 
 No production rendering, lighting or worldgen rewrite is authorized by this decision. See [PR-0C evidence](PR_0C_RENDERING_LIGHTING_DIAGNOSTICS.md) and [technical comparison](PR_0C_LIGHTING_DECISION.md) for actual measurements, limitations, resources, dirty-region/migration requirements and falsifiable next-PR acceptance. Timing ranges describe measured processes, not a performance guarantee or confidence interval. Full spatial camera/shadow quality and backend GPU timing remain explicit future gates.
+
+## ADR-0036: Validate Exact Geometry Prefix Inputs Before Reusing Lighting Work
+
+Status: `verified`
+
+### Context
+
+PR-0C identified recurring CPU preparation costs but did not establish safe output revisions. Public mutable tile arrays, generation workspaces, castable chunk dictionaries and light halo writes bypass a setter-only mutation scheme. `NeedsLightUpdate` schedules work; clearing it does not certify an unchanged committed output. Reusing complete masks would also entangle source flicker, solar/weather inputs, temporal history and existing incoming-bloom behavior.
+
+### Decision
+
+Reuse one bounded raw AO/sky-portal prefix only after comparing its freshly sampled packed light/occlusion inputs, ordered chunk references/absence, World identity, visible rectangle and complete profile. Resolve surface columns on every preparation and compare their actual values separately. Conservatively reset on session application, camera/zoom/viewport changes and resource generation changes. Unknown or oversized dependencies bypass reuse. Do not introduce incomplete Core revisions, persistent settings or a hash-only validity check.
+
+All source/solar/weather/flicker evaluation, directional occlusion, bloom, temporal/history, reflection, encoding, upload hashes and uploads continue in their original order. Prepare invocation cadence is unchanged. Device reset invalidates CPU reuse and GPU resources; the existing Update-time resource preparation recreates textures and history. Resource disposal releases the cache. The original CPU path remains the default; only explicit environment value `YJSE_DISABLE_LIGHTING_PREPARATION_REUSE=0` or the renderer property opts in. Disabling immediately restores original CPU work; reverting removes the feature.
+
+### Consequences and validation
+
+Exact input sampling and comparison still cost CPU time. Moving cameras can produce no hits and pay validation overhead; favorable static observations cannot establish an advancing-time or gameplay-wide gain. Cache telemetry reports actual AO/portal hits, misses, bypasses and bounded numeric payload rather than inferred work savings. Raw CPU upload time includes unpartitioned driver/wait work; GPU execution remains unknown. The four Golden references remain immutable and the existing bloom washout/cyan cave lines are deliberately preserved.
+
+Matched native calibration records 162 processes across nine scenarios/two resolutions and 36 exact cross-role comparisons. Six stationary fixtures hit 1,125/1,125 prefixes after warmup; three camera paths hit zero and copy 81.9 MB/process. Some mask observations improve, while 1080p motion costs and inclusive/upload/frame tails worsen; large BEFORE/OFF shifts also expose order/host variation. This does not justify a default rollout or a causal general performance claim. Keep the experiment opt-in and retain all unfavorable data.
+
+See [PR-0D evidence and rollback](PR_0D_LIGHTING_PREPARATION_REUSE.md) for exact five-plane regressions, zero-byte cache contracts, real device resets/source expiry, immutable references, actual allocation outliers and Windows/Ubuntu gates. The next proposed experiment is a conservative motion-eligibility bypass plus order-balanced replication through existing smoke tooling, after human review/manual integration. No RGB/renderer/worldgen migration or automatic reference replacement follows from this ADR.

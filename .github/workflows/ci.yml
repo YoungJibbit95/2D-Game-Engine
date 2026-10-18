@@ -117,6 +117,9 @@ jobs:
       - name: Validate lighting diagnostic report contracts
         run: python -m unittest discover -s tools -p test_lighting_diagnostic_report.py
 
+      - name: Validate lighting reuse comparison contracts
+        run: python -m unittest discover -s tools -p test_lighting_reuse_compare.py
+
       - name: Run strict sprite audit
         if: matrix.configuration == 'Debug'
         run: >-
@@ -263,7 +266,7 @@ jobs:
 
       - name: Run published client smokes on Windows Mesa
         if: runner.os == 'Windows'
-        timeout-minutes: 8
+        timeout-minutes: 12
         shell: pwsh
         run: |
           $mesaBin = Join-Path '${{ steps.msys2.outputs.msys2-location }}' 'ucrt64/bin'
@@ -277,8 +280,10 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           Get-FileHash -Algorithm SHA256 -LiteralPath $env:SDL_OPENGL_LIBRARY, (Join-Path $mesaBin 'libgallium_wgl.dll')
           & ./tools/run_client_smokes.ps1 -PublishRoot '${{ runner.temp }}/yjse-client-publish' -OutputDirectory artifacts/client-smokes
+          $env:YJSE_DISABLE_LIGHTING_PREPARATION_REUSE = '0'
           & ./tools/run_golden_scenes.ps1 -PublishRoot '${{ runner.temp }}/yjse-client-publish' -OutputDirectory artifacts/golden-scenes
-          & ./tools/run_lighting_diagnostics.ps1 -PublishRoot '${{ runner.temp }}/yjse-client-publish' -OutputDirectory artifacts/lighting-diagnostics
+          Remove-Item Env:YJSE_DISABLE_LIGHTING_PREPARATION_REUSE
+          & ./tools/run_lighting_diagnostics.ps1 -PublishRoot '${{ runner.temp }}/yjse-client-publish' -OutputDirectory artifacts/lighting-diagnostics -PreparationReuse inherit -CompareReuseFallback -IncludeReuseLifecycle
 
       - name: Run published client smokes on Ubuntu Mesa
         if: runner.os == 'Linux'
@@ -298,6 +303,7 @@ jobs:
         env:
           LIBGL_ALWAYS_SOFTWARE: "1"
           SDL_AUDIODRIVER: dummy
+          YJSE_DISABLE_LIGHTING_PREPARATION_REUSE: "0"
         run: >-
           xvfb-run -a
           pwsh -NoProfile -File tools/run_golden_scenes.ps1
@@ -306,7 +312,7 @@ jobs:
 
       - name: Run unpaced lighting diagnostics on Ubuntu Mesa
         if: runner.os == 'Linux'
-        timeout-minutes: 8
+        timeout-minutes: 12
         env:
           LIBGL_ALWAYS_SOFTWARE: "1"
           SDL_AUDIODRIVER: dummy
@@ -315,6 +321,7 @@ jobs:
           pwsh -NoProfile -File tools/run_lighting_diagnostics.ps1
           -PublishRoot "${{ runner.temp }}/yjse-client-publish"
           -OutputDirectory artifacts/lighting-diagnostics
+          -PreparationReuse inherit -CompareReuseFallback -IncludeReuseLifecycle
 
       - name: Upload test results
         if: always()

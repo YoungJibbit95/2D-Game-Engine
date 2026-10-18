@@ -1,0 +1,372 @@
+{
+  "policy_test_freeze": "4fd2d6c88bf2b927ac9f755ef52fa8ec18effbbf",
+  "purpose": "Rebuilt policy/correctness controls only; not substituted calibration timings. Raw paths refer to ignored local artifacts.",
+  "default_fixture": {
+    "capture": "artifacts\\final-native\\default-policy\\8eecfc926cc640f383d3399908dee23b\\client-smoke-playing.json",
+    "capture_sha256": "e9096e4b08d3bdb623fb505ee8f5adcf1b6e798443420d33adbf8a036aeddc93",
+    "screenshot_sha256": "8bf163a15b7024199b3fdc4a9b71029ee9e99670b8dcfa1da0b184cd4bf1b76f",
+    "benchmark_context": {
+      "OSDescription": "Microsoft Windows 10.0.26100",
+      "CPU": "AMD Ryzen 5 5500                               ",
+      "LogicalProcessors": "12",
+      "Configuration": "Release",
+      "CheckoutRevision": "4fd2d6c88bf2b927ac9f755ef52fa8ec18effbbf+dirty",
+      "ClientAssemblyVersion": "1.0.0+4fd2d6c88bf2b927ac9f755ef52fa8ec18effbbf",
+      "CoreAssemblyVersion": "1.0.0+4fd2d6c88bf2b927ac9f755ef52fa8ec18effbbf",
+      "ClientAssemblySHA256": "545C151A9D15019BE6ED2174F5D6931422AFF635FB5A35B9285C10B07377DE33",
+      "CoreAssemblySHA256": "0669B4BC0D0293A115DEDB037F44FCE97ABD9C73CBAB67010D832CCDB42A5C4A",
+      "GPUTime": "unknown",
+      "LightingPreparationReuse": "off",
+      "SoftwareFrameRateLimit": "60",
+      "PresentationInterval": "Immediate",
+      "TimingPolicy": "Real Stopwatch; 60 FPS cap; frame nearest-rank p95/p99; profiler average is EMA; screenshot readback excluded from Draw"
+    },
+    "capture_environment": {
+      "OS": "Windows",
+      "Runtime": ".NET 8.0.28",
+      "Architecture": "X64",
+      "MonoGame": "3.8.4.1",
+      "GraphicsProfile": "Reach",
+      "Renderer": "NVIDIA GeForce RTX 3070 Ti/PCIe/SSE2",
+      "DriverIdentity": "NVIDIA GeForce RTX 3070 Ti:32.0.16.1692"
+    }
+  },
+  "optimized_original_goldens": [
+    {
+      "scene": "forest_day",
+      "benchmark_context": {
+        "OSDescription": "Microsoft Windows 10.0.26100",
+        "CPU": "AMD Ryzen 5 5500                               ",
+        "LogicalProcessors": "12",
+        "Configuration": "Release",
+        "CheckoutRevision": "4fd2d6c88bf2b927ac9f755ef52fa8ec18effbbf+dirty",
+        "ClientAssemblyVersion": "1.0.0+4fd2d6c88bf2b927ac9f755ef52fa8ec18effbbf",
+        "CoreAssemblyVersion": "1.0.0+4fd2d6c88bf2b927ac9f755ef52fa8ec18effbbf",
+        "ClientAssemblySHA256": "545C151A9D15019BE6ED2174F5D6931422AFF635FB5A35B9285C10B07377DE33",
+        "CoreAssemblySHA256": "0669B4BC0D0293A115DEDB037F44FCE97ABD9C73CBAB67010D832CCDB42A5C4A",
+        "GPUTime": "unknown",
+        "LightingPreparationReuse": "on",
+        "SoftwareFrameRateLimit": "60",
+        "PresentationInterval": "Immediate",
+        "TimingPolicy": "Real Stopwatch; 60 FPS cap; frame nearest-rank p95/p99; profiler average is EMA; screenshot readback excluded from Draw"
+      },
+      "exact": {
+        "mode": "exact",
+        "differing_pixel_count": 0,
+        "reference_sha256": "8bf163a15b7024199b3fdc4a9b71029ee9e99670b8dcfa1da0b184cd4bf1b76f",
+        "candidate_sha256": "8bf163a15b7024199b3fdc4a9b71029ee9e99670b8dcfa1da0b184cd4bf1b76f"
+      },
+      "baseline": {
+        "mode": "exact",
+        "differing_pixel_count": 0,
+        "reference_sha256": "8bf163a15b7024199b3fdc4a9b71029ee9e99670b8dcfa1da0b184cd4bf1b76f",
+        "candidate_sha256": "8bf163a15b7024199b3fdc4a9b71029ee9e99670b8dcfa1da0b184cd4bf1b76f"
+      }
+    },
+    {
+      "scene": "forest_night",
+      "benchmark_context": {
+        "OSDescription": "Microsoft Windows 10.0.26100",
+        "CPU": "AMD Ryzen 5 5500                               ",
+        "LogicalProcessors": "12",
+        "Configuration": "Release",
+        "CheckoutRevision": "4fd2d6c88bf2b927ac9f755ef52fa8ec18effbbf+dirty",
+        "ClientAssemblyVersion": "1.0.0+4fd2d6c88bf2b927ac9f755ef52fa8ec18effbbf",
+        "CoreAssemblyVersion": "1.0.0+4fd2d6c88bf2b927ac9f755ef52fa8ec18effbbf",
+        "ClientAssemblySHA256": "545C151A9D15019BE6ED2174F5D6931422AFF635FB5A35B9285C10B07377DE33",
+        "CoreAssemblySHA256": "0669B4BC0D0293A115DEDB037F44FCE97ABD9C73CBAB67010D832CCDB42A5C4A",
+        "GPUTime": "unknown",
+        "LightingPreparationReuse": "on",
+        "SoftwareFrameRateLimit": "60",
+        "PresentationInterval": "Immediate",
+        "TimingPolicy": "Real Stopwatch; 60 FPS cap; frame nearest-rank p95/p99; profiler average is EMA; screenshot readback excluded from Draw"
+      },
+      "exact": {
+        "mode": "exact",
+        "differing_pixel_count": 0,
+        "reference_sha256": "e822e4feed84f0c4947d9eb8a2ee6671c354cb5501ca548c9651bb4dae1fe5d3",
+        "candidate_sha256": "e822e4feed84f0c4947d9eb8a2ee6671c354cb5501ca548c9651bb4dae1fe5d3"
+      },
+      "baseline": {
+        "mode": "exact",
+        "differing_pixel_count": 0,
+        "reference_sha256": "e822e4feed84f0c4947d9eb8a2ee6671c354cb5501ca548c9651bb4dae1fe5d3",
+        "candidate_sha256": "e822e4feed84f0c4947d9eb8a2ee6671c354cb5501ca548c9651bb4dae1fe5d3"
+      }
+    },
+    {
+      "scene": "cave_lit",
+      "benchmark_context": {
+        "OSDescription": "Microsoft Windows 10.0.26100",
+        "CPU": "AMD Ryzen 5 5500                               ",
+        "LogicalProcessors": "12",
+        "Configuration": "Release",
+        "CheckoutRevision": "4fd2d6c88bf2b927ac9f755ef52fa8ec18effbbf+dirty",
+        "ClientAssemblyVersion": "1.0.0+4fd2d6c88bf2b927ac9f755ef52fa8ec18effbbf",
+        "CoreAssemblyVersion": "1.0.0+4fd2d6c88bf2b927ac9f755ef52fa8ec18effbbf",
+        "ClientAssemblySHA256": "545C151A9D15019BE6ED2174F5D6931422AFF635FB5A35B9285C10B07377DE33",
+        "CoreAssemblySHA256": "0669B4BC0D0293A115DEDB037F44FCE97ABD9C73CBAB67010D832CCDB42A5C4A",
+        "GPUTime": "unknown",
+        "LightingPreparationReuse": "on",
+        "SoftwareFrameRateLimit": "60",
+        "PresentationInterval": "Immediate",
+        "TimingPolicy": "Real Stopwatch; 60 FPS cap; frame nearest-rank p95/p99; profiler average is EMA; screenshot readback excluded from Draw"
+      },
+      "exact": {
+        "mode": "exact",
+        "differing_pixel_count": 0,
+        "reference_sha256": "5c60c86d3f01d03ee4576e05264e815907ab3535216e46d471a8d51ab71d41ed",
+        "candidate_sha256": "5c60c86d3f01d03ee4576e05264e815907ab3535216e46d471a8d51ab71d41ed"
+      },
+      "baseline": {
+        "mode": "exact",
+        "differing_pixel_count": 0,
+        "reference_sha256": "5c60c86d3f01d03ee4576e05264e815907ab3535216e46d471a8d51ab71d41ed",
+        "candidate_sha256": "5c60c86d3f01d03ee4576e05264e815907ab3535216e46d471a8d51ab71d41ed"
+      }
+    },
+    {
+      "scene": "world_select",
+      "benchmark_context": {
+        "OSDescription": "Microsoft Windows 10.0.26100",
+        "CPU": "AMD Ryzen 5 5500                               ",
+        "LogicalProcessors": "12",
+        "Configuration": "Release",
+        "CheckoutRevision": "4fd2d6c88bf2b927ac9f755ef52fa8ec18effbbf+dirty",
+        "ClientAssemblyVersion": "1.0.0+4fd2d6c88bf2b927ac9f755ef52fa8ec18effbbf",
+        "CoreAssemblyVersion": "1.0.0+4fd2d6c88bf2b927ac9f755ef52fa8ec18effbbf",
+        "ClientAssemblySHA256": "545C151A9D15019BE6ED2174F5D6931422AFF635FB5A35B9285C10B07377DE33",
+        "CoreAssemblySHA256": "0669B4BC0D0293A115DEDB037F44FCE97ABD9C73CBAB67010D832CCDB42A5C4A",
+        "GPUTime": "unknown",
+        "LightingPreparationReuse": "not-applicable",
+        "SoftwareFrameRateLimit": "60",
+        "PresentationInterval": "Immediate",
+        "TimingPolicy": "Real Stopwatch; 60 FPS cap; frame nearest-rank p95/p99; profiler average is EMA; screenshot readback excluded from Draw"
+      },
+      "exact": {
+        "mode": "exact",
+        "differing_pixel_count": 0,
+        "reference_sha256": "072f881cff769a126af107d264d0d2048a87a3e89ade7107f65b1c4becc22b25",
+        "candidate_sha256": "072f881cff769a126af107d264d0d2048a87a3e89ade7107f65b1c4becc22b25"
+      },
+      "baseline": {
+        "mode": "exact",
+        "differing_pixel_count": 0,
+        "reference_sha256": "072f881cff769a126af107d264d0d2048a87a3e89ade7107f65b1c4becc22b25",
+        "candidate_sha256": "072f881cff769a126af107d264d0d2048a87a3e89ade7107f65b1c4becc22b25"
+      }
+    }
+  ],
+  "lifecycle": [
+    {
+      "capture": "artifacts\\final-native\\lifecycle-on\\254878d58062453cbc6bd7354636efcd\\client-smoke-playing.json",
+      "capture_sha256": "7252ae4a0b9f0d0bf6669b21025ea10bb310f09564401d4570e7f37d578225d4",
+      "screenshot_sha256": "ce2bfc24377dda11c080fcfb8352d2d2e564b708483bd1a2402ee952adeb4e86",
+      "benchmark_context": {
+        "OSDescription": "Microsoft Windows 10.0.26100",
+        "CPU": "AMD Ryzen 5 5500                               ",
+        "LogicalProcessors": "12",
+        "Configuration": "Release",
+        "CheckoutRevision": "4fd2d6c88bf2b927ac9f755ef52fa8ec18effbbf+dirty",
+        "ClientAssemblyVersion": "1.0.0+4fd2d6c88bf2b927ac9f755ef52fa8ec18effbbf",
+        "CoreAssemblyVersion": "1.0.0+4fd2d6c88bf2b927ac9f755ef52fa8ec18effbbf",
+        "ClientAssemblySHA256": "545C151A9D15019BE6ED2174F5D6931422AFF635FB5A35B9285C10B07377DE33",
+        "CoreAssemblySHA256": "0669B4BC0D0293A115DEDB037F44FCE97ABD9C73CBAB67010D832CCDB42A5C4A",
+        "GPUTime": "unknown",
+        "LightingPreparationReuse": "on",
+        "SoftwareFrameRateLimit": "0",
+        "PresentationInterval": "Immediate",
+        "TimingPolicy": "Unpaced fixed-60Hz simulation workload; VSync/limiter disabled; real CPU Stopwatch samples; GPU unknown; readback/serialization outside timed CPU scopes"
+      },
+      "capture_environment": {
+        "OS": "Windows",
+        "Runtime": ".NET 8.0.28",
+        "Architecture": "X64",
+        "MonoGame": "3.8.4.1",
+        "GraphicsProfile": "Reach",
+        "Renderer": "NVIDIA GeForce RTX 3070 Ti/PCIe/SSE2",
+        "DriverIdentity": "NVIDIA GeForce RTX 3070 Ti:32.0.16.1692"
+      },
+      "mode": "on",
+      "measured_frames": 360,
+      "work_totals": {
+        "PrepareExecutions": 270,
+        "UploadCalls": 193,
+        "UploadBytes": 4656704,
+        "TextureRebuilds": 3,
+        "RaysCast": 1773540,
+        "OccluderSamples": 5085048,
+        "ReprojectedPixels": 1610544,
+        "RejectedPixels": 113
+      },
+      "prefix_cache": {
+        "available": true,
+        "measured_prepares": 270,
+        "totals": {
+          "AmbientCacheHits": 267,
+          "PortalCacheHits": 267,
+          "CacheLookups": 270,
+          "CacheBypasses": 0,
+          "DependencySamples": 1628640,
+          "CacheCopyBytes": 13102752
+        },
+        "misses_among_lookups": {
+          "ambient": 3,
+          "portal": 3
+        },
+        "ratios_per_prepare": {
+          "lookups": 1.0,
+          "bypasses": 0.0,
+          "ambient_hits": 0.9888888888888889,
+          "portal_hits": 0.9888888888888889
+        },
+        "ratios_per_lookup": {
+          "ambient_hits": 0.9888888888888889,
+          "portal_hits": 0.9888888888888889,
+          "ambient_misses": 0.011111111111111112,
+          "portal_misses": 0.011111111111111112
+        },
+        "copy_bytes_per_measured_frame": 36396.53333333333,
+        "copy_bytes_per_prepare": 48528.71111111111,
+        "dependency_samples_per_lookup": 6032.0,
+        "estimated_payload_bytes": {
+          "count": 360,
+          "mean": 74848.0,
+          "p50": 74848,
+          "p95": 74848,
+          "p99": 74848,
+          "max": 74848,
+          "min": 74848
+        },
+        "interpretation": "Hits reuse only the raw ambient-occlusion/sky-portal prefix. Dependency samples are freshly validated and full lighting preparation continues; hits do not mean skipped frames, skipped temporal settling or GPU savings. Payload is a persistent source-derived CPU estimate, not bytes allocated each frame or measured VRAM. Undefined ratios are null."
+      },
+      "initial_time": 0,
+      "final_time": 0.005555555845300357,
+      "last_point_lights": 0
+    },
+    {
+      "capture": "artifacts\\final-native\\lifecycle-off\\a86d273e7a0d46338ec52506e6f7a387\\client-smoke-playing.json",
+      "capture_sha256": "c94661fd18a22caa17b8762628b6c31dd3d84f175b0c8aa6fa15744d5b37a71e",
+      "screenshot_sha256": "ce2bfc24377dda11c080fcfb8352d2d2e564b708483bd1a2402ee952adeb4e86",
+      "benchmark_context": {
+        "OSDescription": "Microsoft Windows 10.0.26100",
+        "CPU": "AMD Ryzen 5 5500                               ",
+        "LogicalProcessors": "12",
+        "Configuration": "Release",
+        "CheckoutRevision": "4fd2d6c88bf2b927ac9f755ef52fa8ec18effbbf+dirty",
+        "ClientAssemblyVersion": "1.0.0+4fd2d6c88bf2b927ac9f755ef52fa8ec18effbbf",
+        "CoreAssemblyVersion": "1.0.0+4fd2d6c88bf2b927ac9f755ef52fa8ec18effbbf",
+        "ClientAssemblySHA256": "545C151A9D15019BE6ED2174F5D6931422AFF635FB5A35B9285C10B07377DE33",
+        "CoreAssemblySHA256": "0669B4BC0D0293A115DEDB037F44FCE97ABD9C73CBAB67010D832CCDB42A5C4A",
+        "GPUTime": "unknown",
+        "LightingPreparationReuse": "off",
+        "SoftwareFrameRateLimit": "0",
+        "PresentationInterval": "Immediate",
+        "TimingPolicy": "Unpaced fixed-60Hz simulation workload; VSync/limiter disabled; real CPU Stopwatch samples; GPU unknown; readback/serialization outside timed CPU scopes"
+      },
+      "capture_environment": {
+        "OS": "Windows",
+        "Runtime": ".NET 8.0.28",
+        "Architecture": "X64",
+        "MonoGame": "3.8.4.1",
+        "GraphicsProfile": "Reach",
+        "Renderer": "NVIDIA GeForce RTX 3070 Ti/PCIe/SSE2",
+        "DriverIdentity": "NVIDIA GeForce RTX 3070 Ti:32.0.16.1692"
+      },
+      "mode": "off",
+      "measured_frames": 360,
+      "work_totals": {
+        "PrepareExecutions": 270,
+        "UploadCalls": 193,
+        "UploadBytes": 4656704,
+        "TextureRebuilds": 3,
+        "RaysCast": 1773540,
+        "OccluderSamples": 17969400,
+        "ReprojectedPixels": 1610544,
+        "RejectedPixels": 113
+      },
+      "prefix_cache": {
+        "available": true,
+        "measured_prepares": 270,
+        "totals": {
+          "AmbientCacheHits": 0,
+          "PortalCacheHits": 0,
+          "CacheLookups": 0,
+          "CacheBypasses": 270,
+          "DependencySamples": 0,
+          "CacheCopyBytes": 0
+        },
+        "misses_among_lookups": {
+          "ambient": 0,
+          "portal": 0
+        },
+        "ratios_per_prepare": {
+          "lookups": 0.0,
+          "bypasses": 1.0,
+          "ambient_hits": 0.0,
+          "portal_hits": 0.0
+        },
+        "ratios_per_lookup": {
+          "ambient_hits": null,
+          "portal_hits": null,
+          "ambient_misses": null,
+          "portal_misses": null
+        },
+        "copy_bytes_per_measured_frame": 0.0,
+        "copy_bytes_per_prepare": 0.0,
+        "dependency_samples_per_lookup": null,
+        "estimated_payload_bytes": {
+          "count": 360,
+          "mean": 74848.0,
+          "p50": 74848,
+          "p95": 74848,
+          "p99": 74848,
+          "max": 74848,
+          "min": 74848
+        },
+        "interpretation": "Hits reuse only the raw ambient-occlusion/sky-portal prefix. Dependency samples are freshly validated and full lighting preparation continues; hits do not mean skipped frames, skipped temporal settling or GPU savings. Payload is a persistent source-derived CPU estimate, not bytes allocated each frame or measured VRAM. Undefined ratios are null."
+      },
+      "initial_time": 0,
+      "final_time": 0.005555555845300357,
+      "last_point_lights": 0
+    }
+  ],
+  "additional_exact_comparisons": [
+    {
+      "kind": "default-versus-on",
+      "differing_pixel_count": 0,
+      "reference_sha256": "8bf163a15b7024199b3fdc4a9b71029ee9e99670b8dcfa1da0b184cd4bf1b76f",
+      "candidate_sha256": "8bf163a15b7024199b3fdc4a9b71029ee9e99670b8dcfa1da0b184cd4bf1b76f"
+    },
+    {
+      "kind": "lifecycle-exact",
+      "differing_pixel_count": 0,
+      "reference_sha256": "ce2bfc24377dda11c080fcfb8352d2d2e564b708483bd1a2402ee952adeb4e86",
+      "candidate_sha256": "ce2bfc24377dda11c080fcfb8352d2d2e564b708483bd1a2402ee952adeb4e86"
+    }
+  ],
+  "ordinary_smokes": [
+    {
+      "capture": "artifacts\\final-native\\default\\b5ad2347ce70497baa0834c3d621e710\\client-smoke-main-menu.json",
+      "capture_sha256": "2249b35c4fc25a5a5f3b093fb22fcfc1abc730ee6bde8d72154e42e10b34f754",
+      "screenshot_sha256": "734cd5848fe714f9cdfeea30e41e1ccadd27d171d22ef98e0e1ae704e4e5935a",
+      "benchmark_context": null,
+      "capture_environment": null
+    },
+    {
+      "capture": "artifacts\\final-native\\default\\b5ad2347ce70497baa0834c3d621e710\\client-smoke-playing.json",
+      "capture_sha256": "6eb519fc2dc92f77d3d922d42270e26ff9bbae3f436531b7565052ef05cc2520",
+      "screenshot_sha256": "c4b9ec4932942cb488e94f5966295254a1f873b884cca108cb577df347ecca81",
+      "benchmark_context": null,
+      "capture_environment": null
+    },
+    {
+      "capture": "artifacts\\final-native\\default\\b5ad2347ce70497baa0834c3d621e710\\client-smoke-world-select.json",
+      "capture_sha256": "a53898c6c7ee3b5b7406e92f64772e527ea0d3dbbe10fea635d092789989241d",
+      "screenshot_sha256": "dcf801f1a91c5750618670db05d9fee4e641f54d0225c59e710bc9b20845205a",
+      "benchmark_context": null,
+      "capture_environment": null
+    }
+  ],
+  "gpu_time": "unknown"
+}

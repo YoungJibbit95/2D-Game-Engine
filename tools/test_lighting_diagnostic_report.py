@@ -8,7 +8,7 @@ import unittest
 
 from PIL import Image
 
-from lighting_diagnostic_report import COUNTERS, FRAME_SCOPES, PREPARE_SCOPES, PROBES, main, report
+from lighting_diagnostic_report import CACHE_COUNTERS, COUNTERS, FRAME_SCOPES, PREPARE_SCOPES, PROBES, main, report
 
 
 class LightingDiagnosticReportTests(unittest.TestCase):
@@ -53,6 +53,128 @@ class LightingDiagnosticReportTests(unittest.TestCase):
 
     def analyze(self):
         return report(self.capture, self.output)
+
+    def with_cache_counters(self):
+        metadata = copy.deepcopy(self.metadata)
+        frames = metadata["LightingDiagnostics"]["Frames"]
+        for frame in frames:
+            frame.update({field: 0 for field in CACHE_COUNTERS})
+            frame["CachePayloadBytes"] = 600
+        for index in (0, 2):
+            frames[index].update({"CacheLookups": 1, "DependencySamples": 50, "CacheCopyBytes": 400})
+        frames[2].update({"AmbientCacheHits": 1, "PortalCacheHits": 1})
+        return metadata
+
+    def test_legacy_capture_does_not_infer_zero_cache_hits(self):
+        result = self.analyze()
+        self.assertTrue(result["valid"], result["errors"])
+        cache = result["prefix_cache"]
+        self.assertFalse(cache["available"])
+        self.assertNotIn("totals", cache)
+        self.assertNotIn("ratios_per_lookup", cache)
+        self.assertIn("unavailable", cache["interpretation"])
+
+    def test_prefix_reuse_counts_and_ratios_preserve_full_prepare_semantics(self):
+        self.write(self.with_cache_counters())
+        result = self.analyze()
+        self.assertTrue(result["valid"], result["errors"])
+        cache = result["prefix_cache"]
+        self.assertTrue(cache["available"])
+        self.assertEqual(2, cache["measured_prepares"])
+        self.assertEqual(2, cache["totals"]["CacheLookups"])
+        self.assertEqual(100, cache["totals"]["DependencySamples"])
+        self.assertEqual(800, cache["totals"]["CacheCopyBytes"])
+        self.assertEqual({"ambient": 1, "portal": 1}, cache["misses_among_lookups"])
+        self.assertEqual(0.5, cache["ratios_per_prepare"]["ambient_hits"])
+        self.assertEqual(0.5, cache["ratios_per_lookup"]["portal_hits"])
+        self.assertEqual(200, cache["copy_bytes_per_measured_frame"])
+        self.assertEqual(400, cache["copy_bytes_per_prepare"])
+        self.assertEqual(50, cache["dependency_samples_per_lookup"])
+        self.assertEqual(600, cache["estimated_payload_bytes"]["mean"])
+        self.assertNotIn("CachePayloadBytes", cache["totals"])
+        self.assertIn("full lighting preparation continues", cache["interpretation"])
+        self.assertEqual(2, result["scopes"]["Presentation.LightingPrepare"]["invocations"])
+
+    def test_cache_partial_fields_and_partial_frame_coverage_fail(self):
+        for field in CACHE_COUNTERS:
+            with self.subTest(field=field):
+                metadata = self.with_cache_counters()
+                del metadata["LightingDiagnostics"]["Frames"][0][field]
+                self.write(metadata)
+                self.assertFalse(self.analyze()["valid"])
+        metadata = self.with_cache_counters()
+        for field in CACHE_COUNTERS:
+            del metadata["LightingDiagnostics"]["Frames"][1][field]
+        self.write(metadata)
+        self.assertFalse(self.analyze()["valid"])
+
+    def test_cache_counter_types_and_nonnegative_values_are_required(self):
+        for field in CACHE_COUNTERS:
+            for value in (-1, True, 0.5, None):
+                with self.subTest(field=field, value=value):
+                    metadata = self.with_cache_counters()
+                    metadata["LightingDiagnostics"]["Frames"][0][field] = value
+                    self.write(metadata)
+                    self.assertFalse(self.analyze()["valid"])
+
+    def test_impossible_cache_hits_or_lookup_dependency_work_fail(self):
+        for index, updates in ((0, {"AmbientCacheHits": 2}),
+                               (0, {"PortalCacheHits": 1}),
+                               (0, {"CacheBypasses": 1}),
+                               (0, {"DependencySamples": 49}),
+                               (2, {"CachePayloadBytes": 0}),
+                               (2, {"CacheLookups": 0, "CacheBypasses": 1,
+                                    "DependencySamples": 0, "CacheCopyBytes": 0})):
+            with self.subTest(index=index, updates=updates):
+                metadata = self.with_cache_counters()
+                metadata["LightingDiagnostics"]["Frames"][index].update(updates)
+                self.write(metadata)
+                self.assertFalse(self.analyze()["valid"])
+
+    def test_unscheduled_and_bypassed_frames_cannot_retain_cache_work(self):
+        for updates in ({"DependencySamples": 1}, {"CacheCopyBytes": 1},
+                        {"CacheLookups": 1}, {"CacheBypasses": 1}, {"AmbientCacheHits": 1}):
+            metadata = self.with_cache_counters()
+            metadata["LightingDiagnostics"]["Frames"][1].update(updates)
+            self.write(metadata)
+            self.assertFalse(self.analyze()["valid"])
+        for updates in ({"DependencySamples": 1}, {"CacheCopyBytes": 1}):
+            metadata = self.with_cache_counters()
+            metadata["LightingDiagnostics"]["Frames"][0].update(
+                {"CacheLookups": 0, "CacheBypasses": 1, "DependencySamples": 0, "CacheCopyBytes": 0})
+            metadata["LightingDiagnostics"]["Frames"][0].update(updates)
+            self.write(metadata)
+            self.assertFalse(self.analyze()["valid"])
+
+    def test_cache_bypasses_do_not_count_as_misses_and_payload_can_persist(self):
+        metadata = self.with_cache_counters()
+        metadata["LightingDiagnostics"]["Frames"][0].update(
+            {"CacheLookups": 0, "CacheBypasses": 1, "DependencySamples": 0, "CacheCopyBytes": 0})
+        self.write(metadata)
+        result = self.analyze()
+        self.assertTrue(result["valid"], result["errors"])
+        cache = result["prefix_cache"]
+        self.assertEqual({"ambient": 0, "portal": 0}, cache["misses_among_lookups"])
+        self.assertEqual(1, cache["ratios_per_lookup"]["ambient_hits"])
+        self.assertEqual(0.5, cache["ratios_per_prepare"]["ambient_hits"])
+        self.assertEqual(0.5, cache["ratios_per_prepare"]["bypasses"])
+        self.assertEqual(600, cache["estimated_payload_bytes"]["min"])
+        self.assertEqual(600, cache["estimated_payload_bytes"]["max"])
+
+    def test_zero_lookup_cache_ratios_are_undefined_and_portal_can_miss_alone(self):
+        metadata = self.with_cache_counters()
+        metadata["LightingDiagnostics"]["Frames"][2]["PortalCacheHits"] = 0
+        self.write(metadata)
+        cache = self.analyze()["prefix_cache"]
+        self.assertEqual({"ambient": 1, "portal": 2}, cache["misses_among_lookups"])
+        for frame in metadata["LightingDiagnostics"]["Frames"]:
+            frame.update({field: 0 for field in CACHE_COUNTERS})
+            frame["CacheBypasses"] = frame["PrepareExecutions"]
+        self.write(metadata)
+        result = self.analyze()
+        self.assertTrue(result["valid"], result["errors"])
+        self.assertTrue(all(value is None for value in result["prefix_cache"]["ratios_per_lookup"].values()))
+        self.assertEqual(1, result["prefix_cache"]["ratios_per_prepare"]["bypasses"])
 
     def test_raw_arithmetic_and_amortized_distributions_are_distinct(self):
         result = self.analyze()

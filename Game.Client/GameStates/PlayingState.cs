@@ -256,6 +256,7 @@ public sealed partial class PlayingState : IGameState, ITextInputReceiver, IKeyb
             ? WorldSessionFactory.CreateSingleplayer(seed: 1337, worldName: "Debug World")
             : CreateGoldenSession());
         _session = session;
+        _lightingRenderer.InvalidatePreparationReuse();
         _simulation = session.Simulation;
         _frameSnapshot = _simulation.LatestSnapshot;
         _content = session.Content;

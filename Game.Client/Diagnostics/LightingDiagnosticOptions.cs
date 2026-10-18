@@ -1,4 +1,5 @@
 using Microsoft.Xna.Framework;
+using System.Text.Json.Serialization;
 
 namespace Game.Client.Diagnostics;
 
@@ -11,6 +12,12 @@ public sealed record LightingDiagnosticOptions
     public int PeriodTicks { get; init; } = 240;
     public bool DisableBloom { get; init; }
     public int ForceCoreLightingInterval { get; init; }
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public bool AdvanceWorldTime { get; init; }
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public int ForceDeviceResetInterval { get; init; }
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public int DynamicLightLifetimeTicks { get; init; }
 
     internal void Validate(GoldenSceneFixture fixture)
     {
@@ -21,7 +28,10 @@ public sealed record LightingDiagnosticOptions
             !float.IsFinite(ZoomAmplitude) || ZoomAmplitude is < 0 or > 0.5f ||
             fixture.Zoom - ZoomAmplitude < 1 || fixture.Zoom + ZoomAmplitude > 4 ||
             PeriodTicks is < 60 or > 1200 || PeriodTicks % 4 != 0 ||
-            (ForceCoreLightingInterval != 0 && ForceCoreLightingInterval is < 60 or > 1200))
+            (ForceCoreLightingInterval != 0 && ForceCoreLightingInterval is < 60 or > 1200) ||
+            (ForceDeviceResetInterval != 0 && ForceDeviceResetInterval is < 60 or > 1200) ||
+            (DynamicLightLifetimeTicks != 0 && (!fixture.DynamicLights ||
+                DynamicLightLifetimeTicks < 60 || DynamicLightLifetimeTicks > fixture.Frames - 60)))
         {
             throw new InvalidDataException("Invalid bounded lighting diagnostic workload.");
         }
