@@ -3,7 +3,8 @@
 Date: 2026-10-18. Branch: `codex/yjse-p0-002-golden-scenes`.
 Base: `502720e8885c5250a6bc4469847c3694681f28e7`, the manually merged PR-0A on `origin/master`.
 Frozen capture implementation: `9385ed33bbdfc78d40501c1379b4b429086c0a60`.
-Hosted acceptance: pending; local evidence below is not a hosted result.
+Pull request: [#7](https://github.com/YoungJibbit95/2D-Game-Engine/pull/7).
+Hosted implementation acceptance: **pass**, all five jobs in [run 39109396729](https://github.com/YoungJibbit95/2D-Game-Engine/actions/runs/39109396729) at `7655578e863d5ed7786553adfc099ecb95d03f5f`. Final evidence-only commits retain normal CI; [current PR checks](https://github.com/YoungJibbit95/2D-Game-Engine/pull/7/checks) govern the latest head. Human review/manual integration only.
 
 The original `main` checkout at `F:\Coding\2D Pixel Game Engine` and its 96 modified tracked / 185 untracked files are preserved. This PR uses `F:\Coding\YJsE-PR-0B`. Feature-branch commits, push and PR creation are explicitly authorized; no automatic merge or force-push is permitted.
 
@@ -72,15 +73,19 @@ Use `-CaptureOnly` explicitly to bootstrap captures into ignored artifacts; CI n
 | Locked restore, Debug/Release build | pass, zero warnings/errors |
 | Functional suites | pass, 1,733/1,733 in each configuration, including eight new fixture/clock/isolation/determinism cases |
 | Image comparator regressions | pass, 13/13; compression independence, one-pixel/alpha/size/mode/metadata changes, portable thresholds and invalid input |
-| Style and whitespace | style verify passes; final `git diff --check` required before handoff |
+| Style and whitespace | style verify and `git diff --check` pass |
 | Existing strict audits/previews | pass, both manifests zero hard issues, unchanged UI/Wave05 references and seven preview regression tests |
 | Existing Release timing gates | pass, all 21 isolated classes / 39 tests at unchanged budgets; quick harness passes with matching 240-tick hash `0x2B10E91090EC0C22` |
 | Website | `npm ci` and `npm run validate` pass (zero Svelte diagnostics); npm reports four advisories, one moderate/three high, in the unchanged dependency lockfile |
 | Native Release Golden capture | pass, four exact pairs from clean frozen code; logs `artifacts/golden-frozen.log` |
-| Debug against versioned baselines | pending |
-| Ordinary published three-state smokes | pending on this PR; inherited PR-0A evidence is separate |
-| Hosted Windows/Ubuntu Debug/Release | pending; workflow now runs ordinary smokes and all four Golden exact-pair + versioned-baseline gates in every matrix cell |
+| Debug against versioned baselines | pass, four fresh-process exact pairs and four exact versioned-reference comparisons with rebuilt frozen-code Debug binaries; `artifacts/golden-debug-final.log` |
+| Ordinary published three-state smokes | pass, native Release Main Menu/World Select/Playing, 263 resources / 1,518 descriptors / zero invalid resources; `artifacts/ordinary-final.log` |
+| Hosted Windows/Ubuntu Debug/Release | pass, complete run 39109396729 at 7655578; each cell passes 1,733 functional tests, 13 comparator regressions, ordinary smokes and all four Golden exact-pair + portable-baseline gates. Both Release jobs also pass 21 isolated classes / 39 tests and quick harness; both Debug jobs pass strict audits, unchanged previews and seven preview regressions |
 
-Two genuine subagents had separate responsibilities: an isolated image-comparator implementation and a read-only runtime/reproducibility review. The lead integrated and executed validation. Independent pre-freeze review has no open blocking findings. No real Linux execution is claimed until the hosted run succeeds.
+All four hosted Golden artifacts from that exact PR run were downloaded and checked: every repeated capture has zero changed pixels; every fixture/state comparison has zero differences. Native-to-Mesa portable mean RGBA error is 0.019109/0.020667 for Forest day, 0.095647/0.097894 for night and 0.111442/0.114834 for cave (Windows/Ubuntu respectively); World Select is pixel-exact across all environments. Debug and Release produce the same per-OS image metrics. At most 47 of 518,400 pixels exceed channel delta 12 (0.0091%); the maximum delta of 209 is confined to a few UI glyph-edge pixels. Independently inspected Night/Cave previews and amplified diffs preserve terrain, camera and both lights, with low-amplitude light-falloff differences. Driver precision is a plausible explanation, not a traced proof of the cause. No tolerance was raised or reference replaced to pass hosted CI.
+
+The first push run [39109371377, attempt 1](https://github.com/YoungJibbit95/2D-Game-Engine/actions/runs/39109371377/attempts/1) failed the unchanged `FallingLeafPlannerTests.Plan_RemainsAllocationFreeWithCallerOwnedBuffer` on Ubuntu Release (4,744 measured bytes versus 0; 1,732/1,733 functional tests). The parallel complete PR run passed 1,733/1,733 on identical code. A read-only audit found no changed planner/test/Core path or evidence identifying the allocation source; the cause remains unknown. One rerun of the unchanged failed job was requested, with no skip, threshold change or test alteration. A repeated failure requires allocation tracing rather than repeated blind retries. This diagnosis history does not replace the complete green PR run above.
+
+Two genuine subagents had separate responsibilities: an isolated image-comparator implementation and a read-only runtime/reproducibility review. The lead integrated and executed validation. Independent frozen-code/baseline review and hosted visual-artifact review have no open blocking findings; reviewers did not execute builds/tests themselves.
 
 Rollback: revert the PR commits. No asset, Core, save-format or renderer migration needs reversal. After manual integration, the next separate PR should establish the explicitly scoped Renderer V2/Lighting V2 comparison using these fixtures and matched measurements; Worldgen V2 remains separate. Do not automatically start or merge those changes.
