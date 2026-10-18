@@ -58,6 +58,7 @@ public sealed class WorldMenuPresentationTests
     }
 
     [Fact]
+    [Trait("Category", "StrictAllocation")]
     public void LayoutPlanning_HasZeroSteadyStateAllocation()
     {
         _ = WorldMenuLayoutPlanner.PlanWorldSelect(new Rectangle(0, 0, 1920, 1080), entryCount: 24);
