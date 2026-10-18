@@ -14,6 +14,7 @@ Last updated: 2026-10-18 (PR-0A cross-platform asset integrity and release CI)
 - Published Main Menu, World Select and real Forest gameplay captures pass locally: 263 resources, 1,518 frames, zero invalid resources. Forest screenshot visually inspected. The wrapper verifies fresh PNG/JSON results, gameplay telemetry and process deadlines; native rendering code is unchanged.
 - Current gate commands, review, local artifacts, hosted CI and rollback are recorded in `PR_0A_ASSET_CI.md`. Older evidence below is historical and must not be mistaken for this branch's hosted result.
 - PR [#6](https://github.com/YoungJibbit95/2D-Game-Engine/pull/6) opened as draft; reviewed initial commit `88db61b`. Hosted Windows and Ubuntu Release, Website and Windows Debug passed. Both OS families rendered all three real Mesa smokes; downloaded Forest captures were visually inspected. Ubuntu Debug exposed PNG-compression-only mismatches in UI and Wave05 previews. Shared exact image equality, complete Wave05 summary/hash validation and seven Python fixtures correct those cross-platform gates without changing checked-in images. Final complete-matrix acceptance is still required.
+- PR-0A implementation completed at `3d70e36b3fb361cfacb3984fe4d08f74f5b5127f`. [Complete CI run 39105931841](https://github.com/YoungJibbit95/2D-Game-Engine/actions/runs/39105931841) passes Website and Windows/Ubuntu Debug/Release on that same code revision. All four functional partitions pass 1,725/1,725; both Release jobs pass all 21 timing classes / 39 tests, quick harness and all three real published-client smokes. Both Debug jobs pass strict audits, seven Python preview regressions and unchanged image/summary contracts. Independent reviews of the integrated code and preview follow-up have no open findings. The earlier failed runs above are diagnosis history, superseded by this complete green run.
 
 - Active epic: Epic 2 - Living Sandbox And Developer Experience
 - Active milestone: Milestone 5 - reduce authoritative snapshot/query costs and calibrate high-entity/streaming workloads
@@ -281,7 +282,7 @@ Raw local artifacts remain under ignored `artifacts/`, including `performance-li
 
 ## Exact Next Action
 
-Finish PR-0A's integrated review and Windows/Ubuntu PR CI, fixing observed failures without relaxing any gate. Once CI and graphics smokes pass, hand off the PR for human review; do not merge. The next separate PR is PR-0B: reproducible Golden Scene captures and visual/benchmark fixtures. Renderer V2, Lighting V2 and Worldgen V2 remain subsequent independently measured PRs.
+Hand off PR-0A / [PR #6](https://github.com/YoungJibbit95/2D-Game-Engine/pull/6) for human review and an explicit integration decision; do not merge automatically. Implementation `3d70e36` has a complete green Windows/Ubuntu matrix (run 39105931841); the final documentation-only revision must retain its normal PR checks. After PR-0A integration, the next separate PR is PR-0B: reproducible Golden Scene captures and visual/benchmark fixtures. Renderer V2, Lighting V2 and Worldgen V2 remain subsequent independently measured PRs.
 
 Historical Session 0 resume action (superseded by the user's Sprint 0 request):
 

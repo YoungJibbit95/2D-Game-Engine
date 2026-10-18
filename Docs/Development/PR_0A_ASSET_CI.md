@@ -3,6 +3,7 @@
 Date: 2026-10-18. Branch: `codex/yjse-p0-001-asset-ci`.
 Base: `5ceb115420cc91ae2cdd36d0b63e4c8c476e05ee` (`origin/master`).
 Pull request: [#6](https://github.com/YoungJibbit95/2D-Game-Engine/pull/6). Initial reviewed implementation: `88db61b6d7fcbe7b28da9af2b516e2d2afb50ec2`.
+Final reviewed code: `3d70e36b3fb361cfacb3984fe4d08f74f5b5127f`. Code acceptance: **ready for review**, with [all five CI jobs green](https://github.com/YoungJibbit95/2D-Game-Engine/actions/runs/39105931841). Subsequent evidence-documentation commits keep normal CI enabled; [latest PR checks](https://github.com/YoungJibbit95/2D-Game-Engine/pull/6/checks) remain authoritative for the current PR head.
 Integrator: Codex lead. Asset and CI investigators: two real read-only subagents; independent integrated-diff review uses the asset investigator. Only the lead writes this worktree.
 Authorization: feature branch, commits, push and PR explicitly permitted by the user; no merge or force-push.
 
@@ -52,14 +53,14 @@ Commands below run in the isolated worktree; detailed logs/TRX/JSON/images are u
 | Isolated Release performance | pass | `tools/run_isolated_performance_tests.ps1 -Configuration Release`; all 21 classes / 39 tests passed at unchanged budgets; `artifacts/isolated-performance.log` |
 | Quick benchmark harness | pass | `dotnet run --project Game.Benchmarks -c Release --no-build -- --quick --output artifacts/performance-quick.json`; matching 240-tick replay hashes |
 | Hosted Windows / Ubuntu Release | pass | [Implementation run 39105463555](https://github.com/YoungJibbit95/2D-Game-Engine/actions/runs/39105463555), commit `88db61b`: both Release jobs, 21 isolated performance classes and all three published Mesa smokes per OS passed. Downloaded artifacts verified 263 resources / 1,518 frames / 0 invalid; llvmpipe LLVM 23.1.3 Windows, LLVM 20.1.2 Ubuntu. Both Forest captures visually inspected |
-| Complete final PR matrix | not run | Follow-up preview code awaits the next complete [PR checks](https://github.com/YoungJibbit95/2D-Game-Engine/pull/6/checks); the earlier Ubuntu Debug failure is recorded above, not reported as green |
+| Complete implementation matrix | pass | [Run 39105931841](https://github.com/YoungJibbit95/2D-Game-Engine/actions/runs/39105931841), exact implementation `3d70e36`: Website, Windows/Ubuntu Debug/Release all pass; each functional partition 1,725/1,725; both Debug jobs run seven Python preview regressions; both Release jobs pass 21 timing classes and all three real published smokes |
 | Golden scene corpus / gameplay playthrough | not run | Separate PR-0B; these smoke captures are not a completed golden corpus or a 15–30 minute gameplay acceptance |
 
 Visual evidence: 640x360, 30 frames with 10 warmup frames, 60 FPS cap. Forest/day/clear capture inspected: real player, world tiles, layered background and HUD visible. The synthetic asset sample panel is excluded by existing scene-pixel validation. GPU timing and performance improvement: unknown; no rendering optimization is claimed.
 
 ## Review, risk and rollback
 
-Independent read-only integrated-diff review: pass for `88db61b` after correcting the review finding for null/empty/whitespace SourceRoots and adding corresponding regression cases. Follow-up UI-preview exact-pixel fix also reviewed with no findings. Reviewer did not execute tests; test evidence above was executed by the lead. Hosted run links will be recorded after execution. Until required hosted gates pass, this is a draft candidate.
+Independent read-only integrated-diff review: pass for `88db61b` after correcting the review finding for null/empty/whitespace SourceRoots and adding corresponding regression cases. Shared UI/Wave05 preview fix at `3d70e36` was independently reviewed and the commit contents confirmed with no open findings. Reviewer did not execute tests; local evidence above was executed by the lead, and hosted evidence is linked to actual Actions runs. All required implementation gates pass; the PR is ready for human review, with no automatic merge.
 
 Mesa is a rolling distribution: action/installer are pinned but the signed package dependency closure is resolved at run time and recorded, not frozen as a distribution snapshot. A package/graphics failure must fail CI; there is no placeholder, skip or success fallback. Existing palette/silhouette review debt is unaffected. Save/load and negative-X behavior are covered by the unchanged full functional suite; renderer-neutral Core boundaries remain intact.
 
