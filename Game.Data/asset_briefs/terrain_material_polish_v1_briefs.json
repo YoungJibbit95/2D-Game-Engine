@@ -8,7 +8,7 @@
   "briefs": [
     {
       "spriteId": "world/tiles/polish_v1/forest_grass_loam_autotile",
-      "outputPath": "Assets/TerrainPolishV1/world/tiles/forest_grass_loam_autotile.png",
+      "outputPath": "assets/TerrainPolishV1/world/tiles/forest_grass_loam_autotile.png",
       "width": 256,
       "height": 16,
       "subject": "Forest Grass And Loam",
@@ -39,7 +39,7 @@
     },
     {
       "spriteId": "world/tiles/polish_v1/forest_loam_autotile",
-      "outputPath": "Assets/TerrainPolishV1/world/tiles/forest_loam_autotile.png",
+      "outputPath": "assets/TerrainPolishV1/world/tiles/forest_loam_autotile.png",
       "width": 256,
       "height": 16,
       "subject": "Deep Forest Loam",
@@ -68,7 +68,7 @@
     },
     {
       "spriteId": "world/tiles/polish_v1/layered_stone_autotile",
-      "outputPath": "Assets/TerrainPolishV1/world/tiles/layered_stone_autotile.png",
+      "outputPath": "assets/TerrainPolishV1/world/tiles/layered_stone_autotile.png",
       "width": 256,
       "height": 16,
       "subject": "Layered Cave Stone",
@@ -97,7 +97,7 @@
     },
     {
       "spriteId": "world/tiles/polish_v1/amberstone_autotile",
-      "outputPath": "Assets/TerrainPolishV1/world/tiles/amberstone_autotile.png",
+      "outputPath": "assets/TerrainPolishV1/world/tiles/amberstone_autotile.png",
       "width": 256,
       "height": 16,
       "subject": "Veined Amberstone",
@@ -127,7 +127,7 @@
     },
     {
       "spriteId": "world/tiles/polish_v1/marsh_moss_autotile",
-      "outputPath": "Assets/TerrainPolishV1/world/tiles/marsh_moss_autotile.png",
+      "outputPath": "assets/TerrainPolishV1/world/tiles/marsh_moss_autotile.png",
       "width": 256,
       "height": 16,
       "subject": "Twilight Marsh Moss",
@@ -158,7 +158,7 @@
     },
     {
       "spriteId": "world/tiles/polish_v1/amberwood_plank_autotile",
-      "outputPath": "Assets/TerrainPolishV1/world/tiles/amberwood_plank_autotile.png",
+      "outputPath": "assets/TerrainPolishV1/world/tiles/amberwood_plank_autotile.png",
       "width": 256,
       "height": 16,
       "subject": "Gnarled Amberwood Planks",

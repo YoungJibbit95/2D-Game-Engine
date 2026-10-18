@@ -181,7 +181,8 @@ public sealed class SpriteAssetTests
         var briefs = SpriteGenerationBriefRegistry.Create(
             new SpriteGenerationBriefJsonLoader().LoadBriefsFromDirectory(Path.Combine(dataRoot, "asset_briefs")));
 
-        var report = new SpriteAssetAuditService().Audit(dataRoot, sprites, briefs);
+        var report = new SpriteAssetAuditService().Audit(
+            dataRoot, sprites, briefs, new SpriteAssetAuditOptions { TreatMissingFilesAsErrors = true });
         var starterSpriteIds = new[]
         {
             "tiles/dirt",
@@ -212,6 +213,7 @@ public sealed class SpriteAssetTests
         };
 
         Assert.False(report.HasErrors, string.Join(Environment.NewLine, report.Issues.Select(issue => issue.Message)));
+        Assert.All(report.Entries, entry => Assert.Equal(SpriteAssetFileStatus.Present, entry.FileStatus));
         foreach (var spriteId in starterSpriteIds)
         {
             var entry = Assert.Single(report.Entries, entry => entry.SpriteId == spriteId);
@@ -337,6 +339,100 @@ public sealed class SpriteAssetTests
         Assert.True(report.HasErrors);
         Assert.Contains(report.Issues, issue => issue.Code == SpriteAssetAuditCodes.DimensionMismatch);
         Assert.Contains(report.Issues, issue => issue.Code == SpriteAssetAuditCodes.IncompleteAutoTileMasks);
+    }
+
+    [Theory]
+    [InlineData("assets/Wave05/sprite.png", true)]
+    [InlineData("Assets/Wave05/sprite.png", false)]
+    [InlineData("assets/wave05/sprite.png", false)]
+    [InlineData("assets/Wave05/Sprite.png", false)]
+    [InlineData("assets\\Wave05\\sprite.png", true)]
+    [InlineData("assets/./Wave05/sprite.png", true)]
+    [InlineData("assets//Wave05/sprite.png", true)]
+    public void AssetAudit_RequiresExactFileTreeCaseOnEveryPlatform(string path, bool present)
+    {
+        using var temp = new TempAssetRoot();
+        WritePngHeader(Path.Combine(temp.Root, "assets", "Wave05", "sprite.png"), 16, 16);
+        var assets = SpriteAssetRegistry.Create(new[] { CreateSprite("items/test") with { Path = path } });
+
+        var report = new SpriteAssetAuditService().Audit(
+            temp.Root, assets, options: new SpriteAssetAuditOptions
+            {
+                RequireGenerationBriefs = false,
+                TreatMissingFilesAsErrors = true
+            });
+
+        Assert.Equal(present ? SpriteAssetFileStatus.Present : SpriteAssetFileStatus.Missing,
+            Assert.Single(report.Entries).FileStatus);
+        Assert.Equal(!present, report.HasErrors);
+    }
+
+    [Fact]
+    public void AssetAudit_RequiresExactBriefPathCase()
+    {
+        using var temp = new TempAssetRoot();
+        WritePngHeader(Path.Combine(temp.Root, "assets", "sprite.png"), 16, 16);
+        var assets = SpriteAssetRegistry.Create(new[] { CreateSprite("items/test") with { Path = "assets/sprite.png" } });
+        var briefs = SpriteGenerationBriefRegistry.Create(new[]
+        {
+            new SpriteGenerationBrief { SpriteId = "items/test", OutputPath = "Assets/sprite.png", Width = 16, Height = 16 }
+        });
+
+        var report = new SpriteAssetAuditService().Audit(temp.Root, assets, briefs);
+
+        Assert.Contains(report.Issues, issue => issue.Code == SpriteAssetAuditCodes.BriefPathMismatch);
+    }
+
+    [Fact]
+    public void AssetAudit_RespectsModSourceRootAndSharedAliases()
+    {
+        using var baseRoot = new TempAssetRoot();
+        using var modRoot = new TempAssetRoot();
+        WritePngHeader(Path.Combine(baseRoot.Root, "sprites", "shared.png"), 8, 8);
+        WritePngHeader(Path.Combine(modRoot.Root, "sprites", "shared.png"), 16, 16);
+        var canonical = CreateSprite("items/canonical") with { Path = "sprites/shared.png", SourceRoot = modRoot.Root };
+        var assets = SpriteAssetRegistry.Create(new[]
+        {
+            canonical,
+            canonical with { Id = "items/alias", SourceAliasOf = canonical.Id }
+        });
+
+        var report = new SpriteAssetAuditService().Audit(baseRoot.Root, assets,
+            options: new SpriteAssetAuditOptions { RequireGenerationBriefs = false, TreatMissingFilesAsErrors = true });
+
+        Assert.False(report.HasErrors);
+        Assert.Equal(2, report.Entries.Count);
+        Assert.All(report.Entries, entry => Assert.Equal(Path.Combine(modRoot.Root, "sprites", "shared.png"), entry.ResolvedPath));
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData(" ")]
+    public void AssetAudit_UnspecifiedSourceRootUsesContentRoot(string? sourceRoot)
+    {
+        using var temp = new TempAssetRoot();
+        WritePngHeader(Path.Combine(temp.Root, "sprites", "shared.png"), 16, 16);
+        var assets = SpriteAssetRegistry.Create(new[]
+        {
+            CreateSprite("items/test") with { Path = "sprites/shared.png", SourceRoot = sourceRoot }
+        });
+
+        var report = new SpriteAssetAuditService().Audit(temp.Root, assets,
+            options: new SpriteAssetAuditOptions { RequireGenerationBriefs = false, TreatMissingFilesAsErrors = true });
+
+        Assert.False(report.HasErrors);
+        Assert.Equal(SpriteAssetFileStatus.Present, Assert.Single(report.Entries).FileStatus);
+    }
+
+    [Theory]
+    [InlineData("../outside.png")]
+    [InlineData("sprites/../../outside.png")]
+    [InlineData("/outside.png")]
+    public void Registry_RejectsSourceRootEscapes(string path)
+    {
+        Assert.Throws<RegistryValidationException>(() =>
+            SpriteAssetRegistry.Create(new[] { CreateSprite("items/test") with { Path = path } }));
     }
 
     private static SpriteAssetDefinition CreateSprite(string id)

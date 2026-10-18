@@ -12,7 +12,7 @@ from PIL import Image, ImageDraw, ImageFont
 
 
 DATA_ROOT = Path(__file__).resolve().parents[2]
-OUTPUT_ROOT = DATA_ROOT / "Assets" / "TerrainPolishV1" / "world" / "tiles"
+OUTPUT_ROOT = DATA_ROOT / "assets" / "TerrainPolishV1" / "world" / "tiles"
 MANIFEST_PATH = DATA_ROOT / "assets" / "terrain_material_polish_v1.sprites.json"
 BRIEF_PATH = DATA_ROOT / "asset_briefs" / "terrain_material_polish_v1_briefs.json"
 PROVENANCE_PATH = DATA_ROOT / "art_direction" / "terrain_material_polish_v1_provenance.json"

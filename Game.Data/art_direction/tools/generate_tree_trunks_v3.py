@@ -17,7 +17,7 @@ from PIL import Image
 
 
 ROOT = Path(__file__).resolve().parents[2]
-OUTPUT = ROOT / "Assets" / "TreeTrunksV3" / "world" / "tiles"
+OUTPUT = ROOT / "assets" / "TreeTrunksV3" / "world" / "tiles"
 MANIFEST = ROOT / "assets" / "tree_trunks_v3.sprites.json"
 PREVIEW = ROOT / "art_direction" / "tree_trunks_v3_contact_sheet.png"
 PROVENANCE = ROOT / "art_direction" / "tree_trunks_v3_provenance.json"

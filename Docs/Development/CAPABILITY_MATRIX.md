@@ -1,11 +1,15 @@
 
 # YjsE Capability Matrix
 
-Last updated: 2026-07-22 after Session 0 baseline integration, subsystem audits and isolated Release performance validation
+Last updated: 2026-10-18 for PR-0A cross-platform asset and release-CI stabilization
 
 Capability status values are limited to `verified`, `implemented-unverified`, `partial`, `planned`, `blocked`, and `deprecated`. Local evidence is never presented as a hosted Windows/Ubuntu result.
 
 ## Validation Baseline
+
+- PR-0A uses clean `origin/master` base `5ceb115420cc91ae2cdd36d0b63e4c8c476e05ee` in an isolated worktree. The original `main` checkout and its 96 modified tracked / 185 untracked files are preserved. See `PR_0A_ASSET_CI.md` for current commands, evidence and hosted status; the Session 0 entries below are historical.
+- Case-exact sprite/brief auditing is `verified` locally, including wrong-case rejection on Windows and pack-specific mod SourceRoots. All 268 authored sprites resolve; IDs and PNG bytes are unchanged. Website source validation also enforces exact case.
+- The published client smoke runner is `verified` locally on NVIDIA RTX 3070 Ti for Main Menu, World Select and Forest gameplay, including gameplay telemetry, PNG/JSON, strict preload and an external deadline. Hosted Windows Mesa / Ubuntu graphics remain `implemented-unverified` until the PR workflow completes. These are rendering correctness gates, not GPU performance measurements.
 
 - Audit-start HEAD: `f9a06072a1172d2bd8d064cabad92235443dd8c8` on `master`, with a pre-existing dirty tree.
 - Audit-start Debug and Release: builds passed; tests were 459/461 in each configuration.

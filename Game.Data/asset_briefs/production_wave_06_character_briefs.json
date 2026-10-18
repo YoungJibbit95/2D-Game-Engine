@@ -14,7 +14,7 @@
   "briefs": [
     {
       "spriteId": "entities/player/character_v2_wave06/body",
-      "outputPath": "Assets/Wave06Character/player_body_actions.png",
+      "outputPath": "assets/Wave06Character/player_body_actions.png",
       "width": 384,
       "height": 40,
       "frameWidth": 24,
@@ -102,7 +102,7 @@
     },
     {
       "spriteId": "entities/player/character_v2_wave06/clothes",
-      "outputPath": "Assets/Wave06Character/player_clothes_actions.png",
+      "outputPath": "assets/Wave06Character/player_clothes_actions.png",
       "width": 384,
       "height": 40,
       "frameWidth": 24,
@@ -190,7 +190,7 @@
     },
     {
       "spriteId": "entities/player/character_v2_wave06/hair",
-      "outputPath": "Assets/Wave06Character/player_hair_actions.png",
+      "outputPath": "assets/Wave06Character/player_hair_actions.png",
       "width": 384,
       "height": 40,
       "frameWidth": 24,
@@ -278,7 +278,7 @@
     },
     {
       "spriteId": "entities/player/character_v2_wave06/armor",
-      "outputPath": "Assets/Wave06Character/player_armor_actions.png",
+      "outputPath": "assets/Wave06Character/player_armor_actions.png",
       "width": 384,
       "height": 40,
       "frameWidth": 24,
@@ -366,7 +366,7 @@
     },
     {
       "spriteId": "entities/player/character_v2_wave06/equipment",
-      "outputPath": "Assets/Wave06Character/player_equipment_actions.png",
+      "outputPath": "assets/Wave06Character/player_equipment_actions.png",
       "width": 384,
       "height": 40,
       "frameWidth": 24,

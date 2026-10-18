@@ -17,6 +17,7 @@ public sealed class SpriteAssetAuditService
         var entries = new List<SpriteAssetAuditEntry>();
         var issues = new List<SpriteAssetAuditIssue>();
         var fallbackId = assets.Fallback.Id;
+        var sourceFiles = new Dictionary<string, HashSet<string>>(StringComparer.Ordinal);
 
         foreach (var asset in assets.Definitions.OrderBy(asset => asset.Id, StringComparer.OrdinalIgnoreCase))
         {
@@ -25,8 +26,23 @@ public sealed class SpriteAssetAuditService
                 continue;
             }
 
-            var resolvedPath = ResolvePath(contentRoot, asset.Path);
-            var fileRead = ReadPngDimensions(resolvedPath);
+            var sourceRoot = Path.GetFullPath(string.IsNullOrWhiteSpace(asset.SourceRoot) ? contentRoot : asset.SourceRoot);
+            if (!sourceFiles.TryGetValue(sourceRoot, out var files))
+            {
+                // Enumerated names retain the actual case even on Windows. File.Exists alone
+                // would silently accept a manifest that cannot be loaded on Linux.
+                files = Directory.Exists(sourceRoot)
+                    ? Directory.EnumerateFiles(sourceRoot, "*", SearchOption.AllDirectories)
+                        .Select(path => NormalizePath(Path.GetRelativePath(sourceRoot, path)))
+                        .ToHashSet(StringComparer.Ordinal)
+                    : new HashSet<string>(StringComparer.Ordinal);
+                sourceFiles.Add(sourceRoot, files);
+            }
+
+            var resolvedPath = ResolvePath(sourceRoot, asset.Path);
+            var fileRead = files.Contains(NormalizePath(Path.GetRelativePath(sourceRoot, resolvedPath)))
+                ? ReadPngDimensions(resolvedPath)
+                : PngDimensionReadResult.Missing;
             var fileStatus = fileRead.Status;
             SpriteGenerationBrief? brief = null;
             var hasBrief = generationBriefs is not null && generationBriefs.TryGetBySpriteId(asset.Id, out brief);
@@ -164,17 +180,17 @@ public sealed class SpriteAssetAuditService
     {
         return Path.GetFullPath(Path.IsPathRooted(manifestPath)
             ? manifestPath
-            : Path.Combine(contentRoot, manifestPath.Replace('/', Path.DirectorySeparatorChar)));
+            : Path.Combine(contentRoot, NormalizePath(manifestPath).Replace('/', Path.DirectorySeparatorChar)));
     }
 
     private static bool PathsMatch(string left, string right)
     {
-        return string.Equals(NormalizePath(left), NormalizePath(right), StringComparison.OrdinalIgnoreCase);
+        return string.Equals(NormalizePath(left), NormalizePath(right), StringComparison.Ordinal);
     }
 
     private static string NormalizePath(string path)
     {
-        return path.Replace('\\', '/').Trim('/');
+        return path.Replace('\\', '/');
     }
 
     private static PngDimensionReadResult ReadPngDimensions(string path)

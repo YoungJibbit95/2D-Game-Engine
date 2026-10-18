@@ -7,7 +7,7 @@
   "briefs": [
     {
       "spriteId": "tiles/oak_trunk_v3_autotile",
-      "outputPath": "Assets/TreeTrunksV3/world/tiles/oak_trunk_v3_autotile.png",
+      "outputPath": "assets/TreeTrunksV3/world/tiles/oak_trunk_v3_autotile.png",
       "width": 256,
       "height": 16,
       "subject": "Organic Forest Oak Limbs",
@@ -17,7 +17,7 @@
     },
     {
       "spriteId": "tiles/living_wood_v3_autotile",
-      "outputPath": "Assets/TreeTrunksV3/world/tiles/living_wood_v3_autotile.png",
+      "outputPath": "assets/TreeTrunksV3/world/tiles/living_wood_v3_autotile.png",
       "width": 256,
       "height": 16,
       "subject": "Organic Amber Living-Wood Limbs",
@@ -27,7 +27,7 @@
     },
     {
       "spriteId": "tiles/mangrove_trunk_v3_autotile",
-      "outputPath": "Assets/TreeTrunksV3/world/tiles/mangrove_trunk_v3_autotile.png",
+      "outputPath": "assets/TreeTrunksV3/world/tiles/mangrove_trunk_v3_autotile.png",
       "width": 256,
       "height": 16,
       "subject": "Organic Marsh Mangrove Limbs",
