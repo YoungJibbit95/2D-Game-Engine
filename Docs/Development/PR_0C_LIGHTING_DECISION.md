@@ -26,11 +26,11 @@ The unchanged four PR-0B references are a visual/control baseline, not a through
 | Evidence set | Existing implementation | Incremental candidate | Chunk RGB / GPU candidate |
 | --- | --- | --- | --- |
 | Four fixed Golden scenes | Preserved PR-0B PNGs and timing sidecars; see [baseline dossier](PR_0B_GOLDEN_SCENES.md) | Unimplemented; performance unknown | Unimplemented; performance unknown |
-| PR-0C uncapped CPU preparation/upload | Pending lead integration of measured capture results | Unimplemented; no before/after claim | Unimplemented; no before/after claim |
-| Camera/zoom, source-density and cave probes | Pending lead integration of captures and diagnostic metrics | Unimplemented | Unimplemented |
+| PR-0C uncapped CPU preparation/upload | 54 validated native captures at 1080p/1440p: day prepare mean 0.843–1.114 ms with zero post-warmup uploads; dynamic prepare mean 1.298–2.649 ms, upload CPU mean 0.383–1.309 ms; detailed per-scenario ranges in the [measurement dossier](PR_0C_RENDERING_LIGHTING_DIAGNOSTICS.md) | Unimplemented; no before/after claim | Unimplemented; no before/after claim |
+| Camera/zoom, source-density and cave probes | Fixed 104x58 Medium mask; no measured resource rebuilds. Ten extrema pairs repeat exactly, with no obvious new seam at inspected endpoints. Source washout and unresolved cave lines persist; six-source any-channel clipping reaches 5.7195% of 1080p ROI | Unimplemented | Unimplemented |
 | Genuine GPU execution/transfer timing | Unknown | Unknown | Unknown |
 
-Pending cells are not passed gates or evidence that a candidate is faster. The lead fills measured observations in the PR-0C measurement report before PR acceptance; these candidate cells remain unknown until executable matched experiments exist.
+Candidate cells remain unknown until executable matched experiments exist. Current-path evidence establishes a bounded next experiment, not that a replacement is faster. CPU timing variance is material, including one unresolved 1080p day frame-p95 outlier at 22.670 ms; GPU execution remains unknown.
 
 ## Quality hypotheses to test without changing references
 

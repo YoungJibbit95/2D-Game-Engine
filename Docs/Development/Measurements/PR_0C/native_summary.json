@@ -1,0 +1,3547 @@
+{
+  "version": 1,
+  "context": {
+    "CPU": "AMD Ryzen 5 5500                               ",
+    "Configuration": "Release",
+    "ClientAssemblyVersion": "1.0.0+1ecfaaa4369a362001228239505fe2f435ac0d16",
+    "ClientAssemblySHA256": "675802DD45E00E2228BDCE517B11D001AC9790119C3B724FF4307F5355B508B1",
+    "CoreAssemblySHA256": "4E760822446F532999F2356E025547A364A89B371E6F46151F33561C8CD500A4",
+    "CaptureEnvironment": {
+      "OS": "Windows",
+      "Runtime": ".NET 8.0.28",
+      "Architecture": "X64",
+      "MonoGame": "3.8.4.1",
+      "GraphicsProfile": "Reach",
+      "Renderer": "NVIDIA GeForce RTX 3070 Ti/PCIe/SSE2",
+      "DriverIdentity": "NVIDIA GeForce RTX 3070 Ti:32.0.16.1692"
+    }
+  },
+  "gpu_time": "unknown",
+  "groups": [
+    {
+      "resolution": "1920x1080",
+      "scene": "cave_lit",
+      "repeats": 3,
+      "fixture_contract": {
+        "GoldenScene": {
+          "Fixture": {
+            "Version": 1,
+            "SceneId": "diag_cave_lit",
+            "StartState": 2,
+            "Seed": 1337,
+            "BiomeId": "crystal_depths",
+            "TimeOfDay": 0.5,
+            "Weather": 0,
+            "DynamicLights": true,
+            "Width": 1920,
+            "Height": 1080,
+            "Zoom": 2,
+            "CameraX": -1045562,
+            "CameraY": 1886,
+            "Frames": 1800,
+            "WarmupFrames": 300,
+            "Diagnostic": {
+              "CameraPath": "Static",
+              "DynamicLightCount": 2,
+              "PanAmplitude": 48,
+              "ZoomAmplitude": 0.25,
+              "PeriodTicks": 240,
+              "DisableBloom": false,
+              "ForceCoreLightingInterval": 0
+            }
+          },
+          "PresentationFrame": 1800,
+          "SimulationTick": 1800,
+          "ContentFingerprint": "8F9CC78330B80DADE79EA897544BD4ECA4219E2D4B94F94567AB0A0BF1E082B0",
+          "SettingsFingerprint": "7D6A3D464D8C6ABBC266E751922A7912FBB9D50C1A6551EC768690F627DEE361",
+          "CameraX": -1045562,
+          "CameraY": 1886,
+          "CameraZoom": 2,
+          "TimeOfDay": 0.5,
+          "Weather": "Clear",
+          "WeatherIntensity": 0,
+          "Wind": 0.9084746,
+          "CloudCover": 0,
+          "Day": 1,
+          "BiomeId": "crystal_depths",
+          "CaveProfileId": "crystal_depths",
+          "PointLightsUsed": 2,
+          "DynamicLightsCollected": 2,
+          "LoadedChunks": 55,
+          "StateHash": "D011B32BCFC82360"
+        },
+        "SourceFixtureSHA256": "44DE1FDF9DB888C9416F4560E862E3BFBB67191FBCD6A462B2C4CFE5A26B21AB"
+      },
+      "per_process_ranges": {
+        "frames": {
+          "min": 1500,
+          "max": 1500
+        },
+        "prepare_scope_invocations": {
+          "min": 1125,
+          "max": 1125
+        },
+        "prepare_mean_ms": {
+          "min": 1.3714918222222223,
+          "max": 2.2521303111111113
+        },
+        "prepare_p95_ms": {
+          "min": 2.4561,
+          "max": 3.9198
+        },
+        "prepare_p99_ms": {
+          "min": 2.9418,
+          "max": 4.9606
+        },
+        "prepare_amortized_ms": {
+          "min": 1.0286188666666667,
+          "max": 1.6890977333333335
+        },
+        "mask_scope_invocations": {
+          "min": 1125,
+          "max": 1125
+        },
+        "mask_mean_ms": {
+          "min": 0.6714423111111112,
+          "max": 0.9434923555555557
+        },
+        "mask_p95_ms": {
+          "min": 0.913,
+          "max": 1.1326
+        },
+        "mask_p99_ms": {
+          "min": 1.0017,
+          "max": 1.5819
+        },
+        "mask_amortized_ms": {
+          "min": 0.5035817333333333,
+          "max": 0.7076192666666667
+        },
+        "upload_cpu_scope_invocations": {
+          "min": 1125,
+          "max": 1125
+        },
+        "upload_cpu_mean_ms": {
+          "min": 0.42183777777777776,
+          "max": 0.9220360000000001
+        },
+        "upload_cpu_p95_ms": {
+          "min": 1.4162,
+          "max": 2.4585
+        },
+        "upload_cpu_p99_ms": {
+          "min": 1.8588,
+          "max": 3.6403
+        },
+        "upload_cpu_amortized_ms": {
+          "min": 0.3163783333333333,
+          "max": 0.691527
+        },
+        "frame_AverageMilliseconds": {
+          "min": 2.2987467999999973,
+          "max": 4.040017199999996
+        },
+        "frame_P95Milliseconds": {
+          "min": 3.7086,
+          "max": 6.2504
+        },
+        "frame_P99Milliseconds": {
+          "min": 4.7943,
+          "max": 7.4034
+        },
+        "logical_upload_bytes_per_frame": {
+          "min": 36175.914666666664,
+          "max": 36175.914666666664
+        },
+        "texture_rebuilds": {
+          "min": 0,
+          "max": 0
+        },
+        "lights_used_max": {
+          "min": 2,
+          "max": 2
+        },
+        "mask_width": {
+          "min": 104,
+          "max": 104
+        },
+        "mask_height": {
+          "min": 58,
+          "max": 58
+        },
+        "estimated_texture_payload_bytes": {
+          "min": 217152,
+          "max": 217152
+        },
+        "logical_upload_calls": {
+          "min": 2249,
+          "max": 2249
+        },
+        "core_lighting_mean_ms": {
+          "min": 0.099843,
+          "max": 0.1128578
+        },
+        "core_lighting_samples": {
+          "min": 1500,
+          "max": 1500
+        },
+        "any_channel_clipped_fraction": {
+          "min": 0.008512731481481482,
+          "max": 0.008512731481481482
+        },
+        "all_channels_clipped_fraction": {
+          "min": 0.002412229938271605,
+          "max": 0.002412229938271605
+        }
+      }
+    },
+    {
+      "resolution": "1920x1080",
+      "scene": "cave_panzoom",
+      "repeats": 3,
+      "fixture_contract": {
+        "GoldenScene": {
+          "Fixture": {
+            "Version": 1,
+            "SceneId": "diag_cave_panzoom",
+            "StartState": 2,
+            "Seed": 1337,
+            "BiomeId": "crystal_depths",
+            "TimeOfDay": 0.5,
+            "Weather": 0,
+            "DynamicLights": true,
+            "Width": 1920,
+            "Height": 1080,
+            "Zoom": 2,
+            "CameraX": -1045562,
+            "CameraY": 1886,
+            "Frames": 1800,
+            "WarmupFrames": 300,
+            "Diagnostic": {
+              "CameraPath": "PanZoom",
+              "DynamicLightCount": 2,
+              "PanAmplitude": 48,
+              "ZoomAmplitude": 0.25,
+              "PeriodTicks": 240,
+              "DisableBloom": false,
+              "ForceCoreLightingInterval": 0
+            }
+          },
+          "PresentationFrame": 1800,
+          "SimulationTick": 1800,
+          "ContentFingerprint": "8F9CC78330B80DADE79EA897544BD4ECA4219E2D4B94F94567AB0A0BF1E082B0",
+          "SettingsFingerprint": "7D6A3D464D8C6ABBC266E751922A7912FBB9D50C1A6551EC768690F627DEE361",
+          "CameraX": -1045562,
+          "CameraY": 1886,
+          "CameraZoom": 2,
+          "TimeOfDay": 0.5,
+          "Weather": "Clear",
+          "WeatherIntensity": 0,
+          "Wind": 0.9084746,
+          "CloudCover": 0,
+          "Day": 1,
+          "BiomeId": "crystal_depths",
+          "CaveProfileId": "crystal_depths",
+          "PointLightsUsed": 2,
+          "DynamicLightsCollected": 2,
+          "LoadedChunks": 55,
+          "StateHash": "752007A4EEA558F9"
+        },
+        "SourceFixtureSHA256": "44DE1FDF9DB888C9416F4560E862E3BFBB67191FBCD6A462B2C4CFE5A26B21AB"
+      },
+      "per_process_ranges": {
+        "frames": {
+          "min": 1500,
+          "max": 1500
+        },
+        "prepare_scope_invocations": {
+          "min": 1125,
+          "max": 1125
+        },
+        "prepare_mean_ms": {
+          "min": 1.7426297777777777,
+          "max": 2.083673422222222
+        },
+        "prepare_p95_ms": {
+          "min": 3.0438,
+          "max": 3.9176
+        },
+        "prepare_p99_ms": {
+          "min": 3.7013,
+          "max": 4.9263
+        },
+        "prepare_amortized_ms": {
+          "min": 1.3069723333333334,
+          "max": 1.5627550666666665
+        },
+        "mask_scope_invocations": {
+          "min": 1125,
+          "max": 1125
+        },
+        "mask_mean_ms": {
+          "min": 0.7184894222222222,
+          "max": 0.8726493333333334
+        },
+        "mask_p95_ms": {
+          "min": 0.9819,
+          "max": 1.014
+        },
+        "mask_p99_ms": {
+          "min": 1.029,
+          "max": 1.1298
+        },
+        "mask_amortized_ms": {
+          "min": 0.5388670666666667,
+          "max": 0.654487
+        },
+        "upload_cpu_scope_invocations": {
+          "min": 1125,
+          "max": 1125
+        },
+        "upload_cpu_mean_ms": {
+          "min": 0.6653107555555555,
+          "max": 0.8514338666666666
+        },
+        "upload_cpu_p95_ms": {
+          "min": 1.8614,
+          "max": 2.5817
+        },
+        "upload_cpu_p99_ms": {
+          "min": 2.4291,
+          "max": 3.68
+        },
+        "upload_cpu_amortized_ms": {
+          "min": 0.4989830666666667,
+          "max": 0.6385754
+        },
+        "frame_AverageMilliseconds": {
+          "min": 2.6976235999999982,
+          "max": 3.4028115999999966
+        },
+        "frame_P95Milliseconds": {
+          "min": 4.686,
+          "max": 5.7665
+        },
+        "frame_P99Milliseconds": {
+          "min": 5.7562,
+          "max": 6.7974
+        },
+        "logical_upload_bytes_per_frame": {
+          "min": 54288.0,
+          "max": 54288.0
+        },
+        "texture_rebuilds": {
+          "min": 0,
+          "max": 0
+        },
+        "lights_used_max": {
+          "min": 2,
+          "max": 2
+        },
+        "mask_width": {
+          "min": 104,
+          "max": 104
+        },
+        "mask_height": {
+          "min": 58,
+          "max": 58
+        },
+        "estimated_texture_payload_bytes": {
+          "min": 217152,
+          "max": 217152
+        },
+        "logical_upload_calls": {
+          "min": 3375,
+          "max": 3375
+        },
+        "core_lighting_mean_ms": {
+          "min": 0.09493366666666667,
+          "max": 0.12484393333333332
+        },
+        "core_lighting_samples": {
+          "min": 1500,
+          "max": 1500
+        },
+        "any_channel_clipped_fraction": {
+          "min": 0.008579282407407407,
+          "max": 0.008579282407407407
+        },
+        "all_channels_clipped_fraction": {
+          "min": 0.002431520061728395,
+          "max": 0.002431520061728395
+        }
+      }
+    },
+    {
+      "resolution": "1920x1080",
+      "scene": "core_dirty",
+      "repeats": 3,
+      "fixture_contract": {
+        "GoldenScene": {
+          "Fixture": {
+            "Version": 1,
+            "SceneId": "diag_core_dirty",
+            "StartState": 2,
+            "Seed": 1337,
+            "BiomeId": "forest",
+            "TimeOfDay": 0.5,
+            "Weather": 0,
+            "DynamicLights": false,
+            "Width": 1920,
+            "Height": 1080,
+            "Zoom": 2,
+            "CameraX": -1046522,
+            "CameraY": 926,
+            "Frames": 1800,
+            "WarmupFrames": 300,
+            "Diagnostic": {
+              "CameraPath": "Static",
+              "DynamicLightCount": 0,
+              "PanAmplitude": 48,
+              "ZoomAmplitude": 0.25,
+              "PeriodTicks": 240,
+              "DisableBloom": false,
+              "ForceCoreLightingInterval": 60
+            }
+          },
+          "PresentationFrame": 1800,
+          "SimulationTick": 1800,
+          "ContentFingerprint": "8F9CC78330B80DADE79EA897544BD4ECA4219E2D4B94F94567AB0A0BF1E082B0",
+          "SettingsFingerprint": "7D6A3D464D8C6ABBC266E751922A7912FBB9D50C1A6551EC768690F627DEE361",
+          "CameraX": -1046522,
+          "CameraY": 926,
+          "CameraZoom": 2,
+          "TimeOfDay": 0.5,
+          "Weather": "Clear",
+          "WeatherIntensity": 0,
+          "Wind": -0.98195744,
+          "CloudCover": 0,
+          "Day": 1,
+          "BiomeId": "forest",
+          "CaveProfileId": "",
+          "PointLightsUsed": 0,
+          "DynamicLightsCollected": 0,
+          "LoadedChunks": 55,
+          "StateHash": "48B1F8D9E3BF666D"
+        },
+        "SourceFixtureSHA256": "0DB199F187782C8B213E7A3DC4FA0984FDA2E7950245425E87CCA56D3F66AB19"
+      },
+      "per_process_ranges": {
+        "frames": {
+          "min": 1500,
+          "max": 1500
+        },
+        "prepare_scope_invocations": {
+          "min": 1125,
+          "max": 1125
+        },
+        "prepare_mean_ms": {
+          "min": 0.9045411555555556,
+          "max": 1.1018889777777778
+        },
+        "prepare_p95_ms": {
+          "min": 1.1823,
+          "max": 1.2757
+        },
+        "prepare_p99_ms": {
+          "min": 1.234,
+          "max": 1.5748
+        },
+        "prepare_amortized_ms": {
+          "min": 0.6784058666666667,
+          "max": 0.8264167333333333
+        },
+        "mask_scope_invocations": {
+          "min": 1125,
+          "max": 1125
+        },
+        "mask_mean_ms": {
+          "min": 0.7017082666666666,
+          "max": 0.8546342222222222
+        },
+        "mask_p95_ms": {
+          "min": 0.902,
+          "max": 0.9756
+        },
+        "mask_p99_ms": {
+          "min": 0.9434,
+          "max": 1.2443
+        },
+        "mask_amortized_ms": {
+          "min": 0.5262812,
+          "max": 0.6409756666666666
+        },
+        "upload_cpu_scope_invocations": {
+          "min": 1125,
+          "max": 1125
+        },
+        "upload_cpu_mean_ms": {
+          "min": 4.346666666666667e-05,
+          "max": 5.546666666666667e-05
+        },
+        "upload_cpu_p95_ms": {
+          "min": 0.0001,
+          "max": 0.0002
+        },
+        "upload_cpu_p99_ms": {
+          "min": 0.0002,
+          "max": 0.0003
+        },
+        "upload_cpu_amortized_ms": {
+          "min": 3.26e-05,
+          "max": 4.16e-05
+        },
+        "frame_AverageMilliseconds": {
+          "min": 2.2049410666666684,
+          "max": 2.7962783333333374
+        },
+        "frame_P95Milliseconds": {
+          "min": 3.3567,
+          "max": 3.6974
+        },
+        "frame_P99Milliseconds": {
+          "min": 3.7973,
+          "max": 5.0672
+        },
+        "logical_upload_bytes_per_frame": {
+          "min": 0.0,
+          "max": 0.0
+        },
+        "texture_rebuilds": {
+          "min": 0,
+          "max": 0
+        },
+        "lights_used_max": {
+          "min": 0,
+          "max": 0
+        },
+        "mask_width": {
+          "min": 104,
+          "max": 104
+        },
+        "mask_height": {
+          "min": 58,
+          "max": 58
+        },
+        "estimated_texture_payload_bytes": {
+          "min": 217152,
+          "max": 217152
+        },
+        "logical_upload_calls": {
+          "min": 0,
+          "max": 0
+        },
+        "core_lighting_mean_ms": {
+          "min": 0.2490854,
+          "max": 0.34344926666666664
+        },
+        "core_lighting_samples": {
+          "min": 1500,
+          "max": 1500
+        },
+        "any_channel_clipped_fraction": {
+          "min": 0.0,
+          "max": 0.0
+        },
+        "all_channels_clipped_fraction": {
+          "min": 0.0,
+          "max": 0.0
+        }
+      }
+    },
+    {
+      "resolution": "1920x1080",
+      "scene": "dense_lights",
+      "repeats": 3,
+      "fixture_contract": {
+        "GoldenScene": {
+          "Fixture": {
+            "Version": 1,
+            "SceneId": "diag_dense_lights",
+            "StartState": 2,
+            "Seed": 1337,
+            "BiomeId": "forest",
+            "TimeOfDay": 0,
+            "Weather": 0,
+            "DynamicLights": true,
+            "Width": 1920,
+            "Height": 1080,
+            "Zoom": 2,
+            "CameraX": -1046522,
+            "CameraY": 926,
+            "Frames": 1800,
+            "WarmupFrames": 300,
+            "Diagnostic": {
+              "CameraPath": "Static",
+              "DynamicLightCount": 12,
+              "PanAmplitude": 48,
+              "ZoomAmplitude": 0.25,
+              "PeriodTicks": 240,
+              "DisableBloom": false,
+              "ForceCoreLightingInterval": 0
+            }
+          },
+          "PresentationFrame": 1800,
+          "SimulationTick": 1800,
+          "ContentFingerprint": "8F9CC78330B80DADE79EA897544BD4ECA4219E2D4B94F94567AB0A0BF1E082B0",
+          "SettingsFingerprint": "7D6A3D464D8C6ABBC266E751922A7912FBB9D50C1A6551EC768690F627DEE361",
+          "CameraX": -1046522,
+          "CameraY": 926,
+          "CameraZoom": 2,
+          "TimeOfDay": 0,
+          "Weather": "Clear",
+          "WeatherIntensity": 0,
+          "Wind": 0.27049312,
+          "CloudCover": 0,
+          "Day": 1,
+          "BiomeId": "forest",
+          "CaveProfileId": "",
+          "PointLightsUsed": 6,
+          "DynamicLightsCollected": 6,
+          "LoadedChunks": 55,
+          "StateHash": "B6DCC5652CE77928"
+        },
+        "SourceFixtureSHA256": "9F0A6A8BA3423646EE73223315543365A9C4BD6DF5814B291316F26EE2337F66"
+      },
+      "per_process_ranges": {
+        "frames": {
+          "min": 1500,
+          "max": 1500
+        },
+        "prepare_scope_invocations": {
+          "min": 1125,
+          "max": 1125
+        },
+        "prepare_mean_ms": {
+          "min": 1.542060711111111,
+          "max": 2.2553075555555555
+        },
+        "prepare_p95_ms": {
+          "min": 2.5954,
+          "max": 3.8679
+        },
+        "prepare_p99_ms": {
+          "min": 3.3247,
+          "max": 4.7721
+        },
+        "prepare_amortized_ms": {
+          "min": 1.1565455333333332,
+          "max": 1.6914806666666666
+        },
+        "mask_scope_invocations": {
+          "min": 1125,
+          "max": 1125
+        },
+        "mask_mean_ms": {
+          "min": 0.9264841777777777,
+          "max": 1.1357434666666666
+        },
+        "mask_p95_ms": {
+          "min": 1.3149,
+          "max": 1.3347
+        },
+        "mask_p99_ms": {
+          "min": 1.4102,
+          "max": 1.4925
+        },
+        "mask_amortized_ms": {
+          "min": 0.6948631333333333,
+          "max": 0.8518075999999999
+        },
+        "upload_cpu_scope_invocations": {
+          "min": 1125,
+          "max": 1125
+        },
+        "upload_cpu_mean_ms": {
+          "min": 0.3828324444444445,
+          "max": 0.805856
+        },
+        "upload_cpu_p95_ms": {
+          "min": 1.2993,
+          "max": 2.4315
+        },
+        "upload_cpu_p99_ms": {
+          "min": 1.9289,
+          "max": 3.2816
+        },
+        "upload_cpu_amortized_ms": {
+          "min": 0.28712433333333337,
+          "max": 0.6043919999999999
+        },
+        "frame_AverageMilliseconds": {
+          "min": 2.185436466666664,
+          "max": 3.296275466666668
+        },
+        "frame_P95Milliseconds": {
+          "min": 3.6919,
+          "max": 5.3109
+        },
+        "frame_P99Milliseconds": {
+          "min": 4.6484,
+          "max": 6.3069
+        },
+        "logical_upload_bytes_per_frame": {
+          "min": 36192.0,
+          "max": 36192.0
+        },
+        "texture_rebuilds": {
+          "min": 0,
+          "max": 0
+        },
+        "lights_used_max": {
+          "min": 6,
+          "max": 6
+        },
+        "mask_width": {
+          "min": 104,
+          "max": 104
+        },
+        "mask_height": {
+          "min": 58,
+          "max": 58
+        },
+        "estimated_texture_payload_bytes": {
+          "min": 217152,
+          "max": 217152
+        },
+        "logical_upload_calls": {
+          "min": 2250,
+          "max": 2250
+        },
+        "core_lighting_mean_ms": {
+          "min": 0.008093466666666667,
+          "max": 0.013287933333333333
+        },
+        "core_lighting_samples": {
+          "min": 1500,
+          "max": 1500
+        },
+        "any_channel_clipped_fraction": {
+          "min": 0.05719521604938271,
+          "max": 0.05719521604938271
+        },
+        "all_channels_clipped_fraction": {
+          "min": 0.043800154320987654,
+          "max": 0.043800154320987654
+        }
+      }
+    },
+    {
+      "resolution": "1920x1080",
+      "scene": "forest_day",
+      "repeats": 3,
+      "fixture_contract": {
+        "GoldenScene": {
+          "Fixture": {
+            "Version": 1,
+            "SceneId": "diag_forest_day",
+            "StartState": 2,
+            "Seed": 1337,
+            "BiomeId": "forest",
+            "TimeOfDay": 0.5,
+            "Weather": 0,
+            "DynamicLights": false,
+            "Width": 1920,
+            "Height": 1080,
+            "Zoom": 2,
+            "CameraX": -1046522,
+            "CameraY": 926,
+            "Frames": 1800,
+            "WarmupFrames": 300,
+            "Diagnostic": {
+              "CameraPath": "Static",
+              "DynamicLightCount": 0,
+              "PanAmplitude": 48,
+              "ZoomAmplitude": 0.25,
+              "PeriodTicks": 240,
+              "DisableBloom": false,
+              "ForceCoreLightingInterval": 0
+            }
+          },
+          "PresentationFrame": 1800,
+          "SimulationTick": 1800,
+          "ContentFingerprint": "8F9CC78330B80DADE79EA897544BD4ECA4219E2D4B94F94567AB0A0BF1E082B0",
+          "SettingsFingerprint": "7D6A3D464D8C6ABBC266E751922A7912FBB9D50C1A6551EC768690F627DEE361",
+          "CameraX": -1046522,
+          "CameraY": 926,
+          "CameraZoom": 2,
+          "TimeOfDay": 0.5,
+          "Weather": "Clear",
+          "WeatherIntensity": 0,
+          "Wind": -0.98195744,
+          "CloudCover": 0,
+          "Day": 1,
+          "BiomeId": "forest",
+          "CaveProfileId": "",
+          "PointLightsUsed": 0,
+          "DynamicLightsCollected": 0,
+          "LoadedChunks": 55,
+          "StateHash": "BB22E0B75A668999"
+        },
+        "SourceFixtureSHA256": "0DB199F187782C8B213E7A3DC4FA0984FDA2E7950245425E87CCA56D3F66AB19"
+      },
+      "per_process_ranges": {
+        "frames": {
+          "min": 1500,
+          "max": 1500
+        },
+        "prepare_scope_invocations": {
+          "min": 1125,
+          "max": 1125
+        },
+        "prepare_mean_ms": {
+          "min": 0.8442635555555555,
+          "max": 0.9190340444444444
+        },
+        "prepare_p95_ms": {
+          "min": 1.1999,
+          "max": 1.2342
+        },
+        "prepare_p99_ms": {
+          "min": 1.2603,
+          "max": 1.2753
+        },
+        "prepare_amortized_ms": {
+          "min": 0.6331976666666667,
+          "max": 0.6892755333333332
+        },
+        "mask_scope_invocations": {
+          "min": 1125,
+          "max": 1125
+        },
+        "mask_mean_ms": {
+          "min": 0.6446251555555556,
+          "max": 0.7042725333333333
+        },
+        "mask_p95_ms": {
+          "min": 0.905,
+          "max": 0.9456
+        },
+        "mask_p99_ms": {
+          "min": 0.9477,
+          "max": 0.9795
+        },
+        "mask_amortized_ms": {
+          "min": 0.48346886666666666,
+          "max": 0.5282044
+        },
+        "upload_cpu_scope_invocations": {
+          "min": 1125,
+          "max": 1125
+        },
+        "upload_cpu_mean_ms": {
+          "min": 3.662222222222222e-05,
+          "max": 3.768888888888889e-05
+        },
+        "upload_cpu_p95_ms": {
+          "min": 0.0001,
+          "max": 0.0001
+        },
+        "upload_cpu_p99_ms": {
+          "min": 0.0001,
+          "max": 0.0001
+        },
+        "upload_cpu_amortized_ms": {
+          "min": 2.7466666666666666e-05,
+          "max": 2.8266666666666668e-05
+        },
+        "frame_AverageMilliseconds": {
+          "min": 1.7929891333333317,
+          "max": 3.6311933999999977
+        },
+        "frame_P95Milliseconds": {
+          "min": 2.7873,
+          "max": 22.6697
+        },
+        "frame_P99Milliseconds": {
+          "min": 3.2411,
+          "max": 23.6972
+        },
+        "logical_upload_bytes_per_frame": {
+          "min": 0.0,
+          "max": 0.0
+        },
+        "texture_rebuilds": {
+          "min": 0,
+          "max": 0
+        },
+        "lights_used_max": {
+          "min": 0,
+          "max": 0
+        },
+        "mask_width": {
+          "min": 104,
+          "max": 104
+        },
+        "mask_height": {
+          "min": 58,
+          "max": 58
+        },
+        "estimated_texture_payload_bytes": {
+          "min": 217152,
+          "max": 217152
+        },
+        "logical_upload_calls": {
+          "min": 0,
+          "max": 0
+        },
+        "core_lighting_mean_ms": {
+          "min": 0.009259733333333332,
+          "max": 0.012164133333333334
+        },
+        "core_lighting_samples": {
+          "min": 1500,
+          "max": 1500
+        },
+        "any_channel_clipped_fraction": {
+          "min": 0.0,
+          "max": 0.0
+        },
+        "all_channels_clipped_fraction": {
+          "min": 0.0,
+          "max": 0.0
+        }
+      }
+    },
+    {
+      "resolution": "1920x1080",
+      "scene": "forest_night",
+      "repeats": 3,
+      "fixture_contract": {
+        "GoldenScene": {
+          "Fixture": {
+            "Version": 1,
+            "SceneId": "diag_forest_night",
+            "StartState": 2,
+            "Seed": 1337,
+            "BiomeId": "forest",
+            "TimeOfDay": 0,
+            "Weather": 0,
+            "DynamicLights": true,
+            "Width": 1920,
+            "Height": 1080,
+            "Zoom": 2,
+            "CameraX": -1046522,
+            "CameraY": 926,
+            "Frames": 1800,
+            "WarmupFrames": 300,
+            "Diagnostic": {
+              "CameraPath": "Static",
+              "DynamicLightCount": 2,
+              "PanAmplitude": 48,
+              "ZoomAmplitude": 0.25,
+              "PeriodTicks": 240,
+              "DisableBloom": false,
+              "ForceCoreLightingInterval": 0
+            }
+          },
+          "PresentationFrame": 1800,
+          "SimulationTick": 1800,
+          "ContentFingerprint": "8F9CC78330B80DADE79EA897544BD4ECA4219E2D4B94F94567AB0A0BF1E082B0",
+          "SettingsFingerprint": "7D6A3D464D8C6ABBC266E751922A7912FBB9D50C1A6551EC768690F627DEE361",
+          "CameraX": -1046522,
+          "CameraY": 926,
+          "CameraZoom": 2,
+          "TimeOfDay": 0,
+          "Weather": "Clear",
+          "WeatherIntensity": 0,
+          "Wind": 0.27049312,
+          "CloudCover": 0,
+          "Day": 1,
+          "BiomeId": "forest",
+          "CaveProfileId": "",
+          "PointLightsUsed": 2,
+          "DynamicLightsCollected": 2,
+          "LoadedChunks": 55,
+          "StateHash": "9B3D7CE267EA3467"
+        },
+        "SourceFixtureSHA256": "9F0A6A8BA3423646EE73223315543365A9C4BD6DF5814B291316F26EE2337F66"
+      },
+      "per_process_ranges": {
+        "frames": {
+          "min": 1500,
+          "max": 1500
+        },
+        "prepare_scope_invocations": {
+          "min": 1125,
+          "max": 1125
+        },
+        "prepare_mean_ms": {
+          "min": 1.5794149333333332,
+          "max": 1.7707494222222222
+        },
+        "prepare_p95_ms": {
+          "min": 2.7786,
+          "max": 3.2505
+        },
+        "prepare_p99_ms": {
+          "min": 3.6003,
+          "max": 3.8612
+        },
+        "prepare_amortized_ms": {
+          "min": 1.1845611999999999,
+          "max": 1.3280620666666667
+        },
+        "mask_scope_invocations": {
+          "min": 1125,
+          "max": 1125
+        },
+        "mask_mean_ms": {
+          "min": 0.789064,
+          "max": 0.8541058666666667
+        },
+        "mask_p95_ms": {
+          "min": 1.0623,
+          "max": 1.148
+        },
+        "mask_p99_ms": {
+          "min": 1.1192,
+          "max": 1.1992
+        },
+        "mask_amortized_ms": {
+          "min": 0.591798,
+          "max": 0.6405794
+        },
+        "upload_cpu_scope_invocations": {
+          "min": 1125,
+          "max": 1125
+        },
+        "upload_cpu_mean_ms": {
+          "min": 0.48808720000000005,
+          "max": 0.5975573333333333
+        },
+        "upload_cpu_p95_ms": {
+          "min": 1.6449,
+          "max": 2.0093
+        },
+        "upload_cpu_p99_ms": {
+          "min": 2.5379,
+          "max": 2.9481
+        },
+        "upload_cpu_amortized_ms": {
+          "min": 0.36606540000000004,
+          "max": 0.44816799999999996
+        },
+        "frame_AverageMilliseconds": {
+          "min": 2.370886800000001,
+          "max": 2.769071333333332
+        },
+        "frame_P95Milliseconds": {
+          "min": 4.1137,
+          "max": 4.5774
+        },
+        "frame_P99Milliseconds": {
+          "min": 4.9387,
+          "max": 5.4199
+        },
+        "logical_upload_bytes_per_frame": {
+          "min": 36192.0,
+          "max": 36192.0
+        },
+        "texture_rebuilds": {
+          "min": 0,
+          "max": 0
+        },
+        "lights_used_max": {
+          "min": 2,
+          "max": 2
+        },
+        "mask_width": {
+          "min": 104,
+          "max": 104
+        },
+        "mask_height": {
+          "min": 58,
+          "max": 58
+        },
+        "estimated_texture_payload_bytes": {
+          "min": 217152,
+          "max": 217152
+        },
+        "logical_upload_calls": {
+          "min": 2250,
+          "max": 2250
+        },
+        "core_lighting_mean_ms": {
+          "min": 0.009487066666666667,
+          "max": 0.011890266666666666
+        },
+        "core_lighting_samples": {
+          "min": 1500,
+          "max": 1500
+        },
+        "any_channel_clipped_fraction": {
+          "min": 0.0047309027777777775,
+          "max": 0.0047309027777777775
+        },
+        "all_channels_clipped_fraction": {
+          "min": 0.0011641589506172839,
+          "max": 0.0011641589506172839
+        }
+      }
+    },
+    {
+      "resolution": "1920x1080",
+      "scene": "forest_pan",
+      "repeats": 3,
+      "fixture_contract": {
+        "GoldenScene": {
+          "Fixture": {
+            "Version": 1,
+            "SceneId": "diag_forest_pan",
+            "StartState": 2,
+            "Seed": 1337,
+            "BiomeId": "forest",
+            "TimeOfDay": 0,
+            "Weather": 0,
+            "DynamicLights": true,
+            "Width": 1920,
+            "Height": 1080,
+            "Zoom": 2,
+            "CameraX": -1046522,
+            "CameraY": 926,
+            "Frames": 1800,
+            "WarmupFrames": 300,
+            "Diagnostic": {
+              "CameraPath": "Pan",
+              "DynamicLightCount": 2,
+              "PanAmplitude": 48,
+              "ZoomAmplitude": 0.25,
+              "PeriodTicks": 240,
+              "DisableBloom": false,
+              "ForceCoreLightingInterval": 0
+            }
+          },
+          "PresentationFrame": 1800,
+          "SimulationTick": 1800,
+          "ContentFingerprint": "8F9CC78330B80DADE79EA897544BD4ECA4219E2D4B94F94567AB0A0BF1E082B0",
+          "SettingsFingerprint": "7D6A3D464D8C6ABBC266E751922A7912FBB9D50C1A6551EC768690F627DEE361",
+          "CameraX": -1046522,
+          "CameraY": 926,
+          "CameraZoom": 2,
+          "TimeOfDay": 0,
+          "Weather": "Clear",
+          "WeatherIntensity": 0,
+          "Wind": 0.27049312,
+          "CloudCover": 0,
+          "Day": 1,
+          "BiomeId": "forest",
+          "CaveProfileId": "",
+          "PointLightsUsed": 2,
+          "DynamicLightsCollected": 2,
+          "LoadedChunks": 55,
+          "StateHash": "D2CB5988BD380D5A"
+        },
+        "SourceFixtureSHA256": "9F0A6A8BA3423646EE73223315543365A9C4BD6DF5814B291316F26EE2337F66"
+      },
+      "per_process_ranges": {
+        "frames": {
+          "min": 1500,
+          "max": 1500
+        },
+        "prepare_scope_invocations": {
+          "min": 1125,
+          "max": 1125
+        },
+        "prepare_mean_ms": {
+          "min": 1.2982657777777777,
+          "max": 2.6485445333333333
+        },
+        "prepare_p95_ms": {
+          "min": 2.2099,
+          "max": 4.698
+        },
+        "prepare_p99_ms": {
+          "min": 2.8392,
+          "max": 5.6696
+        },
+        "prepare_amortized_ms": {
+          "min": 0.9736993333333334,
+          "max": 1.9864084
+        },
+        "mask_scope_invocations": {
+          "min": 1125,
+          "max": 1125
+        },
+        "mask_mean_ms": {
+          "min": 0.6480792000000001,
+          "max": 0.9635549333333333
+        },
+        "mask_p95_ms": {
+          "min": 0.9171,
+          "max": 1.098
+        },
+        "mask_p99_ms": {
+          "min": 1.0371,
+          "max": 1.3144
+        },
+        "mask_amortized_ms": {
+          "min": 0.48605940000000003,
+          "max": 0.7226661999999999
+        },
+        "upload_cpu_scope_invocations": {
+          "min": 1125,
+          "max": 1125
+        },
+        "upload_cpu_mean_ms": {
+          "min": 0.40132382222222224,
+          "max": 1.3089764444444445
+        },
+        "upload_cpu_p95_ms": {
+          "min": 1.2532,
+          "max": 3.3685
+        },
+        "upload_cpu_p99_ms": {
+          "min": 1.7564,
+          "max": 4.3878
+        },
+        "upload_cpu_amortized_ms": {
+          "min": 0.3009928666666667,
+          "max": 0.9817323333333333
+        },
+        "frame_AverageMilliseconds": {
+          "min": 1.9093690666666685,
+          "max": 3.852399733333327
+        },
+        "frame_P95Milliseconds": {
+          "min": 3.2867,
+          "max": 6.3667
+        },
+        "frame_P99Milliseconds": {
+          "min": 4.2649,
+          "max": 7.459
+        },
+        "logical_upload_bytes_per_frame": {
+          "min": 51875.2,
+          "max": 51875.2
+        },
+        "texture_rebuilds": {
+          "min": 0,
+          "max": 0
+        },
+        "lights_used_max": {
+          "min": 2,
+          "max": 2
+        },
+        "mask_width": {
+          "min": 104,
+          "max": 104
+        },
+        "mask_height": {
+          "min": 58,
+          "max": 58
+        },
+        "estimated_texture_payload_bytes": {
+          "min": 217152,
+          "max": 217152
+        },
+        "logical_upload_calls": {
+          "min": 3225,
+          "max": 3225
+        },
+        "core_lighting_mean_ms": {
+          "min": 0.008276666666666667,
+          "max": 0.013577666666666665
+        },
+        "core_lighting_samples": {
+          "min": 1500,
+          "max": 1500
+        },
+        "any_channel_clipped_fraction": {
+          "min": 0.004782021604938271,
+          "max": 0.004782021604938271
+        },
+        "all_channels_clipped_fraction": {
+          "min": 0.0011612654320987655,
+          "max": 0.0011612654320987655
+        }
+      }
+    },
+    {
+      "resolution": "1920x1080",
+      "scene": "forest_zoom",
+      "repeats": 3,
+      "fixture_contract": {
+        "GoldenScene": {
+          "Fixture": {
+            "Version": 1,
+            "SceneId": "diag_forest_zoom",
+            "StartState": 2,
+            "Seed": 1337,
+            "BiomeId": "forest",
+            "TimeOfDay": 0,
+            "Weather": 0,
+            "DynamicLights": true,
+            "Width": 1920,
+            "Height": 1080,
+            "Zoom": 2,
+            "CameraX": -1046522,
+            "CameraY": 926,
+            "Frames": 1800,
+            "WarmupFrames": 300,
+            "Diagnostic": {
+              "CameraPath": "Zoom",
+              "DynamicLightCount": 2,
+              "PanAmplitude": 48,
+              "ZoomAmplitude": 0.25,
+              "PeriodTicks": 240,
+              "DisableBloom": false,
+              "ForceCoreLightingInterval": 0
+            }
+          },
+          "PresentationFrame": 1800,
+          "SimulationTick": 1800,
+          "ContentFingerprint": "8F9CC78330B80DADE79EA897544BD4ECA4219E2D4B94F94567AB0A0BF1E082B0",
+          "SettingsFingerprint": "7D6A3D464D8C6ABBC266E751922A7912FBB9D50C1A6551EC768690F627DEE361",
+          "CameraX": -1046522,
+          "CameraY": 926,
+          "CameraZoom": 2,
+          "TimeOfDay": 0,
+          "Weather": "Clear",
+          "WeatherIntensity": 0,
+          "Wind": 0.27049312,
+          "CloudCover": 0,
+          "Day": 1,
+          "BiomeId": "forest",
+          "CaveProfileId": "",
+          "PointLightsUsed": 2,
+          "DynamicLightsCollected": 2,
+          "LoadedChunks": 55,
+          "StateHash": "7F2793E5303A51FD"
+        },
+        "SourceFixtureSHA256": "9F0A6A8BA3423646EE73223315543365A9C4BD6DF5814B291316F26EE2337F66"
+      },
+      "per_process_ranges": {
+        "frames": {
+          "min": 1500,
+          "max": 1500
+        },
+        "prepare_scope_invocations": {
+          "min": 1125,
+          "max": 1125
+        },
+        "prepare_mean_ms": {
+          "min": 1.3894388444444445,
+          "max": 1.8150302222222223
+        },
+        "prepare_p95_ms": {
+          "min": 2.3625,
+          "max": 3.4811
+        },
+        "prepare_p99_ms": {
+          "min": 3.0925,
+          "max": 4.8589
+        },
+        "prepare_amortized_ms": {
+          "min": 1.0420791333333332,
+          "max": 1.3612726666666668
+        },
+        "mask_scope_invocations": {
+          "min": 1125,
+          "max": 1125
+        },
+        "mask_mean_ms": {
+          "min": 0.6801022222222223,
+          "max": 0.7841312
+        },
+        "mask_p95_ms": {
+          "min": 0.933,
+          "max": 1.0746
+        },
+        "mask_p99_ms": {
+          "min": 1.019,
+          "max": 1.1878
+        },
+        "mask_amortized_ms": {
+          "min": 0.5100766666666666,
+          "max": 0.5880984
+        },
+        "upload_cpu_scope_invocations": {
+          "min": 1125,
+          "max": 1125
+        },
+        "upload_cpu_mean_ms": {
+          "min": 0.4327927111111111,
+          "max": 0.7312821333333334
+        },
+        "upload_cpu_p95_ms": {
+          "min": 1.3782,
+          "max": 2.2009
+        },
+        "upload_cpu_p99_ms": {
+          "min": 1.932,
+          "max": 3.3681
+        },
+        "upload_cpu_amortized_ms": {
+          "min": 0.3245945333333333,
+          "max": 0.5484616
+        },
+        "frame_AverageMilliseconds": {
+          "min": 1.9718997333333321,
+          "max": 2.664736333333334
+        },
+        "frame_P95Milliseconds": {
+          "min": 3.3406,
+          "max": 5.0645
+        },
+        "frame_P99Milliseconds": {
+          "min": 4.152,
+          "max": 6.6941
+        },
+        "logical_upload_bytes_per_frame": {
+          "min": 54288.0,
+          "max": 54288.0
+        },
+        "texture_rebuilds": {
+          "min": 0,
+          "max": 0
+        },
+        "lights_used_max": {
+          "min": 2,
+          "max": 2
+        },
+        "mask_width": {
+          "min": 104,
+          "max": 104
+        },
+        "mask_height": {
+          "min": 58,
+          "max": 58
+        },
+        "estimated_texture_payload_bytes": {
+          "min": 217152,
+          "max": 217152
+        },
+        "logical_upload_calls": {
+          "min": 3375,
+          "max": 3375
+        },
+        "core_lighting_mean_ms": {
+          "min": 0.007000733333333333,
+          "max": 0.010806466666666667
+        },
+        "core_lighting_samples": {
+          "min": 1500,
+          "max": 1500
+        },
+        "any_channel_clipped_fraction": {
+          "min": 0.004769483024691358,
+          "max": 0.004769483024691358
+        },
+        "all_channels_clipped_fraction": {
+          "min": 0.001162229938271605,
+          "max": 0.001162229938271605
+        }
+      }
+    },
+    {
+      "resolution": "1920x1080",
+      "scene": "night_no_bloom",
+      "repeats": 3,
+      "fixture_contract": {
+        "GoldenScene": {
+          "Fixture": {
+            "Version": 1,
+            "SceneId": "diag_night_no_bloom",
+            "StartState": 2,
+            "Seed": 1337,
+            "BiomeId": "forest",
+            "TimeOfDay": 0,
+            "Weather": 0,
+            "DynamicLights": true,
+            "Width": 1920,
+            "Height": 1080,
+            "Zoom": 2,
+            "CameraX": -1046522,
+            "CameraY": 926,
+            "Frames": 1800,
+            "WarmupFrames": 300,
+            "Diagnostic": {
+              "CameraPath": "Static",
+              "DynamicLightCount": 2,
+              "PanAmplitude": 48,
+              "ZoomAmplitude": 0.25,
+              "PeriodTicks": 240,
+              "DisableBloom": true,
+              "ForceCoreLightingInterval": 0
+            }
+          },
+          "PresentationFrame": 1800,
+          "SimulationTick": 1800,
+          "ContentFingerprint": "8F9CC78330B80DADE79EA897544BD4ECA4219E2D4B94F94567AB0A0BF1E082B0",
+          "SettingsFingerprint": "DE3A34D0AEE4313664425A72569CE5B762D7CC01046AD84ADF8D7089D75D6539",
+          "CameraX": -1046522,
+          "CameraY": 926,
+          "CameraZoom": 2,
+          "TimeOfDay": 0,
+          "Weather": "Clear",
+          "WeatherIntensity": 0,
+          "Wind": 0.27049312,
+          "CloudCover": 0,
+          "Day": 1,
+          "BiomeId": "forest",
+          "CaveProfileId": "",
+          "PointLightsUsed": 2,
+          "DynamicLightsCollected": 2,
+          "LoadedChunks": 55,
+          "StateHash": "25D22469337B3C69"
+        },
+        "SourceFixtureSHA256": "9F0A6A8BA3423646EE73223315543365A9C4BD6DF5814B291316F26EE2337F66"
+      },
+      "per_process_ranges": {
+        "frames": {
+          "min": 1500,
+          "max": 1500
+        },
+        "prepare_scope_invocations": {
+          "min": 1125,
+          "max": 1125
+        },
+        "prepare_mean_ms": {
+          "min": 1.718866311111111,
+          "max": 1.9185293333333333
+        },
+        "prepare_p95_ms": {
+          "min": 3.0768,
+          "max": 3.4466
+        },
+        "prepare_p99_ms": {
+          "min": 3.8279,
+          "max": 4.3545
+        },
+        "prepare_amortized_ms": {
+          "min": 1.2891497333333333,
+          "max": 1.4388969999999999
+        },
+        "mask_scope_invocations": {
+          "min": 1125,
+          "max": 1125
+        },
+        "mask_mean_ms": {
+          "min": 0.8211603555555556,
+          "max": 0.889352888888889
+        },
+        "mask_p95_ms": {
+          "min": 1.0333,
+          "max": 1.0994
+        },
+        "mask_p99_ms": {
+          "min": 1.0902,
+          "max": 1.4231
+        },
+        "mask_amortized_ms": {
+          "min": 0.6158702666666667,
+          "max": 0.6670146666666666
+        },
+        "upload_cpu_scope_invocations": {
+          "min": 1125,
+          "max": 1125
+        },
+        "upload_cpu_mean_ms": {
+          "min": 0.5551288,
+          "max": 0.6792179555555555
+        },
+        "upload_cpu_p95_ms": {
+          "min": 1.8664,
+          "max": 2.0708
+        },
+        "upload_cpu_p99_ms": {
+          "min": 2.7292,
+          "max": 3.0106
+        },
+        "upload_cpu_amortized_ms": {
+          "min": 0.4163466,
+          "max": 0.5094134666666666
+        },
+        "frame_AverageMilliseconds": {
+          "min": 2.6062692000000025,
+          "max": 3.0211475333333415
+        },
+        "frame_P95Milliseconds": {
+          "min": 4.38,
+          "max": 5.137
+        },
+        "frame_P99Milliseconds": {
+          "min": 5.1803,
+          "max": 6.3851
+        },
+        "logical_upload_bytes_per_frame": {
+          "min": 36192.0,
+          "max": 36192.0
+        },
+        "texture_rebuilds": {
+          "min": 0,
+          "max": 0
+        },
+        "lights_used_max": {
+          "min": 2,
+          "max": 2
+        },
+        "mask_width": {
+          "min": 104,
+          "max": 104
+        },
+        "mask_height": {
+          "min": 58,
+          "max": 58
+        },
+        "estimated_texture_payload_bytes": {
+          "min": 217152,
+          "max": 217152
+        },
+        "logical_upload_calls": {
+          "min": 2250,
+          "max": 2250
+        },
+        "core_lighting_mean_ms": {
+          "min": 0.011168866666666666,
+          "max": 0.011932133333333332
+        },
+        "core_lighting_samples": {
+          "min": 1500,
+          "max": 1500
+        },
+        "any_channel_clipped_fraction": {
+          "min": 2.3148148148148147e-05,
+          "max": 2.3148148148148147e-05
+        },
+        "all_channels_clipped_fraction": {
+          "min": 0.0,
+          "max": 0.0
+        }
+      }
+    },
+    {
+      "resolution": "2560x1440",
+      "scene": "cave_lit",
+      "repeats": 3,
+      "fixture_contract": {
+        "GoldenScene": {
+          "Fixture": {
+            "Version": 1,
+            "SceneId": "diag_cave_lit",
+            "StartState": 2,
+            "Seed": 1337,
+            "BiomeId": "crystal_depths",
+            "TimeOfDay": 0.5,
+            "Weather": 0,
+            "DynamicLights": true,
+            "Width": 2560,
+            "Height": 1440,
+            "Zoom": 2,
+            "CameraX": -1045562,
+            "CameraY": 1886,
+            "Frames": 1800,
+            "WarmupFrames": 300,
+            "Diagnostic": {
+              "CameraPath": "Static",
+              "DynamicLightCount": 2,
+              "PanAmplitude": 48,
+              "ZoomAmplitude": 0.25,
+              "PeriodTicks": 240,
+              "DisableBloom": false,
+              "ForceCoreLightingInterval": 0
+            }
+          },
+          "PresentationFrame": 1800,
+          "SimulationTick": 1800,
+          "ContentFingerprint": "8F9CC78330B80DADE79EA897544BD4ECA4219E2D4B94F94567AB0A0BF1E082B0",
+          "SettingsFingerprint": "34570B854C1132A39D08D691B07FAC17BCF10B5B3267869D287E4CE597688117",
+          "CameraX": -1045562,
+          "CameraY": 1886,
+          "CameraZoom": 2,
+          "TimeOfDay": 0.5,
+          "Weather": "Clear",
+          "WeatherIntensity": 0,
+          "Wind": 0.9084746,
+          "CloudCover": 0,
+          "Day": 1,
+          "BiomeId": "crystal_depths",
+          "CaveProfileId": "crystal_depths",
+          "PointLightsUsed": 2,
+          "DynamicLightsCollected": 2,
+          "LoadedChunks": 55,
+          "StateHash": "D011B32BCFC82360"
+        },
+        "SourceFixtureSHA256": "44DE1FDF9DB888C9416F4560E862E3BFBB67191FBCD6A462B2C4CFE5A26B21AB"
+      },
+      "per_process_ranges": {
+        "frames": {
+          "min": 1500,
+          "max": 1500
+        },
+        "prepare_scope_invocations": {
+          "min": 1125,
+          "max": 1125
+        },
+        "prepare_mean_ms": {
+          "min": 1.8348655111111112,
+          "max": 2.152308088888889
+        },
+        "prepare_p95_ms": {
+          "min": 3.3188,
+          "max": 3.8291
+        },
+        "prepare_p99_ms": {
+          "min": 4.2684,
+          "max": 5.0817
+        },
+        "prepare_amortized_ms": {
+          "min": 1.3761491333333333,
+          "max": 1.6142310666666666
+        },
+        "mask_scope_invocations": {
+          "min": 1125,
+          "max": 1125
+        },
+        "mask_mean_ms": {
+          "min": 0.7431669333333334,
+          "max": 0.8311624888888889
+        },
+        "mask_p95_ms": {
+          "min": 0.9248,
+          "max": 0.949
+        },
+        "mask_p99_ms": {
+          "min": 0.9834,
+          "max": 1.0158
+        },
+        "mask_amortized_ms": {
+          "min": 0.5573752000000001,
+          "max": 0.6233718666666667
+        },
+        "upload_cpu_scope_invocations": {
+          "min": 1125,
+          "max": 1125
+        },
+        "upload_cpu_mean_ms": {
+          "min": 0.7234840888888888,
+          "max": 0.9137389333333333
+        },
+        "upload_cpu_p95_ms": {
+          "min": 2.2066,
+          "max": 2.5762
+        },
+        "upload_cpu_p99_ms": {
+          "min": 3.0651,
+          "max": 3.782
+        },
+        "upload_cpu_amortized_ms": {
+          "min": 0.5426130666666666,
+          "max": 0.6853042
+        },
+        "frame_AverageMilliseconds": {
+          "min": 3.827916399999996,
+          "max": 4.681751866666675
+        },
+        "frame_P95Milliseconds": {
+          "min": 6.0649,
+          "max": 7.1022
+        },
+        "frame_P99Milliseconds": {
+          "min": 6.9524,
+          "max": 8.2069
+        },
+        "logical_upload_bytes_per_frame": {
+          "min": 36175.914666666664,
+          "max": 36175.914666666664
+        },
+        "texture_rebuilds": {
+          "min": 0,
+          "max": 0
+        },
+        "lights_used_max": {
+          "min": 2,
+          "max": 2
+        },
+        "mask_width": {
+          "min": 104,
+          "max": 104
+        },
+        "mask_height": {
+          "min": 58,
+          "max": 58
+        },
+        "estimated_texture_payload_bytes": {
+          "min": 217152,
+          "max": 217152
+        },
+        "logical_upload_calls": {
+          "min": 2249,
+          "max": 2249
+        },
+        "core_lighting_mean_ms": {
+          "min": 0.11167253333333334,
+          "max": 0.12562393333333333
+        },
+        "core_lighting_samples": {
+          "min": 1500,
+          "max": 1500
+        },
+        "any_channel_clipped_fraction": {
+          "min": 0.0026350911458333333,
+          "max": 0.0026350911458333333
+        },
+        "all_channels_clipped_fraction": {
+          "min": 8.680555555555556e-05,
+          "max": 8.680555555555556e-05
+        }
+      }
+    },
+    {
+      "resolution": "2560x1440",
+      "scene": "cave_panzoom",
+      "repeats": 3,
+      "fixture_contract": {
+        "GoldenScene": {
+          "Fixture": {
+            "Version": 1,
+            "SceneId": "diag_cave_panzoom",
+            "StartState": 2,
+            "Seed": 1337,
+            "BiomeId": "crystal_depths",
+            "TimeOfDay": 0.5,
+            "Weather": 0,
+            "DynamicLights": true,
+            "Width": 2560,
+            "Height": 1440,
+            "Zoom": 2,
+            "CameraX": -1045562,
+            "CameraY": 1886,
+            "Frames": 1800,
+            "WarmupFrames": 300,
+            "Diagnostic": {
+              "CameraPath": "PanZoom",
+              "DynamicLightCount": 2,
+              "PanAmplitude": 48,
+              "ZoomAmplitude": 0.25,
+              "PeriodTicks": 240,
+              "DisableBloom": false,
+              "ForceCoreLightingInterval": 0
+            }
+          },
+          "PresentationFrame": 1800,
+          "SimulationTick": 1800,
+          "ContentFingerprint": "8F9CC78330B80DADE79EA897544BD4ECA4219E2D4B94F94567AB0A0BF1E082B0",
+          "SettingsFingerprint": "34570B854C1132A39D08D691B07FAC17BCF10B5B3267869D287E4CE597688117",
+          "CameraX": -1045562,
+          "CameraY": 1886,
+          "CameraZoom": 2,
+          "TimeOfDay": 0.5,
+          "Weather": "Clear",
+          "WeatherIntensity": 0,
+          "Wind": 0.9084746,
+          "CloudCover": 0,
+          "Day": 1,
+          "BiomeId": "crystal_depths",
+          "CaveProfileId": "crystal_depths",
+          "PointLightsUsed": 2,
+          "DynamicLightsCollected": 2,
+          "LoadedChunks": 55,
+          "StateHash": "752007A4EEA558F9"
+        },
+        "SourceFixtureSHA256": "44DE1FDF9DB888C9416F4560E862E3BFBB67191FBCD6A462B2C4CFE5A26B21AB"
+      },
+      "per_process_ranges": {
+        "frames": {
+          "min": 1500,
+          "max": 1500
+        },
+        "prepare_scope_invocations": {
+          "min": 1125,
+          "max": 1125
+        },
+        "prepare_mean_ms": {
+          "min": 1.4407011555555556,
+          "max": 2.4757135111111115
+        },
+        "prepare_p95_ms": {
+          "min": 2.7437,
+          "max": 4.5918
+        },
+        "prepare_p99_ms": {
+          "min": 3.2776,
+          "max": 5.9646
+        },
+        "prepare_amortized_ms": {
+          "min": 1.0805258666666666,
+          "max": 1.8567851333333334
+        },
+        "mask_scope_invocations": {
+          "min": 1125,
+          "max": 1125
+        },
+        "mask_mean_ms": {
+          "min": 0.5676957333333333,
+          "max": 0.8432486222222223
+        },
+        "mask_p95_ms": {
+          "min": 0.8263,
+          "max": 0.9714
+        },
+        "mask_p99_ms": {
+          "min": 0.9027,
+          "max": 1.2383
+        },
+        "mask_amortized_ms": {
+          "min": 0.4257718,
+          "max": 0.6324364666666668
+        },
+        "upload_cpu_scope_invocations": {
+          "min": 1125,
+          "max": 1125
+        },
+        "upload_cpu_mean_ms": {
+          "min": 0.6052015111111112,
+          "max": 1.2239256
+        },
+        "upload_cpu_p95_ms": {
+          "min": 1.7236,
+          "max": 3.2237
+        },
+        "upload_cpu_p99_ms": {
+          "min": 2.2238,
+          "max": 4.6114
+        },
+        "upload_cpu_amortized_ms": {
+          "min": 0.4539011333333334,
+          "max": 0.9179442000000001
+        },
+        "frame_AverageMilliseconds": {
+          "min": 2.540010866666663,
+          "max": 4.485255200000003
+        },
+        "frame_P95Milliseconds": {
+          "min": 4.3947,
+          "max": 7.2366
+        },
+        "frame_P99Milliseconds": {
+          "min": 5.019,
+          "max": 8.6259
+        },
+        "logical_upload_bytes_per_frame": {
+          "min": 54288.0,
+          "max": 54288.0
+        },
+        "texture_rebuilds": {
+          "min": 0,
+          "max": 0
+        },
+        "lights_used_max": {
+          "min": 2,
+          "max": 2
+        },
+        "mask_width": {
+          "min": 104,
+          "max": 104
+        },
+        "mask_height": {
+          "min": 58,
+          "max": 58
+        },
+        "estimated_texture_payload_bytes": {
+          "min": 217152,
+          "max": 217152
+        },
+        "logical_upload_calls": {
+          "min": 3375,
+          "max": 3375
+        },
+        "core_lighting_mean_ms": {
+          "min": 0.07073406666666666,
+          "max": 0.11244546666666667
+        },
+        "core_lighting_samples": {
+          "min": 1500,
+          "max": 1500
+        },
+        "any_channel_clipped_fraction": {
+          "min": 0.0026274956597222223,
+          "max": 0.0026274956597222223
+        },
+        "all_channels_clipped_fraction": {
+          "min": 9.006076388888889e-05,
+          "max": 9.006076388888889e-05
+        }
+      }
+    },
+    {
+      "resolution": "2560x1440",
+      "scene": "core_dirty",
+      "repeats": 3,
+      "fixture_contract": {
+        "GoldenScene": {
+          "Fixture": {
+            "Version": 1,
+            "SceneId": "diag_core_dirty",
+            "StartState": 2,
+            "Seed": 1337,
+            "BiomeId": "forest",
+            "TimeOfDay": 0.5,
+            "Weather": 0,
+            "DynamicLights": false,
+            "Width": 2560,
+            "Height": 1440,
+            "Zoom": 2,
+            "CameraX": -1046522,
+            "CameraY": 926,
+            "Frames": 1800,
+            "WarmupFrames": 300,
+            "Diagnostic": {
+              "CameraPath": "Static",
+              "DynamicLightCount": 0,
+              "PanAmplitude": 48,
+              "ZoomAmplitude": 0.25,
+              "PeriodTicks": 240,
+              "DisableBloom": false,
+              "ForceCoreLightingInterval": 60
+            }
+          },
+          "PresentationFrame": 1800,
+          "SimulationTick": 1800,
+          "ContentFingerprint": "8F9CC78330B80DADE79EA897544BD4ECA4219E2D4B94F94567AB0A0BF1E082B0",
+          "SettingsFingerprint": "34570B854C1132A39D08D691B07FAC17BCF10B5B3267869D287E4CE597688117",
+          "CameraX": -1046522,
+          "CameraY": 926,
+          "CameraZoom": 2,
+          "TimeOfDay": 0.5,
+          "Weather": "Clear",
+          "WeatherIntensity": 0,
+          "Wind": -0.98195744,
+          "CloudCover": 0,
+          "Day": 1,
+          "BiomeId": "forest",
+          "CaveProfileId": "",
+          "PointLightsUsed": 0,
+          "DynamicLightsCollected": 0,
+          "LoadedChunks": 55,
+          "StateHash": "48B1F8D9E3BF666D"
+        },
+        "SourceFixtureSHA256": "0DB199F187782C8B213E7A3DC4FA0984FDA2E7950245425E87CCA56D3F66AB19"
+      },
+      "per_process_ranges": {
+        "frames": {
+          "min": 1500,
+          "max": 1500
+        },
+        "prepare_scope_invocations": {
+          "min": 1125,
+          "max": 1125
+        },
+        "prepare_mean_ms": {
+          "min": 0.8612748444444445,
+          "max": 1.0316656
+        },
+        "prepare_p95_ms": {
+          "min": 1.2223,
+          "max": 1.2839
+        },
+        "prepare_p99_ms": {
+          "min": 1.2891,
+          "max": 1.3709
+        },
+        "prepare_amortized_ms": {
+          "min": 0.6459561333333333,
+          "max": 0.7737492
+        },
+        "mask_scope_invocations": {
+          "min": 1125,
+          "max": 1125
+        },
+        "mask_mean_ms": {
+          "min": 0.6371736888888888,
+          "max": 0.7747083555555556
+        },
+        "mask_p95_ms": {
+          "min": 0.9115,
+          "max": 0.9778
+        },
+        "mask_p99_ms": {
+          "min": 0.9622,
+          "max": 1.0399
+        },
+        "mask_amortized_ms": {
+          "min": 0.4778802666666666,
+          "max": 0.5810312666666667
+        },
+        "upload_cpu_scope_invocations": {
+          "min": 1125,
+          "max": 1125
+        },
+        "upload_cpu_mean_ms": {
+          "min": 3.653333333333334e-05,
+          "max": 5.973333333333333e-05
+        },
+        "upload_cpu_p95_ms": {
+          "min": 0.0001,
+          "max": 0.0001
+        },
+        "upload_cpu_p99_ms": {
+          "min": 0.0001,
+          "max": 0.0002
+        },
+        "upload_cpu_amortized_ms": {
+          "min": 2.7400000000000002e-05,
+          "max": 4.48e-05
+        },
+        "frame_AverageMilliseconds": {
+          "min": 2.154800799999999,
+          "max": 2.9388316666666663
+        },
+        "frame_P95Milliseconds": {
+          "min": 3.2166,
+          "max": 3.9338
+        },
+        "frame_P99Milliseconds": {
+          "min": 3.7656,
+          "max": 4.3357
+        },
+        "logical_upload_bytes_per_frame": {
+          "min": 0.0,
+          "max": 0.0
+        },
+        "texture_rebuilds": {
+          "min": 0,
+          "max": 0
+        },
+        "lights_used_max": {
+          "min": 0,
+          "max": 0
+        },
+        "mask_width": {
+          "min": 104,
+          "max": 104
+        },
+        "mask_height": {
+          "min": 58,
+          "max": 58
+        },
+        "estimated_texture_payload_bytes": {
+          "min": 217152,
+          "max": 217152
+        },
+        "logical_upload_calls": {
+          "min": 0,
+          "max": 0
+        },
+        "core_lighting_mean_ms": {
+          "min": 0.26729026666666666,
+          "max": 0.2877244666666667
+        },
+        "core_lighting_samples": {
+          "min": 1500,
+          "max": 1500
+        },
+        "any_channel_clipped_fraction": {
+          "min": 0.0,
+          "max": 0.0
+        },
+        "all_channels_clipped_fraction": {
+          "min": 0.0,
+          "max": 0.0
+        }
+      }
+    },
+    {
+      "resolution": "2560x1440",
+      "scene": "dense_lights",
+      "repeats": 3,
+      "fixture_contract": {
+        "GoldenScene": {
+          "Fixture": {
+            "Version": 1,
+            "SceneId": "diag_dense_lights",
+            "StartState": 2,
+            "Seed": 1337,
+            "BiomeId": "forest",
+            "TimeOfDay": 0,
+            "Weather": 0,
+            "DynamicLights": true,
+            "Width": 2560,
+            "Height": 1440,
+            "Zoom": 2,
+            "CameraX": -1046522,
+            "CameraY": 926,
+            "Frames": 1800,
+            "WarmupFrames": 300,
+            "Diagnostic": {
+              "CameraPath": "Static",
+              "DynamicLightCount": 12,
+              "PanAmplitude": 48,
+              "ZoomAmplitude": 0.25,
+              "PeriodTicks": 240,
+              "DisableBloom": false,
+              "ForceCoreLightingInterval": 0
+            }
+          },
+          "PresentationFrame": 1800,
+          "SimulationTick": 1800,
+          "ContentFingerprint": "8F9CC78330B80DADE79EA897544BD4ECA4219E2D4B94F94567AB0A0BF1E082B0",
+          "SettingsFingerprint": "34570B854C1132A39D08D691B07FAC17BCF10B5B3267869D287E4CE597688117",
+          "CameraX": -1046522,
+          "CameraY": 926,
+          "CameraZoom": 2,
+          "TimeOfDay": 0,
+          "Weather": "Clear",
+          "WeatherIntensity": 0,
+          "Wind": 0.27049312,
+          "CloudCover": 0,
+          "Day": 1,
+          "BiomeId": "forest",
+          "CaveProfileId": "",
+          "PointLightsUsed": 6,
+          "DynamicLightsCollected": 6,
+          "LoadedChunks": 55,
+          "StateHash": "B6DCC5652CE77928"
+        },
+        "SourceFixtureSHA256": "9F0A6A8BA3423646EE73223315543365A9C4BD6DF5814B291316F26EE2337F66"
+      },
+      "per_process_ranges": {
+        "frames": {
+          "min": 1500,
+          "max": 1500
+        },
+        "prepare_scope_invocations": {
+          "min": 1125,
+          "max": 1125
+        },
+        "prepare_mean_ms": {
+          "min": 1.9307275555555554,
+          "max": 2.338299288888889
+        },
+        "prepare_p95_ms": {
+          "min": 3.0832,
+          "max": 4.1555
+        },
+        "prepare_p99_ms": {
+          "min": 3.8827,
+          "max": 5.6239
+        },
+        "prepare_amortized_ms": {
+          "min": 1.4480456666666666,
+          "max": 1.7537244666666665
+        },
+        "mask_scope_invocations": {
+          "min": 1125,
+          "max": 1125
+        },
+        "mask_mean_ms": {
+          "min": 0.9981273777777777,
+          "max": 1.0663425777777777
+        },
+        "mask_p95_ms": {
+          "min": 1.2492,
+          "max": 1.5764
+        },
+        "mask_p99_ms": {
+          "min": 1.3422,
+          "max": 1.7456
+        },
+        "mask_amortized_ms": {
+          "min": 0.7485955333333333,
+          "max": 0.7997569333333333
+        },
+        "upload_cpu_scope_invocations": {
+          "min": 1125,
+          "max": 1125
+        },
+        "upload_cpu_mean_ms": {
+          "min": 0.5868657777777778,
+          "max": 1.0682869333333334
+        },
+        "upload_cpu_p95_ms": {
+          "min": 1.6605,
+          "max": 2.7783
+        },
+        "upload_cpu_p99_ms": {
+          "min": 2.4847,
+          "max": 4.1179
+        },
+        "upload_cpu_amortized_ms": {
+          "min": 0.44014933333333334,
+          "max": 0.8012151999999999
+        },
+        "frame_AverageMilliseconds": {
+          "min": 3.2120946666666685,
+          "max": 3.4117750000000027
+        },
+        "frame_P95Milliseconds": {
+          "min": 4.9453,
+          "max": 5.6526
+        },
+        "frame_P99Milliseconds": {
+          "min": 5.8482,
+          "max": 6.9909
+        },
+        "logical_upload_bytes_per_frame": {
+          "min": 36192.0,
+          "max": 36192.0
+        },
+        "texture_rebuilds": {
+          "min": 0,
+          "max": 0
+        },
+        "lights_used_max": {
+          "min": 6,
+          "max": 6
+        },
+        "mask_width": {
+          "min": 104,
+          "max": 104
+        },
+        "mask_height": {
+          "min": 58,
+          "max": 58
+        },
+        "estimated_texture_payload_bytes": {
+          "min": 217152,
+          "max": 217152
+        },
+        "logical_upload_calls": {
+          "min": 2250,
+          "max": 2250
+        },
+        "core_lighting_mean_ms": {
+          "min": 0.008777266666666667,
+          "max": 0.0108024
+        },
+        "core_lighting_samples": {
+          "min": 1500,
+          "max": 1500
+        },
+        "any_channel_clipped_fraction": {
+          "min": 0.030861002604166667,
+          "max": 0.030861002604166667
+        },
+        "all_channels_clipped_fraction": {
+          "min": 0.023042534722222223,
+          "max": 0.023042534722222223
+        }
+      }
+    },
+    {
+      "resolution": "2560x1440",
+      "scene": "forest_day",
+      "repeats": 3,
+      "fixture_contract": {
+        "GoldenScene": {
+          "Fixture": {
+            "Version": 1,
+            "SceneId": "diag_forest_day",
+            "StartState": 2,
+            "Seed": 1337,
+            "BiomeId": "forest",
+            "TimeOfDay": 0.5,
+            "Weather": 0,
+            "DynamicLights": false,
+            "Width": 2560,
+            "Height": 1440,
+            "Zoom": 2,
+            "CameraX": -1046522,
+            "CameraY": 926,
+            "Frames": 1800,
+            "WarmupFrames": 300,
+            "Diagnostic": {
+              "CameraPath": "Static",
+              "DynamicLightCount": 0,
+              "PanAmplitude": 48,
+              "ZoomAmplitude": 0.25,
+              "PeriodTicks": 240,
+              "DisableBloom": false,
+              "ForceCoreLightingInterval": 0
+            }
+          },
+          "PresentationFrame": 1800,
+          "SimulationTick": 1800,
+          "ContentFingerprint": "8F9CC78330B80DADE79EA897544BD4ECA4219E2D4B94F94567AB0A0BF1E082B0",
+          "SettingsFingerprint": "34570B854C1132A39D08D691B07FAC17BCF10B5B3267869D287E4CE597688117",
+          "CameraX": -1046522,
+          "CameraY": 926,
+          "CameraZoom": 2,
+          "TimeOfDay": 0.5,
+          "Weather": "Clear",
+          "WeatherIntensity": 0,
+          "Wind": -0.98195744,
+          "CloudCover": 0,
+          "Day": 1,
+          "BiomeId": "forest",
+          "CaveProfileId": "",
+          "PointLightsUsed": 0,
+          "DynamicLightsCollected": 0,
+          "LoadedChunks": 55,
+          "StateHash": "BB22E0B75A668999"
+        },
+        "SourceFixtureSHA256": "0DB199F187782C8B213E7A3DC4FA0984FDA2E7950245425E87CCA56D3F66AB19"
+      },
+      "per_process_ranges": {
+        "frames": {
+          "min": 1500,
+          "max": 1500
+        },
+        "prepare_scope_invocations": {
+          "min": 1125,
+          "max": 1125
+        },
+        "prepare_mean_ms": {
+          "min": 0.8425610666666667,
+          "max": 1.113733688888889
+        },
+        "prepare_p95_ms": {
+          "min": 1.1483,
+          "max": 1.3429
+        },
+        "prepare_p99_ms": {
+          "min": 1.2742,
+          "max": 3.2178
+        },
+        "prepare_amortized_ms": {
+          "min": 0.6319208000000001,
+          "max": 0.8353002666666667
+        },
+        "mask_scope_invocations": {
+          "min": 1125,
+          "max": 1125
+        },
+        "mask_mean_ms": {
+          "min": 0.6181741333333334,
+          "max": 0.8372302222222222
+        },
+        "mask_p95_ms": {
+          "min": 0.8572,
+          "max": 0.9923
+        },
+        "mask_p99_ms": {
+          "min": 0.9284,
+          "max": 1.501
+        },
+        "mask_amortized_ms": {
+          "min": 0.46363060000000006,
+          "max": 0.6279226666666666
+        },
+        "upload_cpu_scope_invocations": {
+          "min": 1125,
+          "max": 1125
+        },
+        "upload_cpu_mean_ms": {
+          "min": 3.3422222222222224e-05,
+          "max": 5.0488888888888895e-05
+        },
+        "upload_cpu_p95_ms": {
+          "min": 0.0001,
+          "max": 0.0001
+        },
+        "upload_cpu_p99_ms": {
+          "min": 0.0001,
+          "max": 0.0002
+        },
+        "upload_cpu_amortized_ms": {
+          "min": 2.506666666666667e-05,
+          "max": 3.786666666666667e-05
+        },
+        "frame_AverageMilliseconds": {
+          "min": 1.8700705999999958,
+          "max": 2.9777877999999958
+        },
+        "frame_P95Milliseconds": {
+          "min": 2.8933,
+          "max": 3.8495
+        },
+        "frame_P99Milliseconds": {
+          "min": 3.5404,
+          "max": 4.8983
+        },
+        "logical_upload_bytes_per_frame": {
+          "min": 0.0,
+          "max": 0.0
+        },
+        "texture_rebuilds": {
+          "min": 0,
+          "max": 0
+        },
+        "lights_used_max": {
+          "min": 0,
+          "max": 0
+        },
+        "mask_width": {
+          "min": 104,
+          "max": 104
+        },
+        "mask_height": {
+          "min": 58,
+          "max": 58
+        },
+        "estimated_texture_payload_bytes": {
+          "min": 217152,
+          "max": 217152
+        },
+        "logical_upload_calls": {
+          "min": 0,
+          "max": 0
+        },
+        "core_lighting_mean_ms": {
+          "min": 0.008296666666666667,
+          "max": 0.015333000000000001
+        },
+        "core_lighting_samples": {
+          "min": 1500,
+          "max": 1500
+        },
+        "any_channel_clipped_fraction": {
+          "min": 0.0,
+          "max": 0.0
+        },
+        "all_channels_clipped_fraction": {
+          "min": 0.0,
+          "max": 0.0
+        }
+      }
+    },
+    {
+      "resolution": "2560x1440",
+      "scene": "forest_night",
+      "repeats": 3,
+      "fixture_contract": {
+        "GoldenScene": {
+          "Fixture": {
+            "Version": 1,
+            "SceneId": "diag_forest_night",
+            "StartState": 2,
+            "Seed": 1337,
+            "BiomeId": "forest",
+            "TimeOfDay": 0,
+            "Weather": 0,
+            "DynamicLights": true,
+            "Width": 2560,
+            "Height": 1440,
+            "Zoom": 2,
+            "CameraX": -1046522,
+            "CameraY": 926,
+            "Frames": 1800,
+            "WarmupFrames": 300,
+            "Diagnostic": {
+              "CameraPath": "Static",
+              "DynamicLightCount": 2,
+              "PanAmplitude": 48,
+              "ZoomAmplitude": 0.25,
+              "PeriodTicks": 240,
+              "DisableBloom": false,
+              "ForceCoreLightingInterval": 0
+            }
+          },
+          "PresentationFrame": 1800,
+          "SimulationTick": 1800,
+          "ContentFingerprint": "8F9CC78330B80DADE79EA897544BD4ECA4219E2D4B94F94567AB0A0BF1E082B0",
+          "SettingsFingerprint": "34570B854C1132A39D08D691B07FAC17BCF10B5B3267869D287E4CE597688117",
+          "CameraX": -1046522,
+          "CameraY": 926,
+          "CameraZoom": 2,
+          "TimeOfDay": 0,
+          "Weather": "Clear",
+          "WeatherIntensity": 0,
+          "Wind": 0.27049312,
+          "CloudCover": 0,
+          "Day": 1,
+          "BiomeId": "forest",
+          "CaveProfileId": "",
+          "PointLightsUsed": 2,
+          "DynamicLightsCollected": 2,
+          "LoadedChunks": 55,
+          "StateHash": "9B3D7CE267EA3467"
+        },
+        "SourceFixtureSHA256": "9F0A6A8BA3423646EE73223315543365A9C4BD6DF5814B291316F26EE2337F66"
+      },
+      "per_process_ranges": {
+        "frames": {
+          "min": 1500,
+          "max": 1500
+        },
+        "prepare_scope_invocations": {
+          "min": 1125,
+          "max": 1125
+        },
+        "prepare_mean_ms": {
+          "min": 1.5641236444444446,
+          "max": 2.0073394666666666
+        },
+        "prepare_p95_ms": {
+          "min": 2.8075,
+          "max": 3.4643
+        },
+        "prepare_p99_ms": {
+          "min": 3.5048,
+          "max": 4.3849
+        },
+        "prepare_amortized_ms": {
+          "min": 1.1730927333333334,
+          "max": 1.5055045999999999
+        },
+        "mask_scope_invocations": {
+          "min": 1125,
+          "max": 1125
+        },
+        "mask_mean_ms": {
+          "min": 0.7514679111111111,
+          "max": 0.8755752
+        },
+        "mask_p95_ms": {
+          "min": 1.0295,
+          "max": 1.0432
+        },
+        "mask_p99_ms": {
+          "min": 1.1063,
+          "max": 1.1906
+        },
+        "mask_amortized_ms": {
+          "min": 0.5636009333333333,
+          "max": 0.6566814
+        },
+        "upload_cpu_scope_invocations": {
+          "min": 1125,
+          "max": 1125
+        },
+        "upload_cpu_mean_ms": {
+          "min": 0.4893476444444445,
+          "max": 0.7631347555555555
+        },
+        "upload_cpu_p95_ms": {
+          "min": 1.6484,
+          "max": 2.1874
+        },
+        "upload_cpu_p99_ms": {
+          "min": 2.3578,
+          "max": 3.0694
+        },
+        "upload_cpu_amortized_ms": {
+          "min": 0.3670107333333334,
+          "max": 0.5723510666666667
+        },
+        "frame_AverageMilliseconds": {
+          "min": 2.615658466666666,
+          "max": 3.5567533333333334
+        },
+        "frame_P95Milliseconds": {
+          "min": 4.2608,
+          "max": 5.6325
+        },
+        "frame_P99Milliseconds": {
+          "min": 5.3538,
+          "max": 6.628
+        },
+        "logical_upload_bytes_per_frame": {
+          "min": 36143.744,
+          "max": 36143.744
+        },
+        "texture_rebuilds": {
+          "min": 0,
+          "max": 0
+        },
+        "lights_used_max": {
+          "min": 2,
+          "max": 2
+        },
+        "mask_width": {
+          "min": 104,
+          "max": 104
+        },
+        "mask_height": {
+          "min": 58,
+          "max": 58
+        },
+        "estimated_texture_payload_bytes": {
+          "min": 217152,
+          "max": 217152
+        },
+        "logical_upload_calls": {
+          "min": 2247,
+          "max": 2247
+        },
+        "core_lighting_mean_ms": {
+          "min": 0.0099018,
+          "max": 0.012670933333333334
+        },
+        "core_lighting_samples": {
+          "min": 1500,
+          "max": 1500
+        },
+        "any_channel_clipped_fraction": {
+          "min": 0.0011984592013888889,
+          "max": 0.0011984592013888889
+        },
+        "all_channels_clipped_fraction": {
+          "min": 3.255208333333333e-05,
+          "max": 3.255208333333333e-05
+        }
+      }
+    },
+    {
+      "resolution": "2560x1440",
+      "scene": "forest_pan",
+      "repeats": 3,
+      "fixture_contract": {
+        "GoldenScene": {
+          "Fixture": {
+            "Version": 1,
+            "SceneId": "diag_forest_pan",
+            "StartState": 2,
+            "Seed": 1337,
+            "BiomeId": "forest",
+            "TimeOfDay": 0,
+            "Weather": 0,
+            "DynamicLights": true,
+            "Width": 2560,
+            "Height": 1440,
+            "Zoom": 2,
+            "CameraX": -1046522,
+            "CameraY": 926,
+            "Frames": 1800,
+            "WarmupFrames": 300,
+            "Diagnostic": {
+              "CameraPath": "Pan",
+              "DynamicLightCount": 2,
+              "PanAmplitude": 48,
+              "ZoomAmplitude": 0.25,
+              "PeriodTicks": 240,
+              "DisableBloom": false,
+              "ForceCoreLightingInterval": 0
+            }
+          },
+          "PresentationFrame": 1800,
+          "SimulationTick": 1800,
+          "ContentFingerprint": "8F9CC78330B80DADE79EA897544BD4ECA4219E2D4B94F94567AB0A0BF1E082B0",
+          "SettingsFingerprint": "34570B854C1132A39D08D691B07FAC17BCF10B5B3267869D287E4CE597688117",
+          "CameraX": -1046522,
+          "CameraY": 926,
+          "CameraZoom": 2,
+          "TimeOfDay": 0,
+          "Weather": "Clear",
+          "WeatherIntensity": 0,
+          "Wind": 0.27049312,
+          "CloudCover": 0,
+          "Day": 1,
+          "BiomeId": "forest",
+          "CaveProfileId": "",
+          "PointLightsUsed": 2,
+          "DynamicLightsCollected": 2,
+          "LoadedChunks": 55,
+          "StateHash": "D2CB5988BD380D5A"
+        },
+        "SourceFixtureSHA256": "9F0A6A8BA3423646EE73223315543365A9C4BD6DF5814B291316F26EE2337F66"
+      },
+      "per_process_ranges": {
+        "frames": {
+          "min": 1500,
+          "max": 1500
+        },
+        "prepare_scope_invocations": {
+          "min": 1125,
+          "max": 1125
+        },
+        "prepare_mean_ms": {
+          "min": 1.7850644444444443,
+          "max": 1.9170235555555555
+        },
+        "prepare_p95_ms": {
+          "min": 3.1733,
+          "max": 3.4155
+        },
+        "prepare_p99_ms": {
+          "min": 4.0286,
+          "max": 4.3663
+        },
+        "prepare_amortized_ms": {
+          "min": 1.3387983333333333,
+          "max": 1.4377676666666666
+        },
+        "mask_scope_invocations": {
+          "min": 1125,
+          "max": 1125
+        },
+        "mask_mean_ms": {
+          "min": 0.7502386666666667,
+          "max": 0.8338718222222222
+        },
+        "mask_p95_ms": {
+          "min": 1.0105,
+          "max": 1.0742
+        },
+        "mask_p99_ms": {
+          "min": 1.0906,
+          "max": 1.1467
+        },
+        "mask_amortized_ms": {
+          "min": 0.562679,
+          "max": 0.6254038666666667
+        },
+        "upload_cpu_scope_invocations": {
+          "min": 1125,
+          "max": 1125
+        },
+        "upload_cpu_mean_ms": {
+          "min": 0.6992717333333334,
+          "max": 0.7295636444444444
+        },
+        "upload_cpu_p95_ms": {
+          "min": 2.1096,
+          "max": 2.1663
+        },
+        "upload_cpu_p99_ms": {
+          "min": 2.9139,
+          "max": 3.1908
+        },
+        "upload_cpu_amortized_ms": {
+          "min": 0.5244538,
+          "max": 0.5471727333333333
+        },
+        "frame_AverageMilliseconds": {
+          "min": 2.5830590000000004,
+          "max": 3.1045198000000025
+        },
+        "frame_P95Milliseconds": {
+          "min": 4.5212,
+          "max": 5.0519
+        },
+        "frame_P99Milliseconds": {
+          "min": 5.5342,
+          "max": 6.2085
+        },
+        "logical_upload_bytes_per_frame": {
+          "min": 51875.2,
+          "max": 51875.2
+        },
+        "texture_rebuilds": {
+          "min": 0,
+          "max": 0
+        },
+        "lights_used_max": {
+          "min": 2,
+          "max": 2
+        },
+        "mask_width": {
+          "min": 104,
+          "max": 104
+        },
+        "mask_height": {
+          "min": 58,
+          "max": 58
+        },
+        "estimated_texture_payload_bytes": {
+          "min": 217152,
+          "max": 217152
+        },
+        "logical_upload_calls": {
+          "min": 3225,
+          "max": 3225
+        },
+        "core_lighting_mean_ms": {
+          "min": 0.0074122,
+          "max": 0.009545266666666666
+        },
+        "core_lighting_samples": {
+          "min": 1500,
+          "max": 1500
+        },
+        "any_channel_clipped_fraction": {
+          "min": 0.0012174479166666666,
+          "max": 0.0012174479166666666
+        },
+        "all_channels_clipped_fraction": {
+          "min": 3.580729166666667e-05,
+          "max": 3.580729166666667e-05
+        }
+      }
+    },
+    {
+      "resolution": "2560x1440",
+      "scene": "forest_zoom",
+      "repeats": 3,
+      "fixture_contract": {
+        "GoldenScene": {
+          "Fixture": {
+            "Version": 1,
+            "SceneId": "diag_forest_zoom",
+            "StartState": 2,
+            "Seed": 1337,
+            "BiomeId": "forest",
+            "TimeOfDay": 0,
+            "Weather": 0,
+            "DynamicLights": true,
+            "Width": 2560,
+            "Height": 1440,
+            "Zoom": 2,
+            "CameraX": -1046522,
+            "CameraY": 926,
+            "Frames": 1800,
+            "WarmupFrames": 300,
+            "Diagnostic": {
+              "CameraPath": "Zoom",
+              "DynamicLightCount": 2,
+              "PanAmplitude": 48,
+              "ZoomAmplitude": 0.25,
+              "PeriodTicks": 240,
+              "DisableBloom": false,
+              "ForceCoreLightingInterval": 0
+            }
+          },
+          "PresentationFrame": 1800,
+          "SimulationTick": 1800,
+          "ContentFingerprint": "8F9CC78330B80DADE79EA897544BD4ECA4219E2D4B94F94567AB0A0BF1E082B0",
+          "SettingsFingerprint": "34570B854C1132A39D08D691B07FAC17BCF10B5B3267869D287E4CE597688117",
+          "CameraX": -1046522,
+          "CameraY": 926,
+          "CameraZoom": 2,
+          "TimeOfDay": 0,
+          "Weather": "Clear",
+          "WeatherIntensity": 0,
+          "Wind": 0.27049312,
+          "CloudCover": 0,
+          "Day": 1,
+          "BiomeId": "forest",
+          "CaveProfileId": "",
+          "PointLightsUsed": 2,
+          "DynamicLightsCollected": 2,
+          "LoadedChunks": 55,
+          "StateHash": "7F2793E5303A51FD"
+        },
+        "SourceFixtureSHA256": "9F0A6A8BA3423646EE73223315543365A9C4BD6DF5814B291316F26EE2337F66"
+      },
+      "per_process_ranges": {
+        "frames": {
+          "min": 1500,
+          "max": 1500
+        },
+        "prepare_scope_invocations": {
+          "min": 1125,
+          "max": 1125
+        },
+        "prepare_mean_ms": {
+          "min": 1.5588583999999999,
+          "max": 1.744231288888889
+        },
+        "prepare_p95_ms": {
+          "min": 2.7648,
+          "max": 3.15
+        },
+        "prepare_p99_ms": {
+          "min": 3.4322,
+          "max": 4.2785
+        },
+        "prepare_amortized_ms": {
+          "min": 1.1691438,
+          "max": 1.3081734666666667
+        },
+        "mask_scope_invocations": {
+          "min": 1125,
+          "max": 1125
+        },
+        "mask_mean_ms": {
+          "min": 0.6771171555555555,
+          "max": 0.7534932444444444
+        },
+        "mask_p95_ms": {
+          "min": 0.9343,
+          "max": 1.0398
+        },
+        "mask_p99_ms": {
+          "min": 1.0269,
+          "max": 1.1125
+        },
+        "mask_amortized_ms": {
+          "min": 0.5078378666666666,
+          "max": 0.5651199333333333
+        },
+        "upload_cpu_scope_invocations": {
+          "min": 1125,
+          "max": 1125
+        },
+        "upload_cpu_mean_ms": {
+          "min": 0.5797102222222222,
+          "max": 0.6708353777777778
+        },
+        "upload_cpu_p95_ms": {
+          "min": 1.6948,
+          "max": 2.0396
+        },
+        "upload_cpu_p99_ms": {
+          "min": 2.2602,
+          "max": 2.9537
+        },
+        "upload_cpu_amortized_ms": {
+          "min": 0.43478266666666665,
+          "max": 0.5031265333333333
+        },
+        "frame_AverageMilliseconds": {
+          "min": 2.234033266666668,
+          "max": 2.6530428666666688
+        },
+        "frame_P95Milliseconds": {
+          "min": 3.7864,
+          "max": 4.6741
+        },
+        "frame_P99Milliseconds": {
+          "min": 4.5824,
+          "max": 6.0069
+        },
+        "logical_upload_bytes_per_frame": {
+          "min": 54288.0,
+          "max": 54288.0
+        },
+        "texture_rebuilds": {
+          "min": 0,
+          "max": 0
+        },
+        "lights_used_max": {
+          "min": 2,
+          "max": 2
+        },
+        "mask_width": {
+          "min": 104,
+          "max": 104
+        },
+        "mask_height": {
+          "min": 58,
+          "max": 58
+        },
+        "estimated_texture_payload_bytes": {
+          "min": 217152,
+          "max": 217152
+        },
+        "logical_upload_calls": {
+          "min": 3375,
+          "max": 3375
+        },
+        "core_lighting_mean_ms": {
+          "min": 0.006598199999999999,
+          "max": 0.008624133333333332
+        },
+        "core_lighting_samples": {
+          "min": 1500,
+          "max": 1500
+        },
+        "any_channel_clipped_fraction": {
+          "min": 0.0012245008680555555,
+          "max": 0.0012245008680555555
+        },
+        "all_channels_clipped_fraction": {
+          "min": 3.0381944444444444e-05,
+          "max": 3.0381944444444444e-05
+        }
+      }
+    },
+    {
+      "resolution": "2560x1440",
+      "scene": "night_no_bloom",
+      "repeats": 3,
+      "fixture_contract": {
+        "GoldenScene": {
+          "Fixture": {
+            "Version": 1,
+            "SceneId": "diag_night_no_bloom",
+            "StartState": 2,
+            "Seed": 1337,
+            "BiomeId": "forest",
+            "TimeOfDay": 0,
+            "Weather": 0,
+            "DynamicLights": true,
+            "Width": 2560,
+            "Height": 1440,
+            "Zoom": 2,
+            "CameraX": -1046522,
+            "CameraY": 926,
+            "Frames": 1800,
+            "WarmupFrames": 300,
+            "Diagnostic": {
+              "CameraPath": "Static",
+              "DynamicLightCount": 2,
+              "PanAmplitude": 48,
+              "ZoomAmplitude": 0.25,
+              "PeriodTicks": 240,
+              "DisableBloom": true,
+              "ForceCoreLightingInterval": 0
+            }
+          },
+          "PresentationFrame": 1800,
+          "SimulationTick": 1800,
+          "ContentFingerprint": "8F9CC78330B80DADE79EA897544BD4ECA4219E2D4B94F94567AB0A0BF1E082B0",
+          "SettingsFingerprint": "9A8D0E19CFA71B26ABE816BA31232FF38EA9843A915425EF833B9C454EE8469B",
+          "CameraX": -1046522,
+          "CameraY": 926,
+          "CameraZoom": 2,
+          "TimeOfDay": 0,
+          "Weather": "Clear",
+          "WeatherIntensity": 0,
+          "Wind": 0.27049312,
+          "CloudCover": 0,
+          "Day": 1,
+          "BiomeId": "forest",
+          "CaveProfileId": "",
+          "PointLightsUsed": 2,
+          "DynamicLightsCollected": 2,
+          "LoadedChunks": 55,
+          "StateHash": "25D22469337B3C69"
+        },
+        "SourceFixtureSHA256": "9F0A6A8BA3423646EE73223315543365A9C4BD6DF5814B291316F26EE2337F66"
+      },
+      "per_process_ranges": {
+        "frames": {
+          "min": 1500,
+          "max": 1500
+        },
+        "prepare_scope_invocations": {
+          "min": 1125,
+          "max": 1125
+        },
+        "prepare_mean_ms": {
+          "min": 1.7204156444444445,
+          "max": 1.8600474666666664
+        },
+        "prepare_p95_ms": {
+          "min": 2.9632,
+          "max": 3.2028
+        },
+        "prepare_p99_ms": {
+          "min": 3.8779,
+          "max": 4.0637
+        },
+        "prepare_amortized_ms": {
+          "min": 1.2903117333333334,
+          "max": 1.3950356
+        },
+        "mask_scope_invocations": {
+          "min": 1125,
+          "max": 1125
+        },
+        "mask_mean_ms": {
+          "min": 0.7607967999999999,
+          "max": 0.8350707555555555
+        },
+        "mask_p95_ms": {
+          "min": 1.0122,
+          "max": 1.0597
+        },
+        "mask_p99_ms": {
+          "min": 1.0913,
+          "max": 1.1418
+        },
+        "mask_amortized_ms": {
+          "min": 0.5705975999999999,
+          "max": 0.6263030666666667
+        },
+        "upload_cpu_scope_invocations": {
+          "min": 1125,
+          "max": 1125
+        },
+        "upload_cpu_mean_ms": {
+          "min": 0.5882041777777778,
+          "max": 0.6660208000000001
+        },
+        "upload_cpu_p95_ms": {
+          "min": 1.6986,
+          "max": 1.9803
+        },
+        "upload_cpu_p99_ms": {
+          "min": 2.6972,
+          "max": 2.8157
+        },
+        "upload_cpu_amortized_ms": {
+          "min": 0.44115313333333334,
+          "max": 0.4995156
+        },
+        "frame_AverageMilliseconds": {
+          "min": 2.7235268,
+          "max": 3.0320785333333315
+        },
+        "frame_P95Milliseconds": {
+          "min": 4.5572,
+          "max": 4.906
+        },
+        "frame_P99Milliseconds": {
+          "min": 5.4775,
+          "max": 5.5679
+        },
+        "logical_upload_bytes_per_frame": {
+          "min": 36143.744,
+          "max": 36143.744
+        },
+        "texture_rebuilds": {
+          "min": 0,
+          "max": 0
+        },
+        "lights_used_max": {
+          "min": 2,
+          "max": 2
+        },
+        "mask_width": {
+          "min": 104,
+          "max": 104
+        },
+        "mask_height": {
+          "min": 58,
+          "max": 58
+        },
+        "estimated_texture_payload_bytes": {
+          "min": 217152,
+          "max": 217152
+        },
+        "logical_upload_calls": {
+          "min": 2247,
+          "max": 2247
+        },
+        "core_lighting_mean_ms": {
+          "min": 0.009002733333333332,
+          "max": 0.0101978
+        },
+        "core_lighting_samples": {
+          "min": 1500,
+          "max": 1500
+        },
+        "any_channel_clipped_fraction": {
+          "min": 1.3020833333333334e-05,
+          "max": 1.3020833333333334e-05
+        },
+        "all_channels_clipped_fraction": {
+          "min": 0.0,
+          "max": 0.0
+        }
+      }
+    }
+  ],
+  "matched_world_probe_observations": [
+    {
+      "resolution": "1920x1080",
+      "reference": "forest_night",
+      "candidate": "forest_pan",
+      "matched_configured_inputs_and_ticks": true,
+      "authoritative_state_hash_equal": false,
+      "state_hash_limitation": "Different scene IDs name different worlds; world names participate in the state hash. Full authoritative-state equivalence is not asserted by this configured-input comparison.",
+      "available_pairs": 1500,
+      "absolute_probe_difference": {
+        "ProbeShadow": {
+          "count": 1500,
+          "mean": 0.0024608087599999997,
+          "p50": 0.0013270000000000226,
+          "p95": 0.010113819999999996,
+          "p99": 0.012859759999999998,
+          "max": 0.014704149999999971,
+          "min": 1.1499999999997623e-05
+        },
+        "ProbeRed": {
+          "count": 1500,
+          "mean": 0.0042128265,
+          "p50": 0.0042472000000000065,
+          "p95": 0.009314319999999987,
+          "p99": 0.012266529999999998,
+          "max": 0.013127100000000003,
+          "min": 4.493999999999332e-05
+        },
+        "ProbeGreen": {
+          "count": 1500,
+          "mean": 0.0057508433,
+          "p50": 0.00579776999999998,
+          "p95": 0.012714769999999986,
+          "p99": 0.016744780000000015,
+          "max": 0.017919530000000017,
+          "min": 6.13499999999878e-05
+        },
+        "ProbeBlue": {
+          "count": 1500,
+          "mean": 0.008525958253333334,
+          "p50": 0.008595569999999997,
+          "p95": 0.018850389999999995,
+          "p99": 0.02482511999999998,
+          "max": 0.0265667,
+          "min": 9.095999999997328e-05
+        },
+        "ProbeBloom": {
+          "count": 1500,
+          "mean": 0.003647318306666688,
+          "p50": 0.0034118300000000046,
+          "p95": 0.009035330000000008,
+          "p99": 0.011043369999999997,
+          "max": 0.011043369999999997,
+          "min": 0.0
+        }
+      }
+    },
+    {
+      "resolution": "1920x1080",
+      "reference": "forest_night",
+      "candidate": "forest_zoom",
+      "matched_configured_inputs_and_ticks": true,
+      "authoritative_state_hash_equal": false,
+      "state_hash_limitation": "Different scene IDs name different worlds; world names participate in the state hash. Full authoritative-state equivalence is not asserted by this configured-input comparison.",
+      "available_pairs": 1500,
+      "absolute_probe_difference": {
+        "ProbeShadow": {
+          "count": 1500,
+          "mean": 0.014649308646666668,
+          "p50": 0.012540920000000011,
+          "p95": 0.03337714000000003,
+          "p99": 0.03856533999999995,
+          "max": 0.039229190000000025,
+          "min": 0.000410149999999998
+        },
+        "ProbeRed": {
+          "count": 1500,
+          "mean": 0.0049973971933333335,
+          "p50": 0.004971749999999997,
+          "p95": 0.011940300000000015,
+          "p99": 0.014682079999999986,
+          "max": 0.015080330000000003,
+          "min": 1.4500000000139401e-06
+        },
+        "ProbeGreen": {
+          "count": 1500,
+          "mean": 0.006821842813333334,
+          "p50": 0.006786810000000004,
+          "p95": 0.01629944,
+          "p99": 0.020042210000000005,
+          "max": 0.020585870000000006,
+          "min": 1.9500000000005624e-06
+        },
+        "ProbeBlue": {
+          "count": 1500,
+          "mean": 0.010113780066666666,
+          "p50": 0.010061850000000039,
+          "p95": 0.02416491999999998,
+          "p99": 0.029713749999999983,
+          "max": 0.03051978999999999,
+          "min": 2.8899999999776327e-06
+        },
+        "ProbeBloom": {
+          "count": 1500,
+          "mean": 0.009790880360000002,
+          "p50": 0.008808129999999914,
+          "p95": 0.02330782999999992,
+          "p99": 0.030956529999999982,
+          "max": 0.030956529999999982,
+          "min": 0.0
+        }
+      }
+    },
+    {
+      "resolution": "1920x1080",
+      "reference": "cave_lit",
+      "candidate": "cave_panzoom",
+      "matched_configured_inputs_and_ticks": true,
+      "authoritative_state_hash_equal": false,
+      "state_hash_limitation": "Different scene IDs name different worlds; world names participate in the state hash. Full authoritative-state equivalence is not asserted by this configured-input comparison.",
+      "available_pairs": 1500,
+      "absolute_probe_difference": {
+        "ProbeShadow": {
+          "count": 1500,
+          "mean": 0.014186652780000001,
+          "p50": 0.013066290000000036,
+          "p95": 0.03166076000000001,
+          "p99": 0.03655094000000003,
+          "max": 0.04089362000000002,
+          "min": 5.459999999957166e-06
+        },
+        "ProbeRed": {
+          "count": 1500,
+          "mean": 0.0048680807066666665,
+          "p50": 0.004581000000000002,
+          "p95": 0.011196789999999984,
+          "p99": 0.014788459999999976,
+          "max": 0.016194719999999996,
+          "min": 7.267999999999164e-05
+        },
+        "ProbeGreen": {
+          "count": 1500,
+          "mean": 0.006645315706666668,
+          "p50": 0.006253430000000004,
+          "p95": 0.015284540000000013,
+          "p99": 0.02018740999999999,
+          "max": 0.02210706000000001,
+          "min": 9.922000000001097e-05
+        },
+        "ProbeBlue": {
+          "count": 1500,
+          "mean": 0.009852066526666666,
+          "p50": 0.009271080000000043,
+          "p95": 0.022660170000000035,
+          "p99": 0.029928979999999994,
+          "max": 0.032774990000000004,
+          "min": 0.00014707999999996613
+        },
+        "ProbeBloom": {
+          "count": 1500,
+          "mean": 0.013194722306666667,
+          "p50": 0.011828179999999966,
+          "p95": 0.029193110000000022,
+          "p99": 0.0361051,
+          "max": 0.0361051,
+          "min": 0.0
+        }
+      }
+    },
+    {
+      "resolution": "2560x1440",
+      "reference": "forest_night",
+      "candidate": "forest_pan",
+      "matched_configured_inputs_and_ticks": true,
+      "authoritative_state_hash_equal": false,
+      "state_hash_limitation": "Different scene IDs name different worlds; world names participate in the state hash. Full authoritative-state equivalence is not asserted by this configured-input comparison.",
+      "available_pairs": 1500,
+      "absolute_probe_difference": {
+        "ProbeShadow": {
+          "count": 1500,
+          "mean": 0.003462115853333333,
+          "p50": 0.0020729099999999834,
+          "p95": 0.011619690000000016,
+          "p99": 0.015193069999999975,
+          "max": 0.016837270000000015,
+          "min": 5.7790000000002006e-05
+        },
+        "ProbeRed": {
+          "count": 1500,
+          "mean": 0.00464769626,
+          "p50": 0.002828390000000014,
+          "p95": 0.013976000000000016,
+          "p99": 0.016779920000000004,
+          "max": 0.017665139999999996,
+          "min": 3.128999999998938e-05
+        },
+        "ProbeGreen": {
+          "count": 1500,
+          "mean": 0.006344475093333333,
+          "p50": 0.0038609699999999914,
+          "p95": 0.019078349999999994,
+          "p99": 0.02290592999999999,
+          "max": 0.024114319999999995,
+          "min": 4.268999999998413e-05
+        },
+        "ProbeBlue": {
+          "count": 1500,
+          "mean": 0.009406052773333333,
+          "p50": 0.005724139999999989,
+          "p95": 0.028284699999999996,
+          "p99": 0.03395942000000002,
+          "max": 0.035750870000000046,
+          "min": 6.332000000003335e-05
+        },
+        "ProbeBloom": {
+          "count": 1500,
+          "mean": 0.004081449840000006,
+          "p50": 0.0018762500000000237,
+          "p95": 0.01314510000000002,
+          "p99": 0.015248200000000045,
+          "max": 0.015248200000000045,
+          "min": 0.0
+        }
+      }
+    },
+    {
+      "resolution": "2560x1440",
+      "reference": "forest_night",
+      "candidate": "forest_zoom",
+      "matched_configured_inputs_and_ticks": true,
+      "authoritative_state_hash_equal": false,
+      "state_hash_limitation": "Different scene IDs name different worlds; world names participate in the state hash. Full authoritative-state equivalence is not asserted by this configured-input comparison.",
+      "available_pairs": 1500,
+      "absolute_probe_difference": {
+        "ProbeShadow": {
+          "count": 1500,
+          "mean": 0.01656386944,
+          "p50": 0.014856819999999993,
+          "p95": 0.036401989999999995,
+          "p99": 0.04025962999999999,
+          "max": 0.04499149999999996,
+          "min": 9.179999999997523e-06
+        },
+        "ProbeRed": {
+          "count": 1500,
+          "mean": 0.00734486954,
+          "p50": 0.0063346099999999905,
+          "p95": 0.017132839999999983,
+          "p99": 0.020591739999999997,
+          "max": 0.021440790000000015,
+          "min": 4.9839999999995444e-05
+        },
+        "ProbeGreen": {
+          "count": 1500,
+          "mean": 0.01002632894,
+          "p50": 0.008647199999999994,
+          "p95": 0.02338770000000001,
+          "p99": 0.028109369999999995,
+          "max": 0.0292684,
+          "min": 6.801000000000723e-05
+        },
+        "ProbeBlue": {
+          "count": 1500,
+          "mean": 0.014864615940000001,
+          "p50": 0.012819999999999998,
+          "p95": 0.034673620000000016,
+          "p99": 0.04167377,
+          "max": 0.04339209000000005,
+          "min": 0.00010083999999999094
+        },
+        "ProbeBloom": {
+          "count": 1500,
+          "mean": 0.008452874846666675,
+          "p50": 0.006510400000000027,
+          "p95": 0.022168900000000047,
+          "p99": 0.029710039999999993,
+          "max": 0.029710039999999993,
+          "min": 0.0
+        }
+      }
+    },
+    {
+      "resolution": "2560x1440",
+      "reference": "cave_lit",
+      "candidate": "cave_panzoom",
+      "matched_configured_inputs_and_ticks": true,
+      "authoritative_state_hash_equal": false,
+      "state_hash_limitation": "Different scene IDs name different worlds; world names participate in the state hash. Full authoritative-state equivalence is not asserted by this configured-input comparison.",
+      "available_pairs": 1500,
+      "absolute_probe_difference": {
+        "ProbeShadow": {
+          "count": 1500,
+          "mean": 0.014887131653333332,
+          "p50": 0.012872500000000009,
+          "p95": 0.036001980000000045,
+          "p99": 0.04328160999999997,
+          "max": 0.048406630000000006,
+          "min": 0.0004028400000000154
+        },
+        "ProbeRed": {
+          "count": 1500,
+          "mean": 0.007949501966666666,
+          "p50": 0.007756440000000003,
+          "p95": 0.01708679000000002,
+          "p99": 0.02003184999999999,
+          "max": 0.023010979999999986,
+          "min": 8.795999999999804e-05
+        },
+        "ProbeGreen": {
+          "count": 1500,
+          "mean": 0.010851700366666666,
+          "p50": 0.010588150000000018,
+          "p95": 0.02332482999999999,
+          "p99": 0.027345060000000004,
+          "max": 0.031411809999999984,
+          "min": 0.0001200699999999999
+        },
+        "ProbeBlue": {
+          "count": 1500,
+          "mean": 0.016088276193333334,
+          "p50": 0.015697600000000034,
+          "p95": 0.034580410000000006,
+          "p99": 0.04054067,
+          "max": 0.046569819999999984,
+          "min": 0.0001780600000000354
+        },
+        "ProbeBloom": {
+          "count": 1500,
+          "mean": 0.012235091660000011,
+          "p50": 0.010460829999999977,
+          "p95": 0.03022670000000005,
+          "p99": 0.04481489999999999,
+          "max": 0.04481489999999999,
+          "min": 0.0
+        }
+      }
+    }
+  ],
+  "interpretation": "Per-process CPU ranges; inclusive scopes overlap. Upload bytes are logical RGBA8 payload, not measured bus traffic. Probe differences compare nearest mask samples at one fixed world position and include grid quantization, visibility and temporal history; they are not proof of flicker or a spatial image-quality gate."
+}

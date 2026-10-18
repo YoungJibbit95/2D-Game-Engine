@@ -1,6 +1,6 @@
 # YjsE Architecture Decisions
 
-Last updated: 2026-07-19
+Last updated: 2026-10-18
 
 Decision status values are limited to `verified`, `implemented-unverified`, `partial`, `planned`, `blocked`, and `deprecated`.
 
@@ -950,3 +950,23 @@ CI runs the same complete functional partition in Debug and Release with all tim
 ### Validation
 
 The local functional partition passes 1,710/1,710 in Debug and Release. The discovery script finds 21 classes containing 39 tests, and all pass in fresh Release processes. The combat-query, dense-scene and AI scheduling gates also pass together across their seven-window medians with unchanged p99 ceilings and 0 B requirements. Combined-host timing outliers remain recorded as diagnostics; no threshold was raised.
+
+PR-0A/PR-0B subsequently verified the complete Windows/Ubuntu matrix. Strict allocation Facts now also use the existing runner in separate processes in every OS/configuration cell, with exact 0 B assertions and one-test TRX counts; they have no median/retry/tolerance fallback. This is a separate partition of the same coverage, not a skipped correctness gate. The current work ledger and PR checks supersede historical test counts above.
+
+## ADR-0035: Establish Diagnostic Evidence Before Lighting Migration
+
+Status: `verified`
+
+### Context
+
+The current client reconstructs lighting from Core scalar tile light, geometry and presentation-only RGB sources. `LightingPrepare` includes mask/temporal/encoding/hash work and CPU `SetData` duration; the scope named `LightingGpuUpload` is not a GPU timer. Dynamic lights combine neutral brightening, additive color and bloom. Screen-space sampling/history and missing source provenance need investigation before adopting a new field/compositor.
+
+### Decision
+
+Keep the existing implementation and four PR-0B Golden references. Use opt-in fixed-input, unpaced smoke fixtures, raw CPU distributions, logical upload/resource counters, separate Core telemetry and descriptive visual probes. Actual GPU execution remains unknown until validated query support exists. Candidate performance is unknown, and CPU API time cannot be relabelled as GPU time.
+
+The preferred next experiment is pixel-preserving geometry/light-output versioning and bounded preparation reuse. A cleared dirty flag is not a version. Chunk RGB propagation and simplified GPU composition remain separate optional experiments requiring shared input contracts, explicit dirty/neighbor/residency handling, reproducible shader tooling, measured comparisons and reviewed reference changes. They do not replace authoritative scalar light or its save/hash contract in PR-0C.
+
+### Consequences and validation
+
+No production rendering, lighting or worldgen rewrite is authorized by this decision. See [PR-0C evidence](PR_0C_RENDERING_LIGHTING_DIAGNOSTICS.md) and [technical comparison](PR_0C_LIGHTING_DECISION.md) for actual measurements, limitations, resources, dirty-region/migration requirements and falsifiable next-PR acceptance. Timing ranges describe measured processes, not a performance guarantee or confidence interval. Full spatial camera/shadow quality and backend GPU timing remain explicit future gates.
