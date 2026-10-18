@@ -2,9 +2,16 @@
 
 # YjsE Work Ledger
 
-Last updated: 2026-10-18 (PR-0A cross-platform asset integrity and release CI)
+Last updated: 2026-10-18 (PR-0B Golden Scenes and reproducible visual/benchmark fixtures)
 
 ## Active Work
+
+- Current user-directed work is PR-0B, after the user's manual merge of PR-0A at `502720e8885c5250a6bc4469847c3694681f28e7`. Branch `codex/yjse-p0-002-golden-scenes`, isolated worktree `F:\Coding\YJsE-PR-0B`. Original `main` checkout and all 96 modified tracked / 185 untracked files remain preserved. Existing authorization permits commits/push/PR, never automatic merge.
+- Four smoke-based Golden fixtures now cover Forest day/night, a lit Crystal Depths cave and empty World Select. Inputs are seed 1337, fixed camera/weather/clock, 960x540, 180 presentation frames / gameplay ticks, 60 warmup frames and a fresh settings/save root. Night/cave use two real moving projectiles through unchanged simulation/render/light paths. No Core, asset, renderer-architecture, lighting or worldgen algorithm changes.
+- Frozen implementation `9385ed3` produces four exact fresh-process pairs on native Windows/NVIDIA. Versioned reference PNGs include scene/state/content/settings fingerprints, real CPU/frame timings and actual loaded Client/Core version/hash provenance. Image comparison always enforces exact scene metadata, with exact pixels in matching render environments and explicit portable thresholds across drivers. Diffs include amplified image, reference/candidate/diff preview, bounds and metrics. Independent frozen-code/baseline review has no open blocking findings.
+- Debug/Release each pass 1,733 functional tests; 13 comparator and seven existing preview regressions pass. All 21 isolated Release performance classes / 39 tests and quick replay hash `0x2B10E91090EC0C22` pass. Strict main/Wave05 audits and unchanged previews pass. Website validates with zero Svelte diagnostics; npm reports four existing advisories in its unchanged lockfile. Debug baseline comparison, ordinary smokes and hosted expanded matrix are pending. Commands, limitations and provenance are recorded in `PR_0B_GOLDEN_SCENES.md`.
+
+### Previous PR-0A evidence
 
 - User-directed active work supersedes the historical Session 0 work package below: Sprint 0 / PR-0A, cross-platform asset integrity and reliable published-client smokes.
 - Branch: `codex/yjse-p0-001-asset-ci`, clean remote base `5ceb115420cc91ae2cdd36d0b63e4c8c476e05ee`, isolated worktree `F:\Coding\YJsE-PR-0A`. Original checkout `F:\Coding\2D Pixel Game Engine` remains on `main` / `164795ae74b9928fa1c608adeadfe6f1396aeea1`; all 96 modified tracked files and 185 untracked files are preserved.
@@ -282,7 +289,7 @@ Raw local artifacts remain under ignored `artifacts/`, including `performance-li
 
 ## Exact Next Action
 
-Hand off PR-0A / [PR #6](https://github.com/YoungJibbit95/2D-Game-Engine/pull/6) for human review and an explicit integration decision; do not merge automatically. Implementation `3d70e36` has a complete green Windows/Ubuntu matrix (run 39105931841); the final documentation-only revision must retain its normal PR checks. After PR-0A integration, the next separate PR is PR-0B: reproducible Golden Scene captures and visual/benchmark fixtures. Renderer V2, Lighting V2 and Worldgen V2 remain subsequent independently measured PRs.
+Complete PR-0B's Debug baseline comparison and ordinary published smokes, open its separate PR against `master`, and inspect the complete hosted Windows/Ubuntu Debug/Release result including exact repeated Mesa captures and portable comparisons against the versioned NVIDIA references. Resolve actual failures without loosening gates, record evidence and hand off for human review. Do not merge automatically. Renderer V2, Lighting V2 and Worldgen V2 remain subsequent independently measured PRs after manual integration.
 
 Historical Session 0 resume action (superseded by the user's Sprint 0 request):
 
