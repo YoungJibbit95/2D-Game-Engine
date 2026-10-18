@@ -282,7 +282,8 @@ jobs:
           & ./tools/run_client_smokes.ps1 -PublishRoot '${{ runner.temp }}/yjse-client-publish' -OutputDirectory artifacts/client-smokes
           $env:YJSE_DISABLE_LIGHTING_PREPARATION_REUSE = '0'
           & ./tools/run_golden_scenes.ps1 -PublishRoot '${{ runner.temp }}/yjse-client-publish' -OutputDirectory artifacts/golden-scenes
-          & ./tools/run_lighting_diagnostics.ps1 -PublishRoot '${{ runner.temp }}/yjse-client-publish' -OutputDirectory artifacts/lighting-diagnostics -PreparationReuse on -CompareReuseFallback -IncludeReuseLifecycle
+          Remove-Item Env:YJSE_DISABLE_LIGHTING_PREPARATION_REUSE
+          & ./tools/run_lighting_diagnostics.ps1 -PublishRoot '${{ runner.temp }}/yjse-client-publish' -OutputDirectory artifacts/lighting-diagnostics -PreparationReuse inherit -CompareReuseFallback -IncludeReuseLifecycle
 
       - name: Run published client smokes on Ubuntu Mesa
         if: runner.os == 'Linux'
@@ -320,7 +321,7 @@ jobs:
           pwsh -NoProfile -File tools/run_lighting_diagnostics.ps1
           -PublishRoot "${{ runner.temp }}/yjse-client-publish"
           -OutputDirectory artifacts/lighting-diagnostics
-          -PreparationReuse on -CompareReuseFallback -IncludeReuseLifecycle
+          -PreparationReuse inherit -CompareReuseFallback -IncludeReuseLifecycle
 
       - name: Upload test results
         if: always()
